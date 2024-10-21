@@ -339,7 +339,7 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                 
                 for instrument_name in instrument_from_orders_currency:
 
-                    log.warning (f"check_whether_order_db_reconciled_each_other {instrument_name}")
+                    log.debug (f"check_whether_order_db_reconciled_each_other {instrument_name}")
                     db_reconciled =  check_whether_order_db_reconciled_each_other (sub_account_summary,
                                                                                    instrument_name,
                                                                                    orders_currency)
