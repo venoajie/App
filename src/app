@@ -654,7 +654,7 @@ class StreamAccountData(ModifyOrderDb):
         
         if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
             
-            archive_db_table= f"my_trades_all_{currency_lower}_json"    
+            archive_db_table= f"my_trades_all_{currency}_json"    
                     
             unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_ticker)
             log.warning (f"unrecorded_transactions {unrecorded_transactions}")
@@ -664,11 +664,9 @@ class StreamAccountData(ModifyOrderDb):
                 await insert_tables (trade_db_table, 
                                     transaction)
 
-            currency_lower = currency.lower()
-            
-            archive_db_table= f"my_trades_all_{currency_lower}_json"
+            archive_db_table= f"my_trades_all_{currency}_json"
                                     
-            await self.modify_order_and_db.resupply_transaction_log (currency_lower,
+            await self.modify_order_and_db.resupply_transaction_log (currency,
                                                                         transaction_log_trading,
                                                                         archive_db_table
                                                                         )
