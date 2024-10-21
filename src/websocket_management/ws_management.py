@@ -65,6 +65,8 @@ def get_config(file_name: str) -> list:
     """ """
     config_path = provide_path_for_file (file_name)
     
+    log.error(f"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    
     try:
         if os.path.exists(config_path):
             with open(config_path, "rb") as handle:

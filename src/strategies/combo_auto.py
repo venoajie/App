@@ -8,8 +8,6 @@ from dataclassy import dataclass, fields
 from loguru import logger as log
 
 # user defined formula
-
-
 from transaction_management.deribit.api_requests import (
     get_tickers)
 from db_management.sqlite_management import (

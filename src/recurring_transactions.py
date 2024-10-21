@@ -205,10 +205,6 @@ async def running_strategy() -> None:
                                                             "all", 
                                                             "all", 
                                                             column_trade)
-                
-                if "ETH" in currency:
-                    log.error (f"my_trades_currency {my_trades_currency}")
-                    log.error ([o["amount"] for o in my_trades_currency])
 
                 column_order= "instrument_name","label","order_id","amount","timestamp"
                 
@@ -220,7 +216,7 @@ async def running_strategy() -> None:
                                                   "all", 
                                                   column_order)     
                 
-                running= RunningStrategy (sub_account_id,
+                running = RunningStrategy (sub_account_id,
                                         sub_account_summary,
                                         my_trades_currency,
                                         orders_currency)
@@ -239,12 +235,6 @@ async def running_strategy() -> None:
                                                                             orders_currency,
                                                                             from_transaction_log)
                     
-                    if db_reconciled["sum_trade_from_log_and_db_is_equal"]\
-                        and db_reconciled["len_order_from_sub_account_and_db_is_equal"]:
-                        await running.running_strategies(currency)
-                        
-                    #
-                    
                     if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
                         
                         archive_db_table= f"my_trades_all_{currency_lower}_json"       
@@ -257,16 +247,14 @@ async def running_strategy() -> None:
                         log.warning (f"unrecorded_transactions {unrecorded_transactions}")
                         
                         for transaction  in unrecorded_transactions:
-                            #log.error (f"transaction {transaction}")
+
                             await insert_tables (trade_db_table, 
                                                 transaction)
 
                         currency_lower = currency.lower()
                         
                         archive_db_table= f"my_trades_all_{currency_lower}_json"
-                        
-                        transaction_log_trading= f"transaction_log_{currency_lower}_json"
-                        
+                                                
                         await running.modify_order_and_db.resupply_transaction_log (currency_lower,
                                                                                     transaction_log_trading,
                                                                                     archive_db_table
