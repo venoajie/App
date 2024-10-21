@@ -54,8 +54,8 @@ async def reconciling_sub_account_and_db_open_orders (instrument_name: str,
         else [o["order_id"] for o in sub_account_orders_instrument]
 
     log.debug (f"instrument_name {instrument_name}")
-    log.debug (f"orders_currency {orders_currency}")
-    db_orders_instrument = [o for o in orders_currency if instrument_name in o["instrument_name"]]
+    db_orders_instrument = [o for o in orders_currency \
+        if instrument_name in o["instrument_name"]]
     log.debug (f"db_orders_instrument {db_orders_instrument}")
 
     db_orders_instrument_id = [] if db_orders_instrument == [] \
@@ -163,11 +163,6 @@ async def get_unrecorded_trade_and_order_id(instrument_name: str) -> dict:
     return  [] if not from_sqlite_all else [o["data"] for o in from_sqlite_all\
                     if o["trade_id"] in unrecorded_trade_id]
 
-
-
-
-
-
 def check_whether_order_db_reconciled_each_other (sub_account,
                                                   instrument_name,
                                                   orders_currency) -> None:
@@ -180,19 +175,22 @@ def check_whether_order_db_reconciled_each_other (sub_account,
         sub_account_size_instrument = 0 if sub_account_size_instrument == [] \
             else sub_account_size_instrument [0]
         sub_account_orders = sub_account["open_orders"]
-        len_sub_account_orders = 0 if not sub_account_orders \
-            else len([o["amount"] for o in sub_account_orders])
         
-        orders_instrument = [o["amount"] for o in orders_instrument \
+        sub_account_instrument = [o for o in sub_account_orders \
             if o["instrument_name"] == instrument_name ]
         
+        len_sub_account_instrument = 0 if not sub_account_instrument \
+            else len([o["amount"] for o in sub_account_instrument])
+        
+        orders_instrument = [o for o in orders_currency \
+            if o["instrument_name"] == instrument_name ]
         len_orders_instrument = 0 if not orders_instrument \
             else len([o["amount"] for o in orders_instrument])
             
         # comparing the result
-        len_order_from_sub_account_and_db_is_equal = len_orders_instrument == len_sub_account_orders 
+        len_order_from_sub_account_and_db_is_equal = len_orders_instrument == len_sub_account_instrument 
         
-        log.critical (f"len_order {len_order_from_sub_account_and_db_is_equal} len_sub_account_orders {len_sub_account_orders} len_db_orders_currency {len_orders_instrument}")
+        log.critical (f"len_order {len_order_from_sub_account_and_db_is_equal} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
         
         return len_order_from_sub_account_and_db_is_equal == len_order_from_sub_account_and_db_is_equal
 
