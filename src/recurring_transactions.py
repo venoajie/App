@@ -336,69 +336,70 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                 instrument_from_sub_account = [o["instrument_name"] for o  in sub_account_summary["positions"]]
 
                 instrument_from_orders_currency = [o["instrument_name"] for o  in orders_currency]
-                
-                log.error (f"instrument_from_orders_currency {instrument_from_orders_currency}")
-                
-                for instrument_name in instrument_from_orders_currency:
+                                
+                if instrument_from_orders_currency:
+                    for instrument_name in instrument_from_orders_currency:
 
-                    log.debug (f"check_whether_order_db_reconciled_each_other {instrument_name}")
-                    db_reconciled =  check_whether_order_db_reconciled_each_other (sub_account_summary,
-                                                                                   instrument_name,
-                                                                                   orders_currency)
-        
-                    if not db_reconciled:
-                        
-                        await reconciling_sub_account_and_db_open_orders (instrument_name,
-                                                                          order_db_table,
-                                                                          orders_currency,
-                                                                          sub_account_summary)
-
-                        await modify_order_and_db.resupply_sub_accountdb (currency)
-                        
-                for instrument_name in instrument_from_sub_account:
-                    
-                    log.warning (f"check_whether_db_reconciled_each_other {instrument_name}")
-                    await clean_up_closed_transactions (instrument_name, 
-                                                        trade_db_table)
-
-                    db_reconciled =  check_whether_db_reconciled_each_other (sub_account_summary,
-                                                                            instrument_name,
-                                                                            my_trades_currency,
-                                                                            orders_currency,
-                                                                            from_transaction_log)
-                    
-                    if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
-                                            
-                        await modify_order_and_db.update_trades_from_exchange (currency,
-                                                                                    archive_db_table,
-                                                                                    5)
+                        log.debug (f"check_whether_order_db_reconciled_each_other {instrument_name}")
+                        db_reconciled =  check_whether_order_db_reconciled_each_other (sub_account_summary,
+                                                                                    instrument_name,
+                                                                                    orders_currency)
+            
+                        if not db_reconciled:
                             
-                        unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_name)
-                        log.warning (f"unrecorded_transactions {unrecorded_transactions}")
-                        
-                        for transaction  in unrecorded_transactions:
+                            await reconciling_sub_account_and_db_open_orders (instrument_name,
+                                                                            order_db_table,
+                                                                            orders_currency,
+                                                                            sub_account_summary)
 
-                            await insert_tables (trade_db_table, 
-                                                transaction)
-
-                        currency_lower = currency.lower()
+                            await modify_order_and_db.resupply_sub_accountdb (currency)
                         
-                        archive_db_table= f"my_trades_all_{currency_lower}_json"
+                if instrument_from_sub_account:
+                    
+                    for instrument_name in instrument_from_sub_account:
+                        
+                        log.warning (f"check_whether_db_reconciled_each_other {instrument_name}")
+                        await clean_up_closed_transactions (instrument_name, 
+                                                            trade_db_table)
+
+                        db_reconciled =  check_whether_db_reconciled_each_other (sub_account_summary,
+                                                                                instrument_name,
+                                                                                my_trades_currency,
+                                                                                orders_currency,
+                                                                                from_transaction_log)
+                        
+                        if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
                                                 
-                        await modify_order_and_db.resupply_transaction_log (currency_lower,
-                                                                                    transaction_log_trading,
-                                                                                    archive_db_table
-                                                                                    )
-                        await modify_order_and_db.resupply_sub_accountdb (currency)
-        
-                    if not db_reconciled["len_order_from_sub_account_and_db_is_equal"]:
-                                    
-                        await reconciling_sub_account_and_db_open_orders (instrument_name,
-                                                                          order_db_table,
-                                                                          orders_currency,
-                                                                          sub_account_summary)
+                            await modify_order_and_db.update_trades_from_exchange (currency,
+                                                                                        archive_db_table,
+                                                                                        5)
+                                
+                            unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_name)
+                            log.warning (f"unrecorded_transactions {unrecorded_transactions}")
+                            
+                            for transaction  in unrecorded_transactions:
 
-                        await modify_order_and_db.resupply_sub_accountdb (currency)
+                                await insert_tables (trade_db_table, 
+                                                    transaction)
+
+                            currency_lower = currency.lower()
+                            
+                            archive_db_table= f"my_trades_all_{currency_lower}_json"
+                                                    
+                            await modify_order_and_db.resupply_transaction_log (currency_lower,
+                                                                                        transaction_log_trading,
+                                                                                        archive_db_table
+                                                                                        )
+                            await modify_order_and_db.resupply_sub_accountdb (currency)
+            
+                        if not db_reconciled["len_order_from_sub_account_and_db_is_equal"]:
+                                        
+                            await reconciling_sub_account_and_db_open_orders (instrument_name,
+                                                                            order_db_table,
+                                                                            orders_currency,
+                                                                            sub_account_summary)
+
+                            await modify_order_and_db.resupply_sub_accountdb (currency)
 
             else:  
                 # when sub account value was None
