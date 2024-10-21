@@ -51,6 +51,7 @@ from websocket_management.ws_management import (
 from websocket_management.cleaning_up_transactions import (
     clean_up_closed_transactions,
     check_whether_db_reconciled_each_other,
+    check_whether_order_db_reconciled_each_other,
     get_unrecorded_trade_and_order_id,
     reconciling_sub_account_and_db_open_orders)
 
@@ -341,11 +342,9 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                 for instrument_name in instrument_from_orders_currency:
 
                     log.warning (f"instrument_name {instrument_name}")
-                    db_reconciled =  check_whether_db_reconciled_each_other (sub_account_summary,
-                                                                            instrument_name,
-                                                                            my_trades_currency,
-                                                                            orders_currency,
-                                                                            from_transaction_log)
+                    db_reconciled =  check_whether_order_db_reconciled_each_other (sub_account_summary,
+                                                                                   instrument_name,
+                                                                                   orders_currency)
                     
                     log.critical (f"db_reconciled {db_reconciled}")
                     log.info (not db_reconciled["len_order_from_sub_account_and_db_is_equal"])            

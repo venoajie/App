@@ -164,6 +164,39 @@ async def get_unrecorded_trade_and_order_id(instrument_name: str) -> dict:
                     if o["trade_id"] in unrecorded_trade_id]
 
 
+
+
+
+
+def check_whether_order_db_reconciled_each_other (sub_account,
+                                                  instrument_name,
+                                                  orders_currency) -> None:
+    """ """
+    log.info (f"instrument_name {instrument_name}")
+    
+    if sub_account :
+        
+        sub_account_size_instrument = [o["size"] for o in sub_account ["positions"] \
+            if o["instrument_name"] == instrument_name ]
+        sub_account_size_instrument = 0 if sub_account_size_instrument == [] \
+            else sub_account_size_instrument [0]
+        sub_account_orders = sub_account["open_orders"]
+        len_sub_account_orders = 0 if not sub_account_orders \
+            else len([o["amount"] for o in sub_account_orders])
+        
+        len_orders_currency = 0 if not orders_currency \
+            else len([o["amount"] for o in orders_currency])
+            
+        # comparing the result
+        len_order_from_sub_account_and_db_is_equal = len_orders_currency == len_sub_account_orders 
+        
+        log.critical (f"len_order {len_order_from_sub_account_and_db_is_equal} len_sub_account_orders {len_sub_account_orders} len_db_orders_currency {len_orders_currency}")
+        
+        return len_order_from_sub_account_and_db_is_equal == len_order_from_sub_account_and_db_is_equal
+
+    else :        
+        return len_order_from_sub_account_and_db_is_equal == False
+
 def check_whether_db_reconciled_each_other (sub_account,
                                             instrument_name,
                                             my_trades_currency,
@@ -185,6 +218,7 @@ def check_whether_db_reconciled_each_other (sub_account,
         from_transaction_log_instrument = ([o for o in from_transaction_log \
             if o["instrument_name"] == instrument_name])
         
+        log.critical (f"from_transaction_log_instrument {from_transaction_log_instrument}")
         #timestamp could be double-> come from combo transaction. hence, trade_id is used to distinguish
         try:
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
@@ -202,7 +236,6 @@ def check_whether_db_reconciled_each_other (sub_account,
                 {'instrument_name': 'BTC-18OCT24', 'position': -100, 'timestamp': 1728904931445, 'trade_id': '320831413'}
                 ]
             
-            log.critical (f"from_transaction_log_instrument {from_transaction_log_instrument}")
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
                 else str(max([extract_integers_from_text(o["timestamp"]) for o in from_transaction_log_instrument ]))
             log.critical (f"last_time_stamp_log {last_time_stamp_log}")
