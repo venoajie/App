@@ -185,17 +185,14 @@ def check_whether_order_db_reconciled_each_other (sub_account,
         orders_instrument = [o for o in orders_currency \
             if o["instrument_name"] == instrument_name ]
         len_orders_instrument = 0 if not orders_instrument \
-            else len([o["amount"] for o in orders_instrument])
-            
-        # comparing the result
-        len_order_from_sub_account_and_db_is_equal = len_orders_instrument == len_sub_account_instrument 
+            else len([o["amount"] for o in orders_instrument])    
         
-        log.critical (f"len_order {len_order_from_sub_account_and_db_is_equal} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
-        
-        return len_order_from_sub_account_and_db_is_equal == len_order_from_sub_account_and_db_is_equal
+        log.critical (f"len_order equal {len_orders_instrument == len_sub_account_instrument } len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
+        # comparing and return the result
+        return  len_orders_instrument == len_sub_account_instrument 
 
     else :        
-        return len_order_from_sub_account_and_db_is_equal == False
+        return  False
 
 def check_whether_db_reconciled_each_other (sub_account,
                                             instrument_name,
