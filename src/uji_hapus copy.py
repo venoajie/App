@@ -1,3 +1,7 @@
+# https://medium.com/@mohamed.h.eltedawy/etl-data-pipeline-with-airflow-and-postgresql-c9d40f8abf03
+
+
+
 # Generate SQL insert commands from data
 def generate_insert_sql(table_name, data, columns):
     # Construct the column and placeholder strings
