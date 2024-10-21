@@ -348,6 +348,9 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                                                                             orders_currency,
                                                                             from_transaction_log)
                     
+                    log.error (f"db_reconciled {db_reconciled}")
+                    log.info (not db_reconciled["len_order_from_sub_account_and_db_is_equal"])
+                    
                     if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
                                             
                         await modify_order_and_db.update_trades_from_exchange (currency,
