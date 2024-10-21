@@ -337,6 +337,8 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
 
                 instrument_from_orders_currency = [o["instrument_name"] for o  in orders_currency]
                 
+                log.error (f"instrument_from_orders_currency {instrument_from_orders_currency}")
+                
                 for instrument_name in instrument_from_orders_currency:
 
                     log.debug (f"check_whether_order_db_reconciled_each_other {instrument_name}")
