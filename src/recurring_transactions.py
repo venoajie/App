@@ -203,10 +203,10 @@ async def running_strategy() -> None:
 
             sub_account_summary = reading_from_pkl_data ("sub_accounts",
                                                         currency)
-            current_server_time = current_server_time ()
-            current_server_time_cached = current_server_time_cached ()
+            current_server = current_server_time ()
+            current_server_cached = current_server_time_cached ()
             
-            log.debug (f"current_server_time {current_server_time} current_server_time_cached {current_server_time_cached}")
+            log.debug (f"current_server_time {current_server} current_server_time_cached {current_server_cached}")
             
             if sub_account_summary:           
                 sub_account_summary = sub_account_summary[0]
