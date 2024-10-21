@@ -53,6 +53,8 @@ async def reconciling_sub_account_and_db_open_orders (instrument_name: str,
     sub_account_orders_instrument_id = [] if sub_account_orders_instrument == [] \
         else [o["order_id"] for o in sub_account_orders_instrument]
 
+    log.debug (f"instrument_name {instrument_name}")
+    log.debug (f"orders_currency {orders_currency}")
     db_orders_instrument = [o for o in orders_currency if instrument_name in o["instrument_name"]]
     log.debug (f"db_orders_instrument {db_orders_instrument}")
 
