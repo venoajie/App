@@ -216,11 +216,6 @@ async def running_strategy() -> None:
                                                   "all", 
                                                   column_order)     
                 
-                modify_order_and_db: str = ModifyOrderDb(sub_account_id)
-                
-                await modify_order_and_db.update_trades_from_exchange (currency,
-                                                                               archive_db_table,
-                                                                               1)
                 instrument_from_sub_account = [o["instrument_name"] for o  in sub_account_summary["positions"]]
                 
                 for instrument_name in instrument_from_sub_account:
@@ -239,12 +234,8 @@ async def running_strategy() -> None:
                         
                         archive_db_table= f"my_trades_all_{currency_lower}_json"    
                         
-                        modify_order_and_db: str = ModifyOrderDb(sub_account_id)   
+                        modify_order_and_db: object = ModifyOrderDb(sub_account_id)   
                     
-                        await modify_order_and_db.update_trades_from_exchange (currency,
-                                                                               archive_db_table,
-                                                                               5)
-                            
                         unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_name)
                         log.warning (f"unrecorded_transactions {unrecorded_transactions}")
                         
@@ -257,11 +248,11 @@ async def running_strategy() -> None:
                         
                         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                                 
-                        await running.modify_order_and_db.resupply_transaction_log (currency_lower,
+                        await modify_order_and_db.resupply_transaction_log (currency_lower,
                                                                                     transaction_log_trading,
                                                                                     archive_db_table
                                                                                     )
-                        await running.modify_order_and_db.resupply_sub_accountdb (currency)
+                        await modify_order_and_db.resupply_sub_accountdb (currency)
         
                     if not db_reconciled["len_order_from_sub_account_and_db_is_equal"]:
                                     
@@ -339,12 +330,11 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                                                   currency, 
                                                   "all", 
                                                   "all", 
-                                                  column_order)     
+                                                  column_order)   
                 
-                running = RunningStrategy (sub_account_id,
-                                        sub_account_summary,
-                                        my_trades_currency,
-                                        orders_currency)
+                modify_order_and_db: object = ModifyOrderDb(sub_account_id)   
+                
+                await modify_order_and_db.resupply_sub_accountdb (currency)
                 
                 instrument_from_sub_account = [o["instrument_name"] for o  in sub_account_summary["positions"]]
                 
@@ -362,7 +352,7 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                     
                     if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
                                             
-                        await running.modify_order_and_db.update_trades_from_exchange (currency,
+                        await modify_order_and_db.update_trades_from_exchange (currency,
                                                                                     archive_db_table,
                                                                                     5)
                             
@@ -378,11 +368,11 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                         
                         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                                 
-                        await running.modify_order_and_db.resupply_transaction_log (currency_lower,
+                        await modify_order_and_db.resupply_transaction_log (currency_lower,
                                                                                     transaction_log_trading,
                                                                                     archive_db_table
                                                                                     )
-                        await running.modify_order_and_db.resupply_sub_accountdb (currency)
+                        await modify_order_and_db.resupply_sub_accountdb (currency)
         
                     if not db_reconciled["len_order_from_sub_account_and_db_is_equal"]:
                                     
@@ -391,7 +381,7 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                                                                           orders_currency,
                                                                           sub_account_summary)
 
-                        await running.modify_order_and_db.resupply_sub_accountdb (currency)
+                        await modify_order_and_db.resupply_sub_accountdb (currency)
 
             else:  
                 # when sub account value was None
