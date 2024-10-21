@@ -222,9 +222,7 @@ async def running_strategy() -> None:
                 for instrument_name in instrument_from_sub_account:
                     
                     log.warning (f"instrument_name {instrument_name}")
-                    await clean_up_closed_transactions (instrument_name, 
-                                                        trade_db_table)
-
+                    
                     db_reconciled =  check_whether_db_reconciled_each_other (sub_account_summary,
                                                                             instrument_name,
                                                                             my_trades_currency,
@@ -262,7 +260,7 @@ async def running_strategy() -> None:
                                                                           orders_currency,
                                                                           sub_account_summary)
 
-                        await running.modify_order_and_db.resupply_sub_accountdb (currency)
+                        await modify_order_and_db.resupply_sub_accountdb (currency)
 
             else:  
                 # when sub account value was None
@@ -359,7 +357,7 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                         
                 for instrument_name in instrument_from_sub_account:
                     
-                    log.warning (f"instrument_name {instrument_name}")
+                    log.warning (f"check_whether_db_reconciled_each_other instrument_name {instrument_name}")
                     await clean_up_closed_transactions (instrument_name, 
                                                         trade_db_table)
 
@@ -368,9 +366,6 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                                                                             my_trades_currency,
                                                                             orders_currency,
                                                                             from_transaction_log)
-                    
-                    log.error (f"db_reconciled {db_reconciled}")
-                    log.info (not db_reconciled["len_order_from_sub_account_and_db_is_equal"])
                     
                     if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
                                             
