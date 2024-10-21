@@ -339,12 +339,10 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                 
                 for instrument_name in instrument_from_orders_currency:
 
-                    log.warning (f"instrument_name {instrument_name}")
+                    log.warning (f"check_whether_order_db_reconciled_each_other {instrument_name}")
                     db_reconciled =  check_whether_order_db_reconciled_each_other (sub_account_summary,
                                                                                    instrument_name,
                                                                                    orders_currency)
-                    
-                    log.critical (f"db_reconciled {db_reconciled}")
         
                     if not db_reconciled:
                         
@@ -357,7 +355,7 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                         
                 for instrument_name in instrument_from_sub_account:
                     
-                    log.warning (f"check_whether_db_reconciled_each_other instrument_name {instrument_name}")
+                    log.warning (f"check_whether_db_reconciled_each_other {instrument_name}")
                     await clean_up_closed_transactions (instrument_name, 
                                                         trade_db_table)
 
