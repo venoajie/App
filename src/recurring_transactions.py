@@ -41,8 +41,7 @@ from utilities.string_modification import (
     parsing_label,)
 from utilities.system_tools import (
     catch_error_message, 
-    provide_path_for_file,
-    ttl_cache)
+    provide_path_for_file,)
 from websocket_management.allocating_ohlc import (
     ohlc_end_point, 
     ohlc_result_per_time_frame,
@@ -88,12 +87,6 @@ async def back_up_db():
     await back_up_db_sqlite ()
 
 async def current_server_time() -> float:
-    """ """
-    current_time = await get_server_time()
-    return current_time["result"]
-
-@ttl_cache (5)
-async def current_server_time_cached() -> float:
     """ """
     current_time = await get_server_time()
     return current_time["result"]
@@ -203,10 +196,6 @@ async def running_strategy() -> None:
 
             sub_account_summary = reading_from_pkl_data ("sub_accounts",
                                                         currency)
-            current_server = await current_server_time ()
-            current_server_cached = await current_server_time_cached ()
-            
-            log.debug (f"current_server_time {current_server} current_server_time_cached {current_server_cached}")
             
             if sub_account_summary:           
                 sub_account_summary = sub_account_summary[0]
@@ -221,6 +210,131 @@ async def running_strategy() -> None:
                 
                 #log.error (f"my_trades_currency {my_trades_currency}")
                 
+                orders_currency = await get_query(order_db_table, 
+                                                  currency, 
+                                                  "all", 
+                                                  "all", 
+                                                  column_order)     
+                
+                modify_order_and_db: str = ModifyOrderDb(sub_account_id)
+                
+                await modify_order_and_db.update_trades_from_exchange (currency,
+                                                                               archive_db_table,
+                                                                               1)
+                instrument_from_sub_account = [o["instrument_name"] for o  in sub_account_summary["positions"]]
+                
+                for instrument_name in instrument_from_sub_account:
+                    
+                    log.warning (f"instrument_name {instrument_name}")
+                    await clean_up_closed_transactions (instrument_name, 
+                                                        trade_db_table)
+
+                    db_reconciled =  check_whether_db_reconciled_each_other (sub_account_summary,
+                                                                            instrument_name,
+                                                                            my_trades_currency,
+                                                                            orders_currency,
+                                                                            from_transaction_log)
+                    
+                    if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
+                        
+                        archive_db_table= f"my_trades_all_{currency_lower}_json"    
+                        
+                        modify_order_and_db: str = ModifyOrderDb(sub_account_id)   
+                    
+                        await modify_order_and_db.update_trades_from_exchange (currency,
+                                                                               archive_db_table,
+                                                                               5)
+                            
+                        unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_name)
+                        log.warning (f"unrecorded_transactions {unrecorded_transactions}")
+                        
+                        for transaction  in unrecorded_transactions:
+
+                            await insert_tables (trade_db_table, 
+                                                transaction)
+
+                        currency_lower = currency.lower()
+                        
+                        archive_db_table= f"my_trades_all_{currency_lower}_json"
+                                                
+                        await running.modify_order_and_db.resupply_transaction_log (currency_lower,
+                                                                                    transaction_log_trading,
+                                                                                    archive_db_table
+                                                                                    )
+                        await running.modify_order_and_db.resupply_sub_accountdb (currency)
+        
+                    if not db_reconciled["len_order_from_sub_account_and_db_is_equal"]:
+                                    
+                        await reconciling_sub_account_and_db_open_orders (instrument_name,
+                                                                          order_db_table,
+                                                                          orders_currency,
+                                                                          sub_account_summary)
+
+                        await running.modify_order_and_db.resupply_sub_accountdb (currency)
+
+            else:  
+                # when sub account value was None
+                await telegram_bot_sendtext (f"sub_account {sub_account_summary}")
+                        
+    except Exception as error:
+        
+        catch_error_message(
+            error, 10, "app"
+        )
+
+
+async def reconciling_balances_and_order_from_various_sources() -> None:
+    """ """
+    sub_account_id = "deribit-148510"
+
+    file_toml = "config_strategies.toml"
+        
+    config_app = get_config(file_toml)
+
+    tradable_config_app = config_app["tradable"]
+    
+    currencies= [o["spot"] for o in tradable_config_app] [0]
+            
+    try:
+        for currency in currencies:
+            
+            currency_lower = currency.lower()
+
+            # prepare table for sources from db
+            trade_db_table= "my_trades_all_json"
+            
+            order_db_table= "orders_all_json"         
+            
+            transaction_log_trading= f"transaction_log_{currency_lower}_json"  
+            
+            archive_db_table= f"my_trades_all_{currency_lower}_json"  
+                                        
+            column_list= "instrument_name", "position", "timestamp","trade_id"                 
+            
+            column_order= "instrument_name","label","order_id","amount","timestamp"
+
+            column_trade: str= "instrument_name","label", "combo_id", "amount", "price","side"
+
+            sub_account_summary = reading_from_pkl_data ("sub_accounts",
+                                                        currency)
+            
+            if sub_account_summary:           
+            
+                sub_account_summary = sub_account_summary[0]
+                        
+                # send query to get result
+                from_transaction_log = await get_query (transaction_log_trading, 
+                                                            currency, 
+                                                            "all", 
+                                                            "all", 
+                                                            column_list)                                       
+                        
+                my_trades_currency: list= await get_query(trade_db_table, 
+                                                            currency, 
+                                                            "all", 
+                                                            "all", 
+                                                            column_trade)
+
                 orders_currency = await get_query(order_db_table, 
                                                   currency, 
                                                   "all", 
@@ -247,9 +361,7 @@ async def running_strategy() -> None:
                                                                             from_transaction_log)
                     
                     if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
-                        
-                        archive_db_table= f"my_trades_all_{currency_lower}_json"       
-                    
+                                            
                         await running.modify_order_and_db.update_trades_from_exchange (currency,
                                                                                     archive_db_table,
                                                                                     5)
@@ -290,7 +402,6 @@ async def running_strategy() -> None:
         catch_error_message(
             error, 10, "app"
         )
-
 
 def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
     """ """
@@ -440,7 +551,7 @@ if __name__ == "__main__":
         
 
         schedule.every().hour.do(back_up_db)
-        schedule.every(1).seconds.do(running_strategy)
+        schedule.every(1).seconds.do(reconciling_balances_and_order_from_various_sources)
         schedule.every(15).seconds.do(run_every_15_seconds)
         #schedule.every(3).seconds.do(run_every_3_seconds)
         #schedule.every(5).seconds.do(run_every_5_seconds)
