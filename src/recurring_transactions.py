@@ -335,7 +335,25 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                 modify_order_and_db: object = ModifyOrderDb(sub_account_id)   
                 
                 instrument_from_sub_account = [o["instrument_name"] for o  in sub_account_summary["positions"]]
+
+                instrument_from_orders_currency = [o["instrument_name"] for o  in orders_currency]
                 
+                for instrument_name in instrument_from_sub_account:
+
+                    db_reconciled =  check_whether_db_reconciled_each_other (sub_account_summary,
+                                                                            instrument_name,
+                                                                            my_trades_currency,
+                                                                            orders_currency,
+                                                                            from_transaction_log)
+                    
+                    log.error (f"db_reconciled {db_reconciled}")
+                    log.info (not db_reconciled["len_order_from_sub_account_and_db_is_equal"])            
+        
+                    if not db_reconciled["len_order_from_sub_account_and_db_is_equal"]:
+                        
+                        pass
+                
+                        
                 for instrument_name in instrument_from_sub_account:
                     
                     log.warning (f"instrument_name {instrument_name}")
