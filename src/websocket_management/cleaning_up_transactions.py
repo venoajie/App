@@ -174,8 +174,10 @@ def check_whether_db_reconciled_each_other (sub_account,
     
     if sub_account :
         
-        sub_account_size_all = [o["size"] for o in sub_account ["positions"] \
-            if o["instrument_name"] == instrument_name ][0]
+        sub_account_size_instrument = [o["size"] for o in sub_account ["positions"] \
+            if o["instrument_name"] == instrument_name ]
+        sub_account_size_instrument = 0 if sub_account_size_instrument == [] \
+            else sub_account_size_instrument [0]
         sub_account_orders = sub_account["open_orders"]
         len_sub_account_orders = 0 if not sub_account_orders \
             else len([o["amount"] for o in sub_account_orders])
@@ -199,10 +201,10 @@ def check_whether_db_reconciled_each_other (sub_account,
             else len([o["amount"] for o in orders_currency])
             
         # comparing the result
-        sum_trade_from_log_and_db_is_equal = current_position_log == sum_my_trades_currency == sub_account_size_all
+        sum_trade_from_log_and_db_is_equal = current_position_log == sum_my_trades_currency == sub_account_size_instrument
         len_order_from_sub_account_and_db_is_equal = len_orders_currency == len_sub_account_orders 
         
-        log.info (f"sum_from_log_and_trade_is_equal {sum_trade_from_log_and_db_is_equal} sum_my_trades_currency {sum_my_trades_currency}  sub_account_size_all {sub_account_size_all} current_position_log {current_position_log}")
+        log.info (f"sum_from_log_and_trade_is_equal {sum_trade_from_log_and_db_is_equal} sum_my_trades_currency {sum_my_trades_currency}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
         log.critical (f"len_order {len_order_from_sub_account_and_db_is_equal} len_sub_account_orders {len_sub_account_orders} len_db_orders_currency {len_orders_currency}")
         # combining result
         result = dict(sum_trade_from_log_and_db_is_equal = sum_trade_from_log_and_db_is_equal,
