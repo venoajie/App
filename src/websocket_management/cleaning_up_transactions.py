@@ -218,7 +218,6 @@ def check_whether_db_reconciled_each_other (sub_account,
         from_transaction_log_instrument = ([o for o in from_transaction_log \
             if o["instrument_name"] == instrument_name])
         
-        log.critical (f"from_transaction_log_instrument {from_transaction_log_instrument}")
         #timestamp could be double-> come from combo transaction. hence, trade_id is used to distinguish
         try:
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
@@ -227,7 +226,7 @@ def check_whether_db_reconciled_each_other (sub_account,
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  last_time_stamp_log in o["trade_id"]][0]
                 
-        # trade id = None (because of settlement)
+        # just in case, trade id = None (because of settlement)
         except:
                 
             examples_from_transaction_log_instrument = [
@@ -238,11 +237,10 @@ def check_whether_db_reconciled_each_other (sub_account,
             
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
                 else str(max([extract_integers_from_text(o["timestamp"]) for o in from_transaction_log_instrument ]))
-            log.critical (f"last_time_stamp_log {last_time_stamp_log}")
+
             current_position_log = 0 if from_transaction_log_instrument == []\
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  last_time_stamp_log in o["trade_id"]][0]
-        log.critical (f"current_position_log {current_position_log}")
 
         my_trades_instrument = [o for o in my_trades_currency \
             if o["instrument_name"] == instrument_name]        
