@@ -334,8 +334,6 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                 
                 modify_order_and_db: object = ModifyOrderDb(sub_account_id)   
                 
-                await modify_order_and_db.resupply_sub_accountdb (currency)
-                
                 instrument_from_sub_account = [o["instrument_name"] for o  in sub_account_summary["positions"]]
                 
                 for instrument_name in instrument_from_sub_account:
