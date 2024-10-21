@@ -201,7 +201,6 @@ def check_whether_db_reconciled_each_other (sub_account,
                                             orders_currency,
                                             from_transaction_log) -> None:
     """ """
-    log.info (f"instrument_name {instrument_name}")
     
     if sub_account :
         
@@ -266,7 +265,6 @@ def check_whether_db_reconciled_each_other (sub_account,
         # combining result
         result = dict(sum_trade_from_log_and_db_is_equal = sum_trade_from_log_and_db_is_equal,
                     len_order_from_sub_account_and_db_is_equal = len_order_from_sub_account_and_db_is_equal)
-        log.warning (f" {result}")
         
         return result
 
