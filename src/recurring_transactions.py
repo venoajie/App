@@ -41,7 +41,8 @@ from utilities.string_modification import (
     parsing_label,)
 from utilities.system_tools import (
     catch_error_message, 
-    provide_path_for_file,)
+    provide_path_for_file,
+    ttl_cache)
 from websocket_management.allocating_ohlc import (
     ohlc_end_point, 
     ohlc_result_per_time_frame,
@@ -87,6 +88,12 @@ async def back_up_db():
     await back_up_db_sqlite ()
 
 async def current_server_time() -> float:
+    """ """
+    current_time = await get_server_time()
+    return current_time["result"]
+
+@ttl_cache (5)
+async def current_server_time_cached() -> float:
     """ """
     current_time = await get_server_time()
     return current_time["result"]
@@ -196,6 +203,10 @@ async def running_strategy() -> None:
 
             sub_account_summary = reading_from_pkl_data ("sub_accounts",
                                                         currency)
+            current_server_time = current_server_time ()
+            current_server_time_cached = current_server_time_cached ()
+            
+            log.debug (f"current_server_time {current_server_time} current_server_time_cached {current_server_time_cached}")
             
             if sub_account_summary:           
                 sub_account_summary = sub_account_summary[0]

@@ -65,7 +65,7 @@ def get_config(file_name: str) -> list:
     """ """
     config_path = provide_path_for_file (file_name)
     
-    log.error(f"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    log.critical(f"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     
     try:
         if os.path.exists(config_path):
