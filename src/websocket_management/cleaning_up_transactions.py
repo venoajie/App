@@ -204,6 +204,7 @@ def check_whether_db_reconciled_each_other (sub_account,
             
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
                 else str(max([extract_integers_from_text(o["timestamp"]) for o in from_transaction_log_instrument ]))
+            log.critical (f"last_time_stamp_log {last_time_stamp_log}")
             current_position_log = 0 if from_transaction_log_instrument == []\
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  last_time_stamp_log in o["trade_id"]][0]
