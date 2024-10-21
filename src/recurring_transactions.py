@@ -350,8 +350,12 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
         
                     if not db_reconciled:
                         
-                        pass
-                
+                        await reconciling_sub_account_and_db_open_orders (instrument_name,
+                                                                          order_db_table,
+                                                                          orders_currency,
+                                                                          sub_account_summary)
+
+                        await modify_order_and_db.resupply_sub_accountdb (currency)
                         
                 for instrument_name in instrument_from_sub_account:
                     
