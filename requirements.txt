@@ -1,0 +1,10 @@
+dataclassy==0.11.1
+websockets
+orjson
+aiohttp
+aiosqlite
+aioschedule
+psutil
+cachetools
+duckdb
+python-dotenv
