@@ -440,7 +440,7 @@ if __name__ == "__main__":
         schedule.every().hour.do(check_and_save_every_60_minutes)
         
 
-        schedule.every(1).seconds.do(back_up_db)
+        schedule.every().hour.do(back_up_db)
         schedule.every(1).seconds.do(running_strategy)
         schedule.every(15).seconds.do(run_every_15_seconds)
         #schedule.every(3).seconds.do(run_every_3_seconds)
