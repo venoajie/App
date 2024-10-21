@@ -347,9 +347,8 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                                                                                    orders_currency)
                     
                     log.critical (f"db_reconciled {db_reconciled}")
-                    log.info (not db_reconciled["len_order_from_sub_account_and_db_is_equal"])            
         
-                    if not db_reconciled["len_order_from_sub_account_and_db_is_equal"]:
+                    if not db_reconciled:
                         
                         pass
                 
