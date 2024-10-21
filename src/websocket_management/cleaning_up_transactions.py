@@ -202,6 +202,7 @@ def check_whether_db_reconciled_each_other (sub_account,
                 {'instrument_name': 'BTC-18OCT24', 'position': -100, 'timestamp': 1728904931445, 'trade_id': '320831413'}
                 ]
             
+            log.critical (f"from_transaction_log_instrument {from_transaction_log_instrument}")
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
                 else str(max([extract_integers_from_text(o["timestamp"]) for o in from_transaction_log_instrument ]))
             log.critical (f"last_time_stamp_log {last_time_stamp_log}")
