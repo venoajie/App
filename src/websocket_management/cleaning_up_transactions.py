@@ -209,8 +209,11 @@ def check_whether_db_reconciled_each_other (sub_account,
         sub_account_size_instrument = 0 if sub_account_size_instrument == [] \
             else sub_account_size_instrument [0]
         sub_account_orders = sub_account["open_orders"]
-        len_sub_account_orders = 0 if not sub_account_orders \
-            else len([o["amount"] for o in sub_account_orders])
+        sub_account_instrument = [o for o in sub_account_orders \
+            if o["instrument_name"] == instrument_name ]
+        
+        len_sub_account_instrument = 0 if not sub_account_instrument \
+            else len([o["amount"] for o in sub_account_instrument])
         
         from_transaction_log_instrument = ([o for o in from_transaction_log \
             if o["instrument_name"] == instrument_name])
@@ -244,15 +247,18 @@ def check_whether_db_reconciled_each_other (sub_account,
         sum_my_trades_currency = 0 if not my_trades_instrument \
             else sum([o["amount"] for o in my_trades_instrument])
         
-        len_orders_currency = 0 if not orders_currency \
-            else len([o["amount"] for o in orders_currency])
+        orders_instrument = [o for o in orders_currency \
+            if o["instrument_name"] == instrument_name ]
+        
+        len_orders_instrument = 0 if not orders_instrument \
+            else len([o["amount"] for o in orders_instrument])    
             
         # comparing the result
         sum_trade_from_log_and_db_is_equal = current_position_log == sum_my_trades_currency == sub_account_size_instrument
-        len_order_from_sub_account_and_db_is_equal = len_orders_currency == len_sub_account_orders 
+        len_order_from_sub_account_and_db_is_equal = len_orders_instrument == len_sub_account_instrument 
         
         log.info (f"sum_from_log_and_trade_is_equal {sum_trade_from_log_and_db_is_equal} sum_my_trades_currency {sum_my_trades_currency}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
-        log.critical (f"len_order {len_order_from_sub_account_and_db_is_equal} len_sub_account_orders {len_sub_account_orders} len_db_orders_currency {len_orders_currency}")
+        log.critical (f"len_order {len_order_from_sub_account_and_db_is_equal} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
         # combining result
         result = dict(sum_trade_from_log_and_db_is_equal = sum_trade_from_log_and_db_is_equal,
                     len_order_from_sub_account_and_db_is_equal = len_order_from_sub_account_and_db_is_equal)
