@@ -123,15 +123,22 @@ def is_cancelling_order_allowed(
 
     cancel_allowed: bool = False
 
-    if len_orders != [] and len_orders > 0:
+    if len_orders != [] \
+        and len_orders > 0:
 
-        time_interval = get_timing_factor(strong_bullish, bullish, threshold)
+        time_interval = get_timing_factor(
+            strong_bullish,
+            bullish, 
+            threshold)
 
         max_tstamp_orders: int = get_max_time_stamp(open_orders_label_strategy)
         
-        minimum_waiting_time_has_passed: bool = is_minimum_waiting_time_has_passed (
-            server_time, max_tstamp_orders, time_interval
+        minimum_waiting_time_has_passed: bool = is_minimum_waiting_time_has_passed(
+            server_time,
+            max_tstamp_orders, 
+            time_interval
         )
+        
         if minimum_waiting_time_has_passed:
             cancel_allowed: bool = True
 

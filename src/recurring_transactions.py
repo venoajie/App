@@ -559,7 +559,7 @@ if __name__ == "__main__":
         
 
         schedule.every().hour.do(back_up_db)
-        schedule.every(1).seconds.do(reconciling_balances_and_order_from_various_sources)
+        #schedule.every(1).seconds.do(reconciling_balances_and_order_from_various_sources)
         schedule.every(15).seconds.do(run_every_15_seconds)
         #schedule.every(3).seconds.do(run_every_3_seconds)
         #schedule.every(5).seconds.do(run_every_5_seconds)
