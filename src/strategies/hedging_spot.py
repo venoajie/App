@@ -414,8 +414,8 @@ class HedgingSpot(BasicStrategy):
 
         over_hedged  =  self.over_hedged_opening
         
-        log.critical (f"bearish {bearish}  strong_bearish {strong_bearish}" )
-        log.critical (f"len_orders == 0 {len_open_orders} {len_open_orders == 0} sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} not over_hedged {not self.over_hedged_opening}" )
+        log.warning (f"bearish {bearish}  strong_bearish {strong_bearish}" )
+        log.debug (f"len_orders == 0 {len_open_orders} {len_open_orders == 0} sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} not over_hedged {not self.over_hedged_opening}" )
         
         SIZE_FACTOR = get_waiting_time_factor(weighted_factor, strong_bearish, bearish)
     
