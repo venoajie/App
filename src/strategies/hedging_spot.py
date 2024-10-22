@@ -428,9 +428,9 @@ class HedgingSpot(BasicStrategy):
 
             else:
                 
-                order_allowed: bool = self. opening_position (instrument_name,
-                                                              non_checked_strategies,
-                                                          futures_instruments,
+                order_allowed: bool = self. opening_position (non_checked_strategies,
+                                                              instrument_name,
+                                                              futures_instruments,
                                                           open_orders_label_strategy,
                                                           market_condition,
                                                           params,
