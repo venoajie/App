@@ -1,46 +1,11 @@
-import datetime
-from functools import lru_cache, wraps
+sub_account = [
+     {
+         'estimated_liquidation_price': None, 'size_currency': -0.000297175, 'total_profit_loss': 3.793e-06, 'realized_profit_loss': 0.0, 'floating_profit_loss': 1.296e-06, 'leverage': 25, 'average_price': 68170.5, 'delta': -0.000297175, 'mark_price': 67300.4, 'settlement_price': 67595.19, 'instrument_name': 'BTC-1NOV24', 'open_orders_margin': 0.0, 'initial_margin': 1.1887e-05, 'maintenance_margin': 5.944e-06, 'index_price': 67082.45, 'direction': 'sell', 'kind': 'future', 'size': -20.0
+         }, {
+             'estimated_liquidation_price': None, 'size_currency': -0.004169366, 'total_profit_loss': -7.2824e-05, 'realized_profit_loss': 0.0, 'floating_profit_loss': 1.6072e-05, 'leverage': 25, 'average_price': 66003.64, 'delta': -0.004169366, 'mark_price': 67156.49, 'settlement_price': 67416.37, 'instrument_name': 'BTC-25OCT24', 'open_orders_margin': 0.0, 'initial_margin': 0.000166776, 'maintenance_margin': 8.3388e-05, 'index_price': 67082.45, 'direction': 'sell', 'kind': 'future', 'size': -280.0
+             }, 
+         {'total_profit_loss': 0.0, 'realized_profit_loss': 0.0, 'floating_profit_loss': 0.0, 'average_price': 0.0, 'delta': 0.0, 'mark_price': 0.0, 'settlement_price': 744.58, 'instrument_name': 'BTC-FS-29NOV24_PERP', 'initial_margin': 0.0, 'maintenance_margin': 0.0, 'index_price': 0.0, 'direction': 'zero', 'kind': 'future_combo'}, {'estimated_liquidation_price': None, 'size_currency': 0.004023349, 'realized_funding': -1.8e-07, 'total_profit_loss': -1.1036e-05, 'realized_profit_loss': -1.83e-07, 'floating_profit_loss': -1.0738e-05, 'leverage': 50, 'average_price': 67292.85, 'delta': 0.004023349, 'interest_value': 0.028593508994823238, 'mark_price': 67108.27, 'settlement_price': 67378.94, 'instrument_name': 'BTC-PERPETUAL', 'open_orders_margin': 0.0, 'initial_margin': 8.0468e-05, 'maintenance_margin': 4.0234e-05, 'index_price': 67082.45, 'direction': 'buy', 'kind': 'future', 'size': 270.0}]
 
-
-def get_ttl_hash(seconds=3600):
-    """Calculate hash value for TTL caching.
-
-    Args:
-        seconds (int, optional): Expiration time in seconds. Defaults to 3600.
-
-    Returns:
-        int: Hash value.
-    """
-    utime = datetime.datetime.now().timestamp()
-    return round(utime / (seconds + 1))
-
-
-def ttl_cache(ttl_seconds=3600):
-    """A decorator for TTL cache functionality.
-
-    Args:
-        ttl_seconds (int, optional): Expiration time in seconds. Defaults to 3600.
-    """
-    def ttl_cache_deco(func):
-        """Returns a function with time-to-live (TTL) caching capabilities."""
-        # Function with caching capability and dummy argument
-        @lru_cache(maxsize=None)
-        def cached_dummy_func(*args, ttl_dummy, **kwargs):
-            del ttl_dummy  # Remove the dummy argument
-            return func(*args, **kwargs)
-
-        # Function to input the hash value into the dummy argument
-        @wraps(func)
-        def ttl_cached_func(*args, **kwargs):
-            hash = get_ttl_hash(ttl_seconds)
-            return cached_dummy_func(*args, ttl_dummy=hash, **kwargs)
-        return ttl_cached_func
-
-    return ttl_cache_deco
-
-
-@ttl_cache(ttl_seconds=5)
-def get_content():
-    return "AAAAAAAAAAAAA"
-
-print (get_content ())
+print ( [o["size"] for o in sub_account  \
+            if o["instrument_name"] == "BTC-1NOV24" ]
+)
