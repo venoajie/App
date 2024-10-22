@@ -555,8 +555,8 @@ class StreamAccountData(ModifyOrderDb):
             
         else:
                 
-            await self.saving_order(instrument_name,
-                                    non_checked_strategies,
+            await self.saving_order(non_checked_strategies,
+                                    instrument_name,
                                     order,
                                     order_db_table)
                                     
@@ -905,6 +905,7 @@ class StreamAccountData(ModifyOrderDb):
 
             
     async def update_user_changes(self,
+                                  non_checked_strategies,
                                   data_orders, 
                                   currency, 
                                   order_db_table,
@@ -936,9 +937,10 @@ class StreamAccountData(ModifyOrderDb):
             else:
                 for order in orders:
                     
-                    await self.saving_order(instrument_name,
-                                    order, 
-                                    order_db_table)
+                    await self.saving_order(non_checked_strategies,
+                                            instrument_name,
+                                            order,
+                                            order_db_table)
                                             
                 await self.modify_order_and_db. resupply_sub_accountdb(currency)            
         #log.debug (f"positions {positions}")
@@ -965,7 +967,8 @@ class StreamAccountData(ModifyOrderDb):
         order_state= order["order_state"]
         #log.info (f"""order_state == "cancelled" or order_state == "filled" {order_state} {order_state == "cancelled" or order_state == "filled"}""")
         if order_state == "cancelled" or order_state == "filled":
-            await saving_orders (order_db_table, order)
+            await saving_orders (order_db_table, 
+                                 order)
         
         else:
             
