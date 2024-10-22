@@ -49,8 +49,6 @@ def determine_opening_size(instrument_name: str,
     """ """
     sign = ensure_sign_consistency(side)
     
-    log.error (f"instrument_name {instrument_name} futures_instruments {futures_instruments} side {side} factor {factor}")
-    
     proposed_size= max(1, int(abs(max_position) * factor)) 
     
     return size_rounding(instrument_name, 
