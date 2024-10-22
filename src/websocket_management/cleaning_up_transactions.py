@@ -176,6 +176,9 @@ def check_whether_order_db_reconciled_each_other (sub_account,
     
     if sub_account :
         
+        log.critical (f"sub_account {sub_account}")
+        log.info (sub_account["positions"])
+        
         sub_account_size_instrument = [o["size"] for o in sub_account ["positions"] \
             if o["instrument_name"] == instrument_name ]
         sub_account_size_instrument = 0 if sub_account_size_instrument == [] \
