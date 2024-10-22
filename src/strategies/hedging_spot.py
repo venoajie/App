@@ -237,6 +237,7 @@ class HedgingSpot(BasicStrategy):
         pass
     
     def opening_position (self, 
+                          non_checked_strategies,
                           instrument_name,
                           futures_instruments,
                           open_orders_label_strategy,
@@ -287,7 +288,8 @@ class HedgingSpot(BasicStrategy):
             
             if order_allowed :
                 
-                label_and_side_consistent= is_label_and_side_consistent(params)
+                label_and_side_consistent= is_label_and_side_consistent(non_checked_strategies,
+                                                                        params)
                 
                 if label_and_side_consistent:# and not order_has_sent_before:
                     
@@ -369,6 +371,7 @@ class HedgingSpot(BasicStrategy):
     
     async def is_send_and_cancel_open_order_allowed(
         self,
+        non_checked_strategies,
         instrument_name: str,
         futures_instruments,
         orders_currency_strategy: list,
@@ -422,6 +425,7 @@ class HedgingSpot(BasicStrategy):
             else:
                 
                 order_allowed: bool = self. opening_position (instrument_name,
+                                                              non_checked_strategies,
                                                           futures_instruments,
                                                           open_orders_label_strategy,
                                                           market_condition,

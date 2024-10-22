@@ -762,7 +762,8 @@ class StreamAccountData(ModifyOrderDb):
                                                 index_price,
                                                 server_time)
                         
-                        send_order: dict = await hedging.is_send_and_cancel_open_order_allowed (instrument_ticker,
+                        send_order: dict = await hedging.is_send_and_cancel_open_order_allowed (non_checked_strategies,
+                                                                                                instrument_ticker,
                                                                                                 active_futures,
                                                                                                 orders_currency_strategy,
                                                                                                 best_ask_prc,
