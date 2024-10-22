@@ -40,7 +40,8 @@ from utilities.string_modification import (
     transform_nested_dict_to_list,
     parsing_label,)
 from utilities.system_tools import (
-    catch_error_message, 
+    raise_error_message,
+    async_raise_error_message,
     provide_path_for_file,)
 from websocket_management.allocating_ohlc import (
     ohlc_end_point, 
@@ -55,9 +56,6 @@ from websocket_management.cleaning_up_transactions import (
     get_unrecorded_trade_and_order_id,
     reconciling_sub_account_and_db_open_orders)
 
-def catch_error(error, idle: int = None) -> list:
-    """ """
-    catch_error_message(error, idle)
     
 async def get_instruments_from_deribit(currency) -> float:
     """ """
@@ -268,7 +266,7 @@ async def running_strategy() -> None:
                         
     except Exception as error:
         
-        catch_error_message(
+        await async_raise_error_message(
             error, 10, "app"
         )
 
@@ -407,7 +405,7 @@ async def reconciling_balances_and_order_from_various_sources() -> None:
                         
     except Exception as error:
         
-        catch_error_message(
+        await async_raise_error_message(
             error, 10, "app"
         )
 
@@ -548,7 +546,7 @@ async def check_and_save_every_60_minutes():
         # catch_error('update currencies and instruments')
 
     except Exception as error:
-        catch_error(error)
+        await async_raise_error_message(error)
 
 
 if __name__ == "__main__":
@@ -576,4 +574,4 @@ if __name__ == "__main__":
 
     except Exception as error:
         print(error)
-        catch_error(error, 30)
+        raise_error_message(error, 30)

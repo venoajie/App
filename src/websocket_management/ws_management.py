@@ -25,19 +25,15 @@ from strategies.basic_strategy import (
     get_basic_closing_paramaters,
     are_size_and_order_appropriate)
 from transaction_management.deribit.transaction_log import (saving_transaction_log,)
-from transaction_management.deribit.orders_management import (
-    saving_traded_orders,)
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,
     get_tickers,
     SendApiRequest)
 from utilities.system_tools import (
-    catch_error_message,
-    raise_error_message,
+    async_raise_error_message,
     provide_path_for_file,
-    reading_from_db_pickle,
-    sleep_and_restart)
+    reading_from_db_pickle,)
 from utilities.pickling import replace_data, read_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
@@ -55,11 +51,6 @@ def deribit_url_main() -> str:
 
 def parse_dotenv(sub_account) -> dict:
     return main_dotenv(sub_account)
-
-async def raise_error(error, idle: int = None) -> None:
-    """ """
-    await raise_error_message(error, idle)
-
 
 def get_config(file_name: str) -> list:
     """ """
@@ -372,10 +363,8 @@ async def get_and_save_currencies()->None:
         # catch_error('update currencies and instruments')
 
     except Exception as error:
-        
-        await cancel_all ()
-        
-        catch_error_message(
+                
+        await async_raise_error_message(
         error, 10, "app"
         )
 
@@ -761,7 +750,7 @@ async def distribute_ticker_result_as_per_data_type(my_path_ticker, data_orders,
                     replace_data(my_path_ticker, ticker_change)
 
     except Exception as error:
-        await raise_error_message(
+        await async_raise_error_message(
             error,
             "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
         )

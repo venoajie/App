@@ -8,7 +8,6 @@ import aiohttp
 # user defined formula
 from configuration import config
 
-
 async def private_connection (endpoint: str,
                               connection_url: str = "https://api.telegram.org/bot",
                               ) -> None:
@@ -73,3 +72,5 @@ async def telegram_bot_sendtext (bot_message: str,
 
     return await private_connection(endpoint=endpoint,
                                     connection_url=connection_url)
+
+

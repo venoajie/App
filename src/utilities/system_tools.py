@@ -6,7 +6,7 @@ import asyncio
 
 import datetime
 from functools import lru_cache, wraps
-
+from transaction_management.deribit.telegram_bot import telegram_bot_sendtext
 
 # https://python.plainenglish.io/five-python-wrappers-that-can-reduce-your-code-by-half-af775feb1d5
 
@@ -307,7 +307,45 @@ def exception_handler(func):
     return wrapper
 
 
-def catch_error_message(error: str, idle: float = None, message: str = None) -> None:
+def parse_error_message(
+    error: str, 
+    message: str = None) -> str:
+    """
+
+    Capture & emit error message
+
+    Args:
+        message (str): error message
+
+    Returns:
+        trace back error message
+
+    """
+
+    from loguru import logger as log
+
+    import traceback
+
+    info = f"{error} \n \n {traceback.format_exc()}"
+
+    if message != None:
+        info = f"{message} \n \n {error} \n \n {traceback.format_exc()}"
+
+    log.add(
+        "error.log", 
+        backtrace=True, 
+        diagnose=True
+    )  # Caution, may leak sensitive data in prod
+
+   
+    log.critical (f"{info}")
+    
+    return info
+
+def raise_error_message(
+    error: str, 
+    idle: float = None, 
+    message: str = None) -> None:
     """
 
     Capture & emit error message
@@ -325,39 +363,28 @@ def catch_error_message(error: str, idle: float = None, message: str = None) -> 
 
     """
 
-    import traceback
-    from utilities import telegram_app
-    from loguru import logger as log
-
-    info = f"{error} \n \n {traceback.format_exc()}"
-
-    if idle == None:
-        info = f"{error}"
-    
-    if message != None:
-        info = f"{message} \n \n {error} \n \n {traceback.format_exc()}"
-
+    info = parse_error_message(error, 
+                               message)
+   
     if error == True:  # to respond 'def is_current_file_running'  result
         sys.exit(1)
 
-    log.critical(f"{error}")
-
-    if "back up" not in error:  # to respond 'def is_current_file_running'  result
-        log.debug(traceback.format_exc())
-
-    telegram_app.telegram_bot_sendtext(info)
+    if idle == None:
+        info = f"{error}"
 
     if idle != None:
-        log.info(f"restart {idle} seconds after error")
         sleep_and_restart_program(idle)
 
     else:
         sys.exit()
 
+    return info
 
-async def raise_error_message(
-    error: str, idle: float = None, message: str = None
-) -> None:
+
+async def async_raise_error_message(
+    error: str, 
+    idle: float = None,
+    message: str = None) -> None:
     """
 
     Capture & emit error message
@@ -375,40 +402,21 @@ async def raise_error_message(
 
     """
 
-    import traceback
-    from utilities import telegram_app
-    from loguru import logger as log
-
-    info = f"{error} \n \n {traceback.format_exc()}"
-
-    if message != None:
-        info = f"{message} \n \n {error} \n \n {traceback.format_exc()}"
+    info = parse_error_message(error, 
+                               message)
+    
+    await telegram_bot_sendtext (info)
 
     if error == True:  # to respond 'def is_current_file_running'  result
         sys.exit(1)
 
-    if error == "server rejected WebSocket connection: HTTP 503":
-        log.critical(f"{error}")
-        telegram_app.telegram_bot_sendtext(
-            "server rejected WebSocket connection: HTTP 503"
-        )
-
-    log.critical(f"{error}")
-    log.debug(traceback.format_exc())
-
-    log.add(
-        "error.log", backtrace=True, diagnose=True
-    )  # Caution, may leak sensitive data in prod
-
-    telegram_app.telegram_bot_sendtext(info)
-
     if idle != None:
-        log.info(f"restart {idle} seconds after error")
         await sleep_and_restart(idle)
 
     else:
         sys.exit()
 
+    return info
 
 def check_file_attributes(filepath: str) -> None:
     """

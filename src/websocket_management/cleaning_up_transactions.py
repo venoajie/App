@@ -84,11 +84,12 @@ async def reconciling_sub_account_and_db_open_orders (instrument_name: str,
                 
                 for order_id in unrecorded_order_id:
                     
+                    order = [o for o in sub_account_orders_instrument if order_id in ["order_id"]]
+                    
                     if order_id:
                         
                         try:
-                            
-                            order = [o for o in sub_account_orders_instrument if order_id in ["order_id"]][0]
+                            order = order [0]
                                                         
                             order_state= order["order_state"]
                             
@@ -102,7 +103,8 @@ async def reconciling_sub_account_and_db_open_orders (instrument_name: str,
                                                 )
                         
                             if order_state == "open":
-                                await insert_tables(order_db_table, order)
+                                await insert_tables(order_db_table, 
+                                                    order)
             
                         except:
                             await telegram_bot_sendtext (f"order {order}")

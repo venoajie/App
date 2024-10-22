@@ -168,7 +168,7 @@ class FutureSpreads(BasicStrategy):
             
     def __post_init__(self):
         self.basic_params: str = BasicStrategy (self.strategy_label, 
-                                                      self.strategy_parameters)
+                                                self.strategy_parameters)
   
 
     async def is_send_exit_order_allowed (self,
