@@ -541,7 +541,8 @@ class ModifyOrderDb(SendApiRequest):
                                                     max_closed_transactions_downloaded_from_sqlite)
         #log.warning(f"transaction_log {transaction_log}")
                 
-        await saving_transaction_log (transaction_log_trading,
+        if transaction_log:
+            await saving_transaction_log (transaction_log_trading,
                                     archive_db_table,
                                     transaction_log, 
                                     first_tick_fr_sqlite, 
