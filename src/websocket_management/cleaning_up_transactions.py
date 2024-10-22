@@ -264,7 +264,7 @@ def check_whether_db_reconciled_each_other (sub_account,
         len_order_from_sub_account_and_db_is_equal = len_orders_instrument == len_sub_account_instrument 
         
         if not sum_trade_from_log_and_db_is_equal:
-            log.info (f"sum_from_log_and_trade_is_equal {sum_trade_from_log_and_db_is_equal} sum_my_trades_currency {sum_my_trades_currency}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
+            log.critical (f"sum_from_log_and_trade_is_equal {sum_trade_from_log_and_db_is_equal} sum_my_trades_currency {sum_my_trades_currency}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
         
         if not len_order_from_sub_account_and_db_is_equal:
             log.critical (f"len_order {len_order_from_sub_account_and_db_is_equal} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
