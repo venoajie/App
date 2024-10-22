@@ -57,6 +57,7 @@ async def reconciling_sub_account_and_db_open_orders (instrument_name: str,
     db_orders_instrument = [o for o in orders_currency \
         if instrument_name in o["instrument_name"]]
     log.debug (f"db_orders_instrument {db_orders_instrument}")
+    log.warning (f"sub_account_orders_instrument {sub_account_orders_instrument}")
 
     db_orders_instrument_id = [] if db_orders_instrument == [] \
         else [o["order_id"] for o in db_orders_instrument]
@@ -74,7 +75,10 @@ async def reconciling_sub_account_and_db_open_orders (instrument_name: str,
                 
         # both contain orders, but different id
         else:
-            unrecorded_order_id = get_unique_elements(db_orders_instrument_id, sub_account_orders_instrument_id)
+            unrecorded_order_id = get_unique_elements(db_orders_instrument_id, 
+                                                      sub_account_orders_instrument_id)
+            
+            log.info (f"unrecorded_order_id {unrecorded_order_id}")
             
             if unrecorded_order_id:
                 
