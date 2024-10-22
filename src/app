@@ -989,7 +989,9 @@ class StreamAccountData(ModifyOrderDb):
 
             if not label:
                 
-                await labelling_the_unlabelled_and_resend_it(order, instrument_name)
+                await labelling_the_unlabelled_and_resend_it(non_checked_strategies,
+                                                             order,
+                                                             instrument_name)
             
 def main():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc

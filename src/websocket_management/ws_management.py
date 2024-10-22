@@ -720,7 +720,9 @@ def delta_price_pct(last_traded_price: float, market_price: float) -> bool:
         if (last_traded_price == [] or last_traded_price == 0)
         else delta_price / last_traded_price
     )
-async def labelling_the_unlabelled_and_resend_it(order, instrument_name):
+async def labelling_the_unlabelled_and_resend_it(non_checked_strategies,
+                                                 order, 
+                                                 instrument_name):
     """_summary_
     """
     from transaction_management.deribit.orders_management import labelling_unlabelled_transaction
@@ -732,7 +734,9 @@ async def labelling_the_unlabelled_and_resend_it(order, instrument_name):
 
     await cancel_by_order_id (order_id)
     
-    await if_order_is_true(labelled_order, instrument_name)
+    await if_order_is_true(non_checked_strategies,
+                           labelled_order,
+                           instrument_name)
 
     
 async def distribute_ticker_result_as_per_data_type(my_path_ticker, data_orders, instrument
