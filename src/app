@@ -526,6 +526,7 @@ class StreamAccountData(ModifyOrderDb):
 
 
     async def update_user_changes_non_ws(self,
+                                         non_checked_strategies,
                                          data_orders, 
                                         currency, 
                                         order_db_table,
@@ -555,8 +556,9 @@ class StreamAccountData(ModifyOrderDb):
         else:
                 
             await self.saving_order(instrument_name,
-                                order, 
-                                order_db_table)
+                                    non_checked_strategies,
+                                    order,
+                                    order_db_table)
                                     
             await self.modify_order_and_db.resupply_sub_accountdb(currency)            
         #log.debug (f"positions {positions}")
@@ -778,7 +780,8 @@ class StreamAccountData(ModifyOrderDb):
                                 log.error (f"result_order {result_order}")
                                 
                                 data_orders = result_order["result"]
-                                await self.update_user_changes_non_ws (data_orders, 
+                                await self.update_user_changes_non_ws (non_checked_strategies,
+                                                                       data_orders, 
                                                                         currency, 
                                                                         order_db_table,
                                                                         trade_db_table, 
@@ -811,12 +814,13 @@ class StreamAccountData(ModifyOrderDb):
                             if result_order:
                                 log.error (f"result_order {result_order}")
                                 data_orders = result_order["result"]
-                                await self.update_user_changes_non_ws (data_orders, 
-                                    currency, 
-                                    order_db_table,
-                                    trade_db_table, 
-                                    archive_db_table,
-                                    transaction_log_trading)
+                                await self.update_user_changes_non_ws (non_checked_strategies,
+                                                                       data_orders, 
+                                                                        currency, 
+                                                                        order_db_table,
+                                                                        trade_db_table, 
+                                                                        archive_db_table,
+                                                                        transaction_log_trading)
                                 
                             await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
 
