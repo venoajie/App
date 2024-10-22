@@ -80,22 +80,24 @@ async def reconciling_sub_account_and_db_open_orders (instrument_name: str,
                 
                 for order_id in unrecorded_order_id:
                     
-                    order = [o for o in sub_account_orders_instrument if order_id in ["order_id"]][0]
-                                                
-                    order_state= order["order_state"]
+                    if order_id:
+                        
+                        order = [o for o in sub_account_orders_instrument if order_id in ["order_id"]][0]
+                                                    
+                        order_state= order["order_state"]
+                        
+                        if order_state == "cancelled" \
+                            or order_state == "filled":
+                            await deleting_row (order_db_table,
+                                                "databases/trading.sqlite3",
+                                                filter_trade,
+                                                "=",
+                                                order_id,
+                                            )
                     
-                    if order_state == "cancelled" \
-                        or order_state == "filled":
-                        await deleting_row (order_db_table,
-                                            "databases/trading.sqlite3",
-                                            filter_trade,
-                                            "=",
-                                            order_id,
-                                        )
-                
-                    if order_state == "open":
-                        await insert_tables(order_db_table, order)
-    
+                        if order_state == "open":
+                            await insert_tables(order_db_table, order)
+        
     # sub account did not contain order from respective instrument
     else:
         # if db contain orders, delete them
