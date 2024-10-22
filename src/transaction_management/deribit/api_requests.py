@@ -561,6 +561,7 @@ class ModifyOrderDb(SendApiRequest):
 
 
     async def if_order_is_true(self,
+                               non_checked_strategies,
                                order, 
                                instrument: str = None) -> None:
         """ """
@@ -577,7 +578,8 @@ class ModifyOrderDb(SendApiRequest):
                 # update param orders with instrument
                 params.update({"instrument": instrument})
 
-            label_and_side_consistent = is_label_and_side_consistent(params)
+            label_and_side_consistent = is_label_and_side_consistent(non_checked_strategies,
+                                                                     params)
 
             if  label_and_side_consistent:
                 await inserting_additional_params(params)
