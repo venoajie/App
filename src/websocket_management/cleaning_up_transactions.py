@@ -176,9 +176,6 @@ def check_whether_order_db_reconciled_each_other (sub_account,
     
     if sub_account :
         
-        log.critical (f"sub_account {sub_account}")
-        log.info (sub_account["positions"])
-        
         sub_account_orders = sub_account["open_orders"]
         
         sub_account_instrument = [o for o in sub_account_orders \
