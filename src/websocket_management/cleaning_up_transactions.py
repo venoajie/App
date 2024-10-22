@@ -82,22 +82,26 @@ async def reconciling_sub_account_and_db_open_orders (instrument_name: str,
                     
                     if order_id:
                         
-                        order = [o for o in sub_account_orders_instrument if order_id in ["order_id"]][0]
-                                                    
-                        order_state= order["order_state"]
+                        try:
+                            
+                            order = [o for o in sub_account_orders_instrument if order_id in ["order_id"]][0]
+                                                        
+                            order_state= order["order_state"]
+                            
+                            if order_state == "cancelled" \
+                                or order_state == "filled":
+                                await deleting_row (order_db_table,
+                                                    "databases/trading.sqlite3",
+                                                    filter_trade,
+                                                    "=",
+                                                    order_id,
+                                                )
                         
-                        if order_state == "cancelled" \
-                            or order_state == "filled":
-                            await deleting_row (order_db_table,
-                                                "databases/trading.sqlite3",
-                                                filter_trade,
-                                                "=",
-                                                order_id,
-                                            )
-                    
-                        if order_state == "open":
-                            await insert_tables(order_db_table, order)
-        
+                            if order_state == "open":
+                                await insert_tables(order_db_table, order)
+            
+                        except:
+                            await telegram_bot_sendtext (f"order {order}")
     # sub account did not contain order from respective instrument
     else:
         # if db contain orders, delete them
