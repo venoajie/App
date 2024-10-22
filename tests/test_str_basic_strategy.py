@@ -5,10 +5,53 @@ import pytest
 from strategies.basic_strategy import (
     are_size_and_order_appropriate,
     check_if_next_closing_size_will_not_exceed_the_original,
+    is_label_and_side_consistent,
     positions_and_orders,
     proforma_size,
     sum_order_under_closed_label_int)
 
+non_checked_strategies = ["futureSpread",
+                          "comboAuto",]
+      
+params1 = {"label": "hedgingSpot-open-100",
+           "side": "sell"}
+params2 = {"label": "customShort-open-100",
+           "side": "sell"}
+params3 = {"label": "comboAuto-open-100",
+           "side": "sell"}
+params4 = {"label": "comboAuto-open-100",
+           "side": "buy"}
+params5 = {"label": "futureSpread-open-100",
+           "side": "buy"}
+params6 = {"label": "futureSpread-open-100",
+           "side": "sell"}
+params7 = {"label": "customLong-open-100",
+           "side": "buy"}
+params8 = {"label": "customLong-open-100",
+           "side": "sell"}
+params9 = {"label": "hedgingSpot-open-100",
+           "side": "buy"}
+@pytest.mark.parametrize("non_checked_strategies, params, expected", [
+    ( non_checked_strategies, params1, True),
+    ( non_checked_strategies, params2, True),
+    ( non_checked_strategies, params3, True),
+    ( non_checked_strategies, params4, True),
+    ( non_checked_strategies, params5, True),
+    ( non_checked_strategies, params6, True),
+    ( non_checked_strategies, params7, True),
+    ( non_checked_strategies, params8, False),
+    ( non_checked_strategies, params9, False),
+    ])
+def test_is_label_and_side_consistent (non_checked_strategies, 
+                                        params,
+                                        expected):
+    
+    result = is_label_and_side_consistent (non_checked_strategies, 
+                                              params,)
+
+    assert result == expected
+    
+    
 @pytest.mark.parametrize("closed_orders_label_strategy, label_integer_open, expected", [
     ( [], [], 0),
     ])
@@ -20,7 +63,6 @@ def test_sum_order_under_closed_label_int (closed_orders_label_strategy,
                                               label_integer_open,)
 
     assert result == expected
-
 
 
 @pytest.mark.parametrize("basic_size, net_size, next_size, expected", [

@@ -121,7 +121,9 @@ async def send_limit_order(params) -> None:
     return send_limit_result
 
 
-async def if_order_is_true(order, instrument: str = None) -> None:
+async def if_order_is_true(non_checked_strategies: list,
+                           order, 
+                           instrument: str = None) -> None:
     """ """
     # log.debug (order)
     if order["order_allowed"]:
@@ -136,7 +138,8 @@ async def if_order_is_true(order, instrument: str = None) -> None:
             # update param orders with instrument
             params.update({"instrument": instrument})
 
-        label_and_side_consistent = is_label_and_side_consistent(params)
+        label_and_side_consistent = is_label_and_side_consistent(non_checked_strategies,
+                                                                 params)
 
         if  label_and_side_consistent:
             await inserting_additional_params(params)

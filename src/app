@@ -177,13 +177,18 @@ class StreamAccountData(ModifyOrderDb):
             
             strategy_attributes = config_app["strategies"]
                                     
-            active_strategies =   [o["strategy_label"] for o in strategy_attributes if o["is_active"]==True]
+            active_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                if o["is_active"]==True]
+
+            non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                if o["non_checked_for_size_label_consistency"]==True]
             
-            cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes if o["cancellable"]==True]
+            cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                if o["cancellable"]==True]
             
             for currency in currencies:
                 await self.modify_order_and_db.cancel_the_cancellables (currency,
-                                                                   cancellable_strategies)
+                                                                        cancellable_strategies)
                 
                 await self.modify_order_and_db.resupply_sub_accountdb (currency)
 
@@ -316,12 +321,13 @@ class StreamAccountData(ModifyOrderDb):
                             if "user.changes.any" in message_channel:
                                 #log.debug (f"user.changes.any.{currency.upper()}.raw")
                                 
-                                await self.update_user_changes(data_orders, 
-                                                          currency, 
-                                                          order_db_table,
-                                                          trade_db_table, 
-                                                          archive_db_table,
-                                                          transaction_log_trading)
+                                await self.update_user_changes(non_checked_strategies,
+                                                               data_orders, 
+                                                                currency, 
+                                                                order_db_table,
+                                                                trade_db_table, 
+                                                                archive_db_table,
+                                                                transaction_log_trading)
                             
                             TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
                             WHERE_FILTER_TICK: str = "tick"
@@ -389,6 +395,7 @@ class StreamAccountData(ModifyOrderDb):
                                                                                 active_futures,
                                                                                 active_combo_perp,
                                                                                 strategy_attributes,
+                                                                                non_checked_strategies,
                                                                                 instrument_ticker, 
                                                                                 futures_instruments,
                                                                         )
@@ -575,6 +582,7 @@ class StreamAccountData(ModifyOrderDb):
                                         active_futures,
                                         active_combo_perp,
                                         strategy_attributes,
+                                        non_checked_strategies,
                                         instrument_ticker, 
                                         futures_instruments,) -> None:
 
@@ -761,7 +769,9 @@ class StreamAccountData(ModifyOrderDb):
                         if send_order["order_allowed"]:
                             
                             #log.error  (f"send_order {send_order}")
-                            result_order = await self.modify_order_and_db.if_order_is_true(send_order, instrument_ticker)
+                            result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
+                                                                                           send_order, 
+                                                                                           instrument_ticker)
                             
                             if result_order:
                                 
@@ -794,7 +804,9 @@ class StreamAccountData(ModifyOrderDb):
                                                                                                  nearest_transaction_to_index,)
                             
                             log.error (f"send_closing_order {send_closing_order}")
-                            result_order = await self.modify_order_and_db.if_order_is_true(send_closing_order, instrument_ticker)
+                            result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
+                                                                                           send_closing_order, 
+                                                                                           instrument_ticker)
                             
                             if result_order:
                                 log.error (f"result_order {result_order}")
@@ -858,7 +870,9 @@ class StreamAccountData(ModifyOrderDb):
                                     if False and send_order["order_allowed"]:
                                         
                                         #log.error  (f"send_order {send_order}")
-                                        await self.modify_order_and_db.if_order_is_true(send_order, instrument_ticker)
+                                        await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
+                                                                                        send_order, 
+                                                                                        instrument_ticker)
                                         await self.modify_order_and_db.if_cancel_is_true(send_order)
 
                             log.error (f"send_order {send_order}")
@@ -888,11 +902,11 @@ class StreamAccountData(ModifyOrderDb):
             
     async def update_user_changes(self,
                                   data_orders, 
-                                currency, 
-                                order_db_table,
-                                trade_db_table, 
-                                archive_db_table,
-                                transaction_log_trading) -> None:
+                                  currency, 
+                                  order_db_table,
+                                  trade_db_table,
+                                  archive_db_table,
+                                  transaction_log_trading) -> None:
         
         trades = data_orders["trades"]
         
@@ -938,6 +952,7 @@ class StreamAccountData(ModifyOrderDb):
     
 
     async def saving_order (self,
+                            non_checked_strategies,
                            instrument_name,
                            order,
                            order_db_table) -> None:
@@ -954,7 +969,8 @@ class StreamAccountData(ModifyOrderDb):
 
             order_id= order["order_id"]    
             
-            label_and_side_consistent= is_label_and_side_consistent(order)
+            label_and_side_consistent= is_label_and_side_consistent(non_checked_strategies,
+                                                                    order)
             
             #log.critical (f' ORDERS label_and_side_consistent {label_and_side_consistent} label {label} everything_NOT_consistent {not label_and_side_consistent}')
             

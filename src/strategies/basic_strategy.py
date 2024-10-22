@@ -550,7 +550,8 @@ async def get_additional_params_for_open_label(transaction: list, label: str) ->
             transaction.update({"take_profit": 0})
             
 
-def is_label_and_side_consistent(params) -> bool:
+def is_label_and_side_consistent(non_checked_strategies,
+                                 params) -> bool:
     """ """
     
     #log.error (f"params {params}")
@@ -558,18 +559,24 @@ def is_label_and_side_consistent(params) -> bool:
 
     is_consistent = True if "closed" in label else False
     # log.warning(f"params {params}")
-
-    if "open" in label:
         
-        side = get_transaction_side(params)
+    if bool([ele for ele in non_checked_strategies if(ele in label)]):
+        is_consistent = True
 
-        if side == "sell":
-            is_consistent = True if ("Short" in label \
-                                    or "hedging" in label \
-                                        or "future" in label) else False
+    else:
+        
+        if "open" in label:
+            
+            side = get_transaction_side(params)
 
-        if side == "buy":
-            is_consistent = True if "Long" in label else False
+            if side == "sell":
+                
+                is_consistent = True if ("Short" in label \
+                                        or "hedging" in label) \
+                                            else False
+
+            if side == "buy":
+                is_consistent = True if "Long" in label else False
 
     return is_consistent
 
