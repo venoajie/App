@@ -227,8 +227,7 @@ async def insert_market_condition_result(currencies,
                                          ratio: float = 0.9,
                                          fluctuation_threshold=(0.4 / 100)) -> dict:
     """ """
-    
-
+    currencies =["BTC","ETH"]
     for currency in currencies:
 
         log.error (f"{currency}")

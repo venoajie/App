@@ -53,7 +53,6 @@ async def clean_up_databases(idle_time) -> None:
     while True:
         
         await count_and_delete_ohlc_rows()
-        await insert_market_condition_result(currencies, WINDOW, RATIO)
         await asyncio.sleep(idle_time)
     #await back_up_db()
 
