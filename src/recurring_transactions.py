@@ -51,8 +51,34 @@ async def clean_up_databases(idle_time) -> None:
         await asyncio.sleep(idle_time)
     #await back_up_db()
 
+async def update_ohlc_and_market_condition(idle_time) -> None:
+    """ """
 
-async def update_ohlc_and_market_condition(idle_time: float) -> None:
+    
+
+    ONE_PCT = 1 / 100
+    WINDOW = 9
+    RATIO = 0.9
+    THRESHOLD = 0.01 * ONE_PCT
+    
+    file_toml = "config_strategies.toml"
+        
+    config_app = get_config(file_toml)
+
+    tradable_config_app = config_app["tradable"]
+    
+    currencies= [o["spot"] for o in tradable_config_app] [0]
+    end_timestamp=     get_now_unix_time() 
+    
+    while True:
+        
+        for c in currencies:
+            print (c)
+
+        await asyncio.sleep(idle_time)
+    #await back_up_db()
+
+async def update_ohlc_and_market_condition_(idle_time: float) -> None:
     """ """
     
 
