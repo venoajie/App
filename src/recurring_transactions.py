@@ -39,8 +39,14 @@ async def clean_up_databases(idle_time) -> None:
     """ """
 
     from websocket_management.cleaning_up_transactions import count_and_delete_ohlc_rows
-
+    
+    curr=["eth,"btc]
+    
     while True:
+        
+        for c in curr:
+            print (c)
+
         await count_and_delete_ohlc_rows()
         await asyncio.sleep(idle_time)
     #await back_up_db()
