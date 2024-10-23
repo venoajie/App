@@ -195,6 +195,8 @@ async def get_market_condition(instrument,
             #    log.error(f'ema_high_9 {ema_high_9}')
             
             log.error(f'ohlc_1_high_9 {ohlc_1_high_9}')
+            ema_low_9 = await get_ema(ohlc_1_low_9["ohlc"], ratio)
+
 
 async def insert_market_condition_result(currencies,
                                          limit: int = 100,
