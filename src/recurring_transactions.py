@@ -51,6 +51,8 @@ async def update_ohlc_and_market_condition(idle_time: float) -> None:
 
     while True:
 
+        await asyncio.sleep(idle_time)
+
         ONE_PCT = 1 / 100
         WINDOW = 9
         RATIO = 0.9
@@ -116,13 +118,12 @@ async def update_ohlc_and_market_condition(idle_time: float) -> None:
                 
                     
                     await insert_tables(table_ohlc, result)
-        await asyncio.sleep(idle_time)
         
 
 async def main():
     await asyncio.gather(
-        update_ohlc_and_market_condition(5), 
-        clean_up_databases(60), 
+        update_ohlc_and_market_condition(1), 
+        clean_up_databases(3), 
         return_exceptions=True)
     
 asyncio.run(main())
