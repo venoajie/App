@@ -4,4 +4,10 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "aiohttp>=3.10.10",
+    "attr>=0.3.2",
+    "multidict>=6.1.0",
+    "requests>=2.32.3",
+    "tomli>=2.0.2",
+    "urllib3>=2.2.3",]
