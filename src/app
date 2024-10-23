@@ -29,6 +29,9 @@ from strategies.hedging_spot import HedgingSpot
 from strategies.futures_spread import (
     delete_respective_closed_futures_from_trade_db, 
     FutureSpreads)
+from transaction_management.deribit.api_requests import (
+    get_currencies,
+    get_instruments,)
 from transaction_management.deribit.orders_management import (
     saving_traded_orders,
     saving_orders,)
@@ -1012,6 +1015,46 @@ async def clean_up_databases(idle_time) -> None:
         await count_and_delete_ohlc_rows()
         await asyncio.sleep(idle_time)
 
+async def get_instruments_from_deribit(currency) -> float:
+    """ """
+
+    result = await get_instruments(currency)
+
+    return result
+
+
+async def get_currencies_from_deribit() -> float:
+    """ """
+
+    result = await get_currencies()
+    return result
+
+
+async def update_instruments(idle_time):
+
+    try:
+        
+        while True:
+
+            get_currencies_all = await get_currencies_from_deribit()
+            currencies = [o["currency"] for o in get_currencies_all["result"]]
+
+            for currency in currencies:
+
+                instruments = await get_instruments_from_deribit(currency)
+
+                my_path_instruments = provide_path_for_file("instruments", currency)
+
+                replace_data(my_path_instruments, instruments)
+
+            my_path_cur = provide_path_for_file("currencies")
+
+            replace_data(my_path_cur, currencies)
+            
+            await asyncio.sleep(idle_time)
+
+    except Exception as error:
+        await async_raise_error_message(error)
 
 async def main():
     sub_account_id = "deribit-148510"
