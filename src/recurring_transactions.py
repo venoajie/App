@@ -76,17 +76,6 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
 
             print (f"{currency}")
             
-            instrument_name= f"{currency}-PERPETUAL"
-
-            await insert_market_condition_result(instrument_name, WINDOW, RATIO)
-            
-            time_frame= [3,5,15,60,30,"1D"]
-                
-            ONE_SECOND = 1000
-            
-            one_minute = ONE_SECOND * 60
-            
-            WHERE_FILTER_TICK: str = "tick"
             
         await asyncio.sleep(idle_time)
     #await back_up_db()
