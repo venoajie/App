@@ -1007,6 +1007,8 @@ async def clean_up_databases(idle_time) -> None:
 
     while True:
         
+        log.info ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        
         await count_and_delete_ohlc_rows()
         await asyncio.sleep(idle_time)
 
