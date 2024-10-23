@@ -162,6 +162,8 @@ async def get_market_condition(instrument,
     if  current_tick !=None:
         log.error (current_tick)
         ohlc_1_low_9 = await cleaned_up_ohlc("low", table_1, 10)
+        ohlc_1_close_9 = await cleaned_up_ohlc("close", table_1, 10)
+        ohlc_1_open_3 = await cleaned_up_ohlc("open", table_1, 4)
 
 
 async def insert_market_condition_result(currencies,
