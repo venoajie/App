@@ -57,9 +57,7 @@ async def clean_up_databases(idle_time) -> None:
     #await back_up_db()
 
 async def update_ohlc_and_market_condition(idle_time) -> None:
-    """ """
-
-    
+    """ """   
 
     ONE_PCT = 1 / 100
     WINDOW = 9
