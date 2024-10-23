@@ -664,6 +664,7 @@ class StreamAccountData(ModifyOrderDb):
                                                                       from_transaction_log)
         
         
+        log.error (f"db_reconciled {instrumendb_reconciledt_from_orders_currency}")
         if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
             
             archive_db_table= f"my_trades_all_{currency}_json"    
