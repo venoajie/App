@@ -194,13 +194,14 @@ async def get_market_condition(instrument,
             ema_high_9 = await get_ema(ohlc_1_high_9["ohlc"], ratio)
             #    log.error(f'ema_high_9 {ema_high_9}')
             
-            log.error(f'ohlc_1_high_9 {ohlc_1_high_9}')
             ema_low_9 = await get_ema(ohlc_1_low_9["ohlc"], ratio)
 
             ohlc_close_20 = await cleaned_up_ohlc("close", table_1, 21)
 
             ema_close_9 = await get_ema(ohlc_1_close_9["ohlc"], ratio)
             ema_close_20 = await get_ema(ohlc_close_20["ohlc"], ratio)
+
+            log.error(f'ohlc_1_high_9 {ohlc_1_high_9}')
 
 
 async def insert_market_condition_result(currencies,
