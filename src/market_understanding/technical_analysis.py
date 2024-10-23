@@ -219,7 +219,7 @@ async def get_market_condition(instrument,
             #df_vwap = await get_vwap(ohlc_all, vwap_period)
             #vwap = df_vwap.iloc[-1]
             #result.update({f"1m_vwap": vwap})
-#            return result
+            return result
 
 
 async def insert_market_condition_result(currencies,
