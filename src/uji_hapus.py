@@ -1,11 +1,64 @@
-sub_account = [
-     {
-         'estimated_liquidation_price': None, 'size_currency': -0.000297175, 'total_profit_loss': 3.793e-06, 'realized_profit_loss': 0.0, 'floating_profit_loss': 1.296e-06, 'leverage': 25, 'average_price': 68170.5, 'delta': -0.000297175, 'mark_price': 67300.4, 'settlement_price': 67595.19, 'instrument_name': 'BTC-1NOV24', 'open_orders_margin': 0.0, 'initial_margin': 1.1887e-05, 'maintenance_margin': 5.944e-06, 'index_price': 67082.45, 'direction': 'sell', 'kind': 'future', 'size': -20.0
-         }, {
-             'estimated_liquidation_price': None, 'size_currency': -0.004169366, 'total_profit_loss': -7.2824e-05, 'realized_profit_loss': 0.0, 'floating_profit_loss': 1.6072e-05, 'leverage': 25, 'average_price': 66003.64, 'delta': -0.004169366, 'mark_price': 67156.49, 'settlement_price': 67416.37, 'instrument_name': 'BTC-25OCT24', 'open_orders_margin': 0.0, 'initial_margin': 0.000166776, 'maintenance_margin': 8.3388e-05, 'index_price': 67082.45, 'direction': 'sell', 'kind': 'future', 'size': -280.0
-             }, 
-         {'total_profit_loss': 0.0, 'realized_profit_loss': 0.0, 'floating_profit_loss': 0.0, 'average_price': 0.0, 'delta': 0.0, 'mark_price': 0.0, 'settlement_price': 744.58, 'instrument_name': 'BTC-FS-29NOV24_PERP', 'initial_margin': 0.0, 'maintenance_margin': 0.0, 'index_price': 0.0, 'direction': 'zero', 'kind': 'future_combo'}, {'estimated_liquidation_price': None, 'size_currency': 0.004023349, 'realized_funding': -1.8e-07, 'total_profit_loss': -1.1036e-05, 'realized_profit_loss': -1.83e-07, 'floating_profit_loss': -1.0738e-05, 'leverage': 50, 'average_price': 67292.85, 'delta': 0.004023349, 'interest_value': 0.028593508994823238, 'mark_price': 67108.27, 'settlement_price': 67378.94, 'instrument_name': 'BTC-PERPETUAL', 'open_orders_margin': 0.0, 'initial_margin': 8.0468e-05, 'maintenance_margin': 4.0234e-05, 'index_price': 67082.45, 'direction': 'buy', 'kind': 'future', 'size': 270.0}]
+import asyncio, datetime,time
 
-print ( [o["size"] for o in sub_account  \
-            if o["instrument_name"] == "BTC-1NOV24" ]
-)
+from transaction_management.deribit.api_requests import (
+    get_currencies,)
+from configuration.label_numbering import get_now_unix_time
+
+async def get_currencies_from_deribit() -> float:
+    """ """
+
+    result = await get_currencies()
+
+    print(f"get_currencies {result}")
+
+    return result
+
+
+async def check_and_save_every_60_minutes():
+
+    try:
+
+        get_currencies_all = await get_currencies_from_deribit()
+        currencies = [o["currency"] for o in get_currencies_all["result"]]
+        #        print(currencies)
+
+        for currency in currencies:
+
+            instruments = await get_instruments_from_deribit(currency)
+            # print (f'instruments {instruments}')
+
+            my_path_instruments = provide_path_for_file("instruments", currency)
+
+            replace_data(my_path_instruments, instruments)
+
+        my_path_cur = provide_path_for_file("currencies")
+
+        replace_data(my_path_cur, currencies)
+        # catch_error('update currencies and instruments')
+
+    except Exception as error:
+        await async_raise_error_message(error)
+
+
+async def main1():
+    while True:
+
+        t0 = time.time()
+        await asyncio.sleep(1)
+        t1 = time.time()
+        
+        print(1)
+async def main5():
+    while True:
+
+        t0 = time.time()
+        await asyncio.sleep(5)
+        t1 = time.time()
+        
+        print(5)
+
+async def main():
+    results = await asyncio.gather(main1(), main5(), return_exceptions=True)
+    print(results)  # Will print [ValueError(), KeyError()]
+
+asyncio.run(main())
