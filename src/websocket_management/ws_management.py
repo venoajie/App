@@ -415,7 +415,6 @@ async def on_restart(currencies_default: str,
     
     # refresh databases
     await get_and_save_currencies()                
-    log.warning("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     
     for currency in currencies_default:
         
@@ -432,8 +431,6 @@ async def on_restart(currencies_default: str,
         #                                   order_table,
         #                                   100)
         #await check_db_consistencies_and_clean_up_imbalances(currency)                           
-
-    log.warning("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     
 async def check_db_consistencies_and_clean_up_imbalances(currency: str, cancellable_strategies, sub_accounts: list =[]) -> None:
     
