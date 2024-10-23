@@ -150,25 +150,27 @@ async def get_instruments_from_deribit(currency) -> float:
 async def update_instruments(idle_time):
 
     try:
+        
+        while True:
 
-        get_currencies_all = await get_currencies_from_deribit()
-        currencies = [o["currency"] for o in get_currencies_all["result"]]
-        #        print(currencies)
+            get_currencies_all = await get_currencies_from_deribit()
+            currencies = [o["currency"] for o in get_currencies_all["result"]]
+            #        print(currencies)
 
-        for currency in currencies:
+            for currency in currencies:
 
-            instruments = await get_instruments_from_deribit(currency)
-            # print (f'instruments {instruments}')
+                instruments = await get_instruments_from_deribit(currency)
+                # print (f'instruments {instruments}')
 
-            my_path_instruments = provide_path_for_file("instruments", currency)
+                my_path_instruments = provide_path_for_file("instruments", currency)
 
-            replace_data(my_path_instruments, instruments)
+                replace_data(my_path_instruments, instruments)
 
-        my_path_cur = provide_path_for_file("currencies")
+            my_path_cur = provide_path_for_file("currencies")
 
-        replace_data(my_path_cur, currencies)
-        # catch_error('update currencies and instruments')
-        await asyncio.sleep(idle_time)
+            replace_data(my_path_cur, currencies)
+            # catch_error('update currencies and instruments')
+            await asyncio.sleep(idle_time)
 
     except Exception as error:
         await async_raise_error_message(error)
