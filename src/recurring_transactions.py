@@ -68,12 +68,7 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
     
     while True:
         
-        await get_market_condition(currencies, 
-                                                WINDOW, 
-                                                RATIO, )
-        
-
-            #await insert_market_condition_result(instrument_name, WINDOW, RATIO)
+        await insert_market_condition_result(currencies, WINDOW, RATIO)
             
         await asyncio.sleep(idle_time)
     #await back_up_db()
