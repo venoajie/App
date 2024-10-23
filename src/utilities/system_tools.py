@@ -6,7 +6,6 @@ import asyncio
 
 import datetime
 from functools import lru_cache, wraps
-from transaction_management.deribit.telegram_bot import telegram_bot_sendtext
 
 # https://python.plainenglish.io/five-python-wrappers-that-can-reduce-your-code-by-half-af775feb1d5
 
@@ -405,8 +404,6 @@ async def async_raise_error_message(
     info = parse_error_message(error, 
                                message)
     
-    await telegram_bot_sendtext (info)
-
     if error == True:  # to respond 'def is_current_file_running'  result
         sys.exit(1)
 
