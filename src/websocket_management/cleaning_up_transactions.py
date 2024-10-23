@@ -624,7 +624,7 @@ async def count_and_delete_ohlc_rows():
     database: str = "databases/trading.sqlite3"  
 
     for table in tables:
-        log.error (f"table {table}")
+
         rows_threshold= max_rows(table)
         
         if "supporting_items_json" in table:

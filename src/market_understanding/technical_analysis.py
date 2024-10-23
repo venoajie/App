@@ -239,4 +239,4 @@ async def insert_market_condition_result(currencies,
                                             fluctuation_threshold)
         log.info(f"TA {result}")
 
-        await insert_tables("market_analytics_json", result)
+        #await insert_tables("market_analytics_json", result)
