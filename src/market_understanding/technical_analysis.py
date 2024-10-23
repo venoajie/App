@@ -159,7 +159,7 @@ async def get_market_condition(instrument,
     ohlc_1_high_9 = await cleaned_up_ohlc("high", table_1, 10)
     current_tick = ohlc_1_high_9["tick"]
 
-    if False and current_tick !=None:
+    if  current_tick !=None:
         ohlc_1_low_9 = await cleaned_up_ohlc("low", table_1, 10)
         ohlc_1_close_9 = await cleaned_up_ohlc("close", table_1, 10)
         ohlc_1_open_3 = await cleaned_up_ohlc("open", table_1, 4)
@@ -188,7 +188,7 @@ async def get_market_condition(instrument,
         
         last_tick_from_prev_TA = get_last_tick_from_prev_TA(TA_result_data)
         
-        if last_tick_from_prev_TA == 0 or current_tick > last_tick_from_prev_TA:
+        if False and ast_tick_from_prev_TA == 0 or current_tick > last_tick_from_prev_TA:
 
             #    log.error(f'ohlc_1_high_9 {ohlc_1_high_9}')
             ema_high_9 = await get_ema(ohlc_1_high_9["ohlc"], ratio)
