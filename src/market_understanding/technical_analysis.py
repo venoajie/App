@@ -160,45 +160,7 @@ async def get_market_condition(instrument,
     current_tick = ohlc_1_high_9["tick"]
 
     if  current_tick !=None:
-        ohlc_1_low_9 = await cleaned_up_ohlc("low", table_1, 10)
-        ohlc_1_close_9 = await cleaned_up_ohlc("close", table_1, 10)
-        ohlc_1_open_3 = await cleaned_up_ohlc("open", table_1, 4)
-
-        
-        if False and ast_tick_from_prev_TA == 0 or current_tick > last_tick_from_prev_TA:
-
-            #    log.error(f'ohlc_1_high_9 {ohlc_1_high_9}')
-            ema_high_9 = await get_ema(ohlc_1_high_9["ohlc"], ratio)
-            #    log.error(f'ema_high_9 {ema_high_9}')
-            
-            ema_low_9 = await get_ema(ohlc_1_low_9["ohlc"], ratio)
-
-            ohlc_close_20 = await cleaned_up_ohlc("close", table_1, 21)
-
-            ema_close_9 = await get_ema(ohlc_1_close_9["ohlc"], ratio)
-            ema_close_20 = await get_ema(ohlc_close_20["ohlc"], ratio)
-
-            result.update({"1m_ema_close_20": ema_close_20})
-            result.update({"1m_ema_close_9": ema_close_9})
-            result.update({"1m_ema_high_9": ema_high_9})
-            result.update({"1m_ema_low_9": ema_low_9})
-
-            result.update({"60_open": ohlc_60["ohlc"][0]})
-            result.update({"60_last_price": ohlc_60["last_price"]})
-            # print (f"result{ohlc_1_high_9}")
-            result.update({"last_price": last_price})
-
-            vwap_period = 10
-
-            ohlc_all = await get_price_ohlc(f"close", table_1, vwap_period)
-            log.error (f"ohlc_all {ohlc_all}")
-
-            df_vwap = await get_vwap(ohlc_all, vwap_period)
-            vwap = df_vwap.iloc[-1]
-            #result.update({f"1m_vwap": vwap})
-            return result
-
-
+        log.error (current_tick)
 async def insert_market_condition_result(currencies,
                                          limit: int = 100,
                                          ratio: float = 0.9,
