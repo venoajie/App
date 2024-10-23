@@ -74,9 +74,63 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
     end_timestamp=     get_now_unix_time() 
     
     while True:
-        
-        await insert_market_condition_result(currencies, WINDOW, RATIO)
             
+        for currency in currencies:
+            
+            print (f"{currency}")
+            print (f"{currencies}")
+            
+            instrument_name= f"{currency}-PERPETUAL"
+
+            await insert_market_condition_result(instrument_name, WINDOW, RATIO)
+            
+            time_frame= [3,5,15,60,30,"1D"]
+                
+            ONE_SECOND = 1000
+            
+            one_minute = ONE_SECOND * 60
+            
+            WHERE_FILTER_TICK: str = "tick"
+            
+            for resolution in time_frame:
+                
+                table_ohlc= f"ohlc{resolution}_{currency.lower()}_perp_json" 
+                            
+                last_tick_query_ohlc_resolution: str = querying_arithmetic_operator (WHERE_FILTER_TICK, "MAX", table_ohlc)
+
+                #data_from_ohlc1_start_from_ohlc_resolution_tick: str = 
+                
+                start_timestamp: int = await last_tick_fr_sqlite (last_tick_query_ohlc_resolution)
+                
+                if resolution == "1D":
+                    delta= (end_timestamp - start_timestamp)/(one_minute * 60 * 24)
+            
+                else:
+                    delta= (end_timestamp - start_timestamp)/(one_minute * resolution)
+                            
+                if delta > 1:
+                    end_point= ohlc_end_point(instrument_name,
+                                    resolution,
+                                    start_timestamp,
+                                    end_timestamp,
+                                    )
+
+                    ohlc_request = requests.get(end_point).json()["result"]
+                    
+                    result = [o for o in transform_nested_dict_to_list(ohlc_request) \
+                        if o["tick"] > start_timestamp][0]
+                    
+                    await ohlc_result_per_time_frame (instrument_name,
+                                                    resolution,
+                                                    result,
+                                                    table_ohlc,
+                                                    WHERE_FILTER_TICK, )
+                
+                    
+                    await insert_tables(table_ohlc, result)
+
+
+      
         await asyncio.sleep(idle_time)
     #await back_up_db()
 

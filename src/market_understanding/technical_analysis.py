@@ -214,7 +214,7 @@ async def get_market_condition(instrument,
             vwap_period = 10
 
             ohlc_all = await get_price_ohlc(f"close", table_1, vwap_period)
-            log.error (f"ohlc_all {ohlc_all}")
+            #log.error (f"ohlc_all {ohlc_all}")
 
             #df_vwap = await get_vwap(ohlc_all, vwap_period)
             #vwap = df_vwap.iloc[-1]
@@ -222,21 +222,15 @@ async def get_market_condition(instrument,
             return result
 
 
-async def insert_market_condition_result(currencies,
+async def insert_market_condition_result(instrument_name,
                                          limit: int = 100,
                                          ratio: float = 0.9,
                                          fluctuation_threshold=(0.4 / 100)) -> dict:
     """ """
-    for currency in currencies:
+    result = await get_market_condition(instrument_name, 
+                                        limit, 
+                                        ratio, 
+                                        fluctuation_threshold)
+    log.info(f"TA {result}")
 
-        log.error (f"{currency}")
-        
-        instrument_name= f"{currency}-PERPETUAL"
-        
-        result = await get_market_condition(instrument_name, 
-                                            limit, 
-                                            ratio, 
-                                            fluctuation_threshold)
-        log.info(f"TA {result}")
-
-        #await insert_tables("market_analytics_json", result)
+    #await insert_tables("market_analytics_json", result)
