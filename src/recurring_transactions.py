@@ -21,7 +21,8 @@ from utilities.string_modification import (
     transform_nested_dict_to_list,)
 from utilities.system_tools import (
     async_raise_error_message,
-    provide_path_for_file,)
+    provide_path_for_file,
+    raise_error_message)
 from websocket_management.allocating_ohlc import (
     ohlc_end_point, 
     ohlc_result_per_time_frame,
@@ -165,4 +166,20 @@ async def main():
     
     
 if __name__ == "__main__":
-    asyncio.run(main())
+    
+    
+    try:
+        asyncio.run(main())
+        
+    except (KeyboardInterrupt, SystemExit):
+        asyncio.get_event_loop().run_until_complete(main().stop_ws())
+        
+
+    except Exception as error:
+        raise_error_message(
+        error, 
+        10, 
+        "app"
+        )
+
+    
