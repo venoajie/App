@@ -1,41 +1,42 @@
 #!/usr/bin/env/python
 # -*- coding: utf-8 -*-
 
-import asyncio, datetime,time
+import asyncio
 import requests
 from loguru import logger as log
+
+from configuration.label_numbering import get_now_unix_time
 from db_management.sqlite_management import (
     back_up_db_sqlite,
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     insert_tables, 
     querying_arithmetic_operator,)
+from market_understanding.technical_analysis import (
+    insert_market_condition_result)
 from utilities.string_modification import (
-    remove_redundant_elements, 
-    transform_nested_dict_to_list,
-    parsing_label,)
-
-from utilities.pickling import (
-    replace_data,
-    read_data,)
-from utilities.system_tools import (
-    raise_error_message,
-    async_raise_error_message,
-    provide_path_for_file,)
+    transform_nested_dict_to_list,)
 from transaction_management.deribit.api_requests import (
     get_currencies,
-    get_instruments,
-    get_server_time,
-    ModifyOrderDb)
+    get_instruments,)
+from utilities.pickling import (
+    replace_data,)
+from utilities.system_tools import (
+    async_raise_error_message,
+    provide_path_for_file,)
 from websocket_management.allocating_ohlc import (
     ohlc_end_point, 
     ohlc_result_per_time_frame,
     last_tick_fr_sqlite,)
 from websocket_management.ws_management import (
     get_config,)
-from configuration.label_numbering import get_now_unix_time
 
-from market_understanding.technical_analysis import (
-    insert_market_condition_result,get_market_condition)
+async def back_up_db(idle_time):
+    
+    while True:
+        
+        await back_up_db_sqlite ()
+        await asyncio.sleep(idle_time)
+    #await back
+    
 
 async def get_currencies_from_deribit() -> float:
     """ """
@@ -134,7 +135,6 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                                                     result,
                                                     table_ohlc,
                                                     WHERE_FILTER_TICK, )
-                
                     
                     await insert_tables(table_ohlc, result)
 
@@ -155,12 +155,10 @@ async def update_instruments(idle_time):
 
             get_currencies_all = await get_currencies_from_deribit()
             currencies = [o["currency"] for o in get_currencies_all["result"]]
-            #        print(currencies)
 
             for currency in currencies:
 
                 instruments = await get_instruments_from_deribit(currency)
-                # print (f'instruments {instruments}')
 
                 my_path_instruments = provide_path_for_file("instruments", currency)
 
@@ -169,7 +167,7 @@ async def update_instruments(idle_time):
             my_path_cur = provide_path_for_file("currencies")
 
             replace_data(my_path_cur, currencies)
-            # catch_error('update currencies and instruments')
+            
             await asyncio.sleep(idle_time)
 
     except Exception as error:
@@ -179,7 +177,7 @@ async def update_instruments(idle_time):
 async def main():
     await asyncio.gather(
         clean_up_databases(60), 
-        update_instruments(5),
+        update_instruments(60),
         update_ohlc_and_market_condition(15), 
         return_exceptions=True)
     
