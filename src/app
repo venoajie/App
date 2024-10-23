@@ -720,7 +720,7 @@ class StreamAccountData(ModifyOrderDb):
             
             delta_time_expiration = min_expiration_timestamp - server_time  
             
-#            log.warning (f"delta_time_seconds < 120 {delta_time_seconds < 120} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
+            log.warning (f"delta_time_seconds < 120 {delta_time_seconds < 120} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
                                                                 
             if delta_time_seconds < 120:#ensure freshness of ta
                 
