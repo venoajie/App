@@ -59,7 +59,7 @@ async def cleaned_up_ohlc(
                                     table, 
                                     window)
 
-    log.warning(f" ohlc_all {ohlc_all}")
+    #log.warning(f" ohlc_all {ohlc_all}")
 
     # pick value only
     ohlc = [o[price] for o in ohlc_all]
@@ -232,6 +232,6 @@ async def insert_market_condition_result(currency,
                                         limit, 
                                         ratio, 
                                         fluctuation_threshold)
-    #log.info(f"TA {result}")
+    log.info(f"TA {result}")
 
     await insert_tables("market_analytics_json", result)
