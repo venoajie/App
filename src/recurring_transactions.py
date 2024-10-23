@@ -12,13 +12,13 @@ from db_management.sqlite_management import (
     querying_arithmetic_operator,)
 from market_understanding.technical_analysis import (
     insert_market_condition_result)
-from utilities.string_modification import (
-    transform_nested_dict_to_list,)
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
 from utilities.pickling import (
     replace_data,)
+from utilities.string_modification import (
+    transform_nested_dict_to_list,)
 from utilities.system_tools import (
     async_raise_error_message,
     provide_path_for_file,)
@@ -26,47 +26,32 @@ from websocket_management.allocating_ohlc import (
     ohlc_end_point, 
     ohlc_result_per_time_frame,
     last_tick_fr_sqlite,)
+from websocket_management.cleaning_up_transactions import count_and_delete_ohlc_rows
 from websocket_management.ws_management import (
     get_config,)
-
+    
 async def back_up_db(idle_time):
     
     while True:
-        
         await back_up_db_sqlite ()
         await asyncio.sleep(idle_time)
-    #await back
     
 
 async def get_currencies_from_deribit() -> float:
     """ """
 
     result = await get_currencies()
-
-    print(f"get_currencies {result}")
-
     return result
 
 
 async def clean_up_databases(idle_time) -> None:
     """ """
 
-    from websocket_management.cleaning_up_transactions import count_and_delete_ohlc_rows
-    
-    file_toml = "config_strategies.toml"
-        
-    config_app = get_config(file_toml)
-
-    tradable_config_app = config_app["tradable"]
-    
-    currencies= [o["spot"] for o in tradable_config_app] [0]
-    WINDOW = 9
-    RATIO = 0.9
     while True:
         
         await count_and_delete_ohlc_rows()
         await asyncio.sleep(idle_time)
-    #await back_up_db()
+
 
 async def update_ohlc_and_market_condition(idle_time) -> None:
     """ """   
@@ -88,9 +73,6 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
     while True:
             
         for currency in currencies:
-            
-            print (f"{currency}")
-            print (f"{currencies}")
             
             instrument_name= f"{currency}-PERPETUAL"
 

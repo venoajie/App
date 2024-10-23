@@ -208,17 +208,8 @@ async def get_market_condition(instrument,
 
             result.update({"60_open": ohlc_60["ohlc"][0]})
             result.update({"60_last_price": ohlc_60["last_price"]})
-            # print (f"result{ohlc_1_high_9}")
             result.update({"last_price": last_price})
 
- #           vwap_period = 10
-
-#            ohlc_all = await get_price_ohlc(f"close", table_1, vwap_period)
-            #log.error (f"ohlc_all {ohlc_all}")
-
-            #df_vwap = await get_vwap(ohlc_all, vwap_period)
-            #vwap = df_vwap.iloc[-1]
-            #result.update({f"1m_vwap": vwap})
             return result
 
 
@@ -231,6 +222,5 @@ async def insert_market_condition_result(instrument_name,
                                         limit, 
                                         ratio, 
                                         fluctuation_threshold)
-    log.info(f"TA {result}")
 
     await insert_tables("market_analytics_json", result)
