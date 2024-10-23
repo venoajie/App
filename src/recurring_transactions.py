@@ -24,7 +24,7 @@ from websocket_management.ws_management import (
 from configuration.label_numbering import get_now_unix_time
 
 from market_understanding.technical_analysis import (
-    insert_market_condition_result,)
+    insert_market_condition_result,get_market_condition)
 
 async def get_currencies_from_deribit() -> float:
     """ """
@@ -41,13 +41,8 @@ async def clean_up_databases(idle_time) -> None:
 
     from websocket_management.cleaning_up_transactions import count_and_delete_ohlc_rows
     
-    curr=["eth","btc"]
-    
     while True:
         
-        for c in curr:
-            print (c)
-
         await count_and_delete_ohlc_rows()
         await asyncio.sleep(idle_time)
     #await back_up_db()
@@ -80,8 +75,14 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
             
             instrument_name= f"{currency}-PERPETUAL"
             log.info (f"{instrument_name}")
+                    
+            result = await get_market_condition(instrument_name, 
+                                                WINDOW, 
+                                                RATIO, )
+            log.info(f"TA {result}")
 
-            await insert_market_condition_result(instrument_name, WINDOW, RATIO)
+
+            #await insert_market_condition_result(instrument_name, WINDOW, RATIO)
             
         await asyncio.sleep(idle_time)
     #await back_up_db()
