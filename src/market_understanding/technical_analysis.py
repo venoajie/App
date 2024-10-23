@@ -222,15 +222,24 @@ async def get_market_condition(instrument,
             return result
 
 
-async def insert_market_condition_result(currency,
+async def insert_market_condition_result(currencies,
                                          limit: int = 100,
                                          ratio: float = 0.9,
                                          fluctuation_threshold=(0.4 / 100)) -> dict:
     """ """
-    result = await get_market_condition(currency, 
-                                        limit, 
-                                        ratio, 
-                                        fluctuation_threshold)
-    log.info(f"TA {result}")
+    
 
-    await insert_tables("market_analytics_json", result)
+    for currency in currencies:
+
+        log.error (f"{currency}")
+        
+        
+        instrument_name= f"{currency}-PERPETUAL"
+        
+        result = await get_market_condition(instrument_name, 
+                                            limit, 
+                                            ratio, 
+                                            fluctuation_threshold)
+        log.info(f"TA {result}")
+
+        await insert_tables("market_analytics_json", result)

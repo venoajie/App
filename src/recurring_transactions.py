@@ -76,7 +76,7 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
             instrument_name= f"{currency}-PERPETUAL"
             log.info (f"{instrument_name}")
                     
-            result = await get_market_condition(instrument_name, 
+            result = await get_market_condition(currencies, 
                                                 WINDOW, 
                                                 RATIO, )
             log.info(f"TA {result}")
