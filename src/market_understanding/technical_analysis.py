@@ -201,6 +201,16 @@ async def get_market_condition(instrument,
             ema_close_9 = await get_ema(ohlc_1_close_9["ohlc"], ratio)
             ema_close_20 = await get_ema(ohlc_close_20["ohlc"], ratio)
 
+            result.update({"1m_ema_close_20": ema_close_20})
+            result.update({"1m_ema_close_9": ema_close_9})
+            result.update({"1m_ema_high_9": ema_high_9})
+            result.update({"1m_ema_low_9": ema_low_9})
+
+            result.update({"60_open": ohlc_60["ohlc"][0]})
+            result.update({"60_last_price": ohlc_60["last_price"]})
+            # print (f"result{ohlc_1_high_9}")
+            result.update({"last_price": last_price})
+
             log.error(f'ohlc_1_high_9 {ohlc_1_high_9}')
 
 
