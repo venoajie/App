@@ -48,14 +48,18 @@ async def get_price_ohlc(
 
 
 async def cleaned_up_ohlc(
-    price: str, table: str, window: int = 100
+    price: str, 
+    table: str,
+    window: int = 100
 ) -> list:
     """ """
 
     # get query for close price
-    ohlc_all = await get_price_ohlc(price, table, window)
+    ohlc_all = await get_price_ohlc(price, 
+                                    table, 
+                                    window)
 
-    #log.warning(f" table {table} ohlc_all {ohlc_all}")
+    log.warning(f" ohlc_all {ohlc_all}")
 
     # pick value only
     ohlc = [o[price] for o in ohlc_all]
@@ -140,7 +144,9 @@ def is_ohlc_fluctuation_exceed_threshold(
 
 
 async def get_market_condition(instrument,
-    limit: int = 100, ratio: float = 0.9, fluctuation_threshold=0.4 / 100
+                               limit: int = 100, 
+                               ratio: float = 0.9,
+                               fluctuation_threshold=0.4 / 100
 ) -> dict:
     """ """
     currency_lower= extract_currency_from_text(instrument).lower()
@@ -217,10 +223,15 @@ async def get_market_condition(instrument,
 
 
 async def insert_market_condition_result(currency,
-    limit: int = 100, ratio: float = 0.9, fluctuation_threshold=(0.4 / 100)
+                                         limit: int = 100,
+                                         ratio: float = 0.9,
+                                         fluctuation_threshold=(0.4 / 100)
 ) -> dict:
     """ """
-    result = await get_market_condition(currency, limit, ratio, fluctuation_threshold)
+    result = await get_market_condition(currency, 
+                                        limit, 
+                                        ratio, 
+                                        fluctuation_threshold)
     #log.info(f"TA {result}")
 
     await insert_tables("market_analytics_json", result)
