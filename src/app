@@ -664,7 +664,6 @@ class StreamAccountData(ModifyOrderDb):
                                                                       from_transaction_log)
         
         
-        log.error (f"db_reconciled {db_reconciled}")
         if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
             
             archive_db_table= f"my_trades_all_{currency}_json"    
@@ -699,8 +698,7 @@ class StreamAccountData(ModifyOrderDb):
             await self.modify_order_and_db.resupply_sub_accountdb (currency)
 
         
-#        log.info (f"index_price is not None {index_price is not None}  {index_price} equity > 0 {equity > 0} ")
-        
+        log.info (f"index_price is not None {index_price is not None}  {index_price} equity > 0 {equity > 0} ")
         if  index_price is not None \
             and equity > 0 \
                 and  db_reconciled ["sum_trade_from_log_and_db_is_equal"]\
