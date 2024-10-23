@@ -1017,7 +1017,7 @@ async def main():
     sub_account_id = "deribit-148510"
     await asyncio.gather(
          StreamAccountData(sub_account_id),
-        clean_up_databases(50), 
+        clean_up_databases(5), 
         return_exceptions=True)
     
 def main():
