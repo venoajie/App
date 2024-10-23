@@ -1014,7 +1014,9 @@ async def clean_up_databases(idle_time) -> None:
 
 
 async def main():
+    sub_account_id = "deribit-148510"
     await asyncio.gather(
+         StreamAccountData(sub_account_id),
         clean_up_databases(60), 
         return_exceptions=True)
     
@@ -1034,7 +1036,7 @@ def main():
         
 if __name__ == "__main__":
     try:
-        main()     
+        #main()     
         asyncio.run(main())
         
     except (KeyboardInterrupt, SystemExit):
