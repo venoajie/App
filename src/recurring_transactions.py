@@ -67,6 +67,7 @@ async def update_ohlc_and_market_condition(idle_time: float) -> None:
     for currency in currencies:
         
         print (f"{currency}")
+        print (f"{currencies}")
         
         instrument_name= f"{currency}-PERPETUAL"
 
