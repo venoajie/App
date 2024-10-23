@@ -126,9 +126,14 @@ async def ohlc_result_per_time_frame(
     last_tick1_fr_sqlite: int = await last_tick_fr_sqlite (last_tick_query_ohlc1)
 
     last_tick_fr_data_orders: int = data_orders ["tick"]
+    
+    log.warning (f"data_orders {data_orders}")
 
     # refilling current ohlc table with updated data
     refilling_current_ohlc_table_with_updated_streaming_data = last_tick1_fr_sqlite == last_tick_fr_data_orders
+
+    log.warning (f"last_tick_fr_data_orders {last_tick_fr_data_orders} last_tick1_fr_sqlite {last_tick1_fr_sqlite}")
+    log.debug (f"last_tick1_fr_sqlite == last_tick_fr_data_orders {last_tick1_fr_sqlite == last_tick_fr_data_orders} last_tick_fr_data_orders > last_tick1_fr_sqlite {last_tick_fr_data_orders > last_tick1_fr_sqlite}")
     
     insert_new_ohlc_and_replace_previous_ohlc_using_fix_data = last_tick_fr_data_orders > last_tick1_fr_sqlite
     
