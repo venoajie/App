@@ -159,7 +159,7 @@ async def get_market_condition(instrument,
     ohlc_1_high_9 = await cleaned_up_ohlc("high", table_1, 10)
     current_tick = ohlc_1_high_9["tick"]
 
-    if current_tick !=None:
+    if False and current_tick !=None:
         ohlc_1_low_9 = await cleaned_up_ohlc("low", table_1, 10)
         ohlc_1_close_9 = await cleaned_up_ohlc("close", table_1, 10)
         ohlc_1_open_3 = await cleaned_up_ohlc("open", table_1, 4)
