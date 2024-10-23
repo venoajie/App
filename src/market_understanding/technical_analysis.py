@@ -184,6 +184,11 @@ async def get_market_condition(instrument,
         result.update({f"1m_current_higher_open": last_price > ohlc_open_price})
         
         TA_result = await querying_table("market_analytics_json")
+        
+        TA_result_data= [o for o in TA_result["list_data_only"] if currency_upper in o["instrument"]]
+        
+        last_tick_from_prev_TA = get_last_tick_from_prev_TA(TA_result_data)
+        
 
 
 async def insert_market_condition_result(currencies,
