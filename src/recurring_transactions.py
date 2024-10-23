@@ -37,18 +37,17 @@ async def get_currencies_from_deribit() -> float:
 
 async def clean_up_databases(idle_time) -> None:
     """ """
-    await asyncio.sleep(idle_time)
 
     from websocket_management.cleaning_up_transactions import count_and_delete_ohlc_rows
 
     await count_and_delete_ohlc_rows()
+    await asyncio.sleep(idle_time)
     #await back_up_db()
 
 
 async def update_ohlc_and_market_condition(idle_time: float) -> None:
     """ """
 
-    await asyncio.sleep(idle_time)
     ONE_PCT = 1 / 100
     WINDOW = 9
     RATIO = 0.9
@@ -114,25 +113,8 @@ async def update_ohlc_and_market_condition(idle_time: float) -> None:
             
                 
                 await insert_tables(table_ohlc, result)
+    await asyncio.sleep(idle_time)
         
-
-
-async def main1():
-    while True:
-
-        t0 = time.time()
-        await asyncio.sleep(1)
-        t1 = time.time()
-        
-        print(1)
-async def main5():
-    while True:
-
-        t0 = time.time()
-        await asyncio.sleep(5)
-        t1 = time.time()
-        
-        print(5)
 
 async def main():
     await asyncio.gather(
