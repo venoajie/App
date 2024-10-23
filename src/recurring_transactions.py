@@ -41,9 +41,19 @@ async def clean_up_databases(idle_time) -> None:
 
     from websocket_management.cleaning_up_transactions import count_and_delete_ohlc_rows
     
+    file_toml = "config_strategies.toml"
+        
+    config_app = get_config(file_toml)
+
+    tradable_config_app = config_app["tradable"]
+    
+    currencies= [o["spot"] for o in tradable_config_app] [0]
+    WINDOW = 9
+    RATIO = 0.9
     while True:
         
         await count_and_delete_ohlc_rows()
+        await insert_market_condition_result(currencies, WINDOW, RATIO)
         await asyncio.sleep(idle_time)
     #await back_up_db()
 

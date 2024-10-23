@@ -233,7 +233,6 @@ async def insert_market_condition_result(currencies,
 
         log.error (f"{currency}")
         
-        
         instrument_name= f"{currency}-PERPETUAL"
         
         result = await get_market_condition(instrument_name, 
