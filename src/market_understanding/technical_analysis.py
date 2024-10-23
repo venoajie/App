@@ -160,7 +160,7 @@ async def get_market_condition(instrument,
     current_tick = ohlc_1_high_9["tick"]
 
     if  current_tick !=None:
-        log.error (current_tick)
+
         ohlc_1_low_9 = await cleaned_up_ohlc("low", table_1, 10)
         ohlc_1_close_9 = await cleaned_up_ohlc("close", table_1, 10)
         ohlc_1_open_3 = await cleaned_up_ohlc("open", table_1, 4)
@@ -211,9 +211,9 @@ async def get_market_condition(instrument,
             # print (f"result{ohlc_1_high_9}")
             result.update({"last_price": last_price})
 
-            vwap_period = 10
+ #           vwap_period = 10
 
-            ohlc_all = await get_price_ohlc(f"close", table_1, vwap_period)
+#            ohlc_all = await get_price_ohlc(f"close", table_1, vwap_period)
             #log.error (f"ohlc_all {ohlc_all}")
 
             #df_vwap = await get_vwap(ohlc_all, vwap_period)
