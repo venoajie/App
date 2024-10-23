@@ -1063,7 +1063,7 @@ async def main():
         clean_up_databases(5), 
         return_exceptions=True)
     
-def main():
+def main_():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
     sub_account_id = "deribit-148510"
     
