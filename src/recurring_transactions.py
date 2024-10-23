@@ -68,6 +68,8 @@ async def update_ohlc_and_market_condition(idle_time: float) -> None:
         
         for currency in currencies:
             
+            print (f"{currency}")
+            
             instrument_name= f"{currency}-PERPETUAL"
 
             await insert_market_condition_result(instrument_name, WINDOW, RATIO)
@@ -116,7 +118,7 @@ async def update_ohlc_and_market_condition(idle_time: float) -> None:
                 
                     
                     await insert_tables(table_ohlc, result)
-            await asyncio.sleep(idle_time)
+        await asyncio.sleep(idle_time)
         
 
 async def main():
