@@ -15,7 +15,8 @@ from db_management.sqlite_management import (
     querying_arithmetic_operator,)
 from utilities.string_modification import (
     transform_nested_dict_to_list,)
-from utilities.system_tools import raise_error_message
+from utilities.system_tools import async_raise_error_message
+
 
 def ohlc_end_point(instrument_ticker: str,
                    resolution: int,
@@ -54,7 +55,7 @@ async def recording_multiple_time_frames(instrument_ticker: str,
     
 
     except Exception as error:
-        await raise_error_message(
+        await async_raise_error_message(
             error,
             "Capture market data - failed to fetch last open_interest",
         )
@@ -67,7 +68,7 @@ async def last_open_interest_tick_fr_sqlite(last_tick_query_ohlc1) -> float:
         last_open_interest = await executing_query_with_return(last_tick_query_ohlc1)
 
     except Exception as error:
-        await raise_error_message(
+        await async_raise_error_message(
             error,
             "Capture market data - failed to fetch last open_interest",
         )
@@ -80,7 +81,7 @@ async def last_tick_fr_sqlite(last_tick_query_ohlc1) -> int:
         last_tick1_fr_sqlite = await executing_query_with_return(last_tick_query_ohlc1)
 
     except Exception as error:
-        await raise_error_message(
+        await async_raise_error_message(
             error,
             "Capture market data - failed to fetch last_tick_fr_sqlite",
         )
@@ -108,7 +109,7 @@ async def replace_previous_ohlc_using_fix_data(instrument_ticker,
         await update_status_data(TABLE_OHLC1, "data", last_tick1_fr_sqlite, WHERE_FILTER_TICK, result, "is")
         
     except Exception as error:
-        await raise_error_message(
+        await async_raise_error_message(
             error,
             "Capture market data - failed to fetch last_tick_fr_sqlite",
         )
@@ -127,14 +128,9 @@ async def ohlc_result_per_time_frame(
 
     last_tick_fr_data_orders: int = data_orders ["tick"]
     
-    log.warning (f"data_orders {data_orders}")
-
     # refilling current ohlc table with updated data
     refilling_current_ohlc_table_with_updated_streaming_data = last_tick1_fr_sqlite == last_tick_fr_data_orders
 
-    log.warning (f"last_tick_fr_data_orders {last_tick_fr_data_orders} last_tick1_fr_sqlite {last_tick1_fr_sqlite}")
-    log.debug (f"last_tick1_fr_sqlite == last_tick_fr_data_orders {last_tick1_fr_sqlite == last_tick_fr_data_orders} last_tick_fr_data_orders > last_tick1_fr_sqlite {last_tick_fr_data_orders > last_tick1_fr_sqlite}")
-    
     insert_new_ohlc_and_replace_previous_ohlc_using_fix_data = last_tick_fr_data_orders > last_tick1_fr_sqlite
     
     if refilling_current_ohlc_table_with_updated_streaming_data:
