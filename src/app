@@ -262,7 +262,7 @@ class StreamAccountData(ModifyOrderDb):
                     message: bytes = await self.websocket_client.recv()
                     message: dict = orjson.loads(message)
                     message_channel: str = None
-                    log.warning (message)
+                    #log.warning (message)
                     if "id" in list(message):
                         if message["id"] == 9929:
                             
@@ -592,7 +592,7 @@ class StreamAccountData(ModifyOrderDb):
         # get portfolio data  
         portfolio = reading_from_pkl_data ("portfolio",
                                               currency)
-        log.error (f"currency {currency}")
+        #log.error (f"currency {currency}")
         #log.info (f"portfolio_all {portfolio}")
         #portfolio = [o[f"{currency}"] for o in portfolio_all]
                                             # obtain spot equity
@@ -637,6 +637,8 @@ class StreamAccountData(ModifyOrderDb):
                                                 column_order)     
 
         instrument_from_orders_currency = remove_redundant_elements([o["instrument_name"] for o  in orders_currency])
+        
+        log.error (f"instrument_from_orders_currency {instrument_from_orders_currency}")
                         
         if instrument_from_orders_currency:
             for instrument_name in instrument_from_orders_currency:
