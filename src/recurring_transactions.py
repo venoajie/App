@@ -40,7 +40,7 @@ async def clean_up_databases(idle_time) -> None:
 
     from websocket_management.cleaning_up_transactions import count_and_delete_ohlc_rows
     
-    curr=["eth,"btc]
+    curr=["eth","btc"]
     
     while True:
         
