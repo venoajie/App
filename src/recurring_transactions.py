@@ -65,7 +65,6 @@ async def update_ohlc_and_market_condition(idle_time: float) -> None:
         
 
     while True:
-        await asyncio.sleep(idle_time)
         end_timestamp=     get_now_unix_time()  
         
         for currency in currencies:
@@ -120,6 +119,7 @@ async def update_ohlc_and_market_condition(idle_time: float) -> None:
                 
                     
                     await insert_tables(table_ohlc, result)
+        await asyncio.sleep(idle_time)
         
 
 async def main():
