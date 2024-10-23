@@ -163,4 +163,6 @@ async def main():
         update_ohlc_and_market_condition(15), 
         return_exceptions=True)
     
-asyncio.run(main())
+    
+if __name__ == "__main__":
+    asyncio.run(main())
