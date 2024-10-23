@@ -3,6 +3,7 @@
 
 import asyncio, datetime,time
 import requests
+from loguru import logger as log
 from db_management.sqlite_management import (
     back_up_db_sqlite,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
@@ -74,13 +75,13 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
         
         for currency in currencies:
 
-            print (f"{currency}")
+            log.error (f"{currency}")
             
             
             instrument_name= f"{currency}-PERPETUAL"
-            print (f"{instrument_name}")
+            log.info (f"{instrument_name}")
 
-            #await insert_market_condition_result(instrument_name, WINDOW, RATIO)
+            await insert_market_condition_result(instrument_name, WINDOW, RATIO)
             
         await asyncio.sleep(idle_time)
     #await back_up_db()

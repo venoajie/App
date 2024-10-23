@@ -225,8 +225,7 @@ async def get_market_condition(instrument,
 async def insert_market_condition_result(currency,
                                          limit: int = 100,
                                          ratio: float = 0.9,
-                                         fluctuation_threshold=(0.4 / 100)
-) -> dict:
+                                         fluctuation_threshold=(0.4 / 100)) -> dict:
     """ """
     result = await get_market_condition(currency, 
                                         limit, 
