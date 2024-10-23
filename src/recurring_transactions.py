@@ -156,7 +156,7 @@ async def update_ohlc_and_market_condition_(idle_time: float) -> None:
 async def main():
     await asyncio.gather(
         clean_up_databases(3), 
-        update_ohlc_and_market_condition(1), 
+        update_ohlc_and_market_condition(5), 
         return_exceptions=True)
     
 asyncio.run(main())
