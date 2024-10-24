@@ -684,7 +684,7 @@ class StreamAccountData(ModifyOrderDb):
                                       "all", 
                                       "all",
                                       column_list)  
-                log.warning (f"from_sqlite_all {from_sqlite_all}")
+                #log.warning (f"from_sqlite_all {from_sqlite_all}")
 
                 unrecorded_transactions = [o["data"] for o in from_sqlite_all\
                     if "321809362" in o["trade_id"]]#["321809362"]#await get_unrecorded_trade_and_order_id (instrument_ticker)
