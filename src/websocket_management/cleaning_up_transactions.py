@@ -180,7 +180,8 @@ async def get_unrecorded_trade_and_order_id(instrument_name: str) -> dict:
     combined_trade_closed_open = from_sqlite_open_trade_id + from_sqlite_closed_trade_id
     #log.warning(f"combined_order_closed_open {combined_order_closed_open}")
 
-    unrecorded_trade_id = get_unique_elements(from_exchange_trade_id, combined_trade_closed_open)
+    unrecorded_trade_id = get_unique_elements(from_exchange_trade_id, 
+                                              combined_trade_closed_open)
     
     #log.debug(f"unrecorded_order_id {unrecorded_order_id}")
     log.debug(f"unrecorded_trade_id {unrecorded_trade_id}")
@@ -592,7 +593,7 @@ async def closing_orphan_order(
                 and closed_transaction_size == abs(o["amount"])
                 ]
 
-    log.warning(F"open_label_with_same_size_as_closed_label {open_label_with_same_size_as_closed_label_int}")
+    #log.warning(F"open_label_with_same_size_as_closed_label {open_label_with_same_size_as_closed_label_int}")
 
     if open_label_with_same_size_as_closed_label_int:
         
@@ -602,23 +603,25 @@ async def closing_orphan_order(
         
         log.warning(F"label_integer {label_integer}")
         
-        if open_label_with_the_same_label_int:
+        if False and open_label_with_the_same_label_int:
             log.error(F"open_label_with_the_same_label_int {open_label_with_the_same_label_int}")
-        
-        else:
-            pass
-    else:
-        closed_transaction = [o for o in transactions_under_label_main if label in o["label"]]
-        log.debug(F" closed_transaction no open order {closed_transaction}")  
-        
-        for transaction in closed_transaction:
             
-            await distribute_closed_transactions(
-            trade_table,
-            transaction, 
-            where_filter,
-            )
+                    
+            trade_id = closed_transaction [where_filter]
 
+            #insert closed transaction to db for closed transaction
+            await insert_tables("my_trades_closed_json", 
+                                closed_transaction)
+
+            #delete respective transaction form active db
+            await deleting_row(
+                trade_table,
+                "databases/trading.sqlite3",
+                where_filter,
+                "=",
+                trade_id,
+            )
+        
 
 async def closing_one_to_one(
     transaction_closed_under_the_same_label_int: dict, 
@@ -646,8 +649,9 @@ async def closing_one_to_many_single_open_order(
     open_label_size = abs(open_label["amount"])
     log.warning(F"open_label_size {open_label_size}")
     
-    closed_label_with_same_size_as_open_label = [o for o in transaction_closed_under_the_same_label_int\
-    if "closed" in o["label"] and abs(o["amount"]) == open_label_size]
+    closed_label_with_same_size_as_open_label = [
+        o for o in transaction_closed_under_the_same_label_int\
+            if "closed" in o["label"] and abs(o["amount"]) == open_label_size]
     
     log.warning(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
     
