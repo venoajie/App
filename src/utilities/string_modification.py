@@ -232,7 +232,7 @@ def extract_integers_from_text(
     words: list
     ) -> int:
     """
-    Extracting integers from label text
+    Extracting integers from label text. More general than get integer in parsing label function
     """
 
     words_to_str = str(words) # ensuring if integer used as argument, will be returned as itself

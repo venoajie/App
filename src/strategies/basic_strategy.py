@@ -388,7 +388,10 @@ def get_order_label(data_from_db: list) -> list:
 
     return [o["label"] for o in data_from_db]
 
-def get_label_super_main(result: list, strategy_label) -> list:
+def get_label_super_main(
+    result: list, 
+    strategy_label: str
+    ) -> list:
     """ """
 
     return [o for o in result if parsing_label(strategy_label)["super_main"]
@@ -439,8 +442,9 @@ def provide_side_to_close_transaction(transaction: dict) -> str:
     return side
 
 
-def sum_order_under_closed_label_int (closed_orders_label_strategy: list,
-                                       label_integer_open: int) -> int:
+def sum_order_under_closed_label_int (
+    closed_orders_label_strategy: list,
+    label_integer_open: int) -> int:
     """ """
     
     if closed_orders_label_strategy:

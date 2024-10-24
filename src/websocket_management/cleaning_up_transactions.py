@@ -36,7 +36,19 @@ from utilities.string_modification import(
     extract_integers_aggregation_from_text,
     extract_integers_from_text,
     get_unique_elements, 
+    parsing_label,
     remove_redundant_elements,)
+
+def get_label_main(
+    result: list, 
+    strategy_label: str
+    ) -> list:
+    """ """
+
+    return [o for o in result \
+        if parsing_label(strategy_label)["main"]
+                    == parsing_label(o["label"])["main"]
+                ]
 
 async def reconciling_sub_account_and_db_open_orders(instrument_name: str,
                                                       order_db_table: str,
@@ -615,6 +627,7 @@ async def closing_one_to_many_single_open_order(
             )
         
 async def closing_one_to_many(
+    open_label,
     transaction_closed_under_the_same_label_int: dict, 
     where_filter: str,
     trade_table: str
@@ -622,39 +635,28 @@ async def closing_one_to_many(
     """
     """
                     
+    len_open_label_size = len(open_label)
     
-    open_label =  ([o for o in transaction_closed_under_the_same_label_int\
-        if "open" in o["label"]])
-    
-    log.info(F"transaction_closed_under_the_same_label_int{transaction_closed_under_the_same_label_int}")
-    log.info(F"open_label{open_label}")
-    
-    if open_label:
+    if len_open_label_size == 1:
+        log.info(F"len_open_label_size 1 {len_open_label_size}")
         
-        len_open_label_size = len(open_label)
-        
-        if len_open_label_size == 1:
-            log.info(F"len_open_label_size 1 {len_open_label_size}")
-            
+        await closing_one_to_many_single_open_order(
+            open_label[0],
+            transaction_closed_under_the_same_label_int,
+            where_filter,
+            trade_table
+            )
+    
+    else:
+        for transaction in open_label:
+            log.warning(F"len_open_label_size > 1 {len_open_label_size}")
+                
             await closing_one_to_many_single_open_order(
-                open_label[0],
+                transaction,
                 transaction_closed_under_the_same_label_int,
                 where_filter,
                 trade_table
                 )
-        
-        else:
-            for transaction in open_label:
-                log.warning(F"len_open_label_size > 1 {len_open_label_size}")
-                    
-                await closing_one_to_many_single_open_order(
-                    transaction,
-                    transaction_closed_under_the_same_label_int,
-                    where_filter,
-                    trade_table
-                    )
-    else:
-        log.error(F" orphaned label {open_label}")
                     
                     
 async def clean_up_closed_transactions(instrument_name, 
@@ -682,8 +684,9 @@ async def clean_up_closed_transactions(instrument_name,
 
     # filtered transactions with closing labels
     if transactions_all:
-        transaction_with_closed_labels = get_transactions_with_closed_label(transactions_all)
         
+        transaction_with_closed_labels = get_transactions_with_closed_label(transactions_all)
+                               
         labels_only = remove_redundant_elements([o["label"] for o in transaction_with_closed_labels])
 
         #log.error(f"closing transactions {labels_only}")
@@ -691,12 +694,16 @@ async def clean_up_closed_transactions(instrument_name,
         if transaction_with_closed_labels:
 
             for label in labels_only:
-                #log.error(f"label {label}")
+                
+                transactions_under_label_main = get_label_main(transactions_all,  
+                                                               label)
+                log.error(f"label {label}")
+                log.error(f"transactions_under_label_main {transactions_under_label_main}")
                 
                 label_integer = get_label_integer(label)
                 
                 closed_transactions_all= transactions_under_label_int(label_integer, 
-                                                                      transactions_all)
+                                                                      transactions_under_label_main)
 
                 size_to_close = closed_transactions_all["summing_closed_transaction"]
                 
@@ -711,11 +718,37 @@ async def clean_up_closed_transactions(instrument_name,
                         )
                     
                 if size_to_close != 0:
-                                      
-                    await closing_one_to_many(transaction_closed_under_the_same_label_int,
-                                             where_filter,
-                                             trade_table)
-                       
+                    
+                    open_label =  ([o for o in transaction_closed_under_the_same_label_int\
+                        if "open" in o["label"]])
+                    
+                    log.info(F"transaction_closed_under_the_same_label_int{transaction_closed_under_the_same_label_int}")
+                    log.info(F"open_label{open_label}")
+                    
+                    if open_label:
+                         
+                        await closing_one_to_many(
+                            open_label,
+                            transaction_closed_under_the_same_label_int,
+                            where_filter,
+                            trade_table)
+                    
+                    #orphan label
+                    else:
+                                    
+                        log.error(F" orphan label {label}")
+                        
+                        closed_transaction_size = abs([o["amount"] for o in transactions_under_label_main if label in o["label"]][0])
+                        
+                        log.error(F" closed_transaction_size label {closed_transaction_size}")                                            
+                                
+                        open_label_with_same_size_as_closed_label_int = [o for o in transactions_under_label_main \
+                            if "open" in o["label"] \
+                                and closed_transaction_size == abs(o["amount"])]
+                        
+                        log.warning(F"open_label_with_same_size_as_closed_label {open_label_with_same_size_as_closed_label_int}")
+    
+                        
     log.error(f" clean_up_closed_transactions {instrument_name} DONE")
 
 
