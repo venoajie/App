@@ -1111,7 +1111,7 @@ def main():
 
     except Exception as error:
         
-        async_raise_error_message (error, 
+        raise_error_message (error, 
                              5,
                              "app"
                              )
