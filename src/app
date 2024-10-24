@@ -1101,12 +1101,12 @@ async def main():
         clean_up_databases(5), 
         return_exceptions=True)
     
-def main_():
+def main():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
     sub_account_id = "deribit-148510"
     
     try:
-        RunningApp()
+        #RunningApp()
         StreamAccountData(sub_account_id)
 
     except Exception as error:
@@ -1118,7 +1118,7 @@ def main_():
         
 if __name__ == "__main__":
     try:
-        main_()     
+        main()     
         #asyncio.run(main())
         
     except (KeyboardInterrupt, SystemExit):
