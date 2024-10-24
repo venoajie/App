@@ -178,7 +178,7 @@ async def get_unrecorded_trade_and_order_id(instrument_name: str) -> dict:
     from_exchange_trade_id = [o["trade_id"] for o in from_sqlite_all]
 
     combined_trade_closed_open = from_sqlite_open_trade_id + from_sqlite_closed_trade_id
-    #log.warning(f"combined_order_closed_open {combined_order_closed_open}")
+    log.warning(f"combined_order_closed_open {combined_trade_closed_open}")
 
     unrecorded_trade_id = get_unique_elements(from_exchange_trade_id, 
                                               combined_trade_closed_open)
