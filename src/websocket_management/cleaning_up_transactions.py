@@ -641,7 +641,7 @@ async def closing_one_to_many(
         else:
             log.warning(F"len_open_label_size > 1 {len_open_label_size}")
     else:
-        log.e(F" orphaned label {open_label}")
+        log.error(F" orphaned label {open_label}")
                     
                     
 async def clean_up_closed_transactions(instrument_name, 
