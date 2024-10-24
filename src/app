@@ -617,6 +617,8 @@ class StreamAccountData(ModifyOrderDb):
         except:
             
             await telegram_bot_sendtext (f"sub_account {sub_account}")
+        
+        log.error (f"sub_account {sub_account}")
                     
         column_trade: str= "instrument_name","label", "amount", "price","side"
 
@@ -664,10 +666,10 @@ class StreamAccountData(ModifyOrderDb):
                     await self.modify_order_and_db.resupply_sub_accountdb (currency)
                         
         db_reconciled = check_whether_db_reconciled_each_other (sub_account,
-                                                                      instrument_ticker,
-                                                                      my_trades_currency,
-                                                                      orders_currency,
-                                                                      from_transaction_log)
+                                                                instrument_ticker,
+                                                                my_trades_currency,
+                                                                orders_currency,
+                                                                from_transaction_log)
         
         
         if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
