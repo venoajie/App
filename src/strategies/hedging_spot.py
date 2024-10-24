@@ -186,13 +186,17 @@ async def get_market_condition_hedging(TA_result_data, index_price, threshold) -
     )
 
 
-def current_position_exceed_max_position (sum_my_trades_currency_str: int, max_position: float) -> bool:
+def current_position_exceed_max_position (
+    sum_my_trades_currency_str: int, 
+    max_position: float) -> bool:
     """ """
     
-    return abs(sum_my_trades_currency_str) > abs(max_position) or sum_my_trades_currency_str > 0
+    return abs(sum_my_trades_currency_str) > abs(max_position) \
+        or sum_my_trades_currency_str > 0
 
-def net_size_of_label (my_trades_currency_strategy: list, 
-                       transaction: list) -> bool:
+def net_size_of_label (
+    my_trades_currency_strategy: list,
+    transaction: list) -> bool:
     """ """
     
     label_integer = get_label_integer (transaction["label"])
@@ -200,8 +204,9 @@ def net_size_of_label (my_trades_currency_strategy: list,
     return sum([o["amount"] for o in my_trades_currency_strategy if str(label_integer) in o["label"]])
     
         
-def net_size_not_over_bought (my_trades_currency_strategy: list, 
-                              transaction: list) -> bool:
+def net_size_not_over_bought (
+    my_trades_currency_strategy: list, 
+    transaction: list) -> bool:
     """ """
     return net_size_of_label (my_trades_currency_strategy, 
                               transaction) < 0
@@ -238,15 +243,16 @@ class HedgingSpot(BasicStrategy):
         """ """
         pass
     
-    def opening_position (self, 
-                          non_checked_strategies,
-                          instrument_name,
-                          futures_instruments,
-                          open_orders_label_strategy,
-                          market_condition,
-                          params,
-                          SIZE_FACTOR,
-                          len_orders) -> bool:
+    def opening_position (
+        self,
+        non_checked_strategies,
+        instrument_name,
+        futures_instruments,
+        open_orders_label_strategy,
+        market_condition,
+        params,
+        SIZE_FACTOR,
+        len_orders) -> bool:
         """ """
 
         order_allowed: bool = False
@@ -261,7 +267,13 @@ class HedgingSpot(BasicStrategy):
             strong_bearish = market_condition["strong_falling_price"]                   
         
             max_position = self.max_position
+            
+            over_hedged_cls  =  self.over_hedged_closing
+            
+            if over_hedged_cls:
+                max_position = self.max_position + over_hedged_cls
         
+            log.info (f"over_hedged_closing {over_hedged_cls} max_position {max_position}")
             fluctuation_exceed_threshold = True#TA_result_data["1m_fluctuation_exceed_threshold"]
 
             size = determine_opening_size(instrument_name, 
@@ -339,9 +351,9 @@ class HedgingSpot(BasicStrategy):
                     order_allowed = True
         else:     
             
-            over_hedged_closing  =  self.over_hedged_closing
+            over_hedged  =  self.over_hedged_closing
             
-            if over_hedged_closing:
+            if over_hedged:
                
                 order_allowed: bool = False
         
@@ -434,11 +446,11 @@ class HedgingSpot(BasicStrategy):
                 order_allowed: bool = self. opening_position (non_checked_strategies,
                                                               instrument_name,
                                                               futures_instruments,
-                                                          open_orders_label_strategy,
-                                                          market_condition,
-                                                          params,
-                                                          SIZE_FACTOR,
-                                                          len_open_orders)
+                                                              open_orders_label_strategy,
+                                                              market_condition,
+                                                              params,
+                                                              SIZE_FACTOR,
+                                                              len_open_orders)
             
                 cancel_allowed: bool = is_cancelling_order_allowed(
                     strong_bearish,
