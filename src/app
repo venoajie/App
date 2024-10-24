@@ -399,6 +399,7 @@ class StreamAccountData(ModifyOrderDb):
                                                                                 active_combo_perp,
                                                                                 strategy_attributes,
                                                                                 non_checked_strategies,
+                                                                                cancellable_strategies,
                                                                                 instrument_ticker, 
                                                                                 futures_instruments,
                                                                         )
@@ -588,6 +589,7 @@ class StreamAccountData(ModifyOrderDb):
                                         active_combo_perp,
                                         strategy_attributes,
                                         non_checked_strategies,
+                                        cancellable_strategies,
                                         instrument_ticker, 
                                         futures_instruments,) -> None:
 
@@ -723,9 +725,16 @@ class StreamAccountData(ModifyOrderDb):
             
             delta_time_expiration = min_expiration_timestamp - server_time  
             
-            log.warning (f"delta_time_seconds < 120 {delta_time_seconds < 120} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
-                                                                
-            if delta_time_seconds < 120:#ensure freshness of ta
+            
+            THRESHOLD_DELTA_TIME_SECONDS = 60 
+            log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
+            
+            #something was wrong because perpetuals were actively traded. cancell  orders
+            if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
+                await self.modify_order_and_db.cancel_the_cancellables (currency,
+                                                                        cancellable_strategies)
+                                                         
+            else:#ensure freshness of ta
                 
                 notional: float = compute_notional_value(index_price, equity)
                     
