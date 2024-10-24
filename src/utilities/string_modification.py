@@ -125,6 +125,15 @@ def get_unique_elements(data1: list, data2: list) -> list:
     return list(set(data1).difference(data2))
 
 
+def remove_dict_elements(
+    original: dict, 
+    item_to_remove: str
+    ) -> str:
+    """
+    """
+
+    return {i:original [i] for i in original if i!= item_to_remove}
+
 def extract_currency_from_text(words: str) -> str:
     """
 
@@ -153,25 +162,6 @@ def extract_currency_from_text(words: str) -> str:
                   
     return (filter1.partition('-')[0]).lower()
 
-
-def remove_dict_elements(original: dict, item_to_remove: str) -> str:
-    """
-    """
-
-    return {i:original [i] for i in original if i!= item_to_remove}
-
-def extract_integers_from_text(words: list) -> int:
-    """
-    Extracting integers from label text
-    """
-
-    try:
-        return int("".join([o for o in words if o.isdigit()]))
-
-    except:
-        return []
-
-
 def remove_apostrophes_from_json(json_load: list) -> int:
     """ """
     import ast
@@ -179,7 +169,9 @@ def remove_apostrophes_from_json(json_load: list) -> int:
     return [ast.literal_eval(str(i)) for i in json_load]
 
 
-def parsing_sqlite_json_output(json_load: list) -> int:
+def parsing_sqlite_json_output(
+    json_load: list
+    ) -> int:
     """
     parsing_sqlite_json_output
 
@@ -204,7 +196,8 @@ def parsing_sqlite_json_output(json_load: list) -> int:
 
 
 def get_strings_before_character(
-    label: str, character: str = "-", character_place: int = [0, 2]
+    label: str, character: str = "-", 
+    character_place: int = [0, 2]
 ) -> str:
     """
 
@@ -235,7 +228,22 @@ def get_strings_before_character(
     return splitted
 
 
-def parsing_label(label: str, integer: int = None) -> dict:
+def extract_integers_from_text(
+    words: list
+    ) -> int:
+    """
+    Extracting integers from label text
+    """
+
+    words_to_str = str(words) # ensuring if integer used as argument, will be returned as itself
+    
+    return int("".join([o for o in words_to_str if o.isdigit()]))
+
+
+def parsing_label(
+    label: str, 
+    integer: int = None
+    ) -> dict:
     """
 
     Args:
@@ -322,7 +330,8 @@ def parsing_label(label: str, integer: int = None) -> dict:
 
 
 def get_transactions_as_per_strategy(
-    my_trades_open_sqlite: list, label: str, detail
+    my_trades_open_sqlite: list, 
+    label: str, detail
 ) -> float:
     """ """
 
@@ -340,7 +349,9 @@ def get_transactions_as_per_strategy(
     )
 
 
-def get_net_sum_strategy_super_main(my_trades_open_sqlite: list, label: str) -> float:
+def get_net_sum_strategy_super_main(
+    my_trades_open_sqlite: list, 
+    label: str) -> float:
     """ """
 
     return (
@@ -382,7 +393,10 @@ def get_net_sum_strategy_hedged(my_trades_open_sqlite: list) -> float:
     )
 
 
-def get_net_sum_strategy_main(my_trades_open_sqlite: list, label: str) -> float:
+def get_net_sum_strategy_main(
+    my_trades_open_sqlite: list, 
+    label: str
+    ) -> float:
     """ """
     return (
         0

@@ -32,10 +32,10 @@ from transaction_management.deribit.telegram_bot import(
 from utilities.system_tools import(
     sleep_and_restart,)
 from utilities.string_modification import(
-    get_unique_elements, 
-    remove_redundant_elements,
     extract_currency_from_text,
-    extract_integers_from_text)
+    extract_integers_from_text,
+    get_unique_elements, 
+    remove_redundant_elements,)
 
 async def reconciling_sub_account_and_db_open_orders(instrument_name: str,
                                                       order_db_table: str,
@@ -603,6 +603,13 @@ async def closing_one_to_many(
             log.warning(F"open_label_size{open_label_size}")
             log.warning(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
                 
+            closed_label_with_same_size_as_open_label_int = str(max([extract_integers_from_text(o["trade_id"]) for o in closed_label_with_same_size_as_open_label]))
+            log.warning(F"closed_label_with_same_size_as_open_label_int{closed_label_with_same_size_as_open_label_int}")
+                
+            closed_label_ready_to_close = ([o for o in closed_label_with_same_size_as_open_label \
+                if closed_label_with_same_size_as_open_label_int in o["trade_id"] ])
+            log.warning(F"closed_label_ready_to_close{closed_label_ready_to_close}")
+            
         else:
             pass
     else:
