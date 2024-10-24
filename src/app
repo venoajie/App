@@ -1058,6 +1058,8 @@ async def update_instruments(idle_time):
 
 async def main():
     sub_account_id = "deribit-148510"
+    StreamAccountData(sub_account_id)
+    
     await asyncio.gather(
          #StreamAccountData(sub_account_id),
         clean_up_databases(5), 
