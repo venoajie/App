@@ -239,6 +239,18 @@ def extract_integers_from_text(
     
     return int("".join([o for o in words_to_str if o.isdigit()]))
 
+def extract_integers_aggregation_from_text(
+    identifier,
+    aggregator,
+    words: list
+    ) -> int:
+    """
+    identifier: id: trade/order/etc
+    aggregator: min, max, len
+    """
+
+    return (aggregator([extract_integers_from_text(o[f"{identifier}"]) for o in words]))
+
 
 def parsing_label(
     label: str, 

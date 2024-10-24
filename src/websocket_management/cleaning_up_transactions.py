@@ -33,6 +33,7 @@ from utilities.system_tools import(
     sleep_and_restart,)
 from utilities.string_modification import(
     extract_currency_from_text,
+    extract_integers_aggregation_from_text,
     extract_integers_from_text,
     get_unique_elements, 
     remove_redundant_elements,)
@@ -588,7 +589,7 @@ async def closing_one_to_many_single_open_order(
     
     log.warning(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
         
-    closed_label_with_same_size_as_open_label_int = str(min([extract_integers_from_text(o["trade_id"]) for o in closed_label_with_same_size_as_open_label]))
+    closed_label_with_same_size_as_open_label_int = str(extract_integers_aggregation_from_text(closed_label_with_same_size_as_open_label))
     log.warning(F"closed_label_with_same_size_as_open_label_int {closed_label_with_same_size_as_open_label_int}")
         
     closed_label_ready_to_close = ([o for o in closed_label_with_same_size_as_open_label \
