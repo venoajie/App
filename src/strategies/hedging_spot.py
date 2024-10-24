@@ -304,14 +304,15 @@ class HedgingSpot(BasicStrategy):
 
         return order_allowed
 
-    def closing_position (self,
-                          transaction,
-                          exit_params,
-                          bullish, 
-                          strong_bullish,
-                          len_orders,
-                          bid_price,
-                          ) -> bool:
+    def closing_position (
+        self,
+        transaction,
+        exit_params,
+        bullish, 
+        strong_bullish,
+        len_orders,
+        bid_price,
+        ) -> bool:
         """ """
         
         order_allowed: bool = False
@@ -340,7 +341,11 @@ class HedgingSpot(BasicStrategy):
             
             over_hedged_closing  =  self.over_hedged_closing
             
-            if not over_hedged_closing:
+            if over_hedged_closing:
+               
+                order_allowed: bool = False
+        
+            else:
             
                 size = exit_params["size"]      
                 #log.info (f"exit_params {exit_params}")
@@ -358,7 +363,7 @@ class HedgingSpot(BasicStrategy):
                             exit_params.update({"size": abs (size)})
                             
                             order_allowed: bool = True
-
+            
         return order_allowed
 
 
