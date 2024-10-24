@@ -600,11 +600,13 @@ async def closing_orphan_order(
             o  for o in open_label_with_same_size_as_closed_label_int\
                 if label_integer in o["label"]]
         
+        log.warning(F"label_integer {label_integer}")
+        
         if open_label_with_the_same_label_int:
             log.error(F"open_label_with_the_same_label_int {open_label_with_the_same_label_int}")
         
         else:
-            log.info(F"open_label_with_same_size_as_closed_label {open_label_with_same_size_as_closed_label_int}")
+            pass
     else:
         closed_transaction = [o for o in transactions_under_label_main if label in o["label"]]
         log.debug(F" closed_transaction no open order {closed_transaction}")  
