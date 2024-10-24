@@ -580,12 +580,12 @@ async def closing_one_to_many_single_open_order(
     trade_table: str
     ) -> None:             
             
-    open_label_size = abs(open_label[0]["amount"])
+    open_label_size = abs(open_label["amount"])
+    log.warning(F"open_label_size{open_label_size}")
     
     closed_label_with_same_size_as_open_label = [o for o in transaction_closed_under_the_same_label_int\
     if "closed" in o["label"] and abs(o["amount"]) == open_label_size]
     
-    log.warning(F"open_label_size{open_label_size}")
     log.warning(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
         
     closed_label_with_same_size_as_open_label_int = str(min([extract_integers_from_text(o["trade_id"]) for o in closed_label_with_same_size_as_open_label]))
@@ -598,7 +598,7 @@ async def closing_one_to_many_single_open_order(
     #closed open order
     await distribute_closed_transactions(
         trade_table,
-        open_label[0], 
+        open_label, 
         where_filter,
         )
     
@@ -632,7 +632,7 @@ async def closing_one_to_many(
             log.info(F"len_open_label_size 1 {len_open_label_size}")
             
             await closing_one_to_many_single_open_order(
-                open_label,
+                open_label[0],
                 transaction_closed_under_the_same_label_int,
                 where_filter,
                 trade_table
