@@ -571,6 +571,7 @@ async def closing_one_to_many(
     open_label_size =  ([o["amount"] for o in transaction_closed_under_the_same_label_int\
         if "open" in o["label"]])
     
+    log.info(F"transaction_closed_under_the_same_label_int{transaction_closed_under_the_same_label_int}")
     log.info(F"open_label_size{open_label_size}")
     
     closed_label_with_same_size_as_open_label = [o for o in transaction_closed_under_the_same_label_int\
