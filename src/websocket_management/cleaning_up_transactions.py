@@ -601,13 +601,9 @@ async def closing_one_to_many(
             if "closed" in o["label"] and abs(o["size"]) == open_label_size]
             
             log.info(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
-             
+                
         else:
             pass
-            for open_order in transaction_closed_under_the_same_label_int:
-                open_order_size =         None
-                log.info(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
-        
     else:
         pass
                     
