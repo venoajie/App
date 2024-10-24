@@ -574,9 +574,13 @@ async def closing_one_to_many(
     log.info(F"transaction_closed_under_the_same_label_int{transaction_closed_under_the_same_label_int}")
     log.info(F"open_label_size{open_label_size}")
     
-    closed_label_with_same_size_as_open_label = [o for o in transaction_closed_under_the_same_label_int\
-        if "closed" in o["label"] and abs(o["size"]) == open_label_size]
-    log.info(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
+    if open_label_size:
+        closed_label_with_same_size_as_open_label = [o for o in transaction_closed_under_the_same_label_int\
+            if "closed" in o["label"] and abs(o["size"]) == open_label_size]
+        log.info(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
+        
+    else:
+        pass
                     
                     
 async def clean_up_closed_transactions(instrument_name, 
