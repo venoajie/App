@@ -186,13 +186,12 @@ async def get_market_condition_hedging(TA_result_data, index_price, threshold) -
     )
 
 
-def current_position_exceed_max_position (
+def current_hedge_position_exceed_max_position (
     sum_my_trades_currency_str: int, 
     max_position: float) -> bool:
     """ """
     
-    return abs(sum_my_trades_currency_str) > abs(max_position) \
-        or sum_my_trades_currency_str > 0
+    return abs(sum_my_trades_currency_str) > abs(max_position) 
 
 def net_size_of_label (
     my_trades_currency_strategy: list,
@@ -215,7 +214,7 @@ def net_size_not_over_bought (
 class HedgingSpot(BasicStrategy):
     """ """
     
-    max_position: float
+    notional: float
     my_trades_currency_strategy: int
     TA_result_data: list
     index_price: float
@@ -223,14 +222,18 @@ class HedgingSpot(BasicStrategy):
     sum_my_trades_currency_strategy: int= fields 
     over_hedged_opening: bool= fields 
     over_hedged_closing: bool= fields 
+    max_position: float= fields 
 
     def __post_init__(self):
         self.sum_my_trades_currency_strategy =  get_transactions_sum (self.my_trades_currency_strategy)   
-        self.over_hedged_opening = current_position_exceed_max_position (self.sum_my_trades_currency_strategy, 
-                                                                         self.max_position)        
+        self.over_hedged_opening = current_hedge_position_exceed_max_position (self.sum_my_trades_currency_strategy, 
+                                                                         self.notional)        
         
         self.over_hedged_closing = self.sum_my_trades_currency_strategy > 0       
     
+        self.max_position =  self.notional + self.sum_my_trades_currency_strategy if self.over_hedged_closing\
+            else self.notional
+            
     def get_basic_params(self) -> dict:
         """ """
         return BasicStrategy(self.strategy_label, 
@@ -270,9 +273,6 @@ class HedgingSpot(BasicStrategy):
             
             over_hedged_cls  =  self.over_hedged_closing
             
-            if over_hedged_cls:
-                max_position = self.max_position + over_hedged_cls
-        
             log.info (f"over_hedged_closing {over_hedged_cls} max_position {max_position}")
             fluctuation_exceed_threshold = True#TA_result_data["1m_fluctuation_exceed_threshold"]
 
@@ -295,7 +295,7 @@ class HedgingSpot(BasicStrategy):
             )
             
             order_allowed: bool = (
-                    size_and_order_appropriate_for_ordering
+                    (size_and_order_appropriate_for_ordering or over_hedged_cls)
                     and (bearish or strong_bearish)
                     and fluctuation_exceed_threshold
                 )
