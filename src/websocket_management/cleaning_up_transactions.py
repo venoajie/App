@@ -734,7 +734,7 @@ async def clean_up_closed_transactions(instrument_name,
                 transactions_under_label_main = get_label_main(transactions_all,  
                                                                label)
                 log.error(f"label {label}")
-                log.error(f"transactions_under_label_main {transactions_under_label_main}")
+                #log.error(f"transactions_under_label_main {transactions_under_label_main}")
                 
                 label_integer = get_label_integer(label)
                 
