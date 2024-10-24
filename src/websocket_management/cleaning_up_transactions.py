@@ -773,6 +773,8 @@ async def clean_up_closed_transactions(instrument_name,
                         
                         await closing_orphan_order(
                             label,
+                            trade_table,
+                            where_filter,
                             transactions_under_label_main
                             )
     
