@@ -535,6 +535,28 @@ def get_closed_open_transactions_under_same_label_int(
     return [o for o in transactions_all if label_integer in o["label"]]
 
 
+async def distribute_closed_transactions(
+    trade_table,
+    closed_transaction: dict, 
+    where_filter: str,
+    ) -> None:
+    """
+    """
+    trade_id = closed_transaction [where_filter]
+
+    #insert closed transaction to db for closed transaction
+    await insert_tables("my_trades_closed_json", 
+                        closed_transaction)
+
+    #delete respective transaction form active db
+    await deleting_row(
+        trade_table,
+        "databases/trading.sqlite3",
+        where_filter,
+        "=",
+        trade_id,
+    )
+
 async def closing_one_to_one(
     transaction_closed_under_the_same_label_int: dict, 
     where_filter: str,
@@ -545,18 +567,11 @@ async def closing_one_to_one(
     
     for transaction in transaction_closed_under_the_same_label_int:
     
-        trade_id = transaction[where_filter]
-        
-        await insert_tables("my_trades_closed_json", 
-                            transaction)
-
-        await deleting_row(
+        await distribute_closed_transactions(
             trade_table,
-            "databases/trading.sqlite3",
+            transaction, 
             where_filter,
-            "=",
-            trade_id,
-        )
+            )
                     
 
 async def closing_one_to_many(
@@ -568,16 +583,29 @@ async def closing_one_to_many(
     """
                     
     
-    open_label_size =  ([o["amount"] for o in transaction_closed_under_the_same_label_int\
+    open_label =  ([o for o in transaction_closed_under_the_same_label_int\
         if "open" in o["label"]])
     
     log.info(F"transaction_closed_under_the_same_label_int{transaction_closed_under_the_same_label_int}")
-    log.info(F"open_label_size{open_label_size}")
+    log.info(F"open_label_size{open_label}")
     
-    if open_label_size:
-        closed_label_with_same_size_as_open_label = [o for o in transaction_closed_under_the_same_label_int\
+    if open_label:
+        
+        len_open_label_size = len(open_label)
+        log.info(F"len_open_label_size{len_open_label_size}")
+        if len_open_label_size == 1:
+            
+            open_label_size = abs(open_label[0]["amount"])
+            
+            closed_label_with_same_size_as_open_label = [o for o in transaction_closed_under_the_same_label_int\
             if "closed" in o["label"] and abs(o["size"]) == open_label_size]
-        log.info(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
+            
+            log.info(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
+                
+        else:
+            for open_order in transaction_closed_under_the_same_label_int:
+                open_order_size =         None
+                log.info(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
         
     else:
         pass
