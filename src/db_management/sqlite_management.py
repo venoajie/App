@@ -17,7 +17,10 @@ def catch_error(error, idle: int = None) -> list:
     system_tools.catch_error_message(error, idle)
 
 
-async def telegram_bot_sendtext(bot_message, purpose: str = "general_error") -> None:
+async def telegram_bot_sendtext(
+    bot_message, 
+    purpose: str = "general_error") -> None:
+    
     return await telegram_bot(bot_message, purpose)
 
 
@@ -63,8 +66,9 @@ async def db_ops(db_name: str = "databases/trading.sqlite3"):
         await conn.commit()
         await conn.close()
 
-async def insert_tables(table_name: str, 
-                        params: list|dict|str):
+async def insert_tables(
+    table_name: str,
+    params: list|dict|str):
     """
     alternative insert format (safer):
     https://stackoverflow.com/questions/56910918/saving-json-data-to-sqlite-python
@@ -136,11 +140,13 @@ async def querying_table(
             async with db as cur:
                 fetchall = await cur.fetchall()
 
-                head = map(lambda attr: attr[0], cur.description)
+                head = map(lambda attr: attr[0], 
+                           cur.description)
                 headers = list(head)
 
         for i in fetchall:
-            combine_result.append(dict(zip(headers, i)))
+            combine_result.append(dict(zip(headers, 
+                                           i)))
 
     except Exception as error:
         log.error (f"querying_table  {table} {error}") 
@@ -273,8 +279,9 @@ def querying_additional_params(table: str = "supporting_items_json") -> str:
 
 
 def querying_last_open_interest_tick(
-    last_tick: int, table: str = "ohlc1_eth_perp_json"
-) -> str:
+    last_tick: int, 
+    table: str = "ohlc1_eth_perp_json"
+    ) -> str:
 
     return f"SELECT open_interest FROM {table} WHERE tick is {last_tick}"
 
@@ -284,7 +291,13 @@ def querying_hedged_strategy(table: str = "my_trades_all_json") -> str:
     return f"SELECT * from {table} where not (label LIKE '%value1%' or label LIKE '%value2%' or label LIKE'%value3%');"
 
 
-async def update_status_data(table: str, data_column: str, filter: str, filter_value: int, new_value, operator=None) -> None:
+async def update_status_data(
+    table: str, 
+    data_column: str, 
+    filter: str, 
+    filter_value: int, 
+    new_value, operator=None
+    ) -> None:
     """
     https://www.beekeeperstudio.io/blog/sqlite-json-with-text
     https://www.sqlitetutorial.net/sqlite-json-functions/sqlite-json_replace-function/
@@ -324,8 +337,10 @@ async def update_status_data(table: str, data_column: str, filter: str, filter_v
 
 
 def querying_open_interest(
-    price: float = "close", table: str = "ohlc1_eth_perp_json", limit: int = None
-) -> str:
+    price: float = "close", 
+    table: str = "ohlc1_eth_perp_json",
+    limit: int = None
+    ) -> str:
 
     all_data = f"""SELECT tick, JSON_EXTRACT (data, '$.volume') AS volume, JSON_EXTRACT (data, '$.{price}')  AS close, open_interest, \
         (open_interest - LAG (open_interest, 1, 0) OVER (ORDER BY tick)) as delta_oi FROM {table}"""
@@ -333,15 +348,20 @@ def querying_open_interest(
 
 
 def querying_ohlc_price_vol(
-    price: float = "close", table: str = "ohlc1_eth_perp_json", limit: int = None
-) -> str:
+    price: float = "close", 
+    table: str = "ohlc1_eth_perp_json",
+    limit: int = None
+    ) -> str:
 
     all_data = f"""SELECT  tick, JSON_EXTRACT (data, '$.volume') AS volume, JSON_EXTRACT (data, '$.{price}')  AS {price} FROM {table} ORDER BY tick DESC"""
 
     return all_data if limit == None else f"""{all_data} limit {limit}"""
 
 
-def querying_hlc_vol(table: str = "ohlc1_eth_perp_json", limit: int = None) -> str:
+def querying_hlc_vol(
+    table: str = "ohlc1_eth_perp_json",
+    limit: int = None
+    ) -> str:
 
     all_data = f"""SELECT  tick, JSON_EXTRACT (data, '$.volume') AS volume, JSON_EXTRACT (data, '$.high') AS high, JSON_EXTRACT (data, '$.low') AS low, JSON_EXTRACT (data, '$.close')  AS close FROM {table} ORDER BY tick DESC"""
 
@@ -349,7 +369,9 @@ def querying_hlc_vol(table: str = "ohlc1_eth_perp_json", limit: int = None) -> s
 
 
 def querying_ohlc_closed(
-    price: float = "close", table: str = "ohlc1_eth_perp_json", limit: int = None
+    price: float = "close", 
+    table: str = "ohlc1_eth_perp_json", 
+    limit: int = None
 ) -> str:
 
     all_data = f"""SELECT  JSON_EXTRACT (data, '$.{price}')  AS close FROM {table} ORDER BY tick DESC"""
@@ -358,7 +380,8 @@ def querying_ohlc_closed(
 
 
 def querying_arithmetic_operator(
-    item: str, operator: str = "MAX", table: str = "ohlc1_eth_perp_json"
+    item: str, operator: str = "MAX", 
+    table: str = "ohlc1_eth_perp_json"
 ) -> float:
 
     return f"SELECT {operator} ({item}) FROM {table}"
@@ -376,14 +399,15 @@ def querying_label_and_size(table) -> str:
     return tab
 
 
-def querying_based_on_currency_or_instrument_and_strategy (table: str, 
-                                                           currency_or_instrument, 
-                                                           strategy: str="all", 
-                                                           status: str="all",
-                                                           columns: list="standard", 
-                                                           limit: int= 0, 
-                                                           order: str=None,
-                                                           ordering: str = "DESC") -> str:
+def querying_based_on_currency_or_instrument_and_strategy (
+    table: str, 
+    currency_or_instrument: str, 
+    strategy: str ="all", 
+    status: str ="all",
+    columns: list="standard", 
+    limit: int = 0, 
+    order: str = None,
+    ordering: str = "DESC") -> str:
     
     """_summary_
     
@@ -440,14 +464,19 @@ def querying_based_on_currency_or_instrument_and_strategy (table: str,
     return tab
 
 def querying_closed_transactions(
-    limit: int = 20, order: str = "id", table: str = "my_trades_closed_json"
-) -> str:
+    limit: int = 20, 
+    order: str = "id", 
+    table: str = "my_trades_closed_json"
+    ) -> str:
     return f"SELECT * FROM {table} ORDER BY {order} DESC LIMIT {limit}"
 
 
 async def executing_closed_transactions(
-    limit: int = 20, order: str = "id", table: str = "my_trades_closed_json"
-) -> dict:
+    limit: int = 20, 
+    order: str = "id", 
+    table: str = "my_trades_closed_json"
+    ) -> dict:
+    
     """
     Provide execution template for querying summary of trading results from sqlite.
     Consist of transaction label, size, and price only.
@@ -466,20 +495,27 @@ async def executing_closed_transactions(
     return [] if result in NONE_DATA else (result)
 
 
-async def executing_query_based_on_currency_or_instrument_and_strategy(table: str, 
-                                                           currency_or_instrument, 
-                                                           strategy: str="all", 
-                                                           status: str="all",
-                                                           columns: list="standard", 
-                                                           limit: int= 0, 
-                                                           order: str="id") -> dict:
+async def executing_query_based_on_currency_or_instrument_and_strategy(
+    table: str, 
+    currency_or_instrument,
+    strategy: str="all",
+    status: str="all",
+    columns: list="standard",
+    limit: int= 0,
+    order: str="id") -> dict:
     """
     Provide execution template for querying summary of trading results from sqlite.
     Consist of transaction label, size, and price only.
     """
 
     # get query
-    query = querying_based_on_currency_or_instrument_and_strategy (table, currency_or_instrument, strategy, status, columns, limit, order)
+    query = querying_based_on_currency_or_instrument_and_strategy (table, 
+                                                                   currency_or_instrument,
+                                                                   strategy, 
+                                                                   status, 
+                                                                   columns, 
+                                                                   limit, 
+                                                                   order)
     
     # execute query
     result = await executing_query_with_return(query)
@@ -585,7 +621,10 @@ async def executing_general_query(
     return 0 if (combine_result == [] or combine_result == None) else (combine_result)
 
 
-def query_pd(table_name: str, field: str = None):
+def query_pd(
+    table_name: str,
+    field: str = None
+    ):
     """
     # fetch tickers from sqlite3 by pandas and transform them to dict
     # https://medium.com/@sayahfares19/making-pandas-fly-6-pandas-best-practices-to-save-memory-energy-8d09e9d52488
