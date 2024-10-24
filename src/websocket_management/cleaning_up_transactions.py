@@ -573,6 +573,7 @@ async def distribute_closed_transactions(
     
 async def closing_orphan_order(
     label: str, 
+    label_integer: int,
     trade_table: str,
     where_filter: str,
     transactions_under_label_main: list,
@@ -585,14 +586,25 @@ async def closing_orphan_order(
 
     log.info(F" closed_transaction_size label {closed_transaction_size}")                                            
             
-    open_label_with_same_size_as_closed_label_int = [o for o in transactions_under_label_main \
-        if "open" in o["label"] \
-            and closed_transaction_size == abs(o["amount"])]
+    open_label_with_same_size_as_closed_label_int = [
+        o for o in transactions_under_label_main \
+            if "open" in o["label"] \
+                and closed_transaction_size == abs(o["amount"])
+                ]
 
     log.warning(F"open_label_with_same_size_as_closed_label {open_label_with_same_size_as_closed_label_int}")
 
     if open_label_with_same_size_as_closed_label_int:
-        pass
+        
+        open_label_with_the_same_label_int = [
+            o  for o in open_label_with_same_size_as_closed_label_int\
+                if label_integer in o["label"]]
+        
+        if open_label_with_the_same_label_int:
+            log.error(F"open_label_with_the_same_label_int {open_label_with_the_same_label_int}")
+        
+        else:
+            log.info(F"open_label_with_same_size_as_closed_label {open_label_with_same_size_as_closed_label_int}")
     else:
         closed_transaction = [o for o in transactions_under_label_main if label in o["label"]]
         log.debug(F" closed_transaction no open order {closed_transaction}")  
@@ -773,6 +785,7 @@ async def clean_up_closed_transactions(instrument_name,
                         
                         await closing_orphan_order(
                             label,
+                            label_integer,
                             trade_table,
                             where_filter,
                             transactions_under_label_main
