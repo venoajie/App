@@ -231,7 +231,7 @@ class HedgingSpot(BasicStrategy):
         
         self.over_hedged_closing = self.sum_my_trades_currency_strategy > 0       
     
-        self.max_position =  self.notional + self.sum_my_trades_currency_strategy if self.over_hedged_closing\
+        self.max_position =  (abs(self.notional) + self.sum_my_trades_currency_strategy) * -1 if self.over_hedged_closing\
             else self.notional
             
     def get_basic_params(self) -> dict:
