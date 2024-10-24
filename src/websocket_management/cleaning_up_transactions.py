@@ -622,7 +622,7 @@ async def closing_one_to_many(
         if "open" in o["label"]])
     
     log.info(F"transaction_closed_under_the_same_label_int{transaction_closed_under_the_same_label_int}")
-    log.info(F"open_label_size{open_label}")
+    log.info(F"open_label{open_label}")
     
     if open_label:
         
@@ -639,7 +639,15 @@ async def closing_one_to_many(
                 )
         
         else:
-            log.warning(F"len_open_label_size > 1 {len_open_label_size}")
+            for transaction in open_label:
+                log.warning(F"len_open_label_size > 1 {len_open_label_size}")
+                    
+                await closing_one_to_many_single_open_order(
+                    transaction,
+                    transaction_closed_under_the_same_label_int,
+                    where_filter,
+                    trade_table
+                    )
     else:
         log.error(F" orphaned label {open_label}")
                     
