@@ -242,8 +242,10 @@ def check_whether_db_reconciled_each_other(
         
         #timestamp could be double-> come from combo transaction. hence, trade_id is used to distinguish
         try:
+            log.warning (f"from_transaction_log_instrument {from_transaction_log_instrument}")
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
                 else (max([(o["user_seq"]) for o in from_transaction_log_instrument ]))
+                
             current_position_log = 0 if from_transaction_log_instrument == []\
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  last_time_stamp_log in o["user_seq"]][0]
@@ -258,12 +260,12 @@ def check_whether_db_reconciled_each_other(
                 ]
             
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
-                else str(max([extract_integers_from_text(o["timestamp"]) for o in from_transaction_log_instrument ]))
-
+                else str(max([extract_integers_from_text(o["trade_id"]) for o in from_transaction_log_instrument ]))
+    
             current_position_log = 0 if from_transaction_log_instrument == []\
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  last_time_stamp_log in o["trade_id"]][0]
-
+    
         my_trades_instrument = [o for o in my_trades_currency \
             if o["instrument_name"] == instrument_name]        
         sum_my_trades_currency = 0 if not my_trades_instrument \
