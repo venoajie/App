@@ -361,7 +361,7 @@ async def resupply_transaction_log(
 
     #log.warning(f"resupply {currency.upper()} TRANSACTION LOG db-START")
                 
-    where_filter= "user_seq"
+    where_filter= "timestamp"
     
     first_tick_query= querying_arithmetic_operator(where_filter,
                                                    "MAX", 
@@ -376,7 +376,7 @@ async def resupply_transaction_log(
 
     max_closed_transactions_downloaded_from_sqlite=balancing_params["max_closed_transactions_downloaded_from_sqlite"]   
     
-    first_tick_fr_sqlite= first_tick_query_result [0]["MAX (user_seq)"] 
+    first_tick_fr_sqlite= first_tick_query_result [0]["MAX (timestamp)"] 
     #log.warning(f"first_tick_fr_sqlite {first_tick_fr_sqlite} {not first_tick_fr_sqlite}")
     
     if not first_tick_fr_sqlite:
