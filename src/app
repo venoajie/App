@@ -643,9 +643,7 @@ class StreamAccountData(ModifyOrderDb):
                                                 column_order)     
 
         instrument_from_orders_currency = remove_redundant_elements([o["instrument_name"] for o  in orders_currency])
-        
-        log.error (f"instrument_from_orders_currency {instrument_from_orders_currency}")
-                        
+            
         if instrument_from_orders_currency:
             for instrument_name in instrument_from_orders_currency:
 

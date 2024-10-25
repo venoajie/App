@@ -35,13 +35,16 @@ async def saving_transaction_log (
         
         for transaction in transaction_log:
             
-            modified_dict= remove_dict_elements(transaction,"info")
+            modified_dict= remove_dict_elements(transaction,
+                                                "info")
                         
-            timestamp_log= modified_dict ["timestamp"]
+            user_seq_log= modified_dict ["user_seq"]
             
             type_log= modified_dict ["type"]
                         
-            if timestamp_log > first_tick_fr_sqlite:
+            if user_seq_log > first_tick_fr_sqlite:
+                
+                timestamp_log= modified_dict ["timestamp"]
 
                 custom_label= f"custom-{type_log.lower()}-{timestamp_log}"
                 
@@ -53,7 +56,7 @@ async def saving_transaction_log (
 
                         instrument_name_log= modified_dict ["instrument_name"]
                         
-                        column_list: str="label", "trade_id"
+                        column_list: str="label", "trade_id", "trade_seq"
                         
                         from_sqlite_open= await get_query (archive_db_table, 
                                                             instrument_name_log, 

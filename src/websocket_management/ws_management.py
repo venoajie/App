@@ -16,19 +16,14 @@ from db_management.sqlite_management import (
     insert_tables,
     deleting_row,
     querying_arithmetic_operator,
-    executing_query_with_return,
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query)
+    executing_query_with_return,)
 from strategies.config_strategies import paramaters_to_balancing_transactions
 from strategies.basic_strategy import (
-    is_label_and_side_consistent,
-    check_db_consistencies,
-    get_basic_closing_paramaters,
-    are_size_and_order_appropriate)
+    is_label_and_side_consistent)
 from transaction_management.deribit.transaction_log import (saving_transaction_log,)
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,
-    get_tickers,
     SendApiRequest)
 from utilities.system_tools import (
     async_raise_error_message,
@@ -36,17 +31,7 @@ from utilities.system_tools import (
     reading_from_db_pickle,)
 from utilities.pickling import replace_data, read_data
 from utilities.string_modification import (
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-    extract_currency_from_text,
-    parsing_label,)
-from websocket_management.cleaning_up_transactions import (
-    reconciling_between_db_and_exchg_data, 
-    clean_up_closed_transactions)
-
-
-def deribit_url_main() -> str:
-    return "https://www.deribit.com/api/v2/"
+    remove_double_brackets_in_list,)
 
 
 def parse_dotenv(sub_account) -> dict:
@@ -188,59 +173,7 @@ async def if_cancel_is_true(order) -> None:
 
         # get parameter orders
         await cancel_by_order_id(order["cancel_id"])
-
-async def updated_open_orders_database(open_orders_from_sub_accounts, from_sqlite_open) -> None:
-    
-    log.error (f"open_orders_from_sub_accounts {open_orders_from_sub_accounts}")
-
-    open_orders_from_sub_accounts_order_id= [o["order_id"] for o in open_orders_from_sub_accounts]
-    log.warning (f"open_orders_from_sub_accounts_order_id {open_orders_from_sub_accounts_order_id}")
         
-    order_id_from_current_db= [o["order_id"] for o in from_sqlite_open]
-    log.error (f"order_id_from_current_db {order_id_from_current_db}")
-    
-    if order_id_from_current_db !=[]:
-        
-        if open_orders_from_sub_accounts==[]:
-            for order in order_id_from_current_db:
-                await deleting_row(
-            "orders_all_json",
-            "databases/trading.sqlite3",
-            "order_id",
-            "=",
-            order,
-        )
-                
-        else:
-            
-            for order_id in order_id_from_current_db:
-                
-                if order_id not in open_orders_from_sub_accounts_order_id:
-                    log.critical (f"open_orders_from_sub_accounts_order_id {open_orders_from_sub_accounts_order_id}")
-                    await deleting_row(
-            "orders_all_json",
-            "databases/trading.sqlite3",
-            "order_id",
-            "=",
-            order_id,
-        )
-
-            for order in open_orders_from_sub_accounts:
-                
-                label=order["label"]
-                instrument_name=order["instrument_name"]
-                    
-                if order["order_id"] not in order_id_from_current_db:
-                    await insert_tables("orders_all_json", order)
-
-                if label=="":
-                    await labelling_the_unlabelled_and_resend_it(order, instrument_name)
-
-    else:
-        if open_orders_from_sub_accounts !=[]:
-            for order in open_orders_from_sub_accounts:
-                await insert_tables("orders_all_json", order)
-
 def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
     """ """
 
@@ -367,46 +300,6 @@ async def get_and_save_currencies()->None:
         await async_raise_error_message(
         error, 10, "app"
         )
-
-async def synchronising_my_trade_db_vs_exchange (currency: str,
-                                                order_db_table: str, 
-                                                trade_db_table: str, 
-                                                archive_db_table: str,
-                                                transaction_log_trading) -> None:
-    """
-    """
-    log.warning("Synchronising my_trade_db vs exchange")
-        
-    column_list= "instrument_name", "position", "timestamp"
-    
-    from_transaction_log = await get_query (transaction_log_trading, 
-                                                currency, 
-                                                "all", 
-                                                "all", 
-                                                column_list)                                       
-
-    instruments = remove_redundant_elements([o["instrument_name"] for o in from_transaction_log])
-    
-    #log.error (f"from_transaction_log {from_transaction_log}")
-    
-    for instrument_name in instruments:
-        
-        last_time_stamp_log = max([o["timestamp"] for o in from_transaction_log if o["instrument_name"] == instrument_name])
-        current_position_log = [o["position"] for o in from_transaction_log if o["timestamp"] == last_time_stamp_log][0]
-        
-        column_list= "instrument_name",  "timestamp", "amount"
-       
-        from_sqlite_open= await get_query (trade_db_table, 
-                                            instrument_name, 
-                                            "all", 
-                                            "all", 
-                                            column_list)                                       
-                
-        current_instrument_trading_position =  0 if from_sqlite_open == [] else sum([o["amount"] for o in from_sqlite_open  ])
-        
-        log.error (f"{instrument_name} current_instrument_trading_position {current_instrument_trading_position} current_position_log {current_position_log}")
-        
-        #if current_instrument_trading_position != current_position_log:
     
 async def on_restart(currencies_default: str,
                      order_table: str) -> None:
@@ -432,173 +325,6 @@ async def on_restart(currencies_default: str,
         #                                   100)
         #await check_db_consistencies_and_clean_up_imbalances(currency)                           
     
-async def check_db_consistencies_and_clean_up_imbalances(currency: str, cancellable_strategies, sub_accounts: list =[]) -> None:
-    
-    if sub_accounts== [] or sub_accounts is None:
-        sub_accounts = reading_from_pkl_data("sub_accounts",currency)
-
-    sub_accounts=sub_accounts[0]
-
-    positions= sub_accounts["positions"]
-
-    active_instruments_from_positions = [o["instrument_name"] for o in positions]
-                    
-    column_list_order: str="order_id", "label","amount"
-    
-    column_list_trade: str= column_list_order, "instrument_name","price", "timestamp","trade_id","side"
-
-    my_trades_currency: list= await get_query("my_trades_all_json", currency, "all", "all", column_list_trade)
-
-    all_outstanding_instruments = remove_redundant_elements([o["instrument_name"] for o in my_trades_currency])
-                      
-    open_orders_from_sub_accounts= sub_accounts["open_orders"]
-    
-    positions_from_sub_accounts= sub_accounts["positions"]
-    
-    for instrument_name in all_outstanding_instruments:
-        log.warning (f"instrument_name {instrument_name} {instrument_name in active_instruments_from_positions}")      
-        
-        my_trades_instrument: list= [o for o in my_trades_currency if instrument_name in o["instrument_name"]]
-        
-        currency: str = extract_currency_from_text(instrument_name)
-            
-        order_from_sqlite_open= await get_query("orders_all_json", 
-                                                    currency, 
-                                                    "all", 
-                                                    "all", 
-                                                    column_list_order)        
-                         
-        db_consistencies= check_db_consistencies (instrument_name, 
-                                                  my_trades_instrument, 
-                                                  positions_from_sub_accounts,
-                                                  order_from_sqlite_open,
-                                                  open_orders_from_sub_accounts)
-
-        log.debug (f"db_consistencies {db_consistencies}")
-        order_is_consistent= db_consistencies["order_is_consistent"]
-        
-        size_is_consistent= db_consistencies["trade_size_is_consistent"]
-            
-        if not db_consistencies["no_non_label_from_from_sqlite_open"]:
-            await updated_open_orders_database(open_orders_from_sub_accounts,order_from_sqlite_open)
-            
-        if not order_is_consistent:
-            log.critical (f"BALANCING-ORDERS-START")
-            #await resupply_sub_accountdb(currency)
-            await updated_open_orders_database(open_orders_from_sub_accounts,order_from_sqlite_open)
-            log.critical (f"BALANCING-ORDERS-DONE")
-            await cancel_the_cancellables(cancellable_strategies)
-                                                        
-        if not size_is_consistent:
-            log.critical (f"BALANCING TRADE-START")
-            
-            await cancel_the_cancellables("open")
-                
-            if "PERPETUAL" not in instrument_name:
-                time_stamp= [o["timestamp"] for o in my_trades_instrument]
-                
-                if time_stamp !=[]:
-                    
-                    last_time_stamp_sqlite= max(time_stamp)
-                    
-                    transaction_log_from_sqlite_open= await get_query("transaction_log_json", 
-                                                    instrument_name, 
-                                                    "all", 
-                                                    "all", 
-                                                    "standard")
-                    log.critical (f"transaction_log_from_sqlite_open {transaction_log_from_sqlite_open}")
-                    delivered_transaction= [o for o in transaction_log_from_sqlite_open if "delivery" in o["type"] ]
-                    delivery_timestamp= [o["timestamp"] for o in delivered_transaction ]
-                    delivery_timestamp= [] if delivery_timestamp==[] else max(delivery_timestamp)
-                    
-                    #log.warning (f"delivery_timestamp {delivery_timestamp} last_time_stamp_sqlite {last_time_stamp_sqlite} last_time_stamp_sqlite < delivery_timestamp {last_time_stamp_sqlite < delivery_timestamp}")
-                    
-                    if delivery_timestamp !=[] and last_time_stamp_sqlite < delivery_timestamp:
-                            
-                        transactions_from_other_side= [ o for o in my_trades_currency \
-                            if instrument_name not in o["instrument_name"]]
-                                                
-                        column_data: str="trade_id","timestamp","amount","price","label","amount","order_id"
-                        
-                        my_trades_instrument_data: list= await get_query("my_trades_all_json", instrument_name, "all", "all", column_data)
-                            
-                        for transaction in my_trades_instrument_data:
-                            
-                            label_int= parsing_label(transaction["label"])["int"]
-                            #log.error (f"label_int {label_int}")
-                            
-                            transactions_from_other_side= [ o for o in my_trades_currency \
-                            if instrument_name not in o["instrument_name"] and label_int in o["label"] ]
-                            
-                            orders_from_other_side= [ o["amount"] for o in order_from_sqlite_open \
-                            if instrument_name not in o["instrument_name"] and label_int in o["label"] ]
-                            
-                            orders_from_other_side= 0 if orders_from_other_side == [] else sum(orders_from_other_side)
-                            
-                            sum_transactions_from_other_side= sum([o["amount"] for o in transactions_from_other_side])
-                            
-                            for transaction in transactions_from_other_side:
-                                
-                                log.debug (f"transaction {transaction}")                
-                                
-                                basic_closing_paramaters= get_basic_closing_paramaters (transaction)  
-                                basic_closing_paramaters.update({"instrument":transaction["instrument_name"]})
-                                tickers= await get_tickers (basic_closing_paramaters["instrument"])
-                                
-                                if basic_closing_paramaters["side"]=="sell":
-                                    entry_price=tickers["best_ask_price"]
-
-                                if basic_closing_paramaters["side"]=="buy":
-                                    entry_price=tickers["best_bid_price"]
-                                    
-                                basic_closing_paramaters.update({"entry_price":entry_price})
-                                basic_closing_paramaters.update({"size":abs(basic_closing_paramaters["size"])})
-                                
-                                log.error (f"basic_closing_paramaters {basic_closing_paramaters}")
-                                log.error (f"sum_transactions_from_other_side {sum_transactions_from_other_side}")
-                                log.error (f"orders_from_other_side {orders_from_other_side}")
-                                log.error (basic_closing_paramaters["size"])
-                                size_and_order_appropriate = are_size_and_order_appropriate("reduce_position",
-                                                                                            sum_transactions_from_other_side,
-                                                                                            orders_from_other_side,
-                                                                                            basic_closing_paramaters["size"])
-                                
-                                
-                                log.error (f"size_and_order_appropriate {size_and_order_appropriate}")
-                                if False and  size_and_order_appropriate:
-                                    await send_limit_order(basic_closing_paramaters)  
-                                
-                            #log.error (f"my_trades_instrument_data {transaction}")
-                        
-                            
-                            #await clean_up_closed_futures_because_has_delivered(instrument_name, transaction, delivered_transaction)
-                        
-            
-            balancing_params=paramaters_to_balancing_transactions()
-            
-            max_transactions_downloaded_from_exchange=balancing_params["max_transactions_downloaded_from_exchange"]
-            
-            trades_from_exchange = await get_my_trades_from_exchange(max_transactions_downloaded_from_exchange, currency)
-            
-            #log.debug (f"trades_from_exchange {trades_from_exchange}")
-            
-            trades_from_exchange_without_futures_combo= [ o for o in trades_from_exchange if f"{currency}-FS" not in o["instrument_name"]]
-            
-            #if "ETH" in instrument_name:
-            #    log.debug (f"trades_from_exchange_without_futures_combo {trades_from_exchange_without_futures_combo}")
-            
-            await reconciling_between_db_and_exchg_data(instrument_name,
-                                                        trades_from_exchange_without_futures_combo,
-                                                        positions_from_sub_accounts,
-                                                        order_from_sqlite_open,
-                                                        open_orders_from_sub_accounts)
-            
-            log.warning (f"CLEAN UP CLOSED TRANSACTIONS-START")
-            await clean_up_closed_transactions(instrument_name)
-            log.critical (f"BALANCING-DONE")
-
-
-
 async def resupply_sub_accountdb(currency) -> None:
 
     # resupply sub account db
@@ -651,16 +377,19 @@ def first_tick_fr_sqlite_if_database_still_empty (max_closed_transactions_downlo
     return delta_some_day_ago
                                                     
                       
-async def resupply_transaction_log(currency: str,
-                                   transaction_log_trading,
-                                   archive_db_table: str) -> list:
+async def resupply_transaction_log(
+    currency: str,
+    transaction_log_trading,
+    archive_db_table: str) -> list:
     """ """
 
     #log.warning(f"resupply {currency.upper()} TRANSACTION LOG db-START")
                 
-    where_filter= "timestamp"
+    where_filter= "user_seq"
     
-    first_tick_query= querying_arithmetic_operator(where_filter, "MAX", transaction_log_trading)
+    first_tick_query= querying_arithmetic_operator(where_filter,
+                                                   "MAX", 
+                                                   transaction_log_trading)
     
     first_tick_query_result = await executing_query_with_return(first_tick_query)
         
@@ -668,7 +397,7 @@ async def resupply_transaction_log(currency: str,
 
     max_closed_transactions_downloaded_from_sqlite=balancing_params["max_closed_transactions_downloaded_from_sqlite"]   
     
-    first_tick_fr_sqlite= first_tick_query_result [0]["MAX (timestamp)"] 
+    first_tick_fr_sqlite= first_tick_query_result [0]["MAX (user_seq)"] 
     #log.warning(f"first_tick_fr_sqlite {first_tick_fr_sqlite} {not first_tick_fr_sqlite}")
     
     if not first_tick_fr_sqlite:
