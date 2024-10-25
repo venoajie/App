@@ -832,7 +832,9 @@ async def count_and_delete_ohlc_rows():
         else:
             where_filter = f"tick"
         
-        count_rows_query = querying_arithmetic_operator(where_filter, "COUNT", table)
+        count_rows_query = querying_arithmetic_operator(where_filter, 
+                                                        "COUNT", 
+                                                        table)
 
         rows = await executing_query_with_return(count_rows_query)
         
@@ -840,7 +842,9 @@ async def count_and_delete_ohlc_rows():
             
         if rows > rows_threshold:
                   
-            first_tick_query = querying_arithmetic_operator(where_filter, "MIN", table)
+            first_tick_query = querying_arithmetic_operator(where_filter, 
+                                                            "MIN",
+                                                            table)
             
             first_tick_fr_sqlite = await executing_query_with_return(first_tick_query)
             
@@ -851,6 +855,10 @@ async def count_and_delete_ohlc_rows():
                 first_tick = first_tick_fr_sqlite[0]["MIN(id)"]
 
             #log. error(f"table {table} where_filter {where_filter} first_tick_fr_sqlite {first_tick_fr_sqlite}")
-            await deleting_row(table, database, where_filter, "=", first_tick)
+            await deleting_row(table,
+                               database,
+                               where_filter,
+                               "=",
+                               first_tick)
             
     log.info("count_and_delete_ohlc_rows-DONE")
