@@ -392,6 +392,8 @@ async def resupply_transaction_log(
                                                    transaction_log_trading)
     
     first_tick_query_result = await executing_query_with_return(first_tick_query)
+    
+    log.info (f"first_tick_query_result {first_tick_query_result}")
         
     balancing_params=paramaters_to_balancing_transactions()
 
