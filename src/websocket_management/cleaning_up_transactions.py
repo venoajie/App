@@ -216,11 +216,12 @@ def check_whether_order_db_reconciled_each_other(sub_account,
     else :        
         return  False
 
-def check_whether_db_reconciled_each_other(sub_account,
-                                            instrument_name,
-                                            my_trades_currency,
-                                            orders_currency,
-                                            from_transaction_log) -> None:
+def check_whether_db_reconciled_each_other(
+    sub_account,
+    instrument_name,
+    my_trades_currency,
+    orders_currency,
+    from_transaction_log) -> None:
     """ """
     
     if sub_account :
@@ -242,10 +243,10 @@ def check_whether_db_reconciled_each_other(sub_account,
         #timestamp could be double-> come from combo transaction. hence, trade_id is used to distinguish
         try:
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
-                else str(max([extract_integers_from_text(o["trade_id"]) for o in from_transaction_log_instrument ]))
+                else (max([(o["user_seq"]) for o in from_transaction_log_instrument ]))
             current_position_log = 0 if from_transaction_log_instrument == []\
                 else [o["position"] for o in from_transaction_log_instrument \
-                    if  last_time_stamp_log in o["trade_id"]][0]
+                    if  last_time_stamp_log in o["user_seq"]][0]
                 
         # just in case, trade id = None(because of settlement)
         except:
