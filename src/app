@@ -885,7 +885,7 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 log.info (f"{future_instrument_name} {future_mark_price} contango {contango}")
                                 
-                                if combo_ticker:
+                                if False and  combo_ticker:
                                 
                                     future_spreads = FutureSpreads(strategy,
                                                                 strategy_params,
