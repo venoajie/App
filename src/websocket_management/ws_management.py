@@ -390,6 +390,7 @@ async def resupply_transaction_log(
     first_tick_query= querying_arithmetic_operator(where_filter,
                                                    "MAX", 
                                                    transaction_log_trading)
+    log.info (f"first_tick_query {first_tick_query}")
     
     first_tick_query_result = await executing_query_with_return(first_tick_query)
     
