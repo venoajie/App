@@ -742,7 +742,7 @@ class StreamAccountData(ModifyOrderDb):
                 log.debug (f"position {position}")
                 position_without_combo = [ o for o in position if "FS" not in o["instrument_name"]]
                 size_all = sum([abs(o["size"]) for o in position_without_combo])
-                leverage_all= [o for o in position_without_combo]
+                leverage_all= size_all/notional
                 
                 leverage_instrument =  [{'instrument_name':o['instrument_name'], 
                                   'leverage_instrument':abs(o['size']/notional)} for o in position_without_combo]
