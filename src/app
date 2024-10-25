@@ -618,7 +618,7 @@ class StreamAccountData(ModifyOrderDb):
             
             await telegram_bot_sendtext (f"sub_account {sub_account}")
         
-        position = [o for o in sub_account["position"]]
+        position = [o for o in sub_account["positions"]]
         size_all = sum([abs(o["size"]) for o in position])
         leverage_all = size_all/notional
         log.error (f"leverage_all {leverage_all} size_all {size_all} notional {notional}")
