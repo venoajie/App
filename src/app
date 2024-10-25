@@ -385,25 +385,26 @@ class StreamAccountData(ModifyOrderDb):
                                                                                             
                                             if ticker:
                                                     
-                                                await self.running_critical_strategy (currencies,
-                                                                                 currency, 
-                                                                                currency_upper,
-                                                                                order_db_table,
-                                                                                trade_db_table, 
-                                                                                archive_db_table,
-                                                                                transaction_log_trading,
-                                                                                min_expiration_timestamp,
-                                                                                data_orders,
-                                                                                ticker,
-                                                                                active_strategies,
-                                                                                active_futures,
-                                                                                active_combo_perp,
-                                                                                strategy_attributes,
-                                                                                non_checked_strategies,
-                                                                                cancellable_strategies,
-                                                                                instrument_ticker, 
-                                                                                futures_instruments,
-                                                                        )
+                                                await self.running_critical_strategy (
+                                                    currencies,
+                                                    currency, 
+                                                    currency_upper,
+                                                    order_db_table,
+                                                    trade_db_table, 
+                                                    archive_db_table,
+                                                    transaction_log_trading,
+                                                    min_expiration_timestamp,
+                                                    data_orders,
+                                                    ticker,
+                                                    active_strategies,
+                                                    active_futures,
+                                                    active_combo_perp,
+                                                    strategy_attributes,
+                                                    non_checked_strategies,
+                                                    cancellable_strategies,
+                                                    instrument_ticker, 
+                                                    futures_instruments,
+                                                    )
                                                                                 
                                         except ValueError:
                                             import traceback
@@ -694,13 +695,18 @@ class StreamAccountData(ModifyOrderDb):
 
         if not db_reconciled["len_order_from_sub_account_and_db_is_equal"]:
                         
+            sub_account_from_exchange = await self.modify_order_and_db.get_sub_account (currency)
+
             await reconciling_sub_account_and_db_open_orders (instrument_ticker,
                                                                 order_db_table,
                                                                 orders_currency,
-                                                                sub_account)
+                                                                sub_account_from_exchange)
 
-            await self.modify_order_and_db.resupply_sub_accountdb (currency)
 
+            my_path_sub_account = provide_path_for_file("sub_accounts", 
+                                                        currency)
+            
+            replace_data(my_path_sub_account, sub_account_from_exchange)
         
         log.info (f"index_price is not None {index_price is not None}  {index_price} equity > 0 {equity > 0} ")
         if  index_price is not None \

@@ -35,21 +35,21 @@ from strategies.basic_strategy import (
     is_label_and_side_consistent,)
 
 
-
-def parse_dotenv(sub_account) -> dict:
+def parse_dotenv(sub_account)-> dict:
     return config.main_dotenv(sub_account)
 
-def get_now_unix() -> int:
+def get_now_unix()-> int:
 
     now_utc = datetime.now()
     
     return time_modification.convert_time_to_unix(now_utc)
 
-async def private_connection (sub_account: str,
-                              endpoint: str,
-                              params: str,
-                              connection_url: str = "https://www.deribit.com/api/v2/",
-                              ) -> None:
+async def private_connection (
+    sub_account: str,
+    endpoint: str,
+    params: str,
+    connection_url: str = "https://www.deribit.com/api/v2/",
+    )-> None:
 
     id = id_numbering.id(endpoint, endpoint)
     
@@ -77,9 +77,10 @@ async def private_connection (sub_account: str,
 
         return response
         
-async def public_connection (endpoint: str,
-                             connection_url: str = "https://www.deribit.com/api/v2/",
-                             ) -> None:
+async def public_connection (
+    endpoint: str,
+    connection_url: str = "https://www.deribit.com/api/v2/",
+    )-> None:
 
 
     async with aiohttp.ClientSession() as session:
@@ -90,14 +91,14 @@ async def public_connection (endpoint: str,
 
         return response
 
-async def get_currencies() -> list:
+async def get_currencies()-> list:
     # Set endpoint
     endpoint: str = f"public/get_currencies?"
 
     return await public_connection(endpoint=endpoint)
 
 
-async def get_server_time() -> int:
+async def get_server_time()-> int:
     """
     Returning server time
     """
@@ -110,20 +111,26 @@ async def get_server_time() -> int:
 
     return result
 
-async def get_instruments(currency):
+async def get_instruments(
+    currency
+    )-> list:
     # Set endpoint
     endpoint: str = f"public/get_instruments?currency={currency.upper()}"
     
     return await public_connection (endpoint=endpoint)
 
-def get_tickers(instrument_name: str) -> list:
+def get_tickers(
+    instrument_name: str
+    )-> list:
     # Set endpoint
     
     import requests, json
     
     return requests.get(f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}").json()["result"] 
     
-def first_tick_fr_sqlite_if_database_still_empty (max_closed_transactions_downloaded_from_sqlite: int) -> int:
+def first_tick_fr_sqlite_if_database_still_empty (
+    max_closed_transactions_downloaded_from_sqlite: int
+    )-> int:
     """
     
     """
@@ -139,15 +146,17 @@ def first_tick_fr_sqlite_if_database_still_empty (max_closed_transactions_downlo
     return delta_some_day_ago
     
     
-async def inserting_additional_params(params: dict) -> None:
+async def inserting_additional_params(params: dict)-> None:
     """ """
 
     if "open" in params["label"]:
         await insert_tables("supporting_items_json", params)
 
-async def update_db_pkl (path, 
-                         data_orders,
-                         currency) -> None:
+async def update_db_pkl (
+    path,
+    data_orders,
+    currency
+    )-> None:
 
     my_path_portfolio = provide_path_for_file (path,
                                                currency)
@@ -158,16 +167,21 @@ async def update_db_pkl (path,
                      data_orders)
 
 
-def currency_inline_with_database_address (currency: str, 
-                                           database_address: str) -> bool:
+def currency_inline_with_database_address (
+    currency: str,
+    database_address: str
+    )-> bool:
     return currency.lower()  in str(database_address)
         
 
-def extract_portfolio_per_id_and_currency (sub_account_id: str,
-                                           sub_accounts: list, 
-                                           currency: str) -> list:
+def extract_portfolio_per_id_and_currency (
+    sub_account_id: str,
+    sub_accounts: list, 
+    currency: str
+    )-> list:
         
-        portfolio_all = ([o for o in sub_accounts if  str(o["id"]) in sub_account_id][0]['portfolio'])
+        portfolio_all = ([o for o in sub_accounts \
+            if  str(o["id"]) in sub_account_id][0]['portfolio'])
 
         return portfolio_all[f"{currency.lower()}"] 
 
@@ -272,7 +286,10 @@ class SendApiRequest:
         return result
 
 
-    async def send_limit_order(self, params) -> None:
+    async def send_limit_order(
+        self, 
+        params
+        )-> None:
         """ """
 
         side = params["side"]
@@ -311,7 +328,7 @@ class SendApiRequest:
         return order_result
     
 
-    async def get_subaccounts(self):
+    async def get_subaccounts(self)-> list:
         # Set endpoint
         endpoint: str = "private/get_subaccounts"
 
@@ -324,8 +341,9 @@ class SendApiRequest:
         return result_sub_account["result"]
 
 
-    async def get_subaccounts_details (self,
-                                       currency):
+    async def get_subaccounts_details (
+        self,
+        currency)-> list:
         # Set endpoint
         endpoint: str = "private/get_subaccounts_details"
 
@@ -340,9 +358,11 @@ class SendApiRequest:
         return result_sub_account["result"]
 
 
-    async def get_user_trades_by_currency(self, 
-                                          currency,
-                                          count: int = 1000) -> list:
+    async def get_user_trades_by_currency(
+        self,
+        currency,
+        count: int = 1000
+        )-> list:
 
         # Set endpoint
         endpoint: str = f"private/get_user_trades_by_currency"
@@ -377,7 +397,7 @@ class SendApiRequest:
         currency,
         start_timestamp: int,
         count: int = 1000,
-    ) -> list:
+        )-> list:
         
         now_unix = get_now_unix()
 
@@ -429,8 +449,10 @@ class ModifyOrderDb(SendApiRequest):
         # Provide class object to access private get API
         self.private_data: str = SendApiRequest (self.sub_account_id)
         
-    async def cancel_by_order_id(self,
-                                 open_order_id) -> None:
+    async def cancel_by_order_id(
+        self,
+        open_order_id
+        )-> None:
 
         where_filter = f"order_id"
         
@@ -455,9 +477,11 @@ class ModifyOrderDb(SendApiRequest):
 
             return result
 
-    async def cancel_the_cancellables(self,
-                                      currency,
-                                      cancellable_strategies) -> None:
+    async def cancel_the_cancellables(
+        self,
+        currency,
+        cancellable_strategies
+        )-> None:
 
         log.critical(f" cancel_the_cancellables")                           
 
@@ -484,19 +508,30 @@ class ModifyOrderDb(SendApiRequest):
 
                         await self.cancel_by_order_id(order_id)
         
-    async def resupply_sub_accountdb(self,
-                                     currency) -> None:
+    async def get_sub_account(
+        self,
+        currency
+        )-> None:
+        return await self.private_data.get_subaccounts_details (currency)
+
+        
+    async def resupply_sub_accountdb(
+        self,
+        currency
+        )-> None:
 
         # resupply sub account db
         log.info(f"resupply {currency.upper()} sub account db-START")
-        sub_accounts = await self.private_data.get_subaccounts_details (currency)
+        sub_accounts = await self.get_sub_account (currency)
 
         my_path_sub_account = provide_path_for_file("sub_accounts", currency)
         replace_data(my_path_sub_account, sub_accounts)
     
         
-    async def resupply_portfolio (self,
-                                 currency) -> None:
+    async def resupply_portfolio (
+        self,
+        currency
+        )-> None:
 
         # resupply sub account db
         sub_accounts = await self.private_data.get_subaccounts ()
@@ -505,14 +540,17 @@ class ModifyOrderDb(SendApiRequest):
                                                            sub_accounts,
                                                            currency)
         
-        await update_db_pkl("portfolio", 
-                            portfolio, 
-                            currency)
+        await update_db_pkl(
+            "portfolio",
+            portfolio,
+            currency
+            )
         
-    async def resupply_transaction_log(self,
-                                       currency: str,
-                                       transaction_log_trading,
-                                       archive_db_table: str) -> list:
+    async def resupply_transaction_log(
+        self,
+        currency: str,
+        transaction_log_trading,
+        archive_db_table: str)-> list:
         """ """
 
         #log.warning(f"resupply {currency.upper()} TRANSACTION LOG db-START")
@@ -528,18 +566,14 @@ class ModifyOrderDb(SendApiRequest):
         max_closed_transactions_downloaded_from_sqlite=balancing_params["max_closed_transactions_downloaded_from_sqlite"]   
         
         first_tick_fr_sqlite= first_tick_query_result [0]["MAX (timestamp)"] 
-        #log.warning(f"first_tick_fr_sqlite {first_tick_fr_sqlite} {not first_tick_fr_sqlite}")
         
         if not first_tick_fr_sqlite:
                     
             first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (max_closed_transactions_downloaded_from_sqlite)
-        
-        #log.debug(f"first_tick_fr_sqlite {first_tick_fr_sqlite}")
-        
+                
         transaction_log= await self.private_data.get_transaction_log (currency, 
                                                     first_tick_fr_sqlite-1, 
                                                     max_closed_transactions_downloaded_from_sqlite)
-        #log.warning(f"transaction_log {transaction_log}")
                 
         if transaction_log:
             await saving_transaction_log (transaction_log_trading,
@@ -547,25 +581,24 @@ class ModifyOrderDb(SendApiRequest):
                                     transaction_log, 
                                     first_tick_fr_sqlite, 
                                     )
-
-        #log.warning(f"resupply {currency.upper()} TRANSACTION LOG db-DONE")
                 
-    async def if_cancel_is_true(self,
-                                order) -> None:
+    async def if_cancel_is_true(
+        self,
+        order)-> None:
         """ """
-        #log.warning (order)
+
         if order["cancel_allowed"]:
 
             # get parameter orders
             await self.cancel_by_order_id(order["cancel_id"])
 
 
-    async def if_order_is_true(self,
-                               non_checked_strategies,
-                               order, 
-                               instrument: str = None) -> None:
+    async def if_order_is_true(
+        self,
+        non_checked_strategies,
+        order, 
+        instrument: str = None)-> None:
         """ """
-        # log.debug (order)
         if order["order_allowed"]:
 
             # get parameter orders
@@ -591,10 +624,12 @@ class ModifyOrderDb(SendApiRequest):
                 return []
                 #await asyncio.sleep(10)
     
-    async def update_trades_from_exchange (self,
-                                            currency: str,
-                                            archive_db_table,
-                                            count: int =  5) -> None:
+    async def update_trades_from_exchange (
+        self,
+        currency: str,
+        archive_db_table,
+        count: int =  5
+        )-> None:
         """
         """
         trades_from_exchange = await self.private_data.get_user_trades_by_currency (currency,
@@ -614,8 +649,9 @@ class ModifyOrderDb(SendApiRequest):
                                                 archive_db_table)
 
     
-    async def send_triple_orders(self, 
-                                 params) -> None:
+    async def send_triple_orders(
+        self,
+        params)-> None:
         """
         triple orders:
             1 limit order
