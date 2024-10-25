@@ -191,8 +191,8 @@ class StreamAccountData(ModifyOrderDb):
                 if o["cancellable"]==True]
             
             for currency in currencies:
-                await self.modify_order_and_db.cancel_the_cancellables (currency,
-                                                                        cancellable_strategies)
+                #await self.modify_order_and_db.cancel_the_cancellables (currency,
+                #                                                        cancellable_strategies)
                 
                 await self.modify_order_and_db.resupply_sub_accountdb (currency)
 
@@ -259,7 +259,8 @@ class StreamAccountData(ModifyOrderDb):
                                 self.ws_operation(
                                     operation="subscribe", ws_channel=ws))
                     
-                    await clean_up_closed_transactions (instrument, trade_db_table)        
+                    await clean_up_closed_transactions (instrument, 
+                                                        trade_db_table)        
             
                 while self.websocket_client.open:
                     # Receive WebSocket messages
@@ -820,6 +821,7 @@ class StreamAccountData(ModifyOrderDb):
                                                                         trade_db_table, 
                                                                         archive_db_table,
                                                                         transaction_log_trading)
+                                await sleep_and_restart ()
                             
                             await self.modify_order_and_db.if_cancel_is_true(send_order)
 
@@ -854,6 +856,7 @@ class StreamAccountData(ModifyOrderDb):
                                                                         trade_db_table, 
                                                                         archive_db_table,
                                                                         transaction_log_trading)
+                                await sleep_and_restart ()
                                 
                             await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
 
