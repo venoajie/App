@@ -665,7 +665,7 @@ def get_basic_closing_paramaters(selected_transaction: list,
                                                                             net_size,
                                                                             size)
 
-    #log.debug (f"side {side}")
+    log.debug (f"sum_order_under_closed_label {sum_order_under_closed_label} label_integer_open {label_integer_open}")
     #log.warning (f"basic_size {basic_size} size_abs {size_abs} size {size} closing_size_ok {closing_size_ok}")
     # size=exactly amount of transaction size
     params.update({"size": size if closing_size_ok else 0 })
