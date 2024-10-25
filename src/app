@@ -740,7 +740,9 @@ class StreamAccountData(ModifyOrderDb):
 
                 position = [o for o in sub_account["positions"]]
                 size_all = sum([abs(o["size"]) for o in position])
-                leverage_all = size_all/notional
+                leverage_all =  [{'instrument_name':o['instrument_name'], 
+                                  'leverage_istrument':o['size']/notional,
+                                  'leverage_all':size_all/notional} for o in position]
                 log.error (f"leverage_all {leverage_all} size_all {size_all} notional {notional}")
         
                     
