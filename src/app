@@ -158,6 +158,31 @@ def get_index (data_orders: dict, ticker: dict) -> float:
             index_price = ticker ["estimated_delivery_price"]
         
     return index_price
+
+
+def future_spread_attributes (
+    position_without_combo:  list,
+    active_futures: list,
+    currency_upper: str,
+    notional: float,
+    best_ask_prc: float,
+    server_time: int,
+    ) -> dict:
+
+        
+    return  [{'instrument_name':o['instrument_name'], 
+              'premium':o['mark_price']  - best_ask_prc, 
+              'contango':(o['mark_price']  - best_ask_prc) > 0, 
+              'leverage_instrument': 0 if ([i["size"]/notional for i in position_without_combo if i["instrument_name"] == o["instrument_name"]]) == []\
+                                else abs([i["size"]/notional for i in position_without_combo if i["instrument_name"] == o["instrument_name"]][0]), 
+                'pct_premium_per_day':((reading_from_pkl_data("ticker", 
+                                                                          o["instrument_name"])[0]["mark_price"]) - best_ask_prc
+                                                   )/((o["expiration_timestamp"] - server_time)/1000/60/60/24
+                                                      )/best_ask_prc,
+                                                   } for o in active_futures if "PERP" not in o["instrument_name"]\
+                                                       and currency_upper  in o["instrument_name"]
+                            ]
+                  
         
 @dataclass(unsafe_hash=True, slots=True)
 class StreamAccountData(ModifyOrderDb):
@@ -918,29 +943,19 @@ class StreamAccountData(ModifyOrderDb):
 
                 # check for delivered instrument               
              
-                        leverage_instrument =  [
-                            {'instrument_name':o['instrument_name'], 
-                            'leverage_instrument':abs(o['size']/notional)
-                            } for o in position_without_combo if "PERP" not in o["instrument_name"]
-                            ]
-                        
-             
-                        pct_premium_per_day =  [
-                            {'instrument_name':o['instrument_name'], 
-                            'leverage_instrument': 0 if ([i["size"]/notional for i in position_without_combo if i["instrument_name"] == o["instrument_name"]]) == []\
-                                else abs([i["size"]/notional for i in position_without_combo if i["instrument_name"] == o["instrument_name"]][0]), 
-                            'pct_premium_per_day':((reading_from_pkl_data("ticker", 
-                                                                          o["instrument_name"])[0]["mark_price"]) - best_ask_prc
-                                                   )/((o["expiration_timestamp"] - server_time)/1000/60/60/24
-                                                      )/best_ask_prc,
-                                                   } for o in active_futures if "PERP" not in o["instrument_name"]\
-                                                       and currency_upper  in o["instrument_name"]
-                            ]
+                        pct_premium_per_day =  future_spread_attributes(
+                            position_without_combo,
+                            active_futures,
+                            currency_upper,
+                            notional,
+                            best_ask_prc,
+                            server_time,
+                            )
                         
                         leverage_threshold = 20
                         max_premium = max([o["pct_premium_per_day"] for o in pct_premium_per_day])
                         log.debug (f"pct_premium_per_day {pct_premium_per_day} max_premium {max_premium}")
-                        log.error (f"leverage_instrument {leverage_instrument}")
+
                         if   "futureSpread" in strategy \
                             and leverage_all < leverage_threshold:
 
@@ -962,14 +977,8 @@ class StreamAccountData(ModifyOrderDb):
                                     size_instrument = 0 if size_instrument == [] else size_instrument [0]
                                     leverage_instrument = size_instrument/notional
                                     
-                                    log.error (f"leverage_all {leverage_all} size_all {size_all} notional {notional} size_instrument_name {size_instrument} leverage_instrument {leverage_instrument}") 
-
-                                    combo_ticker= reading_from_pkl_data("ticker",
-                                                                        combo_instruments_name)
-
-                                    future_ticker= reading_from_pkl_data("ticker",
-                                                                            future_instrument)
-                                    
+                                    combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)
+                                    future_ticker= reading_from_pkl_data("ticker", future_instrument)
                                     
                                     if future_ticker and combo_ticker\
                                         and leverage_instrument < leverage_threshold:
@@ -981,9 +990,7 @@ class StreamAccountData(ModifyOrderDb):
                                         future_mark_price= future_ticker["mark_price"]
                                         
                                         combo_mark_price= combo_ticker["mark_price"]
-                                                                                
-                                        contango = premium > 0
-                                        
+                                                                                                                        
                                         combo_auto = ComboAuto(strategy,
                                                                     strategy_params,
                                                                     my_trades_currency_strategy,
@@ -992,10 +999,10 @@ class StreamAccountData(ModifyOrderDb):
                                                                     )
                                         log.debug (f"combo_instruments_name {combo_instruments_name}")
                                 
-                                        send_order: dict = await combo_auto.is_send_and_cancel_open_order_allowed (combo_instruments_name,
-                                                                                                                    contango,
-                                                                                                                    active_combo_perp,
-                                                                                                                    orders_currency_strategy)
+                                        #send_order: dict = await combo_auto.is_send_and_cancel_open_order_allowed (combo_instruments_name,
+                                        #                                                                            contango,
+                                        #                                                                            active_combo_perp,
+                                        #                                                                            orders_currency_strategy)
                                         
                                         if False and send_order["order_allowed"]:
                                             
