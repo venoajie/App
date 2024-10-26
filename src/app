@@ -917,7 +917,11 @@ class StreamAccountData(ModifyOrderDb):
                             log.debug (f"strategy {strategy}-DONE")
 
                 # check for delivered instrument
+                
+                
 
+                        log.error (f"position_without_combo {position_without_combo}")
+                        log.error (f"active_futures {active_futures}")
                         leverage_instrument =  [
                             {'instrument_name':o['instrument_name'], 
                             'leverage_instrument':abs(o['size']/notional),
