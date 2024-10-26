@@ -940,7 +940,7 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     contango = premium > 0
                                     
-                                    log.info (f"{future_instrument_name} {future_mark_price} premium {premium} contango {contango} combo_mark_price {combo_mark_price}")
+                                    log.info (f"{combo_instruments_name} {future_instrument_name} {future_mark_price} premium {premium} contango {contango} combo_mark_price {combo_mark_price}")
                                     
                                     if False and  combo_ticker:
                                     
