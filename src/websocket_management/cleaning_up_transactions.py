@@ -722,7 +722,6 @@ async def clean_up_closed_transactions(
     #prepare basic parameters for table query
 
     log.error(f" clean_up_closed_transactions {instrument_name} START")
-    log.error(f" transaction_all is None {transaction_all} ")
     
     where_filter = f"trade_id"
 
@@ -742,9 +741,7 @@ async def clean_up_closed_transactions(
     else:      
         
         if transaction_all:
-            
-            log.error (f"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            
+                        
             transactions_all: list = [o for o in transaction_all \
             if instrument_name in o["instrument_name"]]
 
