@@ -721,6 +721,7 @@ async def clean_up_closed_transactions(
     #prepare basic parameters for table query
 
     log.error(f" clean_up_closed_transactions {instrument_name} START")
+    log.error(f" transaction_all {instrument_name} ")
     
     where_filter = f"trade_id"
 
