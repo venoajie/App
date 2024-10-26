@@ -167,7 +167,7 @@ class StreamAccountData(ModifyOrderDb):
         self.client_secret: str = parse_dotenv(self.sub_account_id)["client_secret"]
 
         # Start Primary Coroutine
-        #self.loop.run_until_complete(self.ws_manager())
+        self.loop.run_until_complete(self.ws_manager())
     
     # @lru_cache(maxsize=None)
     async def ws_manager(self) -> None:
@@ -1171,7 +1171,7 @@ async def update_instruments(idle_time):
     except Exception as error:
         await async_raise_error_message(error)
 
-async def main():
+async def main_():
     sub_account_id = "deribit-148510"
     stream = StreamAccountData(sub_account_id)
     
@@ -1182,7 +1182,7 @@ async def main():
     #    clean_up_databases(5), 
     #    return_exceptions=True)
     
-def main_():
+def main():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
     sub_account_id = "deribit-148510"
     
