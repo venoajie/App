@@ -42,6 +42,11 @@ def get_transactions_len(result_strategy_label) -> int:
     return 0 if result_strategy_label == [] else len([o for o in result_strategy_label])
 
 
+def get_transactions_len(result_strategy_label) -> int:
+    """ """
+    return 0 if result_strategy_label == [] else len([o for o in result_strategy_label])
+
+
 def determine_opening_size(
     instrument_name: str,
     futures_instruments,
@@ -81,19 +86,21 @@ class ComboAuto (BasicStrategy):
         
         
         params: dict = self.get_basic_params().get_basic_opening_parameters(ask_price)
-    
+        
+        open_orders_label_strategy: list=  [o for o in orders_currency_strategy if "open" in o["label"]]
     
         size = determine_opening_size(instrument_name, 
                                     futures_instruments, 
                                     params["side"], 
                                     self.max_position)
+        
+        len_open_orders: int = get_transactions_len(open_orders_label_strategy)
 
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
             order_parameters=[] if order_allowed == False else params,
             cancel_allowed=cancel_allowed,
-            cancel_id= None if not cancel_allowed \
-            else get_order_id_max_time_stamp(open_orders_label_strategy)
+            cancel_id= None 
         )
 
     async def is_send_exit_order_allowed (self,
