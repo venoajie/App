@@ -727,7 +727,7 @@ async def clean_up_closed_transactions(
 
     column_list: str= "instrument_name","label", "amount", where_filter
     
-    if transactions_all is  None:
+    if not transactions_all:
         
         #querying tables
         transactions_all: list = await get_query(
@@ -739,6 +739,7 @@ async def clean_up_closed_transactions(
             )           
 
     else:      
+        
         if transactions_all:
             
             transactions_all: list = [o for o in transaction_all \
