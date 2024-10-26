@@ -1176,7 +1176,7 @@ async def main():
     stream = StreamAccountData(sub_account_id)
     
     loop = asyncio.get_event_loop()
-    loop.gather(stream.ws_manager())
+    loop.run_until_complete(stream.ws_manager())
     await asyncio.gather(
         clean_up_databases(5), 
         return_exceptions=True)
