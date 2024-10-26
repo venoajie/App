@@ -974,9 +974,9 @@ class StreamAccountData(ModifyOrderDb):
                                 for transaction in delivered_transactions:
                                     delete_respective_closed_futures_from_trade_db (transaction, trade_db_table)
 
-                    
-                    # updating instrument
-                    await sleep_and_restart ()
+                        
+                        # updating instrument
+                        await sleep_and_restart ()
 
             
     async def update_user_changes(self,
