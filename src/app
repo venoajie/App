@@ -929,7 +929,7 @@ class StreamAccountData(ModifyOrderDb):
                                 )/
                                 (
                                     ([i["expiration_timestamp"] for i in active_futures  if i["instrument_name"] in o["instrument_name"]]) [0] - server_time)/1000/60/60/24
-                                )
+                                )//best_ask_prc
                             } for o in position_without_combo
                             ]
                                                 
@@ -988,7 +988,7 @@ class StreamAccountData(ModifyOrderDb):
                                         
                                         delta_time_in_day = (delta_time/1000)/60/60/24
 
-                                        premium_pct_in_day = premium/delta_time_in_day
+                                        premium_pct_in_day = (premium/delta_time_in_day)/best_ask_prc
                                         
                                         log.info (f"expiration_timestamp {expiration_timestamp} server_time {server_time} delta_time {delta_time} ")
                                         log.info (f"delta_time_in_day {delta_time_in_day} premium_pct_in_day {premium_pct_in_day}")
