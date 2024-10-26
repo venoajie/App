@@ -711,7 +711,8 @@ async def closing_one_to_many(
 async def clean_up_closed_transactions(
     instrument_name, 
     trade_table,
-    transaction_all: list = None) -> None:
+    transaction_all: list = None
+    ) -> None:
     """
     closed transactions: buy and sell in the same label id = 0. When flagged:
     1. remove them from db for open transactions/my_trades_all_json
@@ -721,7 +722,7 @@ async def clean_up_closed_transactions(
     #prepare basic parameters for table query
 
     log.error(f" clean_up_closed_transactions {instrument_name} START")
-    log.error(f" transaction_all is None {transaction_all is None} ")
+    log.error(f" transaction_all is None {transaction_all} ")
     
     where_filter = f"trade_id"
 
