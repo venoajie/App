@@ -968,6 +968,16 @@ class StreamAccountData(ModifyOrderDb):
                                         
                                         contango = premium > 0
                                         
+                                        expiration_timestamp = ([o["expiration_timestamp"] for o in active_futures \
+                                            if future_instrument in o["instrument_name"]]) 
+                                        
+                                        delta_time = expiration_timestamp - server_time
+                                        
+                                        delta_time_in_day = (delta_time/1000)/60/60/24
+                                        
+                                        log.info (f"expiration_timestamp {expiration_timestamp} server_time {server_time} delta_time {delta_time} ")
+                                        log.info (f"delta_time_in_day {delta_time_in_day} ")
+                                        
                                         log.info (f"{combo_instruments_name} {future_instrument} {future_mark_price} premium {premium} contango {contango} combo_mark_price {combo_mark_price}")
                                         
                                         combo_auto = ComboAuto(strategy,
