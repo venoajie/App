@@ -921,7 +921,7 @@ class StreamAccountData(ModifyOrderDb):
                         leverage_instrument =  [
                             {'instrument_name':o['instrument_name'], 
                             'leverage_instrument':abs(o['size']/notional),
-                            'pct_premium_per_day':([o["expiration_timestamp"] for o in active_futures \
+                            'pct_premium_per_day':([i["expiration_timestamp"] for i in active_futures \
                                             if future_instrument in o["instrument_name"]]) [0] - server_time
                             } for o in position_without_combo
                             ]
