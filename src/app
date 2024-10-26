@@ -1176,10 +1176,11 @@ async def main():
     stream = StreamAccountData(sub_account_id)
     
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(stream.ws_manager())
-    await asyncio.gather(
-        clean_up_databases(5), 
-        return_exceptions=True)
+    loop.run_until_complete(stream.ws_manager(),
+                            clean_up_databases(5))
+    #await asyncio.gather(
+    #    clean_up_databases(5), 
+    #    return_exceptions=True)
     
 def main_():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
