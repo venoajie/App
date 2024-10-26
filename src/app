@@ -921,6 +921,7 @@ class StreamAccountData(ModifyOrderDb):
                                     size_instrument_name = ([abs(o["size"]) for o in position_without_combo \
                                         if future_instrument_name in o["instrument_name"]])
                                     
+                                    size_instrument_name = 0 if size_instrument_name == [] else size_instrument_name [0]
                                     leverage_instrument_name = size_instrument_name/notional
                                     
                                     log.error (f"leverage_all {leverage_all} size_all {size_all} notional {notional} size_instrument_name {size_instrument_name} leverage_instrument_name {leverage_instrument_name}") 
