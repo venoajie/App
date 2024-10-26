@@ -912,6 +912,9 @@ class StreamAccountData(ModifyOrderDb):
                             
                             for combo in active_combo_perp:
                                 
+                                log.error (f"currency_upper {currency_upper} {currency_upper in combo}")
+                                log.error (f"combo {combo}")
+                                
                                 if currency_upper in combo:
                                 
                                     combo_instruments_name = combo["instrument_name"]
