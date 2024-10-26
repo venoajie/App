@@ -850,13 +850,16 @@ class StreamAccountData(ModifyOrderDb):
                                     log.error (f"result_order {result_order}")
                                     
                                     data_orders = result_order["result"]
-                                    await self.update_user_changes_non_ws (non_checked_strategies,
-                                                                        data_orders, 
-                                                                            currency, 
-                                                                            order_db_table,
-                                                                            trade_db_table, 
-                                                                            archive_db_table,
-                                                                            transaction_log_trading)
+                                    await self.update_user_changes_non_ws (
+                                        non_checked_strategies,
+                                        data_orders, 
+                                        currency,
+                                        order_db_table,
+                                        trade_db_table,
+                                        archive_db_table,
+                                        transaction_log_trading
+                                        )
+                                    
                                     await sleep_and_restart ()
                                 
                                 await self.modify_order_and_db.if_cancel_is_true(send_order)
@@ -885,13 +888,14 @@ class StreamAccountData(ModifyOrderDb):
                                 if result_order:
                                     log.error (f"result_order {result_order}")
                                     data_orders = result_order["result"]
-                                    await self.update_user_changes_non_ws (non_checked_strategies,
-                                                                        data_orders, 
-                                                                            currency, 
-                                                                            order_db_table,
-                                                                            trade_db_table, 
-                                                                            archive_db_table,
-                                                                            transaction_log_trading)
+                                    await self.update_user_changes_non_ws (
+                                        non_checked_strategies,
+                                        data_orders, 
+                                        currency, 
+                                        order_db_table,
+                                        trade_db_table, 
+                                        archive_db_table,
+                                        transaction_log_trading)
                                     await sleep_and_restart ()
                                     
                                 await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
@@ -902,7 +906,8 @@ class StreamAccountData(ModifyOrderDb):
 
                         leverage_threshold = 20
                         
-                        if   "futureSpread" in strategy and leverage_all < leverage_threshold:
+                        if   "futureSpread" in strategy \
+                            and leverage_all < leverage_threshold:
                             log.error (f"strategy {strategy}-START")
                             
                             for combo in active_combo_perp:
@@ -914,7 +919,7 @@ class StreamAccountData(ModifyOrderDb):
 
                                 #min_trade_amount=  [o["min_trade_amount"] for o in active_combo_perp if o["instrument_name"]== combo_instruments_name][0]
                                 
-                                log.warning (f" combo {combo} future_instrument_name {future_instrument_name} ")
+                                #log.warning (f" combo {combo} future_instrument_name {future_instrument_name} ")
                                 #log.info (f" combo_ticker {combo_ticker}")
                                 
                                 #log.error (f""" future_ticker {reading_from_pkl_data("ticker",future_instrument_name)}""")
@@ -926,9 +931,11 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     future_mark_price= future_ticker["mark_price"]
                                     
-                                    contango = future_mark_price - index_price > 0
+                                    premium = future_mark_price - best_ask_prc
                                     
-                                    log.info (f"{future_instrument_name} {future_mark_price} contango {contango}")
+                                    contango = premium > 0
+                                    
+                                    log.info (f"{future_instrument_name} {future_mark_price} premium {premium} contango {contango}")
                                     
                                     if False and  combo_ticker:
                                     
@@ -1138,11 +1145,6 @@ class RunningApp():
 
         except Exception as error:
             await async_raise_error_message(error)
-
-
-
-
-
 
 
 async def update_instruments(idle_time):
