@@ -927,7 +927,8 @@ class StreamAccountData(ModifyOrderDb):
              
                         pct_premium_per_day =  [
                             {'instrument_name':o['instrument_name'], 
-                            'leverage_instrument': ([i["size"]/notional for i in position_without_combo if i["instrument_name"] == o["instrument_name"]]) , 
+                            'leverage_instrument': 0 if ([i["size"]/notional for i in position_without_combo if i["instrument_name"] == o["instrument_name"]]) == []\
+                                else abs([i["size"]/notional for i in position_without_combo if i["instrument_name"] == o["instrument_name"]][0]), 
                             'pct_premium_per_day':((reading_from_pkl_data("ticker", 
                                                                           o["instrument_name"])[0]["mark_price"]) - best_ask_prc
                                                    )/((o["expiration_timestamp"] - server_time)/1000/60/60/24
