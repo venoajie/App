@@ -50,7 +50,7 @@ class ComboAuto (BasicStrategy):
             
     def __post_init__(self):
         self.basic_params: str = BasicStrategy (self.strategy_label, 
-                                                      self.strategy_parameters)
+                                                self.strategy_parameters)
   
 
     async def is_send_and_cancel_open_order_allowed(

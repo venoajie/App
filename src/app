@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import asyncio
 import json
 import functools
+import os
 # installed
 import websockets
 import orjson
@@ -53,7 +54,6 @@ from websocket_management.ws_management import (
     cancel_all,
     currency_inline_with_database_address,
     distribute_ticker_result_as_per_data_type,
-    get_config,
     get_futures_instruments,
     labelling_the_unlabelled_and_resend_it,
     )
@@ -101,6 +101,18 @@ def reading_from_pkl_data(
     data = read_data(path)
 
     return data
+
+def get_config(file_name: str) -> list:
+    """ """
+    config_path = provide_path_for_file (file_name)
+    
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, "rb") as handle:
+                read= tomli.load(handle)
+                return read
+    except:
+        return []
 
 
 def compute_notional_value(
