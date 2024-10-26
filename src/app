@@ -924,13 +924,10 @@ class StreamAccountData(ModifyOrderDb):
                             } for o in position_without_combo if "PERP" not in o["instrument_name"]
                             ]
                         
-                        log.debug (f"leverage_instrument {leverage_instrument}")
              
                         pct_premium_per_day =  [
                             {'instrument_name':o['instrument_name'], 
-                            'instrument_mark_price':(reading_from_pkl_data("ticker", 
-                                                                          o["instrument_name"])[0]["mark_price"]), 
-                            'best_ask_prc':best_ask_prc, 
+                            'leverage_instrument': abs([i["size"]/notional for i in position_without_combo if i["instrument_name"] == o["instrument_name"]]) , 
                             'pct_premium_per_day':((reading_from_pkl_data("ticker", 
                                                                           o["instrument_name"])[0]["mark_price"]) - best_ask_prc
                                                    )/((o["expiration_timestamp"] - server_time)/1000/60/60/24
@@ -942,6 +939,7 @@ class StreamAccountData(ModifyOrderDb):
                         leverage_threshold = 20
                         max_premium = max([o["pct_premium_per_day"] for o in pct_premium_per_day])
                         log.debug (f"pct_premium_per_day {pct_premium_per_day} max_premium {max_premium}")
+                        log.error (f"leverage_instrument {leverage_instrument}")
                         if   "futureSpread" in strategy \
                             and leverage_all < leverage_threshold:
 
