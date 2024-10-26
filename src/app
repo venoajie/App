@@ -969,7 +969,7 @@ class StreamAccountData(ModifyOrderDb):
                                         contango = premium > 0
                                         
                                         expiration_timestamp = ([o["expiration_timestamp"] for o in active_futures \
-                                            if future_instrument in o["instrument_name"]]) 
+                                            if future_instrument in o["instrument_name"]]) [0]
                                         
                                         delta_time = expiration_timestamp - server_time
                                         
