@@ -56,15 +56,15 @@ from websocket_management.ws_management import (
     get_config,
     get_futures_instruments,
     labelling_the_unlabelled_and_resend_it,
-    on_restart,)
+    )
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
 from websocket_management.cleaning_up_transactions import (
+    check_whether_order_db_reconciled_each_other,
+    check_whether_size_db_reconciled_each_other,
     clean_up_closed_transactions, 
     count_and_delete_ohlc_rows,
-    check_whether_db_reconciled_each_other,
-    check_whether_order_db_reconciled_each_other,
     get_unrecorded_trade_and_order_id,
     reconciling_sub_account_and_db_open_orders)
 
@@ -87,9 +87,11 @@ def memoization (sub_account) -> dict:
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
 
-def reading_from_pkl_data (end_point, 
-                           currency, 
-                           status: str = None) -> dict:
+def reading_from_pkl_data(
+    end_point, 
+    currency,
+    status: str = None
+    ) -> dict:
     """ """
 
     path: str = provide_path_for_file (end_point,
@@ -101,9 +103,11 @@ def reading_from_pkl_data (end_point,
     return data
 
 
-async def update_db_pkl (path, 
-                         data_orders,
-                         currency) -> None:
+async def update_db_pkl(
+    path, 
+    data_orders,
+    currency
+    ) -> None:
 
     my_path_portfolio = provide_path_for_file (path,
                                                currency)
@@ -115,7 +119,10 @@ async def update_db_pkl (path,
 
 def get_settlement_period (strategy_attributes) -> list:
     
-    return (remove_redundant_elements(remove_double_brackets_in_list([o["settlement_period"]for o in strategy_attributes])))
+    return (remove_redundant_elements(
+        remove_double_brackets_in_list(
+            [o["settlement_period"]for o in strategy_attributes]))
+            )
 
 def get_index (data_orders: dict, ticker: dict) -> float:
 
@@ -170,13 +177,17 @@ class StreamAccountData(ModifyOrderDb):
             compression=None,
             close_timeout=60,
         ) as self.websocket_client:
-                
+            
+            # registering strategy config file    
             file_toml = "config_strategies.toml"
              
+            # parsing config file
             config_app = get_config(file_toml)
 
+            # get tradable strategies
             tradable_config_app = config_app["tradable"]
             
+            # get tradable currencies
             currencies= [o["spot"] for o in tradable_config_app] [0]
             
             strategy_attributes = config_app["strategies"]
@@ -184,29 +195,17 @@ class StreamAccountData(ModifyOrderDb):
             active_strategies =   [o["strategy_label"] for o in strategy_attributes \
                 if o["is_active"]==True]
 
+            # get strategies that have not short/long attributes in the label 
             non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
                 if o["non_checked_for_size_label_consistency"]==True]
             
             cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
                 if o["cancellable"]==True]
             
-            for currency in currencies:
-                #await self.modify_order_and_db.cancel_the_cancellables (currency,
-                #                                                        cancellable_strategies)
-                
-                await self.modify_order_and_db.resupply_sub_accountdb (currency)
-
-                await self.modify_order_and_db.resupply_portfolio (currency)
-                
             trade_db_table= "my_trades_all_json"
             
             order_db_table= "orders_all_json"         
                             
-                
-            # Establish restart procedure
-            await on_restart(currencies,
-                            order_db_table)
-            
             settlement_periods= get_settlement_period (strategy_attributes)
                             
             futures_instruments=await get_futures_instruments (currencies,
@@ -221,7 +220,14 @@ class StreamAccountData(ModifyOrderDb):
             min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]    
             
             resolution = 1                
-                            
+                
+            # filling currencies attributes
+            my_path_cur = provide_path_for_file("currencies")
+            replace_data(
+                my_path_cur,
+                currencies
+                )
+            
             while True:
                 
                 # Authenticate WebSocket Connection
@@ -232,16 +238,48 @@ class StreamAccountData(ModifyOrderDb):
 
                 # Start Authentication Refresh Task
                 self.loop.create_task(self.ws_refresh_auth())
-    
-                for instrument in instruments_name:
+                
+                for currency in currencies:
+                    #await self.modify_order_and_db.cancel_the_cancellables (currency,
+                    #                                                        cancellable_strategies)
+                    await self.modify_order_and_db.resupply_sub_accountdb (currency)
 
-                    currency = extract_currency_from_text(instrument).upper()   
+                    await self.modify_order_and_db.resupply_portfolio (currency)
                     
-                    ws_channel_currency = [f"user.portfolio.{currency}",
-                                         f"user.changes.any.{currency.upper()}.raw",
-                                         f"chart.trades.{instrument}.{resolution}"]
+                    await clean_up_closed_transactions (instrument, 
+                                                        trade_db_table)     
+                    
+                    currency_lower = currency.lower ()
+                    archive_db_table= f"my_trades_all_{currency_lower}_json"                    
+                    transaction_log_trading= f"transaction_log_{currency_lower}_json"
+                    
+                    instruments = await get_instruments(currency)
+
+                    my_path_instruments = provide_path_for_file("instruments", 
+                                                                currency)
+
+                    replace_data(my_path_instruments, instruments)
+
+                    await self.modify_order_and_db.resupply_transaction_log(
+                        currency, 
+                        transaction_log_trading,
+                        archive_db_table)
+                    
+                    ws_channel_currency = [
+                        f"user.portfolio.{currency}",
+                        f"user.changes.any.{currency.upper()}.raw",
+                        ]
+                
+                    for ws in ws_channel_currency:
+
+                        self.loop.create_task(
+                            self.ws_operation(
+                                operation="subscribe", ws_channel=ws))
+                    
+                for instrument in instruments_name:
                                         
-                    ws_channel_instrument = [f"incremental_ticker.{instrument}",]
+                    ws_channel_instrument = [f"incremental_ticker.{instrument}",
+                                             f"chart.trades.{instrument}.{resolution}"]
                     
                     for ws in ws_channel_instrument:
                         self.loop.create_task(
@@ -249,18 +287,7 @@ class StreamAccountData(ModifyOrderDb):
                             operation="subscribe",
                             ws_channel= ws,
                         ))
-                    
-                                           
-                    if "PERPETUAL" in instrument:
-                        
-                        for ws in ws_channel_currency:
-
-                            self.loop.create_task(
-                                self.ws_operation(
-                                    operation="subscribe", ws_channel=ws))
-                    
-                    await clean_up_closed_transactions (instrument, 
-                                                        trade_db_table)        
+                       
             
                 while self.websocket_client.open:
                     # Receive WebSocket messages
@@ -316,23 +343,27 @@ class StreamAccountData(ModifyOrderDb):
 
                             if message_channel == f"user.portfolio.{currency.lower()}":
                                 # also always performed at restart                                
-                                await update_db_pkl("portfolio", 
-                                                    data_orders, 
-                                                    currency)
-                                
+                                await update_db_pkl(
+                                    "portfolio", 
+                                    data_orders, 
+                                    currency
+                                    )
+                
                                 await self.modify_order_and_db.resupply_sub_accountdb(currency)    
 
                                 
                             if "user.changes.any" in message_channel:
                                 #log.debug (f"user.changes.any.{currency.upper()}.raw")
                                 
-                                await self.update_user_changes(non_checked_strategies,
-                                                               data_orders, 
-                                                                currency, 
-                                                                order_db_table,
-                                                                trade_db_table, 
-                                                                archive_db_table,
-                                                                transaction_log_trading)
+                                await self.update_user_changes(
+                                    non_checked_strategies,
+                                    data_orders, 
+                                    currency, 
+                                    order_db_table,
+                                    trade_db_table, 
+                                    archive_db_table,
+                                    transaction_log_trading
+                                    )
                             
                             TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
                             WHERE_FILTER_TICK: str = "tick"
@@ -341,12 +372,13 @@ class StreamAccountData(ModifyOrderDb):
                             if "chart.trades" in message_channel:
                                 instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                                                                             
-                                await ohlc_result_per_time_frame(instrument_ticker,
-                                                                 resolution,
-                                                                data_orders,
-                                                                TABLE_OHLC1,
-                                                                WHERE_FILTER_TICK,
-                                                                )
+                                await ohlc_result_per_time_frame(
+                                    instrument_ticker,
+                                    resolution,
+                                    data_orders,
+                                    TABLE_OHLC1,
+                                    WHERE_FILTER_TICK,
+                                    )
                                 
                             instrument_ticker = (message_channel)[19:]  
                             
@@ -364,10 +396,12 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                     if "PERPETUAL" in data_orders["instrument_name"]:
                                         
-                                        await inserting_open_interest(currency, 
-                                                                        WHERE_FILTER_TICK, 
-                                                                        TABLE_OHLC1, 
-                                                                        data_orders)
+                                        await inserting_open_interest(
+                                            currency, 
+                                            WHERE_FILTER_TICK, 
+                                            TABLE_OHLC1, 
+                                            data_orders
+                                            )
 
                                         #! is_transactionlog_vs_sub_accounts_ok
                                         #is_transactionlog_vs_my_trd_curr_ok
@@ -377,7 +411,8 @@ class StreamAccountData(ModifyOrderDb):
                                             
                                         try:                                          
                                                                               
-                                            ticker= reading_from_pkl_data("ticker",instrument_ticker)
+                                            ticker= reading_from_pkl_data("ticker",
+                                                                          instrument_ticker)
                                             
                                             try:
                                                 ticker= ticker[0]
@@ -532,15 +567,17 @@ class StreamAccountData(ModifyOrderDb):
         await self.websocket_client.send(json.dumps(msg))
 
 
-    async def update_user_changes_non_ws(self,
-                                         non_checked_strategies,
-                                         data_orders, 
-                                        currency, 
-                                        order_db_table,
-                                        trade_db_table, 
-                                        archive_db_table,
-                                        transaction_log_trading) -> None:
-        
+    async def update_user_changes_non_ws(
+    self,
+    non_checked_strategies,
+    data_orders, 
+    currency, 
+    order_db_table,
+    trade_db_table, 
+    archive_db_table,
+    transaction_log_trading
+    ) -> None:
+
         trades = data_orders["trades"]
         
         order = data_orders["order"]
@@ -556,9 +593,16 @@ class StreamAccountData(ModifyOrderDb):
                 
                 if f"{currency.upper()}-FS-" not in instrument_name:
                 
-                    await saving_traded_orders (trade, trade_db_table, order_db_table)                      
+                    await saving_traded_orders(
+                        trade, 
+                        trade_db_table, 
+                        order_db_table)                      
 
-                    await saving_traded_orders (trade, archive_db_table, order_db_table)
+                    await saving_traded_orders(
+                        trade,
+                        archive_db_table,
+                        order_db_table
+                        )
             
         else:
                 
@@ -576,367 +620,349 @@ class StreamAccountData(ModifyOrderDb):
                                         archive_db_table)
 
 
-    async def running_critical_strategy(self,
-                                        currencies,
-                                        currency, 
-                                        currency_upper,
-                                        order_db_table,
-                                        trade_db_table, 
-                                        archive_db_table,
-                                        transaction_log_trading,
-                                        min_expiration_timestamp,
-                                        data_orders,
-                                        ticker,
-                                        active_strategies,
-                                        active_futures,
-                                        active_combo_perp,
-                                        strategy_attributes,
-                                        non_checked_strategies,
-                                        cancellable_strategies,
-                                        instrument_ticker, 
-                                        futures_instruments,) -> None:
+    async def running_critical_strategy(
+        self,
+        currencies,
+        currency, 
+        currency_upper,
+        order_db_table,
+        trade_db_table, 
+        archive_db_table,
+        transaction_log_trading,
+        min_expiration_timestamp,
+        data_orders,
+        ticker,
+        active_strategies,
+        active_futures,
+        active_combo_perp,
+        strategy_attributes,
+        non_checked_strategies,
+        cancellable_strategies,
+        instrument_ticker, 
+        futures_instruments,
+        ) -> None:
 
 
         # get portfolio data  
         portfolio = reading_from_pkl_data ("portfolio",
                                               currency)
-        #log.error (f"currency {currency}")
-        #log.info (f"portfolio_all {portfolio}")
-        #portfolio = [o[f"{currency}"] for o in portfolio_all]
-                                            # obtain spot equity
-        #log.error (f"portfolio {portfolio}")
+        
         equity: float = portfolio[0]["equity"]                                       
                                                             
         index_price= get_index (data_orders, ticker)
         
-        sub_account = reading_from_pkl_data("sub_accounts",currency)
-        #log.debug (f"sub_account {sub_account}")
+        sub_account = reading_from_pkl_data("sub_accounts",
+                                            currency)
         
-        try:
-            
-            sub_account = sub_account[0]
+        sub_account = sub_account[0]
                     
-        except:
-            
-            await telegram_bot_sendtext (f"sub_account {sub_account}")
-                    
-        column_trade: str= "instrument_name","label", "amount", "price","side"
-
-        my_trades_currency: list= await get_query(trade_db_table, 
-                                                    currency, 
-                                                    "all", 
-                                                    "all", 
-                                                    column_trade)
-                                                        
-        column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"                                              
-        
-        from_transaction_log = await get_query (transaction_log_trading, 
-                                                    currency, 
-                                                    "all", 
-                                                    "all", 
-                                                    column_list)                                       
-
-        column_order= "instrument_name","label","order_id","amount","timestamp"
-        
-        orders_currency = await get_query(order_db_table, 
-                                                currency, 
-                                                "all", 
-                                                "all", 
-                                                column_order)     
-
-        instrument_from_orders_currency = remove_redundant_elements([o["instrument_name"] for o  in orders_currency])
-            
-        if instrument_from_orders_currency:
-            for instrument_name in instrument_from_orders_currency:
-
-                log.debug (f"check_whether_order_db_reconciled_each_other {instrument_name}")
-                db_reconciled =  check_whether_order_db_reconciled_each_other (sub_account,
-                                                                            instrument_name,
-                                                                            orders_currency)
-    
-                if not db_reconciled:
-                    
-                    await reconciling_sub_account_and_db_open_orders (instrument_name,
-                                                                    order_db_table,
-                                                                    orders_currency,
-                                                                    sub_account)
-
-                    await self.modify_order_and_db.resupply_sub_accountdb (currency)
-                        
-        db_reconciled = check_whether_db_reconciled_each_other (sub_account,
-                                                                    instrument_ticker,
-                                                                    my_trades_currency,
-                                                                    orders_currency,
-                                                                    from_transaction_log)
-        
-        
-        if not db_reconciled["sum_trade_from_log_and_db_is_equal"]: 
-            
-            archive_db_table= f"my_trades_all_{currency}_json"    
-            
-            await self.modify_order_and_db.update_trades_from_exchange (currency,
-                                                                        archive_db_table,
-                                                                        10)
-            unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_ticker)  
-            
-            #log.warning (f"unrecorded_transactions {unrecorded_transactions}")
-            
-            for transaction  in unrecorded_transactions:
-
-                await insert_tables (trade_db_table, 
-                                    transaction)
-
-            archive_db_table= f"my_trades_all_{currency}_json"
-                                    
-            await self.modify_order_and_db.resupply_transaction_log (currency,
-                                                                        transaction_log_trading,
-                                                                        archive_db_table
-                                                                        )
-            await self.modify_order_and_db.resupply_sub_accountdb (currency)
-
-        if not db_reconciled["len_order_from_sub_account_and_db_is_equal"]:
-                        
-            sub_account_from_exchange = await self.modify_order_and_db.get_sub_account (currency)
-
-            await reconciling_sub_account_and_db_open_orders (instrument_ticker,
-                                                                order_db_table,
-                                                                orders_currency,
-                                                                sub_account_from_exchange)
-
-
-            my_path_sub_account = provide_path_for_file("sub_accounts", 
-                                                        currency)
-            
-            replace_data(my_path_sub_account, sub_account_from_exchange)
-        
-        log.info (f"index_price is not None {index_price is not None}  {index_price} equity > 0 {equity > 0} ")
-        if  index_price is not None \
-            and equity > 0 \
-                and  db_reconciled ["sum_trade_from_log_and_db_is_equal"]\
-                    and  db_reconciled ["len_order_from_sub_account_and_db_is_equal"]:
-        
-            TA_result_data_all = await querying_table("market_analytics_json")
-
-            TA_result_data_only=  TA_result_data_all["list_data_only"]
-            
-            TA_result_data = [o for o in TA_result_data_only if currency_upper in o["instrument"]]                                                                                                    
+        if sub_account:
+            column_trade: str= "instrument_name","label", "amount", "price","side"
+            my_trades_currency: list= await get_query(trade_db_table, 
+                                                        currency, 
+                                                        "all", 
+                                                        "all", 
+                                                        column_trade)
                                                             
-            tick_TA=  max([o["tick"] for o in TA_result_data])
-            
-            server_time = get_now_unix_time()  
-            
-            delta_time = server_time-tick_TA
-            
-            delta_time_seconds = delta_time/1000                                                
-            
-            delta_time_expiration = min_expiration_timestamp - server_time  
-            
-            
-            THRESHOLD_DELTA_TIME_SECONDS = 60 
-            log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
-            
-            #something was wrong because perpetuals were actively traded. cancell  orders
-            if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
-                await self.modify_order_and_db.cancel_the_cancellables (currency,
-                                                                        cancellable_strategies)
-                                                         
-            else:#ensure freshness of ta
-                
-                notional: float = compute_notional_value(index_price, equity)
+            column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
+            from_transaction_log = await get_query (transaction_log_trading, 
+                                                        currency, 
+                                                        "all", 
+                                                        "all", 
+                                                        column_list)                                       
 
-
-                position = [o for o in sub_account["positions"]]
-                log.debug (f"position {position}")
-                position_without_combo = [ o for o in position if "FS" not in o["instrument_name"]]
-                size_all = sum([abs(o["size"]) for o in position_without_combo])
-                leverage_all= size_all/notional
-                
-                leverage_instrument =  [{'instrument_name':o['instrument_name'], 
-                                  'leverage_instrument':abs(o['size']/notional)} for o in position_without_combo]
-                
-                
-                log.error (f"leverage_all {leverage_all} size_all {size_all} notional {notional}")
+            column_order= "instrument_name","label","order_id","amount","timestamp"
+            orders_currency = await get_query(order_db_table, 
+                                                    currency, 
+                                                    "all", 
+                                                    "all", 
+                                                    column_order)     
         
-                    
-                best_ask_prc: float = ticker["best_ask_price"] 
+            log.debug (f"check_whether_order_db_reconciled_each_other {instrument_ticker}")
+            len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (sub_account,
+                                                                        instrument_ticker,
+                                                                        orders_currency)
+
+
+            if not len_order_is_reconciled_each_other:
+                            
+                sub_account_from_exchange = await self.modify_order_and_db.get_sub_account (currency)
+
+                await reconciling_sub_account_and_db_open_orders (
+                    instrument_ticker,
+                    order_db_table,
+                    orders_currency,
+                    sub_account_from_exchange
+                    )
+
+                my_path_sub_account = provide_path_for_file("sub_accounts", 
+                                                            currency)
                 
-                for strategy in active_strategies:
-                    
-                    my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
-                    
-                    orders_currency_strategy = [o for o in orders_currency if strategy in (o["label"]) ]
-                    
-                    orders_currency_strategy_label_closed = [o for o in orders_currency_strategy if "closed" in (o["label"]) ]
+                replace_data(
+                    my_path_sub_account,
+                    sub_account_from_exchange
+                    )
+                            
+            size_is_reconciled_each_other = check_whether_size_db_reconciled_each_other(
+                sub_account,
+                instrument_ticker,
+                my_trades_currency,
+                from_transaction_log
+                )
+            
+            if not size_is_reconciled_each_other: 
                 
-                    my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy if "open" in (o["label"])]
-                    
-                    #if my_trades_currency_strategy:
-                        
-                    #    sum_my_trades_currency_strategy = sum([o["amount"] for o in my_trades_currency_strategy ])
-                    
-                    #else:
-                    #    sum_my_trades_currency_strategy = 0
-                        
-                    strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
-                    
-                    #log.error (f"""hedgingSpot in strategy {"hedgingSpot" in strategy} """)                                                             
+                await self.modify_order_and_db.update_trades_from_exchange (
+                    currency,
+                    archive_db_table,
+                    10
+                    )
+                
+                unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_ticker)  
+                            
+                for transaction  in unrecorded_transactions:
 
-                    if "hedgingSpot" in strategy:
-                        
-                        log.debug (f"strategy {strategy} {currency.upper()}-START")
-                        
-                        max_position: int = notional * -1
-                        
-                        hedging = HedgingSpot(strategy,
-                                                strategy_params,
-                                                max_position,
-                                                my_trades_currency_strategy,
-                                                TA_result_data,
-                                                index_price,
-                                                server_time)
-                        
-                        send_order: dict = await hedging.is_send_and_cancel_open_order_allowed (non_checked_strategies,
-                                                                                                instrument_ticker,
-                                                                                                active_futures,
-                                                                                                orders_currency_strategy,
-                                                                                                best_ask_prc,
-                                                                                                )
-                        
-                        if send_order["order_allowed"]:
-                            
-                            #log.error  (f"send_order {send_order}")
-                            result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
-                                                                                           send_order, 
-                                                                                           instrument_ticker)
-                            
-                            if result_order:
-                                
-                                log.error (f"result_order {result_order}")
-                                
-                                data_orders = result_order["result"]
-                                await self.update_user_changes_non_ws (non_checked_strategies,
-                                                                       data_orders, 
-                                                                        currency, 
-                                                                        order_db_table,
-                                                                        trade_db_table, 
-                                                                        archive_db_table,
-                                                                        transaction_log_trading)
-                                await sleep_and_restart ()
-                            
-                            await self.modify_order_and_db.if_cancel_is_true(send_order)
-
-                        if my_trades_currency_strategy_open !=[]:
-                                                                                                        
-                            best_bid_prc: float = ticker["best_bid_price"]
-                            
-                            get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_open]
-
-                            closest_price = get_closest_value(get_prices_in_label_transaction_main, best_bid_prc)
-
-                            nearest_transaction_to_index = [o for o in my_trades_currency_strategy_open \
-                                if o["price"] == closest_price]
-                            #log.debug (f"nearest_transaction_to_index {nearest_transaction_to_index}")
-                            
-                            send_closing_order: dict = await hedging.is_send_exit_order_allowed (orders_currency_strategy_label_closed,
-                                                                                                 best_bid_prc,
-                                                                                                 nearest_transaction_to_index,)
-                            
-                            log.error (f"send_closing_order {send_closing_order}")
-                            result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
-                                                                                           send_closing_order, 
-                                                                                           instrument_ticker)
-                            
-                            if result_order:
-                                log.error (f"result_order {result_order}")
-                                data_orders = result_order["result"]
-                                await self.update_user_changes_non_ws (non_checked_strategies,
-                                                                       data_orders, 
-                                                                        currency, 
-                                                                        order_db_table,
-                                                                        trade_db_table, 
-                                                                        archive_db_table,
-                                                                        transaction_log_trading)
-                                await sleep_and_restart ()
-                                
-                            await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
-
-                        log.debug (f"strategy {strategy}-DONE")
-
-            # check for delivered instrument
-
-                    leverage_threshold = 20
-                    
-                    if   "futureSpread" in strategy and leverage_all < leverage_threshold:
-                        log.error (f"strategy {strategy}-START")
-                        
-                        for combo in active_combo_perp:
-                        
-                            combo_instruments_name = combo["instrument_name"]
-                            future_instrument_name = f"{currency_upper}-{combo_instruments_name[7:][:7]}"
-                            combo_ticker= reading_from_pkl_data("ticker",
-                                                                combo_instruments_name)
-
-                            #min_trade_amount=  [o["min_trade_amount"] for o in active_combo_perp if o["instrument_name"]== combo_instruments_name][0]
-                            
-                            log.warning (f" combo {combo} future_instrument_name {future_instrument_name} ")
-                            #log.info (f" combo_ticker {combo_ticker}")
-                            
-                            #log.error (f""" future_ticker {reading_from_pkl_data("ticker",future_instrument_name)}""")
-                            future_ticker= reading_from_pkl_data("ticker",future_instrument_name)
-                            
-                            if future_ticker:
-                                
-                                future_ticker= future_ticker[0]
-                                
-                                future_mark_price= future_ticker["mark_price"]
-                                
-                                contango = future_mark_price - index_price > 0
-                                
-                                log.info (f"{future_instrument_name} {future_mark_price} contango {contango}")
-                                
-                                if False and  combo_ticker:
-                                
-                                    future_spreads = FutureSpreads(strategy,
-                                                                strategy_params,
-                                                                my_trades_currency_strategy,
-                                                                notional,
-                                                                combo_ticker [0],
-                                                                )
-                                    log.debug (f"combo_instruments_name {combo_instruments_name}")
-                            
-                                    send_order: dict = await future_spreads.is_send_and_cancel_open_order_allowed (combo_instruments_name,
-                                                                                                                contango,
-                                                                                                                active_combo_perp,
-                                                                                                                orders_currency_strategy)
-                                    
-                                    
-                                    if False and send_order["order_allowed"]:
+                    await insert_tables(
+                        trade_db_table,
+                        transaction
+                        )
                                         
-                                        #log.error  (f"send_order {send_order}")
-                                        await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
-                                                                                        send_order, 
-                                                                                        instrument_ticker)
-                                        await self.modify_order_and_db.if_cancel_is_true(send_order)
+                await self.modify_order_and_db.resupply_transaction_log(
+                    currency,
+                    transaction_log_trading,
+                    archive_db_table
+                    )
+                
+                await self.modify_order_and_db.resupply_sub_accountdb (currency)
+            
+            log.info (f"index_price is not None {index_price is not None}  {index_price} equity > 0 {equity > 0} ")
+            
+            if  index_price is not None \
+                and equity > 0 \
+                    and  size_is_reconciled_each_other\
+                        and  len_order_is_reconciled_each_other:
+            
+                TA_result_data_all = await querying_table("market_analytics_json")
 
-                            log.error (f"send_order {send_order}")
-                            log.error (f"strategy {strategy}-DONE")
+                TA_result_data_only=  TA_result_data_all["list_data_only"]
+                
+                TA_result_data = [o for o in TA_result_data_only if currency_upper in o["instrument"]]                                                                                                    
+                                                                
+                tick_TA=  max([o["tick"] for o in TA_result_data])
+                
+                server_time = get_now_unix_time()  
+                
+                delta_time = server_time-tick_TA
+                
+                delta_time_seconds = delta_time/1000                                                
+                
+                delta_time_expiration = min_expiration_timestamp - server_time  
+                
+                THRESHOLD_DELTA_TIME_SECONDS = 60 
+                log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
+                
+                #something was wrong because perpetuals were actively traded. cancell  orders
+                if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
+                    await self.modify_order_and_db.cancel_the_cancellables (currency,
+                                                                            cancellable_strategies)
+                                                            
+                else:#ensure freshness of ta
+                    
+                    notional: float = compute_notional_value(index_price, equity)
 
-                if delta_time_expiration < 0:
+
+                    position = [o for o in sub_account["positions"]]
+                    log.debug (f"position {position}")
+                    position_without_combo = [ o for o in position if f"{currency}-FS" not in o["instrument_name"]]
+                    size_all = sum([abs(o["size"]) for o in position_without_combo])
+                    leverage_all= size_all/notional
                     
-                    instruments_name_with_min_expiration_timestamp = futures_instruments [
-                        "instruments_name_with_min_expiration_timestamp"]     
+                    leverage_instrument =  [{'instrument_name':o['instrument_name'], 
+                                    'leverage_instrument':abs(o['size']/notional)} for o in position_without_combo]
                     
-                    # check any oustanding instrument that has deliverd
                     
-                    for currency in currencies:
+                    log.error (f"leverage_all {leverage_all} size_all {size_all} notional {notional}")
+            
                         
-                        delivered_transactions = [o for o in my_trades_currency \
-                            if instruments_name_with_min_expiration_timestamp in o["instrument_name"]]
+                    best_ask_prc: float = ticker["best_ask_price"] 
+                    
+                    for strategy in active_strategies:
                         
-                        if delivered_transactions:
+                        my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
+                        
+                        orders_currency_strategy = [o for o in orders_currency if strategy in (o["label"]) ]
+                        
+                        orders_currency_strategy_label_closed = [o for o in orders_currency_strategy if "closed" in (o["label"]) ]
+                    
+                        my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy if "open" in (o["label"])]
+                        
+                        #if my_trades_currency_strategy:
                             
-                            for transaction in delivered_transactions:
-                                delete_respective_closed_futures_from_trade_db (transaction, trade_db_table)
+                        #    sum_my_trades_currency_strategy = sum([o["amount"] for o in my_trades_currency_strategy ])
+                        
+                        #else:
+                        #    sum_my_trades_currency_strategy = 0
+                            
+                        strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
+                        
+                        #log.error (f"""hedgingSpot in strategy {"hedgingSpot" in strategy} """)                                                             
+
+                        if "hedgingSpot" in strategy:
+                            
+                            log.debug (f"strategy {strategy} {currency.upper()}-START")
+                            
+                            max_position: int = notional * -1
+                            
+                            hedging = HedgingSpot(strategy,
+                                                    strategy_params,
+                                                    max_position,
+                                                    my_trades_currency_strategy,
+                                                    TA_result_data,
+                                                    index_price,
+                                                    server_time)
+                            
+                            send_order: dict = await hedging.is_send_and_cancel_open_order_allowed (non_checked_strategies,
+                                                                                                    instrument_ticker,
+                                                                                                    active_futures,
+                                                                                                    orders_currency_strategy,
+                                                                                                    best_ask_prc,
+                                                                                                    )
+                            
+                            if send_order["order_allowed"]:
+                                
+                                #log.error  (f"send_order {send_order}")
+                                result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
+                                                                                            send_order, 
+                                                                                            instrument_ticker)
+                                
+                                if result_order:
+                                    
+                                    log.error (f"result_order {result_order}")
+                                    
+                                    data_orders = result_order["result"]
+                                    await self.update_user_changes_non_ws (non_checked_strategies,
+                                                                        data_orders, 
+                                                                            currency, 
+                                                                            order_db_table,
+                                                                            trade_db_table, 
+                                                                            archive_db_table,
+                                                                            transaction_log_trading)
+                                    await sleep_and_restart ()
+                                
+                                await self.modify_order_and_db.if_cancel_is_true(send_order)
+
+                            if my_trades_currency_strategy_open !=[]:
+                                                                                                            
+                                best_bid_prc: float = ticker["best_bid_price"]
+                                
+                                get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_open]
+
+                                closest_price = get_closest_value(get_prices_in_label_transaction_main, best_bid_prc)
+
+                                nearest_transaction_to_index = [o for o in my_trades_currency_strategy_open \
+                                    if o["price"] == closest_price]
+                                #log.debug (f"nearest_transaction_to_index {nearest_transaction_to_index}")
+                                
+                                send_closing_order: dict = await hedging.is_send_exit_order_allowed (orders_currency_strategy_label_closed,
+                                                                                                    best_bid_prc,
+                                                                                                    nearest_transaction_to_index,)
+                                
+                                log.error (f"send_closing_order {send_closing_order}")
+                                result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
+                                                                                            send_closing_order, 
+                                                                                            instrument_ticker)
+                                
+                                if result_order:
+                                    log.error (f"result_order {result_order}")
+                                    data_orders = result_order["result"]
+                                    await self.update_user_changes_non_ws (non_checked_strategies,
+                                                                        data_orders, 
+                                                                            currency, 
+                                                                            order_db_table,
+                                                                            trade_db_table, 
+                                                                            archive_db_table,
+                                                                            transaction_log_trading)
+                                    await sleep_and_restart ()
+                                    
+                                await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
+
+                            log.debug (f"strategy {strategy}-DONE")
+
+                # check for delivered instrument
+
+                        leverage_threshold = 20
+                        
+                        if   "futureSpread" in strategy and leverage_all < leverage_threshold:
+                            log.error (f"strategy {strategy}-START")
+                            
+                            for combo in active_combo_perp:
+                            
+                                combo_instruments_name = combo["instrument_name"]
+                                future_instrument_name = f"{currency_upper}-{combo_instruments_name[7:][:7]}"
+                                combo_ticker= reading_from_pkl_data("ticker",
+                                                                    combo_instruments_name)
+
+                                #min_trade_amount=  [o["min_trade_amount"] for o in active_combo_perp if o["instrument_name"]== combo_instruments_name][0]
+                                
+                                log.warning (f" combo {combo} future_instrument_name {future_instrument_name} ")
+                                #log.info (f" combo_ticker {combo_ticker}")
+                                
+                                #log.error (f""" future_ticker {reading_from_pkl_data("ticker",future_instrument_name)}""")
+                                future_ticker= reading_from_pkl_data("ticker",future_instrument_name)
+                                
+                                if future_ticker:
+                                    
+                                    future_ticker= future_ticker[0]
+                                    
+                                    future_mark_price= future_ticker["mark_price"]
+                                    
+                                    contango = future_mark_price - index_price > 0
+                                    
+                                    log.info (f"{future_instrument_name} {future_mark_price} contango {contango}")
+                                    
+                                    if False and  combo_ticker:
+                                    
+                                        future_spreads = FutureSpreads(strategy,
+                                                                    strategy_params,
+                                                                    my_trades_currency_strategy,
+                                                                    notional,
+                                                                    combo_ticker [0],
+                                                                    )
+                                        log.debug (f"combo_instruments_name {combo_instruments_name}")
+                                
+                                        send_order: dict = await future_spreads.is_send_and_cancel_open_order_allowed (combo_instruments_name,
+                                                                                                                    contango,
+                                                                                                                    active_combo_perp,
+                                                                                                                    orders_currency_strategy)
+                                        
+                                        
+                                        if False and send_order["order_allowed"]:
+                                            
+                                            #log.error  (f"send_order {send_order}")
+                                            await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
+                                                                                            send_order, 
+                                                                                            instrument_ticker)
+                                            await self.modify_order_and_db.if_cancel_is_true(send_order)
+
+                                log.error (f"send_order {send_order}")
+                                log.error (f"strategy {strategy}-DONE")
+
+                    if delta_time_expiration < 0:
+                        
+                        instruments_name_with_min_expiration_timestamp = futures_instruments [
+                            "instruments_name_with_min_expiration_timestamp"]     
+                        
+                        # check any oustanding instrument that has deliverd
+                        
+                        for currency in currencies:
+                            
+                            delivered_transactions = [o for o in my_trades_currency \
+                                if instruments_name_with_min_expiration_timestamp in o["instrument_name"]]
+                            
+                            if delivered_transactions:
+                                
+                                for transaction in delivered_transactions:
+                                    delete_respective_closed_futures_from_trade_db (transaction, trade_db_table)
 
                     
                     # updating instrument
@@ -969,9 +995,17 @@ class StreamAccountData(ModifyOrderDb):
                 
                     if f"{currency.upper()}-FS-" not in instrument_name:
                     
-                        await saving_traded_orders (trade, trade_db_table, order_db_table)                      
+                        await saving_traded_orders(
+                            trade,
+                            trade_db_table,
+                            order_db_table
+                            )                      
 
-                        await saving_traded_orders (trade, archive_db_table, order_db_table)
+                        await saving_traded_orders(
+                            trade, 
+                            archive_db_table, 
+                            order_db_table
+                            )
                 
             else:
                 for order in orders:
@@ -985,9 +1019,10 @@ class StreamAccountData(ModifyOrderDb):
         #log.debug (f"positions {positions}")
         await update_db_pkl("positions", data_orders, currency)
 
-        await self.modify_order_and_db.resupply_transaction_log(currency, 
-                                        transaction_log_trading,
-                                        archive_db_table)
+        await self.modify_order_and_db.resupply_transaction_log(
+            currency,
+            transaction_log_trading,
+            archive_db_table)
         
         #await update_trades_from_exchange (currency,
         #                                   archive_db_table,

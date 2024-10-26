@@ -273,130 +273,6 @@ async def get_futures_instruments (active_currencies,
 def currency_inline_with_database_address (currency: str, database_address: str) -> bool:
     return currency.lower()  in str(database_address)
 
-
-async def get_and_save_currencies()->None:
-    
-    try:
-
-        get_currencies_all = await get_currencies()
-        
-        currencies = [o["currency"] for o in get_currencies_all["result"]]
-        
-        for currency in currencies:
-
-            instruments = await get_instruments(currency)
-
-            my_path_instruments = provide_path_for_file("instruments", currency)
-
-            replace_data(my_path_instruments, instruments)
-
-        my_path_cur = provide_path_for_file("currencies")
-
-        replace_data(my_path_cur, currencies)
-        # catch_error('update currencies and instruments')
-
-    except Exception as error:
-                
-        await async_raise_error_message(
-        error, 10, "app"
-        )
-    
-async def on_restart(currencies_default: str,
-                     order_table: str) -> None:
-    """
-    """
-    
-    # refresh databases
-    await get_and_save_currencies()                
-    
-    for currency in currencies_default:
-        
-        archive_db_table= f"my_trades_all_{currency.lower()}_json"
-        
-        transaction_log_trading= f"transaction_log_{currency.lower()}_json"
-        
-        await resupply_transaction_log(currency, 
-                                       transaction_log_trading,
-                                       archive_db_table)
-        
-        #await update_trades_from_exchange (currency,
-        #                                   archive_db_table,
-        #                                   order_table,
-        #                                   100)
-        #await check_db_consistencies_and_clean_up_imbalances(currency)                           
-    
-async def resupply_sub_accountdb(currency) -> None:
-
-    # resupply sub account db
-    #log.info(f"resupply {currency.upper()} sub account db-START")
-    private_data = await get_private_data ()
-    sub_accounts = await private_data.get_subaccounts(currency)
-
-    my_path_sub_account = provide_path_for_file("sub_accounts", currency)
-    replace_data(my_path_sub_account, sub_accounts)
- 
-
-        
-def first_tick_fr_sqlite_if_database_still_empty (max_closed_transactions_downloaded_from_sqlite: int) -> int:
-    """
-    
-    """
-    
-    from configuration.label_numbering import get_now_unix_time
-    
-    server_time = get_now_unix_time()  
-    
-    some_day_ago = 3600000 * max_closed_transactions_downloaded_from_sqlite
-    
-    delta_some_day_ago = server_time - some_day_ago
-    
-    return delta_some_day_ago
-                                                    
-                      
-async def resupply_transaction_log(
-    currency: str,
-    transaction_log_trading,
-    archive_db_table: str) -> list:
-    """ """
-
-    #log.warning(f"resupply {currency.upper()} TRANSACTION LOG db-START")
-                
-    where_filter= "timestamp"
-    
-    first_tick_query= querying_arithmetic_operator(where_filter,
-                                                   "MAX", 
-                                                   transaction_log_trading)
-    log.info (f"first_tick_query {first_tick_query}")
-    
-    first_tick_query_result = await executing_query_with_return(first_tick_query)
-    
-    log.info (f"first_tick_query_result {first_tick_query_result}")
-        
-    balancing_params=paramaters_to_balancing_transactions()
-
-    max_closed_transactions_downloaded_from_sqlite=balancing_params["max_closed_transactions_downloaded_from_sqlite"]   
-    
-    first_tick_fr_sqlite= first_tick_query_result [0]["MAX (timestamp)"] 
-    #log.warning(f"first_tick_fr_sqlite {first_tick_fr_sqlite} {not first_tick_fr_sqlite}")
-    
-    if not first_tick_fr_sqlite:
-                
-        first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (max_closed_transactions_downloaded_from_sqlite)
-    
-    #log.debug(f"first_tick_fr_sqlite {first_tick_fr_sqlite}")
-    
-    transaction_log= await get_transaction_log (currency, 
-                                                first_tick_fr_sqlite-1, 
-                                                max_closed_transactions_downloaded_from_sqlite)
-    #log.warning(f"transaction_log {transaction_log}")
-            
-    await saving_transaction_log (transaction_log_trading,
-                                  archive_db_table,
-                                  transaction_log, 
-                                  first_tick_fr_sqlite, 
-                                  )
-
-    #log.warning(f"resupply {currency.upper()} TRANSACTION LOG db-DONE")
         
    
 async def inserting_additional_params(params: dict) -> None:
@@ -433,8 +309,11 @@ async def labelling_the_unlabelled_and_resend_it(non_checked_strategies,
                            instrument_name)
 
     
-async def distribute_ticker_result_as_per_data_type(my_path_ticker, data_orders, instrument
-) -> None:
+async def distribute_ticker_result_as_per_data_type(
+    my_path_ticker: str, 
+    data_orders: dict, 
+    instrument_name: str
+    ) -> None:
     """ """
 
     try:

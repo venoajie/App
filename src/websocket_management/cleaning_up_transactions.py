@@ -188,9 +188,11 @@ async def get_unrecorded_trade_and_order_id(instrument_name: str) -> dict:
     return  [] if not from_sqlite_all else [o["data"] for o in from_sqlite_all\
                     if o["trade_id"] in unrecorded_trade_id]
 
-def check_whether_order_db_reconciled_each_other(sub_account,
-                                                  instrument_name,
-                                                  orders_currency) -> None:
+def check_whether_order_db_reconciled_each_other(
+    sub_account,
+    instrument_name,
+    orders_currency
+    ) -> None:
     """ """
     
     if sub_account :
@@ -208,19 +210,20 @@ def check_whether_order_db_reconciled_each_other(sub_account,
         len_orders_instrument = 0 if not orders_instrument \
             else len([o["amount"] for o in orders_instrument])    
         
-        if not len_orders_instrument == len_sub_account_instrument:
-            log.critical(f"len_order equal {len_orders_instrument == len_sub_account_instrument } len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
+        result = len_orders_instrument == len_sub_account_instrument
+        
+        if not result:
+            log.critical(f"len_order equal {result} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
         # comparing and return the result
-        return  len_orders_instrument == len_sub_account_instrument 
+        return  result
 
     else :        
         return  False
 
-def check_whether_db_reconciled_each_other(
+def check_whether_size_db_reconciled_each_other(
     sub_account,
     instrument_name,
     my_trades_currency,
-    orders_currency,
     from_transaction_log) -> None:
     """ """
     
@@ -230,27 +233,20 @@ def check_whether_db_reconciled_each_other(
             if o["instrument_name"] == instrument_name ]
         sub_account_size_instrument = 0 if sub_account_size_instrument == [] \
             else sub_account_size_instrument [0]
-        sub_account_orders = sub_account["open_orders"]
-        sub_account_instrument = [o for o in sub_account_orders \
-            if o["instrument_name"] == instrument_name ]
-        
-        len_sub_account_instrument = 0 if not sub_account_instrument \
-            else len([o["amount"] for o in sub_account_instrument])
-        
+
         from_transaction_log_instrument =([o for o in from_transaction_log \
             if o["instrument_name"] == instrument_name])
         
         #timestamp could be double-> come from combo transaction. hence, trade_id is used to distinguish
         try:
-            #log.warning (f"from_transaction_log_instrument {from_transaction_log_instrument}")
+
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
                 else (max([(o["user_seq"]) for o in from_transaction_log_instrument ]))
                 
-            log.warning (f"last_time_stamp_log {last_time_stamp_log}")
+
             current_position_log = 0 if from_transaction_log_instrument == []\
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  last_time_stamp_log == o["user_seq"]][0]
-            log.warning (f"current_position_log {current_position_log}")
                 
         # just in case, trade id = None(because of settlement)
         except:
@@ -270,35 +266,26 @@ def check_whether_db_reconciled_each_other(
     
         my_trades_instrument = [o for o in my_trades_currency \
             if o["instrument_name"] == instrument_name]        
-        sum_my_trades_currency = 0 if not my_trades_instrument \
+        sum_my_trades_instrument = 0 if not my_trades_instrument \
             else sum([o["amount"] for o in my_trades_instrument])
         
-        orders_instrument = [o for o in orders_currency \
-            if o["instrument_name"] == instrument_name ]
-        
-        len_orders_instrument = 0 if not orders_instrument \
-            else len([o["amount"] for o in orders_instrument])    
             
         # comparing the result
-        sum_trade_from_log_and_db_is_equal = current_position_log == sum_my_trades_currency == sub_account_size_instrument
-        len_order_from_sub_account_and_db_is_equal = len_orders_instrument == len_sub_account_instrument 
+        sum_trade_from_log_and_db_is_equal = current_position_log == sum_my_trades_instrument == sub_account_size_instrument
         
         if not sum_trade_from_log_and_db_is_equal:
-            log.critical(f"sum_from_log_and_trade_is_equal {sum_trade_from_log_and_db_is_equal} sum_my_trades_currency {sum_my_trades_currency}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
-        
-        if not len_order_from_sub_account_and_db_is_equal:
-            log.critical(f"len_order {len_order_from_sub_account_and_db_is_equal} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
+            log.critical(f"sum_from_log_and_trade_is_equal {sum_trade_from_log_and_db_is_equal} sum_my_trades_currency {sum_my_trades_instrument}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
         # combining result
-        result = dict(sum_trade_from_log_and_db_is_equal = sum_trade_from_log_and_db_is_equal,
-                    len_order_from_sub_account_and_db_is_equal = len_order_from_sub_account_and_db_is_equal)
-        
-        return result
+        return sum_trade_from_log_and_db_is_equal == sum_trade_from_log_and_db_is_equal
 
     else :        
-        return dict(sum_trade_from_log_and_db_is_equal = False,
-                len_order_from_sub_account_and_db_is_equal = False)
-
-def check_if_label_open_still_in_active_transaction(from_sqlite_open: list, instrument_name: str, label: str) -> bool:
+        return False
+                    
+def check_if_label_open_still_in_active_transaction(
+    from_sqlite_open: list, 
+    instrument_name: str, 
+    label: str
+    ) -> bool:
     """_summary_
     
     concern: there are highly possibities of one label for multiple instruments for transactions under future spread. 
@@ -343,7 +330,11 @@ def check_if_label_open_still_in_active_transaction(from_sqlite_open: list, inst
     return False if trades_from_sqlite_open==[] else sum_label
 
 
-def get_label_from_respected_id(trades_from_exchange, unrecorded_id, marker) -> str:
+def get_label_from_respected_id(
+    trades_from_exchange, 
+    unrecorded_id, 
+    marker
+    ) -> str:
     #log.info(f"trades_from_exchange {trades_from_exchange}")
     #log.info(f"unrecorded_id {unrecorded_id} marker {marker}")
     
