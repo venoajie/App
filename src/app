@@ -688,7 +688,6 @@ class StreamAccountData(ModifyOrderDb):
                                                     "all", 
                                                     column_order)     
         
-            log.debug (f"check_whether_order_db_reconciled_each_other {instrument_ticker}")
             len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (sub_account,
                                                                         instrument_ticker,
                                                                         orders_currency)
@@ -725,7 +724,7 @@ class StreamAccountData(ModifyOrderDb):
                 await self.modify_order_and_db.update_trades_from_exchange (
                     currency,
                     archive_db_table,
-                    20
+                    60
                     )
                 
                 unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_ticker)  
@@ -746,6 +745,7 @@ class StreamAccountData(ModifyOrderDb):
                 await self.modify_order_and_db.resupply_sub_accountdb (currency)
             
             log.info (f"index_price is not None {index_price is not None}  {index_price} equity > 0 {equity > 0} ")
+            log.debug (f"size_is_reconciled_each_other {size_is_reconciled_each_other} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
             
             if  index_price is not None \
                 and equity > 0 \
