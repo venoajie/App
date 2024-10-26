@@ -1171,13 +1171,13 @@ async def update_instruments(idle_time):
     except Exception as error:
         await async_raise_error_message(error)
 
-def main():
+async def main():
     sub_account_id = "deribit-148510"
     stream = StreamAccountData(sub_account_id)
     
     loop = asyncio.get_event_loop()
     loop.gather(stream.ws_manager())
-    asyncio.gather(stream.ws_manager(),
+    await asyncio.gather(stream.ws_manager(),
                 
         clean_up_databases(5), 
         return_exceptions=True)
