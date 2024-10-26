@@ -276,7 +276,7 @@ def check_whether_size_db_reconciled_each_other(
         if not sum_trade_from_log_and_db_is_equal:
             log.critical(f"sum_from_log_and_trade_is_equal {sum_trade_from_log_and_db_is_equal} sum_my_trades_currency {sum_my_trades_instrument}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
         # combining result
-        return sum_trade_from_log_and_db_is_equal == sum_trade_from_log_and_db_is_equal
+        return sum_trade_from_log_and_db_is_equal
 
     else :        
         return False
