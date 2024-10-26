@@ -918,10 +918,15 @@ class StreamAccountData(ModifyOrderDb):
 
                 # check for delivered instrument
 
-                        leverage_instrument =  [{'instrument_name':o['instrument_name'], 
-                                    'leverage_instrument':abs(o['size']/notional)} for o in position_without_combo]
-                        
-                        
+                        leverage_instrument =  [
+                            {'instrument_name':o['instrument_name'], 
+                            'leverage_instrument':abs(o['size']/notional),
+                            'pct_premium_per_day':([o["expiration_timestamp"] for o in active_futures \
+                                            if future_instrument in o["instrument_name"]]) [0] - server_time
+                            } for o in position_without_combo
+                            ]
+                                                
+                        log.debug (f"leverage_instrument {leverage_instrument}")
                         leverage_threshold = 20
                         
                         if   "futureSpread" in strategy \
@@ -974,9 +979,11 @@ class StreamAccountData(ModifyOrderDb):
                                         delta_time = expiration_timestamp - server_time
                                         
                                         delta_time_in_day = (delta_time/1000)/60/60/24
+
+                                        premium_pct_in_day = premium/delta_time_in_day
                                         
                                         log.info (f"expiration_timestamp {expiration_timestamp} server_time {server_time} delta_time {delta_time} ")
-                                        log.info (f"delta_time_in_day {delta_time_in_day} ")
+                                        log.info (f"delta_time_in_day {delta_time_in_day} premium_pct_in_day {premium_pct_in_day}")
                                         
                                         log.info (f"{combo_instruments_name} {future_instrument} {future_mark_price} premium {premium} contango {contango} combo_mark_price {combo_mark_price}")
                                         
