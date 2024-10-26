@@ -724,7 +724,7 @@ class StreamAccountData(ModifyOrderDb):
                 await self.modify_order_and_db.update_trades_from_exchange (
                     currency,
                     archive_db_table,
-                    10
+                    20
                     )
                 
                 unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_ticker)  
