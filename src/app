@@ -431,7 +431,7 @@ class StreamAccountData(ModifyOrderDb):
                                                                                             
                                             if ticker:
                                                     
-                                                await self.running_critical_strategy (
+                                                await self.running_critical_strategy(
                                                     currencies,
                                                     currency, 
                                                     currency_upper,
@@ -787,9 +787,6 @@ class StreamAccountData(ModifyOrderDb):
                     size_all = sum([abs(o["size"]) for o in position_without_combo])
                     leverage_all= size_all/notional
                     
-                    leverage_instrument =  [{'instrument_name':o['instrument_name'], 
-                                    'leverage_instrument':abs(o['size']/notional)} for o in position_without_combo]
-                        
                     best_ask_prc: float = ticker["best_ask_price"] 
                     
                     for strategy in active_strategies:
@@ -900,7 +897,10 @@ class StreamAccountData(ModifyOrderDb):
 
                 # check for delivered instrument
 
-                        log.error (f"leverage_all {leverage_all} size_all {size_all} notional {notional}")
+                        leverage_instrument =  [{'instrument_name':o['instrument_name'], 
+                                    'leverage_instrument':abs(o['size']/notional)} for o in position_without_combo]
+                        
+                        
                         leverage_threshold = 20
                         
                         if   "futureSpread" in strategy \
@@ -917,6 +917,13 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                     
                                     future_instrument_name = f"{currency_upper}-{combo_instruments_name[7:][:7]}"
+                                    
+                                    size_instrument_name = ([abs(o["size"]) for o in position_without_combo \
+                                        if future_instrument_name in o["instrument_name"]])
+                                    
+                                    leverage_instrument_name = size_instrument_name/notional
+                                    
+                                    log.error (f"leverage_all {leverage_all} size_all {size_all} notional {notional} size_instrument_name {size_instrument_name} leverage_instrument_name {leverage_instrument_name}") 
 
                                     combo_ticker= reading_from_pkl_data("ticker",
                                                                         combo_instruments_name)
