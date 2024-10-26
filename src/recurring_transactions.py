@@ -159,6 +159,7 @@ async def update_instruments(idle_time):
 
 async def main():
     await asyncio.gather(
+        back_up_db(60*15),
         clean_up_databases(60), 
         update_instruments(60),
         update_ohlc_and_market_condition(15), 
