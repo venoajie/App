@@ -5,7 +5,10 @@ import asyncio
 # user defined formula
 
 from db_management.sqlite_management import (
+    deleting_row,
     insert_tables)
+from strategies.basic_strategy import (
+    is_label_and_side_consistent,)
 from transaction_management.deribit.api_requests import (
     SendApiRequest)
 from utilities.system_tools import (
@@ -39,7 +42,11 @@ async def cancel_all () -> None:
     await private_data.get_cancel_order_all()
     
 
-def get_instruments_kind(currency: str, settlement_periods, kind: str= "all") -> list:
+def get_instruments_kind(
+    currency: str,
+    settlement_periods,
+    kind: str= "all"
+    ) -> list:
     """_summary_
 
     Args:
@@ -72,8 +79,9 @@ def get_instruments_kind(currency: str, settlement_periods, kind: str= "all") ->
     return  [o for o in instruments_kind if o["settlement_period"] in settlement_periods]
 
 
-async def get_futures_for_active_currencies (active_currencies,
-                                             settlement_periods) -> list:
+async def get_futures_for_active_currencies (
+    active_currencies,
+    settlement_periods) -> list:
     """_summary_
 
     Returns:
@@ -108,8 +116,10 @@ async def get_futures_for_active_currencies (active_currencies,
     return remove_double_brackets_in_list(instruments_holder_plc)
     
     
-async def get_futures_instruments (active_currencies, 
-                                   settlement_periods) -> list:
+async def get_futures_instruments (
+    active_currencies, 
+    settlement_periods
+    ) -> list:
     
     active_futures=  await get_futures_for_active_currencies(active_currencies,
                                                              settlement_periods)
@@ -118,13 +128,14 @@ async def get_futures_instruments (active_currencies,
           
     min_expiration_timestamp = min([o["expiration_timestamp"] for o in active_futures]) 
     
-    return dict(instruments_name = [o["instrument_name"] for o in (active_futures)],
-                min_expiration_timestamp = min_expiration_timestamp,
-                active_futures = [o for o in active_futures if "future" in o["kind"]],
-                active_combo_perp =  active_combo,
-                instruments_name_with_min_expiration_timestamp = [o["instrument_name"] for o in active_futures \
-                    if o["expiration_timestamp"] == min_expiration_timestamp][0]
-                )
+    return dict(
+        instruments_name = [o["instrument_name"] for o in (active_futures)],
+        min_expiration_timestamp = min_expiration_timestamp,
+        active_futures = [o for o in active_futures if "future" in o["kind"]],
+        active_combo_perp =  active_combo,
+        instruments_name_with_min_expiration_timestamp = [o["instrument_name"] for o in active_futures \
+            if o["expiration_timestamp"] == min_expiration_timestamp][0]
+        )
     
 def currency_inline_with_database_address (currency: str, database_address: str) -> bool:
     return currency.lower()  in str(database_address)
@@ -136,6 +147,63 @@ async def inserting_additional_params(params: dict) -> None:
     if "open" in params["label"]:
         await insert_tables("supporting_items_json", params)
 
+
+async def cancel_by_order_id(open_order_id) -> None:
+    private_data = await get_private_data()
+
+    result = await private_data.get_cancel_order_byOrderId(open_order_id)
+    
+    try:
+        if (result["error"]["message"])=="not_open_order":
+            
+            where_filter = f"order_id"
+            
+            await deleting_row (
+                "orders_all_json",
+                "databases/trading.sqlite3",
+                where_filter,
+                "=",
+                open_order_id,)
+
+    except:
+
+        return result
+
+async def send_limit_order(params) -> None:
+    """ """
+    private_data = await get_private_data()
+
+    send_limit_result = await private_data.send_limit_order(params)
+    
+    return send_limit_result
+
+
+async def if_order_is_true(order, instrument: str = None) -> None:
+    """ """
+    # log.debug (order)
+    if order["order_allowed"]:
+
+        # get parameter orders
+        try:
+            params = order["order_parameters"]
+        except:
+            params = order
+
+        if instrument != None:
+            # update param orders with instrument
+            params.update({"instrument": instrument})
+
+        label_and_side_consistent = is_label_and_side_consistent(params)
+
+        if  label_and_side_consistent:
+            await inserting_additional_params(params)
+            send_limit_result = await send_limit_order(params)
+            return send_limit_result
+            #await asyncio.sleep(10)
+        else:
+            
+            return []
+            #await asyncio.sleep(10)
 
 async def labelling_the_unlabelled_and_resend_it(non_checked_strategies,
                                                  order, 
@@ -151,9 +219,10 @@ async def labelling_the_unlabelled_and_resend_it(non_checked_strategies,
 
     await cancel_by_order_id (order_id)
     
-    await if_order_is_true(non_checked_strategies,
-                           labelled_order,
-                           instrument_name)
+    await if_order_is_true(
+        non_checked_strategies,
+        labelled_order,
+        instrument_name)
 
     
 async def distribute_ticker_result_as_per_data_type(
@@ -167,7 +236,10 @@ async def distribute_ticker_result_as_per_data_type(
         # ticker: list = pickling.read_data(my_path_ticker)
 
         if data_orders["type"] == "snapshot":
-            replace_data(my_path_ticker, data_orders)
+            replace_data(
+                my_path_ticker, 
+                data_orders
+                )
 
             # ticker_fr_snapshot: list = pickling.read_data(my_path_ticker)
 
