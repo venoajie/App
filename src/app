@@ -1171,14 +1171,16 @@ async def update_instruments(idle_time):
     except Exception as error:
         await async_raise_error_message(error)
 
-async def main():
+def main():
     sub_account_id = "deribit-148510"
-    StreamAccountData(sub_account_id)
+    stream = StreamAccountData(sub_account_id)
     
-    await asyncio.gather(
-        StreamAccountData(sub_account_id).ws_manager(),
-        clean_up_databases(5), 
-        return_exceptions=True)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(stream.ws_manager())
+    #asyncio.gather(
+    #    loop.StreamAccountData(sub_account_id).ws_manager(),
+    #    clean_up_databases(5), 
+    #    return_exceptions=True)
     
 def main_():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
