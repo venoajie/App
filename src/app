@@ -171,7 +171,7 @@ def future_spread_attributes (
 
         
     return  [{'instrument_name':o['instrument_name'], 
-              'is_weekly': o["settlement_period"]=="weekly", 
+              'is_weekly': o["settlement_period"]=="week", 
               'premium': (reading_from_pkl_data("ticker", 
                                                                           o["instrument_name"])[0]["mark_price"])   - best_ask_prc, 
               'contango':((reading_from_pkl_data("ticker", 
