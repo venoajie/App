@@ -20,6 +20,7 @@ from utilities.system_tools import (
 from strategies.basic_strategy import (
     BasicStrategy,
     are_size_and_order_appropriate,
+    ensure_sign_consistency,
     size_rounding,)
 
 
@@ -41,6 +42,22 @@ def get_transactions_len(result_strategy_label) -> int:
     return 0 if result_strategy_label == [] else len([o for o in result_strategy_label])
 
 
+def determine_opening_size(
+    instrument_name: str,
+    futures_instruments,
+    notional: float, 
+    factor: float
+    ) -> int:
+    """ """
+    
+    proposed_size= notional * factor
+    
+    return size_rounding(
+        instrument_name,
+        futures_instruments,
+        proposed_size)
+
+
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):
     """ """
@@ -51,8 +68,6 @@ class ComboAuto (BasicStrategy):
     def __post_init__(self):
         self.basic_params: str = BasicStrategy (self.strategy_label, 
                                                 self.strategy_parameters)
-  
-
     async def is_send_and_cancel_open_order_allowed(
         self,
         instrument_name: str,
@@ -66,8 +81,13 @@ class ComboAuto (BasicStrategy):
         
         
         params: dict = self.get_basic_params().get_basic_opening_parameters(ask_price)
-        
-        
+    
+    
+        size = determine_opening_size(instrument_name, 
+                                    futures_instruments, 
+                                    params["side"], 
+                                    self.max_position)
+
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
             order_parameters=[] if order_allowed == False else params,

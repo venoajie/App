@@ -2,13 +2,6 @@
 
 # built ins
 import asyncio
-from datetime import datetime
-import os
-import tomli
-
-# installed
-from loguru import logger as log
-
 # user defined formula
 
 from db_management.sqlite_management import (
@@ -17,8 +10,7 @@ from transaction_management.deribit.api_requests import (
     SendApiRequest)
 from utilities.system_tools import (
     async_raise_error_message,
-    provide_path_for_file,
-    reading_from_db_pickle,)
+    provide_path_for_file,)
 from utilities.pickling import replace_data, read_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,)
@@ -32,12 +24,6 @@ async def get_private_data(sub_account_id: str = "deribit-148510") -> list:
     return SendApiRequest (sub_account_id)
     #return api_request
     
-def reading_from_db(end_point, 
-                    instrument: str = None, 
-                    status: str = None) -> float:
-    """ """
-    return reading_from_db_pickle(end_point, instrument, status)
-
 async def get_my_trades_from_exchange(count: int, currency) -> list:
     """ """
     private_data = await get_private_data()
@@ -52,15 +38,6 @@ async def cancel_all () -> None:
 
     await private_data.get_cancel_order_all()
     
-        
-def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
-    """ """
-
-    path: str = provide_path_for_file(end_point, currency, status)
-    data = read_data(path)
-
-    return data
-
 
 def get_instruments_kind(currency: str, settlement_periods, kind: str= "all") -> list:
     """_summary_
@@ -152,7 +129,6 @@ async def get_futures_instruments (active_currencies,
 def currency_inline_with_database_address (currency: str, database_address: str) -> bool:
     return currency.lower()  in str(database_address)
 
-        
    
 async def inserting_additional_params(params: dict) -> None:
     """ """
@@ -161,14 +137,6 @@ async def inserting_additional_params(params: dict) -> None:
         await insert_tables("supporting_items_json", params)
 
 
-def delta_price_pct(last_traded_price: float, market_price: float) -> bool:
-    """ """
-    delta_price = abs(abs(last_traded_price) - market_price)
-    return (
-        0
-        if (last_traded_price == [] or last_traded_price == 0)
-        else delta_price / last_traded_price
-    )
 async def labelling_the_unlabelled_and_resend_it(non_checked_strategies,
                                                  order, 
                                                  instrument_name):
