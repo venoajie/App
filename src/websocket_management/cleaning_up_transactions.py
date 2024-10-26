@@ -722,16 +722,16 @@ async def clean_up_closed_transactions(
 
     log.error(f" clean_up_closed_transactions {instrument_name} START")
     log.error(f" transaction_all {transaction_all} ")
-    log.error(f" transaction_all { not transactions_all} ")
+    log.error(f" transaction_all { not transaction_all} ")
     
     where_filter = f"trade_id"
 
     column_list: str= "instrument_name","label", "amount", where_filter
     
-    if not transactions_all:
+    if transaction_all is None:
         
         #querying tables
-        transactions_all: list = await get_query(
+        transaction_all: list = await get_query(
             trade_table,
             instrument_name, 
             "all",
@@ -741,13 +741,13 @@ async def clean_up_closed_transactions(
 
     else:      
         
-        if transactions_all:
+        if transaction_all:
             
             transactions_all: list = [o for o in transaction_all \
             if instrument_name in o["instrument_name"]]
 
     # filtered transactions with closing labels
-    if transactions_all:
+    if transaction_all:
         
         transaction_with_closed_labels = get_transactions_with_closed_label(transactions_all)
                                
