@@ -726,10 +726,8 @@ async def clean_up_closed_transactions(
 
     column_list: str= "instrument_name","label", "amount", where_filter
     
-    if transactions_all:
-        transactions_all: list = [o for o in transaction_all \
-            if instrument_name in o["instrument_name"]]
-    else:
+    if transactions_all is  None:
+        
         #querying tables
         transactions_all: list = await get_query(
             trade_table,
@@ -737,7 +735,11 @@ async def clean_up_closed_transactions(
             "all",
             "all",
             column_list,
-            )                                       
+            )           
+
+    else:                            
+        transactions_all: list = [o for o in transaction_all \
+            if instrument_name in o["instrument_name"]]
 
     # filtered transactions with closing labels
     if transactions_all:
