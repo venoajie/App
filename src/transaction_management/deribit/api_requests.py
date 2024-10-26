@@ -581,6 +581,7 @@ class ModifyOrderDb(SendApiRequest):
                                     transaction_log, 
                                     first_tick_fr_sqlite, 
                                     )
+                    
                 
     async def if_cancel_is_true(
         self,
@@ -624,7 +625,7 @@ class ModifyOrderDb(SendApiRequest):
                 return []
                 #await asyncio.sleep(10)
     
-    async def update_trades_from_exchange (
+    async def update_trades_from_exchange(
         self,
         currency: str,
         archive_db_table,
@@ -637,7 +638,8 @@ class ModifyOrderDb(SendApiRequest):
         
         if trades_from_exchange:
             
-            trades_from_exchange_without_futures_combo = [ o for o in trades_from_exchange if f"{currency}-FS" not in o["instrument_name"]]
+            trades_from_exchange_without_futures_combo = [ o for o in trades_from_exchange \
+                if f"{currency}-FS" not in o["instrument_name"]]
 
             if trades_from_exchange_without_futures_combo:
                 
@@ -645,8 +647,10 @@ class ModifyOrderDb(SendApiRequest):
                     
                     log.error (f"trades_from_exchange {trade}")
 
-                    await saving_traded_orders (trade, 
-                                                archive_db_table)
+                    await saving_traded_orders (
+                        trade,
+                        archive_db_table
+                        )
 
     
     async def send_triple_orders(

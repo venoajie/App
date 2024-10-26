@@ -708,8 +708,10 @@ async def closing_one_to_many(
                 )
                     
                     
-async def clean_up_closed_transactions(instrument_name, 
-                                       trade_table) -> None:
+async def clean_up_closed_transactions(
+    instrument_name, 
+    trade_table,
+    transaction_all: list = None) -> None:
     """
     closed transactions: buy and sell in the same label id = 0. When flagged:
     1. remove them from db for open transactions/my_trades_all_json
@@ -724,12 +726,18 @@ async def clean_up_closed_transactions(instrument_name,
 
     column_list: str= "instrument_name","label", "amount", where_filter
     
-    #querying tables
-    transactions_all: list = await get_query(trade_table, 
-                                             instrument_name, 
-                                             "all",     
-                                             "all", 
-                                             column_list,)                                       
+    if transactions_all:
+        transactions_all: list = [o for o in transaction_all \
+            if instrument_name in o["instrument_name"]]
+    else:
+        #querying tables
+        transactions_all: list = await get_query(
+            trade_table,
+            instrument_name, 
+            "all",
+            "all",
+            column_list,
+            )                                       
 
     # filtered transactions with closing labels
     if transactions_all:

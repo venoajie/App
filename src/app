@@ -246,9 +246,6 @@ class StreamAccountData(ModifyOrderDb):
 
                     await self.modify_order_and_db.resupply_portfolio (currency)
                     
-                    await clean_up_closed_transactions (instrument, 
-                                                        trade_db_table)     
-                    
                     currency_lower = currency.lower ()
                     archive_db_table= f"my_trades_all_{currency_lower}_json"                    
                     transaction_log_trading= f"transaction_log_{currency_lower}_json"
@@ -287,6 +284,19 @@ class StreamAccountData(ModifyOrderDb):
                             operation="subscribe",
                             ws_channel= ws,
                         ))
+                    
+                    where_filter = f"trade_id"
+                    column_list: str= "instrument_name","label", "amount", where_filter
+                    transactions_all: list = await get_query(trade_db_table, 
+                                             instrument, 
+                                             "all",     
+                                             "all", 
+                                             column_list,)
+                    
+                    await clean_up_closed_transactions (
+                        instrument,
+                        trade_db_table,
+                        transactions_all)     
                        
             
                 while self.websocket_client.open:
