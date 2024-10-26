@@ -11,19 +11,9 @@ from loguru import logger as log
 
 # user defined formula
 
-from configuration.config import main_dotenv
 from db_management.sqlite_management import (
-    insert_tables,
-    deleting_row,
-    querying_arithmetic_operator,
-    executing_query_with_return,)
-from strategies.config_strategies import paramaters_to_balancing_transactions
-from strategies.basic_strategy import (
-    is_label_and_side_consistent)
-from transaction_management.deribit.transaction_log import (saving_transaction_log,)
+    insert_tables)
 from transaction_management.deribit.api_requests import (
-    get_currencies,
-    get_instruments,
     SendApiRequest)
 from utilities.system_tools import (
     async_raise_error_message,
@@ -34,24 +24,6 @@ from utilities.string_modification import (
     remove_double_brackets_in_list,)
 
 
-def parse_dotenv(sub_account) -> dict:
-    return main_dotenv(sub_account)
-
-def get_config(file_name: str) -> list:
-    """ """
-    config_path = provide_path_for_file (file_name)
-    
-    #log.critical(f"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    
-    try:
-        if os.path.exists(config_path):
-            with open(config_path, "rb") as handle:
-                read= tomli.load(handle)
-                return read
-    except:
-        return []
-
-
 async def get_private_data(sub_account_id: str = "deribit-148510") -> list:
     """
     Provide class object to access private get API
@@ -59,74 +31,12 @@ async def get_private_data(sub_account_id: str = "deribit-148510") -> list:
 
     return SendApiRequest (sub_account_id)
     #return api_request
-
-async def telegram_bot_sendtext(bot_message, purpose: str = "general_error") -> None:
-
-    return await telegram_bot_sendtext(bot_message, purpose)
-        
-async def get_transaction_log(currency: str, 
-                              start_timestamp: int, 
-                              count: int= 1000) -> list:
-    """ """
-
-    private_data = await get_private_data()
     
-    return await private_data.get_transaction_log(currency,
-                                                  start_timestamp, 
-                                                  count)
-    
-def compute_notional_value(index_price: float, 
-                           equity: float) -> float:
-    """ """
-    return index_price * equity
-
-
 def reading_from_db(end_point, 
                     instrument: str = None, 
                     status: str = None) -> float:
     """ """
     return reading_from_db_pickle(end_point, instrument, status)
-
-
-async def send_limit_order(params) -> None:
-    """ """
-    private_data = await get_private_data()
-
-    send_limit_result = await private_data.send_limit_order(params)
-    
-    return send_limit_result
-
-
-async def if_order_is_true(non_checked_strategies: list,
-                           order, 
-                           instrument: str = None) -> None:
-    """ """
-    # log.debug (order)
-    if order["order_allowed"]:
-
-        # get parameter orders
-        try:
-            params = order["order_parameters"]
-        except:
-            params = order
-
-        if instrument != None:
-            # update param orders with instrument
-            params.update({"instrument": instrument})
-
-        label_and_side_consistent = is_label_and_side_consistent(non_checked_strategies,
-                                                                 params)
-
-        if  label_and_side_consistent:
-            await inserting_additional_params(params)
-            send_limit_result = await send_limit_order(params)
-            return send_limit_result
-            #await asyncio.sleep(10)
-        else:
-            
-            return []
-            #await asyncio.sleep(10)
-
 
 async def get_my_trades_from_exchange(count: int, currency) -> list:
     """ """
@@ -142,37 +52,6 @@ async def cancel_all () -> None:
 
     await private_data.get_cancel_order_all()
     
-
-async def cancel_by_order_id(open_order_id) -> None:
-    private_data = await get_private_data()
-
-    result = await private_data.get_cancel_order_byOrderId(open_order_id)
-    
-    try:
-        if (result["error"]["message"])=="not_open_order":
-            
-            where_filter = f"order_id"
-            
-            await deleting_row ("orders_all_json",
-                                "databases/trading.sqlite3",
-                                where_filter,
-                                "=",
-                                open_order_id,)
-            
-    except:
-
-        log.critical(f"CANCEL_by_order_id {result} {open_order_id}")
-
-        return result
-
-
-async def if_cancel_is_true(order) -> None:
-    """ """
-    #log.warning (order)
-    if order["cancel_allowed"]:
-
-        # get parameter orders
-        await cancel_by_order_id(order["cancel_id"])
         
 def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
     """ """

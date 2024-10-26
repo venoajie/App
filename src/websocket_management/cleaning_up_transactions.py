@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 """_summary_
-
-Source data:
-    _type_: fresh data, rerun. why? 
-            1. rare event
-            2. reduce overhead for main program
 """
 # built ins
 import asyncio

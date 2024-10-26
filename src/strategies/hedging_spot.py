@@ -20,6 +20,7 @@ from strategies.basic_strategy import (
 from utilities.string_modification import (
     parsing_label)
 
+
 def get_transactions_len(result_strategy_label) -> int:
     """ """
     return 0 if result_strategy_label == [] else len([o for o in result_strategy_label])
@@ -35,29 +36,36 @@ def get_label_integer(label: dict) -> bool:
     return parsing_label(label)["int"]
 
 
-def hedged_value_to_notional(notional: float, 
-                             hedged_value: float) -> float:
+def hedged_value_to_notional(
+    notional: float,
+    hedged_value: float
+    ) -> float:
     """ """
     return abs(hedged_value / notional)
 
 
-def determine_opening_size(instrument_name: str, 
-                           futures_instruments,
-                           side: str, 
-                           max_position: float, 
-                           factor: float) -> int:
+def determine_opening_size(
+    instrument_name: str,
+    futures_instruments,
+    side: str, 
+    max_position: float, 
+    factor: float
+    ) -> int:
     """ """
     sign = ensure_sign_consistency(side)
     
     proposed_size= max(1, int(abs(max_position) * factor)) 
     
-    return size_rounding(instrument_name, 
-                         futures_instruments, 
-                         proposed_size) * sign
+    return size_rounding(
+        instrument_name,
+        futures_instruments,
+        proposed_size) * sign
 
-def get_waiting_time_factor(weighted_factor, 
-                            strong_fluctuation: bool, 
-                            some_fluctuation: bool,) -> float:
+def get_waiting_time_factor(
+    weighted_factor,
+    strong_fluctuation: bool,
+    some_fluctuation: bool,
+    ) -> float:
     """
     Provide factor for size determination.
     """
@@ -70,15 +78,18 @@ def get_waiting_time_factor(weighted_factor,
 
 
 def is_hedged_value_to_notional_exceed_threshold(
-    notional: float, hedged_value: float, threshold: float
-) -> float:
+    notional: float,
+    hedged_value: float,
+    threshold: float
+    ) -> float:
     """ """
     return hedged_value_to_notional(notional, hedged_value) > threshold
 
 
 def max_order_stack_has_not_exceeded(
     len_orders: float, 
-    strong_market: float) -> bool:
+    strong_market: float
+    ) -> bool:
     """ """
     if strong_market:
         max_order = True
@@ -89,7 +100,11 @@ def max_order_stack_has_not_exceeded(
     return max_order
 
 
-def get_timing_factor(strong_bearish: bool, bearish: bool, threshold: float) -> bool:
+def get_timing_factor(
+    strong_bearish: bool,
+    bearish: bool, 
+    threshold: float
+    ) -> bool:
     """
     Determine order outstanding timing for size determination.
     strong bearish : 30% of normal interval
@@ -103,8 +118,6 @@ def get_timing_factor(strong_bearish: bool, bearish: bool, threshold: float) -> 
     bearish_interval_threshold = (
         (threshold * ONE_PCT * 30) if strong_bearish else (threshold * ONE_PCT * 60)
     )
-    
-    #print (f"bearish_interval_threshold {bearish_interval_threshold} {ONE_MINUTE * bearish_interval_threshold if (strong_bearish or bearish) else ONE_MINUTE *  threshold}")
 
     return (
         ONE_MINUTE * bearish_interval_threshold
@@ -239,7 +252,10 @@ class HedgingSpot(BasicStrategy):
         return BasicStrategy(self.strategy_label, 
                              self.strategy_parameters)
 
-    async def understanding_the_market (self, threshold_market_condition) -> None:
+    async def understanding_the_market (
+        self, 
+        threshold_market_condition
+        ) -> None:
         """ """       
 
     async def risk_managament (self) -> None:
