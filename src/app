@@ -917,6 +917,8 @@ class StreamAccountData(ModifyOrderDb):
                             log.debug (f"strategy {strategy}-DONE")
 
                 # check for delivered instrument
+                        log.info (f"active_futures {active_futures}")
+                        log.warning (f"position_without_combo {position_without_combo}")
                 
              
                         leverage_instrument =  [
