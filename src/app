@@ -923,7 +923,7 @@ class StreamAccountData(ModifyOrderDb):
                             {'instrument_name':o['instrument_name'], 
                             'leverage_instrument':abs(o['size']/notional),
                             'pct_premium_per_day':(((reading_from_pkl_data("ticker",
-                                                                            future_instrument)[0]["mark_price"])-best_ask_prc)/
+                                                                            o["instrument_name"])[0]["mark_price"])-best_ask_prc)/
                                 ([i["expiration_timestamp"] for i in active_futures \
                                             if i["instrument_name"] in o["instrument_name"]]) [0] - server_time)/1000/60/60/24
                             } for o in position_without_combo
