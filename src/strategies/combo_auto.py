@@ -129,6 +129,9 @@ class ComboAuto (BasicStrategy):
                                     futures_instruments, 
                                     self.max_position,
                                     1)
+        len_open_orders: int = get_transactions_len(open_orders_label_strategy)
+        log.debug (f"len_open_orders {len_open_orders}")
+
         if len_open_orders == 0:
             order_allowed = True                    
         else:
@@ -138,8 +141,6 @@ class ComboAuto (BasicStrategy):
                 order_allowed = True      
                 
         log.debug (f"size {size}")
-        len_open_orders: int = get_transactions_len(open_orders_label_strategy)
-        log.debug (f"len_open_orders {len_open_orders}")
         log.debug (f"params {params}")
 
         return dict(
