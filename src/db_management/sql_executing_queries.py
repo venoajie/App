@@ -1,24 +1,20 @@
 # # -*- coding: utf-8 -*-
 
-import sqlite3
-from contextlib import contextmanager
+#import sqlite3
+#from contextlib import contextmanager
 import asyncio
 import aiosqlite
-from loguru import logger as log
+#from loguru import logger as log
 import json
 
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
 
 def catch_error(error, idle: int = None) -> list:
     """ """
     from utilities import system_tools
 
     system_tools.catch_error_message(error, idle)
-
-
-async def telegram_bot_sendtext(bot_message, purpose: str = "general_error") -> None:
-    import deribit_get
-
-    return await deribit_get.telegram_bot_sendtext(bot_message, purpose)
 
 
 async def create_dataBase_sqlite(
@@ -33,7 +29,7 @@ async def create_dataBase_sqlite(
 
     try:
         conn = await aiosqlite.connect(db)
-        cur = await conn.cursor()
+        #cur = await conn.cursor()
         await conn.commit()
         await conn.close()
 
@@ -245,9 +241,6 @@ async def create_tables_json_sqlite(table, type: str = None):
             await telegram_bot_sendtext(
                 "sqlite operation-failed_create_table", "failed_order"
             )
-            await telegram_bot_sendtext(
-                f"sqlite operation-create_table", "failed_order"
-            )
 
 
 async def executing_query_with_return(
@@ -290,7 +283,7 @@ async def executing_query_with_return(
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
-    return 0 if (combine_result == [] or combine_result == None) else (combine_result)
+    return 0 if (combine_result == [] or combine_result is None) else (combine_result)
 
 
 async def querying_tables_item_data(table_name: str):

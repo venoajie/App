@@ -1,3 +1,21 @@
+name: Ruff
+on: [ push, pull_request ]
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v1
+        run: |
+          pip install ruff
+          ruff format 
+        with:
+          author_name: ${{ github.actor }}
+          author_email: ${{ github.actor }}@users.noreply.github.com
+          message: "Format code with ruff"
+          add: "."
+          branch: ${{ github.ref }}
+
 name: Format code
 
 on:

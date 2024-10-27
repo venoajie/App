@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from configparser import ConfigParser
-from loguru import logger as log
 from utilities import system_tools
 
 

@@ -124,7 +124,8 @@ def get_tickers(
     )-> list:
     # Set endpoint
     
-    import requests, json
+    import requests
+    import json
     
     return requests.get(f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}").json()["result"] 
     
@@ -210,7 +211,7 @@ class SendApiRequest:
     ):
 
         if valid_until == False:
-            if trigger_price == None:
+            if trigger_price is None:
                 if "market" in type:
                     params = {
                         "instrument_name": instrument,
@@ -278,7 +279,7 @@ class SendApiRequest:
             endpoint: str = "private/buy"
         if side == "sell":
             endpoint: str = "private/sell"
-        if side != None:
+        if side is not None:
             result = await private_connection (self.sub_account_id,
                                                endpoint=endpoint, 
                                                params=params,
@@ -608,7 +609,7 @@ class ModifyOrderDb(SendApiRequest):
             except:
                 params = order
 
-            if instrument != None:
+            if instrument is not None:
                 # update param orders with instrument
                 params.update({"instrument": instrument})
 

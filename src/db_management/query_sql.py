@@ -61,7 +61,7 @@ def querying_strategies_sent(table: str = "strategy_entries") -> list:
         combine_result = []
 
         return (
-            0 if (combine_result == [] or combine_result == None) else (combine_result)
+            0 if (combine_result == [] or combine_result is None) else (combine_result)
         )
 
 

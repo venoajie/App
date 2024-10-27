@@ -187,7 +187,7 @@ async def get_market_condition_hedging(TA_result_data, index_price, threshold) -
             if delta_price_pct > threshold:
                 strong_falling_price = True
 
-    if rising_price == False and falling_price == False:
+    if not rising_price  and not falling_price :
         neutral_price = True
 
     return dict(
@@ -484,7 +484,7 @@ class HedgingSpot(BasicStrategy):
 
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
-            order_parameters=[] if order_allowed == False else params,
+            order_parameters=[] if not order_allowed else params,
             cancel_allowed=cancel_allowed,
             cancel_id= None if not cancel_allowed \
             else get_order_id_max_time_stamp(open_orders_label_strategy)
@@ -573,7 +573,7 @@ class HedgingSpot(BasicStrategy):
         return dict(
             order_allowed= order_allowed,
             order_parameters=(
-                [] if order_allowed == False else exit_params
+                [] if not order_allowed else exit_params
             ),
             cancel_allowed=cancel_allowed,
             cancel_id=None if not cancel_allowed else cancel_id

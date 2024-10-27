@@ -18,6 +18,6 @@ def labelling(order: str, strategy: str, id_strategy: int = None) -> str:
 
     return (
         (f"{strategy}-{order}-{id_unix_time}")
-        if id_strategy == None
+        if id_strategy is None
         else (f"{id_strategy}")
     )
