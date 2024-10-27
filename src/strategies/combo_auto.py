@@ -84,6 +84,7 @@ class ComboAuto (BasicStrategy):
     future_spread_attributes: list 
     future_ticker: dict
     perpetual_ticker: dict
+    server_time: int
     leverage_futures: float = fields 
     leverage_perpetual: float = fields 
     max_position: float = fields 
@@ -124,20 +125,28 @@ class ComboAuto (BasicStrategy):
         
         open_orders_label_strategy: list=  [o for o in self.orders_currency_strategy if "open" in o["label"]]
     
-        threshold = 1000*60
+        threshold = 60
+        
         size = determine_opening_size(instrument_name, 
                                     futures_instruments, 
                                     self.max_position,
                                     1)
         len_open_orders: int = get_transactions_len(open_orders_label_strategy)
         log.debug (f"len_open_orders {len_open_orders}")
+        
+        params.update({"size": abs (size)})
 
         if len_open_orders == 0:
             order_allowed = True                    
         else:
             last_order_time= max([o["timestamp"] for o in self.orders_currency_strategy])
+                            
+            delta_time = self.server_time-last_order_time
             
-            if last_order_time > threshold:
+            delta_time_seconds = delta_time/1000                                                
+            
+            
+            if delta_time_seconds > threshold:
                 order_allowed = True      
                 
         log.debug (f"size {size}")
