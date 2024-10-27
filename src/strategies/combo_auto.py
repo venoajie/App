@@ -89,10 +89,10 @@ class ComboAuto (BasicStrategy):
             
     def __post_init__(self):
         self.leverage_futures: float = get_size_instrument(
-            self.future_instrument,
+            self.future_ticker["instrument_name"],
             self.position_without_combo) 
         self.leverage_perpetual: float =  get_size_instrument(
-            self.future_instrument,
+            self.perpetual_ticker["instrument_name"],
             self.position_without_combo) 
         self.max_position: float = self.notional 
         self.basic_params: str = BasicStrategy (self.strategy_label, 
@@ -115,6 +115,7 @@ class ComboAuto (BasicStrategy):
         bid_price_perpetual = self.perpetual_ticker ["best_bid_price"]
         
         log.debug (f"ask_price_future {ask_price_future} bid_price_future {bid_price_future} bid_price_perpetual {bid_price_perpetual} ask_price_perpetual {ask_price_perpetual}")
+        log.error (f"lev future {self.leverage_futures} lev.perp {self.leverage_perpetual}")
 
         params: dict = self.basic_params.get_basic_opening_parameters(ask_price,
                                                                             bid_price)

@@ -477,9 +477,7 @@ class StreamAccountData(ModifyOrderDb):
                                                 perpetual_ticker= []
                                                                                             
                                             if perpetual_ticker:
-                                                
-                                                log.error (f"perpetual_ticker {perpetual_ticker}")
-                                                    
+                                                                                                    
                                                 await self.running_critical_strategy(
                                                     currencies,
                                                     currency, 
