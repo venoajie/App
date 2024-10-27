@@ -91,7 +91,7 @@ class ComboAuto (BasicStrategy):
         order_allowed, cancel_allowed, cancel_id = False, False, None
         
         
-        params: dict = self.basic_params().get_basic_opening_parameters(ask_price,
+        params: dict = self.basic_params.get_basic_opening_parameters(ask_price,
                                                                             bid_price)
         
         open_orders_label_strategy: list=  [o for o in self.orders_currency_strategy if "open" in o["label"]]
