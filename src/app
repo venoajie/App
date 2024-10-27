@@ -145,7 +145,10 @@ def get_settlement_period (strategy_attributes) -> list:
             [o["settlement_period"]for o in strategy_attributes]))
             )
 
-def get_index (data_orders: dict, ticker: dict) -> float:
+def get_index (
+    data_orders: dict, 
+    ticker: dict
+    ) -> float:
 
     try:
         index_price= data_orders["index_price"]
