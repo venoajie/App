@@ -66,11 +66,15 @@ def determine_opening_size(
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):
     """ """
-    currency: str
     my_trades_currency_strategy: list
+    orders_currency_strategy: list
+    notional: float
+    future_spread_attributes: list 
+    max_position: float = fields 
     basic_params: object = fields 
             
     def __post_init__(self):
+        self.max_position: float = self.notional 
         self.basic_params: str = BasicStrategy (self.strategy_label, 
                                                 self.strategy_parameters)
         
@@ -79,17 +83,18 @@ class ComboAuto (BasicStrategy):
         self,
         instrument_name: str,
         futures_instruments,
-        orders_currency_strategy: list,
-        ask_price: float,
+        ask_price,
+        bid_price
     ) -> dict:
         """ """
         
         order_allowed, cancel_allowed, cancel_id = False, False, None
         
         
-        params: dict = self.get_basic_params().get_basic_opening_parameters(ask_price)
+        params: dict = self.get_basic_params().get_basic_opening_parameters(ask_price,
+                                                                            bid_price)
         
-        open_orders_label_strategy: list=  [o for o in orders_currency_strategy if "open" in o["label"]]
+        open_orders_label_strategy: list=  [o for o in self.orders_currency_strategy if "open" in o["label"]]
     
         size = determine_opening_size(instrument_name, 
                                     futures_instruments, 
@@ -98,7 +103,7 @@ class ComboAuto (BasicStrategy):
         
         log.debug (f"size {size}")
         len_open_orders: int = get_transactions_len(open_orders_label_strategy)
-        log.debug (f"len_open_orders {len_open_orders}")
+        log.debug (f"len_open_orders {size}")
 
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
