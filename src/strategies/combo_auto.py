@@ -8,19 +8,12 @@ from dataclassy import dataclass, fields
 from loguru import logger as log
 
 # user defined formula
-from transaction_management.deribit.api_requests import (
-    get_tickers)
-from db_management.sqlite_management import (
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-    deleting_row,)
 from utilities.pickling import (
     read_data,)
 from utilities.system_tools import (
     provide_path_for_file,)
 from strategies.basic_strategy import (
     BasicStrategy,
-    are_size_and_order_appropriate,
-    ensure_sign_consistency,
     size_rounding,)
 
 
@@ -45,6 +38,11 @@ def get_transactions_len(result_strategy_label) -> int:
 def get_transactions_len(result_strategy_label) -> int:
     """ """
     return 0 if result_strategy_label == [] else len([o for o in result_strategy_label])
+
+
+def get_delta(my_trades_currency_strategy) -> int:
+    """ """
+    return sum([o["amount"] for o in my_trades_currency_strategy])
 
 
 def get_size_instrument(
@@ -88,6 +86,7 @@ class ComboAuto (BasicStrategy):
     leverage_futures: float = fields 
     leverage_perpetual: float = fields 
     max_position: float = fields 
+    delta: float = fields 
     basic_params: object = fields 
             
     def __post_init__(self):
@@ -97,6 +96,7 @@ class ComboAuto (BasicStrategy):
         self.leverage_perpetual: float =  get_size_instrument(
             self.perpetual_ticker["instrument_name"],
             self.position_without_combo) / self.notional
+        self.delta: float = get_delta (self.my_trades_currency_strategy)
         self.max_position: float = self.notional 
         self.basic_params: str = BasicStrategy (self.strategy_label, 
                                                 self.strategy_parameters)
@@ -135,20 +135,28 @@ class ComboAuto (BasicStrategy):
         log.debug (f"len_open_orders {len_open_orders}")
         
         params.update({"size": abs (size)})
+        
 
-        if len_open_orders == 0:
-            order_allowed = True                    
-        else:
-            last_order_time= max([o["timestamp"] for o in self.orders_currency_strategy])
-                            
-            delta_time = self.server_time-last_order_time
+        # balancing
+        if self.delta < 0:
+            pass
+
+        # inititiating
+        if self.delta <= 0:
             
-            delta_time_seconds = delta_time/1000                                                
-            
-            
-            if delta_time_seconds > threshold:
-                order_allowed = True      
+            if len_open_orders == 0:
+                order_allowed = True                    
+            else:
+                last_order_time= max([o["timestamp"] for o in self.orders_currency_strategy])
+                                
+                delta_time = self.server_time-last_order_time
                 
+                delta_time_seconds = delta_time/1000                                                
+                
+                
+                if delta_time_seconds > threshold:
+                    order_allowed = True      
+                    
         log.debug (f"size {size}")
         log.debug (f"params {params}")
 
