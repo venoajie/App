@@ -99,7 +99,8 @@ class ComboAuto (BasicStrategy):
         size = determine_opening_size(instrument_name, 
                                     futures_instruments, 
                                     params["side"], 
-                                    self.max_position)
+                                    self.max_position,
+                                    10)
         
         log.debug (f"size {size}")
         len_open_orders: int = get_transactions_len(open_orders_label_strategy)
