@@ -84,6 +84,8 @@ class ComboAuto (BasicStrategy):
     future_spread_attributes: list 
     future_ticker: dict
     perpetual_ticker: dict
+    leverage_futures: float = fields 
+    leverage_perpetual: float = fields 
     max_position: float = fields 
     basic_params: object = fields 
             
