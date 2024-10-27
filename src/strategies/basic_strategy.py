@@ -145,14 +145,16 @@ def are_size_and_order_appropriate(
     return ordering_is_ok
 
 
-def check_if_next_closing_size_will_not_exceed_the_original (basic_size: int,
-                                                             net_size: int,
-                                                             next_size: int) -> bool:
+def check_if_next_closing_size_will_not_exceed_the_original (
+    basic_size: int,
+    net_size: int,
+    next_size: int
+    ) -> bool:
     """ """
     
     basic_size_higher_than_next_closing_size = abs (basic_size) >= abs (next_size) 
     basic_size_higher_than_net_size = abs (basic_size) >= abs (net_size) 
-    basic_size_plus_next_size =  (next_size) + (basic_size)
+    basic_size_plus_next_size =  (next_size) +                                                                      (basic_size)
     
     log.warning (f"basic_size {basic_size} net_size {net_size} basic_size_plus_next_size {basic_size_plus_next_size}")
     #log.debug (f"basic_size_higher_than_next_closing_size {basic_size_higher_than_next_closing_size} basic_size_higher_than_net_size {basic_size_higher_than_net_size} ")
