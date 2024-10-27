@@ -70,6 +70,7 @@ class ComboAuto (BasicStrategy):
     orders_currency_strategy: list
     notional: float
     future_spread_attributes: list 
+    future_ticker: list
     max_position: float = fields 
     basic_params: object = fields 
             
@@ -89,8 +90,11 @@ class ComboAuto (BasicStrategy):
         """ """
         
         order_allowed, cancel_allowed, cancel_id = False, False, None
+        ask_price_future = self.future_ticker ["best_ask_price"]
+        bid_price_future = self.future_ticker ["bid_ask_price"]
         
-        
+        log.debug (f"ask_price_future {ask_price_future} bid_price_future {bid_price_future}")
+
         params: dict = self.basic_params.get_basic_opening_parameters(ask_price,
                                                                             bid_price)
         
@@ -99,11 +103,12 @@ class ComboAuto (BasicStrategy):
         size = determine_opening_size(instrument_name, 
                                     futures_instruments, 
                                     self.max_position,
-                                    10)
+                                    1)
         
         log.debug (f"size {size}")
         len_open_orders: int = get_transactions_len(open_orders_label_strategy)
-        log.debug (f"len_open_orders {size}")
+        log.debug (f"len_open_orders {len_open_orders}")
+        log.debug (f"params {params}")
 
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
