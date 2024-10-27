@@ -6,7 +6,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v1
-        run: |
-          pip install ruff
-          ruff format 
+        with:
+          args: "format --check"
           
