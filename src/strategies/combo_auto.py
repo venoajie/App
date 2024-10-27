@@ -91,7 +91,7 @@ class ComboAuto (BasicStrategy):
         
         order_allowed, cancel_allowed, cancel_id = False, False, None
         ask_price_future = self.future_ticker ["best_ask_price"]
-        bid_price_future = self.future_ticker ["bid_ask_price"]
+        bid_price_future = self.future_ticker ["best_bid_price"]
         
         log.debug (f"ask_price_future {ask_price_future} bid_price_future {bid_price_future}")
 
