@@ -47,6 +47,16 @@ def get_transactions_len(result_strategy_label) -> int:
     return 0 if result_strategy_label == [] else len([o for o in result_strategy_label])
 
 
+def get_size_instrument(
+    future_instrument: str,
+    position_without_combo: list) -> int:
+    """ """
+    size_instrument = ([abs(o["size"]) for o in position_without_combo \
+                                        if future_instrument in o["instrument_name"]])
+
+    return  0 if size_instrument == [] else size_instrument [0]
+
+
 def determine_opening_size(
     instrument_name: str,
     futures_instruments,
@@ -66,15 +76,24 @@ def determine_opening_size(
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):
     """ """
+    future_instrument: list
+    position_without_combo: list
     my_trades_currency_strategy: list
     orders_currency_strategy: list
     notional: float
     future_spread_attributes: list 
-    future_ticker: list
+    future_ticker: dict
+    perpetual_ticker: dict
     max_position: float = fields 
     basic_params: object = fields 
             
     def __post_init__(self):
+        self.leverage_futures: float = get_size_instrument(
+            self.future_instrument,
+            self.position_without_combo) 
+        self.leverage_perpetual: float =  get_size_instrument(
+            self.future_instrument,
+            self.position_without_combo) 
         self.max_position: float = self.notional 
         self.basic_params: str = BasicStrategy (self.strategy_label, 
                                                 self.strategy_parameters)
@@ -92,8 +111,10 @@ class ComboAuto (BasicStrategy):
         order_allowed, cancel_allowed, cancel_id = False, False, None
         ask_price_future = self.future_ticker ["best_ask_price"]
         bid_price_future = self.future_ticker ["best_bid_price"]
+        ask_price_perpetual = self.perpetual_ticker ["best_ask_price"]
+        bid_price_perpetual = self.perpetual_ticker ["best_bid_price"]
         
-        log.debug (f"ask_price_future {ask_price_future} bid_price_future {bid_price_future}")
+        log.debug (f"ask_price_future {ask_price_future} bid_price_future {bid_price_future} bid_price_perpetual {bid_price_perpetual} ask_price_perpetual {ask_price_perpetual}")
 
         params: dict = self.basic_params.get_basic_opening_parameters(ask_price,
                                                                             bid_price)
