@@ -92,10 +92,10 @@ class ComboAuto (BasicStrategy):
     def __post_init__(self):
         self.leverage_futures: float = get_size_instrument(
             self.future_ticker["instrument_name"],
-            self.position_without_combo) 
+            self.position_without_combo) / self.notional
         self.leverage_perpetual: float =  get_size_instrument(
             self.perpetual_ticker["instrument_name"],
-            self.position_without_combo) 
+            self.position_without_combo) / self.notional
         self.max_position: float = self.notional 
         self.basic_params: str = BasicStrategy (self.strategy_label, 
                                                 self.strategy_parameters)
