@@ -98,7 +98,6 @@ class ComboAuto (BasicStrategy):
     
         size = determine_opening_size(instrument_name, 
                                     futures_instruments, 
-                                    params["side"], 
                                     self.max_position,
                                     10)
         
