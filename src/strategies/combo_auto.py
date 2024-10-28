@@ -145,9 +145,10 @@ class ComboAuto (BasicStrategy):
         strategy_label = self.strategy_label
         future_instrument_name = self.future_ticker["instrument_name"]
         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
+        combo_instruments_name = self.combo_instruments_name
         
         my_trades_currency_strategy = self.my_trades_currency_strategy
-        log.warning (f"perpetual_instrument_name {perpetual_instrument_name} future_instrument_name {future_instrument_name}")
+        log.warning (f"perpetual_instrument_name {perpetual_instrument_name} future_instrument_name {future_instrument_name} combo_instruments_name {combo_instruments_name}")
         
         
         orders_currency_strategy_future = [o for o in self.orders_currency_strategy if future_instrument_name in o["instrument_name"] ]
@@ -199,7 +200,7 @@ class ComboAuto (BasicStrategy):
                         if delta_price > 0:
                             params.update({"size": abs (traded_future_size)})
                             params.update({"entry_price": delta_price})
-                            params.update({"instrument_name": self.combo_instruments_name})
+                            params.update({"instrument_name": (f"{traded_future["instrument_name"][:3]}-FS-{traded_future["instrument_name"][4:]}_PERP")})
                             params.update({"label": f"{strategy_label}-closed-{label_integer}"})
 
                         log.warning (f"traded_future {traded_future}")
