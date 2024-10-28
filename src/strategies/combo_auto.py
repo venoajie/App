@@ -146,17 +146,17 @@ class ComboAuto (BasicStrategy):
         orders_currency_strategy_perpetual =  [o for o in self.orders_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
         log.error (f"orders_currency_strategy_perpetual {orders_currency_strategy_perpetual}")
         
-        my_trades_currency_strategy_future = [o for o in self.my_trades_currency_strategy if future_instrument_name in o["instrument_name"] ]
+        my_trades_currency_strategy_future = [o for o in my_trades_currency_strategy if future_instrument_name in o["instrument_name"] ]
         log.error (f"my_trades_currency_strategy_future {my_trades_currency_strategy_future}")
-        my_trades_currency_strategy_perpetual =  [o for o in self.my_trades_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
+        my_trades_currency_strategy_perpetual =  [o for o in my_trades_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
         log.info (f"my_trades_currency_strategy_perpetual {my_trades_currency_strategy_perpetual}")
         
         if my_trades_currency_strategy:
             my_trades_currency_strategy_labels = [o["label"] for o in my_trades_currency_strategy  ]
-            
-            for trade in my_trades_currency_strategy_labels:
+            log.info (f"my_trades_currency_strategy_labels {my_trades_currency_strategy_labels}")
+            for label in my_trades_currency_strategy_labels:
                 
-                label = trade ["label"]
+                log.info (f"label {label}")
                 
                 label_integer = get_label_integer(label)
                 
