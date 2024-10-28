@@ -4,15 +4,16 @@
 # built ins
 from datetime import datetime, timedelta
 import asyncio
-import json
 import functools
 import os
-import tomli
+
 # installed
-import websockets
-import orjson
-from loguru import logger as log
 from dataclassy import dataclass, fields
+from loguru import logger as log
+import json
+import orjson
+import tomli
+import websockets
 
 # user defined formula
 from configuration import id_numbering, config
@@ -28,7 +29,7 @@ from transaction_management.deribit.telegram_bot import (
 from strategies.basic_strategy import (
     is_label_and_side_consistent,)
 from strategies.combo_auto import ComboAuto
-from strategies.futures_spread import (
+from strategies.futures_spread import(
     delete_respective_closed_futures_from_trade_db, 
     FutureSpreads)
 from strategies.hedging_spot import HedgingSpot  
