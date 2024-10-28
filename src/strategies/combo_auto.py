@@ -136,8 +136,7 @@ class ComboAuto (BasicStrategy):
     max_position: float = fields 
     delta: float = fields 
     basic_params: object = fields 
-    my_trades_currency_strategy_labels: list 
-    
+    my_trades_currency_strategy_labels: list = fields 
     
             
     def __post_init__(self):
