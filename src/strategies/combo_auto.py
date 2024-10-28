@@ -197,6 +197,21 @@ class ComboAuto (BasicStrategy):
                         traded_future_size = abs(traded_future["amount"])
                         delta_price = traded_future_price - traded_perpetual_price
                         
+                        min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]    
+                        
+                        delta_time_expiration = min_expiration_timestamp - self.server_time 
+                        
+                        params.update({"size": abs (traded_perpetual_size)})
+                        
+                        params.update({"label": f"{strategy_label}-closed-{label_integer}"})
+                        
+                        if delta_time_expiration < 0:
+                            perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
+                            perpetual_ask_price = self.perpetual_ticker["best_ask_price"]
+            
+                            params.update({"entry_price": perpetual_ask_price})
+                            params.update({"instrument_name": perpetual_instrument_name})
+
                         if delta_price > 0:
                             combo_instruments_name = (f"{traded_future["instrument_name"][:3
                                                       ]}-FS-{traded_future["instrument_name"][4:]}_PERP")
@@ -212,10 +227,9 @@ class ComboAuto (BasicStrategy):
                             if  combo_ticker:
                                 bid_price_combo = combo_ticker["best_bid_price"]
                                 if bid_price_combo < delta_price:
-                                    params.update({"size": abs (traded_perpetual_size)})
+                                    
                                     params.update({"entry_price": combo_ticker["best_bid_price"]})
                                     params.update({"instrument_name": (f"{traded_future["instrument_name"][:3]}-FS-{traded_future["instrument_name"][4:]}_PERP")})
-                                    params.update({"label": f"{strategy_label}-closed-{label_integer}"})
 
                         log.warning (f"traded_future {traded_future}")
                         log.info (f"traded_perpetual {traded_perpetual}")
