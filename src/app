@@ -51,13 +51,6 @@ from utilities.string_modification import (
     extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,)
-from websocket_management.ws_management import (
-    cancel_all,
-    currency_inline_with_database_address,
-    distribute_ticker_result_as_per_data_type,
-    get_futures_instruments,
-    labelling_the_unlabelled_and_resend_it,
-    )
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
