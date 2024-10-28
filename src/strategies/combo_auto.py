@@ -147,6 +147,7 @@ class ComboAuto (BasicStrategy):
         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
         
         my_trades_currency_strategy = self.my_trades_currency_strategy
+        log.warning (f"perpetual_instrument_name {perpetual_instrument_name} future_instrument_name {perpetual_instrument_name}")
         
         
         orders_currency_strategy_future = [o for o in self.orders_currency_strategy if future_instrument_name in o["instrument_name"] ]
@@ -168,7 +169,7 @@ class ComboAuto (BasicStrategy):
                 label_integer = get_label_integer(label)
                 
                 log.warning (f"label_integer {label_integer}")
-                log.error (f"my_trades_currency_strategy {my_trades_currency_strategy}")
+                #log.error (f"my_trades_currency_strategy {my_trades_currency_strategy}")
      
                 transactions_under_label_int_all = transactions_under_label_int(label_integer, 
                                                                         my_trades_currency_strategy)
@@ -182,6 +183,7 @@ class ComboAuto (BasicStrategy):
                     
                     if transactions_under_label_int_len == 2:
                             
+                        log.warning (f"transactions_under_label_int_detail {transactions_under_label_int_detail}")
                         traded_future = [o for o in transactions_under_label_int_detail if future_instrument_name in o["instrument_name"]][0]
                         traded_perpetual = [o for o in transactions_under_label_int_detail if perpetual_instrument_name in o["instrument_name"]][0]
                         log.warning (f"traded_future {traded_future}")
