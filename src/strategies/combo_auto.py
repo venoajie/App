@@ -93,9 +93,9 @@ def transactions_under_label_int(
     
     transactions = [o for o in transactions_all if str(label_integer) in o["label"]]
     
-    return dict(transactions_under_label_int= transactions,
-                len_closed_transaction= len([ o["amount"] for o in transactions]),
-                summing_closed_transaction= sum([ o["amount"] for o in transactions]))
+    return dict(transactions = transactions,
+                len_closed_transaction = len([ o["amount"] for o in transactions]),
+                summing_closed_transaction = sum([ o["amount"] for o in transactions]))
     
             
 @dataclass(unsafe_hash=True, slots=True)
@@ -176,14 +176,14 @@ class ComboAuto (BasicStrategy):
 
                 transactions_under_label_int_sum = transactions_under_label_int_all["summing_closed_transaction"]
                 transactions_under_label_int_len = transactions_under_label_int_all["len_closed_transaction"]
-                transactions_under_label_int = transactions_under_label_int_all["transactions_under_label_int"]
+                transactions_under_label_int_detail = transactions_under_label_int_all["transactions"]
                 
                 if transactions_under_label_int_sum == 0:
                     
                     if transactions_under_label_int_len == 2:
                             
-                        traded_future = [o for o in transactions_under_label_int if future_instrument_name in o["instrument_name"]][0]
-                        traded_perpetual = [o for o in transactions_under_label_int if perpetual_instrument_name in o["instrument_name"]][0]
+                        traded_future = [o for o in transactions_under_label_int_detail if future_instrument_name in o["instrument_name"]][0]
+                        traded_perpetual = [o for o in transactions_under_label_int_detail if perpetual_instrument_name in o["instrument_name"]][0]
                         log.warning (f"traded_future {traded_future}")
                         log.info (f"traded_perpetual {traded_perpetual}")
 
