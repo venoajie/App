@@ -85,39 +85,18 @@ def get_label_main(
                     == parsing_label(o["label"])["main"]
                 ]
     
-def transactions_under_label_int(label_integer: int, transactions_all: list) -> str:
+def transactions_under_label_int(
+    label_integer: int,
+    transactions_all: list
+    ) -> str:
     """ """
     
-    transactions = [o for o in transactions_all if label_integer in o["label"]]
+    transactions = [o for o in transactions_all if str(label_integer) in o["label"]]
     
     return dict(transactions_under_label_int= transactions,
                 len_closed_transaction= len([ o["amount"] for o in transactions]),
                 summing_closed_transaction= sum([ o["amount"] for o in transactions]))
-
     
-def get_my_trades_currency_strategy_labels(label_integer: int, transactions_all: list) -> str:
-    """ """
-
-    future_instrument_name = self.future_ticker["instrument_name"]
-    perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
-    
-    my_trades_currency_strategy = self.my_trades_currency_strategy
-    
-    
-    orders_currency_strategy_future = [o for o in self.orders_currency_strategy if future_instrument_name in o["instrument_name"] ]
-    log.warning (f"orders_currency_strategy_future {orders_currency_strategy_future}")
-    orders_currency_strategy_perpetual =  [o for o in self.orders_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
-    log.error (f"orders_currency_strategy_perpetual {orders_currency_strategy_perpetual}")
-    
-    my_trades_currency_strategy_future = [o for o in my_trades_currency_strategy if future_instrument_name in o["instrument_name"] ]
-    log.error (f"my_trades_currency_strategy_future {my_trades_currency_strategy_future}")
-    my_trades_currency_strategy_perpetual =  [o for o in my_trades_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
-    log.info (f"my_trades_currency_strategy_perpetual {my_trades_currency_strategy_perpetual}")
-    
-    if my_trades_currency_strategy:
-        my_trades_currency_strategy_labels = [o["label"] for o in my_trades_currency_strategy  ]
-        log.info (f"my_trades_currency_strategy_labels {my_trades_currency_strategy_labels}")
-        
             
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):
@@ -189,13 +168,10 @@ class ComboAuto (BasicStrategy):
                 label_integer = get_label_integer(label)
                 
                 log.warning (f"label_integer {label_integer}")
-                transactions_under_label_main = get_label_main(my_trades_currency_strategy,  
-                                                                label)
-                
-                log.debug (f"transactions_under_label_main {transactions_under_label_main}")
+                log.error (f"my_trades_currency_strategy {my_trades_currency_strategy}")
      
                 transactions_under_label_int_all = transactions_under_label_int(label_integer, 
-                                                                        transactions_under_label_main)
+                                                                        my_trades_currency_strategy)
                 log.debug (f"closed_transactions_all {transactions_under_label_int_all}")
 
                 transactions_under_label_int_sum = transactions_under_label_int_all["summing_closed_transaction"]

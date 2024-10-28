@@ -431,10 +431,13 @@ def get_transactions_with_closed_label(transactions_all: list) -> list:
     return [] if(transactions_all is None or transactions_all == []) \
         else [o for o in transactions_all if "closed" in o["label"]]
 
-def transactions_under_label_int(label_integer: int, transactions_all: list) -> str:
+def transactions_under_label_int(
+    label_integer: int, 
+    transactions_all: list
+    ) -> str:
     """ """
     
-    transactions = [o for o in transactions_all if label_integer in o["label"]]
+    transactions = [o for o in transactions_all if str(label_integer) in o["label"]]
     
     return dict(closed_transactions= transactions,
                 summing_closed_transaction= sum([ o["amount"] for o in transactions]))
