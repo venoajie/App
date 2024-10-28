@@ -197,15 +197,17 @@ class ComboAuto (BasicStrategy):
                         traded_future_size = abs(traded_future["amount"])
                         delta_price = traded_future_price - traded_perpetual_price
                         
-                        if delta_price > 0 and bid_price_future < delta_price:
+                        if delta_price > 0:
                             combo_instruments_name = (f"{traded_future["instrument_name"][:3
                                                       ]}-FS-{traded_future["instrument_name"][4:]}_PERP")
                             
                             combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)[0]
-                            params.update({"size": abs (bid_price_future)})
-                            params.update({"entry_price": combo_ticker["best_bid_price"]})
-                            params.update({"instrument_name": (f"{traded_future["instrument_name"][:3]}-FS-{traded_future["instrument_name"][4:]}_PERP")})
-                            params.update({"label": f"{strategy_label}-closed-{label_integer}"})
+                            bid_price_combo = combo_ticker["best_bid_price"]
+                            if   bid_price_combo < delta_price:
+                                params.update({"size": abs (traded_perpetual_size)})
+                                params.update({"entry_price": combo_ticker["best_bid_price"]})
+                                params.update({"instrument_name": (f"{traded_future["instrument_name"][:3]}-FS-{traded_future["instrument_name"][4:]}_PERP")})
+                                params.update({"label": f"{strategy_label}-closed-{label_integer}"})
 
                         log.warning (f"traded_future {traded_future}")
                         log.info (f"traded_perpetual {traded_perpetual}")
