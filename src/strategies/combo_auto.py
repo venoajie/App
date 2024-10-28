@@ -197,15 +197,20 @@ class ComboAuto (BasicStrategy):
                         traded_future_size = abs(traded_future["amount"])
                         delta_price = traded_future_price - traded_perpetual_price
                         
-                        min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]    
+                        try:
+                            min_expiration_timestamp = self.future_ticker["min_expiration_timestamp"]    
+                        except:
+                            min_expiration_timestamp = -1  
+                        log.warning (f"min_expiration_timestamp {min_expiration_timestamp}")
                         
                         delta_time_expiration = min_expiration_timestamp - self.server_time 
+                        log.warning (f"delta_time_expiration {delta_time_expiration}")
                         
                         params.update({"size": abs (traded_perpetual_size)})
                         
                         params.update({"label": f"{strategy_label}-closed-{label_integer}"})
                         
-                        if delta_time_expiration < 0:
+                        if not min_expiration_timestamp or delta_time_expiration < 0:
                             perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
                             perpetual_ask_price = self.perpetual_ticker["best_ask_price"]
             
