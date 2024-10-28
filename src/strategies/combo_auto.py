@@ -184,8 +184,8 @@ class ComboAuto (BasicStrategy):
                     if transactions_under_label_int_len == 2:
                             
                         log.warning (f"transactions_under_label_int_detail {transactions_under_label_int_detail}")
-                        traded_future = [o for o in transactions_under_label_int_detail if future_instrument_name in o["instrument_name"]][0]
-                        traded_perpetual = [o for o in transactions_under_label_int_detail if "PERPETUAL" not in o["instrument_name"]][0]
+                        traded_future = [o for o in transactions_under_label_int_detail if "PERPETUAL" not  in o["instrument_name"]][0]
+                        traded_perpetual = [o for o in transactions_under_label_int_detail if perpetual_instrument_name in o["instrument_name"]][0]
                         log.warning (f"traded_future {traded_future}")
                         log.info (f"traded_perpetual {traded_perpetual}")
 
