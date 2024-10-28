@@ -138,37 +138,50 @@ class ComboAuto (BasicStrategy):
         future_instrument_name = self.future_ticker["instrument_name"]
         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
         
-        orders_currency_strategy_future = [o for o in self.orders_currency_strategy if future_instrument_name in o["instrument_name"] ]
-        orders_currency_strategy_perpetual =  [o for o in self.orders_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
-        
-        my_trades_currency_strategy_future = [o for o in self.my_trades_currency_strategy if future_instrument_name in o["instrument_name"] ]
-        my_trades_currency_strategy_perpetual =  [o for o in self.my_trades_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
-        
-        transactions_under_label_main_perpetual = get_label_main(my_trades_currency_strategy_perpetual,  
-                                                               label)
-        
-        transactions_under_label_main_future = get_label_main(my_trades_currency_strategy_future,  
-                                                               label)
-        
-
         label_integer = get_label_integer(label)
         
-        closed_transactions_all_future= transactions_under_label_int(label_integer, 
-                                                                transactions_under_label_main_future)
-
-        closed_transactions_all_perpetual= transactions_under_label_int(label_integer, 
-                                                                transactions_under_label_main_perpetual)
-
-        size_to_close = closed_transactions_all_future["summing_closed_transaction"]
         
-        transaction_closed_under_the_same_label_int = closed_transactions_all_future["closed_transactions"]
+        orders_currency_strategy_future = [o for o in self.orders_currency_strategy if future_instrument_name in o["instrument_name"] ]
+        log.warning (f"orders_currency_strategy_future {orders_currency_strategy_future}")
+        orders_currency_strategy_perpetual =  [o for o in self.orders_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
+        log.error (f"orders_currency_strategy_perpetual {orders_currency_strategy_perpetual}")
+        
+        my_trades_currency_strategy_future = [o for o in self.my_trades_currency_strategy if future_instrument_name in o["instrument_name"] ]
+        log.error (f"my_trades_currency_strategy_future {my_trades_currency_strategy_future}")
+        my_trades_currency_strategy_perpetual =  [o for o in self.my_trades_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
+        log.info (f"my_trades_currency_strategy_perpetual {my_trades_currency_strategy_perpetual}")
+        
+        if my_trades_currency_strategy_future:
+        
+            transactions_under_label_main_future = get_label_main(my_trades_currency_strategy_future,  
+                                                                label)
+            log.debug (f"transactions_under_label_main_future {transactions_under_label_main_future}")
+        
+            closed_transactions_all_future= transactions_under_label_int(label_integer, 
+                                                                    transactions_under_label_main_future)
+            log.debug (f"closed_transactions_all_future {closed_transactions_all_future}")
 
-        size_to_close = closed_transactions_all_perpetual["summing_closed_transaction"]
+            size_to_close = closed_transactions_all_future["summing_closed_transaction"]
+            transaction_closed_under_the_same_label_int = closed_transactions_all_future["closed_transactions"]
+
+            log.error (f"closed_transactions_all_future {closed_transactions_all_future}")
         
-        transaction_closed_under_the_same_label_int = closed_transactions_all_perpetual["closed_transactions"]
+        if my_trades_currency_strategy_perpetual:
+            
+            transactions_under_label_main_perpetual = get_label_main(my_trades_currency_strategy_perpetual,  
+                                                                label)
+            log.error (f"transactions_under_label_main_perpetual {transactions_under_label_main_perpetual}")
+            closed_transactions_all_perpetual= transactions_under_label_int(label_integer, 
+                                                                    transactions_under_label_main_perpetual)
+            log.debug (f"closed_transactions_all_perpetual {closed_transactions_all_perpetual}")
+
         
-        log.error (f"closed_transactions_all_future {closed_transactions_all_future}")
-        log.error (f"closed_transactions_all_perpetual {closed_transactions_all_perpetual}")
+            
+            size_to_close = closed_transactions_all_perpetual["summing_closed_transaction"]
+            
+            transaction_closed_under_the_same_label_int = closed_transactions_all_perpetual["closed_transactions"]
+        
+            log.error (f"closed_transactions_all_perpetual {closed_transactions_all_perpetual}")
 
         
         order_allowed, cancel_allowed, cancel_id = False, False, None
