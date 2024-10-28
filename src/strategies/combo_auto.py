@@ -188,10 +188,11 @@ class ComboAuto (BasicStrategy):
                 
                 label_integer = get_label_integer(label)
                 
+                log.warning (f"label_integer {label_integer}")
                 transactions_under_label_main = get_label_main(my_trades_currency_strategy,  
                                                                 label)
                 
-                #log.debug (f"transactions_under_label_main {transactions_under_label_main}")
+                log.debug (f"transactions_under_label_main {transactions_under_label_main}")
      
                 transactions_under_label_int_all = transactions_under_label_int(label_integer, 
                                                                         transactions_under_label_main)
