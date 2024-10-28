@@ -201,13 +201,20 @@ class ComboAuto (BasicStrategy):
                             combo_instruments_name = (f"{traded_future["instrument_name"][:3
                                                       ]}-FS-{traded_future["instrument_name"][4:]}_PERP")
                             
-                            combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)[0]
-                            bid_price_combo = combo_ticker["best_bid_price"]
-                            if   bid_price_combo < delta_price:
-                                params.update({"size": abs (traded_perpetual_size)})
-                                params.update({"entry_price": combo_ticker["best_bid_price"]})
-                                params.update({"instrument_name": (f"{traded_future["instrument_name"][:3]}-FS-{traded_future["instrument_name"][4:]}_PERP")})
-                                params.update({"label": f"{strategy_label}-closed-{label_integer}"})
+                            log.warning (f"combo_instruments_name {combo_instruments_name}")
+                            
+                            
+                            combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)
+                            combo_ticker= [] if combo_ticker == [] else combo_ticker []
+                            log.warning (f"combo_ticker {combo_ticker}")
+                            
+                            if  combo_ticker:
+                                bid_price_combo = combo_ticker["best_bid_price"]
+                                if bid_price_combo < delta_price:
+                                    params.update({"size": abs (traded_perpetual_size)})
+                                    params.update({"entry_price": combo_ticker["best_bid_price"]})
+                                    params.update({"instrument_name": (f"{traded_future["instrument_name"][:3]}-FS-{traded_future["instrument_name"][4:]}_PERP")})
+                                    params.update({"label": f"{strategy_label}-closed-{label_integer}"})
 
                         log.warning (f"traded_future {traded_future}")
                         log.info (f"traded_perpetual {traded_perpetual}")
