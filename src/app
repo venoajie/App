@@ -1000,7 +1000,7 @@ class StreamAccountData(ModifyOrderDb):
                                         combo_auto = ComboAuto(
                                             strategy,
                                             strategy_params,
-                                            future_instrument,
+                                            combo_instruments_name,
                                             position_without_combo,
                                             my_trades_currency_strategy,
                                             orders_currency_strategy,

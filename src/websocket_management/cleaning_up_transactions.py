@@ -448,7 +448,7 @@ def get_closed_open_transactions_under_same_label_int(
     """ """
     label_integer = get_label_integer(label)
 
-    return [o for o in transactions_all if label_integer in o["label"]]
+    return [o for o in transactions_all if str(label_integer) in o["label"]]
 
 
 async def distribute_closed_transactions(

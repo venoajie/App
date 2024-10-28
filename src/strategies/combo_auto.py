@@ -101,7 +101,7 @@ def transactions_under_label_int(
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):
     """ """
-    future_instrument: list
+    combo_instruments_name: list
     position_without_combo: list
     my_trades_currency_strategy: list
     orders_currency_strategy: list
@@ -159,7 +159,10 @@ class ComboAuto (BasicStrategy):
         #log.error (f"my_trades_currency_strategy_future {my_trades_currency_strategy_future}")
         my_trades_currency_strategy_perpetual =  [o for o in my_trades_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
         #log.info (f"my_trades_currency_strategy_perpetual {my_trades_currency_strategy_perpetual}")
-        
+
+        params: dict = self.basic_params.get_basic_opening_parameters(ask_price,
+                                                                      bid_price)
+                
         if my_trades_currency_strategy:
             
             for label in self.my_trades_currency_strategy_labels:
@@ -173,7 +176,7 @@ class ComboAuto (BasicStrategy):
      
                 transactions_under_label_int_all = transactions_under_label_int(label_integer, 
                                                                         my_trades_currency_strategy)
-                log.debug (f"closed_transactions_all {transactions_under_label_int_all}")
+                #log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
 
                 transactions_under_label_int_sum = transactions_under_label_int_all["summing_closed_transaction"]
                 transactions_under_label_int_len = transactions_under_label_int_all["len_closed_transaction"]
@@ -186,6 +189,19 @@ class ComboAuto (BasicStrategy):
                         log.warning (f"transactions_under_label_int_detail {transactions_under_label_int_detail}")
                         traded_future = [o for o in transactions_under_label_int_detail if "PERPETUAL" not  in o["instrument_name"]][0]
                         traded_perpetual = [o for o in transactions_under_label_int_detail if perpetual_instrument_name in o["instrument_name"]][0]
+
+                        traded_future_price = traded_future["price"]
+                        traded_perpetual_price = traded_perpetual["price"]
+                        traded_perpetual_size = abs(traded_perpetual["amount"])
+                        traded_future_size = abs(traded_future["amount"])
+                        delta_price = traded_future_price - traded_perpetual_price
+                        
+                        if delta_price > 0:
+                            params.update({"size": abs (traded_future_size)})
+                            params.update({"entry_price": delta_price})
+                            params.update({"instrument_name": self.combo_instruments_name})
+                            params.update({"label": f"{strategy_label}-closed-{label_integer}"})
+
                         log.warning (f"traded_future {traded_future}")
                         log.info (f"traded_perpetual {traded_perpetual}")
 
@@ -240,9 +256,6 @@ class ComboAuto (BasicStrategy):
         log.debug (f"ask_price_future {ask_price_future} bid_price_future {bid_price_future} bid_price_perpetual {bid_price_perpetual} ask_price_perpetual {ask_price_perpetual}")
         log.error (f"lev future {self.leverage_futures} lev.perp {self.leverage_perpetual}")
 
-        params: dict = self.basic_params.get_basic_opening_parameters(ask_price,
-                                                                            bid_price)
-        
         open_orders_label_strategy: list=  [o for o in self.orders_currency_strategy if "open" in o["label"]]
     
         threshold = 60
