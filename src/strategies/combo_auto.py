@@ -8,13 +8,16 @@ from dataclassy import dataclass, fields
 from loguru import logger as log
 
 # user defined formula
-from utilities.pickling import (
-    read_data,)
-from utilities.system_tools import (
-    provide_path_for_file,)
 from strategies.basic_strategy import (
     BasicStrategy,
+    get_label_integer,
     size_rounding,)
+from utilities.pickling import (
+    read_data,)
+from utilities.string_modification import(
+    parsing_label,)
+from utilities.system_tools import (
+    provide_path_for_file,)
 
 
 def reading_from_pkl_data(end_point, 
@@ -71,6 +74,26 @@ def determine_opening_size(
         proposed_size)
 
 
+def get_label_main(
+    result: list, 
+    strategy_label: str
+    ) -> list:
+    """ """
+
+    return [o for o in result \
+        if parsing_label(strategy_label)["main"]
+                    == parsing_label(o["label"])["main"]
+                ]
+    
+def transactions_under_label_int(label_integer: int, transactions_all: list) -> str:
+    """ """
+    
+    transactions = [o for o in transactions_all if label_integer in o["label"]]
+    
+    return dict(closed_transactions= transactions,
+                summing_closed_transaction= sum([ o["amount"] for o in transactions]))
+
+
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):
     """ """
@@ -111,6 +134,43 @@ class ComboAuto (BasicStrategy):
     ) -> dict:
         """ """
         
+        label = self.strategy_label
+        future_instrument_name = self.future_ticker["instrument_name"]
+        perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
+        
+        orders_currency_strategy_future = [o for o in self.orders_currency_strategy if future_instrument_name in o["instrument_name"] ]
+        orders_currency_strategy_perpetual =  [o for o in self.orders_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
+        
+        my_trades_currency_strategy_future = [o for o in self.my_trades_currency_strategy if future_instrument_name in o["instrument_name"] ]
+        my_trades_currency_strategy_perpetual =  [o for o in self.my_trades_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
+        
+        transactions_under_label_main_perpetual = get_label_main(my_trades_currency_strategy_perpetual,  
+                                                               label)
+        
+        transactions_under_label_main_future = get_label_main(my_trades_currency_strategy_future,  
+                                                               label)
+        
+
+        label_integer = get_label_integer(label)
+        
+        closed_transactions_all_future= transactions_under_label_int(label_integer, 
+                                                                transactions_under_label_main_future)
+
+        closed_transactions_all_perpetual= transactions_under_label_int(label_integer, 
+                                                                transactions_under_label_main_perpetual)
+
+        size_to_close = closed_transactions_all_future["summing_closed_transaction"]
+        
+        transaction_closed_under_the_same_label_int = closed_transactions_all_future["closed_transactions"]
+
+        size_to_close = closed_transactions_all_perpetual["summing_closed_transaction"]
+        
+        transaction_closed_under_the_same_label_int = closed_transactions_all_perpetual["closed_transactions"]
+        
+        log.error (f"closed_transactions_all_future {closed_transactions_all_future}")
+        log.error (f"closed_transactions_all_perpetual {closed_transactions_all_perpetual}")
+
+        
         order_allowed, cancel_allowed, cancel_id = False, False, None
         ask_price_future = self.future_ticker ["best_ask_price"]
         bid_price_future = self.future_ticker ["best_bid_price"]
@@ -141,18 +201,27 @@ class ComboAuto (BasicStrategy):
         if self.delta < 0:
             pass
 
-        # inititiating
-        if self.delta <= 0:
+        if self.delta < 0:
+            # get orphaned dated futures
+            params.update({"instrument": perpetual_instrument_name})
+
+            params.update({"instrument": future_instrument_name})
+        
+        # initiating. 
+        if self.delta == 0:
+            
+            #priority for dated future
+            params.update({"instrument": future_instrument_name})
             
             if len_open_orders == 0:
-                order_allowed = True                    
+                order_allowed = True
+                                    
             else:
                 last_order_time= max([o["timestamp"] for o in self.orders_currency_strategy])
                                 
                 delta_time = self.server_time-last_order_time
                 
                 delta_time_seconds = delta_time/1000                                                
-                
                 
                 if delta_time_seconds > threshold:
                     order_allowed = True      
