@@ -205,7 +205,8 @@ class ComboAuto (BasicStrategy):
                             
                             
                             combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)
-                            combo_ticker= [] if combo_ticker == [] else combo_ticker [0]
+                            log.warning (f"combo_ticker {combo_ticker}")
+                            combo_ticker= [] if not combo_ticker else combo_ticker [0]
                             log.warning (f"combo_ticker {combo_ticker}")
                             
                             if  combo_ticker:
