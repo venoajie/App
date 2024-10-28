@@ -134,11 +134,11 @@ class ComboAuto (BasicStrategy):
     ) -> dict:
         """ """
         
-        label = self.strategy_label
+        strategy_label = self.strategy_label
         future_instrument_name = self.future_ticker["instrument_name"]
         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
         
-        label_integer = get_label_integer(label)
+        my_trades_currency_strategy = self.my_trades_currency_strategy
         
         
         orders_currency_strategy_future = [o for o in self.orders_currency_strategy if future_instrument_name in o["instrument_name"] ]
@@ -151,8 +151,33 @@ class ComboAuto (BasicStrategy):
         my_trades_currency_strategy_perpetual =  [o for o in self.my_trades_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
         log.info (f"my_trades_currency_strategy_perpetual {my_trades_currency_strategy_perpetual}")
         
-        if my_trades_currency_strategy_future:
+        if my_trades_currency_strategy:
+            my_trades_currency_strategy_labels = [o["label"] for o in my_trades_currency_strategy  ]
+            
+            for trade in my_trades_currency_strategy_labels:
+                
+                label = trade ["label"]
+                
+                label_integer = get_label_integer(label)
+                
+                transactions_under_label_main = get_label_main(my_trades_currency_strategy_labels,  
+                                                                label)
+                
+                log.debug (f"transactions_under_label_main {transactions_under_label_main}")
+     
+                closed_transactions_all = transactions_under_label_int(label_integer, 
+                                                                        transactions_under_label_main)
+                log.debug (f"closed_transactions_all {closed_transactions_all}")
+
+                size_to_close = closed_transactions_all["summing_closed_transaction"]
+                transaction_closed_under_the_same_label_int = closed_transactions_all["closed_transactions"]
+
+                log.error (f"closed_transactions_all_future {closed_transactions_all}")
+            
+        if False and my_trades_currency_strategy_future:
         
+        
+            
             transactions_under_label_main_future = get_label_main(my_trades_currency_strategy_future,  
                                                                 label)
             log.debug (f"transactions_under_label_main_future {transactions_under_label_main_future}")
@@ -166,7 +191,7 @@ class ComboAuto (BasicStrategy):
 
             log.error (f"closed_transactions_all_future {closed_transactions_all_future}")
         
-        if my_trades_currency_strategy_perpetual:
+        if False and  my_trades_currency_strategy_perpetual:
             
             transactions_under_label_main_perpetual = get_label_main(my_trades_currency_strategy_perpetual,  
                                                                 label)
