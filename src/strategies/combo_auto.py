@@ -151,14 +151,14 @@ class ComboAuto (BasicStrategy):
         
         
         orders_currency_strategy_future = [o for o in self.orders_currency_strategy if future_instrument_name in o["instrument_name"] ]
-        log.warning (f"orders_currency_strategy_future {orders_currency_strategy_future}")
+        #log.warning (f"orders_currency_strategy_future {orders_currency_strategy_future}")
         orders_currency_strategy_perpetual =  [o for o in self.orders_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
-        log.error (f"orders_currency_strategy_perpetual {orders_currency_strategy_perpetual}")
+        #log.error (f"orders_currency_strategy_perpetual {orders_currency_strategy_perpetual}")
         
         my_trades_currency_strategy_future = [o for o in my_trades_currency_strategy if future_instrument_name in o["instrument_name"] ]
-        log.error (f"my_trades_currency_strategy_future {my_trades_currency_strategy_future}")
+        #log.error (f"my_trades_currency_strategy_future {my_trades_currency_strategy_future}")
         my_trades_currency_strategy_perpetual =  [o for o in my_trades_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
-        log.info (f"my_trades_currency_strategy_perpetual {my_trades_currency_strategy_perpetual}")
+        #log.info (f"my_trades_currency_strategy_perpetual {my_trades_currency_strategy_perpetual}")
         
         if my_trades_currency_strategy:
             
@@ -185,7 +185,7 @@ class ComboAuto (BasicStrategy):
                             
                         log.warning (f"transactions_under_label_int_detail {transactions_under_label_int_detail}")
                         traded_future = [o for o in transactions_under_label_int_detail if future_instrument_name in o["instrument_name"]][0]
-                        traded_perpetual = [o for o in transactions_under_label_int_detail if perpetual_instrument_name in o["instrument_name"]][0]
+                        traded_perpetual = [o for o in transactions_under_label_int_detail if "PERPETUAL" not in o["instrument_name"]][0]
                         log.warning (f"traded_future {traded_future}")
                         log.info (f"traded_perpetual {traded_perpetual}")
 
