@@ -106,6 +106,7 @@ class ComboAuto (BasicStrategy):
     my_trades_currency_strategy: list
     orders_currency_strategy: list
     notional: float
+    combo_ticker: list,
     future_spread_attributes: list 
     future_ticker: dict
     perpetual_ticker: dict
@@ -148,7 +149,7 @@ class ComboAuto (BasicStrategy):
         combo_instruments_name = self.combo_instruments_name
         
         my_trades_currency_strategy = self.my_trades_currency_strategy
-        log.warning (f"perpetual_instrument_name {perpetual_instrument_name} future_instrument_name {future_instrument_name} combo_instruments_name {combo_instruments_name}")
+        log.warning (f"perpetual_instrument_name {perpetual_instrument_name} future_instrument_name {future_instrument_name} combo_instruments_name {combo_instruments_name} ")
         
         
         orders_currency_strategy_future = [o for o in self.orders_currency_strategy if future_instrument_name in o["instrument_name"] ]
@@ -197,9 +198,13 @@ class ComboAuto (BasicStrategy):
                         traded_future_size = abs(traded_future["amount"])
                         delta_price = traded_future_price - traded_perpetual_price
                         
-                        if delta_price > 0:
-                            params.update({"size": abs (traded_future_size)})
-                            params.update({"entry_price": delta_price})
+                        if delta_price > 0 and bid_price_future < delta_price:
+                            combo_instruments_name = (f"{traded_future["instrument_name"][:3
+                                                      ]}-FS-{traded_future["instrument_name"][4:]}_PERP")
+                            
+                            combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)[0]
+                            params.update({"size": abs (bid_price_future)})
+                            params.update({"entry_price": combo_ticker["best_bid_price"]})
                             params.update({"instrument_name": (f"{traded_future["instrument_name"][:3]}-FS-{traded_future["instrument_name"][4:]}_PERP")})
                             params.update({"label": f"{strategy_label}-closed-{label_integer}"})
 
@@ -211,7 +216,7 @@ class ComboAuto (BasicStrategy):
                 if transactions_under_label_int_sum < 0:
                     pass
 
-                log.error (f"transactions_under_label_int {transactions_under_label_int}")
+                log.error (f"transactions_under_label_int {transactions_under_label_int_detail}")
             
         if False and my_trades_currency_strategy_future:
         
