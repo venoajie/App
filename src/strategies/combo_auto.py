@@ -267,9 +267,6 @@ class ComboAuto (BasicStrategy):
                                     1)
         len_open_orders: int = get_transactions_len(open_orders_label_strategy)
         log.debug (f"len_open_orders {len_open_orders}")
-        
-        params.update({"size": abs (size)})
-        
 
         # balancing
         if self.delta < 0:
