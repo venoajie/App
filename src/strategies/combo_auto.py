@@ -106,7 +106,6 @@ class ComboAuto (BasicStrategy):
     my_trades_currency_strategy: list
     orders_currency_strategy: list
     notional: float
-    combo_ticker: list,
     future_spread_attributes: list 
     future_ticker: dict
     perpetual_ticker: dict
