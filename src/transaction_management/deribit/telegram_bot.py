@@ -15,7 +15,7 @@ async def private_connection(
 
     async with httpx.AsyncClient() as session:
         
-        respons = await session.get(connection_url + endpoint)
+        respons = await session.get(connection_url + endpoint).json()
         
         print(respons)
         async with session.get(connection_url + endpoint) as response:
