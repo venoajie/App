@@ -294,7 +294,7 @@ class SendApiRequest:
         """ """
 
         side = params["side"]
-        instrument = params["instrument"]
+        instrument = params["instrument_name"]
         label_numbered = params["label"]
         size = params["size"]
         try:
@@ -611,7 +611,7 @@ class ModifyOrderDb(SendApiRequest):
 
             if instrument is not None:
                 # update param orders with instrument
-                params.update({"instrument": instrument})
+                params.update({"instrument_name": instrument})
 
             label_and_side_consistent = is_label_and_side_consistent(non_checked_strategies,
                                                                      params)
@@ -666,7 +666,7 @@ class ModifyOrderDb(SendApiRequest):
 
 
         main_side = params["side"]
-        instrument = params["instrument"]
+        instrument = params["instrument_name"]
         main_label = params["label_numbered"]
         closed_label = params["label_closed_numbered"]
         size = params["size"]

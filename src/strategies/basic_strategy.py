@@ -715,7 +715,7 @@ def get_basic_closing_paramaters(selected_transaction: list,
     label_closed: str = get_label("closed", transaction["label"])
     params.update({"label": label_closed})
     
-    params.update({"instrument": transaction ["instrument_name"]})
+    params.update({"instrument_name": transaction ["instrument_name"]})
         
     return params
 
@@ -752,7 +752,7 @@ def get_basic_closing_paramaters_combo_pair (selected_transactions: list) -> dic
     label_closed: str = get_label("closed", label_integer_open)
     params.update({"label": label_closed})
     
-    params.update({"instrument": instrument_name})
+    params.update({"instrument_name": instrument_name})
         
     return params
 

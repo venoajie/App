@@ -183,6 +183,8 @@ class ComboAuto (BasicStrategy):
                 transactions_under_label_int_len = transactions_under_label_int_all["len_closed_transaction"]
                 transactions_under_label_int_detail = transactions_under_label_int_all["transactions"]
                 
+                transactions_under_label_int = [{'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}]
+                
                 if transactions_under_label_int_sum == 0:
                     
                     if transactions_under_label_int_len == 2:
@@ -210,26 +212,40 @@ class ComboAuto (BasicStrategy):
                         
                         params.update({"label": f"{strategy_label}-closed-{label_integer}"})
                         
+                        perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
+                        
+                        open_orders_under_label = [o for o in self.orders_currency_strategy \
+                                if label_integer in o["label"] \
+                                    and perpetual_instrument_name in o["instrument_name"]]
+
+                        
                         if not min_expiration_timestamp or delta_time_expiration < 0:
-                            perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
-                            perpetual_ask_price = self.perpetual_ticker["best_ask_price"]
-            
-                            params.update({"entry_price": perpetual_ask_price})
-                            params.update({"instrument_name": perpetual_instrument_name})
+                            
+                            if open_orders_under_label:
+                                
+                                perpetual_ask_price = self.perpetual_ticker["best_ask_price"]
+                
+                                params.update({"entry_price": perpetual_ask_price})
+                                params.update({"instrument_name": perpetual_instrument_name})
 
                         if delta_price > 0:
                             combo_instruments_name = (f"{traded_future["instrument_name"][:3
                                                       ]}-FS-{traded_future["instrument_name"][4:]}_PERP")
                             
+                            open_orders_under_label_and_instrument = [o for o in self.orders_currency_strategy \
+                                if label_integer in o["label"] \
+                                    and combo_instruments_name in o["instrument_name"]]
+
                             log.warning (f"combo_instruments_name {combo_instruments_name}")
                             
                             
                             combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)
-                            log.warning (f"combo_ticker {combo_ticker}")
+                            #log.warning (f"combo_ticker {combo_ticker}")
+                            closed_combo_ticker = {'best_bid_amount': 0.0, 'best_ask_amount': 0.0, 'implied_bid': -75.5, 'implied_ask': -70.0, 'combo_state': 'closed', 'best_bid_price': 0.0, 'best_ask_price': 0.0, 'mark_price': -41.91, 'max_price': 226.5, 'min_price': -310.0, 'settlement_price': 17.67, 'last_price': -42.5, 'instrument_name': 'BTC-FS-25OCT24_PERP', 'index_price': 67465.47, 'stats': {'volume_notional': 28725020.0, 'volume_usd': 28725020.0}, 'state': 'closed', 'type': 'change', 'timestamp': 1729843200054, 'delivery_price': 67382.03}
                             combo_ticker= [] if not combo_ticker else combo_ticker [0]
                             log.warning (f"combo_ticker {combo_ticker}")
                             
-                            if  combo_ticker:
+                            if  combo_ticker and not open_orders_under_label_and_instrument:
                                 bid_price_combo = combo_ticker["best_bid_price"]
                                 if bid_price_combo < delta_price:
                                     
@@ -307,15 +323,15 @@ class ComboAuto (BasicStrategy):
 
         if self.delta < 0:
             # get orphaned dated futures
-            params.update({"instrument": perpetual_instrument_name})
+            params.update({"instrument_name": perpetual_instrument_name})
 
-            params.update({"instrument": future_instrument_name})
+            params.update({"instrument_name": future_instrument_name})
         
         # initiating. 
         if self.delta == 0:
             
             #priority for dated future
-            params.update({"instrument": future_instrument_name})
+            params.update({"instrument_name": future_instrument_name})
             
             if len_open_orders == 0:
                 order_allowed = True

@@ -191,7 +191,7 @@ async def if_order_is_true(order, instrument: str = None) -> None:
 
         if instrument != None:
             # update param orders with instrument
-            params.update({"instrument": instrument})
+            params.update({"instrument_name": instrument})
 
         label_and_side_consistent = is_label_and_side_consistent(params)
 
