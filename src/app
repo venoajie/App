@@ -283,10 +283,6 @@ class StreamAccountData(ModifyOrderDb):
                 
                 while True:
                     
-                    
-                    s = 5/0
-                    
-                    print (s)
                     # Authenticate WebSocket Connection
                     await self.ws_auth()
 
@@ -527,10 +523,6 @@ class StreamAccountData(ModifyOrderDb):
                     else:
                     
                         log.info("WebSocket connection has broken.")
-                        
-                        await telegram_bot_sendtext (
-                            "WebSocket connection has broken.",
-                            "general_error")
                         
                         await async_raise_error_message(
                             "error-WebSocket connection EXCHANGE has broken",
