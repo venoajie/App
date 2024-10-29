@@ -57,6 +57,8 @@ async def telegram_bot_sendtext(
             ]
 
     connection_url = "https://api.telegram.org/bot"
+    
+    print(bot_message)
 
     endpoint = (
         bot_token
