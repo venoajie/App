@@ -585,9 +585,12 @@ class StreamAccountData(ModifyOrderDb):
                 "client_secret": self.client_secret,
             },
         }
-        orjson_dump= (orjson.dumps(msg))
+        by_json= await self.websocket_client.send(json.dumps(msg))
+        log.warning (f"by_json {json.dumps(msg)}")
+        orjson= (orjson.dumps(msg))
+        log.error (f"by_orjson {orjson.dumps(msg)}")
 
-        await self.websocket_client.send(orjson_dump)
+        await self.websocket_client.send(orjson)
 
     async def ws_refresh_auth(self) -> None:
         """
