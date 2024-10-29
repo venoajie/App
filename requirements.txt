@@ -5,6 +5,7 @@ aiosqlite==0.20.0
     # via app (pyproject.toml)
 anyio==4.6.2.post1
     # via httpx
+certifi==2024.8.30
 dataclassy==0.11.1
     # via app (pyproject.toml)
 h11==0.14.0
@@ -12,7 +13,8 @@ h11==0.14.0
 httpcore==1.0.6
     # via httpx
 httpx==0.27.2
-    # via app (pyproject.toml)
+    # via app (pyproject.toml)    
+idna==3.10
 loguru==0.7.2
     # via app (pyproject.toml)
 orjson==3.10.10
