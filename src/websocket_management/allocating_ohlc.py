@@ -7,7 +7,7 @@ import asyncio
 
 import json
 from loguru import logger as log
-import requests
+import httpx
 
 from db_management.sqlite_management import (
     executing_query_with_return,
@@ -47,7 +47,10 @@ async def recording_multiple_time_frames(instrument_ticker: str,
                               end_timestamp,
                               )
 
-            ohlc_request = requests.get(end_point).json()["result"]
+
+            with httpx.Client() as client:
+                ohlc_request = client.get(end_point, follow_redirects=True).json()["result"]
+            
             result = [o for o in transform_nested_dict_to_list(ohlc_request) if o["tick"]> start_timestamp][0]
             
             await insert_tables(table_ohlc, result)
@@ -103,7 +106,10 @@ async def replace_previous_ohlc_using_fix_data(instrument_ticker,
 
         f" https://deribit.com/api/v2/public/get_tradingview_chart_data?end_timestamp={last_tick_fr_data_orders}&instrument_name={instrument_ticker}&resolution=1&start_timestamp={last_tick1_fr_sqlite}"
 
-        ohlc_request = requests.get(ohlc_endPoint).json()["result"]
+        
+        with httpx.Client() as client:
+            ohlc_request = client.get(ohlc_endPoint, follow_redirects=True).json()["result"]
+        
         result = [o for o in transform_nested_dict_to_list(ohlc_request) if o["tick"]== last_tick1_fr_sqlite][0]
         
         await update_status_data(TABLE_OHLC1, "data", last_tick1_fr_sqlite, WHERE_FILTER_TICK, result, "is")

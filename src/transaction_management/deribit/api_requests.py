@@ -130,8 +130,7 @@ def get_tickers(
     
     with httpx.Client() as client:
         result = client.get(end_point,
-                            follow_redirects=True
-                            ).json()["result"]
+                            follow_redirects=True).json()["result"]
     
     return result
     
