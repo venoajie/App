@@ -1,7 +1,7 @@
 # built ins
 import asyncio
 
-# import json, orjson
+import orjson
 import httpx
 
 # user defined formula
@@ -16,7 +16,7 @@ async def private_connection(
         
         respons = await session.get(connection_url + endpoint)
         
-        return await respons.json()
+        return await respons.orjson()
 
 
 async def telegram_bot_sendtext(
@@ -58,8 +58,6 @@ async def telegram_bot_sendtext(
 
     connection_url = "https://api.telegram.org/bot"
     
-    print(bot_message)
-
     endpoint = (
         bot_token
         + ("/sendMessage?chat_id=")
