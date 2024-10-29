@@ -180,25 +180,7 @@ async def update_instruments(idle_time):
         await async_raise_error_message(error)
 
 
-async def test1(x):
-    for _ in range(0, 3):
-        print('Test1')
-        await asyncio.sleep(x) # Here
-        
-async def test2(c):
-    for _ in range(0, 3):
-        print('Test2')
-        await asyncio.sleep(c) # Here
-    
 async def main():
-    await asyncio.gather(
-        update_ohlc_and_market_condition(5), 
-        test1(1), 
-        test2(2),
-        return_exceptions=True) # Here
-
-
-async def main_():
     await asyncio.gather(
         update_ohlc_and_market_condition(5), 
         #back_up_db(60*15),
@@ -208,7 +190,6 @@ async def main_():
     
     
 if __name__ == "__main__":
-    
     
     try:
         #asyncio.run(main())
