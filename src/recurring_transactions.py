@@ -181,6 +181,20 @@ async def update_instruments(idle_time):
         await async_raise_error_message(error)
 
 
+async def test1():
+    for _ in range(0, 3):
+        print('Test1')
+        await asyncio.sleep(1) # Here
+        
+async def test2():
+    for _ in range(0, 3):
+        print('Test2')
+        await asyncio.sleep(1) # Here
+    
+async def main_():
+    await asyncio.gather(test1(), test2()) # Here
+
+
 async def main():
     await asyncio.gather(
         update_ohlc_and_market_condition(5), 
@@ -194,6 +208,7 @@ if __name__ == "__main__":
     
     
     try:
+        #asyncio.run(main())
         asyncio.run(main())
         
     except (KeyboardInterrupt, SystemExit):
