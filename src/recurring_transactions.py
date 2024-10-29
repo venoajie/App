@@ -132,7 +132,7 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
 
                         log.error (end_point)
                         ohlc_request = httpx.get(end_point)#.json()["result"]
-                        log.error (ohlc_request)
+                        log.error (ohlc_request.text)
                         
                         result = [o for o in transform_nested_dict_to_list(ohlc_request) \
                             if o["tick"] > start_timestamp][0]
