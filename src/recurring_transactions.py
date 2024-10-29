@@ -86,8 +86,6 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
     end_timestamp=     get_now_unix_time() 
     
     while True:
-        
-        log.error (currencies)
             
         for currency in currencies:
             
@@ -122,6 +120,8 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                 else:
                     delta= (end_timestamp - start_timestamp)/(one_minute * resolution)
                             
+                log.error (currency)
+                log.error (delta)
                 if delta > 1:
                     end_point= ohlc_end_point(instrument_name,
                                     resolution,
