@@ -548,7 +548,7 @@ class StreamAccountData(ModifyOrderDb):
         }
 
         try:
-            await self.websocket_client.send(orjson.dumps(msg))
+            await self.websocket_client.send(json.dumps(msg))
         except Exception as error:
             log.warning(error)
 
@@ -586,7 +586,7 @@ class StreamAccountData(ModifyOrderDb):
             },
         }
 
-        await self.websocket_client.send(orjson.dumps(msg))
+        await self.websocket_client.send(json.dumps(msg))
 
     async def ws_refresh_auth(self) -> None:
         """
@@ -606,7 +606,7 @@ class StreamAccountData(ModifyOrderDb):
                         },
                     }
 
-                    await self.websocket_client.send(orjson.dumps(msg))
+                    await self.websocket_client.send(json.dumps(msg))
 
             await asyncio.sleep(150)
 
@@ -633,7 +633,7 @@ class StreamAccountData(ModifyOrderDb):
         }
 
         #log.info(ws_channel)
-        await self.websocket_client.send(orjson.dumps(msg))
+        await self.websocket_client.send(json.dumps(msg))
 
 
     async def update_user_changes_non_ws(
