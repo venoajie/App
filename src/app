@@ -1297,7 +1297,7 @@ def main():
 
     except Exception as error:
         
-        asyncio.run(telegram_bot_sendtext())
+        asyncio.run(telegram_bot_sendtext(error))
         
         raise_error_message (error, 
                              5,
