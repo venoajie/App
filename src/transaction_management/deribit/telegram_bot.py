@@ -65,7 +65,7 @@ async def telegram_bot_sendtext(
         + ("/sendMessage?chat_id=")
         + bot_chatID
         + ("&parse_mode=HTML&text=")
-        + bot_message
+        + str(bot_message)
     )
 
     return await private_connection(
