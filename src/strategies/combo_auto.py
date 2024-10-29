@@ -101,7 +101,8 @@ def transactions_under_label_int(
                 summing_closed_transaction = sum([ o["amount"] for o in transactions]))
     
     
-def get_basic_opening_parameters(strategy_parameters)
+def get_basic_opening_parameters(strategy_label):
+    
     """ """
 
     # provide placeholder for params
@@ -110,19 +111,7 @@ def get_basic_opening_parameters(strategy_parameters)
     # default type: limit
     params.update({"type": "limit"})
 
-    strategy_config: dict = strategy_parameters
-
-    side: str = strategy_config["side"]
-
-    params.update({"side": side})
-
-    if side == "sell":
-        params.update({"entry_price": ask_price})
-
-    if side == "buy":
-        params.update({"entry_price": bid_price})
-
-    label_open: str = get_label("open", self.strategy_label)
+    label_open: str = get_label("open", strategy_label)
     params.update({"label": label_open})
     
     return params
@@ -189,7 +178,7 @@ class ComboAuto (BasicStrategy):
         my_trades_currency_strategy_perpetual =  [o for o in my_trades_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
         #log.info (f"my_trades_currency_strategy_perpetual {my_trades_currency_strategy_perpetual}")
 
-        params: dict = get_basic_opening_parameters()
+        params: dict = get_basic_opening_parameters(strategy_label)
                 
         if my_trades_currency_strategy:
             
