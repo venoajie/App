@@ -124,10 +124,10 @@ def get_tickers(
     )-> list:
     # Set endpoint
     
-    import requests
+    import httpx
     import json
     
-    return requests.get(f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}").json()["result"] 
+    return httpx.get(f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}").json()["result"] 
     
 def first_tick_fr_sqlite_if_database_still_empty (
     max_closed_transactions_downloaded_from_sqlite: int

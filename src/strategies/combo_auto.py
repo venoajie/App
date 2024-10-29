@@ -294,10 +294,10 @@ class ComboAuto (BasicStrategy):
                             min_expiration_timestamp = self.future_ticker["min_expiration_timestamp"]    
                         except:
                             min_expiration_timestamp = -1  
-                        log.warning (f"min_expiration_timestamp {min_expiration_timestamp}")
+                        #log.warning (f"min_expiration_timestamp {min_expiration_timestamp}")
                         
                         delta_time_expiration = min_expiration_timestamp - self.server_time 
-                        log.warning (f"delta_time_expiration {delta_time_expiration}")
+                        #log.warning (f"delta_time_expiration {delta_time_expiration}")
                         
                         exit_params.update({"size": abs (traded_perpetual_size)})
                         

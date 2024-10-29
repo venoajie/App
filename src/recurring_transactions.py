@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-import requests
+import os
+
+import httpx
 from loguru import logger as log
+import tomli
 
 from configuration.label_numbering import get_now_unix_time
 from db_management.sqlite_management import (
@@ -28,9 +31,20 @@ from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     last_tick_fr_sqlite,)
 from websocket_management.cleaning_up_transactions import count_and_delete_ohlc_rows
-from websocket_management.ws_management import (
-    get_config,)
     
+    
+def get_config(file_name: str) -> list:
+    """ """
+    config_path = provide_path_for_file (file_name)
+    
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, "rb") as handle:
+                read= tomli.load(handle)
+                return read
+    except:
+        return []
+
 async def back_up_db(idle_time):
     
     while True:
@@ -108,7 +122,7 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                                     end_timestamp,
                                     )
 
-                    ohlc_request = requests.get(end_point).json()["result"]
+                    ohlc_request = httpx.get(end_point).json()["result"]
                     
                     result = [o for o in transform_nested_dict_to_list(ohlc_request) \
                         if o["tick"] > start_timestamp][0]
