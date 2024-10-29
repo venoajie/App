@@ -122,6 +122,7 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                             
                 log.error (currency)
                 log.error (delta)
+                log.error (resolution)
                 if delta > 1:
                     end_point= ohlc_end_point(instrument_name,
                                     resolution,
@@ -185,7 +186,7 @@ async def main():
         back_up_db(60*15),
         clean_up_databases(60), 
         update_instruments(60),
-        update_ohlc_and_market_condition(15), 
+        update_ohlc_and_market_condition(5), 
         return_exceptions=True)
     
     
