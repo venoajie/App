@@ -1297,10 +1297,14 @@ def main():
 
     except Exception as error:
         
+        asyncio.run(telegram_bot_sendtext())
+        
         raise_error_message (error, 
                              5,
                              "app"
                              )
+        
+        
         
 if __name__ == "__main__":
     try:
