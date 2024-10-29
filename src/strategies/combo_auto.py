@@ -342,10 +342,9 @@ class ComboAuto (BasicStrategy):
                                 bid_price_combo = combo_ticker["best_bid_price"]
                             
                                 if bid_price_combo < delta_price:
-                                    
                                     exit_params.update({"side": "buy"})
                                     exit_params.update({"entry_price": combo_ticker["best_bid_price"]})
-                                    exit_params.update({"instrument_name": (f"{traded_future["instrument_name"][:3]}-FS-{traded_future["instrument_name"][4:]}_PERP")})
+                                    exit_params.update({"instrument_name": combo_instruments_name})
 
                         log.warning (f"traded_future {traded_future}")
                         log.info (f"traded_perpetual {traded_perpetual}")
