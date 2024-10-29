@@ -75,76 +75,77 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
     WINDOW = 9
     RATIO = 0.9
     THRESHOLD = 0.01 * ONE_PCT
-    
-    file_toml = "config_strategies.toml"
+    try:
+        file_toml = "config_strategies.toml"
+            
+        config_app = get_config(file_toml)
+
+        tradable_config_app = config_app["tradable"]
         
-    config_app = get_config(file_toml)
-
-    tradable_config_app = config_app["tradable"]
-    
-    currencies= [o["spot"] for o in tradable_config_app] [0]
-    end_timestamp=     get_now_unix_time() 
-    
-    while True:
-            
-        for currency in currencies:
-            
-            instrument_name= f"{currency}-PERPETUAL"
-
-            await insert_market_condition_result(
-                instrument_name, 
-                WINDOW, 
-                RATIO)
-            
-            time_frame= [3,5,15,60,30,"1D"]
+        currencies= [o["spot"] for o in tradable_config_app] [0]
+        end_timestamp=     get_now_unix_time() 
+        
+        while True:
                 
-            ONE_SECOND = 1000
-            
-            one_minute = ONE_SECOND * 60
-            
-            WHERE_FILTER_TICK: str = "tick"
-            
-            for resolution in time_frame:
+            for currency in currencies:
                 
-                table_ohlc= f"ohlc{resolution}_{currency.lower()}_perp_json" 
-                            
-                last_tick_query_ohlc_resolution: str = querying_arithmetic_operator (WHERE_FILTER_TICK, 
-                                                                                     "MAX",
-                                                                                     table_ohlc)
-                
-                start_timestamp: int = await last_tick_fr_sqlite (last_tick_query_ohlc_resolution)
-                
-                if resolution == "1D":
-                    delta= (end_timestamp - start_timestamp)/(one_minute * 60 * 24)
-            
-                else:
-                    delta= (end_timestamp - start_timestamp)/(one_minute * resolution)
-                            
-                log.error (currency)
-                log.error (delta)
-                log.error (resolution)
-                if delta > 1:
-                    end_point= ohlc_end_point(instrument_name,
-                                    resolution,
-                                    start_timestamp,
-                                    end_timestamp,
-                                    )
+                instrument_name= f"{currency}-PERPETUAL"
 
-                    ohlc_request = httpx.get(end_point).json()["result"]
+                await insert_market_condition_result(
+                    instrument_name, 
+                    WINDOW, 
+                    RATIO)
+                
+                time_frame= [3,5,15,60,30,"1D"]
                     
-                    result = [o for o in transform_nested_dict_to_list(ohlc_request) \
-                        if o["tick"] > start_timestamp][0]
+                ONE_SECOND = 1000
+                
+                one_minute = ONE_SECOND * 60
+                
+                WHERE_FILTER_TICK: str = "tick"
+                
+                for resolution in time_frame:
                     
-                    log.error (result)
+                    table_ohlc= f"ohlc{resolution}_{currency.lower()}_perp_json" 
+                                
+                    last_tick_query_ohlc_resolution: str = querying_arithmetic_operator (WHERE_FILTER_TICK, 
+                                                                                        "MAX",
+                                                                                        table_ohlc)
                     
-                    await ohlc_result_per_time_frame (instrument_name,
-                                                    resolution,
-                                                    result,
-                                                    table_ohlc,
-                                                    WHERE_FILTER_TICK, )
+                    start_timestamp: int = await last_tick_fr_sqlite (last_tick_query_ohlc_resolution)
                     
-                    await insert_tables(table_ohlc, result)
+                    if resolution == "1D":
+                        delta= (end_timestamp - start_timestamp)/(one_minute * 60 * 24)
+                
+                    else:
+                        delta= (end_timestamp - start_timestamp)/(one_minute * resolution)
+                                
+                    log.error (currency)
+                    log.error (delta)
+                    log.error (resolution)
+                    if delta > 1:
+                        end_point= ohlc_end_point(instrument_name,
+                                        resolution,
+                                        start_timestamp,
+                                        end_timestamp,
+                                        )
 
+                        ohlc_request = httpx.get(end_point).json()["result"]
+                        
+                        result = [o for o in transform_nested_dict_to_list(ohlc_request) \
+                            if o["tick"] > start_timestamp][0]
+                        
+                        log.error (result)
+                        
+                        await ohlc_result_per_time_frame (instrument_name,
+                                                        resolution,
+                                                        result,
+                                                        table_ohlc,
+                                                        WHERE_FILTER_TICK, )
+                        
+                        await insert_tables(table_ohlc, result)
+    except Exception as error:
+        await raise_error_message(error)
         #await asyncio.sleep(idle_time)
 
 async def get_instruments_from_deribit(currency) -> float:
@@ -181,18 +182,22 @@ async def update_instruments(idle_time):
         await async_raise_error_message(error)
 
 
-async def test1():
+async def test1(x):
     for _ in range(0, 3):
         print('Test1')
-        await asyncio.sleep(1) # Here
+        await asyncio.sleep(x) # Here
         
-async def test2():
+async def test2(c):
     for _ in range(0, 3):
         print('Test2')
-        await asyncio.sleep(1) # Here
+        await asyncio.sleep(c) # Here
     
 async def main():
-    await asyncio.gather(test1(), test2()) # Here
+    await asyncio.gather(
+        update_ohlc_and_market_condition(5), 
+        test1(1), 
+        test2(2),
+        return_exceptions=True) # Here
 
 
 async def main_():
