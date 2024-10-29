@@ -322,7 +322,7 @@ class ComboAuto (BasicStrategy):
 
                         if delta_price > 0:
                             traded_future_instrument_name = traded_future["instrument_name"]
-                            log.error (f"traded_future_instrument_name {traded_future_instrument_name}")
+                            log.error (f"(traded_future_instrument_name {traded_future_instrument_name})")
                             combo_instruments_name = (f"{traded_future_instrument_name[:3]}-FS-{traded_future_instrument_name[4:]}_PERP")
                             
                             open_orders_under_label_and_instrument = [o for o in self.orders_currency_strategy \
