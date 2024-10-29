@@ -806,7 +806,10 @@ class BasicStrategy (ManageStrategy):
 
 
     def get_basic_opening_parameters(
-        self, ask_price: float = None, bid_price: float = None, notional: float = None
+        self, 
+        ask_price: float = None, 
+        bid_price: float = None, 
+        notional: float = None
     ) -> dict:
         """ """
 
@@ -833,17 +836,22 @@ class BasicStrategy (ManageStrategy):
         
         return params
 
-    def get_basic_closing_paramaters(self,
-                                    selected_transaction: list,
-                                    closed_orders_label_strategy: list) -> dict:
+    def get_basic_closing_paramaters(
+        self,
+        selected_transaction: list,
+        closed_orders_label_strategy: list
+        ) -> dict:
         """ """
             
-        return get_basic_closing_paramaters (selected_transaction,
-                                             closed_orders_label_strategy)
+        return get_basic_closing_paramaters (
+            selected_transaction,
+            closed_orders_label_strategy)
 
 
-    def get_basic_closing_paramaters_combo_pair (self,
-                                                 selected_transactions: list) -> dict:
+    def get_basic_closing_paramaters_combo_pair (
+        self,
+        selected_transactions: list
+        ) -> dict:
         """ """
             
         return get_basic_closing_paramaters_combo_pair (selected_transactions)

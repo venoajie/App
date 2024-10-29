@@ -10,6 +10,7 @@ from loguru import logger as log
 # user defined formula
 from strategies.basic_strategy import (
     BasicStrategy,
+    get_label,
     get_label_integer,
     size_rounding,)
 from utilities.pickling import (
@@ -99,6 +100,33 @@ def transactions_under_label_int(
                 len_closed_transaction = len([ o["amount"] for o in transactions]),
                 summing_closed_transaction = sum([ o["amount"] for o in transactions]))
     
+    
+def get_basic_opening_parameters(strategy_parameters)
+    """ """
+
+    # provide placeholder for params
+    params = {}
+
+    # default type: limit
+    params.update({"type": "limit"})
+
+    strategy_config: dict = strategy_parameters
+
+    side: str = strategy_config["side"]
+
+    params.update({"side": side})
+
+    if side == "sell":
+        params.update({"entry_price": ask_price})
+
+    if side == "buy":
+        params.update({"entry_price": bid_price})
+
+    label_open: str = get_label("open", self.strategy_label)
+    params.update({"label": label_open})
+    
+    return params
+
             
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):
@@ -161,8 +189,7 @@ class ComboAuto (BasicStrategy):
         my_trades_currency_strategy_perpetual =  [o for o in my_trades_currency_strategy if perpetual_instrument_name in o["instrument_name"] ]
         #log.info (f"my_trades_currency_strategy_perpetual {my_trades_currency_strategy_perpetual}")
 
-        params: dict = self.basic_params.get_basic_opening_parameters(ask_price,
-                                                                      bid_price)
+        params: dict = get_basic_opening_parameters()
                 
         if my_trades_currency_strategy:
             
