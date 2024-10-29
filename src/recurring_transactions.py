@@ -130,13 +130,13 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                                         end_timestamp,
                                         )
                         with httpx.Client() as client:
-                            r = client.get(end_point, follow_redirects=True)
+                            ohlc_request = client.get(end_point, follow_redirects=True).json()["result"]
 
-                        log.error (r)
-                        log.error (end_point)
-                        log.error (r.json())
-                        ohlc_request = httpx.get(end_point)#.json()["result"]
-                        log.error (ohlc_request.text)
+                        #log.error (r)
+                        #log.error (end_point)
+                        #log.error (r.json())
+                        #ohlc_request = httpx.get(end_point)#.json()["result"]
+                        log.error (ohlc_request)
                         
                         result = [o for o in transform_nested_dict_to_list(ohlc_request) \
                             if o["tick"] > start_timestamp][0]
