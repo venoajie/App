@@ -548,9 +548,7 @@ class StreamAccountData(ModifyOrderDb):
         }
 
         try:
-            orjson_dump= (orjson.dumps(msg))
-            
-            await self.websocket_client.send(orjson_dump)
+            await self.websocket_client.send(json.dumps(msg))
         except Exception as error:
             log.warning(error)
 
@@ -567,9 +565,7 @@ class StreamAccountData(ModifyOrderDb):
         }
 
         try:
-            orjson_dump= (orjson.dumps(msg))
-            
-            await self.websocket_client.send(orjson_dump)
+            await self.websocket_client.send(json.dumps(msg))
 
         except Exception as error:
             log.warning(error)
@@ -589,7 +585,6 @@ class StreamAccountData(ModifyOrderDb):
                 "client_secret": self.client_secret,
             },
         }
-        
         orjson_dump= (orjson.dumps(msg))
 
         await self.websocket_client.send(orjson_dump)
@@ -611,10 +606,8 @@ class StreamAccountData(ModifyOrderDb):
                             "refresh_token": self.refresh_token,
                         },
                     }
-                    
-                    orjson_dump = (orjson.dumps(msg))
 
-                    await self.websocket_client.send(orjson_dump)
+                    await self.websocket_client.send(json.dumps(msg))
 
             await asyncio.sleep(150)
 
@@ -640,9 +633,8 @@ class StreamAccountData(ModifyOrderDb):
             "params": {"channels": [ws_channel]},
         }
 
-        orjson_dump= (orjson.dumps(msg))
-        
-        await self.websocket_client.send(orjson_dump)
+        #log.info(ws_channel)
+        await self.websocket_client.send(json.dumps(msg))
 
 
     async def update_user_changes_non_ws(
