@@ -90,8 +90,10 @@ def transactions_under_label_int(
     transactions_all: list
     ) -> str:
     """ """
+    log.error (f"transactions_all {transactions_all}")
     
     transactions = [o for o in transactions_all if str(label_integer) in o["label"]]
+    log.error (f"transactions {transactions}")
     
     return dict(transactions = transactions,
                 len_closed_transaction = len([ o["amount"] for o in transactions]),
