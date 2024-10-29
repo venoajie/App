@@ -12,21 +12,11 @@ async def private_connection(
     connection_url: str = "https://api.telegram.org/bot",
     ) -> None:
 
-
     async with httpx.AsyncClient() as session:
         
         respons = await session.get(connection_url + endpoint)
-        data = await respons.json()
         
-        print(data)
-        async with session.get(connection_url + endpoint) as response:
-            # RESToverHTTP Status Code
-            status_code: int = response.status
-
-            # RESToverHTTP Response Content
-            response: dict = await response.json()
-
-        return response
+        return await respons.json()
 
 
 async def telegram_bot_sendtext(
