@@ -5,6 +5,7 @@ import httpx
 
 # user defined formula
 from configuration import config
+from utilities.system_tools import parse_error_message
 
 async def private_connection(
     endpoint: str,
@@ -56,6 +57,9 @@ async def telegram_bot_sendtext(
             ]
 
     connection_url = "https://api.telegram.org/bot"
+    
+    bot_message = parse_error_message(bot_message, 
+                                      purpose)
     
     endpoint = (
         bot_token
