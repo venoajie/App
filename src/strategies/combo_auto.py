@@ -321,8 +321,7 @@ class ComboAuto (BasicStrategy):
                                 exit_params.update({"instrument_name": perpetual_instrument_name})
 
                         if delta_price > 0:
-                            combo_instruments_name = (f"{traded_future["instrument_name"][:3
-                                                      ]}-FS-{traded_future["instrument_name"][4:]}_PERP")
+                            combo_instruments_name = (f"{traded_future["instrument_name"][:3]}-FS-{traded_future["instrument_name"][4:]}_PERP")
                             
                             open_orders_under_label_and_instrument = [o for o in self.orders_currency_strategy \
                                 if label_integer in o["label"] \

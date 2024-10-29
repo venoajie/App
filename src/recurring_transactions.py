@@ -181,25 +181,20 @@ async def update_instruments(idle_time):
         await async_raise_error_message(error)
 
 
-def main():
-    loop = asyncio.gather(
+async def main():
+    await asyncio.gather(
         update_ohlc_and_market_condition(5), 
         #back_up_db(60*15),
-        #clean_up_databases(60), 
-        #update_instruments(60),
+        clean_up_databases(60), 
+        update_instruments(60),
         return_exceptions=True)
-    
-    loop.run_until_complete(main())
-    
     
     
 if __name__ == "__main__":
     
     
     try:
-        
-        main()
-    
+        asyncio.run(main())
         
     except (KeyboardInterrupt, SystemExit):
         asyncio.get_event_loop().run_until_complete(main().stop_ws())
