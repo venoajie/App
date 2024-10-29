@@ -177,6 +177,83 @@ class ComboAuto (BasicStrategy):
         #log.info (f"my_trades_currency_strategy_perpetual {my_trades_currency_strategy_perpetual}")
 
         params: dict = get_basic_opening_parameters(strategy_label)
+        
+        order_allowed, cancel_allowed, cancel_id = False, False, None
+        ask_price_future = self.future_ticker ["best_ask_price"]
+        bid_price_future = self.future_ticker ["best_bid_price"]
+        ask_price_perpetual = self.perpetual_ticker ["best_ask_price"]
+        bid_price_perpetual = self.perpetual_ticker ["best_bid_price"]
+        
+        log.debug (f"ask_price_future {ask_price_future} bid_price_future {bid_price_future} bid_price_perpetual {bid_price_perpetual} ask_price_perpetual {ask_price_perpetual}")
+        log.error (f"lev future {self.leverage_futures} lev.perp {self.leverage_perpetual}")
+
+        open_orders_label_strategy: list=  [o for o in self.orders_currency_strategy if "open" in o["label"]]
+    
+        threshold = 60
+        
+        size = determine_opening_size(instrument_name, 
+                                    futures_instruments, 
+                                    self.max_position,
+                                    1)
+        len_open_orders: int = get_transactions_len(open_orders_label_strategy)
+        log.debug (f"len_open_orders {len_open_orders}")
+
+        # balancing
+        if self.delta < 0:
+            pass
+
+        if self.delta < 0:
+            # get orphaned dated futures
+            params.update({"instrument_name": perpetual_instrument_name})
+
+            params.update({"instrument_name": future_instrument_name})
+        
+        # initiating. 
+        if not my_trades_currency_strategy and self.delta == 0:
+            
+            #priority for dated future
+            params.update({"instrument_name": future_instrument_name})
+            
+            if len_open_orders == 0:
+                order_allowed = True
+                                    
+            else:
+                last_order_time= max([o["timestamp"] for o in self.orders_currency_strategy])
+                                
+                delta_time = self.server_time-last_order_time
+                
+                delta_time_seconds = delta_time/1000                                                
+                
+                if delta_time_seconds > threshold:
+                    order_allowed = True      
+                    
+        log.debug (f"size {size}")
+        log.debug (f"params {params}")
+
+        return dict(
+            order_allowed=order_allowed and len_open_orders == 0,
+            order_parameters=[] if order_allowed == False else params,
+            cancel_allowed=cancel_allowed,
+            cancel_id= None 
+        )
+
+    async def is_send_exit_order_allowed (self,
+                                          ) -> dict:
+        """
+        Returns:
+            dict: _description_
+        """
+        order_allowed, cancel_allowed, cancel_id = False, False, None
+        my_trades_currency_strategy = self.my_trades_currency_strategy
+        
+        
+        strategy_label = self.strategy_label
+        future_instrument_name = self.future_ticker["instrument_name"]
+        perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
+        combo_instruments_name = self.combo_instruments_name
+        
+        exit_params = {}
+
                 
         if my_trades_currency_strategy:
             
@@ -222,9 +299,9 @@ class ComboAuto (BasicStrategy):
                         delta_time_expiration = min_expiration_timestamp - self.server_time 
                         log.warning (f"delta_time_expiration {delta_time_expiration}")
                         
-                        params.update({"size": abs (traded_perpetual_size)})
+                        exit_params.update({"size": abs (traded_perpetual_size)})
                         
-                        params.update({"label": f"{strategy_label}-closed-{label_integer}"})
+                        exit_params.update({"label": f"{strategy_label}-closed-{label_integer}"})
                         
                         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
                         
@@ -239,8 +316,9 @@ class ComboAuto (BasicStrategy):
                                 
                                 perpetual_ask_price = self.perpetual_ticker["best_ask_price"]
                 
-                                params.update({"entry_price": perpetual_ask_price})
-                                params.update({"instrument_name": perpetual_instrument_name})
+                                exit_params.update({"side": "sell"})
+                                exit_params.update({"entry_price": perpetual_ask_price})
+                                exit_params.update({"instrument_name": perpetual_instrument_name})
 
                         if delta_price > 0:
                             combo_instruments_name = (f"{traded_future["instrument_name"][:3
@@ -261,10 +339,12 @@ class ComboAuto (BasicStrategy):
                             
                             if  combo_ticker and not open_orders_under_label_and_instrument:
                                 bid_price_combo = combo_ticker["best_bid_price"]
+                            
                                 if bid_price_combo < delta_price:
                                     
-                                    params.update({"entry_price": combo_ticker["best_bid_price"]})
-                                    params.update({"instrument_name": (f"{traded_future["instrument_name"][:3]}-FS-{traded_future["instrument_name"][4:]}_PERP")})
+                                    exit_params.update({"side": "buy"})
+                                    exit_params.update({"entry_price": combo_ticker["best_bid_price"]})
+                                    exit_params.update({"instrument_name": (f"{traded_future["instrument_name"][:3]}-FS-{traded_future["instrument_name"][4:]}_PERP")})
 
                         log.warning (f"traded_future {traded_future}")
                         log.info (f"traded_perpetual {traded_perpetual}")
@@ -310,126 +390,11 @@ class ComboAuto (BasicStrategy):
         
             log.error (f"closed_transactions_all_perpetual {closed_transactions_all_perpetual}")
 
+
+
+
+        log.warning (f"exit_params {exit_params}")
         
-        order_allowed, cancel_allowed, cancel_id = False, False, None
-        ask_price_future = self.future_ticker ["best_ask_price"]
-        bid_price_future = self.future_ticker ["best_bid_price"]
-        ask_price_perpetual = self.perpetual_ticker ["best_ask_price"]
-        bid_price_perpetual = self.perpetual_ticker ["best_bid_price"]
-        
-        log.debug (f"ask_price_future {ask_price_future} bid_price_future {bid_price_future} bid_price_perpetual {bid_price_perpetual} ask_price_perpetual {ask_price_perpetual}")
-        log.error (f"lev future {self.leverage_futures} lev.perp {self.leverage_perpetual}")
-
-        open_orders_label_strategy: list=  [o for o in self.orders_currency_strategy if "open" in o["label"]]
-    
-        threshold = 60
-        
-        size = determine_opening_size(instrument_name, 
-                                    futures_instruments, 
-                                    self.max_position,
-                                    1)
-        len_open_orders: int = get_transactions_len(open_orders_label_strategy)
-        log.debug (f"len_open_orders {len_open_orders}")
-
-        # balancing
-        if self.delta < 0:
-            pass
-
-        if self.delta < 0:
-            # get orphaned dated futures
-            params.update({"instrument_name": perpetual_instrument_name})
-
-            params.update({"instrument_name": future_instrument_name})
-        
-        # initiating. 
-        if self.delta == 0:
-            
-            #priority for dated future
-            params.update({"instrument_name": future_instrument_name})
-            
-            if len_open_orders == 0:
-                order_allowed = True
-                                    
-            else:
-                last_order_time= max([o["timestamp"] for o in self.orders_currency_strategy])
-                                
-                delta_time = self.server_time-last_order_time
-                
-                delta_time_seconds = delta_time/1000                                                
-                
-                if delta_time_seconds > threshold:
-                    order_allowed = True      
-                    
-        log.debug (f"size {size}")
-        log.debug (f"params {params}")
-
-        return dict(
-            order_allowed=order_allowed and len_open_orders == 0,
-            order_parameters=[] if order_allowed == False else params,
-            cancel_allowed=cancel_allowed,
-            cancel_id= None 
-        )
-
-    async def is_send_exit_order_allowed (self,
-                                          ) -> dict:
-        """
-        Returns:
-            dict: _description_
-        """
-        order_allowed, cancel_allowed, cancel_id = False, False, None
-        log.info (f"my_trades_currency_strategy {self.my_trades_currency_strategy}")
-        my_trades_currency_strategy_open = [o for o in self.my_trades_currency_strategy if "open" in (o["label"])]
-        my_trades_open_label = [o["label"] for o in my_trades_currency_strategy_open]
-        log.warning (f"my_trades_currency_strategy_open {my_trades_currency_strategy_open}")
-        log.info (f"my_trades_open_label {my_trades_open_label}")
-        exit_params = {}
-        for label in my_trades_open_label:
-            
-            log.info (f"label {label}")
-            my_trades_label = [o for o in my_trades_currency_strategy_open if label in o["label"]]
-            log.debug (f"my_trades_label {my_trades_label}")
-            my_trades_label_sell_side = [o for o in my_trades_label if "sell" in o["side"]][0]
-            my_trades_label_buy_side = [o for o in my_trades_label if "buy" in o["side"]][0]
-
-            sell_side_instrument = my_trades_label_sell_side ["instrument_name"]
-            buy_side_instrument = my_trades_label_buy_side ["instrument_name"]
-
-            #get instrument traded price
-            sell_side_trd_prc = my_trades_label_sell_side ["price"] * -1
-            buy_side_trd_prc = my_trades_label_buy_side ["price"]   
-            delta_price =  sell_side_trd_prc +   buy_side_trd_prc
-            
-            buy_side_ticker= reading_from_pkl_data ("ticker",
-                                                    buy_side_instrument)[0]
-            sell_side_ticker= reading_from_pkl_data ("ticker",
-                                                     sell_side_instrument)[0]
-            
-            sell_side_current_prc = sell_side_ticker["best_ask_price"] * -1
-            buy_side_current_prc = buy_side_ticker["best_ask_price"] 
-
-            delta_price_current_prc =  sell_side_current_prc +   buy_side_current_prc
-            
-            delta_pct = (abs(delta_price_current_prc) - abs(delta_price))/delta_price
-
-            log.debug (f"my_trades_label_sell_side {my_trades_label_sell_side}")
-            log.debug (f"my_trades_label_buy_side {my_trades_label_buy_side}")
-            if delta_price < 0 \
-                and delta_pct > .1:
-                
-                instrument_name_combo_id = my_trades_label_sell_side["combo_id"]
-                    
-                if instrument_name_combo_id:
-                    exit_params: dict = self.basic_params. get_basic_closing_paramaters_combo_pair (my_trades_label,)
-                    
-                    instrument_name_ticker= reading_from_pkl_data("ticker",
-                                                                  instrument_name_combo_id)[0]
-                    log.warning (f"instrument_name_ticker {instrument_name_ticker}")
-                    log.warning (f"exit_params {exit_params}")
-
-                    
-                log.warning (f"instrument_name {instrument_name_combo_id}")
-                log.warning (f" delta_price {delta_price} delta_price_current_prhg                                                                                                                                                                                                            c {delta_price_current_prc} delta_pct {delta_pct}")
-                
 
         return dict(
             order_allowed= order_allowed,
