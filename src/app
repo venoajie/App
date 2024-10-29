@@ -1024,7 +1024,7 @@ class StreamAccountData(ModifyOrderDb):
                                                                                             instrument_ticker)
                                             await self.modify_order_and_db.if_cancel_is_true(send_order)
 
-                                        send_closing_order: dict = await hedging.is_send_exit_order_allowed ()
+                                        send_closing_order: dict = await combo_auto.is_send_exit_order_allowed ()
                                         
                                         log.error (f"send_closing_order {send_closing_order}")
                                         #result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
