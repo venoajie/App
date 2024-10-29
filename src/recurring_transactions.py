@@ -142,9 +142,11 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                                                         WHERE_FILTER_TICK, )
                         
                         await insert_tables(table_ohlc, result)
+            
+            await asyncio.sleep(idle_time)
+    
     except Exception as error:
         await raise_error_message(error)
-        #await asyncio.sleep(idle_time)
 
 async def get_instruments_from_deribit(currency) -> float:
     """ """
@@ -182,8 +184,8 @@ async def update_instruments(idle_time):
 
 async def main():
     await asyncio.gather(
-        update_ohlc_and_market_condition(5), 
-        #back_up_db(60*15),
+        update_ohlc_and_market_condition(15), 
+        back_up_db(60*15),
         clean_up_databases(60), 
         update_instruments(60),
         return_exceptions=True)
