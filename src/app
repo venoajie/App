@@ -566,6 +566,10 @@ class StreamAccountData(ModifyOrderDb):
         
         orjson_dump= (orjson.dumps(msg))
         
+        log.error (f" orjson_dump {orjson_dump}")
+        json_dump= (json.dumps(msg))
+        log.error (f" json_dump {json_dump}")
+        
         try:
             await self.websocket_client.send(orjson_dump)
 
