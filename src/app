@@ -585,6 +585,10 @@ class StreamAccountData(ModifyOrderDb):
                 "client_secret": self.client_secret,
             },
         }
+        by_json= await self.websocket_client.send(json.dumps(msg))
+        log.warning (f"by_json {by_json}")
+        by_orjson= await self.websocket_client.send(orjson.dumps(msg))
+        log.error (f"by_orjson {by_orjson}")
 
         await self.websocket_client.send(json.dumps(msg))
 
