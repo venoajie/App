@@ -548,7 +548,9 @@ class StreamAccountData(ModifyOrderDb):
         }
 
         try:
-            await self.websocket_client.send(json.dumps(msg))
+            orjson_dump= (orjson.dumps(msg))
+            
+            await self.websocket_client.send(orjson_dump)
         except Exception as error:
             log.warning(error)
 
@@ -565,7 +567,9 @@ class StreamAccountData(ModifyOrderDb):
         }
 
         try:
-            await self.websocket_client.send(json.dumps(msg))
+            orjson_dump= (orjson.dumps(msg))
+            
+            await self.websocket_client.send(orjson_dump)
 
         except Exception as error:
             log.warning(error)
@@ -585,12 +589,10 @@ class StreamAccountData(ModifyOrderDb):
                 "client_secret": self.client_secret,
             },
         }
-        by_json= await self.websocket_client.send(json.dumps(msg))
-        log.warning (f"by_json {json.dumps(msg)}")
-        by_orjson= (orjson.dumps(msg))
-        log.error (f"by_orjson {orjson.dumps(msg)}")
+        
+        orjson_dump= (orjson.dumps(msg))
 
-        await self.websocket_client.send(by_orjson)
+        await self.websocket_client.send(orjson_dump)
 
     async def ws_refresh_auth(self) -> None:
         """
@@ -609,8 +611,10 @@ class StreamAccountData(ModifyOrderDb):
                             "refresh_token": self.refresh_token,
                         },
                     }
+                    
+                    orjson_dump = (orjson.dumps(msg))
 
-                    await self.websocket_client.send(json.dumps(msg))
+                    await self.websocket_client.send(orjson_dump)
 
             await asyncio.sleep(150)
 
@@ -636,8 +640,9 @@ class StreamAccountData(ModifyOrderDb):
             "params": {"channels": [ws_channel]},
         }
 
-        #log.info(ws_channel)
-        await self.websocket_client.send(json.dumps(msg))
+        orjson_dump= (orjson.dumps(msg))
+        
+        await self.websocket_client.send(orjson_dump)
 
 
     async def update_user_changes_non_ws(
