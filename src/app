@@ -528,6 +528,10 @@ class StreamAccountData(ModifyOrderDb):
                     
                         log.info("WebSocket connection has broken.")
                         
+                        await telegram_bot_sendtext (
+                            "WebSocket connection has broken.",
+                            "general_error")
+                        
                         await async_raise_error_message(
                             "error-WebSocket connection EXCHANGE has broken",
                             0.1,
@@ -535,7 +539,9 @@ class StreamAccountData(ModifyOrderDb):
                         )
 
             except Exception as error:
-                await telegram_bot_sendtext (error,"general_error")
+                await telegram_bot_sendtext (
+                    error,
+                    "general_error")
                 
     async def establish_heartbeat(self) -> None:
         """
