@@ -133,7 +133,7 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                             r = client.get(end_point)
 
                         log.error (end_point)
-                        log.error (r)
+                        log.error (r.json())
                         ohlc_request = httpx.get(end_point)#.json()["result"]
                         log.error (ohlc_request.text)
                         
