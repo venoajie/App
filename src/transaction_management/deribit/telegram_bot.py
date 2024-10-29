@@ -1,7 +1,6 @@
 # built ins
 import asyncio
 
-import orjson
 import httpx
 
 # user defined formula
@@ -16,7 +15,7 @@ async def private_connection(
         
         respons = await session.get(connection_url + endpoint)
         
-        return await respons.orjson()
+        return await respons.json()
 
 
 async def telegram_bot_sendtext(
