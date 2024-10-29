@@ -125,9 +125,15 @@ def get_tickers(
     # Set endpoint
     
     import httpx
-    import json
     
-    return httpx.get(f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}").json()["result"] 
+    end_point = (f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}")
+    
+    with httpx.Client() as client:
+        result = client.get(end_point,
+                            follow_redirects=True
+                            ).json()["result"]
+    
+    return result
     
 def first_tick_fr_sqlite_if_database_still_empty (
     max_closed_transactions_downloaded_from_sqlite: int

@@ -120,28 +120,29 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                     else:
                         delta= (end_timestamp - start_timestamp)/(one_minute * resolution)
                                 
-                    log.error (currency)
-                    log.error (delta)
-                    log.error (resolution)
                     if delta > 1:
                         end_point= ohlc_end_point(instrument_name,
                                         resolution,
                                         start_timestamp,
                                         end_timestamp,
                                         )
+                        
                         with httpx.Client() as client:
                             ohlc_request = client.get(end_point, follow_redirects=True).json()["result"]
                         
                         result = [o for o in transform_nested_dict_to_list(ohlc_request) \
                             if o["tick"] > start_timestamp][0]
 
-                        await ohlc_result_per_time_frame (instrument_name,
-                                                        resolution,
-                                                        result,
-                                                        table_ohlc,
-                                                        WHERE_FILTER_TICK, )
-                        
-                        await insert_tables(table_ohlc, result)
+                        await ohlc_result_per_time_frame (
+                            instrument_name,
+                            resolution,
+                            result,
+                            table_ohlc,
+                            WHERE_FILTER_TICK, )
+
+                        await insert_tables(
+                            table_ohlc, 
+                            result)
             
             await asyncio.sleep(idle_time)
     

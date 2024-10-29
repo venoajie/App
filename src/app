@@ -231,6 +231,10 @@ class StreamAccountData(ModifyOrderDb):
             
             # registering strategy config file    
             file_toml = "config_strategies.toml"
+            
+            s = 5/0
+            
+            print (s)
              
             # parsing config file
             config_app = get_config(file_toml)

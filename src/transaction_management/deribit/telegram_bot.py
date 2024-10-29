@@ -1,32 +1,33 @@
 # built ins
 import asyncio
-from typing import Dict
 
 # import json, orjson
-import aiohttp
+import httpx
 
 # user defined formula
 from configuration import config
 
-async def private_connection (endpoint: str,
-                              connection_url: str = "https://api.telegram.org/bot",
-                              ) -> None:
+async def private_connection(
+    endpoint: str,
+    connection_url: str = "https://api.telegram.org/bot",
+    ) -> None:
 
 
-    async with aiohttp.ClientSession() as session:
+    async with httpx.AsyncClient() as session:
         async with session.get(connection_url + endpoint) as response:
             # RESToverHTTP Status Code
             status_code: int = response.status
 
             # RESToverHTTP Response Content
-            response: Dict = await response.json()
+            response: dict = await response.json()
 
         return response
 
 
-async def telegram_bot_sendtext (bot_message: str, 
-                                purpose: str = "general_error"
-                                ) -> str:
+async def telegram_bot_sendtext(
+    bot_message: str,
+    purpose: str = "general_error"
+    ) -> str:
     """
     # simple telegram
     #https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id
@@ -70,7 +71,8 @@ async def telegram_bot_sendtext (bot_message: str,
         + bot_message
     )
 
-    return await private_connection(endpoint=endpoint,
-                                    connection_url=connection_url)
+    return await private_connection(
+        endpoint=endpoint,
+        connection_url=connection_url)
 
 
