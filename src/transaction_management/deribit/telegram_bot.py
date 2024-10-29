@@ -15,9 +15,10 @@ async def private_connection(
 
     async with httpx.AsyncClient() as session:
         
-        respons = await session.get(connection_url + endpoint).json()
+        respons = await session.get(connection_url + endpoint)
+        data = await respons.json()
         
-        print(respons)
+        print(data)
         async with session.get(connection_url + endpoint) as response:
             # RESToverHTTP Status Code
             status_code: int = response.status
