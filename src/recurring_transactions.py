@@ -191,11 +191,11 @@ async def test2():
         print('Test2')
         await asyncio.sleep(1) # Here
     
-async def main_():
+async def main():
     await asyncio.gather(test1(), test2()) # Here
 
 
-async def main():
+async def main_():
     await asyncio.gather(
         update_ohlc_and_market_condition(5), 
         #back_up_db(60*15),
