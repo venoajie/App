@@ -274,7 +274,7 @@ class ComboAuto (BasicStrategy):
                 if transactions_under_label_int_sum < 0:
                     pass
 
-                log.error (f"transactions_under_label_int {transactions_under_label_int_detail}")
+                #log.error (f"transactions_under_label_int {transactions_under_label_int_detail}")
             
         if False and my_trades_currency_strategy_future:
         
