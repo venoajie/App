@@ -145,7 +145,7 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                     
                     await insert_tables(table_ohlc, result)
 
-            await asyncio.sleep(idle_time)
+        await asyncio.sleep(idle_time)
 
 async def get_instruments_from_deribit(currency) -> float:
     """ """
