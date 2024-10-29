@@ -139,8 +139,6 @@ class ComboAuto (BasicStrategy):
         self,
         instrument_name: str,
         futures_instruments,
-        ask_price,
-        bid_price
     ) -> dict:
         """ """
         
