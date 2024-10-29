@@ -127,6 +127,8 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                     result = [o for o in transform_nested_dict_to_list(ohlc_request) \
                         if o["tick"] > start_timestamp][0]
                     
+                    log.error (result)
+                    
                     await ohlc_result_per_time_frame (instrument_name,
                                                     resolution,
                                                     result,
