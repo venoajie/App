@@ -86,12 +86,17 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
     end_timestamp=     get_now_unix_time() 
     
     while True:
+        
+        log.error (currencies)
             
         for currency in currencies:
             
             instrument_name= f"{currency}-PERPETUAL"
 
-            await insert_market_condition_result(instrument_name, WINDOW, RATIO)
+            await insert_market_condition_result(
+                instrument_name, 
+                WINDOW, 
+                RATIO)
             
             time_frame= [3,5,15,60,30,"1D"]
                 
@@ -105,7 +110,9 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                 
                 table_ohlc= f"ohlc{resolution}_{currency.lower()}_perp_json" 
                             
-                last_tick_query_ohlc_resolution: str = querying_arithmetic_operator (WHERE_FILTER_TICK, "MAX", table_ohlc)
+                last_tick_query_ohlc_resolution: str = querying_arithmetic_operator (WHERE_FILTER_TICK, 
+                                                                                     "MAX",
+                                                                                     table_ohlc)
                 
                 start_timestamp: int = await last_tick_fr_sqlite (last_tick_query_ohlc_resolution)
                 
