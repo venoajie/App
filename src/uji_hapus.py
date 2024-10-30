@@ -474,18 +474,7 @@ class StreamAccountData(ModifyOrderDb):
                                                 0.1,
                                                 "WebSocket connection - failed to process data - cancel_all",
 
-                                            )#
-
-                    else:
-                        
-                        await async_raise_error_message(error, 
-                            0.1,
-                            "WebSocket connection - failed to process data - cancel_all",
-)
-                        await telegram_bot_sendtext (
-                            error,
-                            "general_error")
-                    
+                                            )
 
                     
             except Exception as error:
