@@ -968,7 +968,8 @@ class StreamAccountData(ModifyOrderDb):
                         #max_premium = max([o["pct_premium_per_day"] for o in pct_premium_per_day])
 
                         if   "futureSpread" in strategy \
-                            and leverage_all < leverage_threshold:
+                            and leverage_all < leverage_threshold\
+                                and "ETH" not in currency_upper:
 
                             log.warning (f"strategy {strategy}-START")
              
