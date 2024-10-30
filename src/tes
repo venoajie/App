@@ -94,6 +94,15 @@ def reading_from_pkl_data (end_point,
     return data
 
 
+def compute_notional_value(
+    index_price: float,
+    equity: float
+    ) -> float:
+    """ """
+    return index_price * equity
+
+
+
 async def update_db_pkl (path, 
                          data_orders,
                          currency) -> None:
