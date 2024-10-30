@@ -532,6 +532,8 @@ class StreamAccountData(ModifyOrderDb):
                     error,
                     "general_error")
                 
+                await raise_error_message (error)
+                
     async def establish_heartbeat(self) -> None:
         """
         Requests DBT's `public/set_heartbeat` to
