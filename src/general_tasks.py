@@ -108,9 +108,11 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                     
                     table_ohlc= f"ohlc{resolution}_{currency.lower()}_perp_json" 
                                 
-                    last_tick_query_ohlc_resolution: str = querying_arithmetic_operator (WHERE_FILTER_TICK, 
-                                                                                        "MAX",
-                                                                                        table_ohlc)
+                    last_tick_query_ohlc_resolution: str = querying_arithmetic_operator (
+                        WHERE_FILTER_TICK, 
+                        "MAX",
+                        table_ohlc
+                        )
                     
                     start_timestamp: int = await last_tick_fr_sqlite (last_tick_query_ohlc_resolution)
                     
@@ -128,7 +130,10 @@ async def update_ohlc_and_market_condition(idle_time) -> None:
                                         )
                         
                         with httpx.Client() as client:
-                            ohlc_request = client.get(end_point, follow_redirects=True).json()["result"]
+                            ohlc_request = client.get(
+                                end_point, 
+                                follow_redirects=True
+                                ).json()["result"]
                         
                         result = [o for o in transform_nested_dict_to_list(ohlc_request) \
                             if o["tick"] > start_timestamp][0]
