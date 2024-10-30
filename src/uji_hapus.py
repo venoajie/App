@@ -7,7 +7,7 @@ import json
 import secrets
 
 # installed
-import websockets
+import websocket
 
 class DeribitAPIAccessScope:
     def __init__(self, scope):
@@ -201,7 +201,7 @@ class UserWebsocketEngine:
         # websocket.enableTrace(True)
 
         # Initialize Websocket App
-        ws = websockets.WebSocketApp(self.exchange_version,
+        ws = websocket.WebSocketApp(self.exchange_version,
                                     on_message=on_message,
                                     on_error=on_error,
                                     on_close=on_close)
