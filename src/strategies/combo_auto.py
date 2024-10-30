@@ -178,8 +178,8 @@ class ComboAuto (BasicStrategy):
         params: dict = get_basic_opening_parameters(strategy_label)
         
         order_allowed, cancel_allowed, cancel_id = False, False, None
-        ask_price_future = self.future_ticker ["best_ask_price"]
-        bid_price_future = self.future_ticker ["best_bid_price"]
+        ask_price_future = future_ticker ["best_ask_price"]
+        bid_price_future = future_ticker ["best_bid_price"]
         ask_price_perpetual = self.perpetual_ticker ["best_ask_price"]
         bid_price_perpetual = self.perpetual_ticker ["best_bid_price"]
         
