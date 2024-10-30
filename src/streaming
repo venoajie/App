@@ -424,60 +424,6 @@ class StreamAccountData(ModifyOrderDb):
                                         await distribute_ticker_result_as_per_data_type(
                                             my_path_ticker, data_orders, instrument_ticker)
                                                     
-                                        try:
-                                        
-                                            if "PERPETUAL" in data_orders["instrument_name"]:
-                                                
-                                                await inserting_open_interest(
-                                                    currency, 
-                                                    WHERE_FILTER_TICK, 
-                                                    TABLE_OHLC1, 
-                                                    data_orders
-                                                    )
-                                    
-                                                try:                                          
-                                                                                    
-                                                    perpetual_ticker= reading_from_pkl_data("ticker",
-                                                                                instrument_ticker)
-                                                    
-                                                    try:
-                                                        perpetual_ticker= perpetual_ticker[0]
-                                                    except:
-                                                        perpetual_ticker= []
-                                                                                                    
-                                                    if perpetual_ticker:
-                                                                                                            
-                                                        await self.running_critical_strategy(
-                                                            currency, 
-                                                            currency_upper,
-                                                            order_db_table,
-                                                            trade_db_table, 
-                                                            archive_db_table,
-                                                            transaction_log_trading,
-                                                            data_orders,
-                                                            perpetual_ticker,
-                                                            active_strategies,
-                                                            active_futures,
-                                                            strategy_attributes,
-                                                            non_checked_strategies,
-                                                            cancellable_strategies,
-                                                            instrument_ticker, 
-                                                            )
-                                                                                        
-                                                except ValueError:
-                                                    import traceback
-                                                    traceback.format_exc()
-                                                    log.info(f" error {error}")
-                                                    #continue
-                                                                        
-                                        except Exception as error:
-                                            await cancel_all()
-                                            await async_raise_error_message(
-                                                error, 
-                                                0.1,
-                                                "WebSocket connection - failed to process data - cancel_all",
-
-                                            )#
 
                         except Exception as error:
                             await async_raise_error_message(error)
@@ -527,7 +473,7 @@ class StreamAccountData(ModifyOrderDb):
         #log.error (f" json_dump {json_dump}")
         
         try:
-            await self.websocket_client.send(json_dump)
+            await self.websocket_client.send(json.dumps(msg))
 
         except Exception as error:
             log.warning(error)
@@ -575,7 +521,9 @@ class StreamAccountData(ModifyOrderDb):
             await asyncio.sleep(150)
 
     async def ws_operation(
-        self, operation: str, ws_channel: str, id: int = 100
+        self, operation: str, 
+        ws_channel: str, 
+        id: int = 100
     ) -> None:
         """
         Requests `public/subscribe` or `public/unsubscribe`
@@ -583,8 +531,6 @@ class StreamAccountData(ModifyOrderDb):
         """
         sleep_time: int = 5
         
-        log.warning (f"sleep for {sleep_time} s'")
-
         await asyncio.sleep(sleep_time)
 
         id = id_numbering.id(operation, ws_channel)
@@ -997,7 +943,10 @@ if __name__ == "__main__":
         #main()     
         asyncio.run(main())
         
-    except (KeyboardInterrupt, SystemExit):
+    except (
+        KeyboardInterrupt, 
+        SystemExit
+        ):
         asyncio.get_event_loop().run_until_complete(main().stop_ws())
         
 
