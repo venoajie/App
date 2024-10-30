@@ -57,8 +57,9 @@ from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
 from websocket_management.cleaning_up_transactions import (
-    clean_up_closed_transactions, 
-    check_whether_db_reconciled_each_other,)
+    check_whether_order_db_reconciled_each_other,
+    check_whether_size_db_reconciled_each_other,
+    clean_up_closed_transactions,)
 
 @functools.lru_cache(maxsize=128)
 def memoization (sub_account) -> dict:
