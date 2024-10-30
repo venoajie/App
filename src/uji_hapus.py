@@ -214,61 +214,153 @@ class main:
             compression=None,
             close_timeout=60
             ) as self.websocket_client:
+            
+            
+            try:
+                    
+                # registering strategy config file    
+                file_toml = "config_strategies.toml"
+                
+                # parsing config file
+                config_app = get_config(file_toml)
 
-            # Authenticate WebSocket Connection
-            await self.ws_auth()
+                # get tradable strategies
+                tradable_config_app = config_app["tradable"]
+                
+                # get tradable currencies
+                currencies= [o["spot"] for o in tradable_config_app] [0]
+                
+                strategy_attributes = config_app["strategies"]
+                                        
+                active_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                    if o["is_active"]==True]
 
-            # Establish Heartbeat
-            await self.establish_heartbeat()
+                # get strategies that have not short/long attributes in the label 
+                non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                    if o["non_checked_for_size_label_consistency"]==True]
+                
+                cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                    if o["cancellable"]==True]
+                
+                trade_db_table= "my_trades_all_json"
+                
+                order_db_table= "orders_all_json"         
+                                
+                settlement_periods= get_settlement_period (strategy_attributes)
+                                
+                futures_instruments=await get_futures_instruments (currencies,
+                                                                    settlement_periods)  
+                
+                active_futures = futures_instruments["active_futures"]   
 
-            # Start Authentication Refresh Task
-            self.loop.create_task(
-                self.ws_refresh_auth()
-                )
-
-            # Subscribe to the specified WebSocket Channel
-            self.loop.create_task(
-                self.ws_operation(
-                    operation='subscribe',
-                    ws_channel='trades.BTC-PERPETUAL.raw'
+                instruments_name = futures_instruments["instruments_name"]   
+                                
+                resolution = 1                
+                    
+                # filling currencies attributes
+                my_path_cur = provide_path_for_file("currencies")
+                replace_data(
+                    my_path_cur,
+                    currencies
                     )
-                )
+                
+                while True:
+                            
 
-            while self.websocket_client.open:
-                message: bytes = await self.websocket_client.recv()
-                message: Dict = json.loads(message)
-                logging.info(message)
+                    # Authenticate WebSocket Connection
+                    await self.ws_auth()
 
-                if 'id' in list(message):
-                    if message['id'] == 9929:
-                        if self.refresh_token is None:
-                            logging.info('Successfully authenticated WebSocket Connection')
-                        else:
-                            logging.info('Successfully refreshed the authentication of the WebSocket Connection')
+                    # Establish Heartbeat
+                    await self.establish_heartbeat()
 
-                        self.refresh_token = message['result']['refresh_token']
+                    for currency in currencies:
+                        #await self.modify_order_and_db.cancel_the_cancellables (currency,
+                        #                                                        cancellable_strategies)
+                        await self.modify_order_and_db.resupply_sub_accountdb (currency)
 
-                        # Refresh Authentication well before the required datetime
-                        if message['testnet']:
-                            expires_in: int = 300
-                        else:
-                            expires_in: int = message['result']['expires_in'] - 240
+                        await self.modify_order_and_db.resupply_portfolio (currency)
+                        
+                        currency_lower = currency.lower ()
+                        archive_db_table= f"my_trades_all_{currency_lower}_json"                    
+                        transaction_log_trading= f"transaction_log_{currency_lower}_json"
+                        
+                        instruments = await get_instruments(currency)
 
-                        self.refresh_token_expiry_time = datetime.utcnow() + timedelta(seconds=expires_in)
+                        my_path_instruments = provide_path_for_file("instruments", 
+                                                                    currency)
 
-                    elif message['id'] == 8212:
-                        # Avoid logging Heartbeat messages
-                        continue
+                        replace_data(my_path_instruments, instruments)
 
-                elif 'method' in list(message):
-                    # Respond to Heartbeat Message
-                    if message['method'] == 'heartbeat':
-                        await self.heartbeat_response()
+                        await self.modify_order_and_db.resupply_transaction_log(
+                            currency, 
+                            transaction_log_trading,
+                            archive_db_table)
+                        
+                        ws_channel_currency = [
+                            f"user.portfolio.{currency}",
+                            f"user.changes.any.{currency.upper()}.raw",
+                            ]
+                    
+                        for ws in ws_channel_currency:
 
-            else:
-                logging.info('WebSocket connection has broken.')
-                sys.exit(1)
+                            self.loop.create_task(
+                                self.ws_operation(
+                                    operation="subscribe", ws_channel=ws))
+                        
+                    for instrument in instruments_name:
+                                            
+                        ws_channel_instrument = [f"incremental_ticker.{instrument}",
+                                                f"chart.trades.{instrument}.{resolution}"]
+                        
+                        for ws in ws_channel_instrument:
+                            self.loop.create_task(
+                            self.ws_operation(
+                                operation="subscribe",
+                                ws_channel= ws,
+                            ))
+                        
 
+                    while self.websocket_client.open:
+                        message: bytes = await self.websocket_client.recv()
+                        message: Dict = json.loads(message)
+                        logging.info(message)
+
+                        if 'id' in list(message):
+                            if message['id'] == 9929:
+                                if self.refresh_token is None:
+                                    logging.info('Successfully authenticated WebSocket Connection')
+                                else:
+                                    logging.info('Successfully refreshed the authentication of the WebSocket Connection')
+
+                                self.refresh_token = message['result']['refresh_token']
+
+                                # Refresh Authentication well before the required datetime
+                                if message['testnet']:
+                                    expires_in: int = 300
+                                else:
+                                    expires_in: int = message['result']['expires_in'] - 240
+
+                                self.refresh_token_expiry_time = datetime.utcnow() + timedelta(seconds=expires_in)
+
+                            elif message['id'] == 8212:
+                                # Avoid logging Heartbeat messages
+                                continue
+
+                        elif 'method' in list(message):
+                            # Respond to Heartbeat Message
+                            if message['method'] == 'heartbeat':
+                                await self.heartbeat_response()
+
+                    else:
+                        logging.info('WebSocket connection has broken.')
+                        sys.exit(1)
+                    
+            except Exception as error:
+                await raise_error_message (error)
+                await telegram_bot_sendtext (
+                    error,
+                    "general_error")
+                    
     async def establish_heartbeat(self) -> None:
         """
         Requests DBT's `public/set_heartbeat` to
