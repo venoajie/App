@@ -564,14 +564,14 @@ class StreamAccountData(ModifyOrderDb):
             "params": {},
         }
         
-        orjson_dump= (orjson.dumps(msg))
+        #orjson_dump= (orjson.dumps(msg))
         
-        log.error (f" orjson_dump {orjson_dump}")
+        #log.error (f" orjson_dump {orjson_dump}")
         json_dump= (json.dumps(msg))
-        log.error (f" json_dump {json_dump}")
+        #log.error (f" json_dump {json_dump}")
         
         try:
-            await self.websocket_client.send(orjson_dump)
+            await self.websocket_client.send(json_dump)
 
         except Exception as error:
             log.warning(error)
