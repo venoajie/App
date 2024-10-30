@@ -39,7 +39,6 @@ from utilities.pickling import (
 from utilities.system_tools import (
     provide_path_for_file,
     raise_error_message,
-    catch_error_message,
     raise_error_message,
     sleep_and_restart,)
 from utilities.string_modification import (
