@@ -40,6 +40,7 @@ from utilities.system_tools import (
     provide_path_for_file,
     raise_error_message,
     catch_error_message,
+    raise_error_message,
     sleep_and_restart,)
 from utilities.string_modification import (
     extract_currency_from_text,
@@ -403,7 +404,7 @@ class StreamAccountData(ModifyOrderDb):
                                         "WebSocket connection - failed to process data"
                                     )
 
-                                    catch_error_message(error, 10, "app")
+                                    await raise_error_message(error, 10, "app")
 
                 else:
                 
@@ -851,10 +852,7 @@ def main():
 
     except Exception as error:
         
-        catch_error_message (error, 
-                             10,
-                             "app"
-                             )
+        pass
         
 if __name__ == "__main__":
     try:
@@ -865,6 +863,4 @@ if __name__ == "__main__":
         
 
     except Exception as error:
-        catch_error_message(
-        error, 10, "app"
-        )
+        pass
