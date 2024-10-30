@@ -528,11 +528,11 @@ class StreamAccountData(ModifyOrderDb):
                             telegram_bot_sendtext (error)
                     
             except Exception as error:
+                await raise_error_message (error)
                 await telegram_bot_sendtext (
                     error,
                     "general_error")
                 
-                await raise_error_message (error)
                 
     async def establish_heartbeat(self) -> None:
         """
