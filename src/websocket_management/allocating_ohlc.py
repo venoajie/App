@@ -114,14 +114,12 @@ async def replace_previous_ohlc_using_fix_data(
                                        last_tick1_fr_sqlite, 
                                        last_tick_fr_data_orders,)
 
-        f" https://deribit.com/api/v2/public/get_tradingview_chart_data?end_timestamp={last_tick_fr_data_orders}&instrument_name={instrument_ticker}&resolution=1&start_timestamp={last_tick1_fr_sqlite}"
+        f"https://deribit.com/api/v2/public/get_tradingview_chart_data?end_timestamp={last_tick_fr_data_orders}&instrument_name={instrument_ticker}&resolution=1&start_timestamp={last_tick1_fr_sqlite}"
 
         
-        with httpx.Client() as client:
-            ohlc_request = client.get(
-                ohlc_endPoint, 
-                follow_redirects=True
-                ).json()["result"]
+        with httpx.Client(follow_redirects=True) as client:
+            ohlc_request = client.get(ohlc_endPoint).json()["result"]
+            
             log.error (f"ohlc_request {ohlc_request}")
         
         result = [o for o in transform_nested_dict_to_list(ohlc_request) if o["tick"]== last_tick1_fr_sqlite][0]
@@ -142,7 +140,11 @@ async def ohlc_result_per_time_frame(
     WHERE_FILTER_TICK: str = "tick",
 ) -> None:
 
-    last_tick_query_ohlc1: str = querying_arithmetic_operator (WHERE_FILTER_TICK, "MAX", TABLE_OHLC1)
+    last_tick_query_ohlc1: str = querying_arithmetic_operator (
+        WHERE_FILTER_TICK, 
+        "MAX", 
+        TABLE_OHLC1
+        )
 
     last_tick1_fr_sqlite: int = await last_tick_fr_sqlite (last_tick_query_ohlc1)
 
@@ -155,18 +157,29 @@ async def ohlc_result_per_time_frame(
     
     if refilling_current_ohlc_table_with_updated_streaming_data:
     
-        await update_status_data(TABLE_OHLC1, "data", last_tick1_fr_sqlite, WHERE_FILTER_TICK, data_orders, "is")
+        await update_status_data(
+            TABLE_OHLC1, 
+            "data", 
+            last_tick1_fr_sqlite, 
+            WHERE_FILTER_TICK,
+            data_orders, 
+            "is")
     
     if insert_new_ohlc_and_replace_previous_ohlc_using_fix_data:
         
-        await insert_tables(TABLE_OHLC1, data_orders)
+        await insert_tables(
+            TABLE_OHLC1,
+            data_orders
+            )
         
-        await replace_previous_ohlc_using_fix_data (instrument_ticker,
-                                                    TABLE_OHLC1, 
-                                                    resolution,
-                                                    last_tick1_fr_sqlite, 
-                                                    last_tick_fr_data_orders,
-                                                    WHERE_FILTER_TICK)
+        await replace_previous_ohlc_using_fix_data (
+            instrument_ticker,
+            TABLE_OHLC1, 
+            resolution,
+            last_tick1_fr_sqlite, 
+            last_tick_fr_data_orders,
+            WHERE_FILTER_TICK
+            )
                                                         
 def currency_inline_with_database_address (
     currency: str, 
