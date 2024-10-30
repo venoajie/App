@@ -118,7 +118,6 @@ def get_basic_opening_parameters(strategy_label):
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):
     """ """
-    combo_instruments_name: list
     position_without_combo: list
     my_trades_currency_strategy: list
     orders_currency_strategy: list
@@ -152,7 +151,7 @@ class ComboAuto (BasicStrategy):
         
     async def is_send_and_cancel_open_order_allowed(
         self,
-        instrument_name: str,
+        combo_instruments_name: str,
         futures_instruments,
     ) -> dict:
         """ """
@@ -160,7 +159,6 @@ class ComboAuto (BasicStrategy):
         strategy_label = self.strategy_label
         future_instrument_name = self.future_ticker["instrument_name"]
         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
-        combo_instruments_name = self.combo_instruments_name
         
         my_trades_currency_strategy = self.my_trades_currency_strategy
         log.warning (f"perpetual_instrument_name {perpetual_instrument_name} future_instrument_name {future_instrument_name} combo_instruments_name {combo_instruments_name} ")
