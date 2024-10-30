@@ -12,15 +12,9 @@ Requirements:
 """
 
 # built ins
-import asyncio
 import sys
 import json
 import logging
-from typing import Dict
-from datetime import datetime, timedelta
-
-# installed
-import websockets
 
 
 #!/usr/bin/python3
@@ -322,7 +316,7 @@ class main:
 
                     while self.websocket_client.open:
                         message: bytes = await self.websocket_client.recv()
-                        message: Dict = json.loads(message)
+                        message: dict = json.loads(message)
                         #logging.info(message)
 
                         if 'id' in list(message):
@@ -377,7 +371,6 @@ class main:
                                             )
                         
                                         await self.modify_order_and_db.resupply_sub_accountdb(currency)    
-
                                         
                                     if "user.changes.any" in message_channel:
                                         #log.debug (f"user.changes.any.{currency.upper()}.raw")
@@ -414,10 +407,15 @@ class main:
                                         == f"incremental_ticker.{instrument_ticker}"):
                                         
                                         my_path_ticker = provide_path_for_file(
-                                            "ticker", instrument_ticker)
+                                            "ticker", 
+                                            instrument_ticker
+                                            )
                                         
                                         await distribute_ticker_result_as_per_data_type(
-                                            my_path_ticker, data_orders, instrument_ticker)
+                                            my_path_ticker,
+                                            data_orders, 
+                                            instrument_ticker
+                                            )
                                                     
                                         try:
                                         
@@ -838,7 +836,7 @@ class main:
         Requests DBT's `public/set_heartbeat` to
         establish a heartbeat connection.
         """
-        msg: Dict = {
+        msg: dict = {
                     "jsonrpc": "2.0",
                     "id": 9098,
                     "method": "public/set_heartbeat",
@@ -858,7 +856,7 @@ class main:
         Sends the required WebSocket response to
         the Deribit API Heartbeat message.
         """
-        msg: Dict = {
+        msg: dict = {
                     "jsonrpc": "2.0",
                     "id": 8212,
                     "method": "public/test",
@@ -876,7 +874,7 @@ class main:
         Requests DBT's `public/auth` to
         authenticate the WebSocket Connection.
         """
-        msg: Dict = {
+        msg: dict = {
                     "jsonrpc": "2.0",
                     "id": 9929,
                     "method": "public/auth",
@@ -901,7 +899,7 @@ class main:
         while True:
             if self.refresh_token_expiry_time is not None:
                 if datetime.utcnow() > self.refresh_token_expiry_time:
-                    msg: Dict = {
+                    msg: dict = {
                                 "jsonrpc": "2.0",
                                 "id": 9929,
                                 "method": "public/auth",
@@ -930,7 +928,7 @@ class main:
         """
         await asyncio.sleep(5)
 
-        msg: Dict = {
+        msg: dict = {
                     "jsonrpc": "2.0",
                     "method": f"public/{operation}",
                     "id": 42,
@@ -950,7 +948,7 @@ if __name__ == "__main__":
     # Logging
     logging.basicConfig(
         level='INFO',
-        format='%(asctime)s | %(levelname)s | %(message)s',
+        format='%(asctime)s | %(levelname)s | %(message)s | %(filename)s',
         datefmt='%Y-%m-%d %H:%M:%S'
         )
 

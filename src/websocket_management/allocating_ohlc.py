@@ -18,21 +18,24 @@ from utilities.string_modification import (
 from utilities.system_tools import async_raise_error_message
 
 
-def ohlc_end_point(instrument_ticker: str,
-                   resolution: int,
-                   start_timestamp: int,
-                   end_timestamp: int,):
-    
+def ohlc_end_point(
+    instrument_ticker: str,
+    resolution: int,
+    start_timestamp: int,
+    end_timestamp: int,
+    )-> str:
+
     url=f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
     
     return  f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
 
-async def recording_multiple_time_frames(instrument_ticker: str,
-                                         table_ohlc: str,
-                                         resolution: int,
-                                         start_timestamp: int, 
-                                         end_timestamp: int, 
-                                         ) -> float:
+async def recording_multiple_time_frames(
+    instrument_ticker: str,
+    table_ohlc: str,
+    resolution: int,
+    start_timestamp: int, 
+    end_timestamp: int, 
+    ) -> float:
     """ """
     ONE_SECOND = 1000
     one_minute = ONE_SECOND * 60
@@ -96,12 +99,13 @@ async def last_tick_fr_sqlite(last_tick_query_ohlc1) -> int:
         )
     return last_tick1_fr_sqlite[0]["MAX (tick)"]
 
-async def replace_previous_ohlc_using_fix_data(instrument_ticker,
-                                               TABLE_OHLC1, 
-                                               resolution,
-                                               last_tick1_fr_sqlite, 
-                                               last_tick_fr_data_orders, 
-                                               WHERE_FILTER_TICK) -> int:
+async def replace_previous_ohlc_using_fix_data(
+    instrument_ticker,
+    TABLE_OHLC1, 
+    resolution,
+    last_tick1_fr_sqlite, 
+    last_tick_fr_data_orders, 
+    WHERE_FILTER_TICK) -> int:
     """ """
     try:
 
@@ -164,18 +168,25 @@ async def ohlc_result_per_time_frame(
                                                     last_tick_fr_data_orders,
                                                     WHERE_FILTER_TICK)
                                                         
-def currency_inline_with_database_address (currency: str, database_address: str) -> bool:
+def currency_inline_with_database_address (
+    currency: str, 
+    database_address: str
+    ) -> bool:
+    
     return currency.lower()  in str(database_address)
 
 
-async def inserting_open_interest(currency, 
-                                  WHERE_FILTER_TICK,
-                                  TABLE_OHLC1, 
-                                  data_orders) -> None:
+async def inserting_open_interest(
+    currency, 
+    WHERE_FILTER_TICK,
+    TABLE_OHLC1, 
+    data_orders) -> None:
     """ """
     try:
 
-        if currency_inline_with_database_address(currency, TABLE_OHLC1) and "open_interest" in data_orders:
+        if currency_inline_with_database_address(currency,
+                                                 TABLE_OHLC1) \
+                                                     and "open_interest" in data_orders:
         
             open_interest = data_orders["open_interest"]
                             
