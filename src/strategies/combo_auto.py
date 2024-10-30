@@ -248,7 +248,6 @@ class ComboAuto (BasicStrategy):
         
         strategy_label = self.strategy_label        
         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
-        combo_instruments_name = self.combo_instruments_name
         
         exit_params = {}
 
