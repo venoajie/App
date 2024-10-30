@@ -6,7 +6,7 @@
 import asyncio
 
 #import json
-#from loguru import logger as log
+from loguru import logger as log
 import httpx
 
 from db_management.sqlite_management import (
@@ -49,7 +49,11 @@ async def recording_multiple_time_frames(instrument_ticker: str,
 
 
             with httpx.Client() as client:
-                ohlc_request = client.get(end_point, follow_redirects=True).json()["result"]
+                ohlc_request = client.get(
+                    end_point, 
+                    follow_redirects=True
+                    ).json()["result"]
+                log.error (f"ohlc_request {ohlc_request}")
             
             result = [o for o in transform_nested_dict_to_list(ohlc_request) if o["tick"]> start_timestamp][0]
             
@@ -108,7 +112,11 @@ async def replace_previous_ohlc_using_fix_data(instrument_ticker,
 
         
         with httpx.Client() as client:
-            ohlc_request = client.get(ohlc_endPoint, follow_redirects=True).json()["result"]
+            ohlc_request = client.get(
+                ohlc_endPoint, 
+                follow_redirects=True
+                ).json()["result"]
+            log.error (f"ohlc_request {ohlc_request}")
         
         result = [o for o in transform_nested_dict_to_list(ohlc_request) if o["tick"]== last_tick1_fr_sqlite][0]
         
