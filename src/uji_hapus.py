@@ -430,41 +430,6 @@ class main:
                                                     data_orders
                                                     )
                                                 
-                                                
-                                                try:                                          
-                                                                                    
-                                                    perpetual_ticker= reading_from_pkl_data("ticker",
-                                                                                instrument_ticker)
-                                                    
-                                                    try:
-                                                        perpetual_ticker= perpetual_ticker[0]
-                                                    except:
-                                                        perpetual_ticker= []
-                                                                                                    
-                                                    if perpetual_ticker:
-                                                                                                            
-                                                        await self.running_critical_strategy(
-                                                            currency, 
-                                                            currency_upper,
-                                                            order_db_table,
-                                                            trade_db_table, 
-                                                            archive_db_table,
-                                                            transaction_log_trading,
-                                                            data_orders,
-                                                            perpetual_ticker,
-                                                            active_strategies,
-                                                            active_futures,
-                                                            strategy_attributes,
-                                                            non_checked_strategies,
-                                                            cancellable_strategies,
-                                                            instrument_ticker, 
-                                                            )
-                                                                                        
-                                                except ValueError:
-                                                    import traceback
-                                                    traceback.format_exc()
-                                                    log.info(f" error {error}")
-                                                    #continue
                                                                     
                                         except Exception as error:
                                             await cancel_all()
