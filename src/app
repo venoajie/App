@@ -991,11 +991,32 @@ class StreamAccountData(ModifyOrderDb):
                                 orders_currency_strategy,
                                 notional,
                                 combo_attributes,
-                                future_ticker,
+                                
                                 perpetual_ticker,
                                 server_time
                                 )
                             
+
+                            send_closing_order: dict = await combo_auto.is_send_exit_order_allowed ()
+                            
+                            log.error (f"send_closing_order {send_closing_order}")
+                            #result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
+                            #                                                            send_closing_order, 
+                            #                                                            instrument_ticker)
+                            
+                            if False and result_order:
+                                log.error (f"result_order {result_order}")
+                                data_orders = result_order["result"]
+                                await self.update_user_changes_non_ws (
+                                    non_checked_strategies,
+                                    data_orders, 
+                                    currency, 
+                                    order_db_table,
+                                    trade_db_table, 
+                                    archive_db_table,
+                                    transaction_log_trading)
+                                await sleep_and_restart ()
+                                
                             for combo in active_combo_perp:
                                 
 #                                log.error (f"combo {combo}")
@@ -1028,6 +1049,7 @@ class StreamAccountData(ModifyOrderDb):
                                         log.debug (f"combo_instruments_name {combo_instruments_name}")
                                 
                                         send_order: dict = await combo_auto.is_send_and_cancel_open_order_allowed (combo_instruments_name,
+                                                                                                                   future_ticker,
                                                                                                                     active_futures,)
                                         
                                         log.debug (f"combo_instruments_name {combo_instruments_name}")
@@ -1039,26 +1061,6 @@ class StreamAccountData(ModifyOrderDb):
                                                                                             instrument_ticker)
                                             await self.modify_order_and_db.if_cancel_is_true(send_order)
 
-                                        send_closing_order: dict = await combo_auto.is_send_exit_order_allowed ()
-                                        
-                                        log.error (f"send_closing_order {send_closing_order}")
-                                        #result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
-                                        #                                                            send_closing_order, 
-                                        #                                                            instrument_ticker)
-                                        
-                                        if False and result_order:
-                                            log.error (f"result_order {result_order}")
-                                            data_orders = result_order["result"]
-                                            await self.update_user_changes_non_ws (
-                                                non_checked_strategies,
-                                                data_orders, 
-                                                currency, 
-                                                order_db_table,
-                                                trade_db_table, 
-                                                archive_db_table,
-                                                transaction_log_trading)
-                                            await sleep_and_restart ()
-                                            
                                         await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
 
                                     log.error (f"send_order {send_order}")

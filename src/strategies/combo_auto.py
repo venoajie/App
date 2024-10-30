@@ -123,10 +123,8 @@ class ComboAuto (BasicStrategy):
     orders_currency_strategy: list
     notional: float
     future_spread_attributes: list 
-    future_ticker: dict
     perpetual_ticker: dict
     server_time: int
-    leverage_futures: float = fields 
     leverage_perpetual: float = fields 
     max_position: float = fields 
     delta: float = fields 
@@ -135,9 +133,7 @@ class ComboAuto (BasicStrategy):
     
             
     def __post_init__(self):
-        self.leverage_futures: float = get_size_instrument(
-            self.future_ticker["instrument_name"],
-            self.position_without_combo) / self.notional
+        
         self.leverage_perpetual: float =  get_size_instrument(
             self.perpetual_ticker["instrument_name"],
             self.position_without_combo) / self.notional
@@ -152,9 +148,14 @@ class ComboAuto (BasicStrategy):
     async def is_send_and_cancel_open_order_allowed(
         self,
         combo_instruments_name: str,
+        future_ticker,
         futures_instruments,
     ) -> dict:
         """ """
+        
+        leverage_futures: float = get_size_instrument(
+            future_ticker["instrument_name"],
+            self.position_without_combo) / self.notional
         
         strategy_label = self.strategy_label
         future_instrument_name = self.future_ticker["instrument_name"]
@@ -183,13 +184,13 @@ class ComboAuto (BasicStrategy):
         bid_price_perpetual = self.perpetual_ticker ["best_bid_price"]
         
         log.debug (f"ask_price_future {ask_price_future} bid_price_future {bid_price_future} bid_price_perpetual {bid_price_perpetual} ask_price_perpetual {ask_price_perpetual}")
-        log.error (f"lev future {self.leverage_futures} lev.perp {self.leverage_perpetual}")
+        log.error (f"lev future {leverage_futures} lev.perp {self.leverage_perpetual}")
 
         open_orders_label_strategy: list=  [o for o in self.orders_currency_strategy if "open" in o["label"]]
     
         threshold = 60
         
-        size = determine_opening_size(instrument_name, 
+        size = determine_opening_size(combo_instruments_name, 
                                     futures_instruments, 
                                     self.max_position,
                                     1)
