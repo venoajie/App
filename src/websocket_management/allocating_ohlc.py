@@ -46,6 +46,8 @@ async def recording_multiple_time_frames(instrument_ticker: str,
                               start_timestamp,
                               end_timestamp,
                               )
+            
+            log.debug ("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS")
 
 
             with httpx.Client() as client:
@@ -53,7 +55,7 @@ async def recording_multiple_time_frames(instrument_ticker: str,
                     end_point, 
                     follow_redirects=True
                     ).json()["result"]
-                log.error (f"ohlc_request {ohlc_request}")
+                log.warning (f"ohlc_request {ohlc_request}")
             
             result = [o for o in transform_nested_dict_to_list(ohlc_request) if o["tick"]> start_timestamp][0]
             
