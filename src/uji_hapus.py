@@ -7,7 +7,7 @@ import json
 import secrets
 
 # installed
-import websockets
+import websocket
 
 class DeribitAPIAccessScope:
     def __init__(self, scope):
