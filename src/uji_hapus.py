@@ -1,235 +1,246 @@
+"""
+Description:
+    Deribit WebSocket Asyncio Example.
+
+    - Authenticated connection.
+
+Usage:
+    python3.9 dbt-ws-authenticated-example.py
+
+Requirements:
+    - websocket-client >= 1.2.1
+"""
+
 # built ins
-import time
-from datetime import datetime, timedelta
-import hashlib
-import hmac
+import asyncio
+import sys
 import json
-import secrets
+import logging
+from typing import Dict
+from datetime import datetime, timedelta
 
 # installed
-import websocket
-
-class DeribitAPIAccessScope:
-    def __init__(self, scope):
-        self.scope = scope
-        self.main()
-
-    def main(self):
-        if self.scope == 'read-only':
-            self.account_scope = "read"
-            self.trade_scope = "read"
-            self.wallet_scope = "read"
-            self.block_scope = "read"
-            self.custody = "read_write"  # Must be 'read_write' for the moment given the present API implementation           # noqa: E501
-            self.designated_scope = "account:{} trade:{} wallet:{} block_trade:{} custody:{}".format(
-                                                                                                        self.account_scope,   # noqa: E501
-                                                                                                        self.trade_scope,     # noqa: E501
-                                                                                                        self.wallet_scope,    # noqa: E501
-                                                                                                        self.block_scope,     # noqa: E501
-                                                                                                        self.custody          # noqa: E501
-                                                                                                    )                         # noqa: E501
-            print('Scope Definition: You are using "{}" access'.format(self.scope))                                           # noqa: E501
-        elif self.scope == 'read-write':
-            self.account_scope = "read_write"
-            self.trade_scope = "read_write"
-            self.wallet_scope = "read_write"
-            self.block_scope = "read_write"
-            self.custody = "read_write"
-            self.designated_scope = "account:{} trade:{} wallet:{} block_trade:{} custody:{}".format(                         # noqa: E501
-                                                                                                        self.account_scope,   # noqa: E501
-                                                                                                        self.trade_scope,     # noqa: E501
-                                                                                                        self.wallet_scope,    # noqa: E501
-                                                                                                        self.block_scope,     # noqa: E501
-                                                                                                        self.custody          # noqa: E501
-                                                                                                    )                         # noqa: E501
-            print('Scope Definition: You are using "{}" access'.format(self.scope))                                           # noqa: E501
-        else:
-            self.designated_scope = self.scope
-            print('Invalid Scope Definition: "{}" is not an accepted scope definition. Please try "read-only" or "read-write".'.format(self.scope))  # noqa: E501
-            print('You will receive inconsistent scope definitions.')
-
-        return self.designated_scope
+import websockets
 
 
-class DeribitExchangeVersion:
-    def __init__(self, exchange_version):
-        self.exchange_version = exchange_version
-        self.main()
+class main:
+    def __init__(
+        self,
+        ws_connection_url: str,
+        client_id: str,
+        client_secret: str
+            ) -> None:
+        # Async Event Loop
+        self.loop = asyncio.get_event_loop()
 
-    def main(self):
-        self.exchange_version = 'wss://www.deribit.com/ws/api/v2/'
-        
-        return self.exchange_version
+        # Instance Variables
+        self.ws_connection_url: str = ws_connection_url
+        self.client_id: str = client_id
+        self.client_secret: str = client_secret
+        self.websocket_client: websockets.WebSocketClientProtocol = None
+        self.refresh_token: str = None
+        self.refresh_token_expiry_time: int = None
 
+        # Start Primary Coroutine
+        self.loop.run_until_complete(
+            self.ws_manager()
+            )
 
-class UserWebsocketEngine:
-    def __init__(self, client_Id, scope, exchange_version):
-        self.client_id = client_Id
-        self.scope = scope
-        self.exchange_version = exchange_version
-        self.expiry_time = None
-        self.refresh_token = ''
-        self.authentication_refresh_flag = 0
-        self.heartbeat_requested_flag = 0
-        self.heartbeat_set_flag = 0
-        self.main()
+    async def ws_manager(self) -> None:
+        async with websockets.connect(
+            self.ws_connection_url,
+            ping_interval=None,
+            compression=None,
+            close_timeout=60
+            ) as self.websocket_client:
 
-    def main(self):
-        def on_message(ws, message):
-            message = json.loads(message)
-            # print("Message Received at: " + str(datetime.now().time().strftime('%H:%M:%S')))                                # noqa: E501
-            # print(message)
-            # print(message.keys())
+            # Authenticate WebSocket Connection
+            await self.ws_auth()
 
-            if 'error' in message.keys():
-                error_message = message['error']['message']
-                error_code = message['error']['code']
-                print('You have received an ERROR MESSAGE: {} with the ERROR CODE: {}'.format(error_message, error_code))     # noqa: E501
+            # Establish Heartbeat
+            await self.establish_heartbeat()
 
-            # display successful authentication messages as well as stores your refresh_token                                 # noqa: E501
-            if 'result' in message.keys():
-                if [*message['result']] == ['token_type', 'scope', 'refresh_token', 'expires_in', 'access_token']:            # noqa: E501
-                    if self.authentication_refresh_flag == 1:
-                        print('Successfully Refreshed your Authentication at: ' +
-                            str(datetime.now().time().strftime('%H:%M:%S')))
-                    else:
-                        print('Authentication Success at: ' + str(datetime.now().time().strftime('%H:%M:%S')))                # noqa: E501
-                    self.refresh_token = message['result']['refresh_token']
-                    if message['testnet']:
-                        # The testnet returns an extremely high value for expires_in and is best to use                       # noqa: E501
-                        # 600 in place as so the functionality is as similar as the Live exchange                             # noqa: E501
-                        expires_in = 600
-                    else:
-                        expires_in = message['result']['expires_in']
+            # Start Authentication Refresh Task
+            self.loop.create_task(
+                self.ws_refresh_auth()
+                )
 
-                    self.expiry_time = (datetime.now() + timedelta(seconds=expires_in))                                       # noqa: E501
-                    print('Authentication Expires at: ' + str(self.expiry_time.strftime('%H:%M:%S')))                         # noqa: E501
+            # Subscribe to the specified WebSocket Channel
+            self.loop.create_task(
+                self.ws_operation(
+                    operation='subscribe',
+                    ws_channel='trades.BTC-PERPETUAL.raw'
+                    )
+                )
 
-            # uses your refresh_token to refresh your authentication
-            if datetime.now() > self.expiry_time and self.authentication_refresh_flag == 0:                                   # noqa: E501
-                self.authentication_refresh_flag = 1
-                print('Refreshing your Authentication at: ' + str(self.expiry_time.strftime('%H:%M:%S')))                     # noqa: E501
-                ws_data = {
+            while self.websocket_client.open:
+                message: bytes = await self.websocket_client.recv()
+                message: Dict = json.loads(message)
+                # logging.info(message)
+
+                if 'id' in list(message):
+                    if message['id'] == 9929:
+                        if self.refresh_token is None:
+                            logging.info('Successfully authenticated WebSocket Connection')
+                        else:
+                            logging.info('Successfully refreshed the authentication of the WebSocket Connection')
+
+                        self.refresh_token = message['result']['refresh_token']
+
+                        # Refresh Authentication well before the required datetime
+                        if message['testnet']:
+                            expires_in: int = 300
+                        else:
+                            expires_in: int = message['result']['expires_in'] - 240
+
+                        self.refresh_token_expiry_time = datetime.utcnow() + timedelta(seconds=expires_in)
+
+                    elif message['id'] == 8212:
+                        # Avoid logging Heartbeat messages
+                        continue
+
+                elif 'method' in list(message):
+                    # Respond to Heartbeat Message
+                    if message['method'] == 'heartbeat':
+                        await self.heartbeat_response()
+
+            else:
+                logging.info('WebSocket connection has broken.')
+                sys.exit(1)
+
+    async def establish_heartbeat(self) -> None:
+        """
+        Requests DBT's `public/set_heartbeat` to
+        establish a heartbeat connection.
+        """
+        msg: Dict = {
                     "jsonrpc": "2.0",
-                    "id": 1,
+                    "id": 9098,
+                    "method": "public/set_heartbeat",
+                    "params": {
+                              "interval": 10
+                               }
+                    }
+
+        await self.websocket_client.send(
+            json.dumps(
+                msg
+                )
+                )
+
+    async def heartbeat_response(self) -> None:
+        """
+        Sends the required WebSocket response to
+        the Deribit API Heartbeat message.
+        """
+        msg: Dict = {
+                    "jsonrpc": "2.0",
+                    "id": 8212,
+                    "method": "public/test",
+                    "params": {}
+                    }
+
+        await self.websocket_client.send(
+            json.dumps(
+                msg
+                )
+                )
+
+    async def ws_auth(self) -> None:
+        """
+        Requests DBT's `public/auth` to
+        authenticate the WebSocket Connection.
+        """
+        msg: Dict = {
+                    "jsonrpc": "2.0",
+                    "id": 9929,
                     "method": "public/auth",
                     "params": {
-                        "grant_type": "refresh_token",
-                        "refresh_token": self.refresh_token
+                              "grant_type": "client_credentials",
+                              "client_id": self.client_id,
+                              "client_secret": self.client_secret
+                               }
                     }
-                }
-                ws.send(json.dumps(ws_data))
 
-            # heartbeat set success check and heartbeat response
-            if 'params' in message.keys() and message['params']['type'] == 'heartbeat' and self.heartbeat_set_flag == 0:      # noqa: E501
-                self.heartbeat_set_flag = 1
-                print('Heartbeat Successfully Initiated at: ' + str(datetime.now().time().strftime('%H:%M:%S')))              # noqa: E501
+        await self.websocket_client.send(
+            json.dumps(
+                msg
+                )
+            )
 
-            # respond to a test request
-            if 'params' in message.keys() and message['params']['type'] == 'test_request':                                    # noqa: E501
-                ws_data = {
+    async def ws_refresh_auth(self) -> None:
+        """
+        Requests DBT's `public/auth` to refresh
+        the WebSocket Connection's authentication.
+        """
+        while True:
+            if self.refresh_token_expiry_time is not None:
+                if datetime.utcnow() > self.refresh_token_expiry_time:
+                    msg: Dict = {
+                                "jsonrpc": "2.0",
+                                "id": 9929,
+                                "method": "public/auth",
+                                "params": {
+                                          "grant_type": "refresh_token",
+                                          "refresh_token": self.refresh_token
+                                            }
+                                }
+
+                    await self.websocket_client.send(
+                        json.dumps(
+                            msg
+                            )
+                            )
+
+            await asyncio.sleep(150)
+
+    async def ws_operation(
+        self,
+        operation: str,
+        ws_channel: str
+            ) -> None:
+        """
+        Requests `public/subscribe` or `public/unsubscribe`
+        to DBT's API for the specific WebSocket Channel.
+        """
+        await asyncio.sleep(5)
+
+        msg: Dict = {
                     "jsonrpc": "2.0",
-                    "id": 1,
-                    "method": "public/test",
+                    "method": f"public/{operation}",
+                    "id": 42,
                     "params": {
+                        "channels": [ws_channel]
+                        }
                     }
-                }
-                ws.send(json.dumps(ws_data))
 
-            # print of successful order book subscription
-            if message['id'] == 42:
-                print('Successfully Subscribed to Order Book Data at: {}'.format(datetime.utcnow()))
-                for channel in range(0, len(message['result'])):
-                    message_split = message['result'][channel].split('.')
-                    print('Subscription Channel: {}'.format(message_split[1]))
-                    print('Price Groupings: {}'.format(message_split[2]))
-                    print('Price Levels/Depth: {}'.format(message_split[3]))
-                    print('Interval: {}'.format(message_split[4]))
-
-        def on_error(ws, error):
-            if type(error == "<class 'websocket._exceptions.WebSocketBadStatusException'>"):  # noqa: E501
-                print('')
-                print('ERROR MESSAGE:'+'Testnet is likely down for maintenance or your connection is unstable unless you cancelled this yourself.')  # noqa: E501
-                print('')
-            else:
-                print(error)
-
-        def on_close(ws):
-            print('CONNECTION CLOSED AT: ' + str(datetime.now().time().strftime('%H:%M:%S')))  # noqa: E501
-
-        def on_open(ws):
-            # Initial Authentication
-            ws_data = {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "public/auth",
-                "params": {
-                    "grant_type": "client_signature",
-                    "client_id": self.client_id,
-                    "timestamp": tstamp,
-                    "nonce": nonce,
-                    "scope": self.scope,
-                    "signature": signature,
-                    "data": data}
-            }
-            ws.send(json.dumps(ws_data))
-
-            # Initiating Heartbeat
-            if self.heartbeat_set_flag == 0 and self.heartbeat_requested_flag == 0:                                                     # noqa: E501
-                self.heartbeat_requested_flag = 1
-                print('Heartbeat Requested at: ' + str(datetime.now().time().strftime('%H:%M:%S')))                                     # noqa: E501
-                ws_data = {
-                            "jsonrpc": "2.0",
-                            "id": 1,
-                            "method": "public/set_heartbeat",
-                            "params": {
-                                "interval": 10
-                            }
-                            }
-                ws.send(json.dumps(ws_data))
-
-            # Subscribing to the Order Book
-            ws_data = {"jsonrpc": "2.0",
-                        "method": "public/subscribe",
-                        "id": 42,
-                        "params": {
-                            "channels": ["book.BTC-PERPETUAL.none.10.100ms", "book.ETH-PERPETUAL.none.10.100ms"]}
-                                    }
-            ws.send(json.dumps(ws_data))
-
-        # Detailed Logging
-        # websocket.enableTrace(True)
-
-        # Initialize Websocket App
-        ws = websocket.WebSocketApp(self.exchange_version,
-                                    on_message=on_message,
-                                    on_error=on_error,
-                                    on_close=on_close)
-        ws.on_open = on_open
-
-        ws.run_forever()
+        await self.websocket_client.send(
+            json.dumps(
+                msg
+                )
+            )
 
 
 if __name__ == "__main__":
-    # Local Testing
-    Client_Id = "nOTD9z-n"
-    Client_Secret = "6euDzySQqjNRAG9Rt8EnFPS4ZVfv1vPtTfVjf_8237c"
-    
-    # Your "scope" variable must be 'read-only' or 'read-write'.
-    scope = 'read-only'
-    # Your "exchange_version" variable must be 'live' or 'testnet'.
-    exchange_version = 'live'
+    # Logging
+    logging.basicConfig(
+        level='INFO',
+        format='%(asctime)s | %(levelname)s | %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+        )
 
-    # Client Signature Authentication
-    tstamp = str(int(time.time()) * 1000)
-    data = ''
-    nonce = secrets.token_urlsafe(10)
-    base_signature_string = tstamp + "\n" + nonce + "\n" + data
-    byte_key = Client_Secret.encode()
-    message = base_signature_string.encode()
-    signature = hmac.new(byte_key, message, hashlib.sha256).hexdigest()
+    # DBT LIVE WebSocket Connection URL
+    ws_connection_url: str = 'wss://www.deribit.com/ws/api/v2'
+    # DBT TEST WebSocket Connection URL
+    #ws_connection_url: str = 'wss://test.deribit.com/ws/api/v2'
 
-    # Your Trading Engine
-    UserWebsocketEngine(client_Id=Client_Id,
-                        scope=DeribitAPIAccessScope(scope).designated_scope,
-                        exchange_version=DeribitExchangeVersion(exchange_version).exchange_version)                           # noqa: E501
+    # DBT Client ID
+    client_id: str = 'nOTD9z-n'
+    # DBT Client Secret
+    client_secret: str = '6euDzySQqjNRAG9Rt8EnFPS4ZVfv1vPtTfVjf_8237c'
+
+    main(
+         ws_connection_url=ws_connection_url,
+         client_id=client_id,
+         client_secret=client_secret
+         )
