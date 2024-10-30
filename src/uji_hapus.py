@@ -351,6 +351,133 @@ class main:
                             if message['method'] == 'heartbeat':
                                 await self.heartbeat_response()
 
+
+                            if "params" in list(message):
+                                if message["method"] != "heartbeat":
+                                    message_channel = message["params"]["channel"]
+
+                                    data_orders: list = message["params"]["data"]    
+                                    
+                                    currency: str = extract_currency_from_text(message_channel)
+                                    
+                                    currency_lower=currency
+                                    
+                                    currency_upper=currency.upper()
+                                    
+                                    archive_db_table= f"my_trades_all_{currency_lower}_json"
+                                    
+                                    transaction_log_trading= f"transaction_log_{currency_lower}_json"
+
+                                    if message_channel == f"user.portfolio.{currency.lower()}":
+                                        # also always performed at restart                                
+                                        await update_db_pkl(
+                                            "portfolio", 
+                                            data_orders, 
+                                            currency
+                                            )
+                        
+                                        await self.modify_order_and_db.resupply_sub_accountdb(currency)    
+
+                                        
+                                    if "user.changes.any" in message_channel:
+                                        #log.debug (f"user.changes.any.{currency.upper()}.raw")
+                                        
+                                        await self.update_user_changes(
+                                            non_checked_strategies,
+                                            data_orders, 
+                                            currency, 
+                                            order_db_table,
+                                            trade_db_table, 
+                                            archive_db_table,
+                                            transaction_log_trading
+                                            )
+                                    
+                                    TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+                                    WHERE_FILTER_TICK: str = "tick"
+                                    DATABASE: str = "databases/trading.sqlite3"
+                                    
+                                    if "chart.trades" in message_channel:
+                                        instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
+                                                                                                    
+                                        await ohlc_result_per_time_frame(
+                                            instrument_ticker,
+                                            resolution,
+                                            data_orders,
+                                            TABLE_OHLC1,
+                                            WHERE_FILTER_TICK,
+                                            )
+                                        
+                                    instrument_ticker = (message_channel)[19:]  
+                                    
+                                    if (
+                                        message_channel
+                                        == f"incremental_ticker.{instrument_ticker}"):
+                                        
+                                        my_path_ticker = provide_path_for_file(
+                                            "ticker", instrument_ticker)
+                                        
+                                        await distribute_ticker_result_as_per_data_type(
+                                            my_path_ticker, data_orders, instrument_ticker)
+                                                    
+                                        try:
+                                        
+                                            if "PERPETUAL" in data_orders["instrument_name"]:
+                                                
+                                                await inserting_open_interest(
+                                                    currency, 
+                                                    WHERE_FILTER_TICK, 
+                                                    TABLE_OHLC1, 
+                                                    data_orders
+                                                    )
+                                                
+                                                
+                                                try:                                          
+                                                                                    
+                                                    perpetual_ticker= reading_from_pkl_data("ticker",
+                                                                                instrument_ticker)
+                                                    
+                                                    try:
+                                                        perpetual_ticker= perpetual_ticker[0]
+                                                    except:
+                                                        perpetual_ticker= []
+                                                                                                    
+                                                    if perpetual_ticker:
+                                                                                                            
+                                                        await self.running_critical_strategy(
+                                                            currency, 
+                                                            currency_upper,
+                                                            order_db_table,
+                                                            trade_db_table, 
+                                                            archive_db_table,
+                                                            transaction_log_trading,
+                                                            data_orders,
+                                                            perpetual_ticker,
+                                                            active_strategies,
+                                                            active_futures,
+                                                            strategy_attributes,
+                                                            non_checked_strategies,
+                                                            cancellable_strategies,
+                                                            instrument_ticker, 
+                                                            )
+                                                                                        
+                                                except ValueError:
+                                                    import traceback
+                                                    traceback.format_exc()
+                                                    log.info(f" error {error}")
+                                                    #continue
+                                                                    
+                                        except Exception as error:
+                                            await cancel_all()
+                                            await async_raise_error_message(
+                                                error, 
+                                                0.1,
+                                                "WebSocket connection - failed to process data - cancel_all",
+
+                                            )#
+
+
+
+
                     else:
                         logging.info('WebSocket connection has broken.')
                         sys.exit(1)
@@ -360,6 +487,386 @@ class main:
                 await telegram_bot_sendtext (
                     error,
                     "general_error")
+                    
+                    
+
+    async def update_user_changes_non_ws(
+    self,
+    non_checked_strategies,
+    data_orders, 
+    currency, 
+    order_db_table,
+    trade_db_table, 
+    archive_db_table,
+    transaction_log_trading
+    ) -> None:
+
+        trades = data_orders["trades"]
+        
+        order = data_orders["order"]
+
+        instrument_name = order["instrument_name"]
+        
+        log.debug (f"update_user_changes non ws {instrument_name} -START")
+        
+        log.info (f" {data_orders}")
+        
+        if trades:
+            for trade in trades:
+                
+                if f"{currency.upper()}-FS-" not in instrument_name:
+                
+                    await saving_traded_orders(
+                        trade, 
+                        trade_db_table, 
+                        order_db_table)                      
+
+                    await saving_traded_orders(
+                        trade,
+                        archive_db_table,
+                        order_db_table
+                        )
+            
+        else:
+                
+            await self.saving_order(
+                non_checked_strategies,
+                instrument_name,
+                order,
+                order_db_table
+                )
+                                    
+            await self.modify_order_and_db.resupply_sub_accountdb(currency)            
+
+        await update_db_pkl("positions", data_orders, currency)
+
+        await self.modify_order_and_db.resupply_transaction_log(
+            currency, 
+            transaction_log_trading,
+            archive_db_table
+            )
+
+
+    async def running_critical_strategy(
+        self,
+        currency, 
+        currency_upper,
+        order_db_table,
+        trade_db_table, 
+        archive_db_table,
+        transaction_log_trading,
+        data_orders,
+        perpetual_ticker,
+        active_strategies,
+        active_futures,
+        strategy_attributes,
+        non_checked_strategies,
+        cancellable_strategies,
+        instrument_ticker, 
+        ) -> None:
+
+
+        # get portfolio data  
+        portfolio = reading_from_pkl_data ("portfolio",
+                                              currency)
+        
+        equity: float = portfolio[0]["equity"]                                       
+                                                            
+        index_price= get_index (data_orders, perpetual_ticker)
+        
+        sub_account = reading_from_pkl_data("sub_accounts",
+                                            currency)
+        
+        sub_account = sub_account[0]
+                    
+        if sub_account:
+            column_trade: str= "instrument_name","label", "amount", "price","side"
+            my_trades_currency: list= await get_query(trade_db_table, 
+                                                        currency, 
+                                                        "all", 
+                                                        "all", 
+                                                        column_trade)
+                                                            
+            column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
+            from_transaction_log = await get_query (transaction_log_trading, 
+                                                        currency, 
+                                                        "all", 
+                                                        "all", 
+                                                        column_list)                                       
+
+            column_order= "instrument_name","label","order_id","amount","timestamp"
+            orders_currency = await get_query(order_db_table, 
+                                                    currency, 
+                                                    "all", 
+                                                    "all", 
+                                                    column_order)     
+        
+            len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (sub_account,
+                                                                        instrument_ticker,
+                                                                        orders_currency)
+
+            size_is_reconciled_each_other = check_whether_size_db_reconciled_each_other(
+                sub_account,
+                instrument_ticker,
+                my_trades_currency,
+                from_transaction_log
+                )
+            
+            log.info (f"index_price is not None {index_price is not None}  {index_price} equity > 0 {equity > 0} ")
+            log.debug (f"size_is_reconciled_each_other {size_is_reconciled_each_other} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
+            
+            if  index_price is not None \
+                and equity > 0 \
+                    and  size_is_reconciled_each_other\
+                        and  len_order_is_reconciled_each_other:
+            
+                TA_result_data_all = await querying_table("market_analytics_json")
+
+                TA_result_data_only=  TA_result_data_all["list_data_only"]
+                
+                TA_result_data = [o for o in TA_result_data_only if currency_upper in o["instrument"]]                                                                                                    
+                                                                
+                tick_TA=  max([o["tick"] for o in TA_result_data])
+                
+                server_time = get_now_unix_time()  
+                
+                delta_time = server_time-tick_TA
+                
+                delta_time_seconds = delta_time/1000                                                
+                                
+                THRESHOLD_DELTA_TIME_SECONDS = 60 
+                log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
+                
+                #something was wrong because perpetuals were actively traded. cancell  orders
+                if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
+                    await self.modify_order_and_db.cancel_the_cancellables (currency,
+                                                                            cancellable_strategies)
+                                                            
+                else:#ensure freshness of ta
+                    
+                    notional: float = compute_notional_value(index_price, equity)
+    
+                    best_ask_prc: float = perpetual_ticker["best_ask_price"] 
+                    
+                    for strategy in active_strategies:
+                        
+                        my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
+                        
+                        orders_currency_strategy = [o for o in orders_currency if strategy in (o["label"]) ]
+                        
+                        orders_currency_strategy_label_closed = [o for o in orders_currency_strategy if "closed" in (o["label"]) ]
+                    
+                        my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy if "open" in (o["label"])]
+                        
+                            
+                        strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
+                        
+                        if "hedgingSpot" in strategy:
+                            
+                            log.debug (f"strategy {strategy} {currency.upper()}-START")
+                            
+                            max_position: int = notional * -1
+                            
+                            hedging = HedgingSpot(strategy,
+                                                    strategy_params,
+                                                    max_position,
+                                                    my_trades_currency_strategy,
+                                                    TA_result_data,
+                                                    index_price,
+                                                    server_time)
+                            
+                            send_order: dict = await hedging.is_send_and_cancel_open_order_allowed (
+                                non_checked_strategies,
+                                instrument_ticker,
+                                active_futures,
+                                orders_currency_strategy,
+                                best_ask_prc,
+                                )
+                            
+                            if send_order["order_allowed"]:
+                                
+                                #log.error  (f"send_order {send_order}")
+                                result_order = await self.modify_order_and_db.if_order_is_true(
+                                    non_checked_strategies,
+                                    send_order, 
+                                    instrument_ticker
+                                    )
+
+                                if result_order:
+                                    
+                                    log.error (f"result_order {result_order}")
+                                    
+                                    data_orders = result_order["result"]
+                                    await self.update_user_changes_non_ws (
+                                        non_checked_strategies,
+                                        data_orders, 
+                                        currency,
+                                        order_db_table,
+                                        trade_db_table,
+                                        archive_db_table,
+                                        transaction_log_trading
+                                        )
+                                    
+                                    await sleep_and_restart ()
+                                
+                                await self.modify_order_and_db.if_cancel_is_true(send_order)
+
+                            if my_trades_currency_strategy_open !=[]:
+                                                                                                            
+                                best_bid_prc: float = perpetual_ticker["best_bid_price"]
+                                
+                                get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_open]
+
+                                closest_price = get_closest_value(get_prices_in_label_transaction_main, best_bid_prc)
+
+                                nearest_transaction_to_index = [o for o in my_trades_currency_strategy_open \
+                                    if o["price"] == closest_price]
+                                #log.debug (f"nearest_transaction_to_index {nearest_transaction_to_index}")
+                                
+                                send_closing_order: dict = await hedging.is_send_exit_order_allowed (
+                                    orders_currency_strategy_label_closed,
+                                    best_bid_prc,
+                                    nearest_transaction_to_index,
+                                    )
+
+                                log.error (f"send_closing_order {send_closing_order}")
+                                result_order = await self.modify_order_and_db.if_order_is_true(
+                                    non_checked_strategies,
+                                    send_closing_order, 
+                                    instrument_ticker,
+                                    )
+                                
+                                if result_order:
+                                    log.error (f"result_order {result_order}")
+                                    data_orders = result_order["result"]
+                                    await self.update_user_changes_non_ws (
+                                        non_checked_strategies,
+                                        data_orders, 
+                                        currency, 
+                                        order_db_table,
+                                        trade_db_table, 
+                                        archive_db_table,
+                                        transaction_log_trading)
+                                    await sleep_and_restart ()
+                                    
+                                await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
+
+                            log.debug (f"strategy {strategy}-DONE")
+            
+    async def update_user_changes(
+        self,
+        non_checked_strategies,
+        data_orders, 
+        currency, 
+        order_db_table,
+        trade_db_table,
+        archive_db_table,
+        transaction_log_trading
+        ) -> None:
+        
+        trades = data_orders["trades"]
+        
+        orders = data_orders["orders"]
+
+        instrument_name = data_orders["instrument_name"]
+        
+        log.critical (f"update_user_changes {instrument_name} -START")
+        
+        log.info (f" {data_orders}")
+        
+        if orders:
+            
+            if trades:
+                for trade in trades:
+                
+                    if f"{currency.upper()}-FS-" not in instrument_name:
+                    
+                        await saving_traded_orders(
+                            trade,
+                            trade_db_table,
+                            order_db_table
+                            )                      
+
+                        await saving_traded_orders(
+                            trade, 
+                            archive_db_table, 
+                            order_db_table
+                            )
+                
+            else:
+                for order in orders:
+                    
+                    await self.saving_order(non_checked_strategies,
+                                            instrument_name,
+                                            order,
+                                            order_db_table)
+                                            
+                await self.modify_order_and_db. resupply_sub_accountdb(currency)            
+        #log.debug (f"positions {positions}")
+        await update_db_pkl(
+            "positions", 
+            data_orders,
+            currency)
+
+        await self.modify_order_and_db.resupply_transaction_log(
+            currency,
+            transaction_log_trading,
+            archive_db_table)
+        
+        #await update_trades_from_exchange (currency,
+        #                                   archive_db_table,
+        #                                   10)
+
+        log.info(f"update_user_changes-END")
+    
+
+    async def saving_order (
+        self,
+        non_checked_strategies,
+        instrument_name,
+        order,
+        order_db_table
+        ) -> None:
+
+                    
+        order_state= order["order_state"]
+        #log.info (f"""order_state == "cancelled" or order_state == "filled" {order_state} {order_state == "cancelled" or order_state == "filled"}""")
+        if order_state == "cancelled" or order_state == "filled":
+            await saving_orders (order_db_table, 
+                                 order)
+        
+        else:
+            
+            label= order["label"]
+
+            order_id= order["order_id"]    
+            
+            label_and_side_consistent= is_label_and_side_consistent(non_checked_strategies,
+                                                                    order)
+            
+            #log.critical (f' ORDERS label_and_side_consistent {label_and_side_consistent} label {label} everything_NOT_consistent {not label_and_side_consistent}')
+            
+            if label_and_side_consistent and label:
+                
+                await saving_orders (order_db_table, order)
+                
+            # check if transaction has label. Provide one if not any
+            if  not label_and_side_consistent:
+            
+                await insert_tables(order_db_table, order)
+
+                await self.modify_order_and_db. cancel_by_order_id (order_id)                    
+            
+                await telegram_bot_sendtext('size or open order is inconsistent', "general_error")
+
+            if not label:
+                
+                await labelling_the_unlabelled_and_resend_it(non_checked_strategies,
+                                                             order,
+                                                             instrument_name)
+    
+                    
+                    
                     
     async def establish_heartbeat(self) -> None:
         """
