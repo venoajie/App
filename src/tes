@@ -6,9 +6,11 @@ from datetime import datetime, timedelta
 import asyncio
 import json
 import functools
+import os
 # installed
 import websockets
 import orjson
+import tomli
 from loguru import logger as log
 from dataclassy import dataclass, fields
 
@@ -46,13 +48,11 @@ from utilities.string_modification import (
     remove_double_brackets_in_list,
     remove_redundant_elements,)
 from websocket_management.ws_management import (
-    cancel_all, 
+    cancel_all,
     currency_inline_with_database_address,
     distribute_ticker_result_as_per_data_type,
-    get_config,
     get_futures_instruments,
-    labelling_the_unlabelled_and_resend_it,
-    on_restart,)
+    labelling_the_unlabelled_and_resend_it,)
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
@@ -92,6 +92,18 @@ def reading_from_pkl_data (end_point,
 
     return data
 
+
+def get_config(file_name: str) -> list:
+    """ """
+    config_path = provide_path_for_file (file_name)
+    
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, "rb") as handle:
+                read= tomli.load(handle)
+                return read
+    except:
+        return []
 
 def compute_notional_value(
     index_price: float,
@@ -199,10 +211,6 @@ class StreamAccountData(ModifyOrderDb):
             order_db_table= "orders_all_json"         
                             
                 
-            # Establish restart procedure
-            await on_restart(currencies,
-                            order_db_table)
-            
             settlement_periods= get_settlement_period (strategy_attributes)
                             
             futures_instruments=await get_futures_instruments (currencies,
