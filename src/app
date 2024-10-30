@@ -524,7 +524,7 @@ class StreamAccountData(ModifyOrderDb):
                                             )#
 
                         except Exception as error:
-                            log.info(error)
+                            await async_raise_error_message(error)
                             telegram_bot_sendtext (error)
                             
 
