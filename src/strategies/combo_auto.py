@@ -246,8 +246,7 @@ class ComboAuto (BasicStrategy):
         my_trades_currency_strategy = self.my_trades_currency_strategy
         
         
-        strategy_label = self.strategy_label
-        future_instrument_name = self.future_ticker["instrument_name"]
+        strategy_label = self.strategy_label        
         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
         combo_instruments_name = self.combo_instruments_name
         
