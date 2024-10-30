@@ -46,8 +46,7 @@ from utilities.string_modification import (
     remove_double_brackets_in_list,
     remove_redundant_elements,)
 from websocket_management.ws_management import (
-    cancel_all,
-    compute_notional_value, 
+    cancel_all, 
     currency_inline_with_database_address,
     distribute_ticker_result_as_per_data_type,
     get_config,
