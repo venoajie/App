@@ -424,7 +424,27 @@ class StreamAccountData(ModifyOrderDb):
                                         await distribute_ticker_result_as_per_data_type(
                                             my_path_ticker, data_orders, instrument_ticker)
                                                     
+                                        try:
+                                        
+                                            if "PERPETUAL" in data_orders["instrument_name"]:
+                                                
+                                                await inserting_open_interest(
+                                                    currency, 
+                                                    WHERE_FILTER_TICK, 
+                                                    TABLE_OHLC1, 
+                                                    data_orders
+                                                    )
+                                                                    
+                                        except Exception as error:
+                                            await cancel_all()
+                                            await async_raise_error_message(
+                                                error, 
+                                                0.1,
+                                                "WebSocket connection - failed to process data - cancel_all",
 
+                                            )#
+
+                                        
                         except Exception as error:
                             await async_raise_error_message(error)
                             telegram_bot_sendtext (error)
