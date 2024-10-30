@@ -178,7 +178,7 @@ def get_index (
     return index_price
 
 @dataclass(unsafe_hash=True, slots=True)
-class main:
+class StreamAccountData(ModifyOrderDb):
 
     sub_account_id: str
     client_id: str = fields 
@@ -944,19 +944,38 @@ class main:
             )
 
 
-if __name__ == "__main__":
-    # Logging
-    logging.basicConfig(
-        level='INFO',
-        format='%(asctime)s | %(levelname)s | %(message)s | %(filename)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-        )
-
-    # DBT LIVE WebSocket Connection URL
-    ws_connection_url: str = 'wss://www.deribit.com/ws/api/v2'
-    # DBT TEST WebSocket Connection URL
-    #ws_connection_url: str = 'wss://test.deribit.com/ws/api/v2'
-    
+def main():
+    # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
     sub_account_id = "deribit-148510"
+    
+    try:
+        #RunningApp()
+        StreamAccountData(sub_account_id)
 
-    main(sub_account_id)
+    except Exception as error:
+        raise_error_message (
+            error, 
+            5,
+            "app"
+            )
+        
+        
+        
+if __name__ == "__main__":
+    try:
+        #main()     
+        asyncio.run(main())
+        
+    except (
+        KeyboardInterrupt, 
+        SystemExit
+        ):
+        asyncio.get_event_loop().run_until_complete(main().stop_ws())
+        
+
+    except Exception as error:
+        raise_error_message(
+        error, 
+        10, 
+        "app"
+        )

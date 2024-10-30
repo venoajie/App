@@ -44,21 +44,18 @@ async def recording_multiple_time_frames(
         delta= (end_timestamp - start_timestamp)/(one_minute * resolution)
         
         if delta > 1:
-            end_point= ohlc_end_point(instrument_ticker,
-                              resolution,
-                              start_timestamp,
-                              end_timestamp,
-                              )
-            
-            log.debug ("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS")
-
-
+            end_point= ohlc_end_point(
+                instrument_ticker,
+                resolution,
+                start_timestamp,
+                end_timestamp,
+                )
+        
             with httpx.Client() as client:
                 ohlc_request = client.get(
                     end_point, 
                     follow_redirects=True
                     ).json()["result"]
-                log.warning (f"ohlc_request {ohlc_request}")
             
             result = [o for o in transform_nested_dict_to_list(ohlc_request) if o["tick"]> start_timestamp][0]
             
@@ -109,10 +106,11 @@ async def replace_previous_ohlc_using_fix_data(
     """ """
     try:
 
-        ohlc_endPoint = ohlc_end_point(instrument_ticker, 
-                                       resolution, 
-                                       last_tick1_fr_sqlite, 
-                                       last_tick_fr_data_orders,)
+        ohlc_endPoint = ohlc_end_point(
+            instrument_ticker, 
+            resolution, 
+            last_tick1_fr_sqlite, 
+            last_tick_fr_data_orders,)
 
         f"https://deribit.com/api/v2/public/get_tradingview_chart_data?end_timestamp={last_tick_fr_data_orders}&instrument_name={instrument_ticker}&resolution=1&start_timestamp={last_tick1_fr_sqlite}"
 
@@ -120,11 +118,16 @@ async def replace_previous_ohlc_using_fix_data(
         with httpx.Client(follow_redirects=True) as client:
             ohlc_request = client.get(ohlc_endPoint).json()["result"]
             
-            log.error (f"ohlc_request {ohlc_request}")
-        
         result = [o for o in transform_nested_dict_to_list(ohlc_request) if o["tick"]== last_tick1_fr_sqlite][0]
         
-        await update_status_data(TABLE_OHLC1, "data", last_tick1_fr_sqlite, WHERE_FILTER_TICK, result, "is")
+        await update_status_data(
+            TABLE_OHLC1, 
+            "data", 
+            last_tick1_fr_sqlite,
+            WHERE_FILTER_TICK,
+            result, 
+            "is"
+            )
         
     except Exception as error:
         await async_raise_error_message(
