@@ -106,9 +106,11 @@ def reading_from_pkl_data(
     ) -> dict:
     """ """
 
-    path: str = provide_path_for_file (end_point,
-                                      currency,
-                                      status)
+    path: str = provide_path_for_file (
+        end_point,
+        currency,
+        status,
+        )
 
     data = read_data(path)
 
@@ -141,8 +143,10 @@ async def update_db_pkl(
     currency
     ) -> None:
 
-    my_path_portfolio = provide_path_for_file (path,
-                                               currency)
+    my_path_portfolio = provide_path_for_file (
+        path,
+        currency
+        )
         
     if currency_inline_with_database_address(
         currency,
@@ -427,9 +431,7 @@ class StreamAccountData(ModifyOrderDb):
                                                     TABLE_OHLC1, 
                                                     data_orders
                                                     )
-                                                
-                                                     
-                                                     
+        
                                                 try:                                          
                                                                                     
                                                     perpetual_ticker= reading_from_pkl_data("ticker",
@@ -467,7 +469,6 @@ class StreamAccountData(ModifyOrderDb):
                                                      
                                                                     
                                         except Exception as error:
-                                            await cancel_all()
                                             await async_raise_error_message(
                                                 error, 
                                                 0.1,
@@ -475,15 +476,23 @@ class StreamAccountData(ModifyOrderDb):
 
                                             )#
 
-
-
-
                     else:
-                        logging.info('WebSocket connection has broken.')
-                        sys.exit(1)
+                        
+                        await async_raise_error_message(error, 
+                            0.1,
+                            "WebSocket connection - failed to process data - cancel_all",
+)
+                        await telegram_bot_sendtext (
+                            error,
+                            "general_error")
+                    
+
                     
             except Exception as error:
-                await raise_error_message (error)
+                await raise_error_message (error, 
+                    0.1,
+                    "WebSocket connection - failed to process data - cancel_all",
+)
                 await telegram_bot_sendtext (
                     error,
                     "general_error")
