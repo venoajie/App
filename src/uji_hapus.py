@@ -183,29 +183,29 @@ def get_index (
         
     return index_price
 
-
+@dataclass(unsafe_hash=True, slots=True)
 class main:
-    def __init__(
-        self,
-        ws_connection_url: str,
-        client_id: str,
-        client_secret: str
-            ) -> None:
-        # Async Event Loop
-        self.loop = asyncio.get_event_loop()
 
-        # Instance Variables
-        self.ws_connection_url: str = ws_connection_url
-        self.client_id: str = client_id
-        self.client_secret: str = client_secret
-        self.websocket_client: websockets.WebSocketClientProtocol = None
-        self.refresh_token: str = None
-        self.refresh_token_expiry_time: int = None
+    sub_account_id: str
+    client_id: str = fields 
+    client_secret: str = fields 
+    modify_order_and_db: object = fields 
+    # Async Event Loop
+    loop = asyncio.get_event_loop()
+    ws_connection_url: str = "wss://www.deribit.com/ws/api/v2"
+    # Instance Variables
+    connection_url: str = "https://www.deribit.com/api/v2/"
+    websocket_client: websockets.WebSocketClientProtocol = None
+    refresh_token: str = None
+    refresh_token_expiry_time: int = None
+            
+    def __post_init__(self):
+        self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
+        self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
+        self.client_secret: str = parse_dotenv(self.sub_account_id)["client_secret"]
 
         # Start Primary Coroutine
-        self.loop.run_until_complete(
-            self.ws_manager()
-            )
+        self.loop.run_until_complete(self.ws_manager())
 
     async def ws_manager(self) -> None:
         async with websockets.connect(
@@ -394,14 +394,7 @@ if __name__ == "__main__":
     ws_connection_url: str = 'wss://www.deribit.com/ws/api/v2'
     # DBT TEST WebSocket Connection URL
     #ws_connection_url: str = 'wss://test.deribit.com/ws/api/v2'
+    
+    sub_account_id = "deribit-148510"
 
-    # DBT Client ID
-    client_id: str = 'nOTD9z-n'
-    # DBT Client Secret
-    client_secret: str = '6euDzySQqjNRAG9Rt8EnFPS4ZVfv1vPtTfVjf_8237c'
-
-    main(
-         ws_connection_url=ws_connection_url,
-         client_id=client_id,
-         client_secret=client_secret
-         )
+    main(sub_account_id)
