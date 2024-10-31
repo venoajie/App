@@ -656,7 +656,7 @@ async def distribute_ticker_result_as_per_data_type(
                 
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
+        (main())
         
     except (
         KeyboardInterrupt, 
