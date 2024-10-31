@@ -451,6 +451,49 @@ async def hedging_spot_currency(
     log.debug (f"strategy {strategy}-DONE")
 
 
+async def reconciling_based_on_sources(
+    modify_order_and_db: object,
+    currency: str,
+    orders_instrument_name: list,
+    sub_account: list,
+    orders_currency: list,
+    order_db_table: str
+    ) -> None:
+    
+
+    for instrument_name in orders_instrument_name:
+        log.error (f"instrument_name {instrument_name}")
+        len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other(
+            sub_account,
+            instrument_name,
+            orders_currency
+            )
+        
+        if not len_order_is_reconciled_each_other:
+            log.warning (f"instrument_name {instrument_name} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
+                        
+            sub_account_from_exchange = await modify_order_and_db.get_sub_account (currency)                        
+                        
+            sub_account_from_exchange = sub_account_from_exchange[0]
+
+            log.error (f"sub_account_from_exchange {sub_account_from_exchange}")
+
+            await reconciling_sub_account_and_db_open_orders(
+                instrument_name,
+                order_db_table,
+                orders_currency,
+                sub_account_from_exchange
+                )
+
+            my_path_sub_account = provide_path_for_file(
+                "sub_accounts",
+                currency)
+            
+            replace_data(
+                my_path_sub_account,
+                sub_account_from_exchange
+                )
+
 async def reconciling_size_and_orders(
     sub_account_id: str,
     config_app: list,
@@ -517,54 +560,34 @@ async def reconciling_size_and_orders(
                     log.debug (f"sub_account {sub_account}")
                     log.debug (f"orders_instrument_name {orders_instrument_name}")
                 
-                    
-                    for instrument_name in orders_instrument_name:
-                        log.error (f"instrument_name {instrument_name}")
-                        len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other(
+                    # sources: order db
+                    if orders_instrument_name:
+                        await reconciling_based_on_sources(
+                            modify_order_and_db,
+                            currency,
+                            orders_instrument_name,
                             sub_account,
-                            instrument_name,
-                            orders_currency
+                            orders_currency,
+                            order_db_table
                             )
-                        
-                        if not len_order_is_reconciled_each_other:
-                            log.warning (f"instrument_name {instrument_name} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
-                                        
-                            sub_account_from_exchange = await modify_order_and_db.get_sub_account (currency)                        
-                                        
-                            sub_account_from_exchange = sub_account_from_exchange[0]
+                    
+                
+                    sub_account_orders = sub_account["open_orders"]
+                    
+                    sub_account_instrument = [o for o in sub_account_orders \
+                        if o["instrument_name"] == instrument_name ]
 
-                            log.error (f"sub_account_from_exchange {sub_account_from_exchange}")
-
-                            await reconciling_sub_account_and_db_open_orders(
-                                instrument_name,
-                                order_db_table,
-                                orders_currency,
-                                sub_account_from_exchange
-                                )
-
-                            my_path_sub_account = provide_path_for_file(
-                                "sub_accounts",
-                                currency)
-                            
-                            replace_data(
-                                my_path_sub_account,
-                                sub_account_from_exchange
-                                )
-
-                        else: 
-                            await hedging_spot_currency(
-                                currency,
-                                currencies,
-                                config_app,
-                                modify_order_and_db,
-                                orders_currency,
-                                my_trades_currency,
-                                order_db_table,
-                                trade_db_table,
-                                archive_db_table,
-                                transaction_log_trading_table
+                    # sources: sub account
+                    if sub_account_instrument:
+                        await reconciling_based_on_sources(
+                            modify_order_and_db,
+                            currency,
+                            orders_instrument_name,
+                            sub_account,
+                            orders_currency,
+                            order_db_table
                             )
-                                        
+                    
                     my_trades_instrument_name = [o["instrument_name"] for o in my_trades_currency]
                                     
                     for instrument_name in my_trades_instrument_name:
@@ -602,7 +625,19 @@ async def reconciling_size_and_orders(
                             
                             await modify_order_and_db.resupply_sub_accountdb (currency)
     
-            
+                    await hedging_spot_currency(
+                        currency,
+                        currencies,
+                        config_app,
+                        modify_order_and_db,
+                        orders_currency,
+                        my_trades_currency,
+                        order_db_table,
+                        trade_db_table,
+                        archive_db_table,
+                        transaction_log_trading_table
+                    )
+                                
             await asyncio.sleep(idle_time)
         
     
