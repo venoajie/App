@@ -633,7 +633,7 @@ async def clean_up_closed_transactions(
     where_filter = f"trade_id"
 
     column_list: str= "instrument_name","label", "amount", where_filter
-    
+        
     if transaction_all is None:
         
         #querying tables
@@ -649,13 +649,13 @@ async def clean_up_closed_transactions(
         
         if transaction_all:
                         
-            transactions_all: list = [o for o in transaction_all \
+            transaction_all: list = [o for o in transaction_all \
             if instrument_name in o["instrument_name"]]
 
     # filtered transactions with closing labels
     if transaction_all:
         
-        transaction_with_closed_labels = get_transactions_with_closed_label(transactions_all)
+        transaction_with_closed_labels = get_transactions_with_closed_label(transaction_all)
                                
         labels_only = remove_redundant_elements([o["label"] for o in transaction_with_closed_labels])
 
@@ -665,7 +665,7 @@ async def clean_up_closed_transactions(
 
             for label in labels_only:
                 
-                transactions_under_label_main = get_label_main(transactions_all,  
+                transactions_under_label_main = get_label_main(transaction_all,  
                                                                label)
                 log.error(f"label {label}")
                 #log.error(f"transactions_under_label_main {transactions_under_label_main}")
