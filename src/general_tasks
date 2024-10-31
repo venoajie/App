@@ -288,6 +288,8 @@ async def hedging_spot_currency(
     
     equity: float = portfolio[0]["equity"]    
     
+    log.error (f"perpetual_ticker {perpetual_ticker}")
+    
     perpetual_ticker = perpetual_ticker[0]            
     
     index_price: float = perpetual_ticker ["index_price"]
