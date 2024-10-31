@@ -17,7 +17,6 @@ import websockets
 # user defined formula
 from configuration import id_numbering, config
 from db_management.sqlite_management import (
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     insert_tables,)
 from strategies.basic_strategy import(
     is_label_and_side_consistent,)
@@ -31,8 +30,8 @@ from transaction_management.deribit.orders_management import (
     saving_traded_orders,
     saving_orders,)
 from utilities.pickling import (
-    replace_data,
-    )
+    read_data,
+    replace_data,)
 from utilities.system_tools import (
     provide_path_for_file,
     async_raise_error_message,
@@ -44,14 +43,11 @@ from utilities.string_modification import (
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
-from websocket_management.cleaning_up_transactions import (
-    clean_up_closed_transactions,)
 from websocket_management.ws_management import (
-    currency_inline_with_database_address,
-    distribute_ticker_result_as_per_data_type,
-    get_futures_instruments,
-    labelling_the_unlabelled_and_resend_it,)
-
+    get_futures_instruments,)
+from transaction_management.deribit.managing_deribit import (
+    ModifyOrderDb,
+    currency_inline_with_database_address,)
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
@@ -583,7 +579,7 @@ class StreamAccountData(ModifyOrderDb):
 
             if not label:
                 
-                await labelling_the_unlabelled_and_resend_it(
+                await self.modify_order_and_db. labelling_the_unlabelled_and_resend_it(
                     non_checked_strategies,
                     order,
                     instrument_name)
@@ -602,6 +598,40 @@ def main():
             "app"
             )
         
+async def distribute_ticker_result_as_per_data_type(
+    my_path_ticker: str, 
+    data_orders: dict, 
+    instrument_name: str
+    ) -> None:
+    """ """
+
+    try:
+        # ticker: list = pickling.read_data(my_path_ticker)
+
+        if data_orders["type"] == "snapshot":
+            replace_data(
+                my_path_ticker, 
+                data_orders
+                )
+
+            # ticker_fr_snapshot: list = pickling.read_data(my_path_ticker)
+
+        else:
+            ticker_change: list = read_data(my_path_ticker)
+            if ticker_change != []:
+                # log.debug (ticker_change)
+
+                for item in data_orders:
+                    ticker_change[0][item] = data_orders[item]
+                    replace_data(my_path_ticker, ticker_change)
+
+    except Exception as error:
+        await async_raise_error_message(
+            error,
+            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
+        )
+
+
                 
 if __name__ == "__main__":
     try:
