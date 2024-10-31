@@ -12,9 +12,9 @@ while true; do
                 rclone delete remote:remote-sqlite/ --min-age 1d -vv
 
                 echo "Delete remaining .bak files..."
-                cd databases
-                rm *.bak
-                cd ..
+                #cd databases
+                rm databases/*.bak
+                #cd ..
                 
                 echo "sleep 15 minutes"
                 sleep 15m
