@@ -557,7 +557,6 @@ async def reconciling_size_and_orders(
                     orders_instrument_name = [o["instrument_name"] for o in orders_currency]
                     
                     log.debug (f"sub_account {sub_account}")
-                    log.debug (f"orders_instrument_name {orders_instrument_name}")
                 
                     # sources: order db
                     if orders_instrument_name:
