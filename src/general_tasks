@@ -23,6 +23,8 @@ from transaction_management.deribit.api_requests import (
     get_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb)
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
 from utilities.number_modification import get_closest_value
 from utilities.pickling import (
     read_data,
@@ -639,6 +641,10 @@ async def reconciling_size_and_orders(
     
     except Exception as error:
         await async_raise_error_message(error)
+        await telegram_bot_sendtext (
+                    error,
+                    "general_error")
+                
 
             
 async def main():
