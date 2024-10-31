@@ -223,17 +223,18 @@ async def reconciling_size_and_orders(
     modify_order_and_db = ModifyOrderDb(sub_account_id)
                 
     try:
-        
-        sub_account = reading_from_pkl_data(
-            "sub_accounts",
-            currency)
-        
-        sub_account = sub_account[0]
-                    
-        
-        if sub_account:
             
-            for currency in currencies:
+        for currency in currencies:
+            
+                
+            sub_account = reading_from_pkl_data(
+                "sub_accounts",
+                currency)
+            
+            sub_account = sub_account[0]
+                    
+            
+            if sub_account:
 
                 trade_db_table= "my_trades_all_json"
                 
@@ -332,8 +333,8 @@ async def reconciling_size_and_orders(
                         
                         await modify_order_and_db.resupply_sub_accountdb (currency)
             
-        log.debug (f"size_is_reconciled_each_other {size_is_reconciled_each_other} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
-        
+            log.debug (f"size_is_reconciled_each_other {size_is_reconciled_each_other} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
+            
         await asyncio.sleep(idle_time)
 
     except Exception as error:
