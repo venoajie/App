@@ -479,6 +479,8 @@ async def reconciling_size_and_orders(
                 
                 sub_account = sub_account[0]
                 
+                log.debug (f"sub_account {sub_account}")
+                
                 if sub_account:
 
                     trade_db_table= "my_trades_all_json"
