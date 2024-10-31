@@ -451,8 +451,8 @@ async def hedging_spot_currency(
                         await sleep_and_restart ()
                         
                     await modify_order_and_db.if_cancel_is_true(send_closing_order)
-
-        log.debug (f"strategy {strategy}-DONE")
+    
+            log.debug (f"strategy {strategy}-DONE")
     
     except Exception as error:
         await async_raise_error_message(error)
