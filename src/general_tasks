@@ -278,10 +278,10 @@ async def hedging_spot_currency(
         instrument_ticker
         )
     
-    index_price: float = get_index (
-        data_orders, 
-        perpetual_ticker
-        )
+    log.error (f"perpetual_ticker {perpetual_ticker}")
+    
+    index_price: float = perpetual_ticker ["index_price"]
+    log.error (f"perpetual_ticker {perpetual_ticker}")
                         
     # get portfolio data  
     portfolio: list = reading_from_pkl_data(
