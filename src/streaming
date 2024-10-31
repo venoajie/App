@@ -21,8 +21,6 @@ from db_management.sqlite_management import (
 from strategies.basic_strategy import(
     is_label_and_side_consistent,)
 from transaction_management.deribit.api_requests import (
-    ModifyOrderDb,)
-from transaction_management.deribit.api_requests import (
     get_instruments,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
