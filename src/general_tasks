@@ -292,21 +292,14 @@ async def hedging_spot_currency(
         
         log.error (f"perpetual_ticker {perpetual_ticker}")
         
-        try:
-            perpetual_ticker = perpetual_ticker[0]          
-            index_price: float = perpetual_ticker ["index_price"]  
-        
-        except:
-            perpetual_ticker = False         
-        
-        
                         
-        if  index_price \
-            and equity > 0\
+        if  equity > 0\
                 and perpetual_ticker:
+                    
                 
+            perpetual_ticker = perpetual_ticker[0]
             strategy="hedgingSpot"
-            
+            index_price: float = perpetual_ticker ["index_price"]  
             log.debug (f"strategy {strategy} {currency.upper()}-START")
             
             strategy_attributes = config_app["strategies"]
