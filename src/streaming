@@ -255,7 +255,9 @@ class StreamAccountData(ModifyOrderDb):
                                     else:
                                         expires_in: int = message["result"]["expires_in"] - 240
 
-                                    log.error (f"datetime.utcnow() {datetime.utcnow()} {datetime.now(datetime.UTC)} {datetime.now(timezone.utc)}")
+                                    log.error (f"datetime.utcnow() {datetime.utcnow()}")
+                                    log.error (f" {datetime.now(timezone.utc)}")
+                                    log.error (f" {datetime.datetime.now(datetime.UTC)}")
                                     self.refresh_token_expiry_time = datetime.utcnow() + timedelta(
                                         seconds=expires_in
                                     )
