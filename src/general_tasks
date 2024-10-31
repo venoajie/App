@@ -338,7 +338,7 @@ async def hedging_spot_currency(
         
         delta_time_seconds = delta_time/1000                                                
                         
-        THRESHOLD_DELTA_TIME_SECONDS = 60 
+        THRESHOLD_DELTA_TIME_SECONDS = 120
         log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
         
         #something was wrong because perpetuals were actively traded. cancell  orders
