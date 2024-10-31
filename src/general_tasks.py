@@ -338,12 +338,12 @@ async def reconciling_size_and_orders(
                             )
                         
                         await modify_order_and_db.resupply_sub_accountdb (currency)
-            
-            
-            await asyncio.sleep(idle_time)
-
     except Exception as error:
         await async_raise_error_message(error)
+
+            
+            
+    await asyncio.sleep(idle_time)
 
             
 async def main():
