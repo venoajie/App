@@ -233,8 +233,6 @@ async def reconciling_size_and_orders(
             
             sub_account = sub_account[0]
             
-            log.error (f"sub_account {sub_account}")
-            
             if sub_account:
 
                 trade_db_table= "my_trades_all_json"
@@ -280,7 +278,11 @@ async def reconciling_size_and_orders(
 
                     if not len_order_is_reconciled_each_other:
                                     
-                        sub_account_from_exchange = await modify_order_and_db.get_sub_account (currency)
+                        sub_account_from_exchange = await modify_order_and_db.get_sub_account (currency)                        
+                                    
+                        sub_account_from_exchange = sub_account_from_exchange[0]
+
+                        log.error (f"sub_account_from_exchange {sub_account_from_exchange}")
 
                         await reconciling_sub_account_and_db_open_orders (
                             instrument_name,
