@@ -438,9 +438,9 @@ class StreamAccountData(ModifyOrderDb):
         the WebSocket Connection's authentication.
         """
         while True:
+            now_utc = datetime.now(timezone.utc)
             if self.refresh_token_expiry_time is not None:
-                log.error (f"datetime.utcnow() {datetime.utcnow()} {(datetime.UTC)}")
-                if datetime.utcnow() > self.refresh_token_expiry_time:
+                if now_utc > self.refresh_token_expiry_time:
                     
                     msg: dict = {
                         "jsonrpc": "2.0",
