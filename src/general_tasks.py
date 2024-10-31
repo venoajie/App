@@ -277,7 +277,8 @@ async def reconciling_size_and_orders(
                             orders_currency
                             )
                         
-                        log.warning (f"instrument_name {instrument_name} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
+                        if not len_order_is_reconciled_each_other:
+                            log.warning (f"instrument_name {instrument_name} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
 
                         if not len_order_is_reconciled_each_other:
                                         
@@ -314,7 +315,8 @@ async def reconciling_size_and_orders(
                             from_transaction_log
                             )
                         
-                        log.debug (f"instrument_name {instrument_name} size_is_reconciled_each_other {size_is_reconciled_each_other}")
+                        if not size_is_reconciled_each_other:
+                            log.debug (f"instrument_name {instrument_name} size_is_reconciled_each_other {size_is_reconciled_each_other}")
 
                         if not size_is_reconciled_each_other: 
                             
