@@ -414,6 +414,10 @@ class StreamAccountData(ModifyOrderDb):
             },
         }
         
+        message = await self.websocket_client.send(json.dumps(msg))
+        
+        log.error (f"message {message}")
+        
         await self.websocket_client.send(json.dumps(msg))
 
     async def ws_refresh_auth(self) -> None:
