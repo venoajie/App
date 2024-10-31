@@ -6,7 +6,7 @@
 import asyncio
 
 #import json
-from loguru import logger as log
+#from loguru import logger as log
 import httpx
 
 from db_management.sqlite_management import (
@@ -24,10 +24,11 @@ def ohlc_end_point(
     start_timestamp: int,
     end_timestamp: int,
     )-> str:
-
-    url=f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
     
-    return  f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
+
+    url=(f"https://deribit.com/api/v2/public/get_tradingview_chart_data?")
+    
+    return  (f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}")
 
 async def recording_multiple_time_frames(
     instrument_ticker: str,
@@ -59,7 +60,10 @@ async def recording_multiple_time_frames(
             
             result = [o for o in transform_nested_dict_to_list(ohlc_request) if o["tick"]> start_timestamp][0]
             
-            await insert_tables(table_ohlc, result)
+            await insert_tables(
+                table_ohlc,
+                result
+                )
         
     
 
@@ -71,10 +75,14 @@ async def recording_multiple_time_frames(
     
 
 
-async def last_open_interest_tick_fr_sqlite(last_tick_query_ohlc1) -> float:
+async def last_open_interest_tick_fr_sqlite(
+    last_tick_query_ohlc1
+    ) -> float:
     """ """
     try:
-        last_open_interest = await executing_query_with_return(last_tick_query_ohlc1)
+        last_open_interest = await executing_query_with_return(
+            last_tick_query_ohlc1
+            )
 
     except Exception as error:
         await async_raise_error_message(
@@ -87,7 +95,9 @@ async def last_open_interest_tick_fr_sqlite(last_tick_query_ohlc1) -> float:
 async def last_tick_fr_sqlite(last_tick_query_ohlc1) -> int:
     """ """
     try:
-        last_tick1_fr_sqlite = await executing_query_with_return(last_tick_query_ohlc1)
+        last_tick1_fr_sqlite = await executing_query_with_return(
+            last_tick_query_ohlc1
+            )
 
     except Exception as error:
         await async_raise_error_message(
@@ -110,15 +120,15 @@ async def replace_previous_ohlc_using_fix_data(
             instrument_ticker, 
             resolution, 
             last_tick1_fr_sqlite, 
-            last_tick_fr_data_orders,)
+            last_tick_fr_data_orders,
+            )
 
-        f"https://deribit.com/api/v2/public/get_tradingview_chart_data?end_timestamp={last_tick_fr_data_orders}&instrument_name={instrument_ticker}&resolution=1&start_timestamp={last_tick1_fr_sqlite}"
-
-        
         with httpx.Client(follow_redirects=True) as client:
-            ohlc_request = client.get(ohlc_endPoint).json()["result"]
+            ohlc_request = client.get(
+                ohlc_endPoint
+                ).json()["result"]
             
-        result = [o for o in transform_nested_dict_to_list(ohlc_request) if o["tick"]== last_tick1_fr_sqlite][0]
+        result = [o for o in transform_nested_dict_to_list(ohlc_request) if o["tick"] == last_tick1_fr_sqlite][0]
         
         await update_status_data(
             TABLE_OHLC1, 
@@ -200,17 +210,29 @@ async def inserting_open_interest(
     """ """
     try:
 
-        if currency_inline_with_database_address(currency,
-                                                 TABLE_OHLC1) \
-                                                     and "open_interest" in data_orders:
+        if currency_inline_with_database_address(
+            currency,
+            TABLE_OHLC1) \
+                and "open_interest" in data_orders:
         
             open_interest = data_orders["open_interest"]
                             
-            last_tick_query_ohlc1: str = querying_arithmetic_operator("tick", "MAX", TABLE_OHLC1)
+            last_tick_query_ohlc1: str = querying_arithmetic_operator(
+                "tick",
+                "MAX", 
+                TABLE_OHLC1
+                )
 
             last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
                 
-            await update_status_data(TABLE_OHLC1, "open_interest", last_tick1_fr_sqlite, WHERE_FILTER_TICK, open_interest, "is")
+            await update_status_data(
+                TABLE_OHLC1,
+                "open_interest", 
+                last_tick1_fr_sqlite,
+                WHERE_FILTER_TICK,
+                open_interest, 
+                "is"
+                )
 
     except Exception as error:
         print (f"error allocating ohlc {error}")
