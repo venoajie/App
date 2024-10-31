@@ -370,6 +370,11 @@ class StreamAccountData(ModifyOrderDb):
         }
 
         try:
+            
+            message = await self.websocket_client.send(json.dumps(msg))
+            
+            log.error (f"message {message}")
+        
             await self.websocket_client.send(json.dumps(msg))
         except Exception as error:
             log.warning(error)
@@ -391,6 +396,10 @@ class StreamAccountData(ModifyOrderDb):
         #log.error (f" orjson_dump {orjson_dump}")
         json_dump= (json.dumps(msg))
         #log.error (f" json_dump {json_dump}")
+        
+        message = await self.websocket_client.send(json.dumps(msg))
+        
+        log.error (f"message {message}")
         
         try:
             await self.websocket_client.send(json.dumps(msg))
@@ -414,6 +423,7 @@ class StreamAccountData(ModifyOrderDb):
             },
         }
         
+        
         message = await self.websocket_client.send(json.dumps(msg))
         
         log.error (f"message {message}")
@@ -428,6 +438,8 @@ class StreamAccountData(ModifyOrderDb):
         while True:
             if self.refresh_token_expiry_time is not None:
                 if datetime.utcnow() > self.refresh_token_expiry_time:
+                    
+                    log.error (f"datetime.utcnow() {datetime.utcnow()}")
                     msg: dict = {
                         "jsonrpc": "2.0",
                         "id": 9929,
@@ -437,6 +449,11 @@ class StreamAccountData(ModifyOrderDb):
                             "refresh_token": self.refresh_token,
                         },
                     }
+                    
+                    message = await self.websocket_client.send(json.dumps(msg))
+                    
+                    log.error (f"message {message}")
+                    
 
                     await self.websocket_client.send(json.dumps(msg))
 
