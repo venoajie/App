@@ -469,23 +469,29 @@ class StreamAccountData(ModifyOrderDb):
                                                      
                                                                     
                                         except Exception as error:
+                                            
+                                            await telegram_bot_sendtext (
+                                                error,
+                                                "general_error")
+                                            
                                             await async_raise_error_message(
                                                 error, 
                                                 0.1,
-                                                "WebSocket connection - failed to process data - cancel_all",
+                                                "WebSocket connection - failed to process data",
 
                                             )
 
                     
             except Exception as error:
-                await raise_error_message (error, 
-                    0.1,
-                    "WebSocket connection - failed to process data - cancel_all",
-)
+
                 await telegram_bot_sendtext (
                     error,
                     "general_error")
-                    
+                
+                await raise_error_message (error, 
+                    0.1,
+                    "WebSocket connection - failed to process data",
+)
                     
 
     async def update_user_changes_non_ws(
