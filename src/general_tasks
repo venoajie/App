@@ -301,7 +301,7 @@ async def hedging_spot_currency(
         
         
                         
-        if  index_price is not None \
+        if  index_price \
             and equity > 0\
                 and perpetual_ticker:
                 
