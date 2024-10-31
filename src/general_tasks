@@ -479,8 +479,6 @@ async def reconciling_size_and_orders(
                 
                 sub_account = sub_account[0]
                 
-                log.debug (f"sub_account {sub_account}")
-                
                 if sub_account:
 
                     trade_db_table= "my_trades_all_json"
@@ -515,6 +513,10 @@ async def reconciling_size_and_orders(
                                                             column_order)     
                 
                     orders_instrument_name = [o["instrument_name"] for o in orders_currency]
+                    
+                    log.debug (f"sub_account {sub_account}")
+                    log.debug (f"orders_instrument_name {orders_instrument_name}")
+                
                     
                     for instrument_name in orders_instrument_name:
                         log.error (f"instrument_name {instrument_name}")
