@@ -274,7 +274,8 @@ async def reconciling_size_and_orders(
                         instrument_name,
                         orders_currency
                         )
-
+                    
+                    log.warning (f"instrument_name {instrument_name} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
 
                     if not len_order_is_reconciled_each_other:
                                     
@@ -311,6 +312,8 @@ async def reconciling_size_and_orders(
                         from_transaction_log
                         )
                     
+                    log.debug (f"instrument_name {instrument_name} size_is_reconciled_each_other {size_is_reconciled_each_other}")
+
                     if not size_is_reconciled_each_other: 
                         
                         await modify_order_and_db.update_trades_from_exchange (
@@ -336,7 +339,6 @@ async def reconciling_size_and_orders(
                         
                         await modify_order_and_db.resupply_sub_accountdb (currency)
             
-            log.debug (f"size_is_reconciled_each_other {size_is_reconciled_each_other} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
             
         await asyncio.sleep(idle_time)
 
