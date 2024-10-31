@@ -223,127 +223,130 @@ async def reconciling_size_and_orders(
     modify_order_and_db = ModifyOrderDb(sub_account_id)
                 
     try:
+        
+        while True:
             
-        for currency in currencies:
-            
+            for currency in currencies:
                 
-            sub_account = reading_from_pkl_data(
-                "sub_accounts",
-                currency)
-            
-            sub_account = sub_account[0]
-            
-            if sub_account:
-
-                trade_db_table= "my_trades_all_json"
-                
-                order_db_table= "orders_all_json"
-                
-                currency_lower = currency.lower ()
-                
-                archive_db_table= f"my_trades_all_{currency_lower}_json"                    
-                
-                transaction_log_trading= f"transaction_log_{currency_lower}_json"
-                
-                column_trade: str= "instrument_name","label", "amount", "price","side"
-                my_trades_currency: list= await get_query(trade_db_table, 
-                                                            currency, 
-                                                            "all", 
-                                                            "all", 
-                                                            column_trade)
-                                                                
-                column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
-                from_transaction_log = await get_query (transaction_log_trading, 
-                                                            currency, 
-                                                            "all", 
-                                                            "all", 
-                                                            column_list)                                       
-
-                column_order= "instrument_name","label","order_id","amount","timestamp"
-                orders_currency = await get_query(order_db_table, 
-                                                        currency, 
-                                                        "all", 
-                                                        "all", 
-                                                        column_order)     
-            
-                orders_instrument_name = [o["instrument_name"] for o in orders_currency]
-                
-                for instrument_name in orders_instrument_name:
-                    len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
-                        sub_account,
-                        instrument_name,
-                        orders_currency
-                        )
                     
-                    log.warning (f"instrument_name {instrument_name} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
+                sub_account = reading_from_pkl_data(
+                    "sub_accounts",
+                    currency)
+                
+                sub_account = sub_account[0]
+                
+                if sub_account:
 
-                    if not len_order_is_reconciled_each_other:
-                                    
-                        sub_account_from_exchange = await modify_order_and_db.get_sub_account (currency)                        
-                                    
-                        sub_account_from_exchange = sub_account_from_exchange[0]
+                    trade_db_table= "my_trades_all_json"
+                    
+                    order_db_table= "orders_all_json"
+                    
+                    currency_lower = currency.lower ()
+                    
+                    archive_db_table= f"my_trades_all_{currency_lower}_json"                    
+                    
+                    transaction_log_trading= f"transaction_log_{currency_lower}_json"
+                    
+                    column_trade: str= "instrument_name","label", "amount", "price","side"
+                    my_trades_currency: list= await get_query(trade_db_table, 
+                                                                currency, 
+                                                                "all", 
+                                                                "all", 
+                                                                column_trade)
+                                                                    
+                    column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
+                    from_transaction_log = await get_query (transaction_log_trading, 
+                                                                currency, 
+                                                                "all", 
+                                                                "all", 
+                                                                column_list)                                       
 
-                        log.error (f"sub_account_from_exchange {sub_account_from_exchange}")
-
-                        await reconciling_sub_account_and_db_open_orders (
+                    column_order= "instrument_name","label","order_id","amount","timestamp"
+                    orders_currency = await get_query(order_db_table, 
+                                                            currency, 
+                                                            "all", 
+                                                            "all", 
+                                                            column_order)     
+                
+                    orders_instrument_name = [o["instrument_name"] for o in orders_currency]
+                    
+                    for instrument_name in orders_instrument_name:
+                        len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
+                            sub_account,
                             instrument_name,
-                            order_db_table,
-                            orders_currency,
-                            sub_account_from_exchange
-                            )
-
-                        my_path_sub_account = provide_path_for_file(
-                            "sub_accounts",
-                            currency)
-                        
-                        replace_data(
-                            my_path_sub_account,
-                            sub_account_from_exchange
-                            )
-
-                my_trades_instrument_name = [o["instrument_name"] for o in my_trades_currency]
-                                
-                for instrument_name in my_trades_instrument_name:
-                    
-                    size_is_reconciled_each_other = check_whether_size_db_reconciled_each_other(
-                        sub_account,
-                        instrument_name,
-                        my_trades_currency,
-                        from_transaction_log
-                        )
-                    
-                    log.debug (f"instrument_name {instrument_name} size_is_reconciled_each_other {size_is_reconciled_each_other}")
-
-                    if not size_is_reconciled_each_other: 
-                        
-                        await modify_order_and_db.update_trades_from_exchange (
-                            currency,
-                            archive_db_table,
-                            20
+                            orders_currency
                             )
                         
-                        unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_name)  
-                                    
-                        for transaction  in unrecorded_transactions:
+                        log.warning (f"instrument_name {instrument_name} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
 
-                            await insert_tables(
-                                trade_db_table,
-                                transaction
+                        if not len_order_is_reconciled_each_other:
+                                        
+                            sub_account_from_exchange = await modify_order_and_db.get_sub_account (currency)                        
+                                        
+                            sub_account_from_exchange = sub_account_from_exchange[0]
+
+                            log.error (f"sub_account_from_exchange {sub_account_from_exchange}")
+
+                            await reconciling_sub_account_and_db_open_orders (
+                                instrument_name,
+                                order_db_table,
+                                orders_currency,
+                                sub_account_from_exchange
                                 )
-                                                
-                        await modify_order_and_db.resupply_transaction_log(
-                            currency,
-                            transaction_log_trading,
-                            archive_db_table
+
+                            my_path_sub_account = provide_path_for_file(
+                                "sub_accounts",
+                                currency)
+                            
+                            replace_data(
+                                my_path_sub_account,
+                                sub_account_from_exchange
+                                )
+
+                    my_trades_instrument_name = [o["instrument_name"] for o in my_trades_currency]
+                                    
+                    for instrument_name in my_trades_instrument_name:
+                        
+                        size_is_reconciled_each_other = check_whether_size_db_reconciled_each_other(
+                            sub_account,
+                            instrument_name,
+                            my_trades_currency,
+                            from_transaction_log
                             )
                         
-                        await modify_order_and_db.resupply_sub_accountdb (currency)
+                        log.debug (f"instrument_name {instrument_name} size_is_reconciled_each_other {size_is_reconciled_each_other}")
+
+                        if not size_is_reconciled_each_other: 
+                            
+                            await modify_order_and_db.update_trades_from_exchange (
+                                currency,
+                                archive_db_table,
+                                20
+                                )
+                            
+                            unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_name)  
+                                        
+                            for transaction  in unrecorded_transactions:
+
+                                await insert_tables(
+                                    trade_db_table,
+                                    transaction
+                                    )
+                                                    
+                            await modify_order_and_db.resupply_transaction_log(
+                                currency,
+                                transaction_log_trading,
+                                archive_db_table
+                                )
+                            
+                            await modify_order_and_db.resupply_sub_accountdb (currency)
+    
+            
+            await asyncio.sleep(idle_time)
+        
+    
     except Exception as error:
         await async_raise_error_message(error)
-
-            
-            
-    await asyncio.sleep(idle_time)
 
             
 async def main():
