@@ -658,7 +658,7 @@ async def main():
         reconciling_size_and_orders(
             sub_account_id,
             config_app,
-            1
+            2
             ),
         update_ohlc_and_market_condition(
             tradable_config_app, 
