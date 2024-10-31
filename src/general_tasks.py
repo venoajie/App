@@ -232,7 +232,8 @@ async def reconciling_size_and_orders(
                 currency)
             
             sub_account = sub_account[0]
-                    
+            
+            log.error (f"sub_account {sub_account}")
             
             if sub_account:
 
