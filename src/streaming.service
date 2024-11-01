@@ -1,0 +1,27 @@
+[Unit]
+Description= running streaming from websocket service
+After=multi-user.target
+FailureAction=reboot
+StartLimitAction=reboot
+After==multi-user.target
+#OnFailure=my-app-recovery.service
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/uv run python3 /home/ubuntu/yApp/src/streaming
+WorkingDirectory=/home/ubuntu/App/src
+User=ubuntu
+StandardOutput=null
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+
+
+sudo vim /etc/systemd/system/streaming.service
+sudo chmod +x /etc/systemd/system/streaming.service
+sudo systemctl daemon-reload
+sudo systemctl enable streaming.service
+sudo systemctl start streaming.service
+ 

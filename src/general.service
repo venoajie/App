@@ -1,0 +1,26 @@
+[Unit]
+Description= running general tasks service
+After=multi-user.target
+FailureAction=reboot
+StartLimitAction=reboot
+After==multi-user.target
+#OnFailure=my-app-recovery.service
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/uv run python3 /home/ubuntu/App/src/general_tasks
+WorkingDirectory=/home/ubuntu/App/src
+User=ubuntu
+StandardOutput=null
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+sudo vim /etc/systemd/system/general_tasks.service
+sudo chmod +x /etc/systemd/system/general_tasks.service
+sudo systemctl daemon-reload
+sudo systemctl enable general_tasks.service
+sudo systemctl start general_tasks.service
+ 
