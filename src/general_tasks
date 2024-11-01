@@ -610,7 +610,7 @@ async def reconciling_size_and_orders(
                         if not size_is_reconciled_each_other:
                             
                                     
-                            column_trade: str= "instrument_name","label","instrument_name"
+                            column_trade: str= "instrument_name","label","timestamp"
                             my_trades_instrument_name: list= await get_query(archive_db_table, 
                                                                         instrument_name, 
                                                                         "all", 
