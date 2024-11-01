@@ -207,7 +207,8 @@ class ModifyOrderDb(SendApiRequest):
         self,
         currency: str,
         transaction_log_trading: str,
-        archive_db_table: str)-> list:
+        archive_db_table: str,
+        count: int = 1000)-> list:
         """ """
 
         #log.warning(f"resupply {currency.upper()} TRANSACTION LOG db-START")
@@ -233,7 +234,7 @@ class ModifyOrderDb(SendApiRequest):
         transaction_log= await self.private_data.get_transaction_log (
                         currency, 
                         first_tick_fr_sqlite, 
-                        max_closed_transactions_downloaded_from_sqlite)
+                        count)
                 
         if transaction_log:
             await saving_transaction_log (
