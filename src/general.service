@@ -3,7 +3,6 @@ Description= running general tasks service
 After=multi-user.target
 FailureAction=reboot
 StartLimitAction=reboot
-After==multi-user.target
 #OnFailure=my-app-recovery.service
 
 [Service]

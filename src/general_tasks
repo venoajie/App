@@ -609,15 +609,29 @@ async def reconciling_size_and_orders(
                         
                         if not size_is_reconciled_each_other:
                             log.debug (f"instrument_name {instrument_name} size_is_reconciled_each_other {size_is_reconciled_each_other}")
+                            my_trades_instrument_name = [o for o in my_trades_currency\
+                                if o["instrument_name"]==instrument_name]
+                            
+                            from_transaction_log_instrument =([o for o in from_transaction_log \
+            if o["instrument_name"] == instrument_name])
 
-                            await modify_order_and_db.update_trades_from_exchange (
-                                currency,
-                                archive_db_table,
-                                20
-                                )
+                            
+                            last_time_stamp_log = [] if from_transaction_log_instrument == []\
+                else (max([(o["timestamp"]) for o in from_transaction_log_instrument ]))
+            
+                            last_time_my_trades = [] if my_trades_instrument_name == []\
+                else (max([(o["timestamp"]) for o in my_trades_instrument_name ]))
+            
+                            log.debug (f"last_time_stamp_log {last_time_stamp_log} last_time_my_trades {last_time_my_trades}")
+
+                            #await modify_order_and_db.update_trades_from_exchange (
+                            #    currency,
+                            #    archive_db_table,
+                            #    40
+                            #    )
                             
                             unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_name)  
-                                        
+                            
                             for transaction  in unrecorded_transactions:
 
                                 await insert_tables(
