@@ -35,7 +35,10 @@ async def private_connection (
     connection_url: str = "https://www.deribit.com/api/v2/",
     )-> None:
 
-    id = id_numbering.id(endpoint, endpoint)
+    id = id_numbering.id(
+        endpoint, 
+        endpoint
+        )
     
     payload: Dict = {
         "jsonrpc": "2.0",
@@ -50,7 +53,10 @@ async def private_connection (
     async with aiohttp.ClientSession() as session:
         async with session.post(
             connection_url + endpoint,
-            auth=BasicAuth(client_id, client_secret),
+            auth=BasicAuth(
+                client_id, 
+                client_secret
+                ),
             json=payload,
         ) as response:
             # RESToverHTTP Status Code
@@ -295,19 +301,49 @@ class SendApiRequest:
         self,
         currency,
         count: int = 1000
-        )-> list:
+        ):
 
         # Set endpoint
         endpoint: str = f"private/get_user_trades_by_currency"
 
-        params = {"currency": currency.upper(), "kind": "any", "count": count}
+        params = {
+            "currency": currency.upper(),
+            "kind": "any", 
+            "count": count
+            }
 
         user_trades =  await private_connection (self.sub_account_id,
                                                  endpoint=endpoint, 
                                                  params=params)
 
         return [] if user_trades == [] else user_trades["result"]["trades"]
+        
+        
+    async def get_user_trades_by_instrument_and_time(
+        self,
+        instrument_name,
+        start_timestamp,
+        count: int = 1000
+        ) -> list:
 
+        # Set endpoint
+        endpoint: str = f"private/get_user_trades_by_instrument_and_time"
+        
+        now_unix = get_now_unix()
+
+        params = {
+            "count": count,
+            "end_timestamp": now_unix,
+            "instrument_name": instrument_name, 
+            "start_timestamp": start_timestamp
+            }
+
+        user_trades =  await private_connection (self.sub_account_id,
+                                                 endpoint=endpoint, 
+                                                 params=params)
+
+        return [] if user_trades == [] else user_trades["result"]["trades"]
+        
     async def get_cancel_order_all(self):
         
 

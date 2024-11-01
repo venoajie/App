@@ -206,7 +206,7 @@ class ModifyOrderDb(SendApiRequest):
     async def resupply_transaction_log(
         self,
         currency: str,
-        transaction_log_trading,
+        transaction_log_trading: str,
         archive_db_table: str)-> list:
         """ """
 
@@ -214,7 +214,7 @@ class ModifyOrderDb(SendApiRequest):
                     
         where_filter= "timestamp"
         
-        first_tick_query= querying_arithmetic_operator(where_filter, 
+        first_tick_query = querying_arithmetic_operator(where_filter, 
                                                        "MAX",
                                                        transaction_log_trading)
         
@@ -230,9 +230,10 @@ class ModifyOrderDb(SendApiRequest):
                     
             first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (max_closed_transactions_downloaded_from_sqlite)
                 
-        transaction_log= await self.private_data.get_transaction_log (currency, 
-                                                    first_tick_fr_sqlite-1, 
-                                                    max_closed_transactions_downloaded_from_sqlite)
+        transaction_log= await self.private_data.get_transaction_log (
+                        currency, 
+                        first_tick_fr_sqlite, 
+                        max_closed_transactions_downloaded_from_sqlite)
                 
         if transaction_log:
             await saving_transaction_log (
@@ -313,6 +314,38 @@ class ModifyOrderDb(SendApiRequest):
                         )
 
     
+    async def update_trades_from_exchange_based_on_latest_timestamp(
+        self,
+        instrument_name: str,
+        start_timestamp: int,
+        archive_db_table,
+        count: int =  100
+        )-> None:
+        """
+        """
+        
+        trades_from_exchange = await self.private_data.get_user_trades_by_instrument_and_time(
+                                instrument_name,
+                                start_timestamp,
+                                count
+                                )
+        
+        if trades_from_exchange:
+            
+            trades_from_exchange_without_futures_combo = [ o for o in trades_from_exchange \
+                if f"-FS-" not in o["instrument_name"]]
+
+            if trades_from_exchange_without_futures_combo:
+                
+                for trade in trades_from_exchange_without_futures_combo:
+                    
+                    log.error (f"trades_from_exchange {trade}")
+
+                    await saving_traded_orders(
+                        trade,
+                        archive_db_table
+                        )
+
     async def send_triple_orders(
         self,
         params)-> None:
@@ -407,7 +440,7 @@ class ModifyOrderDb(SendApiRequest):
             if trades:
                 for trade in trades:
                 
-                    if f"{currency.upper()}-FS-" not in instrument_name:
+                    if f"f{currency.upper()}-FS-" not in instrument_name:
                     
                         await saving_traded_orders(
                             trade,

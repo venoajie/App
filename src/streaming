@@ -185,26 +185,30 @@ class StreamAccountData(ModifyOrderDb):
                     for currency in currencies:
                         #await self.modify_order_and_db.cancel_the_cancellables (currency,
                         #                                                        cancellable_strategies)
-                        await self.modify_order_and_db.resupply_sub_accountdb (currency)
-
-                        await self.modify_order_and_db.resupply_portfolio (currency)
                         
                         currency_lower = currency.lower ()
                         archive_db_table= f"my_trades_all_{currency_lower}_json"                    
                         transaction_log_trading= f"transaction_log_{currency_lower}_json"
                         
-                        instruments = await get_instruments(currency)
+                        await self.modify_order_and_db.resupply_sub_accountdb (currency)
 
-                        my_path_instruments = provide_path_for_file("instruments", 
-                                                                    currency)
-
-                        replace_data(my_path_instruments, instruments)
+                        await self.modify_order_and_db.resupply_portfolio (currency)
 
                         await self.modify_order_and_db.resupply_transaction_log(
                             currency, 
                             transaction_log_trading,
                             archive_db_table)
-                        
+                                               
+                        instruments = await get_instruments(currency)
+
+                        my_path_instruments = provide_path_for_file("instruments", 
+                                                                    currency)
+
+                        replace_data(
+                            my_path_instruments,
+                            instruments
+                            )
+ 
                         ws_channel_currency = [
                             f"user.portfolio.{currency}",
                             f"user.changes.any.{currency.upper()}.raw",
