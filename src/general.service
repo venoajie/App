@@ -1,8 +1,5 @@
 [Unit]
 Description= running general tasks service
-After=multi-user.target
-FailureAction=reboot
-StartLimitAction=reboot
 #OnFailure=my-app-recovery.service
 
 [Service]

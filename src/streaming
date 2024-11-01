@@ -21,6 +21,7 @@ from db_management.sqlite_management import (
 from strategies.basic_strategy import(
     is_label_and_side_consistent,)
 from transaction_management.deribit.api_requests import (
+    get_currencies,
     get_instruments,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
@@ -61,6 +62,21 @@ def get_config(file_name: str) -> list:
                 return read
     except:
         return []
+
+
+
+async def get_currencies_from_deribit() -> float:
+    """ """
+
+    return await get_currencies()
+
+
+async def get_instruments_from_deribit(currency) -> float:
+    """ """
+
+    result = await get_instruments(currency)
+
+    return result
 
 
 async def update_db_pkl(
@@ -135,6 +151,30 @@ class StreamAccountData(ModifyOrderDb):
                 # registering strategy config file    
                 file_toml = "config_strategies.toml"
                 
+                    
+                get_currencies_all = await get_currencies_from_deribit()
+
+                currencies = [o["currency"] for o in get_currencies_all["result"]]
+
+                for currency in currencies:
+
+                    instruments = await get_instruments_from_deribit(currency)
+
+                    my_path_instruments = provide_path_for_file("instruments", 
+                                                                currency)
+
+                    replace_data(
+                        my_path_instruments,
+                        instruments
+                        )
+
+                my_path_cur = provide_path_for_file("currencies")
+
+                replace_data(
+                    my_path_cur,
+                    currencies
+                    )
+                
                 # parsing config file
                 config_app = get_config(file_toml)
 
@@ -183,6 +223,7 @@ class StreamAccountData(ModifyOrderDb):
                     self.loop.create_task(self.ws_refresh_auth())
                     
                     for currency in currencies:
+                        
                         #await self.modify_order_and_db.cancel_the_cancellables (currency,
                         #                                                        cancellable_strategies)
                         
@@ -353,7 +394,10 @@ class StreamAccountData(ModifyOrderDb):
                                         
                         except Exception as error:
                             await async_raise_error_message(error)
-                            await telegram_bot_sendtext (error)
+                            await telegram_bot_sendtext (
+                                error,
+                                "general_error"
+                                )
 
                     
             except Exception as error:
@@ -609,20 +653,6 @@ class StreamAccountData(ModifyOrderDb):
                     order,
                     instrument_name)
     
-def main():
-    # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
-    sub_account_id = "deribit-148510"
-    
-    try:
-        StreamAccountData(sub_account_id)
-
-    except Exception as error:
-        raise_error_message (
-            error, 
-            5,
-            "app"
-            )
-        
 async def distribute_ticker_result_as_per_data_type(
     my_path_ticker: str, 
     data_orders: dict, 
@@ -657,6 +687,19 @@ async def distribute_ticker_result_as_per_data_type(
         )
 
 
+def main():
+    # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
+    sub_account_id = "deribit-148510"
+    
+    try:
+        StreamAccountData(sub_account_id)
+
+    except Exception as error:
+        raise_error_message (
+            error, 
+            5,
+            "app"
+            )
                 
 if __name__ == "__main__":
     try:
