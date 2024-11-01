@@ -545,7 +545,7 @@ async def reconciling_size_and_orders(
                     
                     transaction_log_trading_table = f"transaction_log_{currency_lower}_json"
                     
-                    column_trade: str= "instrument_name","label", "amount", "price","side"
+                    column_trade: str= "instrument_name","label", "amount", "price","side","timestamp"
                     my_trades_currency: list= await get_query(trade_db_table, 
                                                                 currency, 
                                                                 "all", 
