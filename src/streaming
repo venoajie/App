@@ -151,7 +151,6 @@ class StreamAccountData(ModifyOrderDb):
                 # registering strategy config file    
                 file_toml = "config_strategies.toml"
                 
-                    
                 get_currencies_all = await get_currencies_from_deribit()
 
                 currencies = [o["currency"] for o in get_currencies_all["result"]]
@@ -203,13 +202,6 @@ class StreamAccountData(ModifyOrderDb):
                 instruments_name = futures_instruments["instruments_name"]   
                                 
                 resolution = 1                
-                    
-                # filling currencies attributes
-                my_path_cur = provide_path_for_file("currencies")
-                replace_data(
-                    my_path_cur,
-                    currencies
-                    )
                 
                 while True:
                     
@@ -239,17 +231,7 @@ class StreamAccountData(ModifyOrderDb):
                             currency, 
                             transaction_log_trading,
                             archive_db_table)
-                                               
-                        instruments = await get_instruments(currency)
-
-                        my_path_instruments = provide_path_for_file("instruments", 
-                                                                    currency)
-
-                        replace_data(
-                            my_path_instruments,
-                            instruments
-                            )
- 
+                
                         ws_channel_currency = [
                             f"user.portfolio.{currency}",
                             f"user.changes.any.{currency.upper()}.raw",
