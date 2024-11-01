@@ -545,7 +545,7 @@ async def reconciling_size_and_orders(
                     
                     transaction_log_trading_table = f"transaction_log_{currency_lower}_json"
                     
-                    column_trade: str= "instrument_name","label", "amount", "price","side","timestamp"
+                    column_trade: str= "instrument_name","label", "amount", "price","side"
                     my_trades_currency: list= await get_query(trade_db_table, 
                                                                 currency, 
                                                                 "all", 
@@ -608,9 +608,15 @@ async def reconciling_size_and_orders(
                             )
                         
                         if not size_is_reconciled_each_other:
+                            
+                                    
+                            column_trade: str= "instrument_name","label","instrument_name"
+                            my_trades_instrument_name: list= await get_query(archive_db_table, 
+                                                                        instrument_name, 
+                                                                        "all", 
+                                                                        "all", 
+                                                                        column_trade)
                             log.debug (f"instrument_name {instrument_name} size_is_reconciled_each_other {size_is_reconciled_each_other}")
-                            my_trades_instrument_name = [o for o in my_trades_currency\
-                                if o["instrument_name"]==instrument_name]
                             
                             from_transaction_log_instrument =([o for o in from_transaction_log \
             if o["instrument_name"] == instrument_name])
