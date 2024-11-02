@@ -751,46 +751,53 @@ async def clean_up_closed_transactions(
     log.error(f" clean_up_closed_transactions {instrument_name} DONE")
 
 
-async def count_and_delete_ohlc_rows(table):
+async def count_and_delete_ohlc_rows(
+    database,
+    table
+    ):
 
-
-    rows_threshold= max_rows(table)
-    log.debug (f"table {table} rows_threshold {rows_threshold}")
-    
-    if "supporting_items_json" in table:
-        where_filter = f"id"
+    try:
+        rows_threshold= max_rows(table)
+        log.debug (f"table {table} rows_threshold {rows_threshold}")
         
-    else:
-        where_filter = f"tick"
-    
-    count_rows_query = querying_arithmetic_operator(where_filter, 
-                                                    "COUNT", 
-                                                    table)
-
-    rows = await executing_query_with_return(count_rows_query)
-    
-    rows = rows[0]["COUNT(tick)"] if where_filter=="tick" else rows[0]["COUNT(id)"]
-    log.debug (f"table {table} rows_threshold {rows_threshold} rows {rows} rows > rows_threshold {rows > rows_threshold}")
+        if "supporting_items_json" in table:
+            where_filter = f"id"
+            
+        else:
+            where_filter = f"tick"
         
-    if rows > rows_threshold:
-                
-        first_tick_query = querying_arithmetic_operator(where_filter, 
-                                                        "MIN",
+        count_rows_query = querying_arithmetic_operator(where_filter, 
+                                                        "COUNT", 
                                                         table)
-        
-        first_tick_fr_sqlite = await executing_query_with_return(first_tick_query)
-        
-        if where_filter=="tick":
-            first_tick = first_tick_fr_sqlite[0]["MIN(tick)"] 
-        
-        if where_filter=="id":
-            first_tick = first_tick_fr_sqlite[0]["MIN(id)"]
 
-        log. error(f"table {table} where_filter {where_filter} first_tick_fr_sqlite {first_tick_fr_sqlite}")
-        await deleting_row(table,
-                            database,
-                            where_filter,
-                            "=",
-                            first_tick)
+        rows = await executing_query_with_return(count_rows_query)
         
-    log.info("count_and_delete_ohlc_rows-DONE")
+        rows = rows[0]["COUNT(tick)"] if where_filter=="tick" else rows[0]["COUNT(id)"]
+        log.debug (f"table {table} rows_threshold {rows_threshold} rows {rows} rows > rows_threshold {rows > rows_threshold}")
+            
+        if rows > rows_threshold:
+                    
+            first_tick_query = querying_arithmetic_operator(where_filter, 
+                                                            "MIN",
+                                                            table)
+            
+            first_tick_fr_sqlite = await executing_query_with_return(first_tick_query)
+            
+            if where_filter=="tick":
+                first_tick = first_tick_fr_sqlite[0]["MIN(tick)"] 
+            
+            if where_filter=="id":
+                first_tick = first_tick_fr_sqlite[0]["MIN(id)"]
+
+            log. error(f"table {table} where_filter {where_filter} first_tick_fr_sqlite {first_tick_fr_sqlite}")
+            await deleting_row(table,
+                                database,
+                                where_filter,
+                                "=",
+                                first_tick)
+        log.info("count_and_delete_ohlc_rows-DONE")
+        
+    except Exception as error:
+        log.info (error)
+        await telegram_bot_sendtext(f"error {error}")
+            

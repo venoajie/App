@@ -152,7 +152,10 @@ async def clean_up_databases(idle_time) -> None:
 
         for table in tables:
                 
-            await count_and_delete_ohlc_rows(table)
+            await count_and_delete_ohlc_rows(
+                database,
+                table
+                )
         
     await asyncio.sleep(idle_time)
 
