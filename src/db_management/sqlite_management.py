@@ -447,7 +447,7 @@ def querying_based_on_currency_or_instrument_and_strategy (
     """
     standard_columns= f"instrument_name, label, amount_dir as amount, timestamp, order_id"
 
-    balance =  f"(sum(amount_dir) OVER (ORDER BY timestamp) as balance)"
+    balance =  f"sum(amount_dir) OVER (ORDER BY timestamp) as balance"
 
     if "balance" in columns:
         standard_columns= f"instrument_name, label, amount_dir as amount, {balance}, timestamp, order_id"
