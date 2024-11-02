@@ -273,38 +273,49 @@ async def hedging_spot_currency(
     archive_db_table: str,
     transaction_log_trading_table: str
     ) -> None:
+    
+    strategy="hedgingSpot"
 
+    log.debug (f"strategy {strategy} {currency.upper()}-START")
     
     try:
+        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         instrument_ticker: str = (f"{currency}-PERPETUAL")
+        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         
         perpetual_ticker: list = reading_from_pkl_data(
             "ticker",
             instrument_ticker
             )
+        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                             
         # get portfolio data  
         portfolio: list = reading_from_pkl_data(
             "portfolio",
             currency
             )
+        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         
         equity: float = portfolio[0]["equity"]    
         
+        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 #        log.error (f"perpetual_ticker {perpetual_ticker}")
         
                         
         if  equity > 0\
                 and perpetual_ticker:
-                    
+            
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 
             perpetual_ticker = perpetual_ticker[0]
-            strategy="hedgingSpot"
+            
             index_price: float = perpetual_ticker ["index_price"]  
-            log.debug (f"strategy {strategy} {currency.upper()}-START")
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            
             
             strategy_attributes = config_app["strategies"]
                     
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             # get strategies that have not short/long attributes in the label 
             non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
                 if o["non_checked_for_size_label_consistency"]==True]
@@ -319,28 +330,34 @@ async def hedging_spot_currency(
             
             active_futures = futures_instruments["active_futures"]   
 
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             notional: float = compute_notional_value(
                 index_price, 
                 equity
                 )
             
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
             
             max_position: int = notional * -1
             
             server_time = get_now_unix_time()  
             
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             TA_result_data_all = await querying_table("market_analytics_json")
 
             TA_result_data_only=  TA_result_data_all["list_data_only"]
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             
             TA_result_data = [o for o in TA_result_data_only if currency in o["instrument"]]                                                                                                    
                                                             
             tick_TA=  max([o["tick"] for o in TA_result_data])
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                             
             delta_time = server_time-tick_TA
             
             delta_time_seconds = delta_time/1000                                                
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                             
             THRESHOLD_DELTA_TIME_SECONDS = 120
             log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
