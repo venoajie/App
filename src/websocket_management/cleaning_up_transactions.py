@@ -753,7 +753,7 @@ async def clean_up_closed_transactions(
 
 async def count_and_delete_ohlc_rows():
 
-    log.info("count_and_delete_ohlc_rows-START")
+    log.critical("count_and_delete_ohlc_rows-START")
     tables = ["market_analytics_json", 
               "supporting_items_json",
               "ohlc1_eth_perp_json", 
