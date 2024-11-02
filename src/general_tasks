@@ -527,6 +527,16 @@ async def reconciling_size_and_orders(
         while True:
             
             for currency in currencies:
+                
+
+                await modify_order_and_db.resupply_transaction_log(
+                    currency,
+                    transaction_log_trading_table,
+                    archive_db_table,
+                    100
+                    )
+                log.error ("sleep")
+                await asyncio.sleep(150000)
                     
                 sub_account = reading_from_pkl_data(
                     "sub_accounts",
