@@ -153,7 +153,8 @@ async def clean_up_databases(idle_time) -> None:
         for table in tables:
                 
             await count_and_delete_ohlc_rows(table)
-            await asyncio.sleep(idle_time)
+        
+        await asyncio.sleep(idle_time)
 
 
 async def update_ohlc_and_market_condition(
