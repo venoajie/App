@@ -585,7 +585,7 @@ async def reconciling_size_and_orders(
                     sub_account_orders = sub_account["open_orders"]
                     
                     sub_account_orders_instrument = [o["instrument_name"] for o in sub_account_orders ]
-                    
+                        
                     # sources: sub account
                     if sub_account_orders_instrument:
                         await reconciling_orders_based_on_sources(
@@ -598,6 +598,11 @@ async def reconciling_size_and_orders(
                             )
 
                     from_transaction_log_instrument = [o["instrument_name"] for o in from_transaction_log ]
+                    
+                    my_trades_instrument_name = [o["instrument_name"] for o in my_trades_currency]
+                                    
+                    log.warning (f"from_transaction_log_instrument {from_transaction_log_instrument}")
+                    log.debug (f"my_trades_instrument_name {my_trades_instrument_name}")
                     
                     #usually needef after db reconciliation, which transaction log more update than my_trading
                     if from_transaction_log_instrument:
@@ -627,11 +632,7 @@ async def reconciling_size_and_orders(
                                         timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
                                         archive_db_table
                                         )
-                                
-                    my_trades_instrument_name = [o["instrument_name"] for o in my_trades_currency]
-                                    
-                    log.debug (f"my_trades_instrument_name {my_trades_instrument_name}")
-                    
+                            
                     if my_trades_instrument_name:
 
                         for instrument_name in my_trades_instrument_name:
