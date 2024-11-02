@@ -684,10 +684,11 @@ def main():
             )
                 
 if __name__ == "__main__":
+    
     try:
         (main())
         
-    except (
+    except(
         KeyboardInterrupt, 
         SystemExit
         ):
@@ -697,6 +698,6 @@ if __name__ == "__main__":
     except Exception as error:
         raise_error_message(
         error, 
-        10, 
+        5, 
         "app"
         )
