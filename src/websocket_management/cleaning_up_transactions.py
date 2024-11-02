@@ -785,10 +785,10 @@ async def count_and_delete_ohlc_rows(
             first_tick_fr_sqlite = await executing_query_with_return(first_tick_query)
             
             if where_filter=="tick":
-                first_tick = first_tick_fr_sqlite[0]["MIN(tick)"] 
+                first_tick = first_tick_fr_sqlite[0]["MIN (tick)"] 
             
             if where_filter=="id":
-                first_tick = first_tick_fr_sqlite[0]["MIN(id)"]
+                first_tick = first_tick_fr_sqlite[0]["MIN (id)"]
 
             log. error(f"table {table} where_filter {where_filter} first_tick_fr_sqlite {first_tick_fr_sqlite}")
             await deleting_row(table,
