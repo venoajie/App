@@ -120,6 +120,8 @@ async def back_up_db(idle_time):
         folder_path = '/databases'
         file_list = os.listdir(folder_path)
         
+        log.critical (file_list)
+        
         for currentFile in file_list:
             log.error(currentFile)
             if any(currentFile.endswith(ext) for ext in extensions):
