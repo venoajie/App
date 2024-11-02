@@ -551,7 +551,7 @@ async def reconciling_size_and_orders(
                         currency,
                         transaction_log_trading_table,
                         archive_db_table,
-                        100
+                        150
                         )
                     log.error ("sleep")
                     await asyncio.sleep(150000)
