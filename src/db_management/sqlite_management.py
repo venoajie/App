@@ -418,6 +418,8 @@ def querying_based_on_currency_or_instrument_and_strategy (
     """
     standard_columns= f"instrument_name, label, amount_dir as amount, timestamp, order_id"
 
+    balance =  f"(sum(amount_dir) OVER (ORDER BY timestamp) as balance)"
+        
     if "trade" in table or "order" in table:
         standard_columns= f"{standard_columns}, price"
         
@@ -450,6 +452,9 @@ def querying_based_on_currency_or_instrument_and_strategy (
         where_clause= f"WHERE (instrument_name LIKE '%{currency_or_instrument}%' AND label LIKE '%{strategy}%' AND label LIKE '%{status}%')"
     
     tab = f"SELECT {standard_columns} FROM {table} {where_clause}"
+        
+    if "balance" in columns:
+        tab = f"SELECT {standard_columns}, {balance} FROM {table} {where_clause}"
     
     if order is not None:
             
