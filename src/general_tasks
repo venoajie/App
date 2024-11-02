@@ -157,7 +157,7 @@ async def clean_up_databases(idle_time) -> None:
                 table
                 )
         
-    await asyncio.sleep(idle_time)
+        await asyncio.sleep(idle_time)
 
 
 async def update_ohlc_and_market_condition(
