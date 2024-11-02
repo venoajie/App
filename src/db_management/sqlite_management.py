@@ -398,6 +398,35 @@ def querying_label_and_size(table) -> str:
     
     return tab
 
+# Generate SQL insert commands from data
+def generate_insert_sql(table_name, data, columns):
+    # Construct the column and placeholder strings
+    columns_str = ", ".join(columns)
+    placeholders = ", ".join(["%s"] * len(columns)) # (%s ,%s)
+    
+    # Create the SQL INSERT statement
+    sql = f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
+    
+    # Extract values from data
+    values = [tuple(row[col] for col in columns) for row in data]
+    
+    balance = "sum(amount_dir) OVER (ORDER BY timestamp) as balance"
+    columns= ("instrument_name", "label", "amount_dir" ,  "timestamp", "order_id",balance)
+
+    table_name="test"
+    columns_str = ", ".join(columns)
+    print (columns_str)
+    placeholders = ", ".join(["%s"] * len(columns)) # (%s ,%s)
+    print (placeholders)
+
+    # Create the SQL INSERT statement
+    sql = f"SELECT {columns_str}) FROM {table_name}"
+    print (sql)
+
+    
+    return sql, values
+
+
 
 def querying_based_on_currency_or_instrument_and_strategy (
     table: str, 
@@ -419,6 +448,11 @@ def querying_based_on_currency_or_instrument_and_strategy (
     standard_columns= f"instrument_name, label, amount_dir as amount, timestamp, order_id"
 
     balance =  f"(sum(amount_dir) OVER (ORDER BY timestamp) as balance)"
+
+    if "balance" in columns:
+        standard_columns= f"instrument_name, label, amount_dir as amount, {balance}, timestamp, order_id"
+        
+        
         
     if "trade" in table or "order" in table:
         standard_columns= f"{standard_columns}, price"
@@ -451,11 +485,8 @@ def querying_based_on_currency_or_instrument_and_strategy (
     if status != "all":
         where_clause= f"WHERE (instrument_name LIKE '%{currency_or_instrument}%' AND label LIKE '%{strategy}%' AND label LIKE '%{status}%')"
     
-    tab = f"SELECT {standard_columns} FROM {table} {where_clause}"
+    tab = f"SELECT {standard_columns},{balance} FROM {table} {where_clause}"
         
-    if "balance" in columns:
-        tab = f"SELECT {standard_columns}, {balance} FROM {table} {where_clause}"
-        log.info (f"balance {tab}")
     
     if order is not None:
             
@@ -466,7 +497,7 @@ def querying_based_on_currency_or_instrument_and_strategy (
         
         tab= f"{tab} LIMIT {limit}"
     
-    #log.error (f"table {tab}")
+    log.error (f"table {tab}")
     return tab
 
 def querying_closed_transactions(
