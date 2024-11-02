@@ -208,7 +208,7 @@ class ModifyOrderDb(SendApiRequest):
         currency: str,
         transaction_log_trading: str,
         archive_db_table: str,
-        count: int = 1000)-> list:
+        count: int = 1)-> list:
         """ """
 
         #log.warning(f"resupply {currency.upper()} TRANSACTION LOG db-START")
@@ -221,15 +221,20 @@ class ModifyOrderDb(SendApiRequest):
         
         first_tick_query_result = await executing_query_with_return(first_tick_query)
             
-        balancing_params = paramaters_to_balancing_transactions()
-
-        max_closed_transactions_downloaded_from_sqlite=balancing_params["max_closed_transactions_downloaded_from_sqlite"]   
-        
         first_tick_fr_sqlite= first_tick_query_result [0]["MAX (timestamp)"] 
         
         if not first_tick_fr_sqlite:
-                    
-            first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (max_closed_transactions_downloaded_from_sqlite)
+
+            balancing_params = paramaters_to_balancing_transactions()
+
+            max_closed_transactions_downloaded_from_sqlite=balancing_params["max_closed_transactions_downloaded_from_sqlite"]  
+            
+            count_at_first_download =  max(
+                                        count,
+                                        max_closed_transactions_downloaded_from_sqlite
+                                        )
+                            
+            first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (count_at_first_download)
                 
         transaction_log= await self.private_data.get_transaction_log (
                         currency, 
