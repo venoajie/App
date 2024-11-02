@@ -342,7 +342,7 @@ class SendApiRequest:
                                                  endpoint=endpoint, 
                                                  params=params)
 
-        yield [] if user_trades == [] else user_trades["result"]["trades"]
+        return [] if user_trades == [] else user_trades["result"]["trades"]
         
     async def get_cancel_order_all(self):
         
