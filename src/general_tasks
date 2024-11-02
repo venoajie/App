@@ -558,7 +558,7 @@ async def reconciling_size_and_orders(
                                                                 currency, 
                                                                 "all", 
                                                                 "all", 
-                                                                column_list)                                       
+                                                                column_list)                                  
 
                     column_order= "instrument_name","label","order_id","amount","timestamp"
                     orders_currency = await get_query(order_db_table, 
@@ -597,17 +597,17 @@ async def reconciling_size_and_orders(
                             order_db_table
                             )
 
-                    from_transaction_log_instrument = remove_redundant_elements([o["instrument_name"] for o in from_transaction_log ])
+                    from_transaction_log_instrument_name_only = remove_redundant_elements([o["instrument_name"] for o in from_transaction_log ])
                     
-                    my_trades_instrument_name = remove_redundant_elements([o["instrument_name"] for o in my_trades_currency])
+                    my_trades_instrument_name_only = remove_redundant_elements([o["instrument_name"] for o in my_trades_currency])
                                     
-                    log.warning (f"from_transaction_log_instrument {from_transaction_log_instrument}")
-                    log.debug (f"my_trades_instrument_name {my_trades_instrument_name}")
+                    log.warning (f"from_transaction_log_instrument {from_transaction_log_instrument_name_only}")
+                    log.debug (f"my_trades_instrument_name {my_trades_instrument_name_only}")
                     
                     #usually needef after db reconciliation, which transaction log more update than my_trading
-                    if from_transaction_log_instrument:
+                    if from_transaction_log_instrument_name_only:
 
-                        for instrument_name in from_transaction_log_instrument:
+                        for instrument_name in from_transaction_log_instrument_name_only:
                             
                             size_is_reconciled_each_other = check_whether_size_db_reconciled_each_other(
                                 sub_account,
@@ -619,13 +619,16 @@ async def reconciling_size_and_orders(
                             log.error (f"size_is_reconciled_each_other {size_is_reconciled_each_other}")
                             
                             if not size_is_reconciled_each_other:
+                            
+                                from_transaction_log_instrument_name =([o for o in from_transaction_log if o["instrument_name"] == instrument_name])     
+                            
                                 unrecorded_trade_id_from_transaction_log = get_unrecorded_trade_from_transaction_log(
                                     my_trades_instrument_name,
-                                    from_transaction_log_instrument
+                                    from_transaction_log_instrument_name
                                     )
                                 
                                 for trade_id in unrecorded_trade_id_from_transaction_log:
-                                    timestamp_log = max([ o["timestamp"] for o in from_transaction_log_instrument if trade_id == o["trade_id"]])
+                                    timestamp_log = max([ o["timestamp"] for o in from_transaction_log_instrument_name if trade_id == o["trade_id"]])
                                 
                                     await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
                                         instrument_name,
@@ -633,9 +636,9 @@ async def reconciling_size_and_orders(
                                         archive_db_table
                                         )
                             
-                    if my_trades_instrument_name:
+                    if my_trades_instrument_name_only:
 
-                        for instrument_name in my_trades_instrument_name:
+                        for instrument_name in my_trades_instrument_name_only:
                             
                             size_is_reconciled_each_other = check_whether_size_db_reconciled_each_other(
                                 sub_account,
@@ -649,6 +652,8 @@ async def reconciling_size_and_orders(
                             if not size_is_reconciled_each_other:
                                 
                                 await modify_order_and_db.resupply_sub_accountdb (currency)
+                            
+                                from_transaction_log_instrument =([o for o in from_transaction_log if o["instrument_name"] == instrument_name])     
                                 
                                 unrecorded_trade_id_from_transaction_log = get_unrecorded_trade_from_transaction_log(
                                     my_trades_instrument_name,
@@ -663,9 +668,7 @@ async def reconciling_size_and_orders(
                                         timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
                                         archive_db_table
                                         )
-                                
-                                
-                                        
+                                    
                                 column_trade: str= "instrument_name","label","timestamp"
                                 my_trades_instrument_name: list= await get_query(archive_db_table, 
                                                                             instrument_name, 
@@ -676,8 +679,6 @@ async def reconciling_size_and_orders(
                                 log.debug (f"instrument_name {instrument_name} size_is_reconciled_each_other {size_is_reconciled_each_other}")
                                 log.debug (f"my_trades_instrument_name {my_trades_instrument_name}")
                                     
-                                from_transaction_log_instrument =([o for o in from_transaction_log if o["instrument_name"] == instrument_name])
-            
                                 last_time_stamp_log = 0 if from_transaction_log_instrument == [] else (max([(o["timestamp"]) for o in from_transaction_log_instrument ]))
                                 
                                 last_time_my_trades = 0 if my_trades_instrument_name == [] else (max([(o["timestamp"]) for o in my_trades_instrument_name ]))
