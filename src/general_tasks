@@ -128,7 +128,7 @@ async def back_up_db(idle_time):
             for currentFile in file_list:
                 log.error(currentFile)
                 if ".bak" in currentFile:
-                    os.remove(currentFile)
+                    os.remove(f"{folder_path}{currentFile}")
             await back_up_db_sqlite ()
             
         except Exception as error:
