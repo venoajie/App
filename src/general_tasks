@@ -117,16 +117,16 @@ async def back_up_db(idle_time):
     extensions = ('.bak')
     
     while True:
-        log.critical ("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
         folder_path = "databases/"
-        log.critical (folder_path)
+
         file_list = os.listdir(folder_path)
         
         log.critical (file_list)
         
         for currentFile in file_list:
             log.error(currentFile)
-            if any(currentFile.endswith(ext) for ext in extensions):
+            if ".bak" in currentFile:
                 os.remove(currentFile)
         await back_up_db_sqlite ()
         await asyncio.sleep(idle_time)
