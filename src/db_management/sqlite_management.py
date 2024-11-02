@@ -497,7 +497,7 @@ def querying_based_on_currency_or_instrument_and_strategy (
         
         tab= f"{tab} LIMIT {limit}"
     
-    log.error (f"table {tab}")
+#    log.error (f"table {tab}")
     return tab
 
 def querying_closed_transactions(
