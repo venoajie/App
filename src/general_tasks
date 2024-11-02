@@ -130,9 +130,7 @@ async def clean_up_databases(idle_time) -> None:
     """ """
 
     while True:
-        
-        log.error ("FFFFFFFFFFFFFFFFFFFFFFFFFF")
-            
+                    
         log.critical("count_and_delete_ohlc_rows-START")
         tables = ["market_analytics_json", 
                 "supporting_items_json",
@@ -804,8 +802,7 @@ async def reconciling_size_and_orders(
                     error,
                     "general_error")
                 
-
-            
+    
 async def main():
     
     sub_account_id = "deribit-148510"    
@@ -821,16 +818,16 @@ async def main():
 
     try:
         await asyncio.gather(
-        #reconciling_size_and_orders(
-        #    sub_account_id,
-        #    config_app,
-        #    2
-        #    ),
+        reconciling_size_and_orders(
+            sub_account_id,
+            config_app,
+            2
+            ),
         update_ohlc_and_market_condition(
             tradable_config_app, 
             15), 
         back_up_db(60*15),
-        clean_up_databases(1), 
+        clean_up_databases(60), 
         update_instruments(60),
         return_exceptions=True)
     

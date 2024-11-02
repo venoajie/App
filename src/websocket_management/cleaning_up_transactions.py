@@ -758,7 +758,6 @@ async def count_and_delete_ohlc_rows(
 
     try:
         rows_threshold= max_rows(table)
-        log.debug (f"table {table} rows_threshold {rows_threshold}")
         
         if "supporting_items_json" in table:
             where_filter = f"id"
@@ -771,10 +770,8 @@ async def count_and_delete_ohlc_rows(
                                                         table)
 
         rows = await executing_query_with_return(count_rows_query)
-        log.debug (f"rows {rows} ")
         
         rows = rows[0]["COUNT (tick)"] if where_filter=="tick" else rows[0]["COUNT (id)"]
-        log.debug (f"table {table} rows_threshold {rows_threshold} rows {rows} rows > rows_threshold {rows > rows_threshold}")
             
         if rows > rows_threshold:
                     
@@ -790,13 +787,12 @@ async def count_and_delete_ohlc_rows(
             if where_filter=="id":
                 first_tick = first_tick_fr_sqlite[0]["MIN (id)"]
 
-            log. error(f"table {table} where_filter {where_filter} first_tick_fr_sqlite {first_tick_fr_sqlite}")
-            await deleting_row(table,
-                                database,
-                                where_filter,
-                                "=",
-                                first_tick)
-        log.info("count_and_delete_ohlc_rows-DONE")
+            await deleting_row(
+                table,
+                database,
+                where_filter,
+                "=",
+                first_tick)
         
     except Exception as error:
         log.info (error)
