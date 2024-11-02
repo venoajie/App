@@ -272,7 +272,8 @@ def check_whether_size_db_reconciled_each_other(
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  last_time_stamp_log in o["trade_id"]][0]
     
-        my_trades_instrument = [o for o in my_trades_currency \
+        my_trades_instrument = 0 if not my_trades_currency \
+            else [o for o in my_trades_currency \
             if o["instrument_name"] == instrument_name]        
         sum_my_trades_instrument = 0 if not my_trades_instrument \
             else sum([o["amount"] for o in my_trades_instrument])
