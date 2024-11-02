@@ -178,10 +178,24 @@ async def get_unrecorded_trade_and_order_id(instrument_name: str) -> dict:
         else [o["data"] for o in from_sqlite_all\
                     if o["trade_id"] in unrecorded_trade_id]
 
+async def get_unrecorded_trade_from_transaction_log(
+    my_trades_instrument_name: list,
+    from_transaction_log_instrument: list) -> dict:
+     
+    my_trades_instrument_name_trade_id = [o["trade_id"] for o in my_trades_instrument_name]
+    from_transaction_log_instrument_trade_id = [o["trade_id"] for o in from_transaction_log_instrument]  
+                       
+    unrecorded_trade_id = get_unique_elements(from_transaction_log_instrument_trade_id, 
+                                              my_trades_instrument_name_trade_id)
+    
+    log.debug(f"unrecorded_trade_from_transaction_log {unrecorded_trade_id}")
+
+    return unrecorded_trade_id
+
 def check_whether_order_db_reconciled_each_other(
-    sub_account,
-    instrument_name,
-    orders_currency
+    sub_account: list,
+    instrument_name: str,
+    orders_currency: list
     ) -> None:
     """ """
     

@@ -45,6 +45,7 @@ from websocket_management.allocating_ohlc import (
 from websocket_management.cleaning_up_transactions import (
     check_whether_order_db_reconciled_each_other,
     check_whether_size_db_reconciled_each_other,
+    get_unrecorded_trade_from_transaction_log,
     get_unrecorded_trade_and_order_id,
     count_and_delete_ohlc_rows,
     reconciling_sub_account_and_db_open_orders)
@@ -612,6 +613,22 @@ async def reconciling_size_and_orders(
                         if not size_is_reconciled_each_other:
                             
                             await modify_order_and_db.resupply_sub_accountdb (currency)
+                            
+                            unrecorded_trade_id_from_transaction_log = get_unrecorded_trade_from_transaction_log(
+                                my_trades_instrument_name,
+                                from_transaction_log_instrument
+                                )
+                            
+                            for trade_id in unrecorded_trade_id_from_transaction_log:
+                                timestamp_log = max([ o["timestamp"] for o in from_transaction_log_instrument if trade_id == o["trade_id"]])
+                            
+                                await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
+                                    instrument_name,
+                                    timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                                    archive_db_table
+                                    )
+                            
+                            
                                     
                             column_trade: str= "instrument_name","label","timestamp"
                             my_trades_instrument_name: list= await get_query(archive_db_table, 
@@ -624,34 +641,24 @@ async def reconciling_size_and_orders(
                             log.debug (f"my_trades_instrument_name {my_trades_instrument_name}")
                                 
                             from_transaction_log_instrument =([o for o in from_transaction_log if o["instrument_name"] == instrument_name])
+        
+                            last_time_stamp_log = 0 if from_transaction_log_instrument == [] else (max([(o["timestamp"]) for o in from_transaction_log_instrument ]))
+                            
+                            last_time_my_trades = 0 if my_trades_instrument_name == [] else (max([(o["timestamp"]) for o in my_trades_instrument_name ]))
+                            
+                            min_last_time_as_download_basis = min (last_time_stamp_log, 
+                                                                    last_time_my_trades) - (1000 * 1000)
             
-                            if my_trades_instrument_name == []:
-                                
-                                timestamp_log = 0 if from_transaction_log_instrument == [] else (min([(o["timestamp"]) for o in from_transaction_log_instrument ]))
-                                
-                                await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
-                                    instrument_name,
-                                    timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
-                                    archive_db_table
-                                    )
-                            
-                            else:
-                                
-                                last_time_stamp_log = 0 if from_transaction_log_instrument == [] else (max([(o["timestamp"]) for o in from_transaction_log_instrument ]))
-                                
-                                last_time_my_trades = 0 if my_trades_instrument_name == [] else (max([(o["timestamp"]) for o in my_trades_instrument_name ]))
-                                
-                                min_last_time_as_download_basis = min (last_time_stamp_log, 
-                                                                       last_time_my_trades) - (1000 * 1000)
-                
-                                log.debug (f"last_time_stamp_log {last_time_stamp_log} last_time_my_trades {last_time_my_trades}")
+                            log.debug (f"last_time_stamp_log {last_time_stamp_log} last_time_my_trades {last_time_my_trades} min_last_time_as_download_basis {min_last_time_as_download_basis}")
 
+                            if min_last_time_as_download_basis:
+                                
                                 await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
-                                    instrument_name,
-                                    min_last_time_as_download_basis,
-                                    archive_db_table
-                                    )
-                            
+                                instrument_name,
+                                min_last_time_as_download_basis,
+                                archive_db_table
+                                )
+                        
                             unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_name)  
                             
                             for transaction  in unrecorded_transactions:
