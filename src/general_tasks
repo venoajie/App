@@ -528,16 +528,6 @@ async def reconciling_size_and_orders(
             
             for currency in currencies:
                 
-
-                await modify_order_and_db.resupply_transaction_log(
-                    currency,
-                    transaction_log_trading_table,
-                    archive_db_table,
-                    100
-                    )
-                log.error ("sleep")
-                await asyncio.sleep(150000)
-                    
                 sub_account = reading_from_pkl_data(
                     "sub_accounts",
                     currency)
@@ -555,7 +545,17 @@ async def reconciling_size_and_orders(
                     archive_db_table = f"my_trades_all_{currency_lower}_json"                    
                     
                     transaction_log_trading_table = f"transaction_log_{currency_lower}_json"
-                    
+                
+
+                    await modify_order_and_db.resupply_transaction_log(
+                        currency,
+                        transaction_log_trading_table,
+                        archive_db_table,
+                        100
+                        )
+                    log.error ("sleep")
+                    await asyncio.sleep(150000)
+                        
                     column_trade: str= "instrument_name","label", "amount", "price","side"
                     my_trades_currency: list= await get_query(trade_db_table, 
                                                                 currency, 
