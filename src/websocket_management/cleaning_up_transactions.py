@@ -774,7 +774,6 @@ async def count_and_delete_ohlc_rows():
 
         rows_threshold= max_rows(table)
         
-        
         if "supporting_items_json" in table:
             where_filter = f"id"
             

@@ -794,7 +794,8 @@ async def main():
     # get tradable strategies
     tradable_config_app = config_app["tradable"]
 
-    await asyncio.gather(
+    try:
+        await asyncio.gather(
         reconciling_size_and_orders(
             sub_account_id,
             config_app,
@@ -808,6 +809,12 @@ async def main():
         update_instruments(60),
         return_exceptions=True)
     
+    except Exception as error:
+        raise_error_message(
+        error, 
+        "app"
+        )
+     
     
 if __name__ == "__main__":
     
