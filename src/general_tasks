@@ -796,11 +796,11 @@ async def main():
 
     try:
         await asyncio.gather(
-        reconciling_size_and_orders(
-            sub_account_id,
-            config_app,
-            2
-            ),
+        #reconciling_size_and_orders(
+        #    sub_account_id,
+        #    config_app,
+        #    2
+        #    ),
         update_ohlc_and_market_condition(
             tradable_config_app, 
             15), 
