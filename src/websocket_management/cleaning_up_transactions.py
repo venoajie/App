@@ -273,9 +273,11 @@ def check_whether_size_db_reconciled_each_other(
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
                 else str(max([extract_integers_from_text(o["trade_id"]) for o in from_transaction_log_instrument ]))
     
+            log.error(f"last_time_stamp_log {last_time_stamp_log}")
             current_position_log = 0 if from_transaction_log_instrument == []\
                 else [o["position"] for o in from_transaction_log_instrument \
-                    if  last_time_stamp_log in o["trade_id"]][0]
+                    if  str(last_time_stamp_log) in o["trade_id"]][0]
+            log.error(f"current_position_log {current_position_log}")
     
         my_trades_instrument = 0 if not my_trades_currency \
             else [o for o in my_trades_currency \

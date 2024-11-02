@@ -474,7 +474,7 @@ async def reconciling_orders_based_on_sources(
     
 
     for instrument_name in remove_redundant_elements(orders_instrument_name):
-        log.error (f"instrument_name {instrument_name}")
+        #log.error (f"instrument_name {instrument_name}")
         len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other(
             sub_account,
             instrument_name,
@@ -603,8 +603,8 @@ async def reconciling_size_and_orders(
                     
                     my_trades_instrument_name_only = remove_redundant_elements([o["instrument_name"] for o in my_trades_currency])
                                     
-                    log.warning (f"from_transaction_log_instrument {from_transaction_log_instrument_name_only}")
-                    log.debug (f"my_trades_instrument_name {my_trades_instrument_name_only}")
+                    #log.warning (f"from_transaction_log_instrument {from_transaction_log_instrument_name_only}")
+                    #log.debug (f"my_trades_instrument_name {my_trades_instrument_name_only}")
                     
                     #usually needef after db reconciliation, which transaction log more update than my_trading
                     if from_transaction_log_instrument_name_only:
@@ -618,7 +618,7 @@ async def reconciling_size_and_orders(
                                 from_transaction_log
                                 )
                             
-                            log.error (f"size_is_reconciled_each_other {size_is_reconciled_each_other}")
+                            #log.error (f"size_is_reconciled_each_other {size_is_reconciled_each_other}")
                             
                             if not size_is_reconciled_each_other:
                             
@@ -636,7 +636,7 @@ async def reconciling_size_and_orders(
                                     from_transaction_log_instrument_name
                                     )
                                 
-                                log.error (f"from_transaction_log_instrument_name {from_transaction_log_instrument_name}")
+                                #log.error (f"from_transaction_log_instrument_name {from_transaction_log_instrument_name}")
                                 
                                 if unrecorded_trade_id_from_transaction_log:
                                     
@@ -677,7 +677,7 @@ async def reconciling_size_and_orders(
                                 from_transaction_log
                                 )
                             
-                            log.error (f"size_is_reconciled_each_other {size_is_reconciled_each_other}")
+                            #log.error (f"size_is_reconciled_each_other {size_is_reconciled_each_other}")
                             
                             if not size_is_reconciled_each_other:
                                 
