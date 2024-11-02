@@ -258,7 +258,7 @@ def check_whether_size_db_reconciled_each_other(
                 else (max([(o["user_seq"]) for o in from_transaction_log_instrument ]))
                 
 
-            current_position_log = 0 if from_transaction_log_instrument == []\
+            current_position_log = 0 if not from_transaction_log_instrument \
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  last_time_stamp_log == o["user_seq"]][0]
                 
@@ -277,7 +277,7 @@ def check_whether_size_db_reconciled_each_other(
                 else str(max([extract_integers_from_text(o["trade_id"]) for o in from_transaction_log_instrument ]))
     
             log.error(f"last_time_stamp_log {last_time_stamp_log}")
-            current_position_log = 0 if from_transaction_log_instrument == []\
+            current_position_log = 0 if not from_transaction_log_instrument \
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  str(last_time_stamp_log) in o["trade_id"]][0]
             log.error(f"current_position_log {current_position_log}")
