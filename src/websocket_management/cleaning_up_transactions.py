@@ -261,6 +261,8 @@ def check_whether_size_db_reconciled_each_other(
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  last_time_stamp_log == o["user_seq"]][0]
                 
+            log.error(f"last_time_stamp_log {last_time_stamp_log}")
+            log.error(f"current_position_log {current_position_log}")
         # just in case, trade id = None(because of settlement)
         except:
                 
