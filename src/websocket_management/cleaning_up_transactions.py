@@ -773,7 +773,7 @@ async def count_and_delete_ohlc_rows(
         
         rows = rows[0]["COUNT (tick)"] if where_filter=="tick" else rows[0]["COUNT (id)"]
         
-        log.error (f"rows > rows_threshold {rows > rows_threshold} rows {rows}")
+        #log.error (f"rows > rows_threshold {rows > rows_threshold} rows {rows}")
             
         if rows > rows_threshold:
                     
