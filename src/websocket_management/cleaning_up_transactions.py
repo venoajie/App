@@ -249,6 +249,7 @@ def check_whether_size_db_reconciled_each_other(
 
         from_transaction_log_instrument =([o for o in from_transaction_log \
             if o["instrument_name"] == instrument_name])
+        log.info (f"from_transaction_log_instrument {from_transaction_log_instrument}")
         
         #timestamp could be double-> come from combo transaction. hence, trade_id is used to distinguish
         try:
