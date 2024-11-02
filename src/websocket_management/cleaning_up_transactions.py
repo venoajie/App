@@ -178,7 +178,7 @@ async def get_unrecorded_trade_and_order_id(instrument_name: str) -> dict:
         else [o["data"] for o in from_sqlite_all\
                     if o["trade_id"] in unrecorded_trade_id]
 
-async def get_unrecorded_trade_from_transaction_log(
+def get_unrecorded_trade_from_transaction_log(
     my_trades_instrument_name: list,
     from_transaction_log_instrument: list) -> dict:
      

@@ -597,9 +597,9 @@ async def reconciling_size_and_orders(
                             order_db_table
                             )
 
-                    from_transaction_log_instrument = [o["instrument_name"] for o in from_transaction_log ]
+                    from_transaction_log_instrument = remove_redundant_elements([o["instrument_name"] for o in from_transaction_log ])
                     
-                    my_trades_instrument_name = [o["instrument_name"] for o in my_trades_currency]
+                    my_trades_instrument_name = remove_redundant_elements([o["instrument_name"] for o in my_trades_currency])
                                     
                     log.warning (f"from_transaction_log_instrument {from_transaction_log_instrument}")
                     log.debug (f"my_trades_instrument_name {my_trades_instrument_name}")
