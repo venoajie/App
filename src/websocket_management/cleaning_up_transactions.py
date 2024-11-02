@@ -253,7 +253,7 @@ def check_whether_size_db_reconciled_each_other(
         
         #timestamp could be double-> come from combo transaction. hence, trade_id is used to distinguish
         # other possibilities (instrument name beyond those in config):
-        from_transaction_log_instrument = [{'instrument_name': 'ETH_USDC', 'position': None, 'timestamp': 1730159747908, 'trade_id': 'ETH_USDC-3685325', 'user_seq': 1730159747919678, 'balance': 3987.0432}]
+        #from_transaction_log_instrument_example = [{'instrument_name': 'ETH_USDC', 'position': None, 'timestamp': 1730159747908, 'trade_id': 'ETH_USDC-3685325', 'user_seq': #1730159747919678, 'balance': 3987.0432}]
         
         try:
 
@@ -296,6 +296,7 @@ def check_whether_size_db_reconciled_each_other(
         current_position_log = 0 if not current_position_log else current_position_log
         sum_my_trades_instrument = 0 if not sum_my_trades_instrument else sum_my_trades_instrument
         sub_account_size_instrument = 0 if not sub_account_size_instrument else sub_account_size_instrument
+        
         sum_trade_from_log_and_db_is_equal = current_position_log == sum_my_trades_instrument == sub_account_size_instrument
         
         if not sum_trade_from_log_and_db_is_equal:
