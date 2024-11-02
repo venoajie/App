@@ -455,6 +455,7 @@ def querying_based_on_currency_or_instrument_and_strategy (
         
     if "balance" in columns:
         tab = f"SELECT {standard_columns}, {balance} FROM {table} {where_clause}"
+        log.info (f"balance {tab}")
     
     if order is not None:
             
