@@ -183,6 +183,8 @@ def get_unrecorded_trade_from_transaction_log(
     from_transaction_log_instrument: list) -> dict:
      
     from_transaction_log_instrument_trade_id = [o["trade_id"] for o in from_transaction_log_instrument]  
+    
+    log.error (f"from_transaction_log_instrument_trade_id {from_transaction_log_instrument_trade_id}")
 
     if my_trades_instrument_name:
         my_trades_instrument_name_trade_id = [o["trade_id"] for o in my_trades_instrument_name]
