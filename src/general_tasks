@@ -132,9 +132,28 @@ async def clean_up_databases(idle_time) -> None:
     while True:
         
         log.error ("FFFFFFFFFFFFFFFFFFFFFFFFFF")
+            
+        log.critical("count_and_delete_ohlc_rows-START")
+        tables = ["market_analytics_json", 
+                "supporting_items_json",
+                "ohlc1_eth_perp_json", 
+                "ohlc1_btc_perp_json", 
+                "ohlc15_eth_perp_json", 
+                "ohlc15_btc_perp_json", 
+                "ohlc30_eth_perp_json", 
+                "ohlc60_eth_perp_json",
+                "ohlc3_eth_perp_json", 
+                "ohlc3_btc_perp_json", 
+                "ohlc5_eth_perp_json", 
+                "ohlc5_btc_perp_json",  
+                "supporting_items_json"]
         
-        await count_and_delete_ohlc_rows()
-        await asyncio.sleep(idle_time)
+        database: str = "databases/trading.sqlite3"  
+
+        for table in tables:
+                
+            await count_and_delete_ohlc_rows(table)
+            await asyncio.sleep(idle_time)
 
 
 async def update_ohlc_and_market_condition(

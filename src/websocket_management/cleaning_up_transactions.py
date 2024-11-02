@@ -751,64 +751,46 @@ async def clean_up_closed_transactions(
     log.error(f" clean_up_closed_transactions {instrument_name} DONE")
 
 
-async def count_and_delete_ohlc_rows():
+async def count_and_delete_ohlc_rows(table):
 
-    log.critical("count_and_delete_ohlc_rows-START")
-    tables = ["market_analytics_json", 
-              "supporting_items_json",
-              "ohlc1_eth_perp_json", 
-              "ohlc1_btc_perp_json", 
-              "ohlc15_eth_perp_json", 
-              "ohlc15_btc_perp_json", 
-              "ohlc30_eth_perp_json", 
-              "ohlc60_eth_perp_json",
-              "ohlc3_eth_perp_json", 
-              "ohlc3_btc_perp_json", 
-              "ohlc5_eth_perp_json", 
-              "ohlc5_btc_perp_json",  
-              "supporting_items_json"]
+
+    rows_threshold= max_rows(table)
+    log.debug (f"table {table} rows_threshold {rows_threshold}")
     
-    database: str = "databases/trading.sqlite3"  
-
-    for table in tables:
-
-        rows_threshold= max_rows(table)
-        log.debug (f"table {table} rows_threshold {rows_threshold}")
+    if "supporting_items_json" in table:
+        where_filter = f"id"
         
-        if "supporting_items_json" in table:
-            where_filter = f"id"
-            
-        else:
-            where_filter = f"tick"
+    else:
+        where_filter = f"tick"
+    
+    count_rows_query = querying_arithmetic_operator(where_filter, 
+                                                    "COUNT", 
+                                                    table)
+
+    rows = await executing_query_with_return(count_rows_query)
+    
+    rows = rows[0]["COUNT(tick)"] if where_filter=="tick" else rows[0]["COUNT(id)"]
+    log.debug (f"table {table} rows_threshold {rows_threshold} rows {rows} rows > rows_threshold {rows > rows_threshold}")
         
-        count_rows_query = querying_arithmetic_operator(where_filter, 
-                                                        "COUNT", 
+    if rows > rows_threshold:
+                
+        first_tick_query = querying_arithmetic_operator(where_filter, 
+                                                        "MIN",
                                                         table)
-
-        rows = await executing_query_with_return(count_rows_query)
         
-        rows = rows[0]["COUNT(tick)"] if where_filter=="tick" else rows[0]["COUNT(id)"]
-        log.debug (f"table {table} rows_threshold {rows_threshold} rows {rows} rows > rows_threshold {rows > rows_threshold}")
-            
-        if rows > rows_threshold:
-                  
-            first_tick_query = querying_arithmetic_operator(where_filter, 
-                                                            "MIN",
-                                                            table)
-            
-            first_tick_fr_sqlite = await executing_query_with_return(first_tick_query)
-            
-            if where_filter=="tick":
-                first_tick = first_tick_fr_sqlite[0]["MIN(tick)"] 
-            
-            if where_filter=="id":
-                first_tick = first_tick_fr_sqlite[0]["MIN(id)"]
+        first_tick_fr_sqlite = await executing_query_with_return(first_tick_query)
+        
+        if where_filter=="tick":
+            first_tick = first_tick_fr_sqlite[0]["MIN(tick)"] 
+        
+        if where_filter=="id":
+            first_tick = first_tick_fr_sqlite[0]["MIN(id)"]
 
-            log. error(f"table {table} where_filter {where_filter} first_tick_fr_sqlite {first_tick_fr_sqlite}")
-            await deleting_row(table,
-                               database,
-                               where_filter,
-                               "=",
-                               first_tick)
-            
+        log. error(f"table {table} where_filter {where_filter} first_tick_fr_sqlite {first_tick_fr_sqlite}")
+        await deleting_row(table,
+                            database,
+                            where_filter,
+                            "=",
+                            first_tick)
+        
     log.info("count_and_delete_ohlc_rows-DONE")
