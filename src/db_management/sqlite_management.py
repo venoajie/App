@@ -491,7 +491,7 @@ def querying_based_on_currency_or_instrument_and_strategy (
     if order is not None:
             
             #tab = f"SELECT instrument_name, label_main as label, amount_dir as amount, order_id, trade_seq FROM {table} {where_clause} ORDER BY {order}"
-            tab = f"SELECT {standard_columns} FROM {table} {where_clause} ORDER BY {order} {ordering} "
+            tab = f"SELECT {standard_columns},{balance} FROM {table} {where_clause} ORDER BY {order} {ordering} "
     
     if limit > 0:
         
