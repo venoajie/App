@@ -333,8 +333,8 @@ class ModifyOrderDb(SendApiRequest):
         
         if trades_from_exchange:
             
-            trades_from_exchange_without_futures_combo = [ o for o in trades_from_exchange \
-                if f"-FS-" not in o["instrument_name"]]
+            trades_from_exchange_without_futures_combo = (o for o in trades_from_exchange \
+                if f"-FS-" not in o["instrument_name"])
 
             if trades_from_exchange_without_futures_combo:
                 
