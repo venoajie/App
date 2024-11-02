@@ -114,8 +114,16 @@ def reading_from_pkl_data(
 
 
 async def back_up_db(idle_time):
+    extensions = ('.bak')
     
     while True:
+        folder_path = '/databases'
+        file_list = os.listdir(folder_path)
+        
+        for currentFile in file_list:
+            log.error(currentFile)
+            if any(currentFile.endswith(ext) for ext in extensions):
+                os.remove(currentFile)
         await back_up_db_sqlite ()
         await asyncio.sleep(idle_time)
     
@@ -826,7 +834,7 @@ async def main():
         update_ohlc_and_market_condition(
             tradable_config_app, 
             15), 
-        back_up_db(60*15),
+        back_up_db(5),
         clean_up_databases(60), 
         update_instruments(60),
         return_exceptions=True)
