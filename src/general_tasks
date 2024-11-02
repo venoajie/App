@@ -117,7 +117,9 @@ async def back_up_db(idle_time):
     extensions = ('.bak')
     
     while True:
-        folder_path = '/databases'
+        log.critical ("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        folder_path = "databases/"
+        log.critical (folder_path)
         file_list = os.listdir(folder_path)
         
         log.critical (file_list)
