@@ -16,11 +16,9 @@ from db_management.sqlite_management import(
     querying_arithmetic_operator,
     querying_duplicated_transactions)
 from strategies.basic_strategy import(
-    check_db_consistencies,
     get_label_integer,)
 from strategies.config_strategies import(
-    max_rows,
-    paramaters_to_balancing_transactions)
+    max_rows)
 from transaction_management.deribit.telegram_bot import(
     telegram_bot_sendtext,)
 from utilities.system_tools import(
@@ -776,6 +774,7 @@ async def count_and_delete_ohlc_rows():
 
         rows_threshold= max_rows(table)
         
+        
         if "supporting_items_json" in table:
             where_filter = f"id"
             
@@ -787,6 +786,7 @@ async def count_and_delete_ohlc_rows():
                                                         table)
 
         rows = await executing_query_with_return(count_rows_query)
+        log.debug (f"table {table} rows_threshold {rows_threshold} rows {rows}")
         
         rows = rows[0]["COUNT(tick)"] if where_filter=="tick" else rows[0]["COUNT(id)"]
             
