@@ -636,24 +636,26 @@ async def reconciling_size_and_orders(
                                 
                                 log.error (f"from_transaction_log_instrument_name {from_transaction_log_instrument_name}")
                                 
-                                timestamp_log = min([o["timestamp"] for o in from_transaction_log_instrument_name if o["trade_id"] in unrecorded_trade_id_from_transaction_log])
+                                if unrecorded_trade_id_from_transaction_log:
+                                    
+                                    timestamp_log = min([o["timestamp"] for o in from_transaction_log_instrument_name if o["trade_id"] in unrecorded_trade_id_from_transaction_log])
+                                    
+                                    log.warning (f"timestamp_log {timestamp_log}")
                                 
-                                log.warning (f"timestamp_log {timestamp_log}")
-                            
-                                await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
-                                    instrument_name,
-                                    timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
-                                    archive_db_table
-                                    )
-                                                                                            
-                                unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_name)  
-                                
-                                for transaction  in unrecorded_transactions:
-
-                                    await insert_tables(
-                                        trade_db_table,
-                                        transaction
+                                    await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
+                                        instrument_name,
+                                        timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                                        archive_db_table
                                         )
+                                                                                                
+                                    unrecorded_transactions = await get_unrecorded_trade_and_order_id (instrument_name)  
+                                    
+                                    for transaction  in unrecorded_transactions:
+
+                                        await insert_tables(
+                                            trade_db_table,
+                                            transaction
+                                            )
 
                             
                     if my_trades_instrument_name_only:
