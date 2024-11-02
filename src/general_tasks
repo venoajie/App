@@ -120,15 +120,20 @@ async def back_up_db(idle_time):
 
         folder_path = "databases/"
 
-        file_list = os.listdir(folder_path)
-        
-        log.critical (file_list)
-        
-        for currentFile in file_list:
-            log.error(currentFile)
-            if ".bak" in currentFile:
-                os.remove(currentFile)
-        await back_up_db_sqlite ()
+        try:
+            file_list = os.listdir(folder_path)
+            
+            log.critical (file_list)
+            
+            for currentFile in file_list:
+                log.error(currentFile)
+                if ".bak" in currentFile:
+                    os.remove(currentFile)
+            await back_up_db_sqlite ()
+            
+        except Exception as error:
+            await raise_error_message(error)
+            
         await asyncio.sleep(idle_time)
     
 
