@@ -122,9 +122,7 @@ async def back_up_db(idle_time):
 
         try:
             file_list = os.listdir(folder_path)
-            
-            log.critical (file_list)
-            
+                        
             for currentFile in file_list:
                 log.error(currentFile)
                 if ".bak" in currentFile:
@@ -843,7 +841,7 @@ async def main():
         update_ohlc_and_market_condition(
             tradable_config_app, 
             15), 
-        back_up_db(5),
+        back_up_db(60*10),
         clean_up_databases(60), 
         update_instruments(60),
         return_exceptions=True)
