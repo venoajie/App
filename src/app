@@ -338,19 +338,33 @@ class RunningStrategy(ModifyOrderDb):
                                         my_path_ticker = provide_path_for_file(
                                             "ticker", data_orders["instrument_name"])
                                         replace_data(my_path_ticker,data_orders)
+
                                     instrument_name =data_orders["instrument_name"]
 
+                                    log.info (f"instrument_name {instrument_name}")                        
                                     instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
+                                    
                                     if instrument_ticker:
                                         for item in data_orders:
-                                            #ticker[0][item] = data_orders[item]
-                                            log.info (f"{ticker[0][item]}")         
-                                            log.info (f"ticker {([o[item] for o in ticker if instrument_name in o["instrument_name"]])}") 
+                                            log.critical(f"item {item} {data_orders[item]}")
+                                            if "stats" not in item and "instrument_name" not in item and "type" not in item:
+                                                [o for o in ticker if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
+                                            #[o for o in ticker if instr
+                                            if "stats"  in item:
+                                                data_orders_stat = data_orders[item]
+                                                for item in data_orders_stat:
+                                                    log.critical(f"item {item} {data_orders_stat[item]}")
+                                                    [o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
+                                                    #log.critical(f""" stats {data_orders[item]}""")
+                                                    #log.critical(f""" stats {data_orders["stats"]}""")
+                                                    #log.critical(f""" stats {data_orders["stats"][item]}""")
+                                                
+                                                #[o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders["stats"][item]
+                                            #[o for o in ticker if instrument_name in o["instrument_name"]][0][item].append(data_orders[item])
+                                            #lotickerg.info (f"{ticker[0][item]}")         
+                                            #log.info (f"ticker {([o[item] for o in ticker if instrument_name in o["instrument_name"]])}") 
                                             #ticker [0]([o[item] for o in ticker if instrument_name in o["instrument_name"]]) = data_orders[item]
-                                    
-                                    ticker_perpetual = [o for o in ticker if instrument_name in o["instrument_name"]]
-                                    log.info (f"ticker {instrument_name} {ticker_perpetual}")                        
-                                    log.info (f"ticker {ticker}")                        
+                                    log.warning (f"ticker {ticker}")                        
                                 
                         except Exception as error:
                             await raise_error_message (error)
