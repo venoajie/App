@@ -343,6 +343,8 @@ class RunningStrategy(ModifyOrderDb):
                                     instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
                                     if instrument_ticker:
                                         for item in data_orders:
+                                            #ticker[0][item] = data_orders[item]
+                                            log.info (f"{ticker[0][item]}")         
                                             log.info (f"ticker {([o[item] for o in ticker if instrument_name in o["instrument_name"]])}") 
                                             #ticker [0]([o[item] for o in ticker if instrument_name in o["instrument_name"]]) = data_orders[item]
                                     
