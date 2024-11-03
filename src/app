@@ -496,13 +496,6 @@ class RunningStrategy(ModifyOrderDb):
                         # check for delivered instrument               
                 
 
-    @cached(cache=LRUCache(maxsize=3))
-    def ticker_data(
-        self,
-        data):
-        return orjson.loads(data)
-
-
 def main():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
     sub_account_id = "deribit-148510"
