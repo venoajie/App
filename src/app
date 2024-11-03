@@ -272,7 +272,6 @@ class RunningStrategy(ModifyOrderDb):
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
                     
-                    ticker = ticker_data(currencies)    
                     for currency in currencies:
 
                         self.loop.create_task(
@@ -282,6 +281,9 @@ class RunningStrategy(ModifyOrderDb):
                             ))
                         
                 
+                    ticker = ticker_data(currencies)    
+                    log.warning (f"ticker {ticker}") 
+                    
                     while self.websocket_client.open:
                         
                         try:
