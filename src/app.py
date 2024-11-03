@@ -2,11 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+from datetime import datetime, timedelta, timezone
 import os
 
+from cachetools import cached, LRUCache, TTLCache
+
+# installed
+from dataclassy import dataclass, fields
 import httpx
+import json, orjson
 from loguru import logger as log
 import tomli
+import websockets
 
 from configuration import id_numbering, config
 from configuration.label_numbering import get_now_unix_time
@@ -20,23 +27,26 @@ from strategies.combo_auto import ComboAuto
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
+
+from transaction_management.deribit.managing_deribit import (
+    ModifyOrderDb,
+    currency_inline_with_database_address,)
+
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from utilities.pickling import (
     replace_data,
     read_data,)
 from utilities.string_modification import (
-    transform_nested_dict_to_list,)
+    extract_currency_from_text,
+    remove_double_brackets_in_list,
+    remove_redundant_elements,)
 from utilities.system_tools import (
     async_raise_error_message,
     provide_path_for_file,
     raise_error_message)
 from websocket_management.ws_management import (
-    cancel_all,
-    currency_inline_with_database_address,
-    distribute_ticker_result_as_per_data_type,
     get_futures_instruments,
-    labelling_the_unlabelled_and_resend_it,
     )
 from websocket_management.cleaning_up_transactions import (
     check_whether_order_db_reconciled_each_other,
@@ -45,6 +55,47 @@ from websocket_management.cleaning_up_transactions import (
     count_and_delete_ohlc_rows,
     get_unrecorded_trade_and_order_id,
     reconciling_sub_account_and_db_open_orders)
+
+# API endpoint for fetching TODOs
+endpoint = "<https://jsonplaceholder.typicode.com/todos/>"
+    
+# Using the LRUCache decorator function with a maximum cache size of 3
+
+def ticker_data(currencies):
+    """_summary_
+    https://blog.apify.com/python-cache-complete-guide/
+
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    #result = (orjson.loads(data))
+    
+    log.critical ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    
+    result=[]
+    for currency in currencies:
+        instrument_name = f"{currency}-PERPETUAL"
+        
+        result_instrument= ((reading_from_pkl_data(
+                "ticker",
+                instrument_name
+                )))[0]
+        result.append (result_instrument)
+
+    return result
+
+result_json = {}
+def ticker_data_alt(data_orders):
+    instrument_name = data_orders["instrument_name"]
+
+    if "snapshot" in data_orders["type"]:
+        my_path_ticker = provide_path_for_file(
+            "ticker", instrument_name)
+        replace_data(my_path_ticker,data_orders)
+        return result_json |data_orders
 
 
 def parse_dotenv (sub_account) -> dict:
@@ -73,7 +124,6 @@ def reading_from_pkl_data(
     path: str = provide_path_for_file (end_point,
                                       currency,
                                       status)
-
     data = read_data(path)
 
     return data
@@ -106,6 +156,14 @@ def get_index (
     return index_price
 
 
+def get_settlement_period (strategy_attributes) -> list:
+    
+    return (remove_redundant_elements(
+        remove_double_brackets_in_list(
+            [o["settlement_period"]for o in strategy_attributes]))
+            )
+    
+    
 def future_spread_attributes (
     position_without_combo:  list,
     active_futures: list,
@@ -129,12 +187,41 @@ def future_spread_attributes (
                                                    } for o in active_futures if "PERP" not in o["instrument_name"]\
                                                        and currency_upper  in o["instrument_name"]
                             ]
-                  
+                          
+@dataclass(unsafe_hash=True, slots=True)
+class RunningStrategy(ModifyOrderDb):
+
+    sub_account_id: str
+    client_id: str = fields 
+    client_secret: str = fields 
+    modify_order_and_db: object = fields 
+    # Async Event Loop
+    loop = asyncio.get_event_loop()
+    ws_connection_url: str = "wss://www.deribit.com/ws/api/v2"
+    # Instance Variables
+    connection_url: str = "https://www.deribit.com/api/v2/"
+    websocket_client: websockets.WebSocketClientProtocol = None
+    refresh_token: str = None
+    refresh_token_expiry_time: int = None
+            
+    def __post_init__(self):
+        self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
+        self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
+        self.client_secret: str = parse_dotenv(self.sub_account_id)["client_secret"]
+
+        # Start Primary Coroutine
+        self.loop.run_until_complete(self.ws_manager())
     
-async def RunningStrategy(idle_time):
-    
-    
-    
+
+    # @lru_cache(maxsize=None)
+    async def ws_manager(self) -> None:
+        async with websockets.connect(
+            self.ws_connection_url,
+            ping_interval=None,
+            compression=None,
+            close_timeout=60,
+        ) as self.websocket_client:
+                
             try:
                     
                 # registering strategy config file    
@@ -188,244 +275,276 @@ async def RunningStrategy(idle_time):
                     )
                 
                 while True:
+                               
+                    # Authenticate WebSocket Connection
+                    await self.ws_auth()
 
-                    # get portfolio data  
-                    portfolio = reading_from_pkl_data ("portfolio",
-                                                            currency)
-                    
-                    equity: float = portfolio[0]["equity"]                                       
-                                                                        
-                    index_price= get_index (data_orders, perpetual_ticker)
-                    
-                    sub_account = reading_from_pkl_data("sub_accounts",
-                                                        currency)
-                    
-                    sub_account = sub_account[0]
-                                
-                    if sub_account:
-                        
-                        transaction_log_trading= f"transaction_log_{currency_lower}_json"
-                        
-                        column_trade: str= "instrument_name","label", "amount", "price","side"
-                        my_trades_currency: list= await get_query(trade_db_table, 
-                                                                    currency, 
-                                                                    "all", 
-                                                                    "all", 
-                                                                    column_trade)
-                                                                        
-                        column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
-                        from_transaction_log = await get_query (transaction_log_trading, 
-                                                                    currency, 
-                                                                    "all", 
-                                                                    "all", 
-                                                                    column_list)                                       
+                    # Establish Heartbeat
+                    await self.establish_heartbeat()
 
-                        column_order= "instrument_name","label","order_id","amount","timestamp"
-                        orders_currency = await get_query(order_db_table, 
-                                                                currency, 
-                                                                "all", 
-                                                                "all", 
-                                                                column_order)     
+                    # Start Authentication Refresh Task
+                    self.loop.create_task(self.ws_refresh_auth())
                     
-                        len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (sub_account,
-                                                                                    instrument_ticker,
-                                                                                    orders_currency)
+                    ticker = ticker_data(currencies)    
+                    for currency in currencies:
 
-
-                                        
-                        size_is_reconciled_each_other = check_whether_size_db_reconciled_each_other(
-                            sub_account,
-                            instrument_ticker,
-                            my_trades_currency,
-                            from_transaction_log
-                            )
+                        self.loop.create_task(
+                            self.ws_operation(
+                                operation="subscribe",
+                                ws_channel= f"incremental_ticker.{currency}-PERPETUAL",
+                            ))
                         
-                        server_time = get_now_unix_time()  
-                        
-                        delta_time = server_time-tick_TA
-                        
-                        delta_time_seconds = delta_time/1000                                                
-                        
-                        delta_time_expiration = min_expiration_timestamp - server_time  
-                        
-                        THRESHOLD_DELTA_TIME_SECONDS = 60 
                 
+                    while self.websocket_client.open:
                         
-                        if  index_price is not None \
-                            and equity > 0 \
-                                and  size_is_reconciled_each_other\
-                                    and  len_order_is_reconciled_each_other:
-                        
-
-                            notional: float = compute_notional_value(index_price, equity)
-
-
-                            position = [o for o in sub_account["positions"]]
-                            #log.debug (f"position {position}")
-                            position_without_combo = [ o for o in position if f"{currency}-FS" not in o["instrument_name"]]
-                            size_all = sum([abs(o["size"]) for o in position_without_combo])
-                            leverage_all= size_all/notional
-                                            
-                            leverage_threshold = 20
-                            #max_premium = max([o["pct_premium_per_day"] for o in pct_premium_per_day])
-
-                            if   "futureSpread" in strategy \
-                                and leverage_all < leverage_threshold\
-                                    and "ETH" not in currency_upper:
-                                        
-
-                                log.warning (f"strategy {strategy}-START")
-                                strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
-
-                                combo_attributes =  future_spread_attributes(
-                                    position_without_combo,
-                                    active_futures,
-                                    currency_upper,
-                                    notional,
-                                    best_ask_prc,
-                                    server_time,
-                                )
+                        try:
+                                
+                            # Receive WebSocket messages
+                            message: bytes = await self.websocket_client.recv()
+                            message: dict = orjson.loads(message)
+                            message_channel: str = None
+                            #log.warning (message)
+                            if "id" in list(message):
+                                if message["id"] == 9929:
                                     
-                                log.debug (f"combo_attributes {combo_attributes}")
-                                                                
-                                combo_auto = ComboAuto(
-                                    strategy,
-                                    strategy_params,
-                                    position_without_combo,
-                                    my_trades_currency_strategy,
-                                    orders_currency_strategy,
-                                    notional,
-                                    combo_attributes,
+                                    if self.refresh_token is None:
+                                        log.info ("Successfully authenticated WebSocket Connection")
+
+                                    else:
+                                        log.info ("Successfully refreshed the authentication of the WebSocket Connection")
+
+                                    self.refresh_token = message["result"]["refresh_token"]
+
+                                    # Refresh Authentication well before the required datetime
+                                    if message["testnet"]:
+                                        expires_in: int = 300
+                                    else:
+                                        expires_in: int = message["result"]["expires_in"] - 240
+
+                                    now_utc = datetime.now(timezone.utc)
                                     
-                                    perpetual_ticker,
-                                    server_time
+                                    self.refresh_token_expiry_time = now_utc + timedelta(
+                                        seconds=expires_in
                                     )
-                                
 
-                                send_closing_order: dict = await combo_auto.is_send_exit_order_allowed ()
-                                
-                                log.error (f"send_closing_order {send_closing_order}")
-                                #result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
-                                #                                                            send_closing_order, 
-                                #                                                            instrument_ticker)
-                                
-                                if False and result_order:
-                                    log.error (f"result_order {result_order}")
-                                    data_orders = result_order["result"]
-                                    await self.update_user_changes_non_ws (
-                                        non_checked_strategies,
-                                        data_orders, 
-                                        currency, 
-                                        order_db_table,
-                                        trade_db_table, 
-                                        archive_db_table,
-                                        transaction_log_trading)
-                                    await sleep_and_restart ()
-                                    
-                                for combo in active_combo_perp:
-                                    
-                        #                                log.error (f"combo {combo}")
-                                    combo_instruments_name = combo["instrument_name"]
-                                    
-                                    if currency_upper in combo_instruments_name:
-                                    
-                                        
-                                        future_instrument = f"{currency_upper}-{combo_instruments_name[7:][:7]}"
-                                        
-                                        size_instrument = ([abs(o["size"]) for o in position_without_combo \
-                                            if future_instrument in o["instrument_name"]])
-                                        
-                                        size_instrument = 0 if size_instrument == [] else size_instrument [0]
-                                        leverage_instrument = size_instrument/notional
-                                        
-                                        combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)
-                                        future_ticker= reading_from_pkl_data("ticker", future_instrument)
-                                        
-                                        if future_ticker and combo_ticker\
-                                            and leverage_instrument < leverage_threshold:
-                                            
-                                            combo_ticker= combo_ticker[0]
+                                elif message["id"] == 8212:
+                                    # Avoid logging Heartbeat messages
+                                    continue
 
-                                            future_ticker= future_ticker[0]
-                                            
-                                            future_mark_price= future_ticker["mark_price"]
-                                            
-                                            combo_mark_price= combo_ticker["mark_price"]
-                                            log.debug (f"combo_instruments_name {combo_instruments_name}")
-                                    
-                                            send_order: dict = await combo_auto.is_send_and_cancel_open_order_allowed (combo_instruments_name,
-                                                                                                                        future_ticker,
-                                                                                                                        active_futures,)
-                                            
-                                            log.debug (f"combo_instruments_name {combo_instruments_name}")
-                                            if False and send_order["order_allowed"]:
-                                                
-                                                #log.error  (f"send_order {send_order}")
-                                                await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
-                                                                                                send_order, 
-                                                                                                instrument_ticker)
-                                                await self.modify_order_and_db.if_cancel_is_true(send_order)
+                            elif "method" in list(message):
+                                # Respond to Heartbeat Message
+                                if message["method"] == "heartbeat":
+                                    await self.heartbeat_response()
 
-                                            await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
-
-                                        log.error (f"send_order {send_order}")
-                                log.warning (f"strategy {strategy}-DONE")
-
-                            if delta_time_expiration < 0:
+                            if "params" in list(message):
                                 
-                                instruments_name_with_min_expiration_timestamp = futures_instruments [
-                                    "instruments_name_with_min_expiration_timestamp"]     
-                                
-                                # check any oustanding instrument that has deliverd
-                                
-                                for currency in currencies:
-                                    
-                                    delivered_transactions = [o for o in my_trades_currency \
-                                        if instruments_name_with_min_expiration_timestamp in o["instrument_name"]]
-                                    
-                                    if delivered_transactions:
-                                        
-                                        for transaction in delivered_transactions:
-                                            delete_respective_closed_futures_from_trade_db (transaction, trade_db_table)
+                                if message["method"] != "heartbeat":
+                                    message_channel = message["params"]["channel"]
 
-    
-    
+                                    data_orders: list = message["params"]["data"] 
+
+                                    log.info (f"data_orders {data_orders}")
+
+                                    if "snapshot" in data_orders["type"]:
+                                        my_path_ticker = provide_path_for_file(
+                                            "ticker", data_orders["instrument_name"])
+                                        replace_data(my_path_ticker,data_orders)
+                                    
+                                    for instrument in ticker:
+                                        if data_orders["instrument_name"]  == instrument ["instrument_name"]:                                            
+                                            for item in data_orders:
+                                                ticker[0][item] = data_orders[item]
+                                    
+                                    instrument_name =data_orders["instrument_name"]
+                                    ticker_perpetual = [o for o in ticker if instrument_name in o["instrument_name"]]
+                                    log.info (f"ticker {ticker_perpetual}")
+                                    
+                        
+                                
+                        except Exception as error:
+                            await raise_error_message (error)
+                            await telegram_bot_sendtext (
+                                error,
+                                "general_error")
+
+
             except Exception as error:
                 await raise_error_message (error)
                 await telegram_bot_sendtext (
                     error,
                     "general_error")
-                
+                            
+    async def establish_heartbeat(self) -> None:
+        """
+        Requests DBT's `public/set_heartbeat` to
+        establish a heartbeat connection.
+        """
+        msg: dict = {
+            "jsonrpc": "2.0",
+            "id": 9098,
+            "method": "public/set_heartbeat",
+            "params": {"interval": 10},
+        }
+
+        try:
+            
+            message = await self.websocket_client.send(json.dumps(msg))
+            
+            log.error (f"message {message}")
+        
+            await self.websocket_client.send(json.dumps(msg))
+        except Exception as error:
+            log.warning(error)
+
+    async def heartbeat_response(self) -> None:
+        """
+        Sends the required WebSocket response to
+        the Deribit API Heartbeat message.
+        """
+        msg: dict = {
+            "jsonrpc": "2.0",
+            "id": 8212,
+            "method": "public/test",
+            "params": {},
+        }
+        
+        #orjson_dump= (orjson.dumps(msg))
+        
+        #log.error (f" orjson_dump {orjson_dump}")
+        json_dump= (json.dumps(msg))
+        #log.error (f" json_dump {json_dump}")
+        
+        message = await self.websocket_client.send(json.dumps(msg))
+        
+        log.error (f"message {message}")
+        
+        try:
+            await self.websocket_client.send(json.dumps(msg))
+
+        except Exception as error:
+            log.warning(error)
+
+    async def ws_auth(self) -> None:
+        """
+        Requests DBT's `public/auth` to
+        authenticate the WebSocket Connection.
+        """
+        msg: dict = {
+            "jsonrpc": "2.0",
+            "id": 9929,
+            "method": "public/auth",
+            "params": {
+                "grant_type": "client_credentials",
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+            },
+        }
+        
+        
+        message = await self.websocket_client.send(json.dumps(msg))
+        
+        log.error (f"message {message}")
+        
+        await self.websocket_client.send(json.dumps(msg))
+
+    async def ws_refresh_auth(self) -> None:
+        """
+        Requests DBT's `public/auth` to refresh
+        the WebSocket Connection's authentication.
+        """
+        while True:
+            now_utc = datetime.now(timezone.utc)
+            if self.refresh_token_expiry_time is not None:
+                if now_utc > self.refresh_token_expiry_time:
                     
-                                
+                    msg: dict = {
+                        "jsonrpc": "2.0",
+                        "id": 9929,
+                        "method": "public/auth",
+                        "params": {
+                            "grant_type": "refresh_token",
+                            "refresh_token": self.refresh_token,
+                        },
+                    }
+                    
+                    message = await self.websocket_client.send(json.dumps(msg))
+                    
+                    log.error (f"message {message}")
+                    
+
+                    await self.websocket_client.send(json.dumps(msg))
+
+            await asyncio.sleep(150)
+    
+                        
+                                    
+    async def ws_operation(
+        self, 
+        operation: str, 
+        ws_channel: str, 
+        id: int = 100
+    ) -> None:
+        """
+        Requests `public/subscribe` or `public/unsubscribe`
+        to DBT's API for the specific WebSocket Channel.
+        """
+        sleep_time: int = 5
+        
+        await asyncio.sleep(sleep_time)
+
+        id = id_numbering.id(operation, ws_channel)
+
+        msg: dict = {
+            "jsonrpc": "2.0",
+            "method": f"private/{operation}",
+            "id": id,
+            "params": {"channels": [ws_channel]},
+        }
+
+        #log.info(ws_channel)
+        await self.websocket_client.send(json.dumps(msg))
+
+
 
                         # check for delivered instrument               
                 
 
-async def main():
-    await asyncio.gather(
-        update_ohlc_and_market_condition(15), 
-        back_up_db(60*15),
-        clean_up_databases(60), 
-        update_instruments(60),
-        return_exceptions=True)
+    @cached(cache=LRUCache(maxsize=3))
+    def ticker_data(
+        self,
+        data):
+        return orjson.loads(data)
+
+
+def main():
+    # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
+    sub_account_id = "deribit-148510"
     
-    
+    try:
+        RunningStrategy(sub_account_id)
+
+    except Exception as error:
+        raise_error_message (
+            error, 
+            5,
+            "app"
+            )
+                
 if __name__ == "__main__":
     
     try:
-        #asyncio.run(main())
-        asyncio.run(main())
+        (main())
         
-    except (KeyboardInterrupt, SystemExit):
+    except(
+        KeyboardInterrupt, 
+        SystemExit
+        ):
         asyncio.get_event_loop().run_until_complete(main().stop_ws())
         
 
     except Exception as error:
         raise_error_message(
         error, 
-        10, 
+        5, 
         "app"
         )
-
-    

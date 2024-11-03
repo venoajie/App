@@ -492,7 +492,8 @@ class StreamAccountData(ModifyOrderDb):
             await asyncio.sleep(150)
 
     async def ws_operation(
-        self, operation: str, 
+        self, 
+        operation: str, 
         ws_channel: str, 
         id: int = 100
     ) -> None:
