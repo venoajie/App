@@ -330,7 +330,7 @@ class RunningStrategy(ModifyOrderDb):
 
                                     data_orders: list = message["params"]["data"] 
 
-                                    log.info (f"data_orders {data_orders}")
+                                    log.debug (f"data_orders {data_orders}")
 
                                     if "snapshot" in data_orders["type"]:
                                         my_path_ticker = provide_path_for_file(
@@ -344,9 +344,7 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     instrument_name =data_orders["instrument_name"]
                                     ticker_perpetual = [o for o in ticker if instrument_name in o["instrument_name"]]
-                                    log.info (f"ticker {ticker_perpetual}")
-                                    
-                        
+                                    log.info (f"ticker {instrument_name} {ticker_perpetual}")                        
                                 
                         except Exception as error:
                             await raise_error_message (error)
