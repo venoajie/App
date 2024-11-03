@@ -338,11 +338,10 @@ class RunningStrategy(ModifyOrderDb):
                                         my_path_ticker = provide_path_for_file(
                                             "ticker", data_orders["instrument_name"])
                                         replace_data(my_path_ticker,data_orders)
-                                    
-                                    for instrument in ticker:
-                                        if data_orders["instrument_name"]  == instrument ["instrument_name"]:                                            
-                                            for item in data_orders:
-                                                ticker[0][item] = data_orders[item]
+                                    instrument_ticker = [o for o in ticker if data_orders["instrument_name"]  == o["instrument_name"]]
+                                    if instrument_ticker:
+                                        for item in data_orders:
+                                            ticker[0][item] = data_orders[item]
                                     
                                     instrument_name =data_orders["instrument_name"]
                                     ticker_perpetual = [o for o in ticker if instrument_name in o["instrument_name"]]
