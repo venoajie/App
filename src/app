@@ -458,6 +458,11 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                             leverage_threshold = 20
                                             #max_premium = max([o["pct_premium_per_day"] for o in pct_premium_per_day])
+                                            
+                                            my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
+                                            
+                                            orders_currency_strategy = [o for o in orders_currency if strategy in (o["label"]) ]
+                        
 
                                             if   "futureSpread" in strategy \
                                                 and leverage_all < leverage_threshold\
@@ -605,12 +610,9 @@ class RunningStrategy(ModifyOrderDb):
         }
 
         try:
-            
-            message = await self.websocket_client.send(json.dumps(msg))
-            
-            log.error (f"message {message}")
-        
+         
             await self.websocket_client.send(json.dumps(msg))
+        
         except Exception as error:
             log.warning(error)
 
@@ -632,9 +634,9 @@ class RunningStrategy(ModifyOrderDb):
         json_dump= (json.dumps(msg))
         #log.error (f" json_dump {json_dump}")
         
-        message = await self.websocket_client.send(json.dumps(msg))
+        #message = await self.websocket_client.send(json.dumps(msg))
         
-        log.error (f"message {message}")
+        #log.error (f"message {message}")
         
         try:
             await self.websocket_client.send(json.dumps(msg))
@@ -659,10 +661,6 @@ class RunningStrategy(ModifyOrderDb):
         }
         
         
-        message = await self.websocket_client.send(json.dumps(msg))
-        
-        log.error (f"message {message}")
-        
         await self.websocket_client.send(json.dumps(msg))
 
     async def ws_refresh_auth(self) -> None:
@@ -685,16 +683,10 @@ class RunningStrategy(ModifyOrderDb):
                         },
                     }
                     
-                    message = await self.websocket_client.send(json.dumps(msg))
-                    
-                    log.error (f"message {message}")
-                    
-
                     await self.websocket_client.send(json.dumps(msg))
 
             await asyncio.sleep(150)
-    
-                        
+                            
                                     
     async def ws_operation(
         self, 
@@ -719,13 +711,7 @@ class RunningStrategy(ModifyOrderDb):
             "params": {"channels": [ws_channel]},
         }
 
-        #log.info(ws_channel)
         await self.websocket_client.send(json.dumps(msg))
-
-
-
-                        # check for delivered instrument               
-                
 
 def main():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
