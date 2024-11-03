@@ -59,9 +59,10 @@ endpoint = "<https://jsonplaceholder.typicode.com/todos/>"
     
 # Using the LRUCache decorator function with a maximum cache size of 3
 
-def ticker_data(currencies):
+def cached_ticker_data(currencies):
     """_summary_
-    https://blog.apify.com/python-cache-complete-guide/
+    https://blog.apify.com/python-cache-complete-guide/]
+    data caching
 
     Args:
         instrument_ticker (_type_): _description_
@@ -84,6 +85,36 @@ def ticker_data(currencies):
         result.append (result_instrument)
 
     return result
+
+
+def update_cached_ticker_data(
+    instrument_name,
+    ticker,
+    data_orders):
+    """_summary_
+    https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
+
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    #result = (orjson.loads(data))
+        
+    instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
+    
+    if instrument_ticker:
+        for item in data_orders:
+            log.critical(f"item {item} {data_orders[item]}")
+            if "stats" not in item and "instrument_name" not in item and "type" not in item:
+                [o for o in ticker if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
+            #[o for o in ticker if instr
+            if "stats"  in item:
+                data_orders_stat = data_orders[item]
+                for item in data_orders_stat:
+                    [o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
+    
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
@@ -281,7 +312,7 @@ class RunningStrategy(ModifyOrderDb):
                             ))
                         
                 
-                    ticker = ticker_data(currencies)    
+                    ticker = cached_ticker_data(currencies)    
                     log.warning (f"ticker {ticker}") 
                     
                     while self.websocket_client.open:
@@ -339,31 +370,15 @@ class RunningStrategy(ModifyOrderDb):
                                             "ticker", data_orders["instrument_name"])
                                         replace_data(my_path_ticker,data_orders)
 
-                                    instrument_name =data_orders["instrument_name"]
-
-                                    log.info (f"instrument_name {instrument_name}")                        
-                                    instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
+                                    instrument_name_perpetual =data_orders["instrument_name"]
                                     
-                                    if instrument_ticker:
-                                        for item in data_orders:
-                                            log.critical(f"item {item} {data_orders[item]}")
-                                            if "stats" not in item and "instrument_name" not in item and "type" not in item:
-                                                [o for o in ticker if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
-                                            #[o for o in ticker if instr
-                                            if "stats"  in item:
-                                                data_orders_stat = data_orders[item]
-                                                for item in data_orders_stat:
-                                                    log.critical(f"item {item} {data_orders_stat[item]}")
-                                                    [o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
-                                                    #log.critical(f""" stats {data_orders[item]}""")
-                                                    #log.critical(f""" stats {data_orders["stats"]}""")
-                                                    #log.critical(f""" stats {data_orders["stats"][item]}""")
-                                                
-                                                #[o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders["stats"][item]
-                                            #[o for o in ticker if instrument_name in o["instrument_name"]][0][item].append(data_orders[item])
-                                            #lotickerg.info (f"{ticker[0][item]}")         
-                                            #log.info (f"ticker {([o[item] for o in ticker if instrument_name in o["instrument_name"]])}") 
-                                            #ticker [0]([o[item] for o in ticker if instrument_name in o["instrument_name"]]) = data_orders[item]
+                                    update_cached_ticker_data(
+                                        instrument_name_perpetual,
+                                        ticker,
+                                        data_orders
+                                        )
+
+                                    log.info (f"instrument_name {instrument_name_perpetual}")      
                                     log.warning (f"ticker {ticker}")                        
                                 
                         except Exception as error:
