@@ -5,8 +5,6 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 import os
 
-from cachetools import cached, LRUCache, TTLCache
-
 # installed
 from dataclassy import dataclass, fields
 import httpx
@@ -86,17 +84,6 @@ def ticker_data(currencies):
         result.append (result_instrument)
 
     return result
-
-result_json = {}
-def ticker_data_alt(data_orders):
-    instrument_name = data_orders["instrument_name"]
-
-    if "snapshot" in data_orders["type"]:
-        my_path_ticker = provide_path_for_file(
-            "ticker", instrument_name)
-        replace_data(my_path_ticker,data_orders)
-        return result_json |data_orders
-
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
