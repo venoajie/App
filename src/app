@@ -387,7 +387,7 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     equity: float = portfolio[0]["equity"]    
                                     
-                                    perpetual_ticker_instrument_name = [o for o in perpetual_ticker if instrument_name_perpetual == o["instrument_name"]]                                   
+                                    perpetual_ticker_instrument_name = [o for o in perpetual_ticker if instrument_name_perpetual == o["instrument_name"]][0]                                   
                                                                                         
                                     index_price= get_index (
                                         data_orders,
