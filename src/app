@@ -190,7 +190,8 @@ def future_spread_attributes (
     server_time: int,
     ) -> dict:
 
-    log.info (f"best_ask_prc {best_ask_prc}")    
+    log.info (f"currency_upper {currency_upper}")    
+    log.info (f"active_futures {active_futures}")    
     return  [{'instrument_name':o['instrument_name'], 
               'is_weekly': o["settlement_period"]=="week", 
               'premium': (reading_from_pkl_data("ticker",  o["instrument_name"])[0]["mark_price"])   - best_ask_prc, 
