@@ -574,6 +574,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                                                                                 active_futures,)
                                                                     
                                                                     log.debug (f"combo_instruments_name {combo_instruments_name}")
+                                                                    log.error (f"send_order {send_order}")
                                                                     if False and send_order["order_allowed"]:
                                                                         
                                                                         #log.error  (f"send_order {send_order}")
@@ -584,7 +585,7 @@ class RunningStrategy(ModifyOrderDb):
 
                                                                     await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
 
-                                                                log.error (f"send_order {send_order}")
+                                                                
                                                         log.warning (f"strategy {strategy}-DONE")
 
                                                     if delta_time_expiration < 0:
