@@ -513,7 +513,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             orders_currency_strategy,
                                                             notional,
                                                             combo_attributes,
-                                                            perpetual_ticker,
+                                                            perpetual_ticker_instrument_name,
                                                             server_time
                                                             )
                                                         
