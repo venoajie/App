@@ -5,7 +5,7 @@ Description= sync_with_remote service
 [Service]
 Type=simple
 Restart=always
-ExecStart=/usr/bin/uv run bash /home/ubuntu/App/src/sync_with_remote.sh
+ExecStart=/usr/bin/bash /home/ubuntu/App/src/sync_with_remote.sh
 WorkingDirectory=/home/ubuntu/App/src
 User=ubuntu
 StandardOutput=null
