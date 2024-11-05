@@ -1,7 +1,7 @@
 
 install:
-uv venv
-uvinit pip install -r requirements.txt
+	uv venv
+	uv pip install -r requirements.txt
 
 
 clean:
