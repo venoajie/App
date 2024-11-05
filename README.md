@@ -37,7 +37,7 @@
 ## Quick start:
 - install app 
 ```shell 
-git clone https://github.com/venoajie/MyApp.git
+git clone https://github.com/venoajie/App.git
 ``` 
 - install dependencies
 ```shell 
@@ -52,7 +52,6 @@ cd MyApp/src/configuration
 - run app
 ```shell 
 cd MyApp/src
-make start # for first time running
 ``` 
 
 ## File structure:
