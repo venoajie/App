@@ -1,4 +1,4 @@
-name: Ruff
+name: Format
 on: [ push, pull_request ]
 jobs:
   ruff:
