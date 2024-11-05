@@ -342,6 +342,7 @@ class SendApiRequest:
                                                  endpoint=endpoint, 
                                                  params=params)
 
+        log.warning(f"user_trades {user_trades}")
         return [] if user_trades == [] else user_trades["result"]["trades"]
         
     async def get_cancel_order_all(self):
