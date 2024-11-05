@@ -365,7 +365,7 @@ async def hedging_spot_currency(
             settlement_periods= get_settlement_period (strategy_attributes)
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             
-            futures_instruments = await get_futures_instruments (currencies,
+            futures_instruments =  get_futures_instruments (currencies,
                                                                 settlement_periods)  
             
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
@@ -386,6 +386,7 @@ async def hedging_spot_currency(
             
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             TA_result_data_all = await querying_table("market_analytics_json")
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 
             TA_result_data_only=  TA_result_data_all["list_data_only"]
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")

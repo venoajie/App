@@ -47,7 +47,7 @@ def get_instruments_kind(
     return  [o for o in instruments_kind if o["settlement_period"] in settlement_periods]
 
 
-async def get_futures_for_active_currencies (
+def get_futures_for_active_currencies(
     active_currencies,
     settlement_periods) -> list:
     """_summary_
@@ -84,13 +84,14 @@ async def get_futures_for_active_currencies (
     return remove_double_brackets_in_list(instruments_holder_plc)
     
     
-async def get_futures_instruments (
+def get_futures_instruments(
     active_currencies, 
     settlement_periods
     ) -> list:
     
-    active_futures=  await get_futures_for_active_currencies(active_currencies,
-                                                             settlement_periods)
+    active_futures=   get_futures_for_active_currencies(
+            active_currencies,
+            settlement_periods)
     
     active_combo = [o for o in active_futures if "future_combo" in o["kind"]]
           

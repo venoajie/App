@@ -195,7 +195,7 @@ class StreamAccountData(ModifyOrderDb):
                                 
                 settlement_periods = get_settlement_period (strategy_attributes)
                                 
-                futures_instruments = await get_futures_instruments (
+                futures_instruments =  get_futures_instruments (
                     currencies,
                     settlement_periods)  
                 
