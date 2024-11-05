@@ -619,7 +619,10 @@ async def reconciling_size_and_orders(
                                                                 currency, 
                                                                 "all", 
                                                                 "all", 
-                                                                column_list)                                  
+                                                                column_list)      
+                    
+                    log.debug (f"from_transaction_log {from_transaction_log}")
+                                                
 
                     column_order= "instrument_name","label","order_id","amount","timestamp"
                     orders_currency = await get_query(order_db_table, 
