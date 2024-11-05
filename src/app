@@ -78,7 +78,7 @@ def cached_ticker_data(currencies):
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
         
-        result_instrument= ((reading_from_pkl_data(
+        result_instrument=                                                  ((reading_from_pkl_data(
                 "ticker",
                 instrument_name
                 )))[0]
