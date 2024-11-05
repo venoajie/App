@@ -621,7 +621,7 @@ async def reconciling_size_and_orders(
                                                                 "all", 
                                                                 column_list)      
                     
-                    log.debug (f"from_transaction_log {from_transaction_log}")
+                    #log.debug (f"from_transaction_log {from_transaction_log}")
                                                 
 
                     column_order= "instrument_name","label","order_id","amount","timestamp"

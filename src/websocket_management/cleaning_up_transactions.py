@@ -238,6 +238,8 @@ def check_whether_size_db_reconciled_each_other(
     from_transaction_log) -> None:
     """ """
     
+    log.info (f" {instrument_name}")
+    
     if sub_account :
         
         sub_account_size_instrument = [o["size"] for o in sub_account ["positions"] \
@@ -247,7 +249,7 @@ def check_whether_size_db_reconciled_each_other(
 
         from_transaction_log_instrument =([o for o in from_transaction_log \
             if o["instrument_name"] == instrument_name])
-        #log.info (f"from_transaction_log_instrument {from_transaction_log_instrument}")
+        log.info (f"from_transaction_log_instrument {from_transaction_log_instrument}")
         
         #timestamp could be double-> come from combo transaction. hence, trade_id is used to distinguish
         # other possibilities (instrument name beyond those in config):
@@ -263,8 +265,8 @@ def check_whether_size_db_reconciled_each_other(
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  last_time_stamp_log == o["user_seq"]][0]
                 
-            #log.error(f"last_time_stamp_log {last_time_stamp_log}")
-            #log.error(f"current_position_log {current_position_log}")
+            log.error(f"last_time_stamp_log {last_time_stamp_log}")
+            log.error(f"current_position_log {current_position_log}")
         # just in case, trade id = None(because of settlement)
         except:
                 
@@ -277,11 +279,11 @@ def check_whether_size_db_reconciled_each_other(
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
                 else str(max([extract_integers_from_text(o["trade_id"]) for o in from_transaction_log_instrument ]))
     
-            #log.error(f"last_time_stamp_log {last_time_stamp_log}")
+            log.error(f"last_time_stamp_log {last_time_stamp_log}")
             current_position_log = 0 if not from_transaction_log_instrument \
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  str(last_time_stamp_log) in o["trade_id"]][0]
-            #log.error(f"current_position_log {current_position_log}")
+            log.error(f"current_position_log {current_position_log}")
     
         my_trades_instrument = 0 if not my_trades_currency \
             else [o for o in my_trades_currency \
