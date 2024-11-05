@@ -360,12 +360,15 @@ async def hedging_spot_currency(
             
             cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
                 if o["cancellable"]==True]
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             
             settlement_periods= get_settlement_period (strategy_attributes)
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             
             futures_instruments = await get_futures_instruments (currencies,
                                                                 settlement_periods)  
             
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             active_futures = futures_instruments["active_futures"]   
 
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
