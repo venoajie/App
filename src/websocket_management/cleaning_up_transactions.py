@@ -295,15 +295,22 @@ def check_whether_size_db_reconciled_each_other(
         sum_my_trades_instrument = 0 if not sum_my_trades_instrument else sum_my_trades_instrument
         sub_account_size_instrument = 0 if not sub_account_size_instrument else sub_account_size_instrument
         
-        sum_trade_from_log_and_db_is_equal = current_position_log == sum_my_trades_instrument == sub_account_size_instrument
+        different_from_sub_accont_and_trans_log = current_position_log == sub_account_size_instrument
         
-        if not sum_trade_from_log_and_db_is_equal:
-            log.critical(f"sum_from_log_and_trade_is_equal {sum_trade_from_log_and_db_is_equal} sum_my_trades_currency {sum_my_trades_instrument}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
+        different_from_all_db_sources = current_position_log == sub_account_size_instrument  == sum_my_trades_instrument 
+        
+        if not different_from_all_db_sources:
+            log.critical(f"different_from_all_db_sources {different_from_all_db_sources} different_from_sub_accont_and_trans_log {different_from_sub_accont_and_trans_log} sum_my_trades_currency {sum_my_trades_instrument}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
+
         # combining result
-        return sum_trade_from_log_and_db_is_equal
+        return dict(different_from_all_db_sources = different_from_all_db_sources,
+                    different_from_sub_accont_and_trans_log = different_from_sub_accont_and_trans_log)
+    
 
     else :        
-        return False
+        return dict(different_from_all_db_sources = False,
+                    different_from_sub_accont_and_trans_log = False == sub_account_size_instrument)
+    
                     
 def check_if_label_open_still_in_active_transaction(
     from_sqlite_open: list, 
