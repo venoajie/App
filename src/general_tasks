@@ -763,6 +763,7 @@ async def reconciling_size_and_orders(
                                                                             "all", 
                                                                             column_trade)
                                 
+                                log.debug (f"my_trades_instrument_name {my_trades_instrument_name}")
                                 log.debug (f"instrument_name {instrument_name} size_is_reconciled_each_other {size_is_reconciled_each_other}")
                                 #log.debug (f"my_trades_instrument_name {my_trades_instrument_name}")
                                     
