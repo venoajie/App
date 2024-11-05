@@ -21,3 +21,4 @@ sudo systemctl daemon-reload
 sudo systemctl enable sync_with_remote.service
 sudo systemctl start sync_with_remote.service
  
+https://medium.com/@mailmeonriju/how-to-write-a-custom-systemctl-linux-service-for-python-scripts-with-virtualenv-and-env-file-c63c4625cbd7

@@ -5,7 +5,7 @@ Description= running general tasks service
 [Service]
 Type=simple
 Restart=always
-ExecStart=/home/ubuntu/App/.venv/bin/python3 /home/ubuntu/App/src/general_tasks
+ExecStart=/home/ubuntu/.cargo/bin/uv run python3 /home/ubuntu/App/src/app
 WorkingDirectory=/home/ubuntu/App/src
 User=ubuntu
 StandardOutput=null

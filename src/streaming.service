@@ -5,11 +5,15 @@ Description= running streaming from websocket service
 [Service]
 Type=simple
 Restart=always
-ExecStart=/usr/bin/uv run python3 /home/ubuntu/yApp/src/streaming
+ExecStart=/home/ubuntu/App/.venv/bin/python3 /home/ubuntu/App/src/streaming
 WorkingDirectory=/home/ubuntu/App/src
 User=ubuntu
 StandardOutput=null
 RestartSec=1
+
+
+/home/ubuntu/App/.venv
+
 
 [Install]
 WantedBy=multi-user.target
