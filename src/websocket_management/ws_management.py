@@ -81,7 +81,7 @@ def get_futures_for_active_currencies(
     for instr in instruments_holder_place:
         instruments_holder_plc.append(instr)
 
-    yield remove_double_brackets_in_list(instruments_holder_plc)
+    return remove_double_brackets_in_list(instruments_holder_plc)
     
     
 def get_futures_instruments(
