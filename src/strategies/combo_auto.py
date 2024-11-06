@@ -306,7 +306,8 @@ class ComboAuto (BasicStrategy):
                     
                     transactions_under_label_int_example = [{'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}]
                                         
-                    if not orders_currency or not outstanding_closed_orders:   
+                    if abs(transactions_under_label_int_all ["premium_pct"])>tp_threshold \
+                        and(not orders_currency or not outstanding_closed_orders):   
                                                     
                         traded_future = [o for o in transactions_detail if "PERPETUAL" not  in o["instrument_name"]][0]
                         traded_perpetual = [o for o in transactions_detail if perpetual_instrument_name in o["instrument_name"]][0]
@@ -316,26 +317,11 @@ class ComboAuto (BasicStrategy):
                         traded_perpetual_size = abs(traded_perpetual["amount"])
                         traded_future_size = abs(traded_future["amount"])
                         current_premium = traded_future_price - perpetual_ask_price
-                        current_premium_exceed_transactions_premium = (current_premium-transactions_premium)/transactions_premium
-                        
-                        try:
-                            min_expiration_timestamp = self.future_ticker["min_expiration_timestamp"]    
-                        except:
-                            min_expiration_timestamp = -1  
-                        #log.warning (f"min_expiration_timestamp {min_expiration_timestamp}")
-                        
-                        delta_time_expiration = min_expiration_timestamp - self.server_time 
-                        #log.warning (f"delta_time_expiration {delta_time_expiration}")
-                        
                         exit_params.update({"size": abs (traded_perpetual_size)})
                         
                         exit_params.update({"label": f"{strategy_label}-closed-{label_integer}"})
                         
                         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
-                        
-                        open_orders_under_label = [o for o in self.orders_currency_strategy \
-                                if label_integer in o["label"] \
-                                    and perpetual_instrument_name in o["instrument_name"]]
                         
                         order_allowed = True
                         
