@@ -102,6 +102,7 @@ def transactions_under_label_int(
     perpetual_price
     ) -> str:
     """ """
+    import math
     
     log.error (f"transactions {transactions}")
 
@@ -109,7 +110,7 @@ def transactions_under_label_int(
     traded_perpetual = [o for o in transactions if "PERPETUAL" in o["instrument_name"]][0]
     
     traded_future_price = traded_future["price"] 
-    transactions_premium = [abs(sum(o["price"]*o["amount"])/o["amount"]) for o in transactions]
+    transactions_premium = sum([(o["price"]*o["amount"])/abs(o["amount"]) for o in transactions])
 
     current_premium = traded_future_price - perpetual_price
     premium_pct = (current_premium-transactions_premium)/transactions_premium
@@ -120,8 +121,7 @@ def transactions_under_label_int(
                 len_closed_transaction = len([ o["amount"] for o in transactions]),
                 premium = transactions_premium,
                 premium_pct = premium_pct,
-                combo_instruments_name = (f"{traded_future_instrument_name[:3]}-FS-{traded_future_instrument_name[4:]}_PERP"),
-                summing_closed_transaction = sum([ o["amount"] for o in transactions]))
+                combo_instruments_name = (f"{traded_future_instrument_name[:3]}-FS-{traded_future_instrument_name[4:]}_PERP"),)
     
     
 def get_basic_opening_parameters(strategy_label):
@@ -304,14 +304,11 @@ class ComboAuto (BasicStrategy):
 
                     transactions_len = transactions_under_label_int_all["len_closed_transaction"]
                     transactions_detail = transactions_under_label_int_all["transactions"]
-                    transactions_premium = transactions_under_label_int_all["premium"]
                     
                     transactions_under_label_int_example = [{'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}]
                                         
                     if transactions_len == 0:   
-                        
-                        current_premium_exceed_threshold = transactions_under_label_int_all["premium_pct"] > tp_threshold
-                            
+                                                    
                         log.warning (f"transactions_under_label_int_detail {transactions_detail}")
                         traded_future = [o for o in transactions_detail if "PERPETUAL" not  in o["instrument_name"]][0]
                         traded_perpetual = [o for o in transactions_detail if perpetual_instrument_name in o["instrument_name"]][0]
