@@ -291,7 +291,8 @@ class ComboAuto (BasicStrategy):
                 #log.error (f"my_trades_currency_strategy {my_trades_currency_strategy}")
      
                 transactions_under_label_int_all = transactions_under_label_int(label_integer, 
-                                                                                my_trades_currency)
+                                                                                my_trades_currency,
+                                                                                perpetual_ask_price)
                 log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
 
                 transactions_sum = transactions_under_label_int_all["summing_closed_transaction"]
