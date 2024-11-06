@@ -106,16 +106,16 @@ def transactions_under_label_int(
     transactions = [o for o in transactions_all if str(label_integer) in o["label"]]
     log.error (f"transactions {transactions}")
 
-    traded_future = [o for o in transactions if "PERPETUAL" not  in o["instrument_name"]][0]
-    traded_perpetual = [o for o in transactions if "PERPETUAL" in o["instrument_name"]][0]
+    traded_future = [o for o in transactions if "PERPETUAL" not  in o["instrument_name"]]
+    traded_perpetual = [o for o in transactions if "PERPETUAL" in o["instrument_name"]]
     
-    traded_future_price = traded_future["price"]
+    traded_future_price = traded_future["price"] if traded_future else 0
     transactions_premium = [abs(sum(o["price"]*o["amount"])/o["amount"]) for o in transactions]
 
     current_premium = traded_future_price - perpetual_price
     premium_pct = (current_premium-transactions_premium)/transactions_premium
     
-    traded_future_instrument_name = traded_future["instrument_name"]
+    traded_future_instrument_name = traded_future["instrument_name"] if traded_future else []
 
     return dict(transactions = transactions,
                 len_closed_transaction = len([ o["amount"] for o in transactions]),
