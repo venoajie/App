@@ -283,6 +283,8 @@ class ComboAuto (BasicStrategy):
             will_be_closed = []
             for label in self.my_trades_currency_strategy_labels:
                 
+                label_integer = get_label_integer(label)
+                
                 transactions = [o for o in my_trades_currency if str(label_integer) in o["label"]]
                 
                 transactions_sum = sum([ o["amount"] for o in transactions])
@@ -291,7 +293,6 @@ class ComboAuto (BasicStrategy):
                 
                     log.info (f"label {label}")
                     
-                    label_integer = get_label_integer(label)
                     
                     log.warning (f"label_integer {label_integer}")
                     #log.error (f"my_trades_currency_strategy {my_trades_currency_strategy}")
