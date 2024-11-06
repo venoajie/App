@@ -98,12 +98,11 @@ def get_label_main(
     
 def transactions_under_label_int(
     label_integer: int,
-    transactions_all: list,
+    transactions: list,
     perpetual_price
     ) -> str:
     """ """
-    log.error (f"transactions_all {transactions_all}")
-    transactions = [o for o in transactions_all if str(label_integer) in o["label"]]
+    
     log.error (f"transactions {transactions}")
 
     traded_future = [o for o in transactions if "PERPETUAL" not  in o["instrument_name"]]
@@ -284,27 +283,30 @@ class ComboAuto (BasicStrategy):
             will_be_closed = []
             for label in self.my_trades_currency_strategy_labels:
                 
-                log.info (f"label {label}")
+                transactions = [o for o in my_trades_currency if str(label_integer) in o["label"]]
                 
-                label_integer = get_label_integer(label)
+                transactions_sum = sum([ o["amount"] for o in transactions])
                 
-                log.warning (f"label_integer {label_integer}")
-                #log.error (f"my_trades_currency_strategy {my_trades_currency_strategy}")
-     
-                transactions_under_label_int_all = transactions_under_label_int(label_integer, 
-                                                                                my_trades_currency,
-                                                                                perpetual_ask_price)
-                log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
-
-                transactions_sum = transactions_under_label_int_all["summing_closed_transaction"]
-                transactions_len = transactions_under_label_int_all["len_closed_transaction"]
-                transactions_detail = transactions_under_label_int_all["transactions"]
-                transactions_premium = transactions_under_label_int_all["premium"]
+                if transactions_sum== 0:
                 
-                transactions_under_label_int_example = [{'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}]
-                
-                if transactions_sum == 0:
+                    log.info (f"label {label}")
                     
+                    label_integer = get_label_integer(label)
+                    
+                    log.warning (f"label_integer {label_integer}")
+                    #log.error (f"my_trades_currency_strategy {my_trades_currency_strategy}")
+        
+                    transactions_under_label_int_all = transactions_under_label_int(label_integer, 
+                                                                                    transactions,
+                                                                                    perpetual_ask_price)
+                    log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
+
+                    transactions_len = transactions_under_label_int_all["len_closed_transaction"]
+                    transactions_detail = transactions_under_label_int_all["transactions"]
+                    transactions_premium = transactions_under_label_int_all["premium"]
+                    
+                    transactions_under_label_int_example = [{'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}]
+                                        
                     if transactions_len == 0:   
                         
                         current_premium_exceed_threshold = transactions_under_label_int_all["premium_pct"] > tp_threshold
@@ -342,13 +344,12 @@ class ComboAuto (BasicStrategy):
                         order_allowed = True
                         
                         will_be_closed.append(dict(
-            order_allowed= order_allowed,
-            order_parameters=(
-                [] if order_allowed == False else exit_params
-            ),
-            cancel_allowed=cancel_allowed,
-            cancel_id=None if not cancel_allowed else cancel_id
+                            order_allowed= order_allowed,
+                            order_parameters=( [] if order_allowed == False else exit_params),
+                            cancel_allowed=cancel_allowed,
+                            cancel_id=None if not cancel_allowed else cancel_id
         ))
+                        log.warning (f"will_be_closed {will_be_closed}")
 
         log.warning (f"exit_params {exit_params}")
         
