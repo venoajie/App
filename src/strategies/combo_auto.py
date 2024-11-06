@@ -270,7 +270,7 @@ class ComboAuto (BasicStrategy):
             dict: _description_
         """
         order_allowed, cancel_allowed, cancel_id = False, False, None
-        my_trades_currency_strategy = self.my_trades_currency_strategy
+        my_trades_currency = self.my_trades_currency_strategy
         
         exit_params = {}
 
@@ -278,7 +278,7 @@ class ComboAuto (BasicStrategy):
         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
         perpetual_price = self.perpetual_ticker["price"]
                 
-        if my_trades_currency_strategy:
+        if my_trades_currency:
             
             will_be_closed = []
             for label in self.my_trades_currency_strategy_labels:
@@ -291,7 +291,7 @@ class ComboAuto (BasicStrategy):
                 #log.error (f"my_trades_currency_strategy {my_trades_currency_strategy}")
      
                 transactions_under_label_int_all = transactions_under_label_int(label_integer, 
-                                                                                my_trades_currency_strategy)
+                                                                                my_trades_currency)
                 log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
 
                 transactions_sum = transactions_under_label_int_all["summing_closed_transaction"]
