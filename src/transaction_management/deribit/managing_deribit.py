@@ -269,6 +269,7 @@ class ModifyOrderDb(SendApiRequest):
         last_time_stamp_log = [] if from_transaction_log_instrument == []\
             else (min([(o["timestamp"]) for o in from_transaction_log_instrument ]))
              
+        log.warning(f"from_transaction_log_instrument {from_transaction_log_instrument}")
         log.warning(f"last_time_stamp_log {last_time_stamp_log}")
         if not first_tick_fr_sqlite:
 
