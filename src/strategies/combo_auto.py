@@ -276,7 +276,7 @@ class ComboAuto (BasicStrategy):
 
         strategy_label = self.strategy_label        
         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
-        perpetual_price = self.perpetual_ticker["price"]
+        perpetual_ask_price = self.perpetual_ticker["best_ask_price"]
                 
         if my_trades_currency:
             
@@ -315,7 +315,7 @@ class ComboAuto (BasicStrategy):
                         traded_perpetual_price = traded_perpetual["price"]
                         traded_perpetual_size = abs(traded_perpetual["amount"])
                         traded_future_size = abs(traded_future["amount"])
-                        current_premium = traded_future_price - traded_perpetual_price
+                        current_premium = traded_future_price - perpetual_ask_price
                         current_premium_exceed_transactions_premium = (current_premium-transactions_premium)/transactions_premium
                         
                         try:
