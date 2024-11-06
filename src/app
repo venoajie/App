@@ -509,8 +509,10 @@ class RunningStrategy(ModifyOrderDb):
                                                         server_time
                                                         )
                                                     
+                                                    tp_threshold = .001/100
+                                                    
 
-                                                    send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto ()
+                                                    send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (tp_threshold)
                                                     
                                                     log.error (f"send_closing_order {send_closing_order}")
 
