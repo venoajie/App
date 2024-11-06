@@ -190,16 +190,16 @@ def future_spread_attributes (
     server_time: int,
     ) -> dict:
 
-    log.warning (currency_upper)    
-    log.info (notional)    
-    log.error ([o["instrument_name"] for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
-              )       
-    log.error ([ (reading_from_pkl_data("ticker",  o["instrument_name"])) for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
-              )    
-    log.debug ([ (reading_from_pkl_data("ticker",  o["instrument_name"]))[0] for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
-              )    
-    log.warning ([ (reading_from_pkl_data("ticker",  o["instrument_name"]))[0]["mark_price"] for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
-              )    
+    #log.warning (currency_upper)    
+    #log.info (notional)    
+    #log.error ([o["instrument_name"] for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
+    #          )       
+    #log.error ([ (reading_from_pkl_data("ticker",  o["instrument_name"])) for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
+    #          )    
+    #log.debug ([ (reading_from_pkl_data("ticker",  o["instrument_name"]))[0] for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
+    #          )    
+    #log.warning ([ (reading_from_pkl_data("ticker",  o["instrument_name"]))[0]["mark_price"] for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
+    #          )    
     
     return  [{'instrument_name':o['instrument_name'], 
               'is_weekly': o["settlement_period"]=="week", 
@@ -495,6 +495,8 @@ class RunningStrategy(ModifyOrderDb):
                                                         server_time,
                                                     )
                         
+                                                    strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
+                                                            
                                                     combo_auto = ComboAuto(
                                                         strategy,
                                                         strategy_params,
@@ -524,8 +526,6 @@ class RunningStrategy(ModifyOrderDb):
                                                             my_trades_currency,
                                                             from_transaction_log
                                                             )                                                        
-                                                            
-                                                        strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
                                                             
                                                         log.debug (f"combo_attributes {combo_attributes}")
                                                             
