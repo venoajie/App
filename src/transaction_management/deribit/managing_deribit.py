@@ -258,38 +258,19 @@ class ModifyOrderDb(SendApiRequest):
         self,
         instrument_name: str,
         transaction_log_trading: str,
-        from_transaction_log: str,
-        archive_db_table: str,
-        count: int = 1)-> list:
+        from_transaction_log_instrument: str,
+        last_time_stamp_log,
+        archive_db_table: str)-> list:
         """ """
 
         log.warning(f"instrument_name {instrument_name}")
-        from_transaction_log_instrument =([o for o in from_transaction_log \
-            if o["instrument_name"] == instrument_name])
-             
-        last_time_stamp_log = [] if from_transaction_log_instrument == []\
-            else (min([(o["timestamp"]) for o in from_transaction_log_instrument ]))
-             
         log.warning(f"from_transaction_log_instrument {from_transaction_log_instrument}")
         log.warning(f"last_time_stamp_log {last_time_stamp_log}")
-        if not first_tick_fr_sqlite:
-
-            balancing_params = paramaters_to_balancing_transactions()
-
-            max_closed_transactions_downloaded_from_sqlite=balancing_params["max_closed_transactions_downloaded_from_sqlite"]  
-            
-            count_at_first_download =  max(
-                                        count,
-                                        max_closed_transactions_downloaded_from_sqlite
-                                        )
-                            
-            first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (count_at_first_download)
                 
         currency = extract_currency_from_text(instrument_name)
         transaction_log= await self.private_data.get_transaction_log (
                         currency, 
-                        last_time_stamp_log, 
-                        count)
+                        last_time_stamp_log)
                 
         log.warning(f"transaction_log {transaction_log}")
         if transaction_log:

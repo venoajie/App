@@ -58,6 +58,16 @@ def get_size_instrument(
 
     return  0 if size_instrument == [] else size_instrument [0]
 
+            
+def convert_list_to_dict (transaction: list) -> dict:
+
+    #convert list to dict
+    try:
+        transaction = transaction[0]
+    except:
+        return transaction
+
+    return transaction
 
 def determine_opening_size(
     instrument_name: str,
@@ -96,6 +106,7 @@ def transactions_under_label_int(
 
     return dict(transactions = transactions,
                 len_closed_transaction = len([ o["amount"] for o in transactions]),
+                premium = [abs(sum(o["price"]*o["amount"])/o["amount"]) for o in transactions],
                 summing_closed_transaction = sum([ o["amount"] for o in transactions]))
     
     
@@ -236,8 +247,9 @@ class ComboAuto (BasicStrategy):
             cancel_id= None 
         )
 
-    async def is_send_exit_order_allowed (self,
-                                          ) -> dict:
+    async def is_send_exit_order_allowed (
+        self,
+        ) -> dict:
         """
         Returns:
             dict: _description_
@@ -245,12 +257,10 @@ class ComboAuto (BasicStrategy):
         order_allowed, cancel_allowed, cancel_id = False, False, None
         my_trades_currency_strategy = self.my_trades_currency_strategy
         
-        
-        strategy_label = self.strategy_label        
-        perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
-        
         exit_params = {}
 
+        strategy_label = self.strategy_label        
+        perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
                 
         if my_trades_currency_strategy:
             
@@ -265,11 +275,12 @@ class ComboAuto (BasicStrategy):
      
                 transactions_under_label_int_all = transactions_under_label_int(label_integer, 
                                                                                 my_trades_currency_strategy)
-                #log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
+                log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
 
                 transactions_under_label_int_sum = transactions_under_label_int_all["summing_closed_transaction"]
                 transactions_under_label_int_len = transactions_under_label_int_all["len_closed_transaction"]
                 transactions_under_label_int_detail = transactions_under_label_int_all["transactions"]
+                transactions_under_label_int_premium = transactions_under_label_int_all["premium"]
                 
                 transactions_under_label_int_example = [{'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}]
                 

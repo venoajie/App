@@ -209,6 +209,23 @@ def get_unrecorded_trade_transactions(
         log.debug(f"unrecorded_trade_from_transaction_log {unrecorded_trade_id}")
 
         return unrecorded_trade_id
+    
+    if direction == "from_my_trade_to_trans_log":
+
+        if my_trades_instrument_name:
+            my_trades_instrument_name_trade_id = [o["trade_id"] for o in my_trades_instrument_name]
+            
+            if my_trades_instrument_name_trade_id:
+                unrecorded_trade_id = get_unique_elements(my_trades_instrument_name_trade_id,
+                                                          from_transaction_log_instrument_trade_id, 
+                                                          )
+                        
+        else:
+            unrecorded_trade_id = []
+        
+        log.debug(f"unrecorded_trade_from_transaction_log {unrecorded_trade_id}")
+
+        return unrecorded_trade_id
 
 def check_whether_order_db_reconciled_each_other(
     sub_account: list,

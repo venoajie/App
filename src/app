@@ -484,11 +484,34 @@ class RunningStrategy(ModifyOrderDb):
                                                     and leverage_all < leverage_threshold\
                                                         and "ETH" not in currency_upper:
                                                             
+                                                    log.warning (f"strategy {strategy}-START")                                                    
                                                             
-                                                            
-
-                                                    log.warning (f"strategy {strategy}-START")
+                                                    combo_attributes =  future_spread_attributes(
+                                                        position_without_combo,
+                                                        active_futures,
+                                                        currency_upper,
+                                                        notional,
+                                                        best_ask_price_perpetual,
+                                                        server_time,
+                                                    )
+                        
+                                                    combo_auto = ComboAuto(
+                                                        strategy,
+                                                        strategy_params,
+                                                        position_without_combo,
+                                                        my_trades_currency_strategy,
+                                                        orders_currency_strategy,
+                                                        notional,
+                                                        combo_attributes,
+                                                        perpetual_ticker_instrument_name,
+                                                        server_time
+                                                        )
                                                     
+
+                                                    send_closing_order: dict = await combo_auto.is_send_exit_order_allowed ()
+                                                    
+                                                    log.error (f"send_closing_order {send_closing_order}")
+
                                                     for instrument_name in active_futures:
 
                                                         len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (sub_account,
@@ -503,34 +526,9 @@ class RunningStrategy(ModifyOrderDb):
                                                             )                                                        
                                                             
                                                         strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
-
-                                                        combo_attributes =  future_spread_attributes(
-                                                            position_without_combo,
-                                                            active_futures,
-                                                            currency_upper,
-                                                            notional,
-                                                            best_ask_price_perpetual,
-                                                            server_time,
-                                                        )
                                                             
                                                         log.debug (f"combo_attributes {combo_attributes}")
-                                                                                        
-                                                        combo_auto = ComboAuto(
-                                                            strategy,
-                                                            strategy_params,
-                                                            position_without_combo,
-                                                            my_trades_currency_strategy,
-                                                            orders_currency_strategy,
-                                                            notional,
-                                                            combo_attributes,
-                                                            perpetual_ticker_instrument_name,
-                                                            server_time
-                                                            )
-                                                        
-
-                                                        send_closing_order: dict = await combo_auto.is_send_exit_order_allowed ()
-                                                        
-                                                        log.error (f"send_closing_order {send_closing_order}")
+                                                            
                                                         #result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
                                                         #                                                            send_closing_order, 
                                                         #                                                            instrument_ticker)
