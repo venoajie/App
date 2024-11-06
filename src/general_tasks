@@ -22,7 +22,7 @@ from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
 from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb)
+    ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from utilities.number_modification import get_closest_value
@@ -689,12 +689,11 @@ async def reconciling_size_and_orders(
                                 if not  size_is_reconciled_each_other_all["different_from_sub_accont_and_trans_log"]:
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
-                                    await modify_order_and_db.resupply_transaction_log(
-                                        currency,
+                                    await modify_order_and_db.resupply_transaction_log_instrument(
+                                        instrument_name,
                                         transaction_log_trading_table,
-                                        archive_db_table
-                                        )
-                            
+                                        from_transaction_log,
+                                        archive_db_table,)
                                 else:
                                     from_transaction_log_instrument_name =([o for o in from_transaction_log if o["instrument_name"] == instrument_name])  
                                     
@@ -760,11 +759,11 @@ async def reconciling_size_and_orders(
                                 if not  size_is_reconciled_each_other_all["different_from_sub_accont_and_trans_log"]:
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
-                                    await modify_order_and_db.resupply_transaction_log(
-                                        currency,
+                                    await modify_order_and_db.resupply_transaction_log_instrument(
+                                        instrument_name,
                                         transaction_log_trading_table,
-                                        archive_db_table
-                                        )
+                                        from_transaction_log,
+                                        archive_db_table,)
                                 else:
                                     column_trade: str= "instrument_name","label","timestamp","trade_id"
                                     my_trades_instrument_name: list= await get_query(archive_db_table, 

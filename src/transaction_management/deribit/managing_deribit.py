@@ -26,9 +26,12 @@ from transaction_management.deribit.transaction_log import (
 from transaction_management.deribit.api_requests import (
     SendApiRequest,)
 from utilities.pickling import replace_data
+from utilities.string_modification import (
+    extract_currency_from_text)
 from utilities.system_tools import (
     provide_path_for_file)
-    
+
+
 def first_tick_fr_sqlite_if_database_still_empty (
     max_closed_transactions_downloaded_from_sqlite: int
     )-> int:
@@ -249,6 +252,51 @@ class ModifyOrderDb(SendApiRequest):
                 first_tick_fr_sqlite, 
                 )
                     
+               
+    async def resupply_transaction_log_instrument(
+        self,
+        instrument_name: str,
+        transaction_log_trading: str,
+        from_transaction_log: str,
+        archive_db_table: str,
+        count: int = 1)-> list:
+        """ """
+
+        log.warning(f"instrument_name {instrument_name}")
+        from_transaction_log_instrument =([o for o in from_transaction_log \
+            if o["instrument_name"] == instrument_name])
+             
+        last_time_stamp_log = [] if from_transaction_log_instrument == []\
+            else (min([(o["timestamp"]) for o in from_transaction_log_instrument ]))
+             
+        log.warning(f"last_time_stamp_log {last_time_stamp_log}")
+        if not first_tick_fr_sqlite:
+
+            balancing_params = paramaters_to_balancing_transactions()
+
+            max_closed_transactions_downloaded_from_sqlite=balancing_params["max_closed_transactions_downloaded_from_sqlite"]  
+            
+            count_at_first_download =  max(
+                                        count,
+                                        max_closed_transactions_downloaded_from_sqlite
+                                        )
+                            
+            first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (count_at_first_download)
+                
+        currency = extract_currency_from_text(instrument_name)
+        transaction_log= await self.private_data.get_transaction_log (
+                        currency, 
+                        last_time_stamp_log, 
+                        count)
+                
+        log.warning(f"transaction_log {transaction_log}")
+        if transaction_log:
+            await saving_transaction_log (
+                transaction_log_trading,
+                archive_db_table,
+                transaction_log, 
+                first_tick_fr_sqlite, 
+                )
                 
     async def if_cancel_is_true(
         self,
