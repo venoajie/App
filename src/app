@@ -474,7 +474,7 @@ class RunningStrategy(ModifyOrderDb):
 
                                             for strategy in active_strategies:
                             
-                                                log.debug (f"position_without_combo {position_without_combo}")
+                                                #log.debug (f"position_without_combo {position_without_combo}")
 
                                                 my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
                                                 
@@ -510,7 +510,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         )
                                                     
 
-                                                    send_closing_order: dict = await combo_auto.is_send_exit_order_allowed ()
+                                                    send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto ()
                                                     
                                                     log.error (f"send_closing_order {send_closing_order}")
 
