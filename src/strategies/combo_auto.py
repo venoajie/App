@@ -102,8 +102,9 @@ def transactions_under_label_int(
     perpetual_price
     ) -> str:
     """ """
-    
+    log.error (f"transactions_all {transactions_all}")
     transactions = [o for o in transactions_all if str(label_integer) in o["label"]]
+    log.error (f"transactions {transactions}")
 
     traded_future = [o for o in transactions if "PERPETUAL" not  in o["instrument_name"]][0]
     traded_perpetual = [o for o in transactions if "PERPETUAL" in o["instrument_name"]][0]
