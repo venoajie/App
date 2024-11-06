@@ -27,7 +27,8 @@ from transaction_management.deribit.api_requests import (
     SendApiRequest,)
 from utilities.pickling import replace_data
 from utilities.string_modification import (
-    extract_currency_from_text)
+    extract_currency_from_text,
+    get_unique_elements)
 from utilities.system_tools import (
     provide_path_for_file)
 
@@ -298,7 +299,21 @@ class ModifyOrderDb(SendApiRequest):
                 transaction_log, 
                 first_tick_fr_sqlite, 
                 )
-                
+            
+
+        column_list: str="timestamp", "trade_id"
+        from_sqlite_all = await get_query(f"my_trades_all_{currency.lower()}_json", 
+                                        instrument_name, 
+                                        "all", 
+                                        "all", 
+                                        column_list,
+                                        #40,
+                                        #"id"
+                                        )  
+        from_exchange_trade_id = [o["trade_id"] for o in from_sqlite_all]
+        
+        unrecorded_trade_id = get_unique_elements(from_exchange_trade_id, 
+                                              combined_trade_closed_open)                
     async def if_cancel_is_true(
         self,
         order)-> None:

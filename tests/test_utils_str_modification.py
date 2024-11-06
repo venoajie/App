@@ -4,7 +4,8 @@ import pytest
 from utilities.string_modification import (
     extract_currency_from_text,
     extract_integers_aggregation_from_text,
-    extract_integers_from_text)
+    extract_integers_from_text,
+    get_unique_elements)
 
 
 @pytest.mark.parametrize("text, expected", [
@@ -60,6 +61,22 @@ def test_extract_integers_aggregation_from_text(
         identifier,
         aggregator,
         text)
+
+    assert result == expected
+
+
+@pytest.mark.parametrize("data1, data2, expected", [
+    ([4, 5, 6], [1, 2, 3, 4, 5], [6]),    
+    ( [1, 2, 3, 4, 5], [4, 5, 6], [1,2,3]),    
+    ])
+def test_get_unique_elements(
+    data1,
+    data2,
+    expected):
+
+    result = get_unique_elements(
+        data1,
+        data2)
 
     assert result == expected
 
