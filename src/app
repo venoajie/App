@@ -463,7 +463,7 @@ class RunningStrategy(ModifyOrderDb):
                                             position = [o for o in sub_account["positions"]]
                                             #log.debug (f"position {position}")
                                             position_without_combo = [ o for o in position if f"{currency}-FS" not in o["instrument_name"]]
-                                            size_all = sum([abs(o["size"]) for o in position_without_combo])
+                                            size_all = sum([abs(o["amount"]) for o in position_without_combo])
                                             leverage_all= size_all/notional
                                                             
                                             leverage_threshold = 20
