@@ -106,18 +106,21 @@ def transactions_under_label_int(
     transactions = [o for o in transactions_all if str(label_integer) in o["label"]]
 
     traded_future = [o for o in transactions if "PERPETUAL" not  in o["instrument_name"]][0]
-    traded_perpetual = [o for o in transactions if perpetual_instrument_name in o["instrument_name"]][0]
+    traded_perpetual = [o for o in transactions if "PERPETUAL" in o["instrument_name"]][0]
     
     traded_future_price = traded_future["price"]
     transactions_premium = [abs(sum(o["price"]*o["amount"])/o["amount"]) for o in transactions]
 
     current_premium = traded_future_price - perpetual_price
-    current_premium_exceed_transactions_premium = (current_premium-transactions_premium)/transactions_premium
-                        
+    premium_pct = (current_premium-transactions_premium)/transactions_premium
+    
+    traded_future_instrument_name = traded_future["instrument_name"]
 
     return dict(transactions = transactions,
                 len_closed_transaction = len([ o["amount"] for o in transactions]),
                 premium = transactions_premium,
+                premium_pct = premium_pct,
+                combo_instruments_name = (f"{traded_future_instrument_name[:3]}-FS-{traded_future_instrument_name[4:]}_PERP"),
                 summing_closed_transaction = sum([ o["amount"] for o in transactions]))
     
     
@@ -259,7 +262,7 @@ class ComboAuto (BasicStrategy):
         )
 
     async def is_send_exit_order_allowed_combo_auto(
-        threshold,
+        tp_threshold,
         self,
         ) -> dict:
         """
@@ -277,6 +280,7 @@ class ComboAuto (BasicStrategy):
                 
         if my_trades_currency_strategy:
             
+            will_be_closed = []
             for label in self.my_trades_currency_strategy_labels:
                 
                 log.info (f"label {label}")
@@ -301,7 +305,7 @@ class ComboAuto (BasicStrategy):
                     
                     if transactions_len == 0:   
                         
-                        current_premium_exceed_threshold
+                        current_premium_exceed_threshold = transactions_under_label_int_all["premium_pct"] > tp_threshold
                             
                         log.warning (f"transactions_under_label_int_detail {transactions_detail}")
                         traded_future = [o for o in transactions_detail if "PERPETUAL" not  in o["instrument_name"]][0]
@@ -369,53 +373,6 @@ class ComboAuto (BasicStrategy):
                                     exit_params.update({"side": "buy"})
                                     exit_params.update({"entry_price": combo_ticker["best_bid_price"]})
                                     exit_params.update({"instrument_name": combo_instruments_name})
-
-                        log.warning (f"traded_future {traded_future}")
-                        log.info (f"traded_perpetual {traded_perpetual}")
-
-                if transactions_under_label_int_sum > 0:
-                    pass
-                if transactions_under_label_int_sum < 0:
-                    pass
-
-                #log.error (f"transactions_under_label_int {transactions_under_label_int_detail}")
-            
-        if False and my_trades_currency_strategy_future:
-        
-        
-            
-            transactions_under_label_main_future = get_label_main(my_trades_currency_strategy_future,  
-                                                                label)
-            log.debug (f"transactions_under_label_main_future {transactions_under_label_main_future}")
-        
-            closed_transactions_all_future= transactions_under_label_int(label_integer, 
-                                                                    transactions_under_label_main_future)
-            log.debug (f"closed_transactions_all_future {closed_transactions_all_future}")
-
-            size_to_close = closed_transactions_all_future["summing_closed_transaction"]
-            transaction_closed_under_the_same_label_int = closed_transactions_all_future["closed_transactions"]
-
-            log.error (f"closed_transactions_all_future {closed_transactions_all_future}")
-        
-        if False and  my_trades_currency_strategy_perpetual:
-            
-            transactions_under_label_main_perpetual = get_label_main(my_trades_currency_strategy_perpetual,  
-                                                                label)
-            log.error (f"transactions_under_label_main_perpetual {transactions_under_label_main_perpetual}")
-            closed_transactions_all_perpetual= transactions_under_label_int(label_integer, 
-                                                                    transactions_under_label_main_perpetual)
-            log.debug (f"closed_transactions_all_perpetual {closed_transactions_all_perpetual}")
-
-        
-            
-            size_to_close = closed_transactions_all_perpetual["summing_closed_transaction"]
-            
-            transaction_closed_under_the_same_label_int = closed_transactions_all_perpetual["closed_transactions"]
-        
-            log.error (f"closed_transactions_all_perpetual {closed_transactions_all_perpetual}")
-
-
-
 
         log.warning (f"exit_params {exit_params}")
         
