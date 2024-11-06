@@ -262,8 +262,8 @@ class ComboAuto (BasicStrategy):
         )
 
     async def is_send_exit_order_allowed_combo_auto(
-        tp_threshold,
         self,
+        tp_threshold,
         ) -> dict:
         """
         Returns:
