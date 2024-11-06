@@ -336,43 +336,17 @@ class ComboAuto (BasicStrategy):
                         open_orders_under_label = [o for o in self.orders_currency_strategy \
                                 if label_integer in o["label"] \
                                     and perpetual_instrument_name in o["instrument_name"]]
-
                         
-                        if not min_expiration_timestamp or delta_time_expiration < 0:
-                            
-                            if open_orders_under_label:
-                                
-                                perpetual_ask_price = self.perpetual_ticker["best_ask_price"]
-                
-                                exit_params.update({"side": "sell"})
-                                exit_params.update({"entry_price": perpetual_ask_price})
-                                exit_params.update({"instrument_name": perpetual_instrument_name})
-
-                        if delta_price > 0:
-                            traded_future_instrument_name = traded_future["instrument_name"]
-                            log.error (f"(traded_future_instrument_name {traded_future_instrument_name})")
-                            combo_instruments_name = (f"{traded_future_instrument_name[:3]}-FS-{traded_future_instrument_name[4:]}_PERP")
-                            
-                            open_orders_under_label_and_instrument = [o for o in self.orders_currency_strategy \
-                                if label_integer in o["label"] \
-                                    and combo_instruments_name in o["instrument_name"]]
-
-                            log.warning (f"combo_instruments_name {combo_instruments_name}")
-                            
-                            
-                            combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)
-                            #log.warning (f"combo_ticker {combo_ticker}")
-                            closed_combo_ticker = {'best_bid_amount': 0.0, 'best_ask_amount': 0.0, 'implied_bid': -75.5, 'implied_ask': -70.0, 'combo_state': 'closed', 'best_bid_price': 0.0, 'best_ask_price': 0.0, 'mark_price': -41.91, 'max_price': 226.5, 'min_price': -310.0, 'settlement_price': 17.67, 'last_price': -42.5, 'instrument_name': 'BTC-FS-25OCT24_PERP', 'index_price': 67465.47, 'stats': {'volume_notional': 28725020.0, 'volume_usd': 28725020.0}, 'state': 'closed', 'type': 'change', 'timestamp': 1729843200054, 'delivery_price': 67382.03}
-                            combo_ticker= [] if not combo_ticker else combo_ticker [0]
-                            log.warning (f"combo_ticker {combo_ticker}")
-                            
-                            if  combo_ticker and not open_orders_under_label_and_instrument:
-                                bid_price_combo = combo_ticker["best_bid_price"]
-                            
-                                if bid_price_combo < delta_price:
-                                    exit_params.update({"side": "buy"})
-                                    exit_params.update({"entry_price": combo_ticker["best_bid_price"]})
-                                    exit_params.update({"instrument_name": combo_instruments_name})
+                        order_allowed = True
+                        
+                        will_be_closed.append(dict(
+            order_allowed= order_allowed,
+            order_parameters=(
+                [] if order_allowed == False else exit_params
+            ),
+            cancel_allowed=cancel_allowed,
+            cancel_id=None if not cancel_allowed else cancel_id
+        ))
 
         log.warning (f"exit_params {exit_params}")
         
