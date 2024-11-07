@@ -332,8 +332,8 @@ class ComboAuto (BasicStrategy):
                             order_parameters=( [] if order_allowed == False else exit_params),
                             cancel_allowed=cancel_allowed,
                             cancel_id=None if not cancel_allowed else cancel_id
-        ))
-                        log.warning (f"will_be_closed {will_be_closed}")
+        ).copy())
+                       # log.warning (f"will_be_closed {will_be_closed}")
 
         log.warning (f"exit_params {will_be_closed}")
         
