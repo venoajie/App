@@ -338,7 +338,7 @@ class ComboAuto (BasicStrategy):
                         log.warning (f"result {result}")
                         log.debug (f"will_be_closed {will_be_closed}")
 
-        log.warning (f"exit_params {will_be_closed}")
+            log.critical (f"exit_params {will_be_closed}")
         
 
         return dict(
