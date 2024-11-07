@@ -511,10 +511,16 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                     tp_threshold = .001/100
                                                     
-
-                                                    send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (tp_threshold)
+                                                    my_trades_currency_strategy_labels: float = [o["label"] for o in my_trades_currency_strategy  ]
                                                     
-                                                    log.error (f"send_closing_order {send_closing_order}")
+                                                    labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
+                                                    
+                                                    for label in labels:
+                                                        
+                                                        send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (label,
+                                                                                                                                           tp_threshold)
+                                                        log.error (f"send_closing_order {send_closing_order}")
+                                                    
                                                     time.sleep(10)
 
                                                     for instrument_name in active_futures:
