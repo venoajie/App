@@ -1,5 +1,12 @@
-transactions = [{'instrument_name': 'BTC-15NOV24', 'label': 'futureSpread-open-1730865794527', 'amount': -200.0, 'price': 74851.0, 'side': 'sell', 'balance': -40}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1730865794527', 'amount': 200.0, 'price': 74586.0, 'side': 'buy', 'balance': -40}]
+from loguru import logger as log
 
-transactions_premium = sum([(o["price"]*o["amount"])/abs(o["amount"]) for o in transactions])
 
-print (transactions_premium)
+transactions = [ {'order_allowed': True, 'order_parameters': {'size': 200.0, 'label': 'futureSpread-closed-1730853512814'}, 'cancel_allowed': False, 'cancel_id': None}, 
+                    {'order_allowed': True, 'order_parameters': {'size': 200.0, 'label': 'futureSpread-closed-1730853452649'}, 'cancel_allowed': False, 'cancel_id': None}
+                ]
+will_be_closed = []
+
+for transaction in transactions:
+    log.error (transaction)
+    will_be_closed.append(transaction)
+log.warning (will_be_closed)

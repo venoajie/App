@@ -276,11 +276,11 @@ class ComboAuto (BasicStrategy):
         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
         perpetual_ask_price = self.perpetual_ticker["best_ask_price"]
         
-        will_be_closed = []
+        
                 
         if my_trades_currency:
             
-            
+            will_be_closed = []
             for label in remove_redundant_elements(self.my_trades_currency_strategy_labels):
                 
                 label_integer = get_label_integer(label)
@@ -327,13 +327,16 @@ class ComboAuto (BasicStrategy):
                         
                         order_allowed = True
                         
-                        will_be_closed.append(dict(
+                        result = dict(
                             order_allowed= order_allowed,
                             order_parameters=( [] if order_allowed == False else exit_params),
                             cancel_allowed=cancel_allowed,
                             cancel_id=None if not cancel_allowed else cancel_id
-        ))
-                        log.warning (f"will_be_closed {will_be_closed}")
+        )
+                        
+                        will_be_closed.append(result)
+                        log.warning (f"result {result}")
+                        log.debug (f"will_be_closed {will_be_closed}")
 
         log.warning (f"exit_params {will_be_closed}")
         
