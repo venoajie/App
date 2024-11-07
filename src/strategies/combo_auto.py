@@ -329,10 +329,10 @@ class ComboAuto (BasicStrategy):
                         
                         will_be_closed.append(dict(
                             order_allowed= order_allowed,
-                            order_parameters=( [] if order_allowed == False else exit_params),
+                            order_parameters=( [] if order_allowed == False else will_be_closed),
                             cancel_allowed=cancel_allowed,
                             cancel_id=None if not cancel_allowed else cancel_id
-        ).copy())
+        ))
                        # log.warning (f"will_be_closed {will_be_closed}")
 
         log.warning (f"exit_params {will_be_closed}")
