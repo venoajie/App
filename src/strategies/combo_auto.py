@@ -286,6 +286,7 @@ class ComboAuto (BasicStrategy):
             
             transactions_sum = sum([ o["amount"] for o in transactions])
             transactions_len = len(transactions) # sum product function applied only for 2 items.
+            log.error (f"transactions_len {transactions_len}")
             
             if transactions_sum== 0 and transactions_len==2:
             
