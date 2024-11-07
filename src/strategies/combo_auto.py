@@ -279,10 +279,11 @@ class ComboAuto (BasicStrategy):
         if my_trades_currency:
             
             will_be_closed = []
-            
+            will_closed = []
             labels=  remove_redundant_elements(self.my_trades_currency_strategy_labels)
         
             for label in labels:
+                will_closed.append (label)
                 
                 label_integer = get_label_integer(label)
                 
@@ -335,11 +336,12 @@ class ComboAuto (BasicStrategy):
                             cancel_id=None if not cancel_allowed else cancel_id
         )
                                 
-                        will_be_closed.append(result.update())
+                        will_be_closed.append(result)
                         log.warning (f"result {result}")
                         log.debug (f"will_be_closed {will_be_closed}")
 
                 log.critical (f"exit_params {will_be_closed}")
+                log.critical (f"will_closed {will_closed}")
             
 
         return dict(
