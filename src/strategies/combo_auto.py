@@ -285,12 +285,12 @@ class ComboAuto (BasicStrategy):
             log.error (f"transactions {transactions}")
             
             transactions_sum = sum([ o["amount"] for o in transactions])
+            transactions_len = len(transactions) # sum product function applied only for 2 items.
             
-            if transactions_sum== 0:
+            if transactions_sum== 0 and transactions_len==2:
             
                 log.info (f"label {label}")
                 
-    
                 transactions_under_label_int_all = transactions_under_label_int(transactions,
                                                                                 perpetual_ask_price)
                 log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
