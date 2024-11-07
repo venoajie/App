@@ -98,7 +98,6 @@ def get_label_main(
                 ]
     
 def transactions_under_label_int(
-    label_integer: int,
     transactions: list,
     perpetual_price
     ) -> str:
@@ -115,10 +114,10 @@ def transactions_under_label_int(
     
     traded_future_instrument_name = traded_future["instrument_name"] 
 
-    return dict(transactions = transactions,
-                premium = transactions_premium,
-                premium_pct = premium_pct,
-                combo_instruments_name = (f"{traded_future_instrument_name[:3]}-FS-{traded_future_instrument_name[4:]}_PERP"),)
+    return dict(
+        premium = transactions_premium,
+        premium_pct = premium_pct,
+        combo_instruments_name = (f"{traded_future_instrument_name[:3]}-FS-{traded_future_instrument_name[4:]}_PERP"),)
     
     
 def get_basic_opening_parameters(strategy_label):
@@ -283,21 +282,19 @@ class ComboAuto (BasicStrategy):
             
             transactions = [o for o in my_trades_currency if str(label_integer) in o["label"]]
             
+            log.error (f"transactions {transactions}")
+            
             transactions_sum = sum([ o["amount"] for o in transactions])
             
             if transactions_sum== 0:
             
                 log.info (f"label {label}")
                 
-                                #log.error (f"my_trades_currency_strategy {my_trades_currency_strategy}")
     
-                transactions_under_label_int_all = transactions_under_label_int(label_integer, 
-                                                                                transactions,
+                transactions_under_label_int_all = transactions_under_label_int(transactions,
                                                                                 perpetual_ask_price)
                 log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
 
-                transactions_detail = transactions_under_label_int_all["transactions"]
-                
                 if orders_currency:
                     outstanding_closed_orders = [o  for o in orders_currency if str(label_integer) in o['label']\
                     and "closed" in o["label"]]
@@ -309,8 +306,8 @@ class ComboAuto (BasicStrategy):
                         
                     combo_instruments_name = transactions_under_label_int_all["combo_instruments_name"]
                                                 
-                    traded_future = [o for o in transactions_detail if "PERPETUAL" not  in o["instrument_name"]][0]
-                    traded_perpetual = [o for o in transactions_detail if perpetual_instrument_name in o["instrument_name"]][0]
+                    traded_future = [o for o in transactions if "PERPETUAL" not  in o["instrument_name"]][0]
+                    traded_perpetual = [o for o in transactions if perpetual_instrument_name in o["instrument_name"]][0]
                     traded_perpetual_size = abs(traded_perpetual["amount"])
                     combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)
                                                                 
