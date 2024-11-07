@@ -306,18 +306,19 @@ class ComboAuto (BasicStrategy):
                                     
                 if abs(transactions_under_label_int_all ["premium_pct"])>tp_threshold \
                     and(not orders_currency or not outstanding_closed_orders):   
+                        
+                    combo_instruments_name = transactions_under_label_int_all["combo_instruments_name"]
                                                 
                     traded_future = [o for o in transactions_detail if "PERPETUAL" not  in o["instrument_name"]][0]
                     traded_perpetual = [o for o in transactions_detail if perpetual_instrument_name in o["instrument_name"]][0]
-
-                    traded_future_price = traded_future["price"]
-                    traded_perpetual_price = traded_perpetual["price"]
                     traded_perpetual_size = abs(traded_perpetual["amount"])
-                    traded_future_size = abs(traded_future["amount"])
-                    current_premium = traded_future_price - perpetual_ask_price
+                    combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)
+                                                                
                     exit_params.update({"size": abs (traded_perpetual_size)})
+                    exit_params.update({"price": combo_ticker[0]["best_bid_price"]})
                     
                     exit_params.update({"label": f"{strategy_label}-closed-{label_integer}"})
+                    exit_params.update({"instrument_name": combo_instruments_name})
                     
                     perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
                     
