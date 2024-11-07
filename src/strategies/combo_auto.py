@@ -281,7 +281,11 @@ class ComboAuto (BasicStrategy):
         if my_trades_currency:
             
             will_be_closed = []
-            for label in remove_redundant_elements(self.my_trades_currency_strategy_labels):
+            
+            labels=  remove_redundant_elements(self.my_trades_currency_strategy_labels)
+            
+            log.info (labels)
+            for label in labels:
                 
                 label_integer = get_label_integer(label)
                 

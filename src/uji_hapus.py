@@ -8,5 +8,5 @@ will_be_closed = []
 
 for transaction in transactions:
     log.error (transaction)
-    will_be_closed.append(transaction)
+    will_be_closed.append(transaction.copy())
 log.warning (will_be_closed)
