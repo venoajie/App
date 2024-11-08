@@ -2,6 +2,7 @@
 install:
 	uv venv
 	uv pip install -r requirements.txt
+	uv python install 3.12
 
 
 clean:
