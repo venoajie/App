@@ -222,8 +222,8 @@ class ModifyOrderDb(SendApiRequest):
         
         where_filter= "timestamp"
         
-        first_tick_query = f"SELECT MIN ({where_filter}) FROM {transaction_log_trading} WHERE instrument_name LIKE '%{instrument_name}%' ORDER  BY {where_filter} DESC
-        LIMIT  {count+1}"
+        first_tick_query = f"""SELECT MIN ({where_filter}) FROM {transaction_log_trading} WHERE instrument_name LIKE '%{instrument_name}%' ORDER  BY {where_filter} DESC
+        LIMIT  {count+1}"""
 
         first_tick_query_result = await executing_query_with_return(first_tick_query)
         
