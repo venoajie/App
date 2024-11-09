@@ -726,6 +726,13 @@ async def reconciling_size_and_orders(
                             
                             if not size_is_reconciled_each_other:
                                 
+                                column_trade: str= "instrument_name","label","timestamp", "trade_id"
+                                my_trades_instrument_name: list= await get_query(archive_db_table, 
+                                                                            instrument_name, 
+                                                                            "all", 
+                                                                            "all", 
+                                                                            column_trade)
+                                    
                                 if not  size_is_reconciled_each_other_all["different_from_sub_accont_and_trans_log"]:
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
@@ -751,13 +758,6 @@ async def reconciling_size_and_orders(
                                             )
                                 else:
                                     from_transaction_log_instrument_name =([o for o in from_transaction_log if o["instrument_name"] == instrument_name])  
-                                    
-                                    column_trade: str= "instrument_name","label","timestamp", "trade_id"
-                                    my_trades_instrument_name: list= await get_query(archive_db_table, 
-                                                                                instrument_name, 
-                                                                                "all", 
-                                                                                "all", 
-                                                                                column_trade)
                                     
                                     unrecorded_trade_id_from_transaction_log = get_unrecorded_trade_transactions(
                                         "from_trans_log_to_my_trade",
