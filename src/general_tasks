@@ -803,7 +803,7 @@ async def reconciling_size_and_orders(
                                 if not  size_is_reconciled_each_other_all["different_from_sub_accont_and_trans_log"]:
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
-                                    await modify_order_and_db.instrument_name(
+                                    await modify_order_and_db.resupply_transaction_log(
                                         currency,
                                         transaction_log_trading_table,
                                         instrument_name,
