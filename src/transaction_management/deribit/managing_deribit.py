@@ -169,6 +169,8 @@ class ModifyOrderDb(SendApiRequest):
         self,
         currency
         )-> None:
+        
+        # fetch data from exchange
         return await self.private_data.get_subaccounts_details (currency)
 
         
@@ -194,12 +196,14 @@ class ModifyOrderDb(SendApiRequest):
         currency
         )-> None:
 
-        # resupply sub account db
+        # fetch data from exchange
         sub_accounts = await self.private_data.get_subaccounts ()
         
-        portfolio = extract_portfolio_per_id_and_currency (self.sub_account_id,
-                                                           sub_accounts,
-                                                           currency)
+        portfolio = extract_portfolio_per_id_and_currency(
+            self.sub_account_id,
+            sub_accounts,
+            currency
+            )
         
         await update_db_pkl(
             "portfolio",
@@ -207,25 +211,25 @@ class ModifyOrderDb(SendApiRequest):
             currency
             )
         
-    async def resupply_transaction_log(
+    async def save_transaction_log_by_instrument(
         self,
         currency: str,
         transaction_log_trading: str,
-        archive_db_table: str,
-        count: int = 1)-> list:
-        """ """
-
-        #log.warning(f"resupply {currency.upper()} TRANSACTION LOG db-START")
-                    
+        instrument_name: str = None,
+        count: int = 1
+        )-> None:
+        
+        
         where_filter= "timestamp"
         
-        first_tick_query = querying_arithmetic_operator(where_filter, 
-                                                       "MAX",
-                                                       transaction_log_trading)
-        
+        first_tick_query = f"SELECT MIN ({where_filter}) FROM {transaction_log_trading} WHERE instrument_name LIKE '%{instrument_name}%' ORDER  BY {where_filter} DESC
+        LIMIT  {count+1}"
+
         first_tick_query_result = await executing_query_with_return(first_tick_query)
+        
+        log.debug (f"first_tick_query_result {first_tick_query_result}")
             
-        first_tick_fr_sqlite= first_tick_query_result [0]["MAX (timestamp)"] 
+        first_tick_fr_sqlite= first_tick_query_result [0]["MIN (timestamp)"] 
         
         if not first_tick_fr_sqlite:
 
@@ -248,53 +252,49 @@ class ModifyOrderDb(SendApiRequest):
         if transaction_log:
             await saving_transaction_log (
                 transaction_log_trading,
-                archive_db_table,
                 transaction_log, 
-                first_tick_fr_sqlite, 
-                )
-                    
-               
-    async def resupply_transaction_log_instrument(
-        self,
-        instrument_name: str,
-        transaction_log_trading: str,
-        from_transaction_log_instrument: str,
-        last_time_stamp_log,
-        archive_db_table: str)-> list:
-        """ """
-
-        log.warning(f"instrument_name {instrument_name}")
-        log.warning(f"from_transaction_log_instrument {from_transaction_log_instrument}")
-        log.warning(f"last_time_stamp_log {last_time_stamp_log}")
-                
-        currency = extract_currency_from_text(instrument_name)
-        transaction_log= await self.private_data.get_transaction_log (
-                        currency, 
-                        last_time_stamp_log)
-                
-        log.warning(f"transaction_log {transaction_log}")
-        if transaction_log:
-            await saving_transaction_log (
-                transaction_log_trading,
-                archive_db_table,
-                transaction_log, 
-                first_tick_fr_sqlite, 
                 )
             
-
-        column_list: str="timestamp", "trade_id"
-        from_sqlite_all = await get_query(f"my_trades_all_{currency.lower()}_json", 
-                                        instrument_name, 
-                                        "all", 
-                                        "all", 
-                                        column_list,
-                                        #40,
-                                        #"id"
-                                        )  
-        from_exchange_trade_id = [o["trade_id"] for o in from_sqlite_all]
+    async def resupply_transaction_log(
+        self,
+        currency: str,
+        transaction_log_trading: str,
+        instrument_name: str = None,
+        count: int = 1
+        )-> None:
         
-        unrecorded_trade_id = get_unique_elements(from_exchange_trade_id, 
-                                              combined_trade_closed_open)                
+        """ """
+ 
+        if instrument_name:
+            self.save_transaction_log_by_instrument(
+                currency,
+                transaction_log_trading,
+                instrument_name,
+                count
+                )
+        
+        else:
+                                                       
+            column_list= "instrument_name", "timestamp",    
+            from_transaction_log = await get_query (
+                transaction_log_trading, 
+                currency,
+                "all",
+                "all", 
+                column_list
+                )      
+            
+            from_transaction_log_instrument = [o["instrument_name"] for o in from_transaction_log ]
+            
+            for instrument_name in from_transaction_log_instrument:
+                self.save_transaction_log_by_instrument(
+                currency,
+                transaction_log_trading,
+                instrument_name,
+                count
+                )
+           
+             
     async def if_cancel_is_true(
         self,
         order)-> None:
