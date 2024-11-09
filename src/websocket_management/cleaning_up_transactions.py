@@ -70,6 +70,9 @@ async def reconciling_sub_account_and_db_open_orders(
     db_orders_instrument_id = [] if db_orders_instrument == [] \
         else [o["order_id"] for o in db_orders_instrument]
         
+    log.debug(f"db_orders_instrument_id {db_orders_instrument_id}")
+    log.warning(f"sub_account_orders_instrument_id {sub_account_orders_instrument_id}")
+
     # sub account contain outstanding order
     if sub_account_orders_instrument:
         
