@@ -266,7 +266,7 @@ class ModifyOrderDb(SendApiRequest):
         """ """
  
         if instrument_name:
-            self.save_transaction_log_by_instrument(
+            await self.save_transaction_log_by_instrument(
                 currency,
                 transaction_log_trading,
                 instrument_name,
