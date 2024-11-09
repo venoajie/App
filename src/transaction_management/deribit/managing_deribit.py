@@ -230,6 +230,7 @@ class ModifyOrderDb(SendApiRequest):
         log.debug (f"first_tick_query_result {first_tick_query_result}")
             
         first_tick_fr_sqlite= first_tick_query_result [0]["MIN (timestamp)"] 
+        log.debug (f"first_tick_fr_sqlite {first_tick_fr_sqlite}")
         
         if not first_tick_fr_sqlite:
 
@@ -249,6 +250,7 @@ class ModifyOrderDb(SendApiRequest):
                         first_tick_fr_sqlite, 
                         count)
                 
+        log.error (f"transaction_log {transaction_log}")
         if transaction_log:
             await saving_transaction_log (
                 transaction_log_trading,
