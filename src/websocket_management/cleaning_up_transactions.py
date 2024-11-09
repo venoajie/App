@@ -330,7 +330,7 @@ def check_whether_size_db_reconciled_each_other(
         different_from_all_db_sources = current_position_log == sub_account_size_instrument  == sum_my_trades_instrument 
         
         if not different_from_all_db_sources:
-            log.info (f"from_transaction_log_instrument {from_transaction_log_instrument}")
+            #log.info (f"from_transaction_log_instrument {from_transaction_log_instrument}")
             log.critical(f"{instrument_name} different_from_all_db_sources {different_from_all_db_sources} different_from_sub_accont_and_trans_log {different_from_sub_accont_and_trans_log} sum_my_trades_currency {sum_my_trades_instrument}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
 
         # combining result
