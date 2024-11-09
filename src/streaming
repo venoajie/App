@@ -226,11 +226,6 @@ class StreamAccountData(ModifyOrderDb):
                         await self.modify_order_and_db.resupply_sub_accountdb (currency)
 
                         await self.modify_order_and_db.resupply_portfolio (currency)
-
-                        await self.modify_order_and_db.resupply_transaction_log(
-                            currency, 
-                            transaction_log_trading,
-                            archive_db_table)
                 
                         ws_channel_currency = [
                             f"user.portfolio.{currency}",
@@ -574,11 +569,6 @@ class StreamAccountData(ModifyOrderDb):
             "positions", 
             data_orders,
             currency)
-
-        await self.modify_order_and_db.resupply_transaction_log(
-            currency,
-            transaction_log_trading,
-            archive_db_table)
         
         log.info(f"update_user_changes-END")
     
