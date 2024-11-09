@@ -47,6 +47,9 @@ from websocket_management.ws_management import (
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
+from websocket_management.cleaning_up_transactions import (
+    clean_up_closed_transactions,)
+
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
@@ -249,6 +252,12 @@ class StreamAccountData(ModifyOrderDb):
                                 operation="subscribe",
                                 ws_channel= ws,
                             ))
+                            
+                            await clean_up_closed_transactions (
+                                    instrument, 
+                                    trade_db_table
+                                            )      
+                                    
                         
                   
                     while self.websocket_client.open:
@@ -330,6 +339,11 @@ class StreamAccountData(ModifyOrderDb):
                                             archive_db_table,
                                             transaction_log_trading
                                             )
+                                        
+                                        await clean_up_closed_transactions (
+                                            instrument, 
+                                            trade_db_table
+                                            )      
                                     
                                     TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
                                     WHERE_FILTER_TICK: str = "tick"
