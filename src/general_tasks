@@ -732,6 +732,13 @@ async def reconciling_size_and_orders(
                                     
                                     from_transaction_log_instrument =([o for o in from_transaction_log if o["instrument_name"] == instrument_name])    
                                     
+                                    column_trade: str= "instrument_name","label","timestamp", "trade_id"
+                                    my_trades_instrument_name: list= await get_query(archive_db_table, 
+                                                                                instrument_name, 
+                                                                                "all", 
+                                                                                "all", 
+                                                                                column_trade)
+                                    
                                     unrecorded_trade_id_from_transaction_log = get_unrecorded_trade_transactions(
                                         "from_my_trade_to_trans_log",
                                         my_trades_instrument_name,
