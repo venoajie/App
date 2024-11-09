@@ -741,7 +741,7 @@ async def reconciling_size_and_orders(
                                         currency,
                                         transaction_log_trading_table,
                                         instrument_name,
-                                        10
+                                        100
                                         )
                                 else:
                                     from_transaction_log_instrument_name =([o for o in from_transaction_log if o["instrument_name"] == instrument_name])  
@@ -781,7 +781,7 @@ async def reconciling_size_and_orders(
                                             currency,
                                             transaction_log_trading_table,
                                             instrument_name,
-                                            5
+                                            100
                                             )
                     if my_trades_instrument_name_only:
 
@@ -807,7 +807,7 @@ async def reconciling_size_and_orders(
                                         currency,
                                         transaction_log_trading_table,
                                         instrument_name,
-                                        5)
+                                        100)
                                 else:
                                     column_trade: str= "instrument_name","label","timestamp","trade_id"
                                     my_trades_instrument_name: list= await get_query(archive_db_table, 
@@ -866,7 +866,7 @@ async def reconciling_size_and_orders(
                                         currency,
                                         transaction_log_trading_table,
                                         instrument_name,
-                                        5
+                                        100
                                         )
                                                     
                     await hedging_spot_currency(
