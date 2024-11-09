@@ -17,6 +17,7 @@ import websockets
 # user defined formula
 from configuration import id_numbering, config
 from db_management.sqlite_management import (
+    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     insert_tables,)
 from strategies.basic_strategy import(
     is_label_and_side_consistent,)
@@ -229,7 +230,27 @@ class StreamAccountData(ModifyOrderDb):
                         await self.modify_order_and_db.resupply_sub_accountdb (currency)
 
                         await self.modify_order_and_db.resupply_portfolio (currency)
-                
+                  
+                        column_trade: str= "instrument_name","label", "amount", "price","side"
+                        my_trades_currency: list= await get_query(
+                            trade_db_table, 
+                            currency, 
+                            "all", 
+                            "all", 
+                            column_trade
+                            )
+                        
+                        my_trades_instrument_name_only = remove_redundant_elements([o["instrument_name"] for o in my_trades_currency])
+                            
+                        if my_trades_instrument_name_only:
+
+                            for instrument_name in my_trades_instrument_name_only:
+                                await clean_up_closed_transactions (
+                                    instrument_name, 
+                                    trade_db_table
+                                            )      
+                                    
+                        
                         ws_channel_currency = [
                             f"user.portfolio.{currency}",
                             f"user.changes.any.{currency.upper()}.raw",
@@ -240,7 +261,7 @@ class StreamAccountData(ModifyOrderDb):
                             self.loop.create_task(
                                 self.ws_operation(
                                     operation="subscribe", ws_channel=ws))
-                        
+                      
                     for instrument in instruments_name:
                                             
                         ws_channel_instrument = [f"incremental_ticker.{instrument}",
@@ -253,13 +274,7 @@ class StreamAccountData(ModifyOrderDb):
                                 ws_channel= ws,
                             ))
                             
-                            await clean_up_closed_transactions (
-                                    instrument, 
-                                    trade_db_table
-                                            )      
-                                    
-                        
-                  
+                    
                     while self.websocket_client.open:
                         
                         try:
