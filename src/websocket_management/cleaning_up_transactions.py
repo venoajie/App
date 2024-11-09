@@ -638,7 +638,8 @@ async def closing_one_to_many_single_open_order(
             
         closed_label_ready_to_close = ([o for o in closed_label_with_same_size_as_open_label \
             if closed_label_with_same_size_as_open_label_int in o["trade_id"] ])[0]
-        log.warning(F"closed_label_ready_to_close{closed_label_ready_to_close}")
+        
+        log.debug (F"closed_label_ready_to_close{closed_label_ready_to_close}")
         
         #closed open order
         await distribute_closed_transactions(
@@ -737,21 +738,25 @@ async def clean_up_closed_transactions(
 
             for label in labels_only:
                 
-                transactions_under_label_main = get_label_main(transaction_all,  
-                                                               label)
-                log.error(f"label {label}")
-                #log.error(f"transactions_under_label_main {transactions_under_label_main}")
+                transactions_under_label_main = get_label_main(
+                    transaction_all,
+                    label
+                    )
                 
                 label_integer = get_label_integer(label)
                 
-                closed_transactions_all= transactions_under_label_int(label_integer, 
-                                                                      transactions_under_label_main)
+                closed_transactions_all= transactions_under_label_int(
+                    label_integer,
+                    transactions_under_label_main
+                    )
 
                 size_to_close = closed_transactions_all["summing_closed_transaction"]
                 
                 transaction_closed_under_the_same_label_int = closed_transactions_all["closed_transactions"]
 
                 if size_to_close == 0:
+                    
+                    log.info(F" closing_one_to_one {transaction_closed_under_the_same_label_int}")
                     
                     await closing_one_to_one(
                         transaction_closed_under_the_same_label_int,
@@ -766,6 +771,8 @@ async def clean_up_closed_transactions(
                                         
                     if open_label:
                          
+                        log.warning(F" closing_one_to_many {open_label}")
+                        
                         await closing_one_to_many(
                             open_label,
                             transaction_closed_under_the_same_label_int,
@@ -775,7 +782,7 @@ async def clean_up_closed_transactions(
                     #orphan label
                     else:
                                     
-                        log.error(F" orphan label {label}")
+                        log.error(F" closing_orphan_order {label}")
                         
                         await closing_orphan_order(
                             label,
