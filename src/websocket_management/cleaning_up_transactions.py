@@ -54,25 +54,19 @@ async def reconciling_sub_account_and_db_open_orders(
         
     sub_account_orders = sub_account["open_orders"]
     
-    sub_account_orders_instrument = [o for o in sub_account_orders if instrument_name in o["instrument_name"]]
+    sub_account_orders_instrument = [o for o in sub_account_orders\
+        if instrument_name in o["instrument_name"]]
     
-    #log.error(f"sub_account_orders_instrument {sub_account_orders_instrument}")
 
     sub_account_orders_instrument_id = [] if sub_account_orders_instrument == [] \
         else [o["order_id"] for o in sub_account_orders_instrument]
 
-    log.debug(f"instrument_name {instrument_name}")
     db_orders_instrument = [o for o in orders_currency \
         if instrument_name in o["instrument_name"]]
-    log.debug(f"db_orders_instrument {db_orders_instrument}")
-    log.warning(f"sub_account_orders_instrument {sub_account_orders_instrument}")
 
     db_orders_instrument_id = [] if db_orders_instrument == [] \
         else [o["order_id"] for o in db_orders_instrument]
         
-    log.debug(f"db_orders_instrument_id {db_orders_instrument_id}")
-    log.warning(f"sub_account_orders_instrument_id {sub_account_orders_instrument_id}")
-
     # sub account contain outstanding order
     if sub_account_orders_instrument:
         
@@ -107,17 +101,20 @@ async def reconciling_sub_account_and_db_open_orders(
                             if order_state == "cancelled" \
                                 or order_state == "filled":
                                     
-                                await deleting_row(order_db_table,
-                                                    "databases/trading.sqlite3",
-                                                    filter_trade,
-                                                    "=",
-                                                    order_id,
-                                                )
+                                await deleting_row(
+                                    order_db_table,
+                                    "databases/trading.sqlite3",
+                                    filter_trade,
+                                    "=",
+                                    order_id,
+                                    )
                         
                             if order_state == "open":
                                 
-                                await insert_tables(order_db_table, 
-                                                    order)
+                                await insert_tables(
+                                    order_db_table,
+                                    order
+                                    )
             
                         except:
                             await telegram_bot_sendtext(f"order {order}")
