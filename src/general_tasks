@@ -803,7 +803,7 @@ async def reconciling_size_and_orders(
                                             transaction_log_trading_table,
                                             archive_db_table
                                             )
-                    if my_trades_instrument_name_only:
+                    if False and my_trades_instrument_name_only:
 
                         for instrument_name in my_trades_instrument_name_only:
                             
