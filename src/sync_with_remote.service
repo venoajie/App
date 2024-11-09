@@ -5,14 +5,18 @@ Description= sync_with_remote service
 [Service]
 Type=simple
 Restart=always
-ExecStart=/usr/bin/bash /home/ubuntu/App/src/sync_with_remote.sh
-WorkingDirectory=/home/ubuntu/App/src
+ExecStart=/usr/bin/bash /home/opc/App/src/sync_with_remote.sh
+WorkingDirectory=/home/opc/App/src
 User=ubuntu
 StandardOutput=null
 RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
+
+#ubuntu
+ExecStart=/usr/bin/bash /home/ubuntu/App/src/sync_with_remote.sh
+WorkingDirectory=/home/ubuntu/App/src
 
 
 sudo vim /etc/systemd/system/sync_with_remote.service

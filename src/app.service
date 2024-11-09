@@ -14,9 +14,9 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 
-sudo vim /etc/systemd/system/general_tasks.service
-sudo chmod +x /etc/systemd/system/general_tasks.service
+sudo vim /etc/systemd/system/app.service
+sudo chmod +x /etc/systemd/system/app.service
 sudo systemctl daemon-reload
-sudo systemctl enable general_tasks.service
+sudo systemctl enable app.service
 sudo systemctl start general_tasks.service
  

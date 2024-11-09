@@ -5,18 +5,18 @@ Description= running streaming from websocket service
 [Service]
 Type=simple
 Restart=always
-ExecStart=/home/ubuntu/App/.venv/bin/python3 /home/ubuntu/App/src/streaming
-WorkingDirectory=/home/ubuntu/App/src
-User=ubuntu
+ExecStart=/home/opc/App/.venv/bin/python3 /home/opc/App/src/streaming  #!
+WorkingDirectory=/home/opc/App/src #!
+User=opc #!
 StandardOutput=null
 RestartSec=1
 
 
-/home/ubuntu/App/.venv
-
-
 [Install]
 WantedBy=multi-user.target
+
+
+/home/ubuntu/App/.venv
 
 
 sudo vim /etc/systemd/system/streaming.service

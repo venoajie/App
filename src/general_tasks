@@ -141,6 +141,46 @@ async def get_currencies_from_deribit() -> float:
     return await get_currencies()
 
 
+async def get_instruments_from_deribit(currency) -> float:
+    """ """
+
+    result = await get_instruments(currency)
+
+    return result
+
+async def regular_db_update(
+    sub_account_id: str,
+    count: int,
+    idle_time: float
+    )-> None:
+
+    try:
+        
+        while True:
+
+            get_currencies_all = await get_currencies_from_deribit()
+            currencies = [o["currency"] for o in get_currencies_all["result"]]
+            
+            modify_order_and_db = ModifyOrderDb(sub_account_id)
+
+            for currency in currencies:
+
+
+                await modify_order_and_db.resupply_sub_accountdb (currency)
+
+                await modify_order_and_db.resupply_portfolio (currency)
+
+                await modify_order_and_db.resupply_transaction_log(
+                    currency, 
+                    transaction_log_trading,
+                    archive_db_table,
+                    count)
+            
+            await asyncio.sleep(idle_time)
+
+    except Exception as error:
+        await async_raise_error_message(error)
+
 async def clean_up_databases(idle_time) -> None:
     """ """
 

@@ -1,12 +1,9 @@
-from loguru import logger as log
-
-
-transactions = [ {'order_allowed': True, 'order_parameters': {'size': 200.0, 'label': 'futureSpread-closed-1730853512814'}, 'cancel_allowed': False, 'cancel_id': None}, 
-                    {'order_allowed': True, 'order_parameters': {'size': 200.0, 'label': 'futureSpread-closed-1730853452649'}, 'cancel_allowed': False, 'cancel_id': None}
-                ]
-will_be_closed = []
-
-for transaction in transactions:
-    log.error (transaction)
-    will_be_closed.append(transaction.copy())
-log.warning (will_be_closed)
+ transactions= [
+     {'instrument_name': 'BTC-8NOV24', 'label': 'futureSpread-open-1730458016096', 'amount': -100.0, 'price': 69967.0, 'side': 'sell', 'balance': 0}, 
+     {'instrument_name': 'BTC-8NOV24', 'label': 'futureSpread-open-1730458016096', 'amount': -100.0, 'price': 69967.0, 'side': 'sell', 'balance': 0},
+     {'instrument_name': 'BTC-8NOV24', 'label': 'futureSpread-open-1730458016096', 'amount': -100.0, 'price': 69967.0, 'side': 'sell', 'balance': 0}, 
+     {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1730458016096', 'amount': 100.0, 'price': 69866.0, 'side': 'buy', 'balance': 0},
+     {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1730458016096', 'amount': 100.0, 'price': 69866.0, 'side': 'buy', 'balance': 0},
+     {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1730458016096', 'amount': 100.0, 'price': 69866.0, 'side': 'buy', 'balance': 0}]
+ 
+ [{'instrument_name': 'BTC-8NOV24', 'label': 'futureSpread-open-1730469355047', 'amount': -100.0, 'price': 71090.5, 'side': 'sell', 'balance': 0}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1730469355047', 'amount': 100.0, 'price': 70974.5, 'side': 'buy', 'balance': 0}
