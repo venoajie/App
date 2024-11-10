@@ -67,10 +67,10 @@ async def main():
     left_column, right_column = st.columns(2)
         
     with left_column:
-        st.subheader("Total Sales:")
+        st.subheader("Trades")
         st.dataframe (data)
     with right_column:
-        st.subheader("Average Sales Per Transaction:")
+        st.subheader("Open orders")
         st.dataframe (data_order)
     
 if __name__ == '__main__':
