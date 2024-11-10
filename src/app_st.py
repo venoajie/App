@@ -41,7 +41,7 @@ async def main():
     st.dataframe(data)
     
     st.subheader("Current Positions")
-    st.table(datas)
+    st.table(data)
 
 if __name__ == '__main__':
     asyncio.run(main())
