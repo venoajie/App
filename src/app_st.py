@@ -38,10 +38,12 @@ async def main():
     #st.dataframe(data["result"])
 
     data = await get_db_table()
-    st.dataframe(data)
     
-    st.subheader("Current Positions")
+    st.header("Current Positions")
     st.table(data)
+
+    st.subheader("Current Positions")
+    st.dataframe(data)
 
 if __name__ == '__main__':
     asyncio.run(main())
