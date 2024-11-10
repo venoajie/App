@@ -33,11 +33,26 @@ async def get_db_table():
     
     return my_trades_currency
 
+async def get_open_orders():
+    order_db_table= "orders_all_json"
+                
+    column_order= "instrument_name","label","order_id","amount","timestamp"
+    orders_currency: list= await get_query(order_db_table, 
+                                                "BTC", 
+                                                "all", 
+                                                "all", 
+                                                column_order)
+    
+    return orders_currency
+
 async def main():
     #data = await fetch_data('https://www.deribit.com/api/v2/public/ticker?instrument_name=BTC-PERPETUAL')
     #st.dataframe(data["result"])
 
     data = await get_db_table()
+    st.title("Current ")
+
+    data_order = await get_open_orders()
     st.title("Current ")
     
     st.header("Current Positions")
@@ -53,13 +68,10 @@ async def main():
         
     with left_column:
         st.subheader("Total Sales:")
-        st.subheader(f"US $ {st.dataframe (data)}")
+        st.dataframe (data)
     with right_column:
         st.subheader("Average Sales Per Transaction:")
-        st.subheader(f"US $ {st.dataframe (data)}")
-    left_column.table (data)
-    right_column.dataframe (data)
-    
+        st.dataframe (data_order)
     
 if __name__ == '__main__':
     
