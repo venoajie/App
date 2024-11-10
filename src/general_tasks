@@ -522,7 +522,7 @@ async def hedging_spot_currency(
                     nearest_transaction_to_index = [o for o in my_trades_currency_strategy_open \
                         if o["price"] == closest_price]
                     
-                    send_closing_order: dict = await hedging.is_send_exit_order_allowed (
+                    send_closing_order: dict = await hedging.is_send_exit_order_allowed(
                         orders_currency_strategy_label_closed,
                         best_bid_prc,
                         nearest_transaction_to_index,
@@ -539,7 +539,7 @@ async def hedging_spot_currency(
                         log.error (f"result_order {result_order}")
                         data_orders = result_order["result"]
 
-                        await modify_order_and_db.update_user_changes_non_ws (
+                        await modify_order_and_db.update_user_changes_non_ws(
                             non_checked_strategies,
                             data_orders, 
                             currency, 

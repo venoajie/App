@@ -154,6 +154,8 @@ def is_cancelling_order_allowed(
             time_interval
         )
         
+        log.warning (f"minimum_waiting_time_has_passed {minimum_waiting_time_has_passed} time_interval {time_interval}")
+        
         if minimum_waiting_time_has_passed:
             cancel_allowed: bool = True
 
@@ -521,8 +523,10 @@ class HedgingSpot(BasicStrategy):
         
         transaction = selected_transaction[0]
 
-        exit_size_not_over_bought = net_size_not_over_bought (self.my_trades_currency_strategy,
-                                                              transaction)
+        exit_size_not_over_bought = net_size_not_over_bought (
+            self.my_trades_currency_strategy,
+            transaction
+            )
         
         if exit_size_not_over_bought:
                 
@@ -530,9 +534,11 @@ class HedgingSpot(BasicStrategy):
 
             threshold_market_condition = hedging_attributes ["delta_price_pct"]
                 
-            market_condition = await get_market_condition_hedging (self.TA_result_data, 
-                                                                    self.index_price, 
-                                                                    threshold_market_condition)
+            market_condition = await get_market_condition_hedging (
+                self.TA_result_data,
+                self.index_price,
+                threshold_market_condition
+                )
 
             bullish, strong_bullish = market_condition["rising_price"], market_condition["strong_rising_price"]
 
@@ -543,19 +549,23 @@ class HedgingSpot(BasicStrategy):
             
             waiting_minute_before_cancel= hedging_attributes["waiting_minute_before_cancel"] * ONE_MINUTE
                 
-            exit_params: dict = self.get_basic_params(). get_basic_closing_paramaters (selected_transaction,
-                                                                                    orders_currency_strategy_label_closed,)
+            exit_params: dict = self.get_basic_params(). get_basic_closing_paramaters (
+                selected_transaction,
+                orders_currency_strategy_label_closed,
+                )
 
             log.warning (f"sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} over_hedged_opening {self.over_hedged_opening} len_orders == 0 {len_orders == 0}")
             
             #log.warning (f"""bid_price {bid_price} transaction ["price"] {transaction ["price"]}""")
                     
-            order_allowed = self. closing_position (transaction,
-                                                    exit_params,
-                                                    bullish, 
-                                                    strong_bullish,
-                                                    len_orders,
-                                                    bid_price,)
+            order_allowed = self. closing_position (
+                transaction,
+                exit_params,
+                bullish, 
+                strong_bullish,
+                len_orders,
+                bid_price,
+                )
             
             if len_orders> 0:          
                 
