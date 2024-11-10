@@ -160,6 +160,8 @@ def is_cancelling_order_allowed(
         )
         
         log.warning (f"minimum_waiting_time_has_passed {minimum_waiting_time_has_passed} time_interval {time_interval}")
+        log.warning (f"server_time {server_time} max_tstamp_orders {max_tstamp_orders}")
+        log.warning (f"open_orders_label_strategy {server_time} max_tstamp_orders {open_orders_label_strategy}")
         
         if minimum_waiting_time_has_passed:
             cancel_allowed: bool = True

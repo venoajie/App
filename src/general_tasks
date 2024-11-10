@@ -66,7 +66,15 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
+def check_cpu_usage(threshold):
+    
+    import psutil
+    import smtplib
 
+    cpu_usage = psutil.cpu_percent()
+    if cpu_usage > threshold:
+        send_alert(f"CPU usage is too high: {cpu_usage}%")
+        
 def get_index (
     data_orders: dict, 
     ticker: dict
