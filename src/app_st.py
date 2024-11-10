@@ -38,12 +38,21 @@ async def main():
     #st.dataframe(data["result"])
 
     data = await get_db_table()
+    st.title("Current ")
     
     st.header("Current Positions")
-    st.table(data)
+    st.table()
 
-    st.subheader("Current Positions")
+    st.subheader("Positions")
     st.dataframe(data)
-
+    
+    left_column, right_column = st.columns(2)
+    left_column.table (data)
+    right_column..dataframe (data)
+    
+    
 if __name__ == '__main__':
+    
+    st.set_page_config(page_title="Sales Dashboard", page_icon=":bar_chart:", layout="wide")
+    
     asyncio.run(main())
