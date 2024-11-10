@@ -33,18 +33,15 @@ async def get_db_table():
     
     return my_trades_currency
 
-
-async def fetch_data(url):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
-        return response.json()
-
 async def main():
     #data = await fetch_data('https://www.deribit.com/api/v2/public/ticker?instrument_name=BTC-PERPETUAL')
     #st.dataframe(data["result"])
 
     data = await get_db_table()
     st.dataframe(data)
+    
+    st.subheader("Current Positions")
+    st.table(datas)
 
 if __name__ == '__main__':
     asyncio.run(main())
