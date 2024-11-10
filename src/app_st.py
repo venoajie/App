@@ -48,7 +48,7 @@ async def main():
     
     left_column, right_column = st.columns(2)
     left_column.table (data)
-    right_column..dataframe (data)
+    right_column.dataframe (data)
     
     
 if __name__ == '__main__':
