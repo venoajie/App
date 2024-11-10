@@ -64,5 +64,15 @@ async def main():
 if __name__ == '__main__':
     
     st.set_page_config(page_title="Sales Dashboard", page_icon=":bar_chart:", layout="wide")
+        
+    # ---- HIDE STREAMLIT STYLE ----
+    hide_st_style = """
+                <style>
+                #MainMenu {visibility: hidden;}
+                footer {visibility: hidden;}
+                header {visibility: hidden;}
+                </style>
+                """
+    st.markdown(hide_st_style, unsafe_allow_html=True)
     
     asyncio.run(main())
