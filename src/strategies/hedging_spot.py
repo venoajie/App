@@ -10,13 +10,18 @@ from dataclassy import dataclass, fields
 from strategies.basic_strategy import (
     BasicStrategy,
     are_size_and_order_appropriate,
+    check_if_next_closing_size_will_not_exceed_the_original,
     delta_pct,
     ensure_sign_consistency,
     get_max_time_stamp,
     get_order_id_max_time_stamp,
+    get_transaction_size,
     is_label_and_side_consistent,
     is_minimum_waiting_time_has_passed,
-    size_rounding,)
+    provide_side_to_close_transaction,
+    provide_size_to_close_transaction,
+    size_rounding,
+    sum_order_under_closed_label_int,)
 from utilities.string_modification import (
     parsing_label)
 
@@ -576,6 +581,32 @@ class HedgingSpot(BasicStrategy):
                     len_orders,
                     orders_currency_strategy_label_closed,
                     self.server_time,)
+                
+                basic_size = get_transaction_size(transaction)
+                side = provide_side_to_close_transaction(transaction)
+                label_integer_open = get_label_integer(transaction ["label"])
+                
+                sum_order_under_closed_label = sum_order_under_closed_label_int (
+                    orders_currency_strategy_label_closed,
+                    label_integer_open
+                    )
+                            
+                net_size = (basic_size + sum_order_under_closed_label)
+                size_abs = provide_size_to_close_transaction(
+                    basic_size,
+                    net_size
+                    )
+                
+                size = size_abs * ensure_sign_consistency(side)   
+                
+                closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original (
+                    basic_size,
+                    net_size,
+                    size
+                    )
+                
+                if not closing_size_ok:
+                    cancel_allowed = True
                 
                 if cancel_allowed:
                     cancel_id= min ([o["order_id"] for o in orders_currency_strategy_label_closed])  

@@ -653,11 +653,12 @@ def get_non_label_from_transaction(transactions) -> list:
     return [] if transactions ==[] else [o for o in transactions if o["label"]==""]
 
 
-def check_db_consistencies (instrument_name: str,
-                            trades_from_sqlite: list, 
-                            positions_from_sub_account: list,
-                            order_from_sqlite_open: list, 
-                            open_orders_from_sub_accounts: list) -> bool:
+def check_db_consistencies (
+    instrument_name: str,
+    trades_from_sqlite: list, 
+    positions_from_sub_account: list,
+    order_from_sqlite_open: list, 
+    open_orders_from_sub_accounts: list) -> bool:
     """ """
 
     no_non_label_from_from_sqlite_open= False if get_non_label_from_transaction(order_from_sqlite_open) != [] else True 
@@ -674,15 +675,20 @@ def check_db_consistencies (instrument_name: str,
     log.error(
         f"size_is_consistent {sum_my_trades_sqlite == size_from_position} sum_my_trades_sqlite {sum_my_trades_sqlite} size_from_positions {size_from_position} "
     )
-    return dict(trade_size_is_consistent=sum_my_trades_sqlite == size_from_position,                
-                order_is_consistent= (len_open_orders_from_sub_accounts == len_from_sqlite_open \
+    return dict(
+        trade_size_is_consistent=sum_my_trades_sqlite == size_from_position,
+        order_is_consistent= (len_open_orders_from_sub_accounts == len_from_sqlite_open \
                     and no_non_label_from_from_sqlite_open),
-                no_non_label_from_from_sqlite_open= False \
+        no_non_label_from_from_sqlite_open= False \
                     if get_non_label_from_transaction(order_from_sqlite_open) != [] else True )
 
-def get_basic_closing_paramaters(selected_transaction: list,
-                                closed_orders_label_strategy: list) -> dict:
+def get_basic_closing_paramaters(
+    selected_transaction: list,
+    closed_orders_label_strategy: list
+    ) -> dict:
+    
     """ """
+    
     transaction: dict = convert_list_to_dict(selected_transaction)
     
     # provide dict placeholder for params
@@ -697,15 +703,22 @@ def get_basic_closing_paramaters(selected_transaction: list,
                   )
     basic_size = get_transaction_size(transaction)
     label_integer_open = get_label_integer(transaction ["label"])
-    sum_order_under_closed_label = sum_order_under_closed_label_int (closed_orders_label_strategy,
-                                                                     label_integer_open)
+    
+    sum_order_under_closed_label = sum_order_under_closed_label_int (
+        closed_orders_label_strategy,
+        label_integer_open
+        )
+    
     net_size = (basic_size + sum_order_under_closed_label)
     size_abs = provide_size_to_close_transaction(basic_size,
                                                 net_size)
     size = size_abs * ensure_sign_consistency(side)   
-    closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original (basic_size,
-                                                                            net_size,
-                                                                            size)
+    
+    closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
+        basic_size,
+        net_size,
+        size
+        )
 
     log.debug (f"sum_order_under_closed_label {sum_order_under_closed_label} label_integer_open {label_integer_open}")
     #log.warning (f"basic_size {basic_size} size_abs {size_abs} size {size} closing_size_ok {closing_size_ok}")
