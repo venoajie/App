@@ -405,6 +405,7 @@ class StreamAccountData(ModifyOrderDb):
                                                 
                                         
                         except Exception as error:
+                            log.critical (error)
                             await telegram_bot_sendtext (
                                 error,
                                 "general_error"
@@ -413,11 +414,13 @@ class StreamAccountData(ModifyOrderDb):
 
                     
             except Exception as error:
-                await raise_error_message (error)
+                log.critical (error)
+                
                 await telegram_bot_sendtext (
                     error,
                     "general_error")
                 
+                await raise_error_message (error)
                 
     async def establish_heartbeat(self) -> None:
         """
@@ -694,6 +697,8 @@ async def distribute_ticker_result_as_per_data_type(
                     replace_data(my_path_ticker, ticker_change)
 
     except Exception as error:
+        
+        log.critical (error)
 
         await telegram_bot_sendtext (
             error,
@@ -713,6 +718,7 @@ def main():
         StreamAccountData(sub_account_id)
 
     except Exception as error:
+        log.critical (error)
         raise_error_message (
             error, 
             5,
@@ -732,6 +738,7 @@ if __name__ == "__main__":
         
 
     except Exception as error:
+        log.critical (error)
         asyncio. telegram_bot_sendtext (
             error,
             "general_error"
