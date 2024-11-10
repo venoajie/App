@@ -41,7 +41,7 @@ async def fetch_data(url):
 
 async def main():
     data = await fetch_data('https://www.deribit.com/api/v2/public/ticker?instrument_name=BTC-PERPETUAL')
-    st.write(data)
+    st.dataframe(data)
 
 if __name__ == '__main__':
     asyncio.run(main())
