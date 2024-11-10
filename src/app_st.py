@@ -12,31 +12,26 @@ import asyncio
 
 
 from db_management.sqlite_management import (
-    back_up_db_sqlite,
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-    insert_tables, 
-    querying_arithmetic_operator,
-    querying_table)
+    executing_query_based_on_currency_or_instrument_and_strategy as get_query,)
 
 trade_db_table= "my_trades_all_json"
 
 
 async def get_db_table():
-    extensions = ('.bak')
                 
-    column_trade: str= "instrument_name","label", "amount", "price","side"
+    column_trade: str= "instrument_name","label", "amount", "price"
     my_trades_currency: list= await get_query(trade_db_table, 
                                                 "BTC", 
                                                 "all", 
                                                 "all", 
                                                 column_trade)
     
-    return my_trades_currency
+    return [o for o in my_trades_currency if "futureSpread" in o["label"]]
 
 async def get_open_orders():
     order_db_table= "orders_all_json"
                 
-    column_order= "instrument_name","label","order_id","amount","timestamp"
+    column_order= "instrument_name","label","amount",
     orders_currency: list= await get_query(order_db_table, 
                                                 "BTC", 
                                                 "all", 
