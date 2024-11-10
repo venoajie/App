@@ -27,6 +27,18 @@ from utilities.system_tools import (
     provide_path_for_file)
 
 
+
+def get_first_tick_query(
+    where_filter: str,
+    transaction_log_trading: str,
+    instrument_name: str,
+    count: int = 1
+    )-> str:
+    
+    return f"""SELECT MIN ({where_filter}) FROM {transaction_log_trading} WHERE instrument_name LIKE '%{instrument_name}%' ORDER  BY {where_filter} DESC
+    LIMIT  {count+1}"""
+
+
 def first_tick_fr_sqlite_if_database_still_empty (
     count: int
     )-> int:
@@ -207,12 +219,14 @@ class ModifyOrderDb(SendApiRequest):
             sub_accounts
             )
     
+        log.info(f"resupply {currency.upper()} sub account db-DONE")
         
     async def resupply_portfolio (
         self,
         currency
         )-> None:
 
+        log.info(f"resupply {currency.upper()} portfolio-START")
         # fetch data from exchange
         sub_accounts = await self.private_data.get_subaccounts ()
         
@@ -228,6 +242,9 @@ class ModifyOrderDb(SendApiRequest):
             currency
             )
         
+        log.info(f"resupply {currency.upper()} portfolio-DONE")
+
+
     async def save_transaction_log_by_instrument(
         self,
         currency: str,
@@ -239,9 +256,13 @@ class ModifyOrderDb(SendApiRequest):
         
         where_filter= "timestamp"
         
-        first_tick_query = f"""SELECT MIN ({where_filter}) FROM {transaction_log_trading} WHERE instrument_name LIKE '%{instrument_name}%' ORDER  BY {where_filter} DESC
-        LIMIT  {count+1}"""
-
+        first_tick_query = get_first_tick_query(
+            where_filter,
+            transaction_log_trading,
+            instrument_name,
+            count
+            )
+        
         first_tick_query_result = await executing_query_with_return(first_tick_query)
                     
         first_tick_fr_sqlite= first_tick_query_result [0]["MIN (timestamp)"] 
@@ -250,7 +271,7 @@ class ModifyOrderDb(SendApiRequest):
                             
             first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (count)
                 
-        transaction_log= await self.private_data.get_transaction_log(
+        transaction_log = await self.private_data.get_transaction_log(
                         currency, 
                         first_tick_fr_sqlite, 
                         count)
