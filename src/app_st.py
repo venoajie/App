@@ -21,7 +21,7 @@ from db_management.sqlite_management import (
 trade_db_table= "my_trades_all_json"
 
 
-async def trade_db_table():
+async def get_db_table():
     extensions = ('.bak')
                 
     column_trade: str= "instrument_name","label", "amount", "price","side"
@@ -43,7 +43,7 @@ async def main():
     #data = await fetch_data('https://www.deribit.com/api/v2/public/ticker?instrument_name=BTC-PERPETUAL')
     #st.dataframe(data["result"])
 
-    data = await trade_db_table()
+    data = await get_db_table()
     st.dataframe(data)
 
 if __name__ == '__main__':
