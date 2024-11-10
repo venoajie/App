@@ -5,7 +5,11 @@
 import asyncio
 import numpy as np
 import pandas as pd
+
 import streamlit as st
+import httpx
+import asyncio
+
 
 from db_management.sqlite_management import (
     back_up_db_sqlite,
@@ -30,12 +34,14 @@ async def trade_db_table():
     st.dataframe(my_trades_currency)
 
 
-async def main():
-    
-    st.title("app_st")
-    data = await trade_db_table()
-    st.dataframe(data)
-    
+async def fetch_data(url):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        return response.json()
 
-if __name__ == main():
+async def main():
+    data = await fetch_data('https://www.deribit.com/api/v2/public/ticker?instrument_name=BTC-PERPETUAL')
+    st.write(data)
+
+if __name__ == '__main__':
     asyncio.run(main())
