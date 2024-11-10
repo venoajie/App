@@ -10,12 +10,9 @@ from db_management.sqlite_management import (
     deleting_row,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     executing_query_with_return,
-    insert_tables,
-    querying_arithmetic_operator,)
+    insert_tables,)
 from strategies.basic_strategy import (
     is_label_and_side_consistent,)
-from strategies.config_strategies import (
-    paramaters_to_balancing_transactions)
 from transaction_management.deribit.orders_management import (
     saving_orders,
     saving_traded_orders,)
@@ -26,29 +23,39 @@ from transaction_management.deribit.transaction_log import (
 from transaction_management.deribit.api_requests import (
     SendApiRequest,)
 from utilities.pickling import replace_data
-from utilities.string_modification import (
-    extract_currency_from_text,
-    get_unique_elements)
 from utilities.system_tools import (
     provide_path_for_file)
 
 
 def first_tick_fr_sqlite_if_database_still_empty (
-    max_closed_transactions_downloaded_from_sqlite: int
+    count: int
     )-> int:
     """
     
     """
     
     from configuration.label_numbering import get_now_unix_time
+    from strategies.config_strategies import (
+        paramaters_to_balancing_transactions)
     
     server_time = get_now_unix_time()  
+        
+    balancing_params = paramaters_to_balancing_transactions()
+
+    max_closed_transactions_downloaded_from_sqlite = balancing_params[
+        "max_closed_transactions_downloaded_from_sqlite"
+        ]  
     
-    some_day_ago = 3600000 * max_closed_transactions_downloaded_from_sqlite
+    count_at_first_download =  max(
+                                count,
+                                max_closed_transactions_downloaded_from_sqlite
+                                )
+
+    some_days_ago = 3600000 * count_at_first_download
     
-    delta_some_day_ago = server_time - some_day_ago
+    delta_some_days_ago = server_time - some_days_ago
     
-    return delta_some_day_ago
+    return delta_some_days_ago
     
     
 async def inserting_additional_params(params: dict)-> None:
@@ -66,11 +73,15 @@ async def update_db_pkl (
     currency
     )-> None:
 
-    my_path_portfolio = provide_path_for_file (path,
-                                               currency)
+    my_path_portfolio = provide_path_for_file(
+        path,
+        currency
+        )
     
-    if currency_inline_with_database_address(currency,
-                                             my_path_portfolio):
+    if currency_inline_with_database_address(
+        currency,
+        my_path_portfolio):
+        
         replace_data(
             my_path_portfolio, 
             data_orders)
@@ -153,14 +164,17 @@ class ModifyOrderDb(SendApiRequest):
                                                     column_list)
     
         if open_orders_sqlite:
+            
             for strategy in cancellable_strategies:
                 open_orders_cancellables = [
                 o for o in open_orders_sqlite if strategy in o["label"]
             ]
+                
                 if open_orders_cancellables:
                     open_orders_cancellables_id = [
                     o["order_id"] for o in open_orders_cancellables
                 ]
+                    
                     for order_id in open_orders_cancellables_id:
 
                         await self.cancel_by_order_id(order_id)
@@ -183,8 +197,11 @@ class ModifyOrderDb(SendApiRequest):
         log.info(f"resupply {currency.upper()} sub account db-START")
         sub_accounts = await self.get_sub_account (currency)
 
-        my_path_sub_account = provide_path_for_file("sub_accounts", 
-                                                    currency)
+        my_path_sub_account = provide_path_for_file(
+            "sub_accounts",
+            currency
+            )
+        
         replace_data(
             my_path_sub_account, 
             sub_accounts
@@ -226,31 +243,18 @@ class ModifyOrderDb(SendApiRequest):
         LIMIT  {count+1}"""
 
         first_tick_query_result = await executing_query_with_return(first_tick_query)
-        
-        log.debug (f"first_tick_query_result {first_tick_query_result}")
-            
+                    
         first_tick_fr_sqlite= first_tick_query_result [0]["MIN (timestamp)"] 
-        log.debug (f"first_tick_fr_sqlite {first_tick_fr_sqlite}")
         
         if not first_tick_fr_sqlite:
-
-            balancing_params = paramaters_to_balancing_transactions()
-
-            max_closed_transactions_downloaded_from_sqlite=balancing_params["max_closed_transactions_downloaded_from_sqlite"]  
-            
-            count_at_first_download =  max(
-                                        count,
-                                        max_closed_transactions_downloaded_from_sqlite
-                                        )
                             
-            first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (count_at_first_download)
+            first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (count)
                 
-        transaction_log= await self.private_data.get_transaction_log (
+        transaction_log= await self.private_data.get_transaction_log(
                         currency, 
                         first_tick_fr_sqlite, 
                         count)
                 
-        log.error (f"transaction_log {transaction_log}")
         if transaction_log:
             await saving_transaction_log (
                 transaction_log_trading,
@@ -266,6 +270,7 @@ class ModifyOrderDb(SendApiRequest):
         )-> None:
         
         """ """
+        log.info(f"resupply {currency.upper()} transaction_log-START")
  
         if instrument_name:
             await self.save_transaction_log_by_instrument(
@@ -295,6 +300,8 @@ class ModifyOrderDb(SendApiRequest):
                 instrument_name,
                 count
                 )
+
+        log.info(f"resupply {currency.upper()} transaction_log-DONE")
            
              
     async def if_cancel_is_true(
