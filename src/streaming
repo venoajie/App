@@ -405,11 +405,11 @@ class StreamAccountData(ModifyOrderDb):
                                                 
                                         
                         except Exception as error:
-                            await async_raise_error_message(error)
                             await telegram_bot_sendtext (
                                 error,
                                 "general_error"
                                 )
+                            await async_raise_error_message(error)
 
                     
             except Exception as error:
@@ -694,6 +694,11 @@ async def distribute_ticker_result_as_per_data_type(
                     replace_data(my_path_ticker, ticker_change)
 
     except Exception as error:
+
+        await telegram_bot_sendtext (
+            error,
+            "general_error"
+            )
         await async_raise_error_message(
             error,
             "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
