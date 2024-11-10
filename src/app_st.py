@@ -31,7 +31,7 @@ async def trade_db_table():
                                                 "all", 
                                                 column_trade)
     
-    st.dataframe(my_trades_currency)
+    return my_trades_currency
 
 
 async def fetch_data(url):
