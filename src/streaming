@@ -223,6 +223,7 @@ class StreamAccountData(ModifyOrderDb):
                         #await self.modify_order_and_db.cancel_the_cancellables (currency,
                         #                                                        cancellable_strategies)
                         
+                        # some pre-trading checks
                         currency_lower = currency.lower ()
                         archive_db_table= f"my_trades_all_{currency_lower}_json"                    
                         transaction_log_trading= f"transaction_log_{currency_lower}_json"
@@ -231,7 +232,7 @@ class StreamAccountData(ModifyOrderDb):
 
                         await self.modify_order_and_db.resupply_portfolio (currency)
                   
-                        column_trade: str= "instrument_name","label", "amount", "price","side"
+                        column_trade: str= "instrument_name","label"
                         my_trades_currency: list= await get_query(
                             trade_db_table, 
                             currency, 
@@ -240,17 +241,26 @@ class StreamAccountData(ModifyOrderDb):
                             column_trade
                             )
                         
-                        my_trades_instrument_name_only = remove_redundant_elements([o["instrument_name"] for o in my_trades_currency])
+                        my_trades_instrument_name_only = remove_redundant_elements(
+                            [o["instrument_name"] for o in my_trades_currency]
+                            )
                             
                         if my_trades_instrument_name_only:
 
                             for instrument_name in my_trades_instrument_name_only:
-                                await clean_up_closed_transactions (
+                                await clean_up_closed_transactions(
                                     instrument_name, 
                                     trade_db_table
                                             )      
-                                    
-                        
+                                                        
+                                await self.modify_order_and_db.resupply_transaction_log(
+                                    currency,
+                                    transaction_log_trading,
+                                    instrument_name,
+                                    3
+                                    )
+                                
+                            
                         ws_channel_currency = [
                             f"user.portfolio.{currency}",
                             f"user.changes.any.{currency.upper()}.raw",
@@ -355,10 +365,6 @@ class StreamAccountData(ModifyOrderDb):
                                             transaction_log_trading
                                             )
                                         
-                                        await clean_up_closed_transactions (
-                                            instrument, 
-                                            trade_db_table
-                                            )      
                                     
                                     TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
                                     WHERE_FILTER_TICK: str = "tick"
@@ -593,11 +599,16 @@ class StreamAccountData(ModifyOrderDb):
                         )
                                             
                 await self.modify_order_and_db. resupply_sub_accountdb(currency)            
-        #log.debug (f"positions {positions}")
+
         await update_db_pkl(
             "positions", 
             data_orders,
             currency)
+
+        await clean_up_closed_transactions(
+            instrument_name, 
+            trade_db_table
+            )      
         
         log.info(f"update_user_changes-END")
     
