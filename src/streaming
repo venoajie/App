@@ -732,6 +732,10 @@ if __name__ == "__main__":
         
 
     except Exception as error:
+        asyncio. telegram_bot_sendtext (
+            error,
+            "general_error"
+            )
         raise_error_message(
         error, 
         5, 
