@@ -16,7 +16,7 @@ async def private_connection(
         
         respons = await session.get(connection_url + endpoint)
         
-        return await respons.json()
+        return  respons.json()
 
 
 async def telegram_bot_sendtext(
