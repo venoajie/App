@@ -42,9 +42,12 @@ async def main():
     
     st.header("Current Positions")
     st.table()
+    
+    st.markdown("""---""")
 
     st.subheader("Positions")
     st.dataframe(data)
+    st.markdown("##")
     
     left_column, right_column = st.columns(2)
     left_column.table (data)
