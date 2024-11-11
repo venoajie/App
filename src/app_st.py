@@ -120,19 +120,23 @@ futures_instruments= get_futures_instruments (currencies,
 active_futures = futures_instruments["active_futures"]   
 
 active_combo_perp = futures_instruments["active_combo_perp"]  
-log.warning (active_combo_perp)
+
+ticker = []
 for combo in active_combo_perp:
     
     instrument_name = combo["instrument_name"]
     
     log.debug (instrument_name)
     
-    perpetual_ticker: list = reading_from_pkl_data(
+    instrument_ticker: list = reading_from_pkl_data(
     "ticker",
     instrument_name
     )
-    log.error (perpetual_ticker)
+    
+    
+    ticker.append (instrument_ticker)
 
+log.error (ticker)
 
 async def get_db_table():
                 
