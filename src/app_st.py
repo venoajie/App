@@ -133,10 +133,9 @@ async def get_ticker():
         
         instrument_name = combo["instrument_name"]
             
-        instrument_ticker: list = reading_from_pkl_data(
-        "ticker",
+        instrument_ticker: list = get_tickers(
         instrument_name
-        )[0]
+        )
         
         
         ticker.append (instrument_ticker)
