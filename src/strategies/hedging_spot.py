@@ -607,7 +607,7 @@ class HedgingSpot(BasicStrategy):
         Returns:
             dict: _description_
         """
-        order_allowed, cancel_allowed, cancel_id = False, False, None
+        order_allowed = False
         
         transaction = selected_transaction[0]
 
@@ -631,11 +631,6 @@ class HedgingSpot(BasicStrategy):
             bullish, strong_bullish = market_condition["rising_price"], market_condition["strong_rising_price"]
 
             len_orders: int = get_transactions_len(closed_orders_label)
-            
-            ONE_SECOND = 1000
-            ONE_MINUTE = ONE_SECOND * 60
-            
-            waiting_minute_before_cancel= hedging_attributes["waiting_minute_before_cancel"] * ONE_MINUTE
                 
             exit_params: dict = self.get_basic_params(). get_basic_closing_paramaters (
                 selected_transaction,
@@ -655,40 +650,9 @@ class HedgingSpot(BasicStrategy):
                 bid_price,
                 )
             
-            if len_orders> 0:                  basic_size = get_transaction_size(transaction)
-                side = provide_side_to_close_transaction(transaction)
-                label_integer_open = get_label_integer(transaction ["label"])
-                
-                sum_order_under_closed_label = sum_order_under_closed_label_int (
-                    closed_orders_label,
-                    label_integer_open
-                    )
-                            
-                net_size = (basic_size + sum_order_under_closed_label)
-                size_abs = provide_size_to_close_transaction(
-                    basic_size,
-                    net_size
-                    )
-                
-                size = size_abs * ensure_sign_consistency(side)   
-                
-                closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original (
-                    basic_size,
-                    net_size,
-                    size
-                    )
-                
-                if not closing_size_ok:
-                    cancel_allowed = True
-                
-                if cancel_allowed:
-                    cancel_id= min ([o["order_id"] for o in closed_orders_label])  
-            
         return dict(
             order_allowed= order_allowed,
             order_parameters=(
                 [] if not order_allowed else exit_params
             ),
-            cancel_allowed=cancel_allowed,
-            cancel_id=None if not cancel_allowed else cancel_id
-        )
+            )
