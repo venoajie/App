@@ -552,7 +552,7 @@ async def reconciling_orders_based_on_sources(
     ) -> None:
     
 
-    for instrument_name in remove_redundant_elements(orders_instrument_name):
+    for instrument_name in (orders_instrument_name):
         log.error (f"instrument_name {instrument_name}")
         len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other(
             sub_account,
@@ -658,7 +658,7 @@ async def reconciling_size_and_orders(
                                                             "all", 
                                                             column_order)     
                 
-                    orders_instrument_name = [o["instrument_name"] for o in orders_currency]
+                    orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in orders_currency])
                     
                     #log.debug (f"sub_account {sub_account}")
                 
@@ -675,7 +675,7 @@ async def reconciling_size_and_orders(
                     
                     sub_account_orders = sub_account["open_orders"]
                     
-                    sub_account_orders_instrument = [o["instrument_name"] for o in sub_account_orders ]
+                    sub_account_orders_instrument = remove_redundant_elements([o["instrument_name"] for o in sub_account_orders ])
                     
                         
                     # sources: sub account
