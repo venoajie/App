@@ -136,6 +136,7 @@ async def get_ticker():
         instrument_ticker: list = await get_tickers(
         instrument_name
         )
+        log.error (instrument_ticker)
         
         
         ticker.append (instrument_ticker)
