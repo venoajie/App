@@ -81,13 +81,6 @@ async def public_connection (
 
         return response
 
-async def get_currencies()-> list:
-    # Set endpoint
-    endpoint: str = f"public/get_currencies?"
-
-    return await public_connection(endpoint=endpoint)
-
-
 async def get_server_time()-> int:
     """
     Returning server time
@@ -109,7 +102,14 @@ async def get_instruments(
     
     return await public_connection (endpoint=endpoint)
 
-def get_tickers(
+async def get_currencies()-> list:
+    # Set endpoint
+    endpoint: str = f"public/get_currencies?"
+
+    return await public_connection(endpoint=endpoint)
+
+
+async def get_tickers(
     instrument_name: str
     )-> list:
     # Set endpoint

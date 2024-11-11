@@ -5,16 +5,117 @@
 import asyncio
 import numpy as np
 import pandas as pd
+import os
+import tomli
 
+from loguru import logger as log
 import streamlit as st
 import httpx
 import asyncio
+from transaction_management.deribit.api_requests import get_tickers, get_currencies,get_instruments
 
+from utilities.pickling import (
+    read_data,
+    replace_data,)
+from utilities.system_tools import (
+    provide_path_for_file,
+    async_raise_error_message,
+    raise_error_message,)
 
+from websocket_management.ws_management import (
+    get_futures_instruments,)
 from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,)
 
+def get_config(file_name: str) -> list:
+    """ """
+    config_path = provide_path_for_file (file_name)
+    
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, "rb") as handle:
+                read= tomli.load(handle)
+                return read
+    except:
+        return []
+
+
+def reading_from_pkl_data(
+    end_point, 
+    currency,
+    status: str = None
+    ) -> dict:
+    """ """
+
+    path: str = provide_path_for_file (end_point,
+                                      currency,
+                                      status)
+
+    return read_data(path)
+
+
+
+
+async def get_currencies_from_deribit() -> float:
+    """ """
+
+    return await get_currencies()
+
+
 trade_db_table= "my_trades_all_json"
+
+
+async def get_instruments_from_deribit(currency) -> float:
+    """ """
+
+    result = await get_instruments(currency)
+
+    return result
+
+# registering strategy config file    
+file_toml = "config_strategies.toml"
+
+# parsing config file
+config_app = get_config(file_toml)
+
+# get tradable strategies
+tradable_config_app = config_app["tradable"]
+
+# get tradable currencies
+currencies= [o["spot"] for o in tradable_config_app] [0]
+
+strategy_attributes = config_app["strategies"]
+                        
+active_strategies =   [o["strategy_label"] for o in strategy_attributes \
+    if o["is_active"]==True]
+
+# get strategies that have not short/long attributes in the label 
+non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
+    if o["non_checked_for_size_label_consistency"]==True]
+
+cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
+    if o["cancellable"]==True]
+
+trade_db_table= "my_trades_all_json"
+
+order_db_table= "orders_all_json"         
+                
+settlement_periods= get_settlement_period (strategy_attributes)
+                
+futures_instruments= get_futures_instruments (currencies,
+                                                    settlement_periods)  
+
+active_futures = futures_instruments["active_futures"]   
+
+active_combo_perp = futures_instruments["active_combo_perp"]  
+
+for instrument_name in active_combo_perp:
+    
+    perpetual_ticker: list = reading_from_pkl_data(
+    "ticker",
+    instrument_name
+    )
+    log.error (perpetual_ticker)
 
 
 async def get_db_table():
