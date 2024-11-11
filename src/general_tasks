@@ -848,19 +848,6 @@ async def reconciling_size_and_orders(
                                         instrument_name,
                                         100
                                         )
-                                                    
-                    await hedging_spot_currency(
-                        currency,
-                        currencies,
-                        config_app,
-                        modify_order_and_db,
-                        orders_currency,
-                        my_trades_currency,
-                        order_db_table,
-                        trade_db_table,
-                        archive_db_table,
-                        transaction_log_trading_table
-                    )
                                 
             await asyncio.sleep(idle_time)
         
@@ -890,12 +877,12 @@ async def main():
         reconciling_size_and_orders(
             sub_account_id,
             config_app,
-            2
+            1
             ),
         update_ohlc_and_market_condition(
             tradable_config_app, 
             15), 
-        back_up_db(60*10),
+        #back_up_db(60*10),
         clean_up_databases(5), 
         update_instruments(60),
         return_exceptions=True)
