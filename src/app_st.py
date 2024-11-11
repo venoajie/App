@@ -214,7 +214,7 @@ if __name__ == '__main__':
                 """
     st.markdown(hide_st_style, unsafe_allow_html=True)
 
-    data_ticker = asyncio.get_ticker()
+    data_ticker = asyncio.run(get_ticker())
     st.subheader("Ticker")
     st.dataframe(data_ticker)
     st.markdown("##")
