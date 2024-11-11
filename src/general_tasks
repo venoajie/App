@@ -887,9 +887,9 @@ async def main():
             config_app,
             1
             ),
-        update_ohlc_and_market_condition(
-            tradable_config_app, 
-            15), 
+        #update_ohlc_and_market_condition(
+        #    tradable_config_app, 
+        #    15), 
         #back_up_db(60*10),
         clean_up_databases(5), 
         update_instruments(60),
