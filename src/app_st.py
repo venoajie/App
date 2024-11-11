@@ -15,7 +15,7 @@ import asyncio
 from transaction_management.deribit.api_requests import get_tickers, get_currencies,get_instruments
 
 from utilities.string_modification import (
-    extract_currency_from_text,
+    remove_dict_elements,
     remove_double_brackets_in_list,
     remove_redundant_elements,)
 
@@ -135,15 +135,28 @@ async def get_ticker():
         instrument_ticker: list = await get_tickers(
         instrument_name
         )
-        log.error (instrument_ticker)
+        
+        elements_to_be_removed=["stats", "combo_state", "state","timestamp"]
+        
+        for element in elements_to_be_removed:
+        # remove unnecessary element
+            modified_dict = remove_dict_elements(
+                instrument_ticker,
+                "stats"
+                )
+        log.error (modified_dict)
         
         
-        ticker.append (instrument_ticker)
+        ticker.append (modified_dict)
 
     return (ticker)
 
 @st.experimental_fragment(run_every=2)
 async def rerun_ticker():
+    
+    """
+    https://st-experimental-fragment.streamlit.app/Job_status
+    """
 
     data_ticker = await (get_ticker())
     st.subheader("Ticker")
