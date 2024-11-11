@@ -138,11 +138,21 @@ async def get_ticker():
         
         elements_to_be_removed=["stats", "combo_state", "state","timestamp"]
         
-        for element in elements_to_be_removed:
-        # remove unnecessary element
-            modified_dict = remove_dict_elements(
+        modified_dict = remove_dict_elements(
                 instrument_ticker,
                 "stats"
+                )
+        modified_dict = remove_dict_elements(
+                modified_dict,
+                "combo_state"
+                )
+        modified_dict = remove_dict_elements(
+                modified_dict,
+                "state"
+                )
+        modified_dict = remove_dict_elements(
+                modified_dict,
+                "timetsamp"
                 )
         log.error (modified_dict)
         
