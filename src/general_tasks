@@ -677,6 +677,10 @@ async def reconciling_size_and_orders(
                     
                     sub_account_orders_instrument = [o["instrument_name"] for o in sub_account_orders ]
                     
+                    log.error (sub_account_orders_instrument)
+                    log.error (sub_account_orders)
+                    log.error (sub_account)
+                    
                         
                     # sources: sub account
                     if sub_account_orders_instrument:
