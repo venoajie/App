@@ -171,8 +171,15 @@ async def main():
     #st.dataframe(data["result"])
 
     try:
-        data = await get_db_table()
         st.title("Current ")
+        
+        
+        data_ticker = await get_ticker()
+        st.subheader("Ticker")
+        st.dataframe(data_ticker)
+        st.markdown("##")
+        
+        data = await get_db_table()
 
         data_order = await get_open_orders()
         st.title("Current ")
@@ -184,11 +191,6 @@ async def main():
 
         st.subheader("Positions")
         st.dataframe(data)
-        st.markdown("##")
-        
-        data_ticker = await get_ticker()
-        st.subheader("Ticker")
-        st.dataframe(data_ticker)
         st.markdown("##")
         
         left_column, right_column = st.columns(2)
