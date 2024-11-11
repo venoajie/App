@@ -174,7 +174,7 @@ async def rerun_ticker():
     st.markdown("##")
 
     st.caption(f"Last updated {datetime.datetime.now()}")        
-    st.rerun()
+    
 
 async def get_db_table():
                 
@@ -229,7 +229,7 @@ async def main():
             st.subheader("Open orders")
             st.dataframe (data_order)
     
-        await  rerun_ticker ()
+        st.rerun()
         
         
     except Exception as error:
