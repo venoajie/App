@@ -121,6 +121,8 @@ active_futures = futures_instruments["active_futures"]
 
 active_combo_perp = futures_instruments["active_combo_perp"]  
 
+
+@st.experimental_fragment(run_every=2)
 async def get_ticker():
                 
     
