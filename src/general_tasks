@@ -607,6 +607,8 @@ async def reconciling_size_and_orders(
             
             for currency in currencies:
                 
+                await modify_order_and_db. resupply_sub_accountdb(currency)
+
                 sub_account = reading_from_pkl_data(
                     "sub_accounts",
                     currency)
