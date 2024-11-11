@@ -560,6 +560,11 @@ async def reconciling_orders_based_on_sources(
             orders_currency
             )
         
+        log.error(instrument_name)
+        log.error(len_order_is_reconciled_each_other)
+        log.error(sub_account)
+
+        
         if not len_order_is_reconciled_each_other:
             log.warning (f"instrument_name {instrument_name} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
                         
@@ -671,6 +676,7 @@ async def reconciling_size_and_orders(
                     sub_account_orders = sub_account["open_orders"]
                     
                     sub_account_orders_instrument = [o["instrument_name"] for o in sub_account_orders ]
+                    
                         
                     # sources: sub account
                     if sub_account_orders_instrument:
