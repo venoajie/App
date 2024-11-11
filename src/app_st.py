@@ -133,7 +133,7 @@ async def get_ticker():
         
         instrument_name = combo["instrument_name"]
             
-        instrument_ticker: list = get_tickers(
+        instrument_ticker: list = await get_tickers(
         instrument_name
         )
         
