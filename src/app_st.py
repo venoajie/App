@@ -14,6 +14,12 @@ import httpx
 import asyncio
 from transaction_management.deribit.api_requests import get_tickers, get_currencies,get_instruments
 
+from utilities.string_modification import (
+    extract_currency_from_text,
+    remove_double_brackets_in_list,
+    remove_redundant_elements,)
+
+
 from utilities.pickling import (
     read_data,
     replace_data,)
@@ -72,6 +78,12 @@ async def get_instruments_from_deribit(currency) -> float:
 
     return result
 
+def get_settlement_period (strategy_attributes) -> list:
+    
+    return (remove_redundant_elements(
+        remove_double_brackets_in_list(
+            [o["settlement_period"]for o in strategy_attributes]))
+            )
 # registering strategy config file    
 file_toml = "config_strategies.toml"
 
