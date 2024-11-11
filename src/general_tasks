@@ -448,7 +448,7 @@ async def hedging_spot_currency(
                     )
                 
                 for order in orders_currency_strategy:
-                    cancel_allowed: dict = await modify_order_and_db.is_cancelling_orders_allowed(
+                    cancel_allowed: dict = await hedging.is_cancelling_orders_allowed(
                         order,
                         orders_currency_strategy,
                         server_time,
