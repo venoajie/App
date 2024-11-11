@@ -174,11 +174,6 @@ async def main():
         st.title("Current ")
         
         
-        data_ticker = await get_ticker()
-        st.subheader("Ticker")
-        st.dataframe(data_ticker)
-        st.markdown("##")
-        
         data = await get_db_table()
 
         data_order = await get_open_orders()
@@ -218,5 +213,10 @@ if __name__ == '__main__':
                 </style>
                 """
     st.markdown(hide_st_style, unsafe_allow_html=True)
+
+    data_ticker = asyncio.get_ticker()
+    st.subheader("Ticker")
+    st.dataframe(data_ticker)
+    st.markdown("##")
     
     asyncio.run(main())
