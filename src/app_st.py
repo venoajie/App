@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import os
 import tomli
-
+import datetime
 from loguru import logger as log
 import streamlit as st
 import httpx
@@ -122,7 +122,6 @@ active_futures = futures_instruments["active_futures"]
 active_combo_perp = futures_instruments["active_combo_perp"]  
 
 
-@st.experimental_fragment(run_every=2)
 async def get_ticker():
     
     log.critical("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
@@ -141,7 +140,18 @@ async def get_ticker():
         
         ticker.append (instrument_ticker)
 
+    st.caption(f"Last updated {datetime.datetime.now()}")
     return (ticker)
+
+@st.experimental_fragment(run_every=2)
+async def rerun_ticker():
+
+    data_ticker = await (get_ticker())
+    st.subheader("Ticker")
+    st.dataframe(data_ticker)
+    st.markdown("##")
+        
+    st.rerun()
 
 async def get_db_table():
                 
@@ -214,9 +224,4 @@ if __name__ == '__main__':
                 """
     st.markdown(hide_st_style, unsafe_allow_html=True)
 
-    data_ticker = asyncio.run(get_ticker())
-    st.subheader("Ticker")
-    st.dataframe(data_ticker)
-    st.markdown("##")
-    
     asyncio.run(main())
