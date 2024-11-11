@@ -490,8 +490,6 @@ async def hedging_spot_currency(
                         
                         await sleep_and_restart ()
                     
-                    
-
                 if my_trades_currency_strategy_open !=[]:
                                                                                                 
                     best_bid_prc: float = perpetual_ticker["best_bid_price"]
@@ -537,10 +535,10 @@ async def hedging_spot_currency(
             log.debug (f"strategy {strategy}-DONE")
     
     except Exception as error:
-        await async_raise_error_message(error)
         await telegram_bot_sendtext (
                     error,
                     "general_error")
+        await async_raise_error_message(error)
                 
 
 
