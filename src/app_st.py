@@ -124,6 +124,8 @@ active_combo_perp = futures_instruments["active_combo_perp"]
 
 @st.experimental_fragment(run_every=2)
 async def get_ticker():
+    
+    log.critical("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 
     
     ticker = []
@@ -168,35 +170,39 @@ async def main():
     #data = await fetch_data('https://www.deribit.com/api/v2/public/ticker?instrument_name=BTC-PERPETUAL')
     #st.dataframe(data["result"])
 
-    data = await get_db_table()
-    st.title("Current ")
+    try:
+        data = await get_db_table()
+        st.title("Current ")
 
-    data_order = await get_open_orders()
-    st.title("Current ")
-    
-    st.header("Current Positions")
-    st.table()
-    
-    st.markdown("""---""")
-
-    st.subheader("Positions")
-    st.dataframe(data)
-    st.markdown("##")
-    
-    data_ticker = await get_ticker()
-    st.subheader("Ticker")
-    st.dataframe(data_ticker)
-    st.markdown("##")
-    
-    left_column, right_column = st.columns(2)
+        data_order = await get_open_orders()
+        st.title("Current ")
         
-    with left_column:
-        st.subheader("Trades")
-        st.dataframe (data)
-    with right_column:
-        st.subheader("Open orders")
-        st.dataframe (data_order)
+        st.header("Current Positions")
+        st.table()
+        
+        st.markdown("""---""")
+
+        st.subheader("Positions")
+        st.dataframe(data)
+        st.markdown("##")
+        
+        data_ticker = await get_ticker()
+        st.subheader("Ticker")
+        st.dataframe(data_ticker)
+        st.markdown("##")
+        
+        left_column, right_column = st.columns(2)
+            
+        with left_column:
+            st.subheader("Trades")
+            st.dataframe (data)
+        with right_column:
+            st.subheader("Open orders")
+            st.dataframe (data_order)
     
+    except Exception as error:
+        await async_raise_error_message(error)
+        
 if __name__ == '__main__':
     
     st.set_page_config(page_title="Sales Dashboard", page_icon=":bar_chart:", layout="wide")
