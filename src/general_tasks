@@ -901,12 +901,11 @@ async def main():
         return_exceptions=True)
     
     except Exception as error:
-        raise_error_message(
-        error, 
-        "app"
-        )
-     
-    
+        await telegram_bot_sendtext (
+                    error,
+                    "general_error")
+        await async_raise_error_message(error)
+                
 if __name__ == "__main__":
     
     try:
