@@ -156,39 +156,6 @@ async def get_instruments_from_deribit(currency) -> float:
 
     return result
 
-async def regular_db_update(
-    sub_account_id: str,
-    count: int,
-    idle_time: float
-    )-> None:
-
-    try:
-        
-        while True:
-
-            get_currencies_all = await get_currencies_from_deribit()
-            currencies = [o["currency"] for o in get_currencies_all["result"]]
-            
-            modify_order_and_db = ModifyOrderDb(sub_account_id)
-
-            for currency in currencies:
-
-
-                await modify_order_and_db.resupply_sub_accountdb (currency)
-
-                await modify_order_and_db.resupply_portfolio (currency)
-
-                await modify_order_and_db.resupply_transaction_log(
-                    currency, 
-                    transaction_log_trading,
-                    instrument_name,
-                    count)
-            
-            await asyncio.sleep(idle_time)
-
-    except Exception as error:
-        await async_raise_error_message(error)
-
 async def clean_up_databases(idle_time) -> None:
     """ """
 
@@ -478,10 +445,19 @@ async def hedging_spot_currency(
                     my_trades_currency_strategy,
                     TA_result_data,
                     index_price,
-                    server_time
                     )
                 
-                send_order: dict = await hedging.is_send_and_cancel_open_order_allowed(
+                for order in orders_currency_strategy:
+                    cancel_allowed: dict = await modify_order_and_db.is_cancelling_orders_allowed(
+                        order,
+                        orders_currency_strategy,
+                        server_time,
+                        )
+                    
+                    if cancel_allowed["cancel_allowed"]:
+                        await modify_order_and_db.if_cancel_is_true(cancel_allowed)
+                    
+                send_order: dict = await hedging.is_send_open_order_allowed(
                     non_checked_strategies,
                     instrument_ticker,
                     active_futures,
@@ -514,7 +490,7 @@ async def hedging_spot_currency(
                         
                         await sleep_and_restart ()
                     
-                    await modify_order_and_db.if_cancel_is_true(send_order)
+                    
 
                 if my_trades_currency_strategy_open !=[]:
                                                                                                 
@@ -558,8 +534,6 @@ async def hedging_spot_currency(
 
                         await sleep_and_restart ()
                         
-                    await modify_order_and_db.if_cancel_is_true(send_closing_order)
-    
             log.debug (f"strategy {strategy}-DONE")
     
     except Exception as error:

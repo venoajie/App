@@ -131,40 +131,33 @@ def get_timing_factor(
     )
 
 
-def is_cancelling_order_allowed(
+def check_if_minimum_waiting_time_has_passed(
     strong_bullish: bool,
     bullish: bool,
     threshold: float,
-    len_orders: int,
-    open_orders_label_strategy: dict,
+    timestamp: int,
     server_time: int,
 ) -> bool:
     """ """
 
     cancel_allowed: bool = False
 
-    if len_orders != [] \
-        and len_orders > 0:
-
-        time_interval = get_timing_factor(
-            strong_bullish,
-            bullish, 
-            threshold)
-
-        max_tstamp_orders: int = get_max_time_stamp(open_orders_label_strategy)
-        
-        minimum_waiting_time_has_passed: bool = is_minimum_waiting_time_has_passed(
-            server_time,
-            max_tstamp_orders, 
-            time_interval
-        )
-        
-        log.warning (f"minimum_waiting_time_has_passed {minimum_waiting_time_has_passed} time_interval {time_interval}")
-        log.warning (f"server_time {server_time} max_tstamp_orders {max_tstamp_orders}")
-        log.warning (f"open_orders_label_strategy {server_time} max_tstamp_orders {open_orders_label_strategy}")
-        
-        if minimum_waiting_time_has_passed:
-            cancel_allowed: bool = True
+    time_interval = get_timing_factor(
+        strong_bullish,
+        bullish, 
+        threshold)
+    
+    minimum_waiting_time_has_passed: bool = is_minimum_waiting_time_has_passed(
+        server_time,
+        timestamp, 
+        time_interval
+    )
+    
+    log.warning (f"minimum_waiting_time_has_passed {minimum_waiting_time_has_passed} time_interval {time_interval}")
+    log.warning (f"server_time {server_time} max_tstamp_orders {timestamp}")
+    
+    if minimum_waiting_time_has_passed:
+        cancel_allowed: bool = True
 
     return cancel_allowed
 
@@ -240,7 +233,6 @@ class HedgingSpot(BasicStrategy):
     my_trades_currency_strategy: int
     TA_result_data: list
     index_price: float
-    server_time: int
     sum_my_trades_currency_strategy: int= fields 
     over_hedged_opening: bool= fields 
     over_hedged_closing: bool= fields 
@@ -248,13 +240,15 @@ class HedgingSpot(BasicStrategy):
 
     def __post_init__(self):
         self.sum_my_trades_currency_strategy =  get_transactions_sum (self.my_trades_currency_strategy)   
-        self.over_hedged_opening = current_hedge_position_exceed_max_position (self.sum_my_trades_currency_strategy, 
-                                                                         self.notional)        
-        
+        self.over_hedged_opening = current_hedge_position_exceed_max_position (
+            self.sum_my_trades_currency_strategy, 
+            self.notional
+            )        
         self.over_hedged_closing = self.sum_my_trades_currency_strategy > 0       
-    
-        self.max_position =  (abs(self.notional) + self.sum_my_trades_currency_strategy) * -1 if self.over_hedged_closing\
-            else self.notional
+        self.max_position =  (abs(self.notional) \
+            + self.sum_my_trades_currency_strategy) * -1 \
+                if self.over_hedged_closing\
+                    else self.notional
             
     def get_basic_params(self) -> dict:
         """ """
@@ -276,7 +270,7 @@ class HedgingSpot(BasicStrategy):
         non_checked_strategies,
         instrument_name,
         futures_instruments,
-        open_orders_label_strategy,
+        open_orders_label,
         market_condition,
         params,
         SIZE_FACTOR,
@@ -307,7 +301,7 @@ class HedgingSpot(BasicStrategy):
                                         self.max_position, 
                                         SIZE_FACTOR)
 
-            sum_orders: int = get_transactions_sum(open_orders_label_strategy)
+            sum_orders: int = get_transactions_sum(open_orders_label)
             
             size_and_order_appropriate_for_ordering: bool = (
                 are_size_and_order_appropriate (
@@ -404,16 +398,133 @@ class HedgingSpot(BasicStrategy):
         return order_allowed
 
 
-    async def cancelling_order (self) -> None:
+    async def cancelling_orders (
+        self,
+        transaction: dict,
+        orders_currency_strategy: list,
+        server_time: int
+    ) -> bool:
+        
         """ """
-        pass
+                
+        cancel_allowed: bool = False
+        
+        ONE_SECOND = 1000
+        ONE_MINUTE = ONE_SECOND * 60
+
+        hedging_attributes: dict = self.strategy_parameters
+        
+        threshold_market_condition: float = hedging_attributes ["delta_price_pct"]
+        
+        waiting_minute_before_cancel= hedging_attributes["waiting_minute_before_cancel"] * ONE_MINUTE
+
+        market_condition: dict = await get_market_condition_hedging(
+            self.TA_result_data,
+            self.index_price,
+            threshold_market_condition
+            )
+        
+        bullish, strong_bullish = market_condition["rising_price"], market_condition["strong_rising_price"]
+
+        bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
+        #neutral = market_condition["neutral_price"]
+        
+        timestamp: int = transaction["timestamp"]
+
+        if "open" in transaction:
+
+            open_size_not_over_bought  =  self.over_hedged_opening
+                    
+            if not open_size_not_over_bought:            
+                
+                open_orders_label: list=  [o for o in orders_currency_strategy if "open" in o["label"]]
+                        
+                len_open_orders: int = get_transactions_len(open_orders_label)
+        
+                #Only one open order a time
+                if len_open_orders > 1:
+                    cancel_allowed = True
+
+                else:
+                                
+                    cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
+                        strong_bearish,
+                        bearish,
+                        waiting_minute_before_cancel,
+                        timestamp,
+                        server_time,
+                    )
+
+            # cancel any orders when overhedged
+            else:
+                
+                if len_open_orders > 0:
+                    cancel_allowed = True
+        
+        if "closed" in transaction:
+
+            exit_size_not_over_bought = net_size_not_over_bought (
+                self.my_trades_currency_strategy,
+                transaction
+                )
+            
+            if exit_size_not_over_bought:
+                            
+                closed_orders_label: list = [o for o in orders_currency_strategy if "closed" in (o["label"]) ]
+                        
+                len_closed_orders: int = get_transactions_len(closed_orders_label)
+                
+                #log.warning (f"""bid_price {bid_price} transaction ["price"] {transaction ["price"]}""")
+                        
+                if len_closed_orders> 1:   
+                    cancel_allowed = True       
+                    
+                else:          
+                    
+                    cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
+                        strong_bullish,
+                        bullish,
+                        waiting_minute_before_cancel,
+                        timestamp,
+                        server_time,
+                        )
+                    
+            # cancel any orders when overhedged
+            else:
+                
+                cancel_allowed = True
+        
+        return cancel_allowed
     
 
     async def modifying_order (self) -> None:
         """ """
         pass
     
-    async def is_send_and_cancel_open_order_allowed(
+    async def is_cancelling_orders_allowed(
+        self,
+        selected_transaction: list,
+        orders_currency_strategy: list,
+        server_time: int,
+        ) -> dict:
+        """ """
+        
+        cancel_allowed, cancel_id = False, None
+        
+        cancel_allowed = await self.cancelling_orders (
+            selected_transaction,
+            orders_currency_strategy,
+            server_time
+            )     
+           
+        if cancel_allowed:
+            cancel_id =  selected_transaction["order_id"] 
+            
+        return dict(
+            cancel_allowed = cancel_allowed,
+            cancel_id = cancel_id)
+
+    async def is_send_open_order_allowed(
         self,
         non_checked_strategies,
         instrument_name: str,
@@ -423,11 +534,11 @@ class HedgingSpot(BasicStrategy):
     ) -> dict:
         """ """
         
-        order_allowed, cancel_allowed, cancel_id = False, False, None
+        order_allowed = False
         
-        open_orders_label_strategy: list=  [o for o in orders_currency_strategy if "open" in o["label"]]
+        open_orders_label: list=  [o for o in orders_currency_strategy if "open" in o["label"]]
         
-        len_open_orders: int = get_transactions_len(open_orders_label_strategy)
+        len_open_orders: int = get_transactions_len(open_orders_label)
         
         hedging_attributes= self.strategy_parameters
         
@@ -447,62 +558,32 @@ class HedgingSpot(BasicStrategy):
         params: dict = self.get_basic_params().get_basic_opening_parameters(ask_price)
         
         weighted_factor= hedging_attributes["weighted_factor"]
-        
 
-        ONE_SECOND = 1000
-        ONE_MINUTE = ONE_SECOND * 60
-
-        waiting_minute_before_cancel= hedging_attributes["waiting_minute_before_cancel"] * ONE_MINUTE
-
-        over_hedged  =  self.over_hedged_opening
-        
         log.warning (f"bearish {bearish}  strong_bearish {strong_bearish}" )
         log.debug (f"len_orders == 0 {len_open_orders} {len_open_orders == 0} sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} not over_hedged {not self.over_hedged_opening}" )
         
         SIZE_FACTOR = get_waiting_time_factor(weighted_factor, strong_bearish, bearish)
     
-        if not over_hedged:            
+        order_allowed: bool = self. opening_position (
+            non_checked_strategies,
+            instrument_name,
+            futures_instruments,
+            open_orders_label,
+            market_condition,
+            params,
+            SIZE_FACTOR,
+            len_open_orders
+            )
             
-            if len_open_orders > 1:
-                cancel_allowed = True
-
-            else:
-                
-                order_allowed: bool = self. opening_position (non_checked_strategies,
-                                                              instrument_name,
-                                                              futures_instruments,
-                                                              open_orders_label_strategy,
-                                                              market_condition,
-                                                              params,
-                                                              SIZE_FACTOR,
-                                                              len_open_orders)
-            
-                cancel_allowed: bool = is_cancelling_order_allowed(
-                    strong_bearish,
-                    bearish,
-                    waiting_minute_before_cancel,
-                    len_open_orders,
-                    open_orders_label_strategy,
-                    self.server_time,
-                )
-
-        else:
-            
-            if len_open_orders > 0:
-                cancel_allowed = True
-
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
             order_parameters=[] if not order_allowed else params,
-            cancel_allowed=cancel_allowed,
-            cancel_id= None if not cancel_allowed \
-            else get_order_id_max_time_stamp(open_orders_label_strategy)
         )
 
 
     async def is_send_exit_order_allowed(
         self,
-        orders_currency_strategy_label_closed,
+        closed_orders_label,
         bid_price: float,
         selected_transaction: list,
     ) -> dict:
@@ -549,7 +630,7 @@ class HedgingSpot(BasicStrategy):
 
             bullish, strong_bullish = market_condition["rising_price"], market_condition["strong_rising_price"]
 
-            len_orders: int = get_transactions_len(orders_currency_strategy_label_closed)
+            len_orders: int = get_transactions_len(closed_orders_label)
             
             ONE_SECOND = 1000
             ONE_MINUTE = ONE_SECOND * 60
@@ -558,7 +639,7 @@ class HedgingSpot(BasicStrategy):
                 
             exit_params: dict = self.get_basic_params(). get_basic_closing_paramaters (
                 selected_transaction,
-                orders_currency_strategy_label_closed,
+                closed_orders_label,
                 )
 
             log.warning (f"sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} over_hedged_opening {self.over_hedged_opening} len_orders == 0 {len_orders == 0}")
@@ -574,22 +655,12 @@ class HedgingSpot(BasicStrategy):
                 bid_price,
                 )
             
-            if len_orders> 0:          
-                
-                cancel_allowed: bool = is_cancelling_order_allowed(
-                    strong_bullish,
-                    bullish,
-                    waiting_minute_before_cancel,
-                    len_orders,
-                    orders_currency_strategy_label_closed,
-                    self.server_time,)
-                
-                basic_size = get_transaction_size(transaction)
+            if len_orders> 0:                  basic_size = get_transaction_size(transaction)
                 side = provide_side_to_close_transaction(transaction)
                 label_integer_open = get_label_integer(transaction ["label"])
                 
                 sum_order_under_closed_label = sum_order_under_closed_label_int (
-                    orders_currency_strategy_label_closed,
+                    closed_orders_label,
                     label_integer_open
                     )
                             
@@ -611,7 +682,7 @@ class HedgingSpot(BasicStrategy):
                     cancel_allowed = True
                 
                 if cancel_allowed:
-                    cancel_id= min ([o["order_id"] for o in orders_currency_strategy_label_closed])  
+                    cancel_id= min ([o["order_id"] for o in closed_orders_label])  
             
         return dict(
             order_allowed= order_allowed,
