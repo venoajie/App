@@ -121,22 +121,23 @@ active_futures = futures_instruments["active_futures"]
 
 active_combo_perp = futures_instruments["active_combo_perp"]  
 
-ticker = []
-for combo in active_combo_perp:
+async def get_ticker():
+                
     
-    instrument_name = combo["instrument_name"]
-    
-    log.debug (instrument_name)
-    
-    instrument_ticker: list = reading_from_pkl_data(
-    "ticker",
-    instrument_name
-    )
-    
-    
-    ticker.append (instrument_ticker)
+    ticker = []
+    for combo in active_combo_perp:
+        
+        instrument_name = combo["instrument_name"]
+            
+        instrument_ticker: list = reading_from_pkl_data(
+        "ticker",
+        instrument_name
+        )
+        
+        
+        ticker.append (instrument_ticker)
 
-log.error (ticker)
+    return (ticker)
 
 async def get_db_table():
                 
@@ -178,6 +179,11 @@ async def main():
 
     st.subheader("Positions")
     st.dataframe(data)
+    st.markdown("##")
+    
+    data_ticker = await get_ticker()
+    st.subheader("Ticker")
+    st.dataframe(data_ticker)
     st.markdown("##")
     
     left_column, right_column = st.columns(2)
