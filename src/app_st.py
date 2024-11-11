@@ -152,7 +152,7 @@ async def get_ticker():
                 )
         modified_dict = remove_dict_elements(
                 modified_dict,
-                "timetsamp"
+                "timestamp"
                 )
         log.error (modified_dict)
         
