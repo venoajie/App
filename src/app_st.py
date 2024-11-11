@@ -140,7 +140,6 @@ async def get_ticker():
         
         ticker.append (instrument_ticker)
 
-    st.caption(f"Last updated {datetime.datetime.now()}")
     return (ticker)
 
 @st.experimental_fragment(run_every=2)
@@ -150,7 +149,8 @@ async def rerun_ticker():
     st.subheader("Ticker")
     st.dataframe(data_ticker)
     st.markdown("##")
-        
+
+    st.caption(f"Last updated {datetime.datetime.now()}")        
     st.rerun()
 
 async def get_db_table():
@@ -182,6 +182,8 @@ async def main():
 
     try:
         st.title("Current ")
+        
+        await  rerun_ticker ()
         
         
         data = await get_db_table()
