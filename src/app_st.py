@@ -183,9 +183,6 @@ async def main():
     try:
         st.title("Current ")
         
-        await  rerun_ticker ()
-        
-        
         data = await get_db_table()
 
         data_order = await get_open_orders()
@@ -209,6 +206,9 @@ async def main():
             st.subheader("Open orders")
             st.dataframe (data_order)
     
+        await  rerun_ticker ()
+        
+        
     except Exception as error:
         await async_raise_error_message(error)
         
