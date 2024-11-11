@@ -120,8 +120,12 @@ futures_instruments= get_futures_instruments (currencies,
 active_futures = futures_instruments["active_futures"]   
 
 active_combo_perp = futures_instruments["active_combo_perp"]  
-
-for instrument_name in active_combo_perp:
+log.warning (active_combo_perp)
+for combo in active_combo_perp:
+    
+    instrument_name = combo["instrument_name"]
+    
+    log.debug (instrument_name)
     
     perpetual_ticker: list = reading_from_pkl_data(
     "ticker",
