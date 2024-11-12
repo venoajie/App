@@ -10,29 +10,26 @@ from dataclassy import dataclass, fields
 from strategies.basic_strategy import (
     BasicStrategy,
     are_size_and_order_appropriate,
-    check_if_next_closing_size_will_not_exceed_the_original,
     delta_pct,
     ensure_sign_consistency,
-    get_max_time_stamp,
-    get_order_id_max_time_stamp,
-    get_transaction_size,
     is_label_and_side_consistent,
     is_minimum_waiting_time_has_passed,
-    provide_side_to_close_transaction,
-    provide_size_to_close_transaction,
-    size_rounding,
-    sum_order_under_closed_label_int,)
+    size_rounding,)
 from utilities.string_modification import (
     parsing_label)
 
 
 def get_transactions_len(result_strategy_label) -> int:
     """ """
-    return 0 if result_strategy_label == [] else len([o for o in result_strategy_label])
+    return 0\
+        if result_strategy_label == [] \
+            else len([o for o in result_strategy_label])
 
 def get_transactions_sum(result_strategy_label) -> int:
     """ """
-    return 0 if result_strategy_label == [] else sum([o["amount"] for o in result_strategy_label])
+    return 0 \
+        if result_strategy_label == [] \
+            else sum([o["amount"] for o in result_strategy_label])
 
 
 def get_label_integer(label: dict) -> bool:
@@ -59,7 +56,9 @@ def determine_opening_size(
     """ """
     sign = ensure_sign_consistency(side)
     
-    proposed_size= max(1, int(abs(max_position) * factor)) 
+    proposed_size= max(
+        1,
+        int(abs(max_position) * factor)) 
     
     return size_rounding(
         instrument_name,
@@ -77,9 +76,13 @@ def get_waiting_time_factor(
 
     ONE_PCT = 1 / 100
     
-    BEARISH_FACTOR = weighted_factor["extreme"] * ONE_PCT if strong_fluctuation else weighted_factor["medium"]  * ONE_PCT
+    BEARISH_FACTOR = weighted_factor["extreme"] * ONE_PCT \
+        if strong_fluctuation \
+            else weighted_factor["medium"]  * ONE_PCT
 
-    return BEARISH_FACTOR if (strong_fluctuation or some_fluctuation) else ONE_PCT
+    return BEARISH_FACTOR \
+        if (strong_fluctuation or some_fluctuation)\
+            else ONE_PCT
 
 
 def is_hedged_value_to_notional_exceed_threshold(
@@ -88,7 +91,10 @@ def is_hedged_value_to_notional_exceed_threshold(
     threshold: float
     ) -> float:
     """ """
-    return hedged_value_to_notional(notional, hedged_value) > threshold
+    return hedged_value_to_notional(
+        notional, 
+        hedged_value
+        ) > threshold
 
 
 def max_order_stack_has_not_exceeded(
@@ -100,7 +106,8 @@ def max_order_stack_has_not_exceeded(
         max_order = True
         
     else:
-        max_order = True if len_orders == 0 else False
+        max_order = True \
+            if len_orders == 0 else False
     
     return max_order
 
@@ -121,13 +128,15 @@ def get_timing_factor(
     ONE_MINUTE: int = 60000
 
     bearish_interval_threshold = (
-        (threshold * ONE_PCT * 30) if strong_bearish else (threshold * ONE_PCT * 60)
+        (threshold * ONE_PCT * 30) \
+            if strong_bearish \
+                else (threshold * ONE_PCT * 60)
     )
 
     return (
         ONE_MINUTE * bearish_interval_threshold
-        if (strong_bearish or bearish)
-        else ONE_MINUTE *  threshold
+        if (strong_bearish or bearish)\
+            else ONE_MINUTE *  threshold
     )
 
 
@@ -162,12 +171,18 @@ def check_if_minimum_waiting_time_has_passed(
     return cancel_allowed
 
 
-async def get_market_condition_hedging(TA_result_data, index_price, threshold) -> dict:
+async def get_market_condition_hedging(
+    TA_result_data, 
+    index_price, 
+    threshold
+    ) -> dict:
+    
     """ """
     neutral_price, rising_price, falling_price = False, False, False
     strong_rising_price, strong_falling_price = False, False
     
-    TA_data=[o for o in TA_result_data if o["tick"] == max([i["tick"] for i in TA_result_data])][0]
+    TA_data=[o for o in TA_result_data \
+        if o["tick"] == max([i["tick"] for i in TA_result_data])][0]
 
     open_60 = TA_data["60_open"]
 
@@ -215,15 +230,17 @@ def net_size_of_label (
     
     label_integer = get_label_integer (transaction["label"])
     
-    return sum([o["amount"] for o in my_trades_currency_strategy if str(label_integer) in o["label"]])
+    return sum([o["amount"] for o in my_trades_currency_strategy \
+        if str(label_integer) in o["label"]])
     
         
 def net_size_not_over_bought (
     my_trades_currency_strategy: list, 
     transaction: list) -> bool:
     """ """
-    return net_size_of_label (my_trades_currency_strategy, 
-                              transaction) < 0
+    return net_size_of_label (
+        my_trades_currency_strategy, 
+        transaction) < 0
 
 @dataclass(unsafe_hash=True, slots=True)
 class HedgingSpot(BasicStrategy):
@@ -252,8 +269,10 @@ class HedgingSpot(BasicStrategy):
             
     def get_basic_params(self) -> dict:
         """ """
-        return BasicStrategy(self.strategy_label, 
-                             self.strategy_parameters)
+        return BasicStrategy(
+            self.strategy_label,
+            self.strategy_parameters
+            )
 
     async def understanding_the_market (
         self, 
@@ -279,8 +298,6 @@ class HedgingSpot(BasicStrategy):
 
         order_allowed: bool = False
         
-        #log.critical (f"len_orders {len_orders} {len_orders == 0}")
-
         if len_orders == 0:
             #bullish = market_condition["rising_price"]
             bearish = market_condition["falling_price"]
@@ -321,8 +338,9 @@ class HedgingSpot(BasicStrategy):
             
             if order_allowed :
                 
-                label_and_side_consistent= is_label_and_side_consistent(non_checked_strategies,
-                                                                        params)
+                label_and_side_consistent= is_label_and_side_consistent(
+                    non_checked_strategies,
+                    params)
                 
                 if label_and_side_consistent:# and not order_has_sent_before:
                     
@@ -378,15 +396,15 @@ class HedgingSpot(BasicStrategy):
         
             else:
             
-                size = exit_params["size"]      
-                #log.info (f"exit_params {exit_params}")
-                #order_allowed: bool = True if size != 0 else False
+                size = exit_params["size"]   
                 
                 if size != 0 :
                     
-                    if (bullish and  bid_price_is_lower ) or strong_bullish :
+                    if (bullish and  bid_price_is_lower ) \
+                        or strong_bullish :
                     
-                        if (False if size == 0 else True) and len_orders == 0:# and max_order:
+                        if (False if size == 0 else True) \
+                            and len_orders == 0:# and max_order:
                             
                             exit_params.update({"entry_price": bid_price})
                                 
@@ -443,6 +461,7 @@ class HedgingSpot(BasicStrategy):
         
                 #Only one open order a time
                 if len_open_orders > 1:
+                    
                     cancel_allowed = True
 
                 else:
@@ -459,6 +478,7 @@ class HedgingSpot(BasicStrategy):
             else:
                 
                 if len_open_orders > 0:
+                    
                     cancel_allowed = True
         
         if "closed" in transaction:
@@ -470,13 +490,15 @@ class HedgingSpot(BasicStrategy):
             
             if exit_size_not_over_bought:
                             
-                closed_orders_label: list = [o for o in orders_currency_strategy if "closed" in (o["label"]) ]
+                closed_orders_label: list = [o for o in orders_currency_strategy\
+                    if "closed" in (o["label"]) ]
                         
                 len_closed_orders: int = get_transactions_len(closed_orders_label)
                 
                 #log.warning (f"""bid_price {bid_price} transaction ["price"] {transaction ["price"]}""")
                         
                 if len_closed_orders> 1:   
+                    
                     cancel_allowed = True       
                     
                 else:          
@@ -536,7 +558,8 @@ class HedgingSpot(BasicStrategy):
         
         order_allowed = False
         
-        open_orders_label: list=  [o for o in orders_currency_strategy if "open" in o["label"]]
+        open_orders_label: list=  [o for o in orders_currency_strategy \
+            if "open" in o["label"]]
         
         len_open_orders: int = get_transactions_len(open_orders_label)
         
@@ -544,9 +567,11 @@ class HedgingSpot(BasicStrategy):
         
         threshold_market_condition= hedging_attributes ["delta_price_pct"]
         
-        market_condition = await get_market_condition_hedging(self.TA_result_data, 
-                                                            self.index_price, 
-                                                            threshold_market_condition)
+        market_condition = await get_market_condition_hedging(
+            self.TA_result_data, 
+            self.index_price, 
+            threshold_market_condition
+            )
 
         
         #bullish = market_condition["rising_price"]
@@ -562,7 +587,11 @@ class HedgingSpot(BasicStrategy):
         log.warning (f"bearish {bearish}  strong_bearish {strong_bearish}" )
         log.debug (f"len_orders == 0 {len_open_orders} {len_open_orders == 0} sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} not over_hedged {not self.over_hedged_opening}" )
         
-        SIZE_FACTOR = get_waiting_time_factor(weighted_factor, strong_bearish, bearish)
+        SIZE_FACTOR = get_waiting_time_factor(
+            weighted_factor, 
+            strong_bearish,
+            bearish
+            )
     
         order_allowed: bool = self. opening_position (
             non_checked_strategies,
@@ -577,7 +606,9 @@ class HedgingSpot(BasicStrategy):
             
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
-            order_parameters=[] if not order_allowed else params,
+            order_parameters=[] \
+                if not order_allowed \
+                    else params,
         )
 
 
@@ -639,8 +670,6 @@ class HedgingSpot(BasicStrategy):
 
             log.warning (f"sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} over_hedged_opening {self.over_hedged_opening} len_orders == 0 {len_orders == 0}")
             
-            #log.warning (f"""bid_price {bid_price} transaction ["price"] {transaction ["price"]}""")
-                    
             order_allowed = self. closing_position (
                 transaction,
                 exit_params,
