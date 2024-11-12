@@ -42,7 +42,8 @@ from utilities.string_modification import (
 from utilities.system_tools import (
     async_raise_error_message,
     provide_path_for_file,
-    raise_error_message)
+    raise_error_message,
+    sleep_and_restart,)
 from websocket_management.ws_management import (
     get_futures_instruments,
     )
@@ -411,7 +412,7 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     archive_db_table= f"my_trades_all_{currency_lower}_json"
                                     
-                                    transaction_log_trading= f"transaction_log_{currency_lower}_json"
+                                    transaction_log_trading_table= f"transaction_log_{currency_lower}_json"
 
                                     update_cached_ticker_data(
                                         instrument_name_perpetual,
@@ -444,7 +445,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                     log.info (f"instrument_name {instrument_name_perpetual} {currency}")   
                                     
-                                    transaction_log_trading= f"transaction_log_{currency_lower}_json"
+                                    transaction_log_trading_table= f"transaction_log_{currency_lower}_json"
                                     
                                     if sub_account \
                                         and "ETH" not in currency_upper:
@@ -453,7 +454,7 @@ class RunningStrategy(ModifyOrderDb):
                                             currency,
                                             order_db_table, 
                                             trade_db_table,
-                                            transaction_log_trading,)
+                                            transaction_log_trading_table,)
                                         
                                         my_trades_currency: list= result_from_db_queries["my_trades_currency"]
                                                                                         
@@ -545,6 +546,31 @@ class RunningStrategy(ModifyOrderDb):
                                                         send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (label,
                                                                                                                                            tp_threshold)
                                                         log.error (f"send_closing_order {send_closing_order}")
+                                                        
+                                                        if send_closing_order["order_allowed"]:
+                                                            
+                                                            instrument_name = send_closing_order["order_parameters"]["instrument_name"]
+                                                                                                
+                                                            result_order = await self.modify_order_and_db.if_order_is_true(
+                                                                non_checked_strategies,
+                                                                send_closing_order, 
+                                                                instrument_name,
+                                                                )
+                                                            
+                                                            if result_order:
+                                                                log.error (f"result_order {result_order}")
+                                                                data_orders = result_order["result"]
+
+                                                                await self.modify_order_and_db.update_user_changes_non_ws(
+                                                                    non_checked_strategies,
+                                                                    data_orders, 
+                                                                    currency, 
+                                                                    order_db_table,
+                                                                    trade_db_table, 
+                                                                    archive_db_table,
+                                                                    transaction_log_trading_table)
+
+                                                                await sleep_and_restart ()
                                                     
                                                     time.sleep(10)
 
@@ -577,7 +603,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 order_db_table,
                                                                 trade_db_table, 
                                                                 archive_db_table,
-                                                                transaction_log_trading)
+                                                                transaction_log_trading_table)
                                                             await sleep_and_restart ()
                                                             
                                                         for combo in active_combo_perp:

@@ -17,11 +17,17 @@ from utilities.string_modification import (
     parsing_label)
 from loguru import logger as log
 
-async def get_hlc_vol(window: int = 9, table: str = "ohlc1_eth_perp_json") -> list:
+async def get_hlc_vol(
+    window: int = 9, 
+    table: str = "ohlc1_eth_perp_json"
+    ) -> list:
     """ """
 
     # get query for close price
-    get_ohlc_query = querying_hlc_vol(table, window)
+    get_ohlc_query = querying_hlc_vol(
+        table, 
+        window
+        )
 
     # executing query above
     ohlc_all = await executing_query_with_return(get_ohlc_query)
@@ -30,12 +36,18 @@ async def get_hlc_vol(window: int = 9, table: str = "ohlc1_eth_perp_json") -> li
     return ohlc_all
 
 async def get_price_ohlc(
-    price: str = "close", window: int = 100, table: str = "ohlc1_eth_perp_json"
-) -> list:
+    price: str = "close", 
+    window: int = 100,
+    table: str = "ohlc1_eth_perp_json"
+    ) -> list:
     """ """
 
     # get query for close price
-    get_ohlc_query = querying_ohlc_price_vol(price, table, window)
+    get_ohlc_query = querying_ohlc_price_vol(
+        price,
+        table,
+        window
+        )
 
     # executing query above
     ohlc_all = await executing_query_with_return(get_ohlc_query)
@@ -44,22 +56,34 @@ async def get_price_ohlc(
 
 
 async def cleaned_up_ohlc(
-    price: str = "close", window: int = 100, table: str = "ohlc1_eth_perp_json"
-) -> list:
+    price: str = "close", 
+    window: int = 100, 
+    table: str = "ohlc1_eth_perp_json"
+    ) -> list:
     """ """
 
     # get query for close price
-    ohlc_all = await get_price_ohlc(price, window, table)
+    ohlc_all = await get_price_ohlc(
+        price,
+        window, 
+        table
+        )
 
     # pick value only
     ohlc = [o[price] for o in ohlc_all]
 
     ohlc.reverse()
 
-    return dict(ohlc=ohlc[: window - 1], last_price=ohlc[-1:][0])
+    return dict(
+        ohlc=ohlc[: window - 1], 
+        last_price=ohlc[-1:][0]
+        )
 
 
-async def get_ema(ohlc, ratio: float = 0.9) -> dict:
+async def get_ema(
+    ohlc,
+    ratio: float = 0.9
+    ) -> dict:
     """
     https://stackoverflow.com/questions/488670/calculate-exponential-moving-average-in-python
     https://stackoverflow.com/questions/59294024/in-python-what-is-the-faster-way-to-calculate-an-ema-by-reusing-the-previous-ca
@@ -70,7 +94,10 @@ async def get_ema(ohlc, ratio: float = 0.9) -> dict:
     )
 
 
-async def get_vwap(ohlc_all, vwap_period) -> dict:
+async def get_vwap(
+    ohlc_all,
+    vwap_period
+    ) -> dict:
     """
     https://github.com/vishnugovind10/emacrossover/blob/main/emavwap1.0.py
     https://stackoverflow.com/questions/44854512/how-to-calculate-vwap-volume-weighted-average-price-using-groupby-and-apply
@@ -79,7 +106,11 @@ async def get_vwap(ohlc_all, vwap_period) -> dict:
     import numpy as np
     import pandas as pd
 
-    df = pd.DataFrame(ohlc_all, columns=["close", "volume"])
+    df = pd.DataFrame(
+        ohlc_all, 
+        columns=["close", 
+                 "volume"]
+        )
 
     return (
         df["volume"]
@@ -88,8 +119,10 @@ async def get_vwap(ohlc_all, vwap_period) -> dict:
     )
 
 
-def positions_and_orders(current_size: int, 
-                             current_orders_size: int) -> int:
+def positions_and_orders(
+    current_size: int, 
+    current_orders_size: int
+    ) -> int:
     """ """
 
     return current_size + current_orders_size
@@ -102,11 +135,14 @@ def ensure_sign_consistency(side) -> float:
 def proforma_size(
     current_size: int, current_orders_size: int, 
     next_orders_size: int
-) -> int:
+    ) -> int:
     """ """
 
     return (
-        positions_and_orders(current_size, current_orders_size) + next_orders_size #the sign is +
+        positions_and_orders(
+            current_size, 
+            current_orders_size
+            ) + next_orders_size #the sign is +
     )
 
 def are_size_and_order_appropriate(
@@ -121,7 +157,12 @@ def are_size_and_order_appropriate(
     for add: current position
     """
     
-    proforma  = proforma_size(current_size_or_open_position, current_orders_size, next_orders_size) 
+    proforma  = proforma_size(
+        current_size_or_open_position, 
+        current_orders_size,
+        next_orders_size
+        )
+     
     ordering_is_ok= False
         
     if purpose=="add_position":
@@ -163,6 +204,7 @@ def check_if_next_closing_size_will_not_exceed_the_original (
     
     if abs(net_size) != abs (basic_size):
         pass
+    
     if basic_size > 0:
         basic_size_sign_diff_than_next_size =  basic_size_plus_next_size < basic_size
         
@@ -174,39 +216,58 @@ def check_if_next_closing_size_will_not_exceed_the_original (
         and basic_size_higher_than_net_size\
            and basic_size_sign_diff_than_next_size# and net_size_exceeding_the_basic_size
     
-def provide_size_to_close_transaction (basic_size: int,
-                                       net_size: int) -> int:
+def provide_size_to_close_transaction (
+    basic_size: int,
+    net_size: int
+    ) -> int:
     """ """
     
     next_size =  (min (basic_size, net_size))
     
     return abs(next_size)
 
-def size_rounding(instrument_name: str, 
-                  futures_instruments, 
-                  proposed_size: float) -> int:
+def size_rounding(
+    instrument_name: str, 
+    futures_instruments, 
+    proposed_size: float
+    ) -> int:
     """ """
 
-    min_trade_amount=  [o["min_trade_amount"] for o in futures_instruments if o["instrument_name"]== instrument_name][0]    
+    min_trade_amount=  [o["min_trade_amount"] for o in futures_instruments \
+        if o["instrument_name"]== instrument_name][0]    
     
     rounded_size= round(proposed_size/min_trade_amount)*min_trade_amount
     
-    return (max(min_trade_amount, rounded_size)) #size is never 0
+    return (max
+            (min_trade_amount, 
+             rounded_size)
+            ) #size is never 0
 
 
-def delta(last_price: float, prev_price: float) -> float:
+def delta(
+    last_price: float, 
+    prev_price: float
+    ) -> float:
     """ """
     return last_price - prev_price
 
 
-def delta_pct(last_price: float, prev_price: float) -> float:
+def delta_pct(
+    last_price: float,
+    prev_price: float
+    ) -> float:
     """ """
-    return abs(delta(last_price, prev_price) / prev_price)
+    return abs(
+        delta(
+            last_price,
+            prev_price
+            ) / prev_price)
 
 
 async def get_market_condition(
-    limit: int = 100, table: str = "ohlc1_eth_perp_json"
-) -> dict:
+    limit: int = 100,
+    table: str = "ohlc1_eth_perp_json"
+    ) -> dict:
     """ """
     rising_price, falling_price, neutral_price = False, False, False
 
@@ -221,7 +282,10 @@ async def get_market_condition(
     ema = TA_result_data["1m_ema_close_9"]
 
     #    log.error(f'ema_low_9 {ema_low_9}')
-    delta_price_pct_ema_low_high = delta_pct(ema_low_9, ema_high_9)
+    delta_price_pct_ema_low_high = delta_pct(
+        ema_low_9, 
+        ema_high_9
+        )
 
     last_price = TA_result_data["last_price"]
 
@@ -254,7 +318,10 @@ def get_label(
 
     if status == "open":
         # get open label
-        label = label_numbering.labelling("open", label_main_or_label_transactions)
+        label = label_numbering.labelling(
+            "open",
+            label_main_or_label_transactions
+            )
 
     if status == "closed":
 
@@ -288,12 +355,15 @@ def is_minimum_waiting_time_has_passed(
     """
     check whether delta time has exceed time threhold
     """
-    #log.info (f"delta_time(server_time, time_stamp) {delta_time(server_time, time_stamp)} time_threshold {time_threshold} {delta_time(server_time, time_stamp)> time_threshold}")
+
     return (
         True
         if time_stamp == []
         
-        else delta_time(server_time, time_stamp) > time_threshold
+        else delta_time(
+            server_time,
+            time_stamp
+            ) > time_threshold
     )
     
 def pct_price_in_usd(
@@ -309,7 +379,10 @@ def price_plus_pct(
     pct_threshold: float
     ) -> float:
     
-    return price + pct_price_in_usd(price, pct_threshold)
+    return price + pct_price_in_usd(
+        price, 
+        pct_threshold
+        )
 
 
 def price_minus_pct(
@@ -317,7 +390,10 @@ def price_minus_pct(
     pct_threshold: float
     ) -> float:
     
-    return price - pct_price_in_usd(price, pct_threshold)
+    return price - pct_price_in_usd(
+        price, 
+        pct_threshold
+        )
 
 
 def is_transaction_price_minus_below_threshold(
@@ -333,17 +409,22 @@ def is_transaction_price_minus_below_threshold(
 
 
 def is_transaction_price_plus_above_threshold(
-    last_transaction_price: float, current_price: float, pct_threshold: float
-) -> bool:
+    last_transaction_price: float, 
+    current_price: float, 
+    pct_threshold: float
+    ) -> bool:
 
-    return price_plus_pct(last_transaction_price, pct_threshold) < current_price
+    return price_plus_pct(
+        last_transaction_price, 
+        pct_threshold
+        ) < current_price
 
 
 def get_max_time_stamp(result_strategy_label) -> int:
     """ """
     return (
         []
-        if result_strategy_label == []
+        if result_strategy_label == []\
         else max([o["timestamp"] for o in result_strategy_label])
     )
 
@@ -363,7 +444,9 @@ def get_order_id_max_time_stamp(result_strategy_label) -> int:
 
 def get_transactions_len(result_strategy_label) -> int:
     """ """
-    return 0 if result_strategy_label == [] else len([o for o in result_strategy_label])
+    return 0 \
+        if result_strategy_label == [] \
+            else len([o for o in result_strategy_label])
 
 
 def get_transactions_sum(result_strategy_label) -> int:
@@ -426,7 +509,8 @@ def get_label_super_main(
     ) -> list:
     """ """
 
-    return [o for o in result if parsing_label(strategy_label)["super_main"]
+    return [o for o in result \
+        if parsing_label(strategy_label)["super_main"]
                     == parsing_label(o["label"])["super_main"]
                 ]
 
@@ -454,10 +538,12 @@ def check_if_id_has_used_before(
     if combined_result !=[]:
         result_order_id= [o[id] for o in combined_result]
 
-    label_is_exist: list = (False if (combined_result == [] or result_order_id== [])\
-        else False if transaction_id not in result_order_id  else True)
+    label_is_exist: list = (False \
+        if (combined_result == [] or result_order_id== [])\
+            else False \
+                if transaction_id not in result_order_id \
+                    else True)
 
-    #log.debug (f"trasaction was existed before {label_is_exist}")
     return label_is_exist
 
 
@@ -478,7 +564,8 @@ def provide_side_to_close_transaction(transaction: dict) -> str:
 
 def sum_order_under_closed_label_int (
     closed_orders_label_strategy: list,
-    label_integer_open: int) -> int:
+    label_integer_open: int
+    ) -> int:
     """ """
     
     if closed_orders_label_strategy:
@@ -536,16 +623,12 @@ def get_additional_params_for_futureSpread_transactions(transaction: list) -> No
      
      """
 
-
-    #log.debug (f"trade {transaction}")
-    
     #convert list to dict
     transaction = convert_list_to_dict(transaction)
         
     timestamp= transaction["timestamp"]
     
-    #get label
-    
+    #get label    
     if "futureSpread" not in transaction:
         label= combine_vars_to_get_future_spread_label(timestamp)
         transaction.update({"label":label})
@@ -570,15 +653,17 @@ async def get_additional_params_for_open_label(
 
     params = await executing_query_with_return(additional_params)
     
-    #log.error (f""""label" not in trade {"label" not in transaction} label is None {label is None}""")
-    
     # provide label
     if "label" not in transaction or label is None:
         side= get_transaction_side(transaction)
-        label_open: str = get_label("open", f"custom{side.title()}")
+        label_open: str = get_label(
+            "open", 
+            f"custom{side.title()}")
         transaction.update({"label": label_open})
         
-    additional_params_label = [] if params == [] else [o for o in params if label in o["label"]]
+    additional_params_label = [] \
+        if params == [] \
+            else [o for o in params if label in o["label"]]
     
     if additional_params_label !=[]:
         if "take_profit" not in transaction:
@@ -595,7 +680,8 @@ async def get_additional_params_for_open_label(
 
 def is_label_and_side_consistent(
     non_checked_strategies,
-    params) -> bool:
+    params
+    ) -> bool:
     """ """
     
     #log.error (f"params {params}")
@@ -604,7 +690,7 @@ def is_label_and_side_consistent(
     is_consistent = True if "closed" in label else False
     # log.warning(f"params {params}")
         
-    if bool([ele for ele in non_checked_strategies if(ele in label)]):
+    if bool([o for o in non_checked_strategies if(o in label)]):
         is_consistent = True
 
     else:
@@ -620,14 +706,16 @@ def is_label_and_side_consistent(
                                             else False
 
             if side == "buy":
-                is_consistent = True if "Long" in label else False
+                is_consistent = True \
+                    if "Long" in label else False
 
     return is_consistent
 
 
 def get_take_profit_pct(
     transaction: dict, 
-    strategy_config: dict) -> float:
+    strategy_config: dict
+    ) -> float:
     """ """
 
     try:
@@ -638,19 +726,29 @@ def get_take_profit_pct(
     return tp_pct
 
 
-def reading_from_db(end_point, instrument: str = None, status: str = None) -> list:
+def reading_from_db(
+    end_point, 
+    instrument: str = None, 
+    status: str = None
+    ) -> list:
     """ """
     from utilities import pickling, system_tools
 
     return pickling.read_data(
-        system_tools.provide_path_for_file(end_point, instrument, status)
+        system_tools.provide_path_for_file(
+            end_point, 
+            instrument, 
+            status
+            )
     )
 
 def get_non_label_from_transaction(transactions) -> list:
     """ """
 
-
-    return [] if transactions ==[] else [o for o in transactions if o["label"]==""]
+    return [] \
+        if transactions ==[] \
+            else [o for o in transactions \
+                if o["label"]==""]
 
 
 def check_db_consistencies (
@@ -658,19 +756,25 @@ def check_db_consistencies (
     trades_from_sqlite: list, 
     positions_from_sub_account: list,
     order_from_sqlite_open: list, 
-    open_orders_from_sub_accounts: list) -> bool:
+    open_orders_from_sub_accounts: list
+    ) -> bool:
     """ """
 
-    no_non_label_from_from_sqlite_open= False if get_non_label_from_transaction(order_from_sqlite_open) != [] else True 
+    no_non_label_from_from_sqlite_open= False \
+        if get_non_label_from_transaction(order_from_sqlite_open) != []\
+            else True 
     
     len_from_sqlite_open= len(order_from_sqlite_open)
     
     len_open_orders_from_sub_accounts=len(open_orders_from_sub_accounts)
     #
-    sum_my_trades_sqlite = 0 if  trades_from_sqlite == [] else sum([o["amount"] for o in trades_from_sqlite])
+    sum_my_trades_sqlite = 0 \
+        if  trades_from_sqlite == [] \
+            else sum([o["amount"] for o in trades_from_sqlite])
 
     size_from_position: int = (0 if positions_from_sub_account == [] \
-        else sum([o["size"] for o in positions_from_sub_account if o["instrument_name"]==instrument_name]))
+        else sum([o["size"] for o in positions_from_sub_account \
+            if o["instrument_name"]==instrument_name]))
 
     log.error(
         f"size_is_consistent {sum_my_trades_sqlite == size_from_position} sum_my_trades_sqlite {sum_my_trades_sqlite} size_from_positions {size_from_position} "
@@ -680,7 +784,8 @@ def check_db_consistencies (
         order_is_consistent= (len_open_orders_from_sub_accounts == len_from_sqlite_open \
                     and no_non_label_from_from_sqlite_open),
         no_non_label_from_from_sqlite_open= False \
-                    if get_non_label_from_transaction(order_from_sqlite_open) != [] else True )
+                    if get_non_label_from_transaction(order_from_sqlite_open) != [] \
+                        else True )
 
 def get_basic_closing_paramaters(
     selected_transaction: list,
@@ -712,6 +817,7 @@ def get_basic_closing_paramaters(
     net_size = (basic_size + sum_order_under_closed_label)
     size_abs = provide_size_to_close_transaction(basic_size,
                                                 net_size)
+ 
     size = size_abs * ensure_sign_consistency(side)   
     
     closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
