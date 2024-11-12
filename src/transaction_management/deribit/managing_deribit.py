@@ -196,6 +196,10 @@ class ModifyOrderDb(SendApiRequest):
         currency
         )-> None:
         
+        data = await self.private_data.get_subaccounts_details (currency)
+        
+        log.debug (f"get_subaccounts_details {data}")
+        
         # fetch data from exchange
         return await self.private_data.get_subaccounts_details (currency)
 

@@ -2,9 +2,11 @@
 
 # user defined formula
 from db_management.sqlite_management import(
-    insert_tables,)
+    insert_tables,
+    )
 from utilities.string_modification import(
-    remove_dict_elements,)
+    remove_dict_elements,
+    )
 
 
 async def saving_transaction_log(
@@ -12,11 +14,9 @@ async def saving_transaction_log(
     transaction_log,
     ) -> None:
     
-    """_summary_
-
-    Args:
-        trades (_type_): _description_
-        orders (_type_): _description_
+    """
+    Saving result from Deribit transaction log API request
+    and distributed them into each db: trading and non-trading. 
     """
     
 
