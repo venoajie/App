@@ -591,26 +591,24 @@ async def reconciling_size_and_orders(
     idle_time: int
     ) -> None:
 
-    # get tradable strategies
-    tradable_config_app = config_app["tradable"]
-    
-    # get tradable currencies
-    currencies= [o["spot"] for o in tradable_config_app] [0]
-    
-    strategy_attributes = config_app["strategies"]
-    
-    modify_order_and_db = ModifyOrderDb(sub_account_id)
-    
-    
-    sub_account_from_exchange = await modify_order_and_db.get_sub_account (currency)   
-    log.error (f"sub_account_from_exchange {sub_account_from_exchange}")
-    
                 
     try:
+        # get tradable strategies
+        tradable_config_app = config_app["tradable"]
         
+        # get tradable currencies
+        currencies= [o["spot"] for o in tradable_config_app] [0]
+        
+        strategy_attributes = config_app["strategies"]
+        
+        modify_order_and_db = ModifyOrderDb(sub_account_id)
+            
         while True:
             
             for currency in currencies:
+                
+                sub_account_from_exchange = await modify_order_and_db.get_sub_account (currency)   
+                log.error (f"sub_account_from_exchange {sub_account_from_exchange}")
                 
                 sub_account = reading_from_pkl_data(
                     "sub_accounts",
