@@ -179,6 +179,38 @@ def get_settlement_period (strategy_attributes) -> list:
         remove_double_brackets_in_list(
             [o["settlement_period"]for o in strategy_attributes]))
             )
+async def get_result_from_db_queries (
+    currency,
+    order_db_table,
+    trade_db_table,
+    transaction_log_trading,
+    ) -> list:
+    
+
+    column_trade: str= "instrument_name","label", "amount", "price","side"
+    my_trades_currency: list= await get_query(trade_db_table, 
+                                                currency, 
+                                                "all", 
+                                                "all", 
+                                                column_trade)
+                                                    
+    column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
+    from_transaction_log = await get_query (transaction_log_trading, 
+                                                currency, 
+                                                "all", 
+                                                "all", 
+                                                column_list)                                       
+
+    column_order= "instrument_name","label","amount","order_id","timestamp"
+    orders_currency = await get_query(order_db_table, 
+                                            currency, 
+                                            "all", 
+                                            "all", 
+                                            column_order)     
+    
+    return dict(my_trades_currency=my_trades_currency,
+                from_transaction_log=from_transaction_log,
+                orders_currency=orders_currency)
     
     
 def future_spread_attributes (
@@ -239,8 +271,7 @@ class RunningStrategy(ModifyOrderDb):
         # Start Primary Coroutine
         self.loop.run_until_complete(self.ws_manager())
     
-
-    # @lru_cache(maxsize=None)
+    
     async def ws_manager(self) -> None:
         async with websockets.connect(
             self.ws_connection_url,
@@ -249,11 +280,11 @@ class RunningStrategy(ModifyOrderDb):
             close_timeout=60,
         ) as self.websocket_client:
                 
+            # registering strategy config file    
+            file_toml = "config_strategies.toml"
+                
             try:
                     
-                # registering strategy config file    
-                file_toml = "config_strategies.toml"
-                
                 # parsing config file
                 config_app = get_config(file_toml)
 
@@ -279,9 +310,9 @@ class RunningStrategy(ModifyOrderDb):
                 
                 order_db_table= "orders_all_json"         
                                 
-                settlement_periods= get_settlement_period (strategy_attributes)
+                settlement_periods = get_settlement_period (strategy_attributes)
                                 
-                futures_instruments= get_futures_instruments (currencies,
+                futures_instruments = get_futures_instruments (currencies,
                                                                     settlement_periods)  
                 
                 active_futures = futures_instruments["active_futures"]   
@@ -375,71 +406,65 @@ class RunningStrategy(ModifyOrderDb):
                                     currency: str = extract_currency_from_text(instrument_name_perpetual)
                                     
                                     currency_upper: str = currency.upper()
+                                    currency_lower: str =currency
                                     
-                                    archive_db_table= f"my_trades_all_{currency}_json"
+                                    archive_db_table= f"my_trades_all_{currency_lower}_json"
                                     
-                                    transaction_log_trading= f"transaction_log_{currency}_json"
+                                    transaction_log_trading= f"transaction_log_{currency_lower}_json"
 
                                     update_cached_ticker_data(
                                         instrument_name_perpetual,
                                         perpetual_ticker,
                                         data_orders
                                         )
-
-
-                                    log.info (f"instrument_name {instrument_name_perpetual} {currency}")      
-                                    
-                                    currency_lower=currency
                                     
                                     # get portfolio data  
-                                    portfolio = reading_from_pkl_data ("portfolio",
-                                                                            currency)
+                                    portfolio = reading_from_pkl_data (
+                                        "portfolio",
+                                        currency
+                                        )
                                     
                                     equity: float = portfolio[0]["equity"]    
                                     
-                                    perpetual_ticker_instrument_name = [o for o in perpetual_ticker if instrument_name_perpetual == o["instrument_name"]][0]                                   
+                                    perpetual_ticker_instrument_name = [o for o in perpetual_ticker \
+                                        if instrument_name_perpetual == o["instrument_name"]][0]                                   
                                                                                         
                                     index_price= get_index (
                                         data_orders,
                                         perpetual_ticker_instrument_name
                                         )
                                     
-                                    sub_account = reading_from_pkl_data("sub_accounts",
-                                                                        currency)
+                                    sub_account = reading_from_pkl_data(
+                                        "sub_accounts",
+                                        currency
+                                        )
                                     
                                     sub_account = sub_account[0]
                                                 
-                                    if sub_account:
-                                        
-                                        transaction_log_trading= f"transaction_log_{currency_lower}_json"
-                                        
-                                        column_trade: str= "instrument_name","label", "amount", "price","side"
-                                        my_trades_currency: list= await get_query(trade_db_table, 
-                                                                                    currency, 
-                                                                                    "all", 
-                                                                                    "all", 
-                                                                                    column_trade)
-                                                                                        
-                                        column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
-                                        from_transaction_log = await get_query (transaction_log_trading, 
-                                                                                    currency, 
-                                                                                    "all", 
-                                                                                    "all", 
-                                                                                    column_list)                                       
-
-                                        column_order= "instrument_name","label","order_id","amount","timestamp"
-                                        orders_currency = await get_query(order_db_table, 
-                                                                                currency, 
-                                                                                "all", 
-                                                                                "all", 
-                                                                                column_order)     
+                                    log.info (f"instrument_name {instrument_name_perpetual} {currency}")   
                                     
-                                        len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (sub_account,
-                                                                                                    instrument_name_perpetual,
-                                                                                                    orders_currency)
+                                    transaction_log_trading= f"transaction_log_{currency_lower}_json"
+                                    
+                                    if sub_account \
+                                        and "ETH" not in currency_upper:
 
+                                        result_from_db_queries = await get_result_from_db_queries (
+                                            currency,
+                                            order_db_table, 
+                                            trade_db_table,
+                                            transaction_log_trading,)
+                                        
+                                        my_trades_currency: list= result_from_db_queries["my_trades_currency"]
+                                                                                        
+                                        from_transaction_log = result_from_db_queries["from_transaction_log"]                          
 
-                                                        
+                                        orders_currency = result_from_db_queries["orders_currency"]     
+                                    
+                                        len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
+                                            sub_account,
+                                            instrument_name_perpetual,
+                                            orders_currency)
+                    
                                         size_is_reconciled_each_other = check_whether_size_db_reconciled_each_other(
                                             sub_account,
                                             instrument_name_perpetual,
@@ -471,18 +496,15 @@ class RunningStrategy(ModifyOrderDb):
                                             
                                             best_ask_price_perpetual = perpetual_ticker_instrument_name["best_ask_price"]
                                         
-
                                             for strategy in active_strategies:
                             
-                                                #log.debug (f"position_without_combo {position_without_combo}")
-
-                                                my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
+                                                my_trades_currency_strategy = [o for o in my_trades_currency \
+                                                    if strategy in (o["label"]) ]
                                                 
-                                                orders_currency_strategy = [o for o in orders_currency if strategy in (o["label"]) ]
+                                                orders_currency_strategy = [o for o in orders_currency \
+                                                    if strategy in (o["label"]) ]
                             
-
-                                                if   "futureSpread" in strategy \
-                                                        and "ETH" not in currency_upper:
+                                                if   "futureSpread" in strategy :
                                                             
                                                     log.warning (f"strategy {strategy}-START")                                                    
                                                             
@@ -495,7 +517,8 @@ class RunningStrategy(ModifyOrderDb):
                                                         server_time,
                                                     )
                         
-                                                    strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
+                                                    strategy_params= [o for o in strategy_attributes \
+                                                        if o["strategy_label"] == strategy][0]   
                                                             
                                                     combo_auto = ComboAuto(
                                                         strategy,
@@ -515,6 +538,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                     labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
                                                     
+                                                    #closing orders
                                                     for label in labels:
                                                         
                                                         send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (label,
