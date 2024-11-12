@@ -280,9 +280,12 @@ class SendApiRequest:
         return result_sub_account["result"]
 
 
-    async def get_subaccounts_details (
+    async def get_subaccounts_details(
         self,
-        currency)-> list:
+        currency
+        )-> list:
+        
+        
         # Set endpoint
         endpoint: str = "private/get_subaccounts_details"
 
