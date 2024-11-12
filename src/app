@@ -314,8 +314,10 @@ class RunningStrategy(ModifyOrderDb):
                                 
                 settlement_periods = get_settlement_period (strategy_attributes)
                                 
-                futures_instruments = get_futures_instruments (currencies,
-                                                                    settlement_periods)  
+                futures_instruments = get_futures_instruments (
+                    currencies,
+                    settlement_periods
+                    )  
                 
                 active_futures = futures_instruments["active_futures"]   
 
@@ -354,7 +356,7 @@ class RunningStrategy(ModifyOrderDb):
                             ))
                         
                 
-                    perpetual_ticker = cached_ticker_data(currencies)    
+                    ticker_perpetual = cached_ticker_data(currencies)    
                     
                     while self.websocket_client.open:
                         
@@ -416,7 +418,7 @@ class RunningStrategy(ModifyOrderDb):
 
                                     update_cached_ticker_data(
                                         instrument_name_perpetual,
-                                        perpetual_ticker,
+                                        ticker_perpetual,
                                         data_orders
                                         )
                                     
@@ -428,12 +430,12 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     equity: float = portfolio[0]["equity"]    
                                     
-                                    perpetual_ticker_instrument_name = [o for o in perpetual_ticker \
+                                    ticker_perpetual_instrument_name = [o for o in ticker_perpetual \
                                         if instrument_name_perpetual == o["instrument_name"]][0]                                   
                                                                                         
                                     index_price= get_index (
                                         data_orders,
-                                        perpetual_ticker_instrument_name
+                                        ticker_perpetual_instrument_name
                                         )
                                     
                                     sub_account = reading_from_pkl_data(
@@ -496,7 +498,7 @@ class RunningStrategy(ModifyOrderDb):
                                             leverage_threshold = 20
                                             #max_premium = max([o["pct_premium_per_day"] for o in pct_premium_per_day])
                                             
-                                            best_ask_price_perpetual = perpetual_ticker_instrument_name["best_ask_price"]
+                                            best_ask_price_perpetual = ticker_perpetual_instrument_name["best_ask_price"]
                                         
                                             for strategy in active_strategies:
                             
@@ -530,7 +532,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         orders_currency_strategy,
                                                         notional,
                                                         combo_attributes,
-                                                        perpetual_ticker_instrument_name,
+                                                        ticker_perpetual_instrument_name,
                                                         server_time
                                                         )
                                                     
@@ -571,88 +573,94 @@ class RunningStrategy(ModifyOrderDb):
                                                                     transaction_log_trading_table)
 
                                                                 await sleep_and_restart ()
-                                                    
-                                                    time.sleep(10)
+                                                                
+                                                    # send combo orders-automatic
+                                                    for combo in active_combo_perp:
+                                                        
+                                                        instrument_name_combo = combo["instrument_name"]
+                                                        
+                                                        if currency_upper in instrument_name_combo:
+                                                                                                                    
+                                                            instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
+                                                            
+                                                            size_instrument = ([abs(o["size"]) for o in position_without_combo \
+                                                                if instrument_name_future in o["instrument_name"]])
+                                                            
+                                                            size_instrument = 0 if size_instrument == [] else size_instrument [0]
+                                                            leverage_instrument = size_instrument/notional
+                                                            
+                                                            ticker_combo= reading_from_pkl_data("ticker", instrument_name_combo)
+                                                            ticker_future= reading_from_pkl_data("ticker", instrument_name_future)
+                                                            
+                                                            if ticker_future and ticker_combo\
+                                                                and leverage_instrument < leverage_threshold:
+                                                                
+                                                                ticker_combo= ticker_combo[0]
 
+                                                                ticker_future= ticker_future[0]
+                                                                
+                                                                mark_price_future = ticker_future["mark_price"]
+                                                                
+                                                                mark_price_combo = ticker_combo["mark_price"]
+                                                                log.debug (f"instrument_name_combo {instrument_name_combo}")
+                                                        
+                                                                send_order: dict = await combo_auto.is_send_and_cancel_open_order_allowed_combo_auto(
+                                                                    instrument_name_combo,
+                                                                    ticker_future,
+                                                                    active_futures,
+                                                                    )
+                                                                
+                                                                log.error (f"send_order {send_order}")
+
+                                                                if False and send_order["order_allowed"]:
+
+                                                                    
+                                                                    #log.error  (f"send_order {send_order}")
+                                                                    await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
+                                                                                                                    send_order, 
+                                                                                                                    instrument_ticker)
+                                                                    await self.modify_order_and_db.if_cancel_is_true(send_order)
+
+                                                                await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
+
+                                                    
                                                     for instrument_name in active_futures:
 
-                                                        len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (sub_account,
-                                                                                                                    instrument_name,
-                                                                                                                    orders_currency)
+                                                        len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
+                                                            sub_account,
+                                                            instrument_name,
+                                                            orders_currency
+                                                            )
 
                                                         size_is_reconciled_each_other = check_whether_size_db_reconciled_each_other(
                                                             sub_account,
                                                             instrument_name,
                                                             my_trades_currency,
                                                             from_transaction_log
-                                                            )                                                        
-                                                            
-                                                        log.debug (f"combo_attributes {combo_attributes}")
-                                                            
-                                                        #result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
-                                                        #                                                            send_closing_order, 
-                                                        #                                                            instrument_ticker)
-                                                        
-                                                        if False and result_order:
-                                                            log.error (f"result_order {result_order}")
-                                                            data_orders = result_order["result"]
-                                                            await self.update_user_changes_non_ws (
-                                                                non_checked_strategies,
-                                                                data_orders, 
-                                                                currency, 
-                                                                order_db_table,
-                                                                trade_db_table, 
-                                                                archive_db_table,
-                                                                transaction_log_trading_table)
-                                                            await sleep_and_restart ()
-                                                            
-                                                        for combo in active_combo_perp:
-                                                            
-                                                #                                log.error (f"combo {combo}")
-                                                            combo_instruments_name = combo["instrument_name"]
-                                                            
-                                                            if currency_upper in combo_instruments_name:
-                                                            
-                                                                
-                                                                future_instrument = f"{currency_upper}-{combo_instruments_name[7:][:7]}"
-                                                                
-                                                                size_instrument = ([abs(o["size"]) for o in position_without_combo \
-                                                                    if future_instrument in o["instrument_name"]])
-                                                                
-                                                                size_instrument = 0 if size_instrument == [] else size_instrument [0]
-                                                                leverage_instrument = size_instrument/notional
-                                                                
-                                                                combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)
-                                                                future_ticker= reading_from_pkl_data("ticker", future_instrument)
-                                                                
-                                                                if future_ticker and combo_ticker\
-                                                                    and leverage_instrument < leverage_threshold:
-                                                                    
-                                                                    combo_ticker= combo_ticker[0]
-
-                                                                    future_ticker= future_ticker[0]
-                                                                    
-                                                                    future_mark_price= future_ticker["mark_price"]
-                                                                    
-                                                                    combo_mark_price= combo_ticker["mark_price"]
-                                                                    log.debug (f"combo_instruments_name {combo_instruments_name}")
-                                                            
-                                                                    send_order: dict = await combo_auto.is_send_and_cancel_open_order_allowed (combo_instruments_name,
-                                                                                                                                                future_ticker,
-                                                                                                                                                active_futures,)
-                                                                    
-                                                                    log.debug (f"combo_instruments_name {combo_instruments_name}")
-                                                                    log.error (f"send_order {send_order}")
-                                                                    if False and send_order["order_allowed"]:
+                                                            )       
                                                                         
-                                                                        #log.error  (f"send_order {send_order}")
-                                                                        await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
-                                                                                                                        send_order, 
-                                                                                                                        instrument_ticker)
-                                                                        await self.modify_order_and_db.if_cancel_is_true(send_order)
-
-                                                                    await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
-
+                                                        if  size_is_reconciled_each_other\
+                                                            and  len_order_is_reconciled_each_other:
+                                                                                                
+                                                                
+                                                            log.debug (f"combo_attributes {combo_attributes}")
+                                                                
+                                                            #result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
+                                                            #                                                            send_closing_order, 
+                                                            #                                                            instrument_ticker)
+                                                            
+                                                            if False and result_order:
+                                                                log.error (f"result_order {result_order}")
+                                                                data_orders = result_order["result"]
+                                                                await self.update_user_changes_non_ws (
+                                                                    non_checked_strategies,
+                                                                    data_orders, 
+                                                                    currency, 
+                                                                    order_db_table,
+                                                                    trade_db_table, 
+                                                                    archive_db_table,
+                                                                    transaction_log_trading_table)
+                                                                await sleep_and_restart ()
                                                                 
                                                         log.warning (f"strategy {strategy}-DONE")
 

@@ -72,17 +72,17 @@ def convert_list_to_dict (transaction: list) -> dict:
 
 def determine_opening_size(
     instrument_name: str,
-    futures_instruments,
+    future_instrument_attributes,
     notional: float, 
     factor: float
     ) -> int:
     """ """
     
-    proposed_size= notional * factor
+    proposed_size = notional * factor
     
     return size_rounding(
         instrument_name,
-        futures_instruments,
+        future_instrument_attributes,
         proposed_size)
 
 
@@ -117,7 +117,7 @@ def transactions_under_label_int(
     return dict(
         premium = transactions_premium,
         premium_pct = premium_pct,
-        combo_instruments_name = (f"{traded_future_instrument_name[:3]}-FS-{traded_future_instrument_name[4:]}_PERP"),)
+        combo_instrument_name = (f"{traded_future_instrument_name[:3]}-FS-{traded_future_instrument_name[4:]}_PERP"),)
     
     
 def get_basic_opening_parameters(strategy_label):
@@ -166,12 +166,12 @@ class ComboAuto (BasicStrategy):
             self.strategy_parameters)
         
         
-    async def is_send_and_cancel_open_order_allowed(
+    async def is_send_and_cancel_open_order_allowed_combo_auto(
         self,
-        combo_instruments_name: str,
+        combo_instrument_name: str,
         future_ticker,
-        futures_instruments,
-    ) -> dict:
+        future_instrument_attributes ,
+        ) -> dict:
         """ """
         
         leverage_futures: float = get_size_instrument(
@@ -183,7 +183,7 @@ class ComboAuto (BasicStrategy):
         perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
         
         my_trades_currency_strategy = self.my_trades_currency_strategy
-        log.warning (f"perpetual_instrument_name {perpetual_instrument_name} future_instrument_name {future_instrument_name} combo_instruments_name {combo_instruments_name} ")
+        log.warning (f"perpetual_instrument_name {perpetual_instrument_name} future_instrument_name {future_instrument_name} combo_instrument_name {combo_instrument_name} ")
         
         
         orders_currency_strategy_future = [o for o in self.orders_currency_strategy if future_instrument_name in o["instrument_name"] ]
@@ -211,10 +211,17 @@ class ComboAuto (BasicStrategy):
     
         threshold = 60
         
-        size = determine_opening_size(combo_instruments_name, 
-                                    futures_instruments, 
-                                    self.max_position,
-                                    1)
+        size_multiply_factor = 1
+        
+        log.error (f"future_instrument_attributes {future_instrument_attributes}")
+        
+        size = determine_opening_size(
+            combo_instrument_name, 
+            future_instrument_attributes, 
+            self.max_position,
+            size_multiply_factor
+            )
+        
         len_open_orders: int = get_transactions_len(open_orders_label_strategy)
         log.debug (f"len_open_orders {len_open_orders}")
 
@@ -305,18 +312,18 @@ class ComboAuto (BasicStrategy):
                 if abs(transactions_under_label_int_all ["premium_pct"])>tp_threshold \
                     and(not orders_currency or not outstanding_closed_orders):   
                         
-                    combo_instruments_name = transactions_under_label_int_all["combo_instruments_name"]
+                    combo_instrument_name = transactions_under_label_int_all["combo_instrument_name"]
                                                 
                     traded_future = [o for o in transactions if "PERPETUAL" not  in o["instrument_name"]][0]
                     traded_perpetual = [o for o in transactions if perpetual_instrument_name in o["instrument_name"]][0]
                     traded_perpetual_size = abs(traded_perpetual["amount"])
-                    combo_ticker= reading_from_pkl_data("ticker", combo_instruments_name)
+                    combo_ticker= reading_from_pkl_data("ticker", combo_instrument_name)
                                                                 
                     exit_params.update({"size": abs (traded_perpetual_size)})
                     exit_params.update({"price": combo_ticker[0]["best_bid_price"]})
                     
                     exit_params.update({"label": f"{strategy_label}-closed-{label_integer}"})
-                    exit_params.update({"instrument_name": combo_instruments_name})
+                    exit_params.update({"instrument_name": combo_instrument_name})
                     
                     perpetual_instrument_name = self.perpetual_ticker["instrument_name"]
                     

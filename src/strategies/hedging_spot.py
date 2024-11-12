@@ -188,7 +188,10 @@ async def get_market_condition_hedging(
 
     fluctuation_exceed_threshold = TA_data["1m_fluctuation_exceed_threshold"]
 
-    delta_price_pct = delta_pct(index_price, open_60)
+    delta_price_pct = delta_pct(
+        index_price,
+        open_60
+        )
     
     if fluctuation_exceed_threshold or True:
 
@@ -455,7 +458,8 @@ class HedgingSpot(BasicStrategy):
                     
             if not open_size_not_over_bought:            
                 
-                open_orders_label: list=  [o for o in orders_currency_strategy if "open" in o["label"]]
+                open_orders_label: list=  [o for o in orders_currency_strategy \
+                    if "open" in o["label"]]
                         
                 len_open_orders: int = get_transactions_len(open_orders_label)
         
@@ -494,9 +498,7 @@ class HedgingSpot(BasicStrategy):
                     if "closed" in (o["label"]) ]
                         
                 len_closed_orders: int = get_transactions_len(closed_orders_label)
-                
-                #log.warning (f"""bid_price {bid_price} transaction ["price"] {transaction ["price"]}""")
-                        
+                    
                 if len_closed_orders> 1:   
                     
                     cancel_allowed = True       
@@ -680,8 +682,10 @@ class HedgingSpot(BasicStrategy):
                 )
             
         return dict(
-            order_allowed= order_allowed,
-            order_parameters=(
-                [] if not order_allowed else exit_params
+            order_allowed = order_allowed,
+            order_parameters = (
+                [] \
+                    if not order_allowed \
+                        else exit_params
             ),
             )

@@ -34,7 +34,8 @@ def get_instruments_kind(
     """ 
     
     my_path_instruments = provide_path_for_file(
-        "instruments", currency
+        "instruments", 
+        currency
     )
 
     instruments_raw = read_data(my_path_instruments)
@@ -44,7 +45,8 @@ def get_instruments_kind(
     instruments_kind= non_spot_instruments if kind =="all" else  [
         o for o in instruments if o["kind"] == kind]
     
-    return  [o for o in instruments_kind if o["settlement_period"] in settlement_periods]
+    return  [o for o in instruments_kind \
+        if o["settlement_period"] in settlement_periods]
 
 
 def get_futures_for_active_currencies(
@@ -67,7 +69,8 @@ def get_futures_for_active_currencies(
                                                   settlement_periods,
                                                   "future_combo" )
         
-        active_combo_perp = [o for o in future_combo_instruments if "_PERP" in o["instrument_name"]]
+        active_combo_perp = [o for o in future_combo_instruments \
+            if "_PERP" in o["instrument_name"]]
         
         combined_instruments = future_instruments + active_combo_perp
         instruments_holder_place.append(combined_instruments)    
@@ -92,16 +95,14 @@ def get_futures_instruments(
     active_futures=   get_futures_for_active_currencies(
             active_currencies,
             settlement_periods)
-    
-    active_combo = [o for o in active_futures if "future_combo" in o["kind"]]
-          
+              
     min_expiration_timestamp = min([o["expiration_timestamp"] for o in active_futures]) 
     
     return dict(
         instruments_name = [o["instrument_name"] for o in (active_futures)],
         min_expiration_timestamp = min_expiration_timestamp,
         active_futures = [o for o in active_futures if "future" in o["kind"]],
-        active_combo_perp =  active_combo,
+        active_combo_perp =  [o for o in active_futures if "future_combo" in o["kind"]],
         instruments_name_with_min_expiration_timestamp = [o["instrument_name"] for o in active_futures \
             if o["expiration_timestamp"] == min_expiration_timestamp][0]
         )

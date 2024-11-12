@@ -222,7 +222,10 @@ def provide_size_to_close_transaction (
     ) -> int:
     """ """
     
-    next_size =  (min (basic_size, net_size))
+    next_size =  (min (
+        basic_size, 
+        net_size)
+                  )
     
     return abs(next_size)
 
@@ -233,10 +236,12 @@ def size_rounding(
     ) -> int:
     """ """
 
-    min_trade_amount=  [o["min_trade_amount"] for o in futures_instruments \
-        if o["instrument_name"]== instrument_name][0]    
+    min_trade_amount =  [o["min_trade_amount"] for o in futures_instruments \
+        if o["instrument_name"] == instrument_name][0]    
     
-    rounded_size= round(proposed_size/min_trade_amount)*min_trade_amount
+    rounded_size = round(
+        proposed_size/min_trade_amount
+        ) * min_trade_amount
     
     return (max
             (min_trade_amount, 
