@@ -343,7 +343,7 @@ class ComboAuto (BasicStrategy):
         instrument_name_perpetual = self.perpetual_ticker["instrument_name"]
         
         my_trades_currency_strategy = self.my_trades_currency_strategy
-        log.warning (f"instrument_name_perpetual {instrument_name_perpetual} instrument_name_future {instrument_name_future} instrument_name_combo {instrument_name_combo} ")
+        log.warning (f"instrument_name_perpetual {instrument_name_perpetual} instrument_name_future {instrument_name_future} ")
         
         
         orders_currency_strategy_future = [o for o in self.orders_currency_strategy if instrument_name_future in o["instrument_name"] ]
