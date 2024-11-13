@@ -384,7 +384,7 @@ class ComboAuto (BasicStrategy):
         #log.error (f"instrument_attributes_futures {instrument_attributes_futures}")
         
         size = determine_opening_size(
-            instrument_name_combo, 
+            instrument_name_future, 
             instrument_attributes_futures, 
             self.max_position,
             size_multiply_factor
