@@ -620,9 +620,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                     await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
                                                                                                                     send_order, 
                                                                                                                     instrument_ticker)
-                                                                    await self.modify_order_and_db.if_cancel_is_true(send_order)
-
-                                                                await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
 
                                                     
                                                     for instrument_name in instrument_attributes_futures:
