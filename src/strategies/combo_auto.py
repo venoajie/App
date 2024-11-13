@@ -344,21 +344,24 @@ class ComboAuto (BasicStrategy):
                     )
                 
                 log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
-
+                    
+                log.warning (f"orders_currency {orders_currency}")
+                log.debug (f"not orders_currency {not orders_currency}")
+                
                 if orders_currency:
                     outstanding_closed_orders = [o  for o in orders_currency\
                         if str(label_integer) in o['label']\
                             and "closed" in o["label"]]
+                    
+                    log.warning (f"outstanding_closed_orders {outstanding_closed_orders}")
+                    log.debug (f"not outstanding_closed_orders {not outstanding_closed_orders}")
+                
                 
                 transactions_under_label_int_example = [{'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}]
-                                    
-                log.warning (f"orders_currency {orders_currency}")
-                log.debug (f"not orders_currency {not orders_currency}")
-                log.warning (f"outstanding_closed_orders {outstanding_closed_orders}")
-                log.debug (f"not outstanding_closed_orders {not outstanding_closed_orders}")
                 
                 if abs(transactions_under_label_int_all ["premium_pct"]) > tp_threshold \
-                    and (not orders_currency or not outstanding_closed_orders):   
+                    and (not orders_currency \
+                        or (orders_currency and not outstanding_closed_orders)):   
                             
                     traded_perpetual = [o for o in transactions \
                         if instrument_name_perpetual in o["instrument_name"]][0]
