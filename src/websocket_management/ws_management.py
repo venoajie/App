@@ -102,7 +102,7 @@ def get_futures_instruments(
         instruments_name = [o["instrument_name"] for o in (active_futures)],
         min_expiration_timestamp = min_expiration_timestamp,
         active_futures = [o for o in active_futures if "future" in o["kind"]],
-        active_combo_perp =  [o for o in active_futures if "future_combo" in o["kind"]],
+        active_combo =  [o for o in active_futures if "future_combo" in o["kind"]],
         instruments_name_with_min_expiration_timestamp = [o["instrument_name"] for o in active_futures \
             if o["expiration_timestamp"] == min_expiration_timestamp][0]
         )

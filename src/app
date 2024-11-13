@@ -322,9 +322,9 @@ class RunningStrategy(ModifyOrderDb):
                     settlement_periods
                     )  
                 
-                instrument_attributes_futures = futures_instruments["instrument_attributes_futures"]   
+                instrument_attributes_futures = futures_instruments["active_futures"]   
 
-                active_combo_perp = futures_instruments["active_combo_perp"]  
+                instrument_attributes_combo = futures_instruments["active_combo"]  
 
                 instruments_name = futures_instruments["instruments_name"]   
                 
@@ -577,7 +577,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 await sleep_and_restart ()
                                                                 
                                                     # send combo orders-automatic
-                                                    for combo in active_combo_perp:
+                                                    for combo in instrument_attributes_combo:
                                                         
                                                         instrument_name_combo = combo["instrument_name"]
                                                         
