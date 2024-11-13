@@ -105,7 +105,14 @@ async def saving_traded_orders (
         filter_trade="order_id"
         
         order_id = trade[f"{filter_trade}"]
-            
+        
+        if   "closed" in label:
+                                    
+                await clean_up_closed_transactions(
+                    instrument_name,
+                    table
+                    )
+                    
         await deleting_row (
             order_db_table,
             "databases/trading.sqlite3",
@@ -114,12 +121,6 @@ async def saving_traded_orders (
             order_id,
             )
         
-        if   "closed" in label:
-                                    
-                await clean_up_closed_transactions(
-                    instrument_name,
-                    table
-                    )
     
 
 async def saving_orders(

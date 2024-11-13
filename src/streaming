@@ -556,15 +556,15 @@ class StreamAccountData(ModifyOrderDb):
                                             
                 await self.modify_order_and_db. resupply_sub_accountdb(currency)            
 
-        await update_db_pkl(
-            "positions", 
-            data_orders,
-            currency)
-
         await clean_up_closed_transactions(
             instrument_name, 
             trade_db_table
             )      
+
+        await update_db_pkl(
+            "positions", 
+            data_orders,
+            currency)
         
         log.info(f"update_user_changes-END")
     
