@@ -240,6 +240,11 @@ class ComboAuto (BasicStrategy):
         
         waiting_minute_before_cancel= hedging_attributes["waiting_minute_before_cancel"] * ONE_MINUTE
         
+        log.error (f"waiting_minute_before_cancel {waiting_minute_before_cancel}")
+        log.error ({"open" in transaction})
+        log.error ({"closed" in transaction})
+        log.error ({transaction})
+        
         timestamp: int = transaction["timestamp"]
 
         if "open" in transaction:
