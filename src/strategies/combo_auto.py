@@ -227,33 +227,47 @@ class ComboAuto (BasicStrategy):
     ) -> bool:
         
         """ """
-                
         cancel_allowed: bool = False
-        
-        ONE_SECOND = 1000
-        ONE_MINUTE = ONE_SECOND * 60
 
-        hedging_attributes: dict = self.strategy_parameters
+        orders_currency = self.orders_currency_strategy
         
-        waiting_minute_before_cancel= hedging_attributes["waiting_minute_before_cancel"] * ONE_MINUTE
+        label_integer = get_label_integer(transaction["label"])
         
-        timestamp: int = transaction["timestamp"]
+        len_outstanding_closed_orders = len([o["amount"]  for o in orders_currency\
+                        if str(label_integer) in o['label']\
+                            and "closed" in o["label"]])
+        
+        log.info (f"len_outstanding_closed_orders {len_outstanding_closed_orders}")
 
-        if "open" in transaction["label"]:
+
+        if len_outstanding_closed_orders > 1:
+            cancel_allowed: bool = True
+                        
+        else:
+            ONE_SECOND = 1000
+            ONE_MINUTE = ONE_SECOND * 60
+
+            hedging_attributes: dict = self.strategy_parameters
             
-            cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
-                    waiting_minute_before_cancel,
-                    timestamp,
-                    server_time,
-                )
-
-        if "closed" in transaction["label"]:
+            waiting_minute_before_cancel= hedging_attributes["waiting_minute_before_cancel"] * ONE_MINUTE
             
-            cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
-                    waiting_minute_before_cancel,
-                    timestamp,
-                    server_time,
+            timestamp: int = transaction["timestamp"]
+
+            if "open" in transaction["label"]:
+                
+                cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
+                        waiting_minute_before_cancel,
+                        timestamp,
+                        server_time,
                     )
+
+            if "closed" in transaction["label"]:
+                
+                cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
+                        waiting_minute_before_cancel,
+                        timestamp,
+                        server_time,
+                        )
         
         return cancel_allowed
     
@@ -419,7 +433,8 @@ class ComboAuto (BasicStrategy):
             transactions_len = len(transactions) # sum product function applied only for 2 items.
             log.error (f"transactions_len {transactions_len}")
                         
-            if transactions_sum== 0 and transactions_len==2:
+            if transactions_sum== 0 \
+                and transactions_len==2:
             
                 traded_future = [o for o in transactions if "PERPETUAL" not  in o["instrument_name"]][0]
                 traded_price_future = (traded_future["price"])
@@ -434,7 +449,7 @@ class ComboAuto (BasicStrategy):
                 
                 log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
                     
-                log.warning (f"orders_currency {orders_currency}")
+                log.info (f"orders_currency {orders_currency}")
                 log.debug (f"not orders_currency {not orders_currency}")
                 
                 if orders_currency:
