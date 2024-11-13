@@ -369,6 +369,7 @@ class ComboAuto (BasicStrategy):
                         instrument_name_combo
                         )
                                                                 
+                    exit_params.update({"type": "limit"})
                     exit_params.update({"size": abs (traded_perpetual_size)})
                     exit_params.update({"price": combo_ticker[0]["best_bid_price"]})
                     
