@@ -12,6 +12,7 @@ from strategies.basic_strategy import (
     BasicStrategy,
     get_label,
     get_label_integer,
+    is_minimum_waiting_time_has_passed,
     size_rounding,)
 from utilities.pickling import (
     read_data,)
@@ -167,6 +168,30 @@ def get_basic_opening_parameters(strategy_label):
     
     return params
 
+   
+def check_if_minimum_waiting_time_has_passed(
+    threshold: float,
+    timestamp: int,
+    server_time: int,
+) -> bool:
+    """ """
+
+    cancel_allowed: bool = False
+    
+    minimum_waiting_time_has_passed: bool = is_minimum_waiting_time_has_passed(
+        server_time,
+        timestamp, 
+        threshold
+    )
+    
+    log.warning (f"minimum_waiting_time_has_passed {minimum_waiting_time_has_passed} threshold {threshold}")
+    log.warning (f"server_time {server_time} max_tstamp_orders {timestamp}")
+    
+    if minimum_waiting_time_has_passed:
+        cancel_allowed: bool = True
+
+    return cancel_allowed
+
             
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):
@@ -196,7 +221,68 @@ class ComboAuto (BasicStrategy):
             self.strategy_label,
             self.strategy_parameters)
         
+     
         
+    async def cancelling_orders (
+        self,
+        transaction: dict,
+        server_time: int
+    ) -> bool:
+        
+        """ """
+                
+        cancel_allowed: bool = False
+        
+        ONE_SECOND = 1000
+        ONE_MINUTE = ONE_SECOND * 60
+
+        hedging_attributes: dict = self.strategy_parameters
+        
+        waiting_minute_before_cancel= hedging_attributes["waiting_minute_before_cancel"] * ONE_MINUTE
+        
+        timestamp: int = transaction["timestamp"]
+
+        if "open" in transaction:
+            
+            cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
+                    waiting_minute_before_cancel,
+                    timestamp,
+                    server_time,
+                )
+
+        if "closed" in transaction:
+            
+            cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
+                    waiting_minute_before_cancel,
+                    timestamp,
+                    server_time,
+                    )
+        
+        return cancel_allowed
+    
+    
+    async def is_cancelling_orders_allowed(
+        self,
+        selected_transaction: list,
+        server_time: int,
+        ) -> dict:
+        """ """
+        
+        cancel_allowed, cancel_id = False, None
+        
+        cancel_allowed = await self.cancelling_orders (
+            selected_transaction,
+            server_time
+            )     
+           
+        if cancel_allowed:
+            cancel_id =  selected_transaction["order_id"] 
+            
+        return dict(
+            cancel_allowed = cancel_allowed,
+            cancel_id = cancel_id)
+
+
     async def is_send_and_cancel_open_order_allowed_combo_auto(
         self,
         instrument_name_combo: str,

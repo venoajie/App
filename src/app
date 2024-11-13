@@ -534,6 +534,16 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                     labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
                                                     
+                                                                                        
+                                                    for order in orders_currency_strategy:
+                                                        cancel_allowed: dict = await combo_auto.is_cancelling_orders_allowed(
+                                                            order,
+                                                            server_time,
+                                                            )
+                                                        
+                                                        if cancel_allowed["cancel_allowed"]:
+                                                            await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
+                                                    
                                                     #closing orders
                                                     for label in labels:
                                                         
