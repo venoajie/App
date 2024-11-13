@@ -634,9 +634,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         if  size_is_reconciled_each_other\
                                                             and  len_order_is_reconciled_each_other:
                                                                                                 
-                                                                
-                                                            log.debug (f"combo_attributes {combo_attributes}")
-                                                                
+                                                                                                                                
                                                             #result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
                                                             #                                                            send_closing_order, 
                                                             #                                                            instrument_ticker)
