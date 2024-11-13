@@ -175,7 +175,6 @@ class ComboAuto (BasicStrategy):
     my_trades_currency_strategy: list
     orders_currency_strategy: list
     notional: float
-    future_spread_attributes: list 
     perpetual_ticker: dict
     server_time: int
     leverage_perpetual: float = fields 
@@ -245,7 +244,7 @@ class ComboAuto (BasicStrategy):
         
         size_multiply_factor = 1
         
-        log.error (f"future_instrument_attributes {future_instrument_attributes}")
+        #log.error (f"future_instrument_attributes {future_instrument_attributes}")
         
         size = determine_opening_size(
             instrument_name_combo, 
