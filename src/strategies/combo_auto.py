@@ -118,7 +118,6 @@ def determine_exit_side_combo_auto(
     return exit_side
 
 
-
 def get_label_main(
     result: list, 
     strategy_label: str
@@ -129,6 +128,41 @@ def get_label_main(
         if parsing_label(strategy_label)["main"]
                     == parsing_label(o["label"])["main"]
                 ]
+    
+
+def get_outstanding_closed_orders(
+    orders_currency: dict, 
+    label_integer: int
+    ) -> list:
+    """ 
+    get outstanding closed orders for respective label
+    """
+
+    return [o  for o in orders_currency\
+        if str(label_integer) in o['label']\
+            and "closed" in o["label"]]
+    
+def basic_ordering (
+    orders_currency: dict, 
+    label_integer: int
+    ) -> list:
+    """ 
+    basic ordering
+    """
+    
+    if orders_currency:
+        outstanding_closed_orders = get_outstanding_closed_orders(
+                        orders_currency, 
+                        label_integer
+                        )
+        log.debug (f" outstanding_closed_orders { outstanding_closed_orders}")
+    
+    no_orders_at_all = not orders_currency
+    current_order_not_related_to_respective_label = (orders_currency \
+        and not outstanding_closed_orders)
+
+    return no_orders_at_all \
+        or current_order_not_related_to_respective_label
     
 def transactions_under_label_int(
     transactions: list,
@@ -238,7 +272,6 @@ class ComboAuto (BasicStrategy):
                             and "closed" in o["label"]])
         
         log.info (f"len_outstanding_closed_orders {len_outstanding_closed_orders}")
-
 
         if len_outstanding_closed_orders > 1:
             cancel_allowed: bool = True
@@ -395,8 +428,6 @@ class ComboAuto (BasicStrategy):
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
             order_parameters=[] if order_allowed == False else params,
-            cancel_allowed=cancel_allowed,
-            cancel_id= None 
         )
 
     async def is_send_exit_order_allowed_combo_auto(
@@ -425,7 +456,8 @@ class ComboAuto (BasicStrategy):
             
             label_integer = get_label_integer(label)
             
-            transactions = [o for o in my_trades_currency if str(label_integer) in o["label"]]
+            transactions = [o for o in my_trades_currency \
+                if str(label_integer) in o["label"]]
             
             log.error (f"transactions {transactions}")
             
@@ -436,7 +468,9 @@ class ComboAuto (BasicStrategy):
             if transactions_sum== 0 \
                 and transactions_len==2:
             
-                traded_future = [o for o in transactions if "PERPETUAL" not  in o["instrument_name"]][0]
+                traded_future = [o for o in transactions \
+                    if "PERPETUAL" not  in o["instrument_name"]][0]
+                
                 traded_price_future = (traded_future["price"])
                 traded_instrument_name_future = traded_future["instrument_name"] 
 
@@ -450,22 +484,17 @@ class ComboAuto (BasicStrategy):
                 log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
                     
                 log.info (f"orders_currency {orders_currency}")
-                log.debug (f"not orders_currency {not orders_currency}")
                 
-                if orders_currency:
-                    outstanding_closed_orders = [o  for o in orders_currency\
-                        if str(label_integer) in o['label']\
-                            and "closed" in o["label"]]
-                    
-                    log.warning (f"outstanding_closed_orders {outstanding_closed_orders}")
-                    log.debug (f"not outstanding_closed_orders {not outstanding_closed_orders}")
                 
+                basic_ordering_is_ok = basic_ordering (
+                    orders_currency,
+                    label_integer
+                    )
                 
                 transactions_under_label_int_example = [{'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-PERPETUAL', 'label': 'futureSpread-open-1729232152632', 'amount': 10.0, 'price': 68126.0, 'side': 'buy'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}, {'instrument_name': 'BTC-25OCT24', 'label': 'futureSpread-open-1729232152632', 'amount': -10.0, 'price': 68235.5, 'side': 'sell'}]
                 
                 if abs(transactions_under_label_int_all ["premium_pct"]) > tp_threshold \
-                    and (not orders_currency \
-                        or (orders_currency and not outstanding_closed_orders)):   
+                    and basic_ordering_is_ok:   
                             
                     traded_perpetual = [o for o in transactions \
                         if instrument_name_perpetual in o["instrument_name"]][0]
