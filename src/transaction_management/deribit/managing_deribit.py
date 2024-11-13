@@ -201,12 +201,29 @@ class ModifyOrderDb(SendApiRequest):
          [
              {
                 'positions': [
-                     {'estimated_liquidation_price': None, 'size_currency': -0.031537551, 'total_profit_loss': -0.005871738, 'realized_profit_loss': 0.0, 'floating_profit_loss': -0.002906191, 'leverage': 25, 'average_price': 74847.72, 'delta': -0.031537551, 'mark_price': 88783.05, 'settlement_price': 81291.98, 'instrument_name': 'BTC-15NOV24', 'index_price': 88627.96, 'direction': 'sell', 'open_orders_margin': 0.0, 'initial_margin': 0.001261552, 'maintenance_margin': 0.000630801, 'kind': 'future', 'size': -2800.0}, 
-                     {'estimated_liquidation_price': None, 'size_currency': -0.006702271, 'total_profit_loss': -0.001912148, 'realized_profit_loss': 0.0, 'floating_profit_loss': -0.000624473, 'leverage': 25, 'average_price': 69650.67, 'delta': -0.006702271, 'mark_price': 89521.9, 'settlement_price': 81891.77, 'instrument_name': 'BTC-29NOV24', 'index_price': 88627.96, 'direction': 'sell', 'open_orders_margin': 0.0, 'initial_margin': 0.000268093, 'maintenance_margin': 0.000134048, 'kind': 'future', 'size': -600.0}, 
-                     {'estimated_liquidation_price': None, 'size_currency': 0.036869785, 'realized_funding': -2.372e-05, 'total_profit_loss': 0.005782196, 'realized_profit_loss': 0.000591453, 'floating_profit_loss': 0.002789786, 'leverage': 50, 'average_price': 76667.01, 'delta': 0.036869785, 'interest_value': 0.2079087278497569, 'mark_price': 88690.51, 'settlement_price': 81217.47, 'instrument_name': 'BTC-PERPETUAL', 'index_price': 88627.96, 'direction': 'buy', 'open_orders_margin': 3.489e-06, 'initial_margin': 0.000737464, 'maintenance_margin': 0.000368766, 'kind': 'future', 'size': 3270.0}
+                     {'estimated_liquidation_price': None, 'size_currency': -0.031537551, 'total_profit_loss': -0.005871738, 
+                     'realized_profit_loss': 0.0, 'floating_profit_loss': -0.002906191, 'leverage': 25, 'average_price': 74847.72,
+                     'delta': -0.031537551, 'mark_price': 88783.05, 'settlement_price': 81291.98, 'instrument_name': 'BTC-15NOV24',
+                     'index_price': 88627.96, 'direction': 'sell', 'open_orders_margin': 0.0, 'initial_margin': 0.001261552, 
+                     'maintenance_margin': 0.000630801, 'kind': 'future', 'size': -2800.0}, 
+                     {'estimated_liquidation_price': None, 'size_currency': -0.006702271, 'total_profit_loss': -0.001912148, 
+                     'realized_profit_loss': 0.0, 'floating_profit_loss': -0.000624473, 'leverage': 25, 'average_price': 69650.67, 
+                     'delta': -0.006702271, 'mark_price': 89521.9, 'settlement_price': 81891.77, 'instrument_name': 'BTC-29NOV24', 
+                     'index_price': 88627.96, 'direction': 'sell', 'open_orders_margin': 0.0, 'initial_margin': 0.000268093, 
+                     'maintenance_margin': 0.000134048, 'kind': 'future', 'size': -600.0}, 
+                     {'estimated_liquidation_price': None, 'size_currency': 0.036869785, 'realized_funding': -2.372e-05, 'total_profit_loss': 0.005782196, 
+                     'realized_profit_loss': 0.000591453, 'floating_profit_loss': 0.002789786, 'leverage': 50, 'average_price': 76667.01, 
+                     'delta': 0.036869785, 'interest_value': 0.2079087278497569, 'mark_price': 88690.51, 'settlement_price': 81217.47, 
+                     'instrument_name': 'BTC-PERPETUAL', 'index_price': 88627.96, 'direction': 'buy', 'open_orders_margin': 3.489e-06, 
+                     'initial_margin': 0.000737464, 'maintenance_margin': 0.000368766, 'kind': 'future', 'size': 3270.0}
                      ], 
                 'open_orders': [
-                     {'is_liquidation': False, 'risk_reducing': False, 'order_type': 'limit', 'creation_timestamp': 1731390729846, 'order_state': 'open', 'reject_post_only': False, 'contracts': 1.0, 'average_price': 0.0, 'reduce_only': False, 'post_only': True, 'last_update_timestamp': 1731390729846, 'filled_amount': 0.0, 'replaced': False, 'mmp': False, 'web': False, 'api': True, 'instrument_name': 'BTC-PERPETUAL', 'amount': 10.0, 'order_id': '80616245864', 'max_show': 10.0, 'time_in_force': 'good_til_cancelled', 'direction': 'buy', 'price': 88569.5, 'label': 'hedgingSpot-closed-1731387973670'}
+                     {'is_liquidation': False, 'risk_reducing': False, 'order_type': 'limit', 'creation_timestamp': 1731390729846, 
+                     'order_state': 'open', 'reject_post_only': False, 'contracts': 1.0, 'average_price': 0.0, 
+                     'reduce_only': False, 'post_only': True, 'last_update_timestamp': 1731390729846, 'filled_amount': 0.0,
+                     'replaced': False, 'mmp': False, 'web': False, 'api': True, 'instrument_name': 'BTC-PERPETUAL', 'amount': 10.0,
+                     'order_id': '80616245864', 'max_show': 10.0, 'time_in_force': 'good_til_cancelled', 'direction': 'buy',
+                     'price': 88569.5, 'label': 'hedgingSpot-closed-1731387973670'}
                      ], 
                 'uid': 148510
                 }
@@ -372,8 +389,10 @@ class ModifyOrderDb(SendApiRequest):
                 # update param orders with instrument
                 params.update({"instrument_name": instrument})
 
-            label_and_side_consistent = is_label_and_side_consistent(non_checked_strategies,
-                                                                     params)
+            label_and_side_consistent = is_label_and_side_consistent(
+                non_checked_strategies,
+                params
+                )
 
             if  label_and_side_consistent:
                 await inserting_additional_params(params)
