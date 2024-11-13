@@ -64,6 +64,7 @@ def cached_ticker_data(currencies):
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
     data caching
+    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
 
     Args:
         instrument_ticker (_type_): _description_
@@ -219,7 +220,7 @@ async def get_result_from_db_queries (
     
 def future_spread_attributes (
     position_without_combo:  list,
-    active_futures: list,
+    instrument_attributes_futures: list,
     currency_upper: str,
     notional: float,
     best_ask_prc: float,
@@ -228,13 +229,13 @@ def future_spread_attributes (
 
     #log.warning (currency_upper)    
     #log.info (notional)    
-    #log.error ([o["instrument_name"] for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
+    #log.error ([o["instrument_name"] for o in instrument_attributes_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
     #          )       
-    #log.error ([ (reading_from_pkl_data("ticker",  o["instrument_name"])) for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
+    #log.error ([ (reading_from_pkl_data("ticker",  o["instrument_name"])) for o in instrument_attributes_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
     #          )    
-    #log.debug ([ (reading_from_pkl_data("ticker",  o["instrument_name"]))[0] for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
+    #log.debug ([ (reading_from_pkl_data("ticker",  o["instrument_name"]))[0] for o in instrument_attributes_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
     #          )    
-    #log.warning ([ (reading_from_pkl_data("ticker",  o["instrument_name"]))[0]["mark_price"] for o in active_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
+    #log.warning ([ (reading_from_pkl_data("ticker",  o["instrument_name"]))[0]["mark_price"] for o in instrument_attributes_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
     #          )    
     
     return  [{'instrument_name':o['instrument_name'], 
@@ -247,7 +248,7 @@ def future_spread_attributes (
                                                               o["instrument_name"])[0]["mark_price"]) - best_ask_prc
                                                    )/((o["expiration_timestamp"] - server_time)/1000/60/60/24
                                                       )/best_ask_prc,
-                                                   } for o in active_futures if "PERP" not in o["instrument_name"]\
+                                                   } for o in instrument_attributes_futures if "PERP" not in o["instrument_name"]\
                                                        and currency_upper  in o["instrument_name"]
                             ]
                           
@@ -321,7 +322,7 @@ class RunningStrategy(ModifyOrderDb):
                     settlement_periods
                     )  
                 
-                active_futures = futures_instruments["active_futures"]   
+                instrument_attributes_futures = futures_instruments["instrument_attributes_futures"]   
 
                 active_combo_perp = futures_instruments["active_combo_perp"]  
 
@@ -605,10 +606,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                 mark_price_combo = ticker_combo["mark_price"]
                                                                 log.debug (f"instrument_name_combo {instrument_name_combo}")
                                                         
-                                                                send_order: dict = await combo_auto.is_send_and_cancel_open_order_allowed_combo_auto(
-                                                                    instrument_name_combo,
+                                                                send_order: dict = await combo_auto.is_send_open_order_allowed_constructing_combo(
                                                                     ticker_future,
-                                                                    active_futures,
+                                                                    instrument_attributes_futures,
                                                                     )
                                                                 
                                                                 log.error (f"send_order {send_order}")
@@ -625,7 +625,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 await self.modify_order_and_db.if_cancel_is_true(send_closing_order)
 
                                                     
-                                                    for instrument_name in active_futures:
+                                                    for instrument_name in instrument_attributes_futures:
 
                                                         len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
                                                             sub_account,

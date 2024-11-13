@@ -73,7 +73,7 @@ def convert_list_to_dict (transaction: list) -> dict:
 
 def determine_opening_size(
     instrument_name: str,
-    future_instrument_attributes,
+    instrument_attributes_futures,
     notional: float, 
     factor: float
     ) -> int:
@@ -83,15 +83,15 @@ def determine_opening_size(
     
     return size_rounding(
         instrument_name,
-        future_instrument_attributes,
+        instrument_attributes_futures,
         proposed_size)
 
 def is_contango(
-    traded_price_future: float,
-    traded_price_perpetual: float,
+    price_future: float,
+    price_perpetual: float,
     ) -> int:
     
-    return traded_price_future > traded_price_perpetual
+    return price_future > price_perpetual
 
 
 def determine_exit_side_combo_auto(
@@ -280,11 +280,10 @@ class ComboAuto (BasicStrategy):
             cancel_id = cancel_id)
 
 
-    async def is_send_and_cancel_open_order_allowed_combo_auto(
+    async def is_send_open_order_allowed_constructing_combo(
         self,
-        instrument_name_combo: str,
         ticker_future,
-        future_instrument_attributes ,
+        instrument_attributes_futures,
         ) -> dict:
         """ """
         
@@ -312,7 +311,7 @@ class ComboAuto (BasicStrategy):
 
         params: dict = get_basic_opening_parameters(strategy_label)
         
-        order_allowed, cancel_allowed, cancel_id = False, False, None
+        order_allowed = False
         ask_price_future = ticker_future ["best_ask_price"]
         bid_price_future = ticker_future ["best_bid_price"]
         ask_price_perpetual = self.perpetual_ticker ["best_ask_price"]
@@ -327,11 +326,19 @@ class ComboAuto (BasicStrategy):
         
         size_multiply_factor = 1
         
-        #log.error (f"future_instrument_attributes {future_instrument_attributes}")
+        contango = is_contango(
+            ask_price_future,
+            bid_price_perpetual,
+            )
+        
+        if contango:
+            pass
+        
+        #log.error (f"instrument_attributes_futures {instrument_attributes_futures}")
         
         size = determine_opening_size(
             instrument_name_combo, 
-            future_instrument_attributes, 
+            instrument_attributes_futures, 
             self.max_position,
             size_multiply_factor
             )
