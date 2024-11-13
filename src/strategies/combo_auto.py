@@ -184,9 +184,6 @@ def check_if_minimum_waiting_time_has_passed(
         threshold
     )
     
-    log.warning (f"minimum_waiting_time_has_passed {minimum_waiting_time_has_passed} threshold {threshold}")
-    log.warning (f"server_time {server_time} max_tstamp_orders {timestamp}")
-    
     if minimum_waiting_time_has_passed:
         cancel_allowed: bool = True
 
@@ -239,11 +236,6 @@ class ComboAuto (BasicStrategy):
         hedging_attributes: dict = self.strategy_parameters
         
         waiting_minute_before_cancel= hedging_attributes["waiting_minute_before_cancel"] * ONE_MINUTE
-        
-        log.error (f"waiting_minute_before_cancel {waiting_minute_before_cancel}")
-        log.error ("open" in transaction["label"])
-        log.error ("closed" in transaction["label"])
-        log.error (transaction)
         
         timestamp: int = transaction["timestamp"]
 

@@ -452,7 +452,7 @@ class HedgingSpot(BasicStrategy):
         
         timestamp: int = transaction["timestamp"]
 
-        if "open" in transaction:
+        if "open" in transaction["label"]:
 
             open_size_not_over_bought  =  self.over_hedged_opening
                     
@@ -485,7 +485,7 @@ class HedgingSpot(BasicStrategy):
                     
                     cancel_allowed = True
         
-        if "closed" in transaction:
+        if "closed" in transaction["label"]:
 
             exit_size_not_over_bought = net_size_not_over_bought (
                 self.my_trades_currency_strategy,
