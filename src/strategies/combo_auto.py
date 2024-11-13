@@ -442,7 +442,7 @@ class ComboAuto (BasicStrategy):
 
         log.info (f"label {label}")
                 
-        order_allowed, cancel_allowed, cancel_id = False, False, None
+        order_allowed = False
         my_trades_currency = self.my_trades_currency_strategy
         orders_currency = self.orders_currency_strategy
         
@@ -536,6 +536,4 @@ class ComboAuto (BasicStrategy):
             order_allowed= order_allowed,
             order_parameters=(
                 [] if order_allowed == False else exit_params),
-            cancel_allowed=cancel_allowed,
-            cancel_id=None if not cancel_allowed else cancel_id
         )
