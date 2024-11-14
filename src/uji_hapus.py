@@ -20,7 +20,7 @@ async def distribute_closed_transactions(
     """
     """
         
-    query: list  = f"SELECT instrument_name, label,amount_dir,trade_id FROM my_trades_all_json WHERE label NOT LIKE '%1730845689850%';"
+    query: list  = f"SELECT instrument_name, label,amount_dir,trade_id FROM my_trades_all_json WHERE label NOT LIKE '%1730845689850%' AND label LIKE '%futureSpread%';"
     
     result = await executing_query_with_return(query)
     
@@ -28,18 +28,5 @@ async def distribute_closed_transactions(
         print (transaction)
       
             
-        #insert closed transaction to db for closed transaction
-        await insert_tables("my_trades_closed_json", 
-                            transaction)
-
-        #delete respective transaction form active db
-        trade_id=transaction["trade_id"]
-        await deleting_row(
-            "my_trades_all_json",
-            "databases/trading.sqlite3",
-            where_filter,
-            "=",
-            trade_id,
-        )
     
 asyncio.run (distribute_closed_transactions(where_filter))
