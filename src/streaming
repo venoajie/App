@@ -617,12 +617,6 @@ class StreamAccountData(ModifyOrderDb):
                     "size or open order is inconsistent",
                     "general_error")
 
-            if not label:
-                
-                await self.modify_order_and_db. labelling_the_unlabelled_and_resend_it(
-                    non_checked_strategies,
-                    order,
-                    instrument_name)
     
 async def distribute_ticker_result_as_per_data_type(
     my_path_ticker: str, 

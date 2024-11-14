@@ -7,8 +7,6 @@ from loguru import logger as log
 from db_management.sqlite_management import(
     deleting_row,
     insert_tables)
-from strategies.basic_strategy import(
-    get_additional_params_for_open_label,)
 from websocket_management.cleaning_up_transactions import (
     clean_up_closed_transactions,)
 
@@ -41,14 +39,6 @@ async def saving_traded_orders (
     instrument_name = trade["instrument_name"]
     
     label= trade["label"]
-    
-    # check if transaction has additional attributes. If no, provide it with them
-    if "open" in label or "combo_id" in trade:
-        
-        await get_additional_params_for_open_label (
-            trade, 
-            label
-            )
 
     # insert clean trading transaction
     if "-FS-" not in instrument_name:
