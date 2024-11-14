@@ -8,9 +8,7 @@ from db_management.sqlite_management import(
     deleting_row,
     insert_tables)
 from strategies.basic_strategy import(
-    get_transaction_side,        
-    get_additional_params_for_open_label,
-    get_additional_params_for_futureSpread_transactions,)
+    get_additional_params_for_open_label,)
 from websocket_management.cleaning_up_transactions import (
     clean_up_closed_transactions,)
 
@@ -26,44 +24,6 @@ def telegram_bot_sendtext(
         purpose)
     
     
-def get_custom_label(transaction: list) -> str:
-
-    side= transaction["direction"]
-    side_label= "Short" if side== "sell" else "Long"
-    
-    try:
-        last_update= transaction["timestamp"]
-    except:
-        try:
-            last_update= transaction["last_update_timestamp"]
-        except:
-            last_update= transaction["creation_timestamp"]
-    
-    return (f"custom{side_label.title()}-open-{last_update}")
-    
-def labelling_unlabelled_transaction(order: dict) -> None:
-
-    side= get_transaction_side(order)
-    order.update({"everything_is_consistent": True})
-    order.update({"order_allowed": True})
-    order.update({"entry_price": order["price"]})
-    order.update({"size": order["amount"]})
-    order.update({"type": "limit"})
-    order.update({"side": side})
-    
-    if "combo_id" in order:
-        get_additional_params_for_futureSpread_transactions(order)
-    else:        
-        label_open: str = get_custom_label(order)
-        order.update({"label": label_open})
-    log.info (f"labelling_unlabelled_transaction {order}")
-    
-    return dict(
-        order=order,
-        label_open=label_open
-        )
-
-
 async def saving_traded_orders (
     trade: str,
     table: str,
@@ -80,11 +40,7 @@ async def saving_traded_orders (
 
     instrument_name = trade["instrument_name"]
     
-    try:
-        label= trade["label"]
-    except:
-        label= get_custom_label(trade)
-        trade.update({"label": label})
+    label= trade["label"]
     
     # check if transaction has additional attributes. If no, provide it with them
     if "open" in label or "combo_id" in trade:

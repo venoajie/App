@@ -391,7 +391,6 @@ class ComboAuto (BasicStrategy):
             )
         
         len_open_orders: int = get_transactions_len(open_orders_label_strategy)
-        log.debug (f"len_open_orders {len_open_orders}")
 
         # balancing
         if self.delta < 0:
@@ -422,6 +421,7 @@ class ComboAuto (BasicStrategy):
                 if delta_time_seconds > threshold:
                     order_allowed = True      
                     
+        log.debug (f"len_open_orders {len_open_orders}")
         log.debug (f"size {size}")
         log.debug (f"params {params}")
 
@@ -459,11 +459,9 @@ class ComboAuto (BasicStrategy):
             transactions = [o for o in my_trades_currency \
                 if str(label_integer) in o["label"]]
             
-            log.error (f"transactions {transactions}")
             
             transactions_sum = sum([ o["amount"] for o in transactions])
             transactions_len = len(transactions) # sum product function applied only for 2 items.
-            log.error (f"transactions_len {transactions_len}")
                         
             if transactions_sum== 0 \
                 and transactions_len==2:
@@ -480,11 +478,6 @@ class ComboAuto (BasicStrategy):
                     traded_price_future,
                     ask_price_perpetual
                     )
-                
-                log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
-                    
-                log.info (f"orders_currency {orders_currency}")
-                
                 
                 basic_ordering_is_ok = basic_ordering (
                     orders_currency,
@@ -529,8 +522,15 @@ class ComboAuto (BasicStrategy):
                     exit_params.update({"side":  (exit_side)})
                                         
                     order_allowed = True
-                    
-        log.critical (f"exit_params {exit_params}")
+         
+        if transactions_len==2:
+            log.error (f"transactions {transactions}")
+            log.error (f"transactions_len {transactions_len}")
+            log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
+            
+            log.info (f"orders_currency {orders_currency}")
+            
+            log.critical (f"exit_params {exit_params}")
 
         return dict(
             order_allowed= order_allowed,

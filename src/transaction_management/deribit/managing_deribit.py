@@ -707,33 +707,3 @@ class ModifyOrderDb(SendApiRequest):
                     'size or open order is inconsistent',
                     "general_error"
                     )
-
-            if not label:
-                
-                await self.labelling_the_unlabelled_and_resend_it(
-                    non_checked_strategies,
-                    order,
-                    instrument_name
-                    )
-        
-    async def labelling_the_unlabelled_and_resend_it(
-        self,
-        non_checked_strategies,
-        order,
-        instrument_name):
-        """_summary_
-        """
-        from transaction_management.deribit.orders_management import labelling_unlabelled_transaction
-        
-        labelling_order= labelling_unlabelled_transaction (order)
-        labelled_order= labelling_order["order"]
-        
-        order_id= order["order_id"]
-
-        await self.cancel_by_order_id (order_id)
-        
-        await self.if_order_is_true(
-            non_checked_strategies,
-            labelled_order,
-            instrument_name)
-
