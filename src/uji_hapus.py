@@ -27,4 +27,4 @@ async def distribute_closed_transactions(
     print (result)
       
         
-asyncio (distribute_closed_transactions(where_filter))
+asyncio.run (distribute_closed_transactions(where_filter))
