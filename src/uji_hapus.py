@@ -20,7 +20,7 @@ async def distribute_closed_transactions(
     """
     """
         
-    query: list  = f"SELECT instrument_name, label,amount,trade_id FROM my_trades_all_json WHERE label NOT LIKE '%1730845689850%';"
+    query: list  = f"SELECT instrument_name, label,amount_dir,trade_id FROM my_trades_all_json WHERE label NOT LIKE '%1730845689850%';"
     
     result = await executing_query_with_return(query)
     
