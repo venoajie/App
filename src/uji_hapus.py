@@ -24,7 +24,8 @@ async def distribute_closed_transactions(
     
     result = await executing_query_with_return(query)
     
-    print (result)
+    for transaction in result:
+        print (transaction)
       
         
     #insert closed transaction to db for closed transaction
