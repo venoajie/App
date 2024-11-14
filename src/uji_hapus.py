@@ -27,18 +27,19 @@ async def distribute_closed_transactions(
     for transaction in result:
         print (transaction)
       
-        
-    #insert closed transaction to db for closed transaction
-    await insert_tables("my_trades_closed_json", 
-                        closed_transaction)
+            
+        #insert closed transaction to db for closed transaction
+        await insert_tables("my_trades_closed_json", 
+                            transaction)
 
-    #delete respective transaction form active db
-    await deleting_row(
-        trade_table,
-        "databases/trading.sqlite3",
-        where_filter,
-        "=",
-        trade_id,
-    )
+        #delete respective transaction form active db
+        trade_id=transaction["trade_id"]
+        await deleting_row(
+            "my_trades_all_json",
+            "databases/trading.sqlite3",
+            where_filter,
+            "=",
+            trade_id,
+        )
     
 asyncio.run (distribute_closed_transactions(where_filter))
