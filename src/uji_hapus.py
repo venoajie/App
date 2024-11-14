@@ -11,7 +11,7 @@ from db_management.sqlite_management import(
 
 where_filter = f"trade_id"
 
-column_list: str= "instrument_name","label", "amount", where_filter
+column_list: str= "instrument_name","label", "amount", "trade_id"
         
         
 async def distribute_closed_transactions(
@@ -20,11 +20,24 @@ async def distribute_closed_transactions(
     """
     """
         
-    query: list  = f"SELECT {column_list} FROM my_trades_all_json WHERE label NOT LIKE '%1730845689850%'"
+    query: list  = f"SELECT instrument_name, label,amount,trade_id FROM my_trades_all_json WHERE label NOT LIKE '%1730845689850%';"
     
     result = await executing_query_with_return(query)
     
     print (result)
       
+        
+    #insert closed transaction to db for closed transaction
+    await insert_tables("my_trades_closed_json", 
+                        closed_transaction)
+
+    #delete respective transaction form active db
+    await deleting_row(
+        trade_table,
+        "databases/trading.sqlite3",
+        where_filter,
+        "=",
+        trade_id,
+    )
     
 asyncio.run (distribute_closed_transactions(where_filter))
