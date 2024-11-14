@@ -562,7 +562,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 )
                                                             
                                                             if result_order:
-                                                                log.error (f"result_order {result_order}")
+                                                                #log.error (f"result_order {result_order}")
                                                                 data_orders = result_order["result"]
 
                                                                 await self.modify_order_and_db.update_user_changes_non_ws(
