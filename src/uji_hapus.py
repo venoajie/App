@@ -20,11 +20,11 @@ async def distribute_closed_transactions(
     """
     """
         
-    query: list  = f"SELECT column_list FROM my_trades_all_json WHERE label NOT LIKE '%1730845689850%'"
+    query: list  = f"SELECT {column_list} FROM my_trades_all_json WHERE label NOT LIKE '%1730845689850%'"
     
     result = await executing_query_with_return(query)
     
     print (result)
       
-        
+    
 asyncio.run (distribute_closed_transactions(where_filter))
