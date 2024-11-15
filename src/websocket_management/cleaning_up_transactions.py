@@ -267,8 +267,6 @@ def check_whether_size_db_reconciled_each_other(
     from_transaction_log) -> None:
     """ """
     
-    log.info (f" {instrument_name}")
-    
     if sub_account :
         
         sub_account_size_instrument = [o["size"] for o in sub_account ["positions"] \
@@ -293,10 +291,7 @@ def check_whether_size_db_reconciled_each_other(
             current_position_log = 0 if not from_transaction_log_instrument \
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  last_time_stamp_log == o["user_seq"]][0]
-                
-            log.error(f"last_time_stamp_log {last_time_stamp_log}")
-            log.error(f"current_position_log {current_position_log}")
-        # just in case, trade id = None(because of settlement)
+                        # just in case, trade id = None(because of settlement)
         except:
                 
             examples_from_transaction_log_instrument = [
