@@ -437,8 +437,10 @@ async def hedging_spot_currency(
         
             index_attributes = randbelow(2)
             log.info (instrument_attributes_futures_for_hedging)
-            instrument_attributes = instrument_attributes_futures_for_hedging[index_attributes]
-            log.debug (instrument_attributes_futures_for_hedging)
+            instrument_attributes = instrument_attributes_futures_for_hedging[index_attributes][0]
+            
+            
+            log.debug (instrument_attributes)
             
             if bearish:
                 index_attributes = randbelow(2)
@@ -963,7 +965,7 @@ async def main():
     
     instrument_attributes_futures_for_hedging = [o for o in futures_instruments["active_futures"] \
         if o["settlement_period"] != "month" and\
-             o["kind"] != "future"]   
+             o["kind"] == "future"]   
 
 
     try:
