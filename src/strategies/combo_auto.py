@@ -326,7 +326,8 @@ class ComboAuto (BasicStrategy):
             
             max_stacked_orders = 3
            
-        log.error (f"len_open_orders_instrument {len_open_orders_instrument} delta_time_seconds {delta_time_seconds} delta_time_seconds > threshold {delta_time_seconds > threshold}")
+            log.error (f"len_open_orders_instrument {len_open_orders_instrument} delta_time_seconds {delta_time_seconds} delta_time_seconds > threshold {delta_time_seconds > threshold}")
+        
         log.error (f"open_orders_instrument {open_orders_instrument} ")
         if not open_orders_instrument or (delta_time_seconds > threshold and len_open_orders_instrument < max_stacked_orders):
         
