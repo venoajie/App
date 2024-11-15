@@ -951,7 +951,7 @@ async def main():
         settlement_periods
         )  
     
-    instrument_attributes_futures_for_hedging = futures_instruments["active_futures"]   
+    instrument_attributes_futures_for_hedging = [o for o in futures_instruments["active_futures"] if o["settlement_period"]=="week"]   
 
 
     try:
