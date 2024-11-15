@@ -321,9 +321,9 @@ class RunningStrategy(ModifyOrderDb):
                     settlement_periods
                     )  
                 
-                instrument_attributes_futures = futures_instruments["active_futures"]   
+                instrument_attributes_futures_all = futures_instruments["active_futures"]   
 
-                instrument_attributes_combo = futures_instruments["active_combo"]  
+                instrument_attributes_combo_all = futures_instruments["active_combo"]  
                 
                 #log.info (instrument_attributes_combo)
 
@@ -591,7 +591,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 await sleep_and_restart ()
                                                                 
                                                     # send combo orders-automatic
-                                                    for instrument_attributes_combo in instrument_attributes_combo:
+                                                    for instrument_attributes_combo in instrument_attributes_combo_all:
                                                         
                                                         try:
                                                             instrument_name_combo = instrument_attributes_combo["instrument_name"]
@@ -640,7 +640,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     ticker_future,
                                                                     ticker_combo,
                                                                     instrument_name_combo,
-                                                                    instrument_attributes_futures,
+                                                                    instrument_attributes_futures_all,
                                                                     instrument_attributes_combo,
                                                                     target_transaction_per_hour
                                                                     )
