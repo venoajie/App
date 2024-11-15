@@ -503,8 +503,6 @@ class ComboAuto (BasicStrategy):
                         if str(label_integer) in o['label']\
                             and "closed" in o["label"]])
         
-        log.info (f"len_outstanding_closed_orders {len_outstanding_closed_orders}")
-
         if len_outstanding_closed_orders > 1:
             cancel_allowed: bool = True
                         
