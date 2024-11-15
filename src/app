@@ -325,7 +325,7 @@ class RunningStrategy(ModifyOrderDb):
 
                 instrument_attributes_combo = futures_instruments["active_combo"]  
                 
-                #log.info (instrument_attributes_combo)
+                log.info (instrument_attributes_combo)
 
                 instruments_name = futures_instruments["instruments_name"]   
                 
@@ -599,6 +599,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         except:
                                                             instrument_name_combo = None
                                                             
+                                                        log.info (f"instrument_attributes_combo {instrument_attributes_combo}")
                                                         log.critical (f"instrument_name_combo {instrument_name_combo}")
                                                         if  instrument_name_combo is not None and currency_upper in instrument_name_combo:
                                                             
