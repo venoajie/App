@@ -436,8 +436,8 @@ async def hedging_spot_currency(
             
         
             index_attributes = randbelow(2)
-            log.info (instrument_attributes_futures_for_hedging)
-            instrument_attributes = instrument_attributes_futures_for_hedging[index_attributes][0]
+
+            instrument_attributes = instrument_attributes_futures_for_hedging[index_attributes]
             
             
             log.debug (instrument_attributes)
