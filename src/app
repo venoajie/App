@@ -325,7 +325,7 @@ class RunningStrategy(ModifyOrderDb):
 
                 instrument_attributes_combo = futures_instruments["active_combo"]  
                 
-                log.info (instrument_attributes_combo)
+                #log.info (instrument_attributes_combo)
 
                 instruments_name = futures_instruments["instruments_name"]   
                 
@@ -677,42 +677,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                         await sleep_and_restart ()
 
                                                     
-                                                    for instrument_name in instrument_attributes_futures:
-
-                                                        len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
-                                                            sub_account,
-                                                            instrument_name,
-                                                            orders_currency
-                                                            )
-
-                                                        size_is_reconciled_each_other = check_whether_size_db_reconciled_each_other(
-                                                            sub_account,
-                                                            instrument_name,
-                                                            my_trades_currency,
-                                                            from_transaction_log
-                                                            )       
-                                                                        
-                                                        if  size_is_reconciled_each_other\
-                                                            and  len_order_is_reconciled_each_other:
-                                                                                                
-                                                                                                                                
-                                                            #result_order = await self.modify_order_and_db.if_order_is_true(non_checked_strategies,
-                                                            #                                                            send_closing_order, 
-                                                            #                                                            instrument_ticker)
-                                                            
-                                                            if False and result_order:
-                                                                log.error (f"result_order {result_order}")
-                                                                data_orders = result_order["result"]
-                                                                await self.update_user_changes_non_ws (
-                                                                    non_checked_strategies,
-                                                                    data_orders, 
-                                                                    currency, 
-                                                                    order_db_table,
-                                                                    trade_db_table, 
-                                                                    archive_db_table,
-                                                                    transaction_log_trading_table)
-                                                                await sleep_and_restart ()
-                                                                
                                                         log.warning (f"strategy {strategy}-DONE")
 
                                                     if delta_time_expiration < 0:
