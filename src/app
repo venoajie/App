@@ -599,8 +599,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         except:
                                                             instrument_name_combo = None
                                                             
-                                                        log.info (f"instrument_attributes_combo {instrument_attributes_combo}")
-                                                        log.critical (f"instrument_name_combo {instrument_name_combo}")
+                                                        log.critical (f"auto_combo {instrument_name_combo}")
                                                         if  instrument_name_combo is not None and currency_upper in instrument_name_combo:
                                                             
                                                             log.debug (f"instrument_name_combo {instrument_name_combo}")
@@ -645,9 +644,10 @@ class RunningStrategy(ModifyOrderDb):
                                                                     target_transaction_per_hour
                                                                     )
                                                         
-                                                                log.error (f"send_order {send_order}")
-
+                                                                
                                                                 if send_order["order_allowed"]:
+                                                                    
+                                                                    log.error (f"send_order {send_order}")
                                                                     
                                                                     ask_price_combo = ticker_combo ["best_ask_price"]
                                                                     
