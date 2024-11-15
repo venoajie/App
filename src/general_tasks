@@ -369,7 +369,7 @@ async def hedging_spot_currency(
     
     try:
         log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        instrument_ticker: str = (f"{currency}-PERPETUAL")
+        instrument_name: str = (f"{currency}-PERPETUAL")
         log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     
         TA_result_data_all = await querying_table("market_analytics_json")
@@ -383,9 +383,9 @@ async def hedging_spot_currency(
         tick_TA=  max([o["tick"] for o in TA_result_data])
         log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         
-        perpetual_ticker: list = reading_from_pkl_data(
+        instrument_ticker: list = reading_from_pkl_data(
             "ticker",
-            instrument_ticker
+            instrument_name
             )
                             
         # get portfolio data  
@@ -402,51 +402,53 @@ async def hedging_spot_currency(
         
                         
         if  equity > 0\
-                and perpetual_ticker:
+                and instrument_ticker:
             
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 
-            perpetual_ticker = perpetual_ticker[0]
+            instrument_ticker = instrument_ticker[0]
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 
-            index_price: float = perpetual_ticker ["index_price"]  
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            
             strategy_attributes = config_app["strategies"]
                     
             strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
                             
             threshold_market_condition: float = strategy_params ["delta_price_pct"]
-            
+
+            index_price: float = instrument_ticker ["index_price"]  
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
+            notional: float = compute_notional_value(
+                index_price, 
+                equity
+                )
+                                    
             market_condition: dict = await get_market_condition_hedging(
                 TA_result_data,
                 index_price,
                 threshold_market_condition
                 )
             
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
-            
-            index_attributes = randbelow(2)
-            log.critical (index_attributes)
-            
-            instrument_attributes_futures = instrument_attributes_futures_for_hedging[index_attributes]
-            
-            log.error (instrument_attributes_futures)
-            
-            if strong_bearish:
-                pass
             
             #neutral = market_condition["neutral_price"]
             log.error (f"market_condition {market_condition}")
             
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            # get strategies that have not short/long attributes in the label 
-            non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                if o["non_checked_for_size_label_consistency"]==True]
+        
+            index_attributes = randbelow(2)
+            log.info (instrument_attributes_futures_for_hedging)
+            instrument_attributes = instrument_attributes_futures_for_hedging[index_attributes][0]
+            log.debug (instrument_attributes_futures_for_hedging)
             
-            cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                if o["cancellable"]==True]
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            if bearish:
+                index_attributes = randbelow(2)
+                instrument_attributes = instrument_attributes_futures_for_hedging[index_attributes][0]
+                instrument_name: str = instrument_attributes ["instrument_name"] 
+                instrument_ticker: list = reading_from_pkl_data(
+                    "ticker",
+                    instrument_name
+                    )[0]
+                index_price: float = instrument_ticker ["index_price"]  
             
             settlement_periods= get_settlement_period (strategy_attributes)
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
@@ -458,10 +460,13 @@ async def hedging_spot_currency(
             active_futures = futures_instruments["active_futures"]   
 
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            notional: float = compute_notional_value(
-                index_price, 
-                equity
-                )
+            # get strategies that have not short/long attributes in the label 
+            non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                if o["non_checked_for_size_label_consistency"]==True]
+            
+            cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                if o["cancellable"]==True]
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
@@ -493,7 +498,7 @@ async def hedging_spot_currency(
                 
                 orders_currency_strategy_label_closed = [o for o in orders_currency_strategy if "closed" in (o["label"]) ]
                 
-                best_ask_prc: float = perpetual_ticker["best_ask_price"] 
+                best_ask_prc: float = instrument_ticker["best_ask_price"] 
 
                 hedging = HedgingSpot(
                     strategy,
@@ -516,7 +521,7 @@ async def hedging_spot_currency(
                     
                 send_order: dict = await hedging.is_send_open_order_allowed(
                     non_checked_strategies,
-                    instrument_ticker,
+                    instrument_name,
                     active_futures,
                     orders_currency_strategy,
                     best_ask_prc,
@@ -527,7 +532,7 @@ async def hedging_spot_currency(
                     result_order = await modify_order_and_db.if_order_is_true(
                         non_checked_strategies,
                         send_order, 
-                        instrument_ticker
+                        instrument_name
                         )
 
                     if result_order:
@@ -549,7 +554,7 @@ async def hedging_spot_currency(
                     
                 if my_trades_currency_strategy_open !=[]:
                                                                                                 
-                    best_bid_prc: float = perpetual_ticker["best_bid_price"]
+                    best_bid_prc: float = instrument_ticker["best_bid_price"]
                     
                     get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_open]
                     
@@ -571,7 +576,7 @@ async def hedging_spot_currency(
                     result_order = await modify_order_and_db.if_order_is_true(
                         non_checked_strategies,
                         send_closing_order, 
-                        instrument_ticker,
+                        instrument_name,
                         )
                     
                     if result_order:
@@ -956,7 +961,7 @@ async def main():
         settlement_periods
         )  
     
-    instrument_attributes_futures_for_hedging = [o for o in futures_instruments["active_futures"] if o["settlement_period"]=="week"]   
+    instrument_attributes_futures_for_hedging = [o for o in futures_instruments["active_futures"] if o["settlement_period"] != "month"]   
 
 
     try:
