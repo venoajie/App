@@ -353,11 +353,11 @@ class SendApiRequest:
 
         params = {"detailed": False}
 
-        result = await private_connection (self.sub_account_id,
-                                           endpoint=endpoint, 
-                                           params=params,
-                           )
-        await deleting_row("orders_all_json")
+        result = await private_connection(
+            self.sub_account_id,
+            endpoint=endpoint,
+            params=params,
+            )
 
         return result
 

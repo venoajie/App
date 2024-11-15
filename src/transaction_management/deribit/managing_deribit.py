@@ -367,6 +367,8 @@ class ModifyOrderDb(SendApiRequest):
 
         await self.get_cancel_order_all()
 
+        await deleting_row("orders_all_json")
+
     async def if_order_is_true(
         self,
         non_checked_strategies,
