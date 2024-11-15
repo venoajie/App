@@ -347,7 +347,7 @@ class StreamAccountData(ModifyOrderDb):
                                             trade_db_table, 
                                             archive_db_table,
                                             )          
-                                        await self.modify_order_and_db.cancel_all_orders()                              
+                                                                  
                                     
                                     TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
                                     WHERE_FILTER_TICK: str = "tick"
@@ -544,6 +544,13 @@ class StreamAccountData(ModifyOrderDb):
                             archive_db_table, 
                             order_db_table
                             )
+                        
+                await clean_up_closed_transactions(
+                    instrument_name, 
+                    trade_db_table
+                    )
+                   
+                await self.modify_order_and_db.cancel_all_orders()    
                 
             else:
                 for order in orders:
@@ -555,12 +562,7 @@ class StreamAccountData(ModifyOrderDb):
                         order_db_table
                         )
                                             
-                await self.modify_order_and_db. resupply_sub_accountdb(currency)            
-
-        await clean_up_closed_transactions(
-            instrument_name, 
-            trade_db_table
-            )      
+                await self.modify_order_and_db. resupply_sub_accountdb(currency)               
 
         await update_db_pkl(
             "positions", 
