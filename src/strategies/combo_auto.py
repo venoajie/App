@@ -571,6 +571,7 @@ class ComboAuto (BasicStrategy):
     async def is_send_exit_order_allowed_combo_auto(
         self,
         label: str,
+        instrument_attributes_combo_all: list,
         tp_threshold: float,
         ) -> dict:
         """
@@ -629,6 +630,12 @@ class ComboAuto (BasicStrategy):
                     orders_currency,
                     label_integer
                     )
+                
+                instrument_attributes_combo = [o for o in instrument_attributes_combo_all if instrument_name_combo in o["instrument_name"]][0]
+                
+                log.error (f"instrument_attributes_combo {instrument_attributes_combo}")
+                
+                tick_size = instrument_attributes_combo["tick_size"]
                                 
                 if premium_pct > tp_threshold \
                     and basic_ordering_is_ok\

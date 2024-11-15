@@ -562,6 +562,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     for label in labels:
                                                         
                                                         send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (label,
+                                                                                                                                           instrument_attributes_combo_all,
                                                                                                                                            tp_threshold)
                                                         
                                                         
@@ -615,7 +616,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                 if instrument_name_future in o["instrument_name"]])
                                                             
                                                             size_instrument = 0 if size_instrument == [] else size_instrument [0]
-                                                            leverage_instrument = size_instrument/notional
                                                             
                                                             ticker_combo= reading_from_pkl_data(
                                                                 "ticker",
@@ -633,11 +633,6 @@ class RunningStrategy(ModifyOrderDb):
 
                                                                 ticker_future= ticker_future[0]
                                                                 
-                                                                mark_price_future = ticker_future["mark_price"]
-                                                                
-                                                                mark_price_combo = ticker_combo["mark_price"]
-                                                                
-                                                                
                                                                 target_transaction_per_hour = 1/3
                                                                 
                                                                 send_order: dict = await combo_auto.is_send_open_order_allowed_auto_combo(
@@ -653,8 +648,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                 if send_order["order_allowed"]:
                                                                     
                                                                     log.error (f"send_order {send_order}")
-                                                                    
-                                                                    ask_price_combo = ticker_combo ["best_ask_price"]
                                                                     
                                                                     result_order = await self.modify_order_and_db.if_order_is_true(
                                                                         non_checked_strategies,
