@@ -344,9 +344,6 @@ class ComboAuto (BasicStrategy):
             # provide placeholder for params
             params = {}
            
-            # default type: limit
-            params.update({"type": "limit"})
-          
             label_open: str = get_label(
                 "open", 
                 self.strategy_label
@@ -381,6 +378,9 @@ class ComboAuto (BasicStrategy):
             params.update({"label": label_open})
             log.error (f"fair_value_combo {fair_value_combo} ask_price_combo {ask_price_combo} entry_price {entry_price} ")
 
+            # default type: limit
+            params.update({"type": "limit"})
+          
         
         return dict(
             order_allowed=order_allowed,
