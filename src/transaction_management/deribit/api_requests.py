@@ -229,7 +229,6 @@ class SendApiRequest:
         params
         )-> None:
         """ """
-        log.info(f'params {params}')
 
         side = params["side"]
         instrument = params["instrument_name"]
@@ -241,7 +240,6 @@ class SendApiRequest:
 
         order_result = None
 
-        log.critical(f'instrument {instrument}')
         if side != None:
             order_result = await self.send_order(
                 side,

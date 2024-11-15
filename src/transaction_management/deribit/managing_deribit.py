@@ -368,7 +368,6 @@ class ModifyOrderDb(SendApiRequest):
         order, 
         instrument: str = None)-> None:
         """ """
-        log.info (order)
         if order["order_allowed"]:
 
             # get parameter orders
@@ -377,7 +376,6 @@ class ModifyOrderDb(SendApiRequest):
             except:
                 params = order
 
-            log.info (params)
             if instrument is not None:
                 # update param orders with instrument
                 params.update({"instrument_name": instrument})
@@ -388,7 +386,6 @@ class ModifyOrderDb(SendApiRequest):
                 )
 
             if  label_and_side_consistent:
-                log.info (params)
                 send_limit_result = await self.private_data.send_limit_order(params)
                 return send_limit_result
                 #await asyncio.sleep(10)
