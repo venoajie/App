@@ -591,9 +591,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                 await sleep_and_restart ()
                                                                 
                                                     # send combo orders-automatic
-                                                    for combo in instrument_attributes_combo:
+                                                    for instrument_attributes_combo in instrument_attributes_combo:
                                                         
-                                                        instrument_name_combo = combo["instrument_name"]
+                                                        instrument_name_combo = instrument_attributes_combo["instrument_name"]
                                                         
                                                         if currency_upper in instrument_name_combo:
                                                                                                                     
@@ -633,6 +633,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     ticker_combo,
                                                                     instrument_name_combo,
                                                                     instrument_attributes_futures,
+                                                                    instrument_attributes_combo,
                                                                     target_transaction_per_hour
                                                                     )
                                                         

@@ -301,6 +301,7 @@ class ComboAuto (BasicStrategy):
         ticker_combo,
         instrument_name_combo,
         instrument_attributes_futures,
+        instrument_attributes_combo,
         target_transaction_per_hour
         ) -> dict:
         """ """
@@ -325,9 +326,6 @@ class ComboAuto (BasicStrategy):
             threshold = 60 * 5
             
             max_stacked_orders = 3
-            
-            "BTC-FS-22NOV24_PERP"
-            "BTC-FS-22NOV24_PERP"
            
             log.error (f"len_open_orders_instrument {len_open_orders_instrument} delta_time_seconds {delta_time_seconds} delta_time_seconds > threshold {delta_time_seconds > threshold}")
         
@@ -362,7 +360,7 @@ class ComboAuto (BasicStrategy):
                 )
            
             if contango and ask_price_combo >0:
-                tick_size = ticker_combo["tick_size"]
+                tick_size = instrument_attributes_combo["tick_size"]
                 fair_value_combo = (abs(bid_price_future - ask_price_perpetual)/tick_size) * tick_size
                 entry_price = max(
                     fair_value_combo, 
