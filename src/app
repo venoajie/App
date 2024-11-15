@@ -592,10 +592,10 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                     # send combo orders-automatic
                                                     for instrument_attributes_combo in instrument_attributes_combo:
+                                                        log.debug (f"instrument_attributes_combo {instrument_attributes_combo}")
                                                         
                                                         instrument_name_combo = instrument_attributes_combo["instrument_name"]
                                                         
-                                                        log.debug (f"instrument_attributes_combo {instrument_attributes_combo}")
                                                         log.debug (f"instrument_name_combo {instrument_name_combo}")
                                                         
                                                         if currency_upper in instrument_name_combo:
