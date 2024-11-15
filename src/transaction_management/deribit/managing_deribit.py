@@ -386,6 +386,7 @@ class ModifyOrderDb(SendApiRequest):
                 )
 
             if  label_and_side_consistent:
+                log.info (params)
                 send_limit_result = await self.private_data.send_limit_order(params)
                 return send_limit_result
                 #await asyncio.sleep(10)
