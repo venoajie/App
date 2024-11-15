@@ -463,7 +463,7 @@ class ComboAuto (BasicStrategy):
             if contango:
                 params.update({"instrument_name": instrument_name_perpetual})
                 params.update({"side": "buy"})
-                params.update({"size": })
+                params.update({"size":size })
                 params.update({"entry_price": ask_price_future})
                 
                 if not open_orders_label_strategy \
