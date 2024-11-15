@@ -903,11 +903,12 @@ async def reconciling_size_and_orders(
                                         100
                                         )
                                                     
+                    instrument_attributes_futures_currency = [o for o in instrument_attributes_futures_for_hedging if currency in o["instrument_name"]]
                     await hedging_spot_currency(
                         currency,
                         currencies,
                         config_app,
-                        instrument_attributes_futures_for_hedging,
+                        instrument_attributes_futures_currency,
                         modify_order_and_db,
                         orders_currency,
                         my_trades_currency,
