@@ -603,6 +603,8 @@ async def reconciling_orders_based_on_sources(
             orders_currency
             )
         
+        log.warning (f"len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
+        
         if not len_order_is_reconciled_each_other:
             log.warning (f"instrument_name {instrument_name} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
                         
