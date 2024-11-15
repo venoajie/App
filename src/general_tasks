@@ -403,6 +403,9 @@ async def hedging_spot_currency(
                 and perpetual_ticker:
             
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                
+            perpetual_ticker = perpetual_ticker[0]
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             log.error (f"perpetual_ticker {perpetual_ticker}")
             index_price: float = perpetual_ticker ["index_price"]  
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
@@ -423,9 +426,6 @@ async def hedging_spot_currency(
             log.error (f"market_condition {market_condition}")
             
             
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-                
-            perpetual_ticker = perpetual_ticker[0]
             
             strategy_attributes = config_app["strategies"]
                     
