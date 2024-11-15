@@ -368,6 +368,7 @@ class ModifyOrderDb(SendApiRequest):
         order, 
         instrument: str = None)-> None:
         """ """
+        log.info (order)
         if order["order_allowed"]:
 
             # get parameter orders
@@ -376,6 +377,7 @@ class ModifyOrderDb(SendApiRequest):
             except:
                 params = order
 
+            log.info (params)
             if instrument is not None:
                 # update param orders with instrument
                 params.update({"instrument_name": instrument})
