@@ -382,12 +382,12 @@ async def hedging_spot_currency(
         tick_TA=  max([o["tick"] for o in TA_result_data])
         log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         
-        instrument_ticker_perpetual: list = reading_from_pkl_data(
+        instrument_ticker: list = reading_from_pkl_data(
             "ticker",
             instrument_name_perpetual
             )[0]
 
-        index_price_perpetual: float = instrument_ticker_perpetual ["index_price"] 
+        index_price_perpetual: float = instrument_ticker ["index_price"] 
         # get portfolio data  
         
         strategy_attributes = config_app["strategies"]
