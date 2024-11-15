@@ -572,7 +572,7 @@ class ComboAuto (BasicStrategy):
         self,
         label: str,
         instrument_attributes_combo_all: list,
-        tp_threshold: float,
+        take_profit_threshold: float,
         ) -> dict:
         """
         Returns:
@@ -632,10 +632,10 @@ class ComboAuto (BasicStrategy):
                     )
                 
                 instrument_attributes_combo = [o for o in instrument_attributes_combo_all if instrument_name_combo in o["instrument_name"]][0]
+                                
+                settlement_period = instrument_attributes_combo["settlement_period"]
                 
-                log.error (f"instrument_attributes_combo {instrument_attributes_combo}")
-                
-                tick_size = instrument_attributes_combo["tick_size"]
+                tp_threshold = take_profit_threshold if settlement_period == "week" else settlement_period * 20
                                 
                 if premium_pct > tp_threshold \
                     and basic_ordering_is_ok\
