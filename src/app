@@ -592,7 +592,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                     # send combo orders-automatic
                                                     for instrument_attributes_combo in instrument_attributes_combo:
-                                                        log.debug (f"instrument_attributes_combo {instrument_attributes_combo}")
                                                         
                                                         try:
                                                             instrument_name_combo = instrument_attributes_combo["instrument_name"]
@@ -600,6 +599,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         except:
                                                             instrument_name_combo = None
                                                             
+                                                        log.critical (f"instrument_name_combo {instrument_name_combo}")
                                                         if  instrument_name_combo is not None and currency_upper in instrument_name_combo:
                                                             
                                                             log.debug (f"instrument_name_combo {instrument_name_combo}")
