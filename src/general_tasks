@@ -406,10 +406,12 @@ async def hedging_spot_currency(
                 
             perpetual_ticker = perpetual_ticker[0]
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            log.error (f"perpetual_ticker {perpetual_ticker}")
+
             index_price: float = perpetual_ticker ["index_price"]  
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             
+            strategy_attributes = config_app["strategies"]
+                    
             strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
 
             log.error (f"strategy_params {strategy_params}")
@@ -425,10 +427,6 @@ async def hedging_spot_currency(
             
             log.error (f"market_condition {market_condition}")
             
-            
-            
-            strategy_attributes = config_app["strategies"]
-                    
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             # get strategies that have not short/long attributes in the label 
             non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
