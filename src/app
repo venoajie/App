@@ -453,8 +453,7 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     transaction_log_trading_table= f"transaction_log_{currency_lower}_json"
                                     
-                                    if sub_account \
-                                        and "ETH" not in currency_upper:
+                                    if sub_account :
 
                                         result_from_db_queries = await get_result_from_db_queries (
                                             currency,
