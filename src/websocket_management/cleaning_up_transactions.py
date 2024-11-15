@@ -54,10 +54,11 @@ async def reconciling_sub_account_and_db_open_orders(
         
     sub_account_orders = sub_account["open_orders"]
     
+    log.error (f"sub_account_from_exchange {sub_account_orders}")
+    
     sub_account_orders_instrument = [o for o in sub_account_orders\
         if instrument_name in o["instrument_name"]]
     
-
     sub_account_orders_instrument_id = [] if sub_account_orders_instrument == [] \
         else [o["order_id"] for o in sub_account_orders_instrument]
 

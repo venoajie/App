@@ -617,9 +617,7 @@ async def reconciling_orders_based_on_sources(
             sub_account_from_exchange = await modify_order_and_db.get_sub_account (currency)                        
                         
             sub_account_from_exchange = sub_account_from_exchange[0]
-
-            log.error (f"sub_account_from_exchange {sub_account_from_exchange}")
-
+            
             await reconciling_sub_account_and_db_open_orders(
                 instrument_name,
                 order_db_table,
