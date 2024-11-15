@@ -329,7 +329,7 @@ class ComboAuto (BasicStrategy):
            
             log.error (f"len_open_orders_instrument {len_open_orders_instrument} delta_time_seconds {delta_time_seconds} delta_time_seconds > threshold {delta_time_seconds > threshold}")
         
-        log.error (f"open_orders_instrument {open_orders_instrument} ")
+        #log.error (f"open_orders_instrument {open_orders_instrument} ")
         if not open_orders_instrument or (delta_time_seconds > threshold and len_open_orders_instrument < max_stacked_orders):
         
             ask_price_combo = ticker_combo ["best_ask_price"]

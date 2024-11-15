@@ -601,9 +601,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                         log.critical (f"auto_combo {instrument_name_combo}")
                                                         if  instrument_name_combo is not None and currency_upper in instrument_name_combo:
-                                                            
-                                                            log.debug (f"instrument_name_combo {instrument_name_combo}")
-                                                                                                                    
+                                                                                                                  
                                                             instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
                                                             
                                                             size_instrument = ([abs(o["size"]) for o in position_without_combo \
@@ -677,24 +675,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         await sleep_and_restart ()
 
                                                     
-                                                        log.warning (f"strategy {strategy}-DONE")
-
-                                                    if delta_time_expiration < 0:
-                                                        
-                                                        instruments_name_with_min_expiration_timestamp = futures_instruments [
-                                                            "instruments_name_with_min_expiration_timestamp"]     
-                                                        
-                                                        # check any oustanding instrument that has deliverd
-                                                        
-                                                        for currency in currencies:
-                                                            
-                                                            delivered_transactions = [o for o in my_trades_currency \
-                                                                if instruments_name_with_min_expiration_timestamp in o["instrument_name"]]
-                                                            
-                                                            if delivered_transactions:
-                                                                
-                                                                for transaction in delivered_transactions:
-                                                                    delete_respective_closed_futures_from_trade_db (transaction, trade_db_table)
+                                                    log.warning (f"strategy {strategy}-DONE")
 
                                                                     
                         except Exception as error:
