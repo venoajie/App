@@ -426,9 +426,12 @@ async def hedging_spot_currency(
             
             bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
             
-            log.error (instrument_attributes_futures_for_hedging)
+            index_attributes = randbelow(2)
+            log.critical (index_attributes)
             
-            log.critical(randbelow(2))
+            instrument_attributes_futures = instrument_attributes_futures_for_hedging[index_attributes]
+            
+            log.error (instrument_attributes_futures)
             
             if strong_bearish:
                 pass
