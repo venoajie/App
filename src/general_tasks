@@ -385,8 +385,8 @@ async def hedging_spot_currency(
         instrument_ticker_perpetual: list = reading_from_pkl_data(
             "ticker",
             instrument_name_perpetual
-            )
-        
+            )[0]
+        log.info (f"instrument_ticker_perpetual {instrument_ticker_perpetual}")
         index_price_perpetual: float = instrument_ticker_perpetual ["index_price"] 
         # get portfolio data  
         
