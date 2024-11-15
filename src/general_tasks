@@ -3,6 +3,7 @@
 
 import asyncio
 import os
+from secrets import randbelow
 
 import httpx
 from loguru import logger as log
@@ -426,6 +427,8 @@ async def hedging_spot_currency(
             bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
             
             log.error (instrument_attributes_futures_for_hedging)
+            
+            log.critical(randbelow(2))
             
             if strong_bearish:
                 pass
