@@ -346,7 +346,8 @@ class StreamAccountData(ModifyOrderDb):
                                             order_db_table,
                                             trade_db_table, 
                                             archive_db_table,
-                                            )                                        
+                                            )          
+                                        await self.modify_order_and_db.cancel_all_orders()                              
                                     
                                     TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
                                     WHERE_FILTER_TICK: str = "tick"

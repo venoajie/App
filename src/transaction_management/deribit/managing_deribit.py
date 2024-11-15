@@ -361,6 +361,11 @@ class ModifyOrderDb(SendApiRequest):
             # get parameter orders
             await self.cancel_by_order_id(order["cancel_id"])
 
+  
+    async def cancel_all_orders(self)-> None:
+        """ """
+
+        await self.get_cancel_order_all()
 
     async def if_order_is_true(
         self,
