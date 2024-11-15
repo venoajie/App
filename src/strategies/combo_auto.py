@@ -181,30 +181,41 @@ def basic_ordering (
         log.debug (f" outstanding_closed_orders { outstanding_closed_orders}")
     
     no_orders_at_all = not orders_currency
+    
     current_order_not_related_to_respective_label = (orders_currency \
         and not outstanding_closed_orders)
 
     return no_orders_at_all \
         or current_order_not_related_to_respective_label
     
-def transactions_under_label_int(
-    transactions: list,
-    traded_instrument_name_future,
-    traded_price_future,
-    ask_price_perpetual
+def get_transactions_premium(
+    transactions: list, 
+    ) -> float:
+    """ 
+    """
+
+    return abs(sum([(o["price"]*o["amount"])/abs(o["amount"]) for o in transactions]))
+    
+    
+def creating_instrument_name_combo(
+    traded_instrument_name_future: list, 
+    ) -> float:
+    """ 
+    """
+
+    return (f"{traded_instrument_name_future[:3]}-FS-{traded_instrument_name_future[4:]}_PERP")
+    
+def delta_premium_pct(
+    transactions_premium: float,
+    current_premium: float
     ) -> str:
     """ """
       
-    transactions_premium = sum([(o["price"]*o["amount"])/abs(o["amount"]) for o in transactions])
-
-    current_premium = traded_price_future - ask_price_perpetual
-    premium_pct = (current_premium-transactions_premium)/transactions_premium
     
 
-    return dict(
-        premium = transactions_premium,
-        premium_pct = premium_pct,
-        instrument_name_combo = (f"{traded_instrument_name_future[:3]}-FS-{traded_instrument_name_future[4:]}_PERP"),)
+    return  abs(
+        current_premium - transactions_premium
+        )/transactions_premium   
     
     
 def get_basic_opening_parameters(strategy_label):
@@ -567,7 +578,7 @@ class ComboAuto (BasicStrategy):
             dict: _description_
         """
 
-        log.info (f"label {label}")
+        log.info (f"is_send_exit_order_allowed_combo_auto {label}")
                 
         order_allowed = False
         my_trades_currency = self.my_trades_currency_strategy
@@ -577,7 +588,6 @@ class ComboAuto (BasicStrategy):
 
         strategy_label = self.strategy_label        
         instrument_name_perpetual = self.ticker_perpetual["instrument_name"]
-        ask_price_perpetual = self.ticker_perpetual["best_ask_price"]
 
         if my_trades_currency:
             
@@ -599,11 +609,18 @@ class ComboAuto (BasicStrategy):
                 traded_price_future = (traded_future["price"])
                 traded_instrument_name_future = traded_future["instrument_name"] 
 
-                transactions_under_label_int_all = transactions_under_label_int(
-                    transactions,
-                    traded_instrument_name_future,
-                    traded_price_future,
-                    ask_price_perpetual
+                combo_ticker= reading_from_pkl_data(
+                    "ticker", 
+                    instrument_name_combo
+                    )
+                
+                current_premium = combo_ticker[0]["best_bid_price"]
+                
+                transactions_premium = get_transactions_premium(transactions)
+                                                                
+                delta_premium_pct = delta_premium_pct(
+                    transactions_premium,
+                    current_premium,
                     )
                 
                 basic_ordering_is_ok = basic_ordering (
@@ -611,8 +628,10 @@ class ComboAuto (BasicStrategy):
                     label_integer
                     )
                                 
-                if abs(transactions_under_label_int_all ["premium_pct"]) > tp_threshold \
-                    and basic_ordering_is_ok:   
+                if delta_premium_pct > tp_threshold \
+                    and basic_ordering_is_ok\
+                        and current_premium > 0\
+                            and current_premium < transactions_premium:   
                             
                     traded_perpetual: list = [o for o in transactions \
                         if instrument_name_perpetual in o["instrument_name"]][0]
@@ -621,16 +640,11 @@ class ComboAuto (BasicStrategy):
                     
                     traded_price_perpetual = (traded_perpetual["price"])
                         
-                    instrument_name_combo = transactions_under_label_int_all["instrument_name_combo"]
+                    instrument_name_combo = creating_instrument_name_combo(traded_instrument_name_future)
                                 
-                    combo_ticker= reading_from_pkl_data(
-                        "ticker", 
-                        instrument_name_combo
-                        )
-                                                                
                     exit_params.update({"type": "limit"})
                     exit_params.update({"size": abs (traded_perpetual_size)})
-                    exit_params.update({"entry_price": combo_ticker[0]["best_bid_price"]})
+                    exit_params.update({"entry_price": current_premium})
                     
                     exit_params.update({"label": f"{strategy_label}-closed-{label_integer}"})
                     exit_params.update({"instrument_name": instrument_name_combo})
@@ -649,11 +663,7 @@ class ComboAuto (BasicStrategy):
                     order_allowed = True
          
         if transactions_len==2:
-            log.error (f"transactions {transactions}")
-            log.error (f"transactions_len {transactions_len}")
-            log.debug (f"transactions_under_label_int_all {transactions_under_label_int_all}")
-            
-            log.info (f"orders_currency {orders_currency}")
+            log.error (f"transactions {transactions}")           
             
             log.critical (f"exit_params {exit_params}")
 
