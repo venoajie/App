@@ -351,7 +351,6 @@ async def update_instruments(idle_time):
 
 async def hedging_spot_currency(
     currency: str,
-    currencies: list,
     config_app: list,
     instrument_attributes_futures_for_hedging: list,
     modify_order_and_db: object,
@@ -369,7 +368,7 @@ async def hedging_spot_currency(
     
     try:
         log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        instrument_name: str = (f"{currency}-PERPETUAL")
+        instrument_name_perpetual: str = (f"{currency}-PERPETUAL")
         log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     
         TA_result_data_all = await querying_table("market_analytics_json")
@@ -383,12 +382,36 @@ async def hedging_spot_currency(
         tick_TA=  max([o["tick"] for o in TA_result_data])
         log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         
-        instrument_ticker: list = reading_from_pkl_data(
+        instrument_ticker_perpetual: list = reading_from_pkl_data(
             "ticker",
-            instrument_name
+            instrument_name_perpetual
             )
-                            
+        
+        index_price_perpetual: float = instrument_ticker_perpetual ["index_price"] 
         # get portfolio data  
+        
+        market_condition: dict = await get_market_condition_hedging(
+            TA_result_data,
+            index_price_perpetual,
+            threshold_market_condition
+            )
+        
+        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
+    
+        #neutral = market_condition["neutral_price"]
+        log.error (f"market_condition {market_condition}")
+        
+        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        if bearish:
+            index_attributes = randbelow(2)
+            instrument_attributes = instrument_attributes_futures_for_hedging[index_attributes]
+            instrument_name: str = instrument_attributes ["instrument_name"] 
+            instrument_ticker: list = reading_from_pkl_data(
+                "ticker",
+                instrument_name
+                )[0]
+
         portfolio: list = reading_from_pkl_data(
             "portfolio",
             currency
@@ -414,53 +437,12 @@ async def hedging_spot_currency(
                             
             threshold_market_condition: float = strategy_params ["delta_price_pct"]
 
-            index_price: float = instrument_ticker ["index_price"]  
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-
             notional: float = compute_notional_value(
-                index_price, 
+                index_price_perpetual, 
                 equity
                 )
                                     
-            market_condition: dict = await get_market_condition_hedging(
-                TA_result_data,
-                index_price,
-                threshold_market_condition
-                )
             
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
-            
-            #neutral = market_condition["neutral_price"]
-            log.error (f"market_condition {market_condition}")
-            
-        
-            index_attributes = randbelow(2)
-
-            instrument_attributes = instrument_attributes_futures_for_hedging[index_attributes]
-            
-            
-            log.debug (instrument_attributes)
-            
-            if bearish:
-                index_attributes = randbelow(2)
-                instrument_attributes = instrument_attributes_futures_for_hedging[index_attributes][0]
-                instrument_name: str = instrument_attributes ["instrument_name"] 
-                instrument_ticker: list = reading_from_pkl_data(
-                    "ticker",
-                    instrument_name
-                    )[0]
-                index_price: float = instrument_ticker ["index_price"]  
-            
-            settlement_periods= get_settlement_period (strategy_attributes)
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            
-            futures_instruments =  get_futures_instruments (currencies,
-                                                                settlement_periods)  
-            
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            active_futures = futures_instruments["active_futures"]   
-
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             # get strategies that have not short/long attributes in the label 
             non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
@@ -468,7 +450,6 @@ async def hedging_spot_currency(
             
             cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
                 if o["cancellable"]==True]
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
@@ -508,7 +489,7 @@ async def hedging_spot_currency(
                     max_position,
                     my_trades_currency_strategy,
                     TA_result_data,
-                    index_price,
+                    index_price_perpetual,
                     )
                 
                 for order in orders_currency_strategy:
@@ -524,7 +505,7 @@ async def hedging_spot_currency(
                 send_order: dict = await hedging.is_send_open_order_allowed(
                     non_checked_strategies,
                     instrument_name,
-                    active_futures,
+                    instrument_attributes_futures_for_hedging,
                     orders_currency_strategy,
                     best_ask_prc,
                     )
@@ -917,7 +898,6 @@ async def reconciling_size_and_orders(
                     instrument_attributes_futures_currency = [o for o in instrument_attributes_futures_for_hedging if currency in o["instrument_name"]]
                     await hedging_spot_currency(
                         currency,
-                        currencies,
                         config_app,
                         instrument_attributes_futures_currency,
                         modify_order_and_db,
