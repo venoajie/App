@@ -620,7 +620,7 @@ class ComboAuto (BasicStrategy):
                 
                 transactions_premium = get_transactions_premium(transactions)
                                                                 
-                delta_premium_pct = delta_premium_pct(
+                premium_pct = delta_premium_pct(
                     transactions_premium,
                     current_premium,
                     )
@@ -630,7 +630,7 @@ class ComboAuto (BasicStrategy):
                     label_integer
                     )
                                 
-                if delta_premium_pct > tp_threshold \
+                if premium_pct > tp_threshold \
                     and basic_ordering_is_ok\
                         and current_premium > 0\
                             and current_premium < transactions_premium:   
