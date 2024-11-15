@@ -433,7 +433,6 @@ async def hedging_spot_currency(
                 and instrument_ticker:
             
                 
-            instrument_ticker = instrument_ticker[0]
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 
             notional: float = compute_notional_value(
