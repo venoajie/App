@@ -386,10 +386,17 @@ async def hedging_spot_currency(
             "ticker",
             instrument_name_perpetual
             )[0]
-        log.info (f"instrument_ticker_perpetual {instrument_ticker_perpetual}")
+
         index_price_perpetual: float = instrument_ticker_perpetual ["index_price"] 
         # get portfolio data  
         
+        strategy_attributes = config_app["strategies"]
+                
+        strategy_params= [o for o in strategy_attributes \
+            if o["strategy_label"] == strategy][0]   
+                        
+        threshold_market_condition: float = strategy_params ["delta_price_pct"]
+
         market_condition: dict = await get_market_condition_hedging(
             TA_result_data,
             index_price_perpetual,
@@ -430,12 +437,6 @@ async def hedging_spot_currency(
                 
             instrument_ticker = instrument_ticker[0]
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-
-            strategy_attributes = config_app["strategies"]
-                    
-            strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
-                            
-            threshold_market_condition: float = strategy_params ["delta_price_pct"]
 
             notional: float = compute_notional_value(
                 index_price_perpetual, 
