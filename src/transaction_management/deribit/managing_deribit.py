@@ -70,15 +70,6 @@ def first_tick_fr_sqlite_if_database_still_empty (
     return delta_some_days_ago
     
     
-async def inserting_additional_params(params: dict)-> None:
-    """ """
-
-    if "open" in params["label"]:
-        await insert_tables(
-            "supporting_items_json",
-            params
-            )
-
 async def update_db_pkl (
     path,
     data_orders,
@@ -395,7 +386,6 @@ class ModifyOrderDb(SendApiRequest):
                 )
 
             if  label_and_side_consistent:
-                await inserting_additional_params(params)
                 send_limit_result = await self.private_data.send_limit_order(params)
                 return send_limit_result
                 #await asyncio.sleep(10)

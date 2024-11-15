@@ -371,7 +371,7 @@ class ComboAuto (BasicStrategy):
                    
         if order_allowed:
             
-            params.update({"instrument_name": instrument_name_combo})
+            params.update({"instrument_name":instrument_name_combo})
             params.update({"side": "sell"})
             params.update({"size": size})
             params.update({"entry_price": entry_price})

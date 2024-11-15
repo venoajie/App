@@ -236,10 +236,7 @@ class SendApiRequest:
         size = params["size"]
         type = params["type"]
         
-        try:
-            limit_prc = params["take_profit_usd"]
-        except:
-            limit_prc = params["entry_price"]
+        limit_prc = params["entry_price"]
 
         order_result = None
 

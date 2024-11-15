@@ -206,8 +206,7 @@ async def clean_up_databases(idle_time) -> None:
                 "ohlc3_eth_perp_json", 
                 "ohlc3_btc_perp_json", 
                 "ohlc5_eth_perp_json", 
-                "ohlc5_btc_perp_json",  
-                "supporting_items_json"]
+                "ohlc5_btc_perp_json",]
         
         database: str = "databases/trading.sqlite3"  
 
