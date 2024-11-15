@@ -407,6 +407,14 @@ class ComboAuto (BasicStrategy):
         
         order_allowed = False
         
+
+        label_open: str = get_label(
+            "open", 
+            self.strategy_label
+            )
+        
+        params.update({"label": label_open})
+        
         strategy_label = self.strategy_label
 
         my_trades_currency_strategy = self.my_trades_currency_strategy
@@ -419,20 +427,6 @@ class ComboAuto (BasicStrategy):
         bid_price_perpetual = self.ticker_perpetual ["best_bid_price"]        
         instrument_name_perpetual = self.ticker_perpetual["instrument_name"]
         
-
-        # provide placeholder for params
-        params = {}
-                
-        # default type: limit
-        params.update({"type": "limit"})
-
-        label_open: str = get_label(
-            "open", 
-            self.strategy_label
-            )
-        
-        params.update({"label": label_open})
-        
         contango = is_contango(
             ask_price_future,
             bid_price_perpetual,
@@ -441,23 +435,8 @@ class ComboAuto (BasicStrategy):
         
         delta = self.delta
         
-
-        open_orders_label_strategy: list=  [o for o in self.orders_currency_strategy if "open" in o["label"]]
-    
-        threshold = 60
-                
-        last_order_time= max([o["timestamp"] for o in self.orders_currency_strategy])
-                        
-        delta_time = self.server_time-last_order_time
-        
-        delta_time_seconds = delta_time/1000                                                
-        
-        size = determine_opening_size(
-            instrument_name_future, 
-            instrument_attributes_futures, 
-            self.notional,
-            target_transaction_per_hour
-            )
+        # provide placeholder for params
+        params = {}
         
         if delta == 0:
             
@@ -491,6 +470,27 @@ class ComboAuto (BasicStrategy):
             if contango:
                 pass
         
+
+        open_orders_label_strategy: list=  [o for o in self.orders_currency_strategy if "open" in o["label"]]
+    
+        threshold = 60
+                
+        last_order_time= max([o["timestamp"] for o in self.orders_currency_strategy])
+                        
+        delta_time = self.server_time-last_order_time
+        
+        delta_time_seconds = delta_time/1000                                                
+        
+        size = determine_opening_size(
+            instrument_name_future, 
+            instrument_attributes_futures, 
+            self.notional,
+            target_transaction_per_hour
+            )
+        
+                
+        # default type: limit
+        params.update({"type": "limit"})
         
         return dict(
             order_allowed=order_allowed,
