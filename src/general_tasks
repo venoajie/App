@@ -352,6 +352,7 @@ async def hedging_spot_currency(
     currency: str,
     currencies: list,
     config_app: list,
+    instrument_attributes_futures_for_hedging: list,
     modify_order_and_db: object,
     orders_currency: list,
     my_trades_currency: str,
@@ -413,11 +414,8 @@ async def hedging_spot_currency(
             strategy_attributes = config_app["strategies"]
                     
             strategy_params= [o for o in strategy_attributes if o["strategy_label"] == strategy][0]   
-
-            log.error (f"strategy_params {strategy_params}")
                             
             threshold_market_condition: float = strategy_params ["delta_price_pct"]
-
             
             market_condition: dict = await get_market_condition_hedging(
                 TA_result_data,
@@ -425,6 +423,14 @@ async def hedging_spot_currency(
                 threshold_market_condition
                 )
             
+            bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
+            
+            log.error (instrument_attributes_futures_for_hedging)
+            
+            if strong_bearish:
+                pass
+            
+            #neutral = market_condition["neutral_price"]
             log.error (f"market_condition {market_condition}")
             
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
@@ -633,6 +639,7 @@ async def reconciling_orders_based_on_sources(
 async def reconciling_size_and_orders(
     sub_account_id: str,
     config_app: list,
+    instrument_attributes_futures_for_hedging: list,
     idle_time: int
     ) -> None:
 
@@ -900,6 +907,7 @@ async def reconciling_size_and_orders(
                         currency,
                         currencies,
                         config_app,
+                        instrument_attributes_futures_for_hedging,
                         modify_order_and_db,
                         orders_currency,
                         my_trades_currency,
@@ -930,12 +938,28 @@ async def main():
 
     # get tradable strategies
     tradable_config_app = config_app["tradable"]
+    
+    # get tradable currencies
+    currencies= [o["spot"] for o in tradable_config_app] [0]
+    
+    strategy_attributes = config_app["strategies"]
+    
+    settlement_periods = get_settlement_period (strategy_attributes)
+                    
+    futures_instruments = get_futures_instruments (
+        currencies,
+        settlement_periods
+        )  
+    
+    instrument_attributes_futures_for_hedging = futures_instruments["active_futures"]   
+
 
     try:
         await asyncio.gather(
         reconciling_size_and_orders(
             sub_account_id,
             config_app,
+            instrument_attributes_futures_for_hedging,
             2
             ),
         update_ohlc_and_market_condition(
