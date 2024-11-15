@@ -364,7 +364,7 @@ async def hedging_spot_currency(
     
     strategy="hedgingSpot"
 
-    log.debug (f"strategy {strategy} {currency.upper()}-START")
+    log.warning (f"strategy {strategy} {currency.upper()}-START")
     
     try:
         log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
@@ -423,12 +423,10 @@ async def hedging_spot_currency(
             "portfolio",
             currency
             )
-        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         
         equity: float = portfolio[0]["equity"]    
         
         log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        log.error (f"equity {equity}")
         
                         
         if  equity > 0\
