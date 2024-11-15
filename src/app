@@ -325,7 +325,7 @@ class RunningStrategy(ModifyOrderDb):
 
                 instrument_attributes_combo = futures_instruments["active_combo"]  
                 
-                log.info (instrument_attributes_combo)
+                #log.info (instrument_attributes_combo)
 
                 instruments_name = futures_instruments["instruments_name"]   
                 

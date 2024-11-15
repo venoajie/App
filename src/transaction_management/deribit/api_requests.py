@@ -240,6 +240,8 @@ class SendApiRequest:
 
         order_result = None
 
+        log.critical(f'instrument {instrument}')
+        log.info(f'params {params}')
         if side != None:
             order_result = await self.send_order(
                 side,

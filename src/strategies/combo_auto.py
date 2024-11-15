@@ -362,7 +362,8 @@ class ComboAuto (BasicStrategy):
                 )
            
             if contango and ask_price_combo >0:
-                fair_value_combo = bid_price_future - ask_price_perpetual
+                tick_size = ticker_combo["tick_size"]
+                fair_value_combo = (abs(bid_price_future - ask_price_perpetual)/tick_size) * tick_size
                 entry_price = max(
                     fair_value_combo, 
                     ask_price_combo)
