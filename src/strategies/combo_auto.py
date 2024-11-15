@@ -325,6 +325,9 @@ class ComboAuto (BasicStrategy):
             threshold = 60 * 5
             
             max_stacked_orders = 3
+            
+            "BTC-FS-22NOV24_PERP"
+            "BTC-FS-22NOV24_PERP"
            
             log.error (f"len_open_orders_instrument {len_open_orders_instrument} delta_time_seconds {delta_time_seconds} delta_time_seconds > threshold {delta_time_seconds > threshold}")
         
@@ -361,7 +364,7 @@ class ComboAuto (BasicStrategy):
                 target_transaction_per_hour
                 )
            
-            if contango:
+            if contango and ask_price_combo >0:
                 fair_value_combo = bid_price_future - ask_price_perpetual
                 entry_price = max(
                     fair_value_combo, 
