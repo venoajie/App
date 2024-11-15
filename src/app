@@ -595,6 +595,9 @@ class RunningStrategy(ModifyOrderDb):
                                                         
                                                         instrument_name_combo = instrument_attributes_combo["instrument_name"]
                                                         
+                                                        log.debug (f"instrument_attributes_combo {instrument_attributes_combo}")
+                                                        log.debug (f"instrument_name_combo {instrument_name_combo}")
+                                                        
                                                         if currency_upper in instrument_name_combo:
                                                                                                                     
                                                             instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
@@ -624,7 +627,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 mark_price_future = ticker_future["mark_price"]
                                                                 
                                                                 mark_price_combo = ticker_combo["mark_price"]
-                                                                log.debug (f"instrument_name_combo {instrument_name_combo}")
+                                                                
                                                                 
                                                                 target_transaction_per_hour = 1/3
                                                                 
