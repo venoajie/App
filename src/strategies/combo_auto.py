@@ -636,6 +636,9 @@ class ComboAuto (BasicStrategy):
                 settlement_period = instrument_attributes_combo["settlement_period"]
                 
                 tp_threshold = take_profit_threshold if settlement_period == "week" else take_profit_threshold * 20
+                
+                log.warning (f"settlement_period {settlement_period}  {settlement_period == "week"} ")
+                log.error (f"tp_threshold {tp_threshold} premium_pct {premium_pct} current_premium {current_premium} transactions_premium {transactions_premium} {current_premium < transactions_premium}")
                                 
                 if premium_pct > tp_threshold \
                     and basic_ordering_is_ok\
