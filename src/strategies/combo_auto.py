@@ -608,7 +608,9 @@ class ComboAuto (BasicStrategy):
                 
                 traded_price_future = (traded_future["price"])
                 traded_instrument_name_future = traded_future["instrument_name"] 
-
+                
+                instrument_name_combo = creating_instrument_name_combo(traded_instrument_name_future)
+                        
                 combo_ticker= reading_from_pkl_data(
                     "ticker", 
                     instrument_name_combo
@@ -639,8 +641,6 @@ class ComboAuto (BasicStrategy):
                     traded_perpetual_size = abs(traded_perpetual["amount"])
                     
                     traded_price_perpetual = (traded_perpetual["price"])
-                        
-                    instrument_name_combo = creating_instrument_name_combo(traded_instrument_name_future)
                                 
                     exit_params.update({"type": "limit"})
                     exit_params.update({"size": abs (traded_perpetual_size)})
