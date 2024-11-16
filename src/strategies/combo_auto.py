@@ -2,6 +2,7 @@
 
 # built ins
 import asyncio
+import operator 
 
 # installed
 from dataclassy import dataclass, fields
@@ -70,6 +71,30 @@ def convert_list_to_dict (transaction: list) -> dict:
         return transaction
 
     return transaction
+
+def sorting_list(
+    listing: list,
+    item_reference: str = "price",
+    is_reversed: bool=True
+    ) -> list:
+    """
+    https://sparkbyexamples.com/python/sort-list-of-dictionaries-by-value-in-python/
+
+    Args:
+        listing (list): _description_
+        item_reference (str, optional): _description_. Defaults to "price".
+        is_reversed (bool, optional): _description_. Defaults to True.
+                                    True = from_highest_to_lowest
+                                    False = from_lowest_to_highest
+
+    Returns:
+        list: _description_
+    """
+
+    return sorted(
+        listing, 
+        key=operator.itemgetter(item_reference), 
+        reverse = is_reversed)
 
 def determine_opening_size(
     instrument_name: str,
@@ -284,7 +309,32 @@ def get_label(
         label: str = f"""{label_main}-closed-{label_id}"""
 
     return label
+
+def get_unpaired_transaction(
+    my_trades_currency_strategy: list
+    ) -> list:
+    """
+    """
+    unpaired_transactions_all =  [o for o in my_trades_currency_strategy if sum(o["label"]) != 0]
     
+    unpaired_transactions_futures =  sorting_list(
+        [o for o in unpaired_transactions_all if "PERPETUAL" not in o["instrument_name"] ],
+        "price",
+        True
+        )
+    
+    unpaired_transactions_perpetual =  sorting_list(
+        [o for o in unpaired_transactions_all if "PERPETUAL" in o["instrument_name"] ],
+        "price",
+        False
+        )
+    
+    log.error (f"unpaired_transactions_futures {unpaired_transactions_futures}")
+    
+    return dict(
+        unpaired_transactions_futures = unpaired_transactions_futures,
+        unpaired_transactions_perpetual = unpaired_transactions_perpetual) 
+        
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):
     """ """
@@ -417,8 +467,8 @@ class ComboAuto (BasicStrategy):
         
         strategy_label = self.strategy_label
 
-        my_trades_currency_strategy = self.my_trades_currency_strategy
-        orders_currency_strategy = self.orders_currency_strategy
+        my_trades_currency = self.my_trades_currency_strategy
+        orders_currency = self.orders_currency_strategy
         
         ask_price_future = ticker_future ["best_ask_price"]
         bid_price_future = ticker_future ["best_bid_price"]
@@ -438,13 +488,35 @@ class ComboAuto (BasicStrategy):
         # provide placeholder for params
         params = {}
         
+        unpaired_transaction = get_unpaired_transaction(my_trades_currency)
+        
+        
+        size = determine_opening_size(
+            instrument_name_future, 
+            instrument_attributes_futures, 
+            self.notional,
+            target_transaction_per_hour
+            )
+        
+        orders_instrument_future: list=  [o for o in orders_currency if instrument_name_future in o["instrument_name"]]
+        len_orders_instrument_future: int=  0 if not orders_instrument_future else len(orders_instrument_future)
+        orders_instrument_perpetual: list=  [o for o in orders_currency if instrument_name_perpetual in o["instrument_name"]]
+        len_orders_instrument_perpetual: int=  0 if not orders_instrument_perpetual else len(orders_instrument_perpetual)
+        
         if delta == 0:
             
             if contango:
-                params.update({"instrument_name": instrument_name_future})
-                params.update({"side": "sell"})
-                params.update({"size": size})
-                params.update({"entry_price": ask_price_future})
+                if unpaired_transaction:
+                    if unpaired_transaction["unpaired_transactions_futures"]:
+                        pass
+                    if unpaired_transaction["unpaired_transactions_perpetual"]:
+                        pass
+                else:
+                    if len_orders_instrument_future == 0:
+                        params.update({"instrument_name": instrument_name_future})
+                        params.update({"side": "sell"})
+                        params.update({"size": size})
+                        params.update({"entry_price": ask_price_future})
                 
                 if not open_orders_label_strategy \
                     or delta_time_seconds > threshold:
@@ -480,14 +552,6 @@ class ComboAuto (BasicStrategy):
         delta_time = self.server_time-last_order_time
         
         delta_time_seconds = delta_time/1000                                                
-        
-        size = determine_opening_size(
-            instrument_name_future, 
-            instrument_attributes_futures, 
-            self.notional,
-            target_transaction_per_hour
-            )
-        
                 
         # default type: limit
         params.update({"type": "limit"})

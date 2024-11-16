@@ -560,9 +560,10 @@ class RunningStrategy(ModifyOrderDb):
                                                     #closing orders
                                                     for label in labels:
                                                         
-                                                        send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (label,
-                                                                                                                                           instrument_attributes_combo_all,
-                                                                                                                                           tp_threshold)
+                                                        send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
+                                                            label,
+                                                            instrument_attributes_combo_all,
+                                                            tp_threshold)
                                                         
                                                         
                                                         if send_closing_order["order_allowed"]:
