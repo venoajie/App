@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-from datetime import datetime, timedelta, timezone, time
+from datetime import datetime, timedelta, timezone
 import os
 
 # installed
 from dataclassy import dataclass, fields
-import httpx
 import json, orjson
 from loguru import logger as log
 import tomli
@@ -16,19 +15,11 @@ import websockets
 from configuration import id_numbering, config
 from configuration.label_numbering import get_now_unix_time
 from db_management.sqlite_management import (
-    querying_table,
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-    insert_tables,)
-from market_understanding.technical_analysis import (
-    insert_market_condition_result)
+    executing_query_based_on_currency_or_instrument_and_strategy as get_query)
 from strategies.combo_auto import ComboAuto
-from strategies.managing_labels import combo_modify_label_unpaired_transaction
-from transaction_management.deribit.api_requests import (
-    get_currencies,
-    get_instruments,)
+from strategies.managing_labels import get_unpaired_transaction,
 from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,
-    currency_inline_with_database_address,)
+    ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from utilities.pickling import (
@@ -49,16 +40,9 @@ from websocket_management.ws_management import (
 from websocket_management.cleaning_up_transactions import (
     check_whether_order_db_reconciled_each_other,
     check_whether_size_db_reconciled_each_other,
-    clean_up_closed_transactions, 
-    count_and_delete_ohlc_rows,
-    get_unrecorded_trade_and_order_id,
-    reconciling_sub_account_and_db_open_orders)
+    )
 
-# API endpoint for fetching TODOs
-endpoint = "<https://jsonplaceholder.typicode.com/todos/>"
-    
 # Using the LRUCache decorator function with a maximum cache size of 3
-
 def cached_ticker_data(currencies):
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
@@ -557,7 +541,25 @@ class RunningStrategy(ModifyOrderDb):
                                                         if cancel_allowed["cancel_allowed"]:
                                                             await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
                                                     
-                                                    #closing orders
+                                                    # closing unpaired transactions
+                                                    unpaired_transaction = get_unpaired_transaction(my_trades_currency)
+                                                    
+                                                    unpaired_transactions_futures = unpaired_transaction["unpaired_transactions_futures"]
+                                                    
+                                                    for transaction in unpaired_transactions_futures:
+                                                    
+                                                        unpaired_transactions_futures_with_good_premium = compare_transactions_price_against_threshold(
+                                                            unpaired_transactions_futures,
+                                                            bid_price_future,
+                                                            "sell",
+                                                            tp_threshold)
+                                                        
+                                                        if unpaired_transactions_futures_with_good_premium:
+                    
+                                                    unpaired_transactions_perpetual = unpaired_transaction["unpaired_transactions_perpetual"]
+                                                    
+                                                    
+                                                    #closing combo auto orders
                                                     for label in labels:
                                                         
                                                         send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
