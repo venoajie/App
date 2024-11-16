@@ -57,15 +57,13 @@ async def reconciling_sub_account_and_db_open_orders(
     sub_account_orders_instrument = [o for o in sub_account_orders\
         if instrument_name in o["instrument_name"]]
     
-    log.error (f"sub_account_orders_instrument {sub_account_orders_instrument}")
     
     sub_account_orders_instrument_id = [] if sub_account_orders_instrument == [] \
         else [o["order_id"] for o in sub_account_orders_instrument]
 
     db_orders_instrument = [o for o in orders_currency \
         if instrument_name in o["instrument_name"]]
-    log.debug (f"db_orders_instrument {db_orders_instrument}")
-
+    
     db_orders_instrument_id = [] if db_orders_instrument == [] \
         else [o["order_id"] for o in db_orders_instrument]
         
@@ -242,16 +240,22 @@ def check_whether_order_db_reconciled_each_other(
         
         sub_account_instrument = [o for o in sub_account_orders \
             if o["instrument_name"] == instrument_name ]
-        
+                
         len_sub_account_instrument = 0 if not sub_account_instrument \
             else len([o["amount"] for o in sub_account_instrument])
-        
+            
+        log.error (f"sub_account_orders_instrument {sub_account_instrument} {len_sub_account_instrument}")
+
         orders_instrument = [o for o in orders_currency \
-            if o["instrument_name"] == instrument_name ]
+            if instrument_name in o["instrument_name"] ]
+        
         len_orders_instrument = 0 if not orders_instrument \
             else len([o["amount"] for o in orders_instrument])    
+
+        log.debug (f"orders_instrument {orders_instrument} {len_orders_instrument}")
         
         result = len_orders_instrument == len_sub_account_instrument
+        log.debug (f"result {result} ")
         
         if not result:
             log.critical(f"len_order equal {result} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
