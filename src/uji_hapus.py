@@ -1,45 +1,18 @@
-import asyncio
 
-# user defined formula
-from db_management.sqlite_management import(
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-    insert_tables,
-    deleting_row,
-    executing_query_with_return,
-    querying_arithmetic_operator,
-    querying_duplicated_transactions)
+from_lowest_to_highest = [
+                            {'instrument_name': 'ETH-PERPETUAL', 'label': 'hedgingSpot-open-1728859651166', 'amount': -5.0, 'price': 2465.65, 'side': 'sell'},
+                               {'instrument_name': 'ETH-PERPETUAL', 'label': 'hedgingSpot-closed-1728806470451', 'amount': 3.0, 'price': 2466.25, 'side': 'buy'},
+                               {'instrument_name': 'ETH-PERPETUAL', 'label': 'hedgingSpot-closed-1728806470451', 'amount': 3.0, 'price': 2466.4, 'side': 'buy'},
+                               {'instrument_name': 'ETH-PERPETUAL', 'label': 'hedgingSpot-closed-1728806470451', 'amount': 3.0, 'price': 2466.45, 'side': 'buy'},
+                          {'instrument_name': 'ETH-PERPETUAL', 'label': 'hedgingSpot-open-1728806470451', 'amount': -3.0, 'price': 2466.6, 'side': 'sell'},
+                               ]
+price = 2466.6
+bid_price_future= 2464.3
+tp_threshold = .01/100
+profited_price = price  - (price*tp_threshold)
+print(profited_price)
+print(profited_price < bid_price_future  )
+unpaired_transactions_futures_with_good_premium = [o for o in from_lowest_to_highest \
+                            if  bid_price_future < (o["price"] - (o["price"] * tp_threshold)) ][0]
 
-where_filter = f"trade_id"
-
-column_list: str= "instrument_name","label", "amount", "trade_id"
-        
-        
-async def distribute_closed_transactions(
-    where_filter: str,
-    ) -> None:
-    """
-    """
-        
-    query: list  = f"SELECT instrument_name, label,amount_dir,trade_id FROM my_trades_all_json WHERE label NOT LIKE '%1731545419861%' AND label LIKE '%hedgingSpot%';"
-    
-    result = await executing_query_with_return(query)
-    
-    for transaction in result:
-        print (transaction)
-      
-            
-        #insert closed transaction to db for closed transaction
-        await insert_tables("my_trades_closed_json", 
-                            transaction)
-
-        #delete respective transaction form active db
-        trade_id=transaction["trade_id"]
-        await deleting_row(
-            "my_trades_all_json",
-            "databases/trading.sqlite3",
-            where_filter,
-            "=",
-            trade_id,
-        )
-    
-asyncio.run (distribute_closed_transactions(where_filter))
+print (unpaired_transactions_futures_with_good_premium)
