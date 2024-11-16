@@ -594,16 +594,14 @@ async def reconciling_orders_based_on_sources(
     order_db_table: str
     ) -> None:
     
-
     for instrument_name in (orders_instrument_name):
-        #log.error (f"instrument_name {instrument_name}")
+
         len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other(
             sub_account,
             instrument_name,
             orders_currency
             )
-        
-        
+            
         if not len_order_is_reconciled_each_other:
             log.warning (f" {instrument_name} len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
                         
@@ -770,9 +768,7 @@ async def reconciling_size_and_orders(
                                             [o["timestamp"] for o in from_transaction_log_instrument_name \
                                                 if o["trade_id"] in unrecorded_trade_id_from_transaction_log]
                                             )
-                                        
-                                        log.warning (f"timestamp_log {timestamp_log}")
-                                    
+                                                                            
                                         await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
                                             instrument_name,
                                             timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other

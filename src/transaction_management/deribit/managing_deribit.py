@@ -23,6 +23,8 @@ from transaction_management.deribit.transaction_log import (
 from transaction_management.deribit.api_requests import (
     SendApiRequest,)
 from utilities.pickling import replace_data
+from utilities.string_modification import (
+    extract_currency_from_text,)
 from utilities.system_tools import (
     provide_path_for_file)
 
@@ -165,7 +167,7 @@ class ModifyOrderDb(SendApiRequest):
                                                     "all",
                                                     "all",
                                                     column_list)
-    
+        
         if open_orders_sqlite:
             
             for strategy in cancellable_strategies:
@@ -181,6 +183,8 @@ class ModifyOrderDb(SendApiRequest):
                     for order_id in open_orders_cancellables_id:
 
                         await self.cancel_by_order_id(order_id)
+
+        await self.resupply_sub_accountdb(currency.upper())      
         
     async def get_sub_account(
         self,
@@ -394,6 +398,8 @@ class ModifyOrderDb(SendApiRequest):
 
             if  label_and_side_consistent:
                 send_limit_result = await self.private_data.send_limit_order(params)
+                currency = extract_currency_from_text (instrument)
+                await self.resupply_sub_accountdb(currency)
                 return send_limit_result
                 #await asyncio.sleep(10)
             else:
@@ -549,6 +555,8 @@ class ModifyOrderDb(SendApiRequest):
         log.critical (f"update_user_changes {instrument_name} -START")
         
         log.info (f" {data_orders}")
+
+        await self.resupply_sub_accountdb(currency)       
         
         if orders:
             
@@ -579,17 +587,16 @@ class ModifyOrderDb(SendApiRequest):
                         order_db_table
                         )
                         
-                await self. resupply_sub_accountdb(currency)            
-
-        await update_db_pkl(
-            "positions", 
-            data_orders,
-            currency)
 
         await self.resupply_transaction_log(
             currency,
             transaction_log_trading,
             archive_db_table)
+
+        await update_db_pkl(
+            "positions", 
+            data_orders,
+            currency)
 
         log.info(f"update_user_changes-END")
     
@@ -614,6 +621,8 @@ class ModifyOrderDb(SendApiRequest):
         log.debug (f"update_user_changes non ws {instrument_name} -START")
         
         log.info (f" {data_orders}")
+
+        await self.resupply_sub_accountdb(currency)   
         
         if trades:
             for trade in trades:
@@ -638,22 +647,19 @@ class ModifyOrderDb(SendApiRequest):
                 instrument_name,
                 order,
                 order_db_table
-                )
-                                    
-            await self.resupply_sub_accountdb(currency)            
-
-        await update_db_pkl(
-            "positions",
-            data_orders, 
-            currency
-            )
-
+                )     
+    
         await self.resupply_transaction_log(
             currency, 
             transaction_log_trading,
             archive_db_table
             )
 
+        await update_db_pkl(
+            "positions",
+            data_orders, 
+            currency
+            )
 
     async def saving_order (
         self,
