@@ -554,20 +554,20 @@ class RunningStrategy(ModifyOrderDb):
                                                     # closing unpaired transactions
                                                         if sum_selected_transaction == 0:
                                                             selected_transaction = selected_transaction[0]
-                                                            log.error (f"label_integer {label_integer} sum_selected_transaction {sum_selected_transaction} ")
+                                                            
                                                             ticker_future= reading_from_pkl_data(
                                                                 "ticker",
                                                                 selected_transaction["instrument_name"]
                                                                 )
-                                                            log.error (f" {ticker_future} ")
                                                             
-                                                            send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                            ticker_future,
-                                                            instrument_attributes_futures_all,
-                                                            target_transaction_per_hour,
-                                                            tp_threshold,
-                                                            selected_transaction
-                                                            )
+                                                            if ticker_future:
+                                                                
+                                                                send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                                ticker_future,
+                                                                instrument_attributes_futures_all,
+                                                                tp_threshold,
+                                                                selected_transaction
+                                                                )
                                                             
                                                     #closing combo auto orders
                                                         else:

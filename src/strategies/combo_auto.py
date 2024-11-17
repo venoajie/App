@@ -816,7 +816,6 @@ class ComboAuto (BasicStrategy):
         self,
         ticker_future,
         instrument_attributes_futures,
-        target_transaction_per_hour,
         take_profit_threshold_original: float,
         selected_transaction
         ) -> dict:
