@@ -317,10 +317,7 @@ def modified_tp_threshold(
     ) -> float:
     """
     """
-
-    log.debug ([o for o in instrument_attributes_futures \
-        if instrument_name in o["instrument_name"]])
-
+    
     instrument_attributes = [o for o in instrument_attributes_futures \
         if instrument_name in o["instrument_name"]][0]
                     

@@ -379,6 +379,9 @@ class ModifyOrderDb(SendApiRequest):
         order, 
         instrument: str = None)-> None:
         """ """
+        log.info (order)
+        log.info (instrument)
+        
         if order["order_allowed"]:
 
             # get parameter orders
