@@ -750,7 +750,6 @@ class ComboAuto (BasicStrategy):
                     "ticker", 
                     instrument_name_combo
                     )
-                log.warning (f"combo_ticker {combo_ticker} ")
                 
                 current_premium = combo_ticker[0]["best_bid_price"]
                 
