@@ -828,8 +828,6 @@ class ComboAuto (BasicStrategy):
             self.strategy_label
             )
         
-        params.update({"label": label_open})
-        
         strategy_label = self.strategy_label
         
         log.error (f"strategy_label {strategy_label}")
