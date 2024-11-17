@@ -312,17 +312,19 @@ def get_label(
 
 def modified_tp_threshold(
     instrument_attributes_futures: list,
-    take_profit_threshold_original: float
+    take_profit_threshold_original: float,
+    instrument_name
     ) -> float:
     """
     """
-    log.info (instrument_attributes_futures)
+
     log.debug ([o for o in instrument_attributes_futures \
-        if instrument_attributes_futures in o["instrument_name"]])
-    instrument_attributes_combo = [o for o in instrument_attributes_futures \
-        if instrument_attributes_futures in o["instrument_name"]][0]
+        if instrument_name in o["instrument_name"]])
+
+    instrument_attributes = [o for o in instrument_attributes_futures \
+        if instrument_name in o["instrument_name"]][0]
                     
-    settlement_period = instrument_attributes_combo["settlement_period"]
+    settlement_period = instrument_attributes["settlement_period"]
     
     return take_profit_threshold_original * 2 \
         if settlement_period == "week" \
@@ -768,7 +770,8 @@ class ComboAuto (BasicStrategy):
                 
                 tp_threshold = modified_tp_threshold(
                     instrument_attributes_combo_all,
-                    take_profit_threshold_original
+                    take_profit_threshold_original,
+                    instrument_name_combo
                     )                
                                 
                 if premium_pct > tp_threshold \
@@ -860,12 +863,6 @@ class ComboAuto (BasicStrategy):
         # provide placeholder for params
         params = {}
         
-        tp_threshold = modified_tp_threshold(
-            instrument_attributes_futures,
-            take_profit_threshold_original
-            )
-                
-        
         orders_instrument_future: list=  [o for o in orders_currency 
                                           if instrument_name_future in o["instrument_name"]]
         
@@ -889,6 +886,12 @@ class ComboAuto (BasicStrategy):
             
             len_orders_instrument: list=  0 if not  orders_instrument \
                 else len(orders_instrument)
+                    
+            tp_threshold = modified_tp_threshold(
+                instrument_attributes_futures,
+                take_profit_threshold_original,
+                instrument_name
+                )
                 
             selected_transaction_price = selected_transaction ["price"]
             transaction_in_profit = bid_price_future < (selected_transaction_price - selected_transaction_price * tp_threshold)
