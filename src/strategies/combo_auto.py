@@ -754,55 +754,57 @@ class ComboAuto (BasicStrategy):
                 
                 current_premium = combo_ticker[0]["best_bid_price"]
                 
-                transactions_premium = get_transactions_premium(transactions)
-                                                                
-                premium_pct = delta_premium_pct(
-                    transactions_premium,
-                    current_premium,
-                    )
-                
-                basic_ordering_is_ok = basic_ordering (
-                    orders_currency,
-                    label_integer
-                    )
-                
-                tp_threshold = modified_tp_threshold(
-                    instrument_attributes_combo_all,
-                    take_profit_threshold_original,
-                    instrument_name_combo
-                    )                
+                if combo_ticker:
+                    
+                    transactions_premium = get_transactions_premium(transactions)
+                                                                    
+                    premium_pct = delta_premium_pct(
+                        transactions_premium,
+                        current_premium,
+                        )
+                    
+                    basic_ordering_is_ok = basic_ordering (
+                        orders_currency,
+                        label_integer
+                        )
+                    
+                    tp_threshold = modified_tp_threshold(
+                        instrument_attributes_combo_all,
+                        take_profit_threshold_original,
+                        instrument_name_combo
+                        )                
+                                    
+                    if premium_pct > tp_threshold \
+                        and basic_ordering_is_ok\
+                            and current_premium > 0\
+                                and current_premium < transactions_premium:   
                                 
-                if premium_pct > tp_threshold \
-                    and basic_ordering_is_ok\
-                        and current_premium > 0\
-                            and current_premium < transactions_premium:   
-                            
-                    traded_perpetual: list = [o for o in transactions \
-                        if instrument_name_perpetual in o["instrument_name"]][0]
-                                                        
-                    traded_perpetual_size = abs(traded_perpetual["amount"])
-                    
-                    traded_price_perpetual = (traded_perpetual["price"])
-                                
-                    exit_params.update({"type": "limit"})
-                    exit_params.update({"size": abs (traded_perpetual_size)})
-                    exit_params.update({"entry_price": current_premium})
-                    
-                    exit_params.update({"label": f"{strategy_label}-closed-{label_integer}"})
-                    exit_params.update({"instrument_name": instrument_name_combo})
-                    
-                    traded_side_future = (traded_future["side"])
-                    traded_side_perpetual = (traded_perpetual["side"])
-                    
-                    exit_side = determine_exit_side_combo_auto(
-                        traded_price_future,
-                        traded_price_perpetual,
-                        traded_side_future,
-                        traded_side_perpetual,)
-    
-                    exit_params.update({"side":  (exit_side)})
-                                        
-                    order_allowed = True
+                        traded_perpetual: list = [o for o in transactions \
+                            if instrument_name_perpetual in o["instrument_name"]][0]
+                                                            
+                        traded_perpetual_size = abs(traded_perpetual["amount"])
+                        
+                        traded_price_perpetual = (traded_perpetual["price"])
+                                    
+                        exit_params.update({"type": "limit"})
+                        exit_params.update({"size": abs (traded_perpetual_size)})
+                        exit_params.update({"entry_price": current_premium})
+                        
+                        exit_params.update({"label": f"{strategy_label}-closed-{label_integer}"})
+                        exit_params.update({"instrument_name": instrument_name_combo})
+                        
+                        traded_side_future = (traded_future["side"])
+                        traded_side_perpetual = (traded_perpetual["side"])
+                        
+                        exit_side = determine_exit_side_combo_auto(
+                            traded_price_future,
+                            traded_price_perpetual,
+                            traded_side_future,
+                            traded_side_perpetual,)
+        
+                        exit_params.update({"side":  (exit_side)})
+                                            
+                        order_allowed = True
          
         return dict(
             order_allowed= order_allowed,
