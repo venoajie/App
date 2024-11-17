@@ -551,10 +551,16 @@ class RunningStrategy(ModifyOrderDb):
                                                         
                                                         sum_selected_transaction = sum([o["amount"] for o in selected_transaction])
                                                         
-                                                        log.error (f"label_integer {label_integer} selected_transaction {sum_selected_transaction} ")
+                                                        
                                                         
                                                     # closing unpaired transactions
                                                         if sum_selected_transaction == 0:
+                                                            log.error (f"label_integer {label_integer} selected_transaction {sum_selected_transaction} ")
+                                                            ticker_future= reading_from_pkl_data(
+                                                                "ticker",
+                                                                selected_transaction["instrument_name"]
+                                                                )
+                                                            log.error (f" {ticker_future} ")
                                                             
                                                             send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                             ticker_future,
