@@ -890,7 +890,7 @@ class ComboAuto (BasicStrategy):
             log.error (f"transaction_in_profit {transaction_in_profit} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
         
             log.info (selected_transaction)
-            selected_transaction_size = abs(selected_transaction["size"])
+            selected_transaction_size = abs(selected_transaction["amount"])
             
             if transaction_in_profit:
                 if len_orders_instrument == 0:
