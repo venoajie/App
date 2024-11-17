@@ -544,12 +544,7 @@ class RunningStrategy(ModifyOrderDb):
 
                                                         if cancel_allowed["cancel_allowed"]:
                                                             await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
-                                                    
-                                                    # closing unpaired transactions
-                                                    log.debug (f"my_trades_currency {my_trades_currency}")
-                                                    
-                                                    
-                                                    #closing combo auto orders
+
                                                     for label in labels:
                                                         
                                                         label_integer: int = get_label_integer (label)
@@ -560,8 +555,8 @@ class RunningStrategy(ModifyOrderDb):
                                                         
                                                         log.error (f"selected_transaction {selected_transaction}")
                                                         
+                                                    # closing unpaired transactions
                                                         if selected_transaction:
-                                                            
                                                             send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                             ticker_future,
                                                             instrument_attributes_futures_all,
@@ -570,6 +565,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             selected_transaction
                                                             )
                                                             
+                                                    #closing combo auto orders
                                                         else:
                                                             send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
                                                             label,
