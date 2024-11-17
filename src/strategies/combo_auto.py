@@ -888,10 +888,11 @@ class ComboAuto (BasicStrategy):
             transaction_in_profit = bid_price_future < (selected_transaction_price - selected_transaction_price * tp_threshold)
             
             log.error (f"transaction_in_profit {transaction_in_profit} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
+        
+            log.info (selected_transaction)
+            selected_transaction_size = abs(selected_transaction["size"])
             
             if transaction_in_profit:
-                log.info (selected_transaction)
-                selected_transaction_size = abs(selected_transaction["size"])
                 if len_orders_instrument == 0:
                     
                     order_allowed = True      
