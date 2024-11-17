@@ -252,7 +252,7 @@ def check_whether_order_db_reconciled_each_other(
             else len([o["amount"] for o in orders_instrument])    
         
         result = len_orders_instrument == len_sub_account_instrument
-        log.debug (f"result {result} ")
+        #log.debug (f"result {result} ")
         
         if not result:
             log.critical(f"len_order equal {result} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
@@ -305,11 +305,11 @@ def check_whether_size_db_reconciled_each_other(
             last_time_stamp_log = [] if from_transaction_log_instrument == []\
                 else str(max([extract_integers_from_text(o["trade_id"]) for o in from_transaction_log_instrument ]))
     
-            log.error(f"last_time_stamp_log {last_time_stamp_log}")
+            #log.error(f"last_time_stamp_log {last_time_stamp_log}")
             current_position_log = 0 if not from_transaction_log_instrument \
                 else [o["position"] for o in from_transaction_log_instrument \
                     if  str(last_time_stamp_log) in o["trade_id"]][0]
-            log.error(f"current_position_log {current_position_log}")
+            #log.error(f"current_position_log {current_position_log}")
     
         my_trades_instrument = 0 if not my_trades_currency \
             else [o for o in my_trades_currency \
