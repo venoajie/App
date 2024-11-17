@@ -547,17 +547,15 @@ class RunningStrategy(ModifyOrderDb):
                                                     for label in labels:
                                                         
                                                         label_integer: int = get_label_integer (label)
+                                                        selected_transaction = [o for o in my_trades_currency_strategy if str(label_integer) in o["label"]]
                                                         
-                                                        selected_transaction = [o for o in my_trades_currency_strategy \
-                                                            if str(label_integer) in o["label"] \
-                                                                and sum(o["amount"]) !=0]
+                                                        sum_selected_transaction = sum([o["amount"] for o in selected_transaction])
                                                         
-                                                        log.error (f"label_integer {label_integer} selected_transaction {selected_transaction} ")
-                                                        log.warning ([o for o in my_trades_currency_strategy \
-                                                            if str(label_integer) in o["label"] ])
+                                                        log.error (f"label_integer {label_integer} selected_transaction {sum_selected_transaction} ")
                                                         
                                                     # closing unpaired transactions
-                                                        if selected_transaction:
+                                                        if sum_selected_transaction == 0:
+                                                            
                                                             send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                             ticker_future,
                                                             instrument_attributes_futures_all,
