@@ -534,6 +534,8 @@ class RunningStrategy(ModifyOrderDb):
                                                     labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
                                                     
                                                     delta = sum([o["amount"] for o in my_trades_currency_strategy])
+                                                    
+                                                    log.info (my_trades_currency_strategy)
 
                                                      
                                                     for order in orders_currency_strategy:
