@@ -563,7 +563,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             if ticker_future:
                                                                 
                                                                 send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                ticker_future,
+                                                                ticker_future[0],
                                                                 instrument_attributes_futures_all,
                                                                 tp_threshold,
                                                                 selected_transaction
