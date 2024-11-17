@@ -868,77 +868,81 @@ class ComboAuto (BasicStrategy):
         
         if delta < 0:
             
-            side = "buy"
+            instrument_side = selected_transaction ["side"]
             
-            instrument_name = selected_transaction ["instrument_name"]
-            
-            orders_instrument: list=  [o for o in orders_instrument_future_closed 
-                                        if instrument_name in o["instrument_name"]]
-            
-            len_orders_instrument: list=  0 if not  orders_instrument \
-                else len(orders_instrument)
-                    
-            tp_threshold = modified_tp_threshold(
-                instrument_attributes_futures,
-                take_profit_threshold_original,
-                instrument_name
-                )
+            if instrument_side =="sell":
                 
-            selected_transaction_price = selected_transaction ["price"]
-            transaction_in_profit = bid_price_future < (selected_transaction_price - selected_transaction_price * tp_threshold)
+                side = "buy"
+                
+                instrument_name = selected_transaction ["instrument_name"]
+                
+                orders_instrument: list=  [o for o in orders_instrument_future_closed 
+                                            if instrument_name in o["instrument_name"]]
+                
+                len_orders_instrument: list=  0 if not  orders_instrument \
+                    else len(orders_instrument)
+                        
+                tp_threshold = modified_tp_threshold(
+                    instrument_attributes_futures,
+                    take_profit_threshold_original,
+                    instrument_name
+                    )
+                    
+                selected_transaction_price = selected_transaction ["price"]
+                transaction_in_profit = bid_price_future < (selected_transaction_price - selected_transaction_price * tp_threshold)
+                
+                log.error (f"transaction_in_profit {transaction_in_profit} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
             
-            log.error (f"transaction_in_profit {transaction_in_profit} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
+                log.info (selected_transaction)
+                selected_transaction_size = abs(selected_transaction["amount"])
+                
+                if transaction_in_profit:
+                    if len_orders_instrument == 0:
+                        
+                        order_allowed = True      
+
+                        params.update({"instrument_name": instrument_name})
+                    
+                        label_integer = get_label_integer (selected_transaction["label"])
+                        
+                        label = f"{strategy_label}-closed-{label_integer}"
+                    
+                        params.update({"side": side})
+                        params.update({"size": selected_transaction_size})
+                        params.update({"label": label})
+                        params.update({"entry_price": bid_price_future})
         
-            log.info (selected_transaction)
-            selected_transaction_size = abs(selected_transaction["amount"])
-            
-            if transaction_in_profit:
-                if len_orders_instrument == 0:
-                    
-                    order_allowed = True      
 
-                    params.update({"instrument_name": instrument_name})
-                
-                    label_integer = get_label_integer (selected_transaction["label"])
+                # using perpetual to balancing delta    
+                else:
+                    sum_orders_instrument_perpetual_open = 0 if orders_instrument_perpetual_open == []\
+                        else sum([o["amount"] for o in orders_instrument_perpetual_open])
+                        
+                    log.debug (f"sum_orders_instrument_perpetual_open {sum_orders_instrument_perpetual_open} {selected_transaction_price <= bid_price_perpetual}")
+                        
+                    if sum_orders_instrument_perpetual_open < abs(delta):
                     
-                    label = f"{strategy_label}-closed-{label_integer}"
-                
-                    params.update({"side": side})
-                    params.update({"size": selected_transaction_size})
-                    params.update({"label": label})
-                    params.update({"entry_price": bid_price_future})
-    
-
-            # using perpetual to balancing delta    
-            else:
-                sum_orders_instrument_perpetual_open = 0 if orders_instrument_perpetual_open == []\
-                    else sum([o["amount"] for o in orders_instrument_perpetual_open])
+                        order_allowed = True
+                                
+                        # opening new perpetual
+                        if selected_transaction_price <= bid_price_perpetual:
+                            params.update({"label": label_open})
+                        
+                        # pairing with perpetuak    
+                        if selected_transaction_price > bid_price_perpetual:
+                            params.update({"label": selected_transaction["label"]})
+                        
+                        params.update({"size": selected_transaction_size})
+                                            
+                        orders_instrument: list=  [o for o in orders_instrument_perpetual_open 
+                                                    if instrument_name_perpetual in o["instrument_name"]]
+                        
+                        len_orders_instrument: list=  0 if not  orders_instrument \
+                            else len(orders_instrument)
                     
-                log.debug (f"sum_orders_instrument_perpetual_open {sum_orders_instrument_perpetual_open} {selected_transaction_price <= bid_price_perpetual}")
-                    
-                if sum_orders_instrument_perpetual_open < abs(delta):
-                
-                    order_allowed = True
-                            
-                    # opening new perpetual
-                    if selected_transaction_price <= bid_price_perpetual:
-                        params.update({"label": label_open})
-                    
-                    # pairing with perpetuak    
-                    if selected_transaction_price > bid_price_perpetual:
-                        params.update({"label": selected_transaction["label"]})
-                    
-                    params.update({"size": selected_transaction_size})
-                                        
-                    orders_instrument: list=  [o for o in orders_instrument_perpetual_open 
-                                                if instrument_name_perpetual in o["instrument_name"]]
-                    
-                    len_orders_instrument: list=  0 if not  orders_instrument \
-                        else len(orders_instrument)
-                
-                    params.update({"instrument_name": instrument_name_perpetual})
-                    params.update({"side": side})
-                    params.update({"entry_price": bid_price_perpetual})
+                        params.update({"instrument_name": instrument_name_perpetual})
+                        params.update({"side": side})
+                        params.update({"entry_price": bid_price_perpetual})
                     
         if delta == 0:
             
