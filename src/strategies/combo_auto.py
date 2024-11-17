@@ -362,7 +362,7 @@ def compare_transactions_price_against_threshold(
     """
     return [o for o in transactions 
             if current_price_future < (o["price"] - (o["price"] * tp_threshold)) \
-                and o["side"] = side]
+                and o["side"] == side]
                         
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):
@@ -484,29 +484,29 @@ class ComboAuto (BasicStrategy):
                     # closirng current futures
                     if unpaired_transactions_futures_with_good_premium:
                         for selected_transaction in unpaired_transactions_futures_with_good_premium:
-                        selected_transaction = unpaired_transactions_futures_with_good_premium[0]
-                        label_integer = get_label_integer (selected_transaction["label"])
-                        instrument_name = selected_transaction ["instrument_name"]
-                        size = selected_transaction ["size"]
-                        
-                        label = f"futureSpread-closed-{label_integer}"
-                    
-                        params.update({"instrument_name": instrument_name})
-                        params.update({"side": side})
-                        params.update({"size": size})
-                        params.update({"label": label})
-                        params.update({"entry_price": bid_price_future})
-                        
-                        orders_instrument: list=  [o for o in orders_instrument_future_closed 
-                                                   if instrument_name in o["instrument_name"]]
-                        
-                        len_orders_instrument: list=  0 if not  orders_instrument \
-                            else len(orders_instrument)
-                        
-                        if len_orders_instrument == 0:
+                            selected_transaction = unpaired_transactions_futures_with_good_premium[0]
+                            label_integer = get_label_integer (selected_transaction["label"])
+                            instrument_name = selected_transaction ["instrument_name"]
+                            size = selected_transaction ["size"]
                             
-                            order_allowed = True      
-                    
+                            label = f"futureSpread-closed-{label_integer}"
+                        
+                            params.update({"instrument_name": instrument_name})
+                            params.update({"side": side})
+                            params.update({"size": size})
+                            params.update({"label": label})
+                            params.update({"entry_price": bid_price_future})
+                            
+                            orders_instrument: list=  [o for o in orders_instrument_future_closed 
+                                                    if instrument_name in o["instrument_name"]]
+                            
+                            len_orders_instrument: list=  0 if not  orders_instrument \
+                                else len(orders_instrument)
+                            
+                            if len_orders_instrument == 0:
+                                
+                                order_allowed = True      
+                        
                     # opening new perpetual    
                     else:
                                             
@@ -848,7 +848,7 @@ class ComboAuto (BasicStrategy):
         
         
         
-    async def is_contra_order_for_unpaired_transaction(
+    async def is_send_contra_order_for_unpaired_transaction_allowed(
         self,
         ticker_future,
         instrument_attributes_futures,
@@ -874,13 +874,11 @@ class ComboAuto (BasicStrategy):
         
         log.error (f"strategy_label {strategy_label}")
 
-        my_trades_currency = self.my_trades_currency_strategy
         orders_currency = self.orders_currency_strategy
         
         ask_price_future = ticker_future ["best_ask_price"]
         bid_price_future = ticker_future ["best_bid_price"]
         instrument_name_future = ticker_future["instrument_name"]
-        ask_price_perpetual = self.ticker_perpetual ["best_ask_price"]
         bid_price_perpetual = self.ticker_perpetual ["best_bid_price"]        
         instrument_name_perpetual = self.ticker_perpetual["instrument_name"]
         
@@ -894,10 +892,6 @@ class ComboAuto (BasicStrategy):
         
         # provide placeholder for params
         params = {}
-        
-        unpaired_transaction = get_unpaired_transaction(my_trades_currency)
-        
-        log.debug (f"unpaired_transaction {unpaired_transaction}")
         
         tp_threshold = modified_tp_threshold(
             instrument_attributes_futures,
@@ -914,15 +908,8 @@ class ComboAuto (BasicStrategy):
         orders_instrument_future: list=  [o for o in orders_currency 
                                           if instrument_name_future in o["instrument_name"]]
         
-        len_orders_instrument_future: int=  (0 if not orders_instrument_future 
-                                             else len(orders_instrument_future))
-        
         orders_instrument_perpetual: list=  [o for o in orders_currency 
                                              if instrument_name_perpetual in o["instrument_name"]]
-        
-        orders_instrument_future_open: list=  [o for o in orders_instrument_future
-                                               if "open" in o["label"]]
-        
         
         orders_instrument_future_closed: list=  [o for o in orders_instrument_future 
                                                  if "closed" in o["label"]]
@@ -930,10 +917,6 @@ class ComboAuto (BasicStrategy):
         orders_instrument_perpetual_open: list=  [o for o in orders_instrument_perpetual 
                                                   if "open" in o["label"]]
         
-        unpaired_transactions_futures = unpaired_transaction["unpaired_transactions_futures"]
-        
-        unpaired_transactions_perpetual = unpaired_transaction["unpaired_transactions_perpetual"]
-                
         if delta < 0:
             
             side = "buy"
@@ -945,72 +928,67 @@ class ComboAuto (BasicStrategy):
             
             len_orders_instrument: list=  0 if not  orders_instrument \
                 else len(orders_instrument)
-            
-            if len_orders_instrument == 0:
                 
-                params.update({"instrument_name": instrument_name})
+            selected_transaction_price = selected_transaction ["price"]
+            transaction_in_profit = bid_price_future < (selected_transaction_price - selected_transaction_price * tp_threshold)
             
-                label_integer = get_label_integer (selected_transaction["label"])
-                size = selected_transaction ["size"]
+            log.error (f"transaction_in_profit {transaction_in_profit} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
+            
+            if transaction_in_profit:
+                if len_orders_instrument == 0:
+                    
+                    order_allowed = True      
+
+                    params.update({"instrument_name": instrument_name})
                 
-                label = f"{strategy_label}-closed-{label_integer}"
-            
-                params.update({"side": side})
-                params.update({"size": size})
-                params.update({"label": label})
-                params.update({"entry_price": bid_price_future})
-                order_allowed = True      
-        
-                    # opening new perpetual    
-                    else:
-                                            
-                        params.update({"instrument_name": instrument_name_perpetual})
-                        params.update({"side": side})
-                        params.update({"size": basic_size})
-                        params.update({"label": label_open})
-                        params.update({"entry_price": bid_price_perpetual})
-                        orders_instrument: list=  [o for o in orders_instrument_perpetual_open 
-                                                   if instrument_name_perpetual in o["instrument_name"]]
-                        
-                        len_orders_instrument: list=  0 if not  orders_instrument \
-                            else len(orders_instrument)
-                        
-                        if len_orders_instrument == 0:
+                    label_integer = get_label_integer (selected_transaction["label"])
+                    size = selected_transaction ["size"]
+                    
+                    label = f"{strategy_label}-closed-{label_integer}"
+                
+                    params.update({"side": side})
+                    params.update({"size": size})
+                    params.update({"label": label})
+                    params.update({"entry_price": bid_price_future})
+    
+
+            # using perpetual to balancing delta    
+            else:
+                sum_orders_instrument_perpetual_open = 0 if orders_instrument_perpetual_open == []\
+                    else [o["amount"] for o in orders_instrument_perpetual_open]
+                    
+                log.debug (f"sum_orders_instrument_perpetual_open {sum_orders_instrument_perpetual_open} {selected_transaction_price <= bid_price_perpetual}")
+                    
+                if sum_orders_instrument_perpetual_open < delta:
+                
+                    order_allowed = True
                             
-                            order_allowed = True      
-                        
-                if unpaired_transactions_perpetual:
-                    pass
+                    # opening new perpetual
+                    if selected_transaction_price <= bid_price_perpetual:
+                        params.update({"label": label_open})
+                    
+                    # pairing with perpetuak    
+                    if selected_transaction_price > bid_price_perpetual:
+                        params.update({"label": selected_transaction["label"]})
+                    
+                    params.update({"size": selected_transaction["size"]})
+                                        
+                    orders_instrument: list=  [o for o in orders_instrument_perpetual_open 
+                                                if instrument_name_perpetual in o["instrument_name"]]
+                    
+                    len_orders_instrument: list=  0 if not  orders_instrument \
+                        else len(orders_instrument)
+                
+                    params.update({"instrument_name": instrument_name_perpetual})
+                    params.update({"side": side})
+                    params.update({"entry_price": bid_price_perpetual})
                     
         if delta == 0:
             
             if contango:
                 # there were unpaired transactions
-                if unpaired_transaction:
-                    if unpaired_transactions_futures:
-                        pass
-                    if unpaired_transactions_perpetual:
-                        pass
-                    
-                # no unpaired transactions. create new one
-                else:
-                    if len_orders_instrument_future == 0:
-                        params.update({"instrument_name": instrument_name_future})
-                        params.update({"side": "sell"})
-                        params.update({"size": basic_size})
-                        params.update({"entry_price": ask_price_future})
-                        params.update({"label": label_open})
-                        
-                        
-                        orders_instrument: list=  [o for o in orders_instrument_future_open 
-                                                   if instrument_name in o["instrument_name"]]
-                        
-                        len_orders_instrument: list=  0 if not  orders_instrument \
-                            else len(orders_instrument)
-                        
-                        if len_orders_instrument == 0:
-                            
-                            order_allowed = True                  
+                pass
+                                 
                             
         if delta > 0:
             

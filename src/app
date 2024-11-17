@@ -17,7 +17,7 @@ from configuration.label_numbering import get_now_unix_time
 from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query)
 from strategies.combo_auto import ComboAuto
-from strategies.managing_labels import get_unpaired_transaction,
+from strategies.managing_labels import get_unpaired_transaction
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -531,6 +531,9 @@ class RunningStrategy(ModifyOrderDb):
                                                     my_trades_currency_strategy_labels: float = [o["label"] for o in my_trades_currency_strategy  ]
                                                     
                                                     labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
+                                                    
+                                                    delta = sum([o["amount"] for o in my_trades_currency_strategy])
+
                                                      
                                                     for order in orders_currency_strategy:
                                                         cancel_allowed: dict = await combo_auto.is_cancelling_orders_allowed(
@@ -546,17 +549,47 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                     unpaired_transactions_futures = unpaired_transaction["unpaired_transactions_futures"]
                                                     
-                                                    for transaction in unpaired_transactions_futures:
+                                                    log.debug (f"unpaired_transaction {unpaired_transaction}")
                                                     
-                                                        unpaired_transactions_futures_with_good_premium = compare_transactions_price_against_threshold(
-                                                            unpaired_transactions_futures,
-                                                            bid_price_future,
-                                                            "sell",
-                                                            tp_threshold)
+                                                    for selected_transaction in unpaired_transactions_futures:
+                                                    
+                                                        send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                            ticker_future,
+                                                            instrument_attributes_futures_all,
+                                                            target_transaction_per_hour,
+                                                            tp_threshold,
+                                                            selected_transaction
+                                                            )
                                                         
-                                                        if unpaired_transactions_futures_with_good_premium:
-                    
-                                                    unpaired_transactions_perpetual = unpaired_transaction["unpaired_transactions_perpetual"]
+                                                        if send_order["order_allowed"]:
+                                                            
+                                                            log.error (f"send_order {send_order}")
+                                                            
+                                                            result_order = await self.modify_order_and_db.if_order_is_true(
+                                                                non_checked_strategies,
+                                                                send_order, 
+                                                                )
+
+                                                            if result_order:
+                                                                
+                                                                log.error (f"result_order {result_order}")
+                                                                
+                                                                try:
+                                                                    data_orders = result_order["result"]
+                                                                    await self.modify_order_and_db.update_user_changes_non_ws(
+                                                                        non_checked_strategies,
+                                                                        data_orders, 
+                                                                        currency,
+                                                                        order_db_table,
+                                                                        trade_db_table,
+                                                                        archive_db_table,
+                                                                        transaction_log_trading_table
+                                                                        )
+                                                                except Exception as error :
+                                                                    pass #handled at api request module
+                                                                    
+                                                                await sleep_and_restart ()
+
                                                     
                                                     
                                                     #closing combo auto orders
@@ -661,7 +694,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                         log.error (f"result_order {result_order}")
                                                                         
                                                                         try:
+                                                                            
                                                                             data_orders = result_order["result"]
+                                                                            
                                                                             await self.modify_order_and_db.update_user_changes_non_ws(
                                                                                 non_checked_strategies,
                                                                                 data_orders, 
@@ -671,6 +706,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                 archive_db_table,
                                                                                 transaction_log_trading_table
                                                                                 )
+                                                                        
                                                                         except Exception as error :
                                                                             pass #handled at api request module
                                                                             
