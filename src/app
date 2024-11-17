@@ -651,8 +651,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                     target_transaction_per_hour
                                                                     )
                                                         
-                                                                log.error (f"send_order {send_order}")
-                                                                
                                                                 if send_order["order_allowed"]:
                                                                     
                                                                     log.error (f"send_order {send_order}")
@@ -664,8 +662,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                         )
 
                                                                     if result_order:
-                                                                        
-                                                                        log.error (f"result_order {result_order}")
                                                                         
                                                                         try:
                                                                             
