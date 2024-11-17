@@ -553,7 +553,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             if label_integer in ["label"] \
                                                                 and sum(o["amount"]) !=0]
                                                         
-                                                        log.error (f"selected_transaction {selected_transaction}")
+                                                        log.error (f"label_integer {label_integer} selected_transaction {selected_transaction} ")
                                                         
                                                     # closing unpaired transactions
                                                         if selected_transaction:
