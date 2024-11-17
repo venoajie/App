@@ -823,9 +823,6 @@ class ComboAuto (BasicStrategy):
         
         order_allowed = False
         
-        log.critical (f"delta {delta}")
-
-
         label_open: str = get_label(
             "open", 
             self.strategy_label
@@ -853,6 +850,9 @@ class ComboAuto (BasicStrategy):
         
         delta = self.delta
         
+        log.critical (f"delta {delta}")
+
+
         # provide placeholder for params
         params = {}
         
