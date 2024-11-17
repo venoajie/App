@@ -535,9 +535,6 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                     delta = sum([o["amount"] for o in my_trades_currency_strategy])
                                                     
-                                                    log.info (my_trades_currency_strategy)
-
-                                                     
                                                     for order in orders_currency_strategy:
                                                         cancel_allowed: dict = await combo_auto.is_cancelling_orders_allowed(
                                                             order,
@@ -552,12 +549,12 @@ class RunningStrategy(ModifyOrderDb):
                                                         label_integer: int = get_label_integer (label)
                                                         
                                                         selected_transaction = [o for o in my_trades_currency_strategy \
-                                                            if str(label_integer) in ["label"] \
+                                                            if str(label_integer) in o["label"] \
                                                                 and sum(o["amount"]) !=0]
                                                         
                                                         log.error (f"label_integer {label_integer} selected_transaction {selected_transaction} ")
                                                         log.warning ([o for o in my_trades_currency_strategy \
-                                                            if str(label_integer) in ["label"] ])
+                                                            if str(label_integer) in o["label"] ])
                                                         
                                                     # closing unpaired transactions
                                                         if selected_transaction:
