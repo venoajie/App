@@ -552,7 +552,9 @@ class RunningStrategy(ModifyOrderDb):
                                                         sum_selected_transaction = sum([o["amount"] for o in selected_transaction])
                                                         
                                                     # closing unpaired transactions
-                                                        if sum_selected_transaction == 0:
+                                                        if sum_selected_transaction != 0:
+                                                            
+                                                            log.info (f"selected_transaction {selected_transaction}")
                                                             selected_transaction = selected_transaction[0]
                                                             
                                                             ticker_future= reading_from_pkl_data(

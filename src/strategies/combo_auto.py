@@ -912,7 +912,7 @@ class ComboAuto (BasicStrategy):
             # using perpetual to balancing delta    
             else:
                 sum_orders_instrument_perpetual_open = 0 if orders_instrument_perpetual_open == []\
-                    else [o["amount"] for o in orders_instrument_perpetual_open]
+                    else sum([o["amount"] for o in orders_instrument_perpetual_open])
                     
                 log.debug (f"sum_orders_instrument_perpetual_open {sum_orders_instrument_perpetual_open} {selected_transaction_price <= bid_price_perpetual}")
                     
