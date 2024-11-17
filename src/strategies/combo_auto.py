@@ -915,7 +915,7 @@ class ComboAuto (BasicStrategy):
                     
                 log.debug (f"sum_orders_instrument_perpetual_open {sum_orders_instrument_perpetual_open} {selected_transaction_price <= bid_price_perpetual}")
                     
-                if sum_orders_instrument_perpetual_open < delta:
+                if sum_orders_instrument_perpetual_open < abs(delta):
                 
                     order_allowed = True
                             
