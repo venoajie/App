@@ -891,6 +891,7 @@ class ComboAuto (BasicStrategy):
             
             if transaction_in_profit:
                 log.info (selected_transaction)
+                selected_transaction_size = abs(selected_transaction["size"])
                 if len_orders_instrument == 0:
                     
                     order_allowed = True      
@@ -898,12 +899,11 @@ class ComboAuto (BasicStrategy):
                     params.update({"instrument_name": instrument_name})
                 
                     label_integer = get_label_integer (selected_transaction["label"])
-                    size = selected_transaction ["size"]
                     
                     label = f"{strategy_label}-closed-{label_integer}"
                 
                     params.update({"side": side})
-                    params.update({"size": size})
+                    params.update({"size": selected_transaction_size})
                     params.update({"label": label})
                     params.update({"entry_price": bid_price_future})
     
@@ -927,7 +927,7 @@ class ComboAuto (BasicStrategy):
                     if selected_transaction_price > bid_price_perpetual:
                         params.update({"label": selected_transaction["label"]})
                     
-                    params.update({"size": selected_transaction["size"]})
+                    params.update({"size": selected_transaction_size})
                                         
                     orders_instrument: list=  [o for o in orders_instrument_perpetual_open 
                                                 if instrument_name_perpetual in o["instrument_name"]]
