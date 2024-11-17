@@ -16,8 +16,9 @@ from configuration import id_numbering, config
 from configuration.label_numbering import get_now_unix_time
 from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query)
+from strategies.basic_strategy import (
+    get_label_integer,)
 from strategies.combo_auto import ComboAuto
-from strategies.managing_labels import get_unpaired_transaction
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -546,71 +547,45 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                     # closing unpaired transactions
                                                     log.debug (f"my_trades_currency {my_trades_currency}")
-                                                    unpaired_transaction = get_unpaired_transaction(my_trades_currency)
-                                                    
-                                                    log.debug (f"unpaired_transaction {unpaired_transaction}")
-                                                    unpaired_transactions_futures = unpaired_transaction["unpaired_transactions_futures"]
                                                     
                                                     
-                                                    for selected_transaction in unpaired_transactions_futures:
-                                                    
-                                                        send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                    #closing combo auto orders
+                                                    for label in labels:
+                                                        
+                                                        label_integer: int = get_label_integer (label)
+                                                        
+                                                        selected_transaction = [o for o in my_trades_currency_strategy \
+                                                            if label_integer in ["label"] \
+                                                                and sum(o["amount"]) !=0]
+                                                        
+                                                        log.error (f"selected_transaction {selected_transaction}")
+                                                        
+                                                        if selected_transaction:
+                                                            
+                                                            send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                             ticker_future,
                                                             instrument_attributes_futures_all,
                                                             target_transaction_per_hour,
                                                             tp_threshold,
                                                             selected_transaction
                                                             )
-                                                        
-                                                        if send_order["order_allowed"]:
                                                             
-                                                            log.error (f"send_order {send_order}")
-                                                            
-                                                            result_order = await self.modify_order_and_db.if_order_is_true(
-                                                                non_checked_strategies,
-                                                                send_order, 
-                                                                )
-
-                                                            if result_order:
-                                                                
-                                                                log.error (f"result_order {result_order}")
-                                                                
-                                                                try:
-                                                                    data_orders = result_order["result"]
-                                                                    await self.modify_order_and_db.update_user_changes_non_ws(
-                                                                        non_checked_strategies,
-                                                                        data_orders, 
-                                                                        currency,
-                                                                        order_db_table,
-                                                                        trade_db_table,
-                                                                        archive_db_table,
-                                                                        transaction_log_trading_table
-                                                                        )
-                                                                except Exception as error :
-                                                                    pass #handled at api request module
-                                                                    
-                                                                await sleep_and_restart ()
-
-                                                    
-                                                    
-                                                    #closing combo auto orders
-                                                    for label in labels:
-                                                        
-                                                        send_closing_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
+                                                        else:
+                                                            send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
                                                             label,
                                                             instrument_attributes_combo_all,
                                                             tp_threshold)
                                                         
                                                         
-                                                        if send_closing_order["order_allowed"]:
+                                                        if send_order["order_allowed"]:
                                                             
-                                                            log.error (f"send_closing_order {send_closing_order}")
+                                                            log.error (f"send_closing_order {send_order}")
                                                             
-                                                            instrument_name = send_closing_order["order_parameters"]["instrument_name"]
+                                                            instrument_name = send_order["order_parameters"]["instrument_name"]
                                                                                                 
                                                             result_order = await self.modify_order_and_db.if_order_is_true(
                                                                 non_checked_strategies,
-                                                                send_closing_order, 
+                                                                send_order, 
                                                                 instrument_name,
                                                                 )
                                                             

@@ -48,7 +48,7 @@ def get_unpaired_transaction(
     ) -> list:
     """
     """
-    unpaired_transactions_all =  [o for o in my_trades_currency_strategy if sum(o["label"]) != 0]
+    unpaired_transactions_all =  [o for o in my_trades_currency_strategy if sum(o["amount"]) != 0]
     
     unpaired_transactions_futures =  sorting_list(
         [o for o in unpaired_transactions_all if "PERPETUAL" not in o["instrument_name"] ],
