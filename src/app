@@ -545,11 +545,12 @@ class RunningStrategy(ModifyOrderDb):
                                                             await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
                                                     
                                                     # closing unpaired transactions
+                                                    log.debug (f"my_trades_currency {my_trades_currency}")
                                                     unpaired_transaction = get_unpaired_transaction(my_trades_currency)
                                                     
+                                                    log.debug (f"unpaired_transaction {unpaired_transaction}")
                                                     unpaired_transactions_futures = unpaired_transaction["unpaired_transactions_futures"]
                                                     
-                                                    log.debug (f"unpaired_transaction {unpaired_transaction}")
                                                     
                                                     for selected_transaction in unpaired_transactions_futures:
                                                     
