@@ -753,7 +753,7 @@ class ComboAuto (BasicStrategy):
                 
                 current_premium = combo_ticker[0]["best_bid_price"]
                 
-                if combo_ticker:
+                if combo_ticker != []:
                     
                     transactions_premium = get_transactions_premium(transactions)
                                                                     
