@@ -806,11 +806,6 @@ class ComboAuto (BasicStrategy):
                                         
                     order_allowed = True
          
-        if transactions_len==2:
-            log.error (f"transactions {transactions}")           
-            
-            log.critical (f"exit_params {exit_params}")
-
         return dict(
             order_allowed= order_allowed,
             order_parameters=(

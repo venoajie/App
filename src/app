@@ -651,6 +651,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     target_transaction_per_hour
                                                                     )
                                                         
+                                                                log.error (f"send_order {send_order}")
                                                                 
                                                                 if send_order["order_allowed"]:
                                                                     
