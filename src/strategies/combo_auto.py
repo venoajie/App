@@ -414,9 +414,9 @@ class ComboAuto (BasicStrategy):
                         params.update({"size": basic_size})
                         params.update({"label": label_open})
                         params.update({"entry_price": ask_price_future})
-                
-        # default type: limit
-        params.update({"type": "limit"})
+                                
+                        # default type: limit
+                        params.update({"type": "limit"})
         
         return dict(
             order_allowed=order_allowed,
