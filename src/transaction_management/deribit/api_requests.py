@@ -238,7 +238,7 @@ class SendApiRequest:
         
         limit_prc = params["entry_price"]
 
-        if limit_prc.isinteger():
+        if limit_prc.is_integer():
             limit_prc =  int(limit_prc)
 
         order_result = None
