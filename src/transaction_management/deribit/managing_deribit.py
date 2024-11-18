@@ -376,11 +376,8 @@ class ModifyOrderDb(SendApiRequest):
     async def if_order_is_true(
         self,
         non_checked_strategies,
-        order, 
-        instrument: str = None)-> None:
+        order,)-> None:
         """ """
-        log.info (order)
-        log.info (instrument)
         
         if order["order_allowed"]:
 
@@ -396,8 +393,8 @@ class ModifyOrderDb(SendApiRequest):
                 )
 
             if  label_and_side_consistent:
-                send_limit_result = await self.private_data.send_limit_order(params)
-                currency = extract_currency_from_text (order["instrument_name"])
+                send_limit_result = await self.private_data.send_limit_order(params)                
+                currency = extract_currency_from_text (params["instrument_name"])
                 await self.resupply_sub_accountdb(currency)
                 return send_limit_result
                 #await asyncio.sleep(10)
