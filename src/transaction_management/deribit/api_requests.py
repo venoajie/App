@@ -255,7 +255,12 @@ class SendApiRequest:
         if order_result != None and ("error" in order_result):
             error = order_result ["error"]
             message = error ["message"]
-            data = error ["data"]
+
+            try:
+                data = error ["data"]
+            except:
+                data = message
+                
             await telegram_bot_sendtext (f"message: {message}, \
                                          data: {data}, \
                                          (params: {params}"\
