@@ -5,14 +5,17 @@ Description= running general tasks service
 [Service]
 Type=simple
 Restart=always
-ExecStart=/home/opc/App/.venv/bin/python3 /home/opc/App/src/general_tasks
-WorkingDirectory=/home/opc/App/src
+ExecStart=/home/ubuntu/App/.venv/bin/python3 /home/ubuntu/App/src/general_tasks
+WorkingDirectory=/home/ubuntu/App/src
 User=ubuntu
 StandardOutput=null
 RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
+
+~         
+
 
 
 #ubuntu

@@ -1,18 +1,19 @@
 [Unit]
-Description= running general tasks service
-#OnFailure=my-app-recovery.service
+Description= running app service
+
 
 [Service]
 Type=simple
 Restart=always
-ExecStart=/home/ubuntu/.cargo/bin/uv run python3 /home/ubuntu/App/src/app
+ExecStart=/home/ubuntu/App/.venv/bin/python3 /home/ubuntu/App/src/app
 WorkingDirectory=/home/ubuntu/App/src
 User=ubuntu
 StandardOutput=null
-RestartSec=5
+RestartSec=1
 
 [Install]
 WantedBy=multi-user.target
+
 
 sudo vim /etc/systemd/system/app.service
 sudo chmod +x /etc/systemd/system/app.service

@@ -402,6 +402,7 @@ def querying_label_and_size(table) -> str:
 # Generate SQL insert commands from data
 def generate_insert_sql(table_name, data, columns):
     # Construct the column and placeholder strings
+    
     columns_str = ", ".join(columns)
     placeholders = ", ".join(["%s"] * len(columns)) # (%s ,%s)
     
@@ -442,6 +443,8 @@ def querying_based_on_currency_or_instrument_and_strategy (
     """_summary_
     
     status: all, open, closed
+    
+    https://medium.com/@ccpythonprogramming/letting-software-define-the-structure-of-a-database-dynamic-schema-d3bb7e17026c
 
     Returns:
         _type_: _description_
