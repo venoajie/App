@@ -413,7 +413,10 @@ async def hedging_spot_currency(
         if bearish:
             index_attributes = randbelow(2)
             instrument_attributes = instrument_attributes_futures_for_hedging[index_attributes]
-            instrument_name: str = instrument_attributes ["instrument_name"] 
+            instrument_attributes_future = [o for o in instrument_attributes 
+                                            if "PERPETUAL" not in o["inatrument_name"]]
+            
+            instrument_name: str = instrument_attributes_future ["instrument_name"] 
             instrument_ticker: list = reading_from_pkl_data(
                 "ticker",
                 instrument_name
