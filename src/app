@@ -641,6 +641,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 send_order: dict = await combo_auto.is_send_open_order_allowed_auto_combo(
                                                                     ticker_future,
                                                                     ticker_combo,
+                                                                    notional,
                                                                     instrument_name_combo,
                                                                     instrument_attributes_futures_all,
                                                                     instrument_attributes_combo,

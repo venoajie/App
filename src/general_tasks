@@ -385,207 +385,212 @@ async def hedging_spot_currency(
         instrument_ticker: list = reading_from_pkl_data(
             "ticker",
             instrument_name
-            )[0]
-
-        index_price_perpetual: float = instrument_ticker ["index_price"] 
-        # get portfolio data  
-        
-        strategy_attributes = config_app["strategies"]
-                
-        strategy_params= [o for o in strategy_attributes \
-            if o["strategy_label"] == strategy][0]   
-                        
-        threshold_market_condition: float = strategy_params ["delta_price_pct"]
-
-        market_condition: dict = await get_market_condition_hedging(
-            TA_result_data,
-            index_price_perpetual,
-            threshold_market_condition
             )
         
-        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
-    
-        #neutral = market_condition["neutral_price"]
-        log.error (f"market_condition {market_condition}")
-        
-        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        if bearish:
-                                    
-            instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
-                                            if "PERPETUAL" not in o["instrument_name"]]
-            if len(instrument_attributes_future) > 1:
-                index_attributes = randbelow(2)
-                instrument_attributes = instrument_attributes_future[index_attributes]
-            else:
-                instrument_attributes = instrument_attributes_future[0]
+        if instrument_ticker:
             
-            instrument_name: str = instrument_attributes ["instrument_name"] 
-            
-            instrument_ticker: list = reading_from_pkl_data(
-                "ticker",
-                instrument_name
-                )[0]
-            
-            log.debug (f"instrument_ticker {instrument_ticker}")
+            instrument_ticker = instrument_ticker[0]
 
-        portfolio: list = reading_from_pkl_data(
-            "portfolio",
-            currency
-            )
-        
-        equity: float = portfolio[0]["equity"]    
-        
-        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        
-                        
-        if  equity > 0\
-                and instrument_ticker:
+            index_price_perpetual: float = instrument_ticker ["index_price"] 
+            # get portfolio data  
             
-                
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-
-            notional: float = compute_notional_value(
-                index_price_perpetual, 
-                equity
-                )
-                                    
-            
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            # get strategies that have not short/long attributes in the label 
-            non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                if o["non_checked_for_size_label_consistency"]==True]
-            
-            cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                if o["cancellable"]==True]
-            
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
-            
-            max_position: int = notional * -1
-            
-            server_time = get_now_unix_time()  
-               
-            delta_time = server_time-tick_TA
-            
-            delta_time_seconds = delta_time/1000                                                
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            strategy_attributes = config_app["strategies"]
+                    
+            strategy_params= [o for o in strategy_attributes \
+                if o["strategy_label"] == strategy][0]   
                             
-            THRESHOLD_DELTA_TIME_SECONDS = 120
-            log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
+            threshold_market_condition: float = strategy_params ["delta_price_pct"]
+
+            market_condition: dict = await get_market_condition_hedging(
+                TA_result_data,
+                index_price_perpetual,
+                threshold_market_condition
+                )
             
-            #something was wrong because perpetuals were actively traded. cancell  orders
-            if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
-                await modify_order_and_db.cancel_the_cancellables(
-                    currency,
-                    cancellable_strategies
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
+        
+            #neutral = market_condition["neutral_price"]
+            log.error (f"market_condition {market_condition}")
+            
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            if bearish:
+                                        
+                instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
+                                                if "PERPETUAL" not in o["instrument_name"]]
+                if len(instrument_attributes_future) > 1:
+                    index_attributes = randbelow(2)
+                    instrument_attributes = instrument_attributes_future[index_attributes]
+                else:
+                    instrument_attributes = instrument_attributes_future[0]
+                
+                instrument_name: str = instrument_attributes ["instrument_name"] 
+                
+                instrument_ticker: list = reading_from_pkl_data(
+                    "ticker",
+                    instrument_name
                     )
-                                                        
-            else:   #ensure freshness of ta
-                
-                my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy if "open" in (o["label"])]
-                
-                orders_currency_strategy = [o for o in orders_currency if strategy in (o["label"]) ]
-                
-                orders_currency_strategy_label_closed = [o for o in orders_currency_strategy if "closed" in (o["label"]) ]
-                
-                best_ask_prc: float = instrument_ticker["best_ask_price"] 
+                                
+                if instrument_ticker:                    
+                    instrument_ticker = instrument_ticker[0]
 
-                hedging = HedgingSpot(
-                    strategy,
-                    strategy_params,
-                    max_position,
-                    my_trades_currency_strategy,
-                    TA_result_data,
-                    index_price_perpetual,
-                    )
+            portfolio: list = reading_from_pkl_data(
+                "portfolio",
+                currency
+                )
+            
+            equity: float = portfolio[0]["equity"]    
+            
+            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            
+                            
+            if  equity > 0\
+                    and instrument_ticker:
                 
-                for order in orders_currency_strategy:
-                    cancel_allowed: dict = await hedging.is_cancelling_orders_allowed(
-                        order,
-                        orders_currency_strategy,
-                        server_time,
+                    
+                log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
+                notional: float = compute_notional_value(
+                    index_price_perpetual, 
+                    equity
+                    )
+                                        
+                
+                log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                # get strategies that have not short/long attributes in the label 
+                non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                    if o["non_checked_for_size_label_consistency"]==True]
+                
+                cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                    if o["cancellable"]==True]
+                
+                log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
+                
+                max_position: int = notional * -1
+                
+                server_time = get_now_unix_time()  
+                
+                delta_time = server_time-tick_TA
+                
+                delta_time_seconds = delta_time/1000                                                
+                log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                                
+                THRESHOLD_DELTA_TIME_SECONDS = 120
+                log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
+                
+                #something was wrong because perpetuals were actively traded. cancell  orders
+                if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
+                    await modify_order_and_db.cancel_the_cancellables(
+                        currency,
+                        cancellable_strategies
+                        )
+                                                            
+                else:   #ensure freshness of ta
+                    
+                    my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy if "open" in (o["label"])]
+                    
+                    orders_currency_strategy = [o for o in orders_currency if strategy in (o["label"]) ]
+                    
+                    orders_currency_strategy_label_closed = [o for o in orders_currency_strategy if "closed" in (o["label"]) ]
+                    
+                    best_ask_prc: float = instrument_ticker["best_ask_price"] 
+
+                    hedging = HedgingSpot(
+                        strategy,
+                        strategy_params,
+                        max_position,
+                        my_trades_currency_strategy,
+                        TA_result_data,
+                        index_price_perpetual,
                         )
                     
-                    if cancel_allowed["cancel_allowed"]:
-                        await modify_order_and_db.if_cancel_is_true(cancel_allowed)
-                    
-                send_order: dict = await hedging.is_send_open_order_allowed(
-                    non_checked_strategies,
-                    instrument_name,
-                    instrument_attributes_futures_for_hedging,
-                    orders_currency_strategy,
-                    best_ask_prc,
-                    )
-                
-                if send_order["order_allowed"]:
-                    
-                    result_order = await modify_order_and_db.if_order_is_true(
-                        non_checked_strategies,
-                        send_order, 
-                        instrument_name
-                        )
-
-                    if result_order:
-                        
-                        log.error (f"result_order {result_order}")
-                        
-                        data_orders = result_order["result"]
-                        await modify_order_and_db.update_user_changes_non_ws(
-                            non_checked_strategies,
-                            data_orders, 
-                            currency,
-                            order_db_table,
-                            trade_db_table,
-                            archive_db_table,
-                            transaction_log_trading_table
+                    for order in orders_currency_strategy:
+                        cancel_allowed: dict = await hedging.is_cancelling_orders_allowed(
+                            order,
+                            orders_currency_strategy,
+                            server_time,
                             )
                         
-                        await sleep_and_restart ()
-                    
-                if my_trades_currency_strategy_open !=[]:
-                                                                                                
-                    best_bid_prc: float = instrument_ticker["best_bid_price"]
-                    
-                    get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_open]
-                    
-                    closest_price = get_closest_value(
-                        get_prices_in_label_transaction_main,
-                        best_bid_prc
-                        )
-
-                    nearest_transaction_to_index = [o for o in my_trades_currency_strategy_open \
-                        if o["price"] == closest_price]
-                    
-                    send_closing_order: dict = await hedging.is_send_exit_order_allowed(
-                        orders_currency_strategy_label_closed,
-                        best_bid_prc,
-                        nearest_transaction_to_index,
-                        )
-
-                    log.error (f"send_closing_order {send_closing_order}")
-                    result_order = await modify_order_and_db.if_order_is_true(
-                        non_checked_strategies,
-                        send_closing_order, 
-                        instrument_name,
-                        )
-                    
-                    if result_order:
-                        log.error (f"result_order {result_order}")
-                        data_orders = result_order["result"]
-
-                        await modify_order_and_db.update_user_changes_non_ws(
-                            non_checked_strategies,
-                            data_orders, 
-                            currency, 
-                            order_db_table,
-                            trade_db_table, 
-                            archive_db_table,
-                            transaction_log_trading_table)
-
-                        await sleep_and_restart ()
+                        if cancel_allowed["cancel_allowed"]:
+                            await modify_order_and_db.if_cancel_is_true(cancel_allowed)
                         
-            log.debug (f"strategy {strategy}-DONE")
+                    send_order: dict = await hedging.is_send_open_order_allowed(
+                        non_checked_strategies,
+                        instrument_name,
+                        instrument_attributes_futures_for_hedging,
+                        orders_currency_strategy,
+                        best_ask_prc,
+                        )
+                    
+                    if send_order["order_allowed"]:
+                        
+                        result_order = await modify_order_and_db.if_order_is_true(
+                            non_checked_strategies,
+                            send_order, 
+                            instrument_name
+                            )
+
+                        if result_order:
+                            
+                            log.error (f"result_order {result_order}")
+                            
+                            data_orders = result_order["result"]
+                            await modify_order_and_db.update_user_changes_non_ws(
+                                non_checked_strategies,
+                                data_orders, 
+                                currency,
+                                order_db_table,
+                                trade_db_table,
+                                archive_db_table,
+                                transaction_log_trading_table
+                                )
+                            
+                            await sleep_and_restart ()
+                        
+                    if my_trades_currency_strategy_open !=[]:
+                                                                                                    
+                        best_bid_prc: float = instrument_ticker["best_bid_price"]
+                        
+                        get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_open]
+                        
+                        closest_price = get_closest_value(
+                            get_prices_in_label_transaction_main,
+                            best_bid_prc
+                            )
+
+                        nearest_transaction_to_index = [o for o in my_trades_currency_strategy_open \
+                            if o["price"] == closest_price]
+                        
+                        send_closing_order: dict = await hedging.is_send_exit_order_allowed(
+                            orders_currency_strategy_label_closed,
+                            best_bid_prc,
+                            nearest_transaction_to_index,
+                            )
+
+                        log.error (f"send_closing_order {send_closing_order}")
+                        result_order = await modify_order_and_db.if_order_is_true(
+                            non_checked_strategies,
+                            send_closing_order, 
+                            instrument_name,
+                            )
+                        
+                        if result_order:
+                            log.error (f"result_order {result_order}")
+                            data_orders = result_order["result"]
+
+                            await modify_order_and_db.update_user_changes_non_ws(
+                                non_checked_strategies,
+                                data_orders, 
+                                currency, 
+                                order_db_table,
+                                trade_db_table, 
+                                archive_db_table,
+                                transaction_log_trading_table)
+
+                            await sleep_and_restart ()
+                            
+                log.debug (f"strategy {strategy}-DONE")
     
     except Exception as error:
         await telegram_bot_sendtext (
