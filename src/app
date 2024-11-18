@@ -503,28 +503,20 @@ class RunningStrategy(ModifyOrderDb):
                                                 if   "futureSpread" in strategy :
                                                 
                                                     log.warning (f"strategy {strategy}-START")                                                    
-
-                                                    #unpaired_transactions_futures = get_unpaired_transaction ["unpaired_transactions_futures"]
-                                                    #unpaired_transactions_perpetual = get_unpaired_transaction ["unpaired_transactions_perpetual"]
-                                                    
-                                                    #await combo_modify_label_unpaired_transaction(
-                                                    #    unpaired_transactions_futures,
-                                                    #    unpaired_transactions_perpetual
-                                                    #    )
-                                                                
+    
                         
                                                     strategy_params= [o for o in strategy_attributes \
                                                         if o["strategy_label"] == strategy][0]   
+                                                    
+                                                    target_transaction_per_hour = 1/10
                                                             
                                                     combo_auto = ComboAuto(
                                                         strategy,
                                                         strategy_params,
-                                                        position_without_combo,
-                                                        my_trades_currency_strategy,
                                                         orders_currency_strategy,
-                                                        notional,
+                                                        server_time,
+                                                        my_trades_currency_strategy,
                                                         ticker_perpetual_instrument_name,
-                                                        server_time
                                                         )
                                                     
                                                     tp_threshold = .001/100
@@ -568,7 +560,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 ticker_future[0],
                                                                 instrument_attributes_futures_all,
                                                                 tp_threshold,
-                                                                selected_transaction
+                                                                selected_transaction,
                                                                 )
                                                             
                                                     #closing combo auto orders
@@ -645,9 +637,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 ticker_combo= ticker_combo[0]
 
                                                                 ticker_future= ticker_future[0]
-                                                                
-                                                                target_transaction_per_hour = 1/10
-                                                                
+                                                    
                                                                 send_order: dict = await combo_auto.is_send_open_order_allowed_auto_combo(
                                                                     ticker_future,
                                                                     ticker_combo,
@@ -689,15 +679,52 @@ class RunningStrategy(ModifyOrderDb):
                                                                         await sleep_and_restart ()
 
                                                     
-                                                    log.warning (f"strategy {strategy}-DONE")
+                                                                send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
+                                                                    ticker_future,
+                                                                    ticker_combo,
+                                                                    instrument_attributes_futures_all,
+                                                                    notional,
+                                                                    target_transaction_per_hour
+                                                                    )
+                                                        
+                                                                if send_order["order_allowed"]:
+                                                                    
+                                                                    log.error (f"send_order {send_order}")
+                                                                    
+                                                                    result_order = await self.modify_order_and_db.if_order_is_true(
+                                                                        non_checked_strategies,
+                                                                        send_order, 
+                                                                        instrument_name_combo
+                                                                        )
 
+                                                                    if result_order:
+                                                                        
+                                                                        try:
+                                                                            
+                                                                            data_orders = result_order["result"]
+                                                                            
+                                                                            await self.modify_order_and_db.update_user_changes_non_ws(
+                                                                                non_checked_strategies,
+                                                                                data_orders, 
+                                                                                currency,
+                                                                                order_db_table,
+                                                                                trade_db_table,
+                                                                                archive_db_table,
+                                                                                transaction_log_trading_table
+                                                                                )
+                                                                        
+                                                                        except Exception as error :
+                                                                            pass #handled at api request module
+                                                                            
+                                                                        await sleep_and_restart ()
+                                                    
+                                                    log.warning (f"strategy {strategy}-DONE")
                                                                     
                         except Exception as error:
                             await raise_error_message (error)
                             await telegram_bot_sendtext (
                                 error,
                                 "general_error")
-
 
             except Exception as error:
                 await raise_error_message (error)
