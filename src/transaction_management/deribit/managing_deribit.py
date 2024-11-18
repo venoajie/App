@@ -397,7 +397,7 @@ class ModifyOrderDb(SendApiRequest):
 
             if  label_and_side_consistent:
                 send_limit_result = await self.private_data.send_limit_order(params)
-                currency = extract_currency_from_text (instrument)
+                currency = extract_currency_from_text (order["instrument_name"])
                 await self.resupply_sub_accountdb(currency)
                 return send_limit_result
                 #await asyncio.sleep(10)
