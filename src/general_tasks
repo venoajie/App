@@ -528,7 +528,6 @@ async def hedging_spot_currency(
                         result_order = await modify_order_and_db.if_order_is_true(
                             non_checked_strategies,
                             send_order, 
-                            instrument_name
                             )
 
                         if result_order:

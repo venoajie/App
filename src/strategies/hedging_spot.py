@@ -347,6 +347,7 @@ class HedgingSpot(BasicStrategy):
                 
                 if label_and_side_consistent:# and not order_has_sent_before:
                     
+                    params.update({"instrument_name": instrument_name})
                     params.update({"size": abs(size)})
                     params.update({"is_label_and_side_consistent": label_and_side_consistent})
                             

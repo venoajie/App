@@ -580,7 +580,6 @@ class RunningStrategy(ModifyOrderDb):
                                                             result_order = await self.modify_order_and_db.if_order_is_true(
                                                                 non_checked_strategies,
                                                                 send_order, 
-                                                                instrument_name,
                                                                 )
                                                             
                                                             if result_order:
@@ -655,7 +654,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                     result_order = await self.modify_order_and_db.if_order_is_true(
                                                                         non_checked_strategies,
                                                                         send_order, 
-                                                                        instrument_name_combo
                                                                         )
 
                                                                     if result_order:
@@ -694,7 +692,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                     result_order = await self.modify_order_and_db.if_order_is_true(
                                                                         non_checked_strategies,
                                                                         send_order, 
-                                                                        instrument_name_combo
                                                                         )
 
                                                                     if result_order:

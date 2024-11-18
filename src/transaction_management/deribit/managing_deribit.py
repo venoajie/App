@@ -390,10 +390,6 @@ class ModifyOrderDb(SendApiRequest):
             except:
                 params = order
 
-            if instrument is not None:
-                # update param orders with instrument
-                params.update({"instrument_name": instrument})
-
             label_and_side_consistent = is_label_and_side_consistent(
                 non_checked_strategies,
                 params
