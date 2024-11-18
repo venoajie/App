@@ -681,7 +681,10 @@ class HedgingSpot(BasicStrategy):
                 len_orders,
                 bid_price,
                 )
-            
+                    
+            # default type: limit
+            exit_params.update({"type": "limit"})
+
         return dict(
             order_allowed = order_allowed,
             order_parameters = (

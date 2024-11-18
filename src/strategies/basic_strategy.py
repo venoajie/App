@@ -713,9 +713,6 @@ def get_basic_closing_paramaters(
     # provide dict placeholder for params
     params = {}
 
-    # default type: limit
-    params.update({"type": "limit"})
-
     # determine side        
     side = provide_side_to_close_transaction(transaction)
     params.update({"side": side}
