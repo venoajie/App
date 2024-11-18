@@ -64,19 +64,19 @@ def cached_ticker_data(currencies):
     result=[]
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
-        
-        log.critical (instrument_name)
-        
-        result_instrument= ((reading_from_pkl_data(
+                        
+        result_instrument= reading_from_pkl_data(
                 "ticker",
                 instrument_name
-                )))
-        if result:
-            result_instrument[0]
+                )
+        
+        if result_instrument:
+            result_instrument = result_instrument[0]
+
         else:
             result_instrument = get_tickers (instrument_name)
-            log.error (f" {result_instrument}")
         result.append (result_instrument)
+
 
     return result
 
