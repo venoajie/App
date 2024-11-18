@@ -833,6 +833,8 @@ class ComboAuto (BasicStrategy):
                             params.update({"instrument_name": instrument_name_perpetual})
                             params.update({"side": side})
                             params.update({"entry_price": bid_price_perpetual})
+                            # default type: limit
+                            params.update({"type": "limit"})
                                                 
                             orders_instrument: list=  [o for o in orders_instrument_perpetual_open 
                                                         if instrument_name_perpetual in o["instrument_name"]]
@@ -840,10 +842,6 @@ class ComboAuto (BasicStrategy):
                             len_orders_instrument: list=  0 if not  orders_instrument \
                                 else len(orders_instrument)
                          
-                            
-                
-        # default type: limit
-        params.update({"type": "limit"})
         
         return dict(
             order_allowed=order_allowed,
