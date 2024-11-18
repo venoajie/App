@@ -561,9 +561,13 @@ async def hedging_spot_currency(
                         nearest_transaction_to_index = [o for o in my_trades_currency_strategy_open \
                             if o["price"] == closest_price]
                         
+                        instrument_ticker: list = reading_from_pkl_data(
+                            "ticker",
+                            nearest_transaction_to_index[0]["instrument_name"])
+                        
                         send_closing_order: dict = await hedging.is_send_exit_order_allowed(
                             orders_currency_strategy_label_closed,
-                            best_bid_prc,
+                            instrument_ticker[0]["best_bid_price"],
                             nearest_transaction_to_index,
                             )
 
