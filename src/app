@@ -58,6 +58,7 @@ def cached_ticker_data(currencies):
     """
     #result = (orjson.loads(data))
     
+    from transaction_management.deribit.api_requests import get_tickers
     log.critical ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     
     result=[]
@@ -69,7 +70,12 @@ def cached_ticker_data(currencies):
         result_instrument= ((reading_from_pkl_data(
                 "ticker",
                 instrument_name
-                )))[0]
+                )))
+        if result:
+            result_instrument[0]
+        else:
+            result_instrument = get_tickers (instrument_name)
+            log.error (f" {result_instrument}")
         result.append (result_instrument)
 
     return result
