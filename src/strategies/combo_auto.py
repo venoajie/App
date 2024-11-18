@@ -360,9 +360,8 @@ class ComboAuto (BasicStrategy):
         
         order_allowed = False
         
-        log.critical (f"is_send_open_order_allowed_constructing_manual_combo delta {delta}")
-
         delta = self.delta
+        log.critical (f"is_send_open_order_allowed_constructing_manual_combo delta {delta}")
 
         if delta == 0:            
 
