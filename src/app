@@ -682,7 +682,6 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                                 send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
                                                                     ticker_future,
-                                                                    ticker_combo,
                                                                     instrument_attributes_futures_all,
                                                                     notional,
                                                                     target_transaction_per_hour
