@@ -785,7 +785,9 @@ class ComboAuto (BasicStrategy):
 
                     # provide placeholder for params
                     params = {}
-            
+                    # default type: limit
+                    params.update({"type": "limit"})
+    
                     log.error (f"transaction_in_profit {transaction_in_profit} len_orders_instrument {len_orders_instrument} bid_price_future {bid_price_future} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
                     
                     if transaction_in_profit:
@@ -833,8 +835,6 @@ class ComboAuto (BasicStrategy):
                             params.update({"instrument_name": instrument_name_perpetual})
                             params.update({"side": side})
                             params.update({"entry_price": bid_price_perpetual})
-                            # default type: limit
-                            params.update({"type": "limit"})
                                                 
                             orders_instrument: list=  [o for o in orders_instrument_perpetual_open 
                                                         if instrument_name_perpetual in o["instrument_name"]]
