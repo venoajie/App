@@ -921,8 +921,9 @@ async def reconciling_size_and_orders(
                                         currency,
                                         transaction_log_trading_table,
                                         instrument_name,
-                                        100
+                                        200
                                         )
+                                    
                                     
             await asyncio.sleep(idle_time)
             
