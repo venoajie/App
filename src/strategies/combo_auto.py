@@ -126,11 +126,12 @@ def determine_exit_side_combo_auto(
         
     if traded_transaction_is_contango:
         
-        if traded_side_future == "sell" and traded_side_perpetual == "buy":
+        if traded_side_future == "sell" \
+            and traded_side_perpetual == "buy":
             
-            exit_side = "buy"                                            
-    
-    return exit_side
+            exit_side = "buy"    
+            
+            return exit_side
 
 
 def extracting_closing_parameters_from_transactions(
@@ -688,15 +689,16 @@ class ComboAuto (BasicStrategy):
                             traded_side_future,
                             traded_side_perpetual,)
         
-                        exit_params = {}            
-                        exit_params.update({"type": "limit"})
-                        exit_params.update({"size": abs (traded_perpetual_size)})
-                        exit_params.update({"entry_price": current_premium})
-                        exit_params.update({"label": f"{strategy_label}-closed-{label_integer}"})
-                        exit_params.update({"instrument_name": instrument_name_combo})                
-                        exit_params.update({"side":  (exit_side)})
-                                            
-                        order_allowed = True
+                        if exit_side:
+                            exit_params = {}            
+                            exit_params.update({"type": "limit"})
+                            exit_params.update({"size": abs (traded_perpetual_size)})
+                            exit_params.update({"entry_price": current_premium})
+                            exit_params.update({"label": f"{strategy_label}-closed-{label_integer}"})
+                            exit_params.update({"instrument_name": instrument_name_combo})                
+                            exit_params.update({"side":  (exit_side)})
+                                                
+                            order_allowed = True
          
         return dict(
             order_allowed= order_allowed,
