@@ -82,6 +82,31 @@ def check_cpu_usage(threshold):
     if cpu_usage > threshold:
         send_alert(f"CPU usage is too high: {cpu_usage}%")
         
+def sorting_list(
+    listing: list,
+    item_reference: str = "price",
+    is_reversed: bool=True
+    ) -> list:
+    """
+    https://sparkbyexamples.com/python/sort-list-of-dictionaries-by-value-in-python/
+
+    Args:
+        listing (list): _description_
+        item_reference (str, optional): _description_. Defaults to "price".
+        is_reversed (bool, optional): _description_. Defaults to True.
+                                    True = from_highest_to_lowest
+                                    False = from_lowest_to_highest
+
+    Returns:
+        list: _description_
+    """
+    import operator 
+
+    return sorted(
+        listing, 
+        key=operator.itemgetter(item_reference), 
+        reverse = is_reversed)
+
 def get_index (
     data_orders: dict, 
     ticker: dict
@@ -863,7 +888,8 @@ async def reconciling_size_and_orders(
                                                                                 "all", 
                                                                                 column_trade)
                                     
-                                    my_trades_data = parsing_sqlite_json_output([o["data"] for o in my_trades_instrument_name])
+                                    my_trades_data = sorting_list(parsing_sqlite_json_output([o["data"] for o in my_trades_instrument_name]),
+                                                                  timestamp,False)
                                     
                                     for trade in my_trades_data:                                        
                                         await saving_traded_orders(
