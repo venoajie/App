@@ -643,7 +643,9 @@ class HedgingSpot(BasicStrategy):
                     
                     max_timestamp = max([o["timestamp"] for o in my_trades_orphan])
                     transaction = [o for o in my_trades_orphan if max_timestamp == o["timestamp"]][0]
-                    
+
+                    instrument_name = transaction["instrument_name"]
+                                                
                     instrument_ticker: list = reading_from_pkl_data(
                         "ticker",
                         instrument_name)
@@ -665,8 +667,6 @@ class HedgingSpot(BasicStrategy):
                             params.update({"type": "limit"})
                             params.update({"size": abs(transaction["amount"])})
 
-                            instrument_name = transaction["instrument_name"]
-                            
                             label_integer = get_label_integer(transaction ["label"])
                             
                             params.update({"label": f"{self.strategy_label}-open-{label_integer}"})
