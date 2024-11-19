@@ -35,6 +35,7 @@ from utilities.pickling import (
     read_data,
     replace_data,)
 from utilities.string_modification import (
+    parsing_sqlite_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
     transform_nested_dict_to_list,)
@@ -862,7 +863,7 @@ async def reconciling_size_and_orders(
                                                                                 column_trade)
                                     
                                     for trade_all in my_trades_instrument_name:
-                                        trade = trade_all["data"]
+                                        trade = parsing_sqlite_json_output(trade_all["data"])
                                         log.error (trade)
                                         
                                         await saving_traded_orders(
