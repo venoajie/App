@@ -637,7 +637,7 @@ class HedgingSpot(BasicStrategy):
                 my_trades_orphan = [o for o in self.my_trades_currency_strategy \
                     if "closed" in o["label"]\
                         and "open" not in (o["label"])]
-                log.critical (f"my_trades_orphan {my_trades_orphan}")
+
                 if my_trades_orphan !=[]:
                     
                     max_timestamp = max([o["timestamp"] for o in my_trades_orphan])
@@ -670,12 +670,11 @@ class HedgingSpot(BasicStrategy):
                             
                             params.update({"label": f"{self.strategy_label}-open-{label_integer}"})
                             
-                            params.update({"instrument_name": {instrument_name}})
+                            params.update({"instrument_name": instrument_name})
                             
-                            params.update({"entry_price": {best_ask_price}})
+                            params.update({"entry_price": best_ask_price})
 
                             order_allowed = True
-                log.critical (f"params {params}")
             
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
