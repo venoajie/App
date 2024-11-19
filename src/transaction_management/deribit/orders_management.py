@@ -36,7 +36,6 @@ async def saving_traded_orders (
     """
 
 
-    log.info (trade)
     instrument_name = trade["instrument_name"]
     
     label= trade["label"]
