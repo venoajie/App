@@ -477,13 +477,13 @@ class HedgingSpot(BasicStrategy):
         if "open" in transaction["label"]:
 
             open_size_not_over_bought  =  self.over_hedged_opening
-                    
-            if not open_size_not_over_bought:            
                 
-                open_orders_label: list=  [o for o in orders_currency_strategy \
-                    if "open" in o["label"]]
-                        
-                len_open_orders: int = get_transactions_len(open_orders_label)
+            open_orders_label: list=  [o for o in orders_currency_strategy \
+                if "open" in o["label"]]
+                    
+            len_open_orders: int = get_transactions_len(open_orders_label)
+                
+            if not open_size_not_over_bought:            
         
                 #Only one open order a time
                 if len_open_orders > 1:
