@@ -862,8 +862,8 @@ async def reconciling_size_and_orders(
                                                                                 "all", 
                                                                                 column_trade)
                                     
-                                    for trade_all in my_trades_instrument_name:
-                                        trade = parsing_sqlite_json_output(trade_all["data"])
+                                    for trade_all in parsing_sqlite_json_output(my_trades_instrument_name):
+                                        trade = (trade_all["data"])
                                         log.error (trade)
                                         
                                         await saving_traded_orders(
