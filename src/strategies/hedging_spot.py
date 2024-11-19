@@ -675,6 +675,7 @@ class HedgingSpot(BasicStrategy):
                             params.update({"entry_price": {best_ask_price}})
 
                             order_allowed = True
+                log.critical (f"params {params}")
             
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
