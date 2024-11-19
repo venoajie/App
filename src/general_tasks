@@ -24,6 +24,8 @@ from strategies.hedging_spot import (
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
+from transaction_management.deribit.orders_management import (
+    saving_traded_orders,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -33,6 +35,7 @@ from utilities.pickling import (
     read_data,
     replace_data,)
 from utilities.string_modification import (
+    parsing_sqlite_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
     transform_nested_dict_to_list,)
@@ -48,6 +51,7 @@ from websocket_management.allocating_ohlc import (
 from websocket_management.cleaning_up_transactions import (
     check_whether_order_db_reconciled_each_other,
     check_whether_size_db_reconciled_each_other,
+    clean_up_closed_transactions,
     get_unrecorded_trade_transactions,
     get_unrecorded_trade_and_order_id,
     count_and_delete_ohlc_rows,
@@ -123,6 +127,31 @@ def reading_from_pkl_data(
 
     return read_data(path)
 
+
+def sorting_list(
+    listing: list,
+    item_reference: str = "price",
+    is_reversed: bool=True
+    ) -> list:
+    """
+    https://sparkbyexamples.com/python/sort-list-of-dictionaries-by-value-in-python/
+
+    Args:
+        listing (list): _description_
+        item_reference (str, optional): _description_. Defaults to "price".
+        is_reversed (bool, optional): _description_. Defaults to True.
+                                    True = from_highest_to_lowest
+                                    False = from_lowest_to_highest
+
+    Returns:
+        list: _description_
+    """
+    import operator
+
+    return sorted(
+        listing, 
+        key=operator.itemgetter(item_reference), 
+        reverse = is_reversed)
 
 async def back_up_db(idle_time):
     extensions = ('.bak')
@@ -852,13 +881,31 @@ async def reconciling_size_and_orders(
                                         100)
 
                                 else:
-                                    column_trade: str= "instrument_name","label","timestamp","trade_id"
+                                    column_trade: str= "data,  instrument_name","label","timestamp","trade_id"
                                     my_trades_instrument_name: list= await get_query(archive_db_table, 
                                                                                 instrument_name, 
                                                                                 "all", 
                                                                                 "all", 
                                                                                 column_trade)
                                     
+                                    my_trades_data = sorting_list(parsing_sqlite_json_output(
+                                        [o["data"] for o in my_trades_instrument_name]),
+                                                                  "timestamp",
+                                                                  False)
+                                    
+                                    for trade in my_trades_data:                                        
+                                        await saving_traded_orders(
+                                        trade,
+                                        trade_db_table
+                                        )      
+                                        
+                                        if   "closed" in trade["label"]:
+                                                                    
+                                                await clean_up_closed_transactions(
+                                                    instrument_name,
+                                                    trade_db_table
+                                                    )                
+
                                     from_transaction_log_instrument =(
                                         [o for o in from_transaction_log \
                                             if o["instrument_name"] == instrument_name]
