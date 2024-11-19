@@ -797,7 +797,7 @@ async def reconciling_size_and_orders(
                             
                             if not size_is_reconciled_each_other:
                                 
-                                column_trade: str= "instrument_name","label","timestamp", "trade_id"
+                                column_trade: str= "data", "instrument_name","label","timestamp", "trade_id"
                                 my_trades_instrument_name: list= await get_query(archive_db_table, 
                                                                             instrument_name, 
                                                                             "all", 
@@ -815,6 +815,25 @@ async def reconciling_size_and_orders(
                                         100
                                         )
                                 else:
+                                    
+                                    my_trades_data = sorting_list(parsing_sqlite_json_output(
+                                        [o["data"] for o in my_trades_instrument_name]),
+                                                                  "timestamp",
+                                                                  False)
+                                    
+                                    for trade in my_trades_data:                                        
+                                        await saving_traded_orders(
+                                        trade,
+                                        trade_db_table
+                                        )      
+                                        
+                                        if   "closed" in trade["label"]:
+                                                                    
+                                                await clean_up_closed_transactions(
+                                                    instrument_name,
+                                                    trade_db_table
+                                                    )                
+
                                     from_transaction_log_instrument_name = (
                                         [o for o in from_transaction_log if o["instrument_name"] == instrument_name]
                                         )  
@@ -881,7 +900,7 @@ async def reconciling_size_and_orders(
                                         100)
 
                                 else:
-                                    column_trade: str= "data,  instrument_name","label","timestamp","trade_id"
+                                    column_trade: str= "data",  "instrument_name","label","timestamp","trade_id"
                                     my_trades_instrument_name: list= await get_query(archive_db_table, 
                                                                                 instrument_name, 
                                                                                 "all", 
