@@ -168,7 +168,7 @@ async def get_result_from_db_queries (
     ) -> list:
     
 
-    column_trade: str= "instrument_name","label", "amount", "price","side"
+    column_trade: str= "instrument_name","label", "amount", "price","side","timestamp"
     my_trades_currency: list= await get_query(trade_db_table, 
                                                 currency, 
                                                 "all", 
@@ -489,7 +489,7 @@ async def hedging_spot_currency(
                 else:   #ensure freshness of ta
                     
                     my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy if "open" in (o["label"])]
-                    
+
                     orders_currency_strategy = [o for o in orders_currency if strategy in (o["label"]) ]
                     
                     orders_currency_strategy_label_closed = [o for o in orders_currency_strategy if "closed" in (o["label"]) ]
@@ -546,6 +546,7 @@ async def hedging_spot_currency(
                                 )
                             
                             await sleep_and_restart ()
+                                
                         
                     if my_trades_currency_strategy_open !=[]:
                                                                                                     

@@ -38,6 +38,26 @@ def get_label_integer(label: dict) -> bool:
     return parsing_label(label)["int"]
 
 
+def reading_from_pkl_data(
+    end_point, 
+    currency,
+    status: str = None
+    ) -> dict:
+    """ """
+        
+    from utilities.pickling import (
+        read_data,)
+    from utilities.system_tools import (
+        provide_path_for_file,)
+
+    path: str = provide_path_for_file (end_point,
+                                      currency,
+                                      status)
+    data = read_data(path)
+
+    return data
+
+
 def hedged_value_to_notional(
     notional: float,
     hedged_value: float
@@ -302,6 +322,7 @@ class HedgingSpot(BasicStrategy):
         order_allowed: bool = False
         
         if len_orders == 0:
+            
             #bullish = market_condition["rising_price"]
             bearish = market_condition["falling_price"]
 
@@ -606,6 +627,54 @@ class HedgingSpot(BasicStrategy):
             SIZE_FACTOR,
             len_open_orders
             )
+        
+        # additional test for possibilities of orphaned closed orders was existed
+        if not order_allowed:        
+            
+            if len_open_orders == 0:
+                
+                # orphaned closed orders: have closed only
+                my_trades_orphan = [o for o in self.my_trades_currency_strategy \
+                    if "closed" in o["label"]\
+                        and "open" not in (o["label"])]
+                log.critical (f"my_trades_orphan {my_trades_orphan}")
+                if my_trades_orphan !=[]:
+                    
+                    max_timestamp = max([o["timestamp"] for o in my_trades_orphan])
+                    transaction = [o for o in my_trades_orphan if max_timestamp == o["timestamp"]][0]
+                    
+                    instrument_ticker: list = reading_from_pkl_data(
+                        "ticker",
+                        instrument_name)
+
+                    if instrument_ticker:
+                        
+                        instrument_ticker = instrument_ticker[0]
+
+                        best_ask_price = instrument_ticker["best_ask_price"]
+                        
+                        transaction_price = transaction["price"]
+                        
+                        if transaction_price < best_ask_price:
+                                                    
+                            params = {}
+
+                            # determine side        
+                            params.update({"side": "sell"})
+                            params.update({"type": "limit"})
+                            params.update({"size": abs(transaction["amount"])})
+
+                            instrument_name = transaction["instrument_name"]
+                            
+                            label_integer = get_label_integer(transaction ["label"])
+                            
+                            params.update({"label": f"{self.strategy_label}-open-{label_integer}"})
+                            
+                            params.update({"instrument_name": {instrument_name}})
+                            
+                            params.update({"entry_price": {best_ask_price}})
+
+                            order_allowed = True
             
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
@@ -693,3 +762,5 @@ class HedgingSpot(BasicStrategy):
                         else exit_params
             ),
             )
+
+
