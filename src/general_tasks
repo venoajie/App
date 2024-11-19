@@ -523,6 +523,7 @@ async def hedging_spot_currency(
                         best_ask_prc,
                         )
                     log.error(f"send_order {send_order}")
+                    log.error(f"instrument_ticker {instrument_ticker}")
                     if send_order["order_allowed"]:
                         
                         result_order = await modify_order_and_db.if_order_is_true(

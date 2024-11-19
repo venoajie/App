@@ -627,7 +627,8 @@ class HedgingSpot(BasicStrategy):
             SIZE_FACTOR,
             len_open_orders
             )
-        
+        log.debug (f"params {params}")
+        log.debug (f"instrument_name {instrument_name}")
         # additional test for possibilities of orphaned closed orders was existed
         if not order_allowed:        
             
@@ -675,6 +676,8 @@ class HedgingSpot(BasicStrategy):
                             params.update({"entry_price": best_ask_price})
 
                             order_allowed = True
+                            log.debug (f"params {params}")
+                            log.debug (f"instrument_ticker {instrument_ticker}")
             
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
