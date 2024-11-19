@@ -862,8 +862,8 @@ async def reconciling_size_and_orders(
                                                                                 column_trade)
                                     
                                     for trade_all in my_trades_instrument_name:
-                                        log.error (trade_all)
-                                        trade = trade_all[0]["data"]
+                                        log.error (trade_all["data"])
+                                        trade = trade_all["data"]
                                         
                                         await saving_traded_orders(
                                         trade,
