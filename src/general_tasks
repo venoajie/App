@@ -26,6 +26,8 @@ from transaction_management.deribit.api_requests import (
     get_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
+from transaction_management.deribit.orders_management import (
+    saving_traded_orders,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from utilities.number_modification import get_closest_value
@@ -852,12 +854,22 @@ async def reconciling_size_and_orders(
                                         100)
 
                                 else:
-                                    column_trade: str= "instrument_name","label","timestamp","trade_id"
+                                    column_trade: str= "data,  instrument_name","label","timestamp","trade_id"
                                     my_trades_instrument_name: list= await get_query(archive_db_table, 
                                                                                 instrument_name, 
                                                                                 "all", 
                                                                                 "all", 
                                                                                 column_trade)
+                                    
+                                    for trade_all in my_trades_instrument_name:
+                                        log.error (trade_all)
+                                        trade = trade_all[0]["data"]
+                                        
+                                        await saving_traded_orders(
+                                        trade,
+                                        trade_db_table
+                                        )                      
+
                                     
                                     from_transaction_log_instrument =(
                                         [o for o in from_transaction_log \
@@ -921,7 +933,7 @@ async def reconciling_size_and_orders(
                                         currency,
                                         transaction_log_trading_table,
                                         instrument_name,
-                                        200
+                                        100
                                         )
                                     
                                     
