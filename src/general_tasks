@@ -889,7 +889,7 @@ async def reconciling_size_and_orders(
                                                                                 column_trade)
                                     
                                     my_trades_data = sorting_list(parsing_sqlite_json_output([o["data"] for o in my_trades_instrument_name]),
-                                                                  timestamp,False)
+                                                                  "timestamp",False)
                                     
                                     for trade in my_trades_data:                                        
                                         await saving_traded_orders(
