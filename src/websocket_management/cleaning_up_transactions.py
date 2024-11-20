@@ -192,7 +192,9 @@ async def get_unrecorded_trade_and_order_id(instrument_name: str) -> dict:
                                       #40,
                                       #"id"
                                       )                                       
+
     from_sqlite_closed_trade_id = [o["trade_id"] for o in from_sqlite_closed]
+
     from_sqlite_open_trade_id = [o["trade_id"] for o in from_sqlite_open]  
                                             
     from_exchange_trade_id = [o["trade_id"] for o in from_sqlite_all]
@@ -299,7 +301,8 @@ async def check_whether_size_db_reconciled_each_other(
     my_trades_currency,
     from_transaction_log,
     archive_db_table,
-    trade_db_table) -> None:
+    trade_db_table,
+    need_update: bool = False) -> None:
     """ """
     
     if sub_account :
@@ -363,7 +366,8 @@ async def check_whether_size_db_reconciled_each_other(
         if not different_from_all_db_sources:
             #log.info (f"from_transaction_log_instrument {from_transaction_log_instrument}")
             log.critical(f"{instrument_name} different_from_all_db_sources {different_from_all_db_sources} different_from_sub_accont_and_trans_log {different_from_sub_accont_and_trans_log} sum_my_trades_currency {sum_my_trades_instrument}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
-            if sum_my_trades_instrument != current_position_log or sum_my_trades_instrument !=sub_account_size_instrument:
+            if need_update \
+                and (sum_my_trades_instrument != current_position_log or sum_my_trades_instrument != sub_account_size_instrument):
                                 
                 column_trade: str= "data", "timestamp"
                 my_trades_instrument_name: list= await get_query(archive_db_table, 
