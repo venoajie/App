@@ -21,8 +21,6 @@ from strategies.config_strategies import(
     max_rows)
 from transaction_management.deribit.telegram_bot import(
     telegram_bot_sendtext,)
-from transaction_management.deribit.orders_management import (
-    saving_traded_orders,)
 from utilities.system_tools import(
     sleep_and_restart,)
 from utilities.string_modification import(
@@ -47,6 +45,54 @@ def get_label_main(
                     == parsing_label(o["label"])["main"]
                 ]
 
+
+    
+async def saving_traded_orders (
+    trade: str,
+    table: str,
+    order_db_table: str = "orders_all_json"
+    ) -> None:
+    
+    """_summary_
+
+    Args:
+        trades (_type_): _description_
+        orders (_type_): _description_
+    """
+
+
+    instrument_name = trade["instrument_name"]
+    
+    label= trade["label"]
+
+    # insert clean trading transaction
+    if "-FS-" not in instrument_name:
+        await insert_tables(
+            table, 
+            trade
+            )
+    
+    if "my_trades_all_json" in table:
+        filter_trade="order_id"
+        
+        order_id = trade[f"{filter_trade}"]
+        
+        if   "closed" in label:
+                                    
+                await clean_up_closed_transactions(
+                    instrument_name,
+                    table
+                    )
+                    
+        await deleting_row (
+            order_db_table,
+            "databases/trading.sqlite3",
+            filter_trade,
+            "=",
+            order_id,
+            )
+        
+    
 
 def sorting_list(
     listing: list,
