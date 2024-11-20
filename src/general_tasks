@@ -782,7 +782,10 @@ async def reconciling_size_and_orders(
                                 
                     #usually needef after db reconciliation, which transaction log more update than my_trading
                     if from_transaction_log_instrument_name_only:
-
+                        
+                        # avoid too much loop
+                        await modify_order_and_db. resupply_sub_accountdb(currency)
+                                    
                         for instrument_name in from_transaction_log_instrument_name_only:
                             
                             size_is_reconciled_each_other_all = await check_whether_size_db_reconciled_each_other(
@@ -802,8 +805,6 @@ async def reconciling_size_and_orders(
                             if not size_is_reconciled_each_other:
                                     
                                 if not  size_is_reconciled_each_other_all["different_from_sub_accont_and_trans_log"]:
-                                    
-                                    await modify_order_and_db. resupply_sub_accountdb(currency)
                                     
                                     await modify_order_and_db.resupply_transaction_log(
                                         currency,
@@ -844,17 +845,12 @@ async def reconciling_size_and_orders(
                                                 trade_db_table,
                                                 transaction
                                                 )
-
-                                    
-                                        await modify_order_and_db. resupply_sub_accountdb(currency)
-                                        await modify_order_and_db.resupply_transaction_log(
-                                            currency,
-                                            transaction_log_trading_table,
-                                            instrument_name,
-                                            100
-                                            )
+                                            
 
                     if my_trades_instrument_name_only:
+                        
+                        # avoid too much loop
+                        await modify_order_and_db. resupply_sub_accountdb(currency)
 
                         for instrument_name in my_trades_instrument_name_only:
                             
@@ -876,7 +872,6 @@ async def reconciling_size_and_orders(
                                 
                                 if not  size_is_reconciled_each_other_all["different_from_sub_accont_and_trans_log"]:
                                     
-                                    await modify_order_and_db. resupply_sub_accountdb(currency)
                                     await modify_order_and_db.resupply_transaction_log(
                                         currency,
                                         transaction_log_trading_table,
@@ -939,14 +934,6 @@ async def reconciling_size_and_orders(
                                             trade_db_table,
                                             transaction
                                             )
-                                    
-                                    await modify_order_and_db. resupply_sub_accountdb(currency)
-                                    await modify_order_and_db.resupply_transaction_log(
-                                        currency,
-                                        transaction_log_trading_table,
-                                        instrument_name,
-                                        100
-                                        )
                                     
             await asyncio.sleep(idle_time)
             
