@@ -782,6 +782,7 @@ async def reconciling_size_and_orders(
                     )
                                 
                     #usually needef after db reconciliation, which transaction log more update than my_trading
+                    log.warning(f"from_transaction_log_instrument_name_only {from_transaction_log_instrument_name_only}")
                     if from_transaction_log_instrument_name_only:
 
                         for instrument_name in from_transaction_log_instrument_name_only:
@@ -874,7 +875,9 @@ async def reconciling_size_and_orders(
                                             instrument_name,
                                             100
                                             )
+                                        
 
+                    log.info (f"my_trades_instrument_name_only {my_trades_instrument_name_only}")
                     if my_trades_instrument_name_only:
 
                         for instrument_name in my_trades_instrument_name_only:
