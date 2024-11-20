@@ -262,7 +262,7 @@ def check_whether_order_db_reconciled_each_other(
     else :        
         return  False
 
-def check_whether_size_db_reconciled_each_other(
+async def check_whether_size_db_reconciled_each_other(
     sub_account,
     instrument_name,
     my_trades_currency,
@@ -330,6 +330,33 @@ def check_whether_size_db_reconciled_each_other(
         if not different_from_all_db_sources:
             #log.info (f"from_transaction_log_instrument {from_transaction_log_instrument}")
             log.critical(f"{instrument_name} different_from_all_db_sources {different_from_all_db_sources} different_from_sub_accont_and_trans_log {different_from_sub_accont_and_trans_log} sum_my_trades_currency {sum_my_trades_instrument}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
+            if sum_my_trades_instrument != current_position_log or sum_my_trades_instrument !=sub_account_size_instrument:
+                                
+                column_trade: str= "data", "timestamp"
+                my_trades_instrument_name: list= await get_query(archive_db_table, 
+                                                            instrument_name, 
+                                                            "all", 
+                                                            "all", 
+                                                            column_trade)
+                
+                my_trades_data = sorting_list(parsing_sqlite_json_output(
+                    [o["data"] for o in my_trades_instrument_name]),
+                                                "timestamp",
+                                                False)
+                
+                for trade in my_trades_data:                                        
+                    await saving_traded_orders(
+                    trade,
+                    trade_db_table
+                    )      
+                    
+                    if   "closed" in trade["label"]:
+                                                
+                            await clean_up_closed_transactions(
+                                instrument_name,
+                                trade_db_table
+                                )                
+
 
         # combining result
         return dict(different_from_all_db_sources = different_from_all_db_sources,

@@ -463,7 +463,7 @@ class RunningStrategy(ModifyOrderDb):
                                             instrument_name_perpetual,
                                             orders_currency)
                     
-                                        size_is_reconciled_each_other = check_whether_size_db_reconciled_each_other(
+                                        size_is_reconciled_each_other = await check_whether_size_db_reconciled_each_other(
                                             sub_account,
                                             instrument_name_perpetual,
                                             my_trades_currency,
