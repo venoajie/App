@@ -782,7 +782,6 @@ async def reconciling_size_and_orders(
                     )
                                 
                     #usually needef after db reconciliation, which transaction log more update than my_trading
-                    log.warning(f"from_transaction_log_instrument_name_only {from_transaction_log_instrument_name_only}")
                     if from_transaction_log_instrument_name_only:
 
                         for instrument_name in from_transaction_log_instrument_name_only:
@@ -795,7 +794,7 @@ async def reconciling_size_and_orders(
                                 )
                             
                             size_is_reconciled_each_other = size_is_reconciled_each_other_all["different_from_all_db_sources"]
-                            log.warning(f"size_is_reconciled_each_other {size_is_reconciled_each_other}")
+                            
                             if not size_is_reconciled_each_other:
                                     
                                 if not  size_is_reconciled_each_other_all["different_from_sub_accont_and_trans_log"]:
@@ -875,9 +874,7 @@ async def reconciling_size_and_orders(
                                             instrument_name,
                                             100
                                             )
-                                        
 
-                    log.info (f"my_trades_instrument_name_only {my_trades_instrument_name_only}")
                     if my_trades_instrument_name_only:
 
                         for instrument_name in my_trades_instrument_name_only:
@@ -888,7 +885,7 @@ async def reconciling_size_and_orders(
                                 my_trades_currency,
                                 from_transaction_log
                                 )
-                            log.debug (f"size_is_reconciled_each_other {size_is_reconciled_each_other_all}")
+                            
                             size_is_reconciled_each_other = size_is_reconciled_each_other_all["different_from_all_db_sources"]
                             
                             if not size_is_reconciled_each_other:
