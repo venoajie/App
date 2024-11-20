@@ -854,6 +854,11 @@ async def reconciling_size_and_orders(
 
                         for instrument_name in my_trades_instrument_name_only:
                             
+                            await clean_up_closed_transactions(
+                                    instrument_name, 
+                                    trade_db_table
+                                            )      
+                            
                             size_is_reconciled_each_other_all = await check_whether_size_db_reconciled_each_other(
                                 sub_account,
                                 instrument_name,
