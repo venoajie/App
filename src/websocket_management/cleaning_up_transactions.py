@@ -21,6 +21,8 @@ from strategies.config_strategies import(
     max_rows)
 from transaction_management.deribit.telegram_bot import(
     telegram_bot_sendtext,)
+from transaction_management.deribit.orders_management import (
+    saving_traded_orders,)
 from utilities.system_tools import(
     sleep_and_restart,)
 from utilities.string_modification import(
@@ -29,7 +31,9 @@ from utilities.string_modification import(
     extract_integers_from_text,
     get_unique_elements, 
     parsing_label,
-    remove_redundant_elements,)
+    parsing_sqlite_json_output,
+    remove_redundant_elements,
+    )
 
 
 def get_label_main(
@@ -42,6 +46,33 @@ def get_label_main(
         if parsing_label(strategy_label)["main"]\
                     == parsing_label(o["label"])["main"]
                 ]
+
+
+def sorting_list(
+    listing: list,
+    item_reference: str = "price",
+    is_reversed: bool=True
+    ) -> list:
+    """
+    https://sparkbyexamples.com/python/sort-list-of-dictionaries-by-value-in-python/
+
+    Args:
+        listing (list): _description_
+        item_reference (str, optional): _description_. Defaults to "price".
+        is_reversed (bool, optional): _description_. Defaults to True.
+                                    True = from_highest_to_lowest
+                                    False = from_lowest_to_highest
+
+    Returns:
+        list: _description_
+    """
+    import operator
+
+    return sorted(
+        listing, 
+        key=operator.itemgetter(item_reference), 
+        reverse = is_reversed)
+
 
 async def reconciling_sub_account_and_db_open_orders(
     instrument_name: str,
@@ -266,7 +297,9 @@ async def check_whether_size_db_reconciled_each_other(
     sub_account,
     instrument_name,
     my_trades_currency,
-    from_transaction_log) -> None:
+    from_transaction_log,
+    archive_db_table,
+    trade_db_table) -> None:
     """ """
     
     if sub_account :

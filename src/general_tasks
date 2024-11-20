@@ -786,11 +786,13 @@ async def reconciling_size_and_orders(
 
                         for instrument_name in from_transaction_log_instrument_name_only:
                             
-                            size_is_reconciled_each_other_all = check_whether_size_db_reconciled_each_other(
+                            size_is_reconciled_each_other_all = await check_whether_size_db_reconciled_each_other(
                                 sub_account,
                                 instrument_name,
                                 my_trades_currency,
-                                from_transaction_log
+                                from_transaction_log,
+                                archive_db_table,
+                                trade_db_table
                                 )
                             
                             size_is_reconciled_each_other = size_is_reconciled_each_other_all["different_from_all_db_sources"]
@@ -879,11 +881,13 @@ async def reconciling_size_and_orders(
 
                         for instrument_name in my_trades_instrument_name_only:
                             
-                            size_is_reconciled_each_other_all = check_whether_size_db_reconciled_each_other(
+                            size_is_reconciled_each_other_all = await check_whether_size_db_reconciled_each_other(
                                 sub_account,
                                 instrument_name,
                                 my_trades_currency,
-                                from_transaction_log
+                                from_transaction_log,
+                                archive_db_table,
+                                trade_db_table
                                 )
                             
                             size_is_reconciled_each_other = size_is_reconciled_each_other_all["different_from_all_db_sources"]
