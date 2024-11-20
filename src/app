@@ -467,7 +467,9 @@ class RunningStrategy(ModifyOrderDb):
                                             sub_account,
                                             instrument_name_perpetual,
                                             my_trades_currency,
-                                            from_transaction_log
+                                            from_transaction_log,
+                                            archive_db_table,
+                                            trade_db_table
                                             )
                                         
                                         server_time = get_now_unix_time()  
