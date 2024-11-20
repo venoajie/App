@@ -794,9 +794,9 @@ async def reconciling_size_and_orders(
                                 my_trades_currency,
                                 from_transaction_log
                                 )
-                            log.warning (f"size_is_reconciled_each_other_all {size_is_reconciled_each_other_all}")
                             
                             size_is_reconciled_each_other = size_is_reconciled_each_other_all["different_from_all_db_sources"]
+                            log.warning (f"size_is_reconciled_each_other_all {instrument_name} {size_is_reconciled_each_other_all} size_is_reconciled_each_other {size_is_reconciled_each_other} not {not size_is_reconciled_each_other}")
                             
                             if not size_is_reconciled_each_other:
                                 
