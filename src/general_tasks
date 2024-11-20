@@ -946,7 +946,7 @@ async def reconciling_size_and_orders(
     
 async def main():
     
-    sub_account_id = "deribit-148510"    
+    sub_account_id = "deribit-250877"    
     
     # registering strategy config file    
     file_toml = "config_strategies.toml"
@@ -985,7 +985,7 @@ async def main():
         update_ohlc_and_market_condition(
             tradable_config_app, 
             15), 
-        back_up_db(60*10),
+        #back_up_db(60*10),
         clean_up_databases(5), 
         update_instruments(60),
         return_exceptions=True)
