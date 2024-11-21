@@ -551,18 +551,18 @@ class RunningStrategy(ModifyOrderDb):
                                                         
                                                         sum_selected_transaction = sum([o["amount"] for o in selected_transaction])
                                                         
-                                                    # closing unpaired transactions
-                                                        if sum_selected_transaction != 0:
+                                                        if ticker_future:
                                                             
-                                                            log.info (f"selected_transaction {selected_transaction}")
-                                                            selected_transaction = selected_transaction[0]
-                                                            
-                                                            ticker_future= reading_from_pkl_data(
-                                                                "ticker",
-                                                                selected_transaction["instrument_name"]
-                                                                )
-                                                            
-                                                            if ticker_future:
+                                                        # closing unpaired transactions
+                                                            if sum_selected_transaction != 0:
+                                                                
+                                                                log.info (f"selected_transaction {selected_transaction}")
+                                                                selected_transaction = selected_transaction[0]
+                                                                
+                                                                ticker_future= reading_from_pkl_data(
+                                                                    "ticker",
+                                                                    selected_transaction["instrument_name"]
+                                                                    )
                                                                 
                                                                 send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                                 ticker_future[0],
@@ -571,45 +571,45 @@ class RunningStrategy(ModifyOrderDb):
                                                                 selected_transaction,
                                                                 server_time,
                                                                 )
-                                                            
-                                                    #closing combo auto orders
-                                                        else:
-                                                            send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
-                                                            label,
-                                                            instrument_attributes_combo_all,
-                                                            tp_threshold)
-                                                        
-                                                        
-                                                        if send_order["order_allowed"]:
-                                                            
-                                                            log.error (f"send_closing_order {send_order}")
-                                                            
-                                                            instrument_name = send_order["order_parameters"]["instrument_name"]
-                                                                                                
-                                                            result_order = await self.modify_order_and_db.if_order_is_true(
-                                                                non_checked_strategies,
-                                                                send_order, 
-                                                                )
-                                                            
-                                                            if result_order:
-                                                                #log.error (f"result_order {result_order}")
                                                                 
-                                                                try:
-                                                                    data_orders = result_order["result"]
+                                                        #closing combo auto orders
+                                                            else:
+                                                                send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
+                                                                label,
+                                                                instrument_attributes_combo_all,
+                                                                tp_threshold)
+                                                            
+                                                            
+                                                            if send_order["order_allowed"]:
+                                                                
+                                                                log.error (f"send_closing_order {send_order}")
+                                                                
+                                                                instrument_name = send_order["order_parameters"]["instrument_name"]
+                                                                                                    
+                                                                result_order = await self.modify_order_and_db.if_order_is_true(
+                                                                    non_checked_strategies,
+                                                                    send_order, 
+                                                                    )
+                                                                
+                                                                if result_order:
+                                                                    #log.error (f"result_order {result_order}")
+                                                                    
+                                                                    try:
+                                                                        data_orders = result_order["result"]
 
-                                                                    await self.modify_order_and_db.update_user_changes_non_ws(
-                                                                        non_checked_strategies,
-                                                                        data_orders, 
-                                                                        currency, 
-                                                                        order_db_table,
-                                                                        trade_db_table, 
-                                                                        archive_db_table,
-                                                                        transaction_log_trading_table)
-                                                        
-                                                                except Exception as error :
-                                                                    pass 
-                                                                
-                                                                await sleep_and_restart ()
+                                                                        await self.modify_order_and_db.update_user_changes_non_ws(
+                                                                            non_checked_strategies,
+                                                                            data_orders, 
+                                                                            currency, 
+                                                                            order_db_table,
+                                                                            trade_db_table, 
+                                                                            archive_db_table,
+                                                                            transaction_log_trading_table)
+                                                            
+                                                                    except Exception as error :
+                                                                        pass 
+                                                                    
+                                                                    await sleep_and_restart ()
                                                                 
                                                     # send combo orders-automatic
                                                     for instrument_attributes_combo in instrument_attributes_combo_all:
