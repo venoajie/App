@@ -817,8 +817,6 @@ class ComboAuto (BasicStrategy):
                             
                         if sum_orders_instrument_perpetual_open < abs(delta):
                         
-                            order_allowed = True
-        
                             label_open: str = get_label(
                                 "open", 
                                 strategy_label
@@ -827,7 +825,9 @@ class ComboAuto (BasicStrategy):
                             # opening new perpetual
                             if selected_transaction_price <= bid_price_perpetual:
                                 params.update({"label": label_open})
-                            
+                        
+                                order_allowed = True
+            
                             # pairing with perpetuak    
                             if selected_transaction_price > bid_price_perpetual:
                                 params.update({"label": selected_transaction["label"]})
