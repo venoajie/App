@@ -800,8 +800,12 @@ class ComboAuto (BasicStrategy):
                 
                 
                 if "PERPETUAL" in instrument_name_transaction:
-                    
-                    transaction_in_profit = bid_price_perpetual > (selected_transaction_price + selected_transaction_price * tp_threshold)
+                                        
+                    if delta > 0:
+                        transaction_in_profit = bid_price_perpetual >= (selected_transaction_price)
+
+                    else:
+                        transaction_in_profit = bid_price_perpetual > selected_transaction_price + (selected_transaction_price * tp_threshold)
 
                     if transaction_in_profit:
 
