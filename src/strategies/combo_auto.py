@@ -712,6 +712,7 @@ class ComboAuto (BasicStrategy):
         instrument_attributes_futures: list,
         take_profit_threshold_original: float,
         selected_transaction: dict,
+        server_time: int
         ) -> dict:
         """ """
         
@@ -831,6 +832,26 @@ class ComboAuto (BasicStrategy):
                             if selected_transaction_price > bid_price_perpetual:
                                 params.update({"label": selected_transaction["label"]})
                             
+                                ONE_SECOND = 1000
+                                ONE_MINUTE = ONE_SECOND * 60
+                                                
+                                if strategy_params is None:
+                                    strategy_params: dict = self.strategy_parameters
+                
+                                waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
+                                
+                                timestamp: int = selected_transaction["timestamp"]
+                            
+                                waiting_time_for_perpetual_order: bool = check_if_minimum_waiting_time_has_passed(
+                                        waiting_minute_before_cancel,
+                                        timestamp,
+                                        server_time,
+                                    )
+                        
+                                if waiting_time_for_perpetual_order:
+                                    order_allowed = True
+                                    
+                                    
                             params.update({"size": selected_transaction_size})
                                 
                             params.update({"instrument_name": instrument_name_perpetual})
