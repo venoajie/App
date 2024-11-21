@@ -362,7 +362,10 @@ class ComboAuto (BasicStrategy):
         
         delta = self.delta
         log.critical (f"is_send_open_order_allowed_constructing_manual_combo delta {delta}")
-        
+
+        ask_price_future = ticker_future ["best_ask_price"]
+        bid_price_perpetual = self.ticker_perpetual ["best_bid_price"]        
+    
                
         contango = is_contango(
             ask_price_future,
@@ -376,9 +379,6 @@ class ComboAuto (BasicStrategy):
         #          pass 
 
         if delta == 0:            
-
-            ask_price_future = ticker_future ["best_ask_price"]
-            bid_price_perpetual = self.ticker_perpetual ["best_bid_price"]        
                       
             if contango: 
                 
