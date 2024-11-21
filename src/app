@@ -569,7 +569,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 instrument_attributes_futures_all,
                                                                 tp_threshold,
                                                                 selected_transaction,
-                                                                server_time
+                                                                server_time,
                                                                 )
                                                             
                                                     #closing combo auto orders
