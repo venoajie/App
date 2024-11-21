@@ -771,7 +771,7 @@ class ComboAuto (BasicStrategy):
                                                     if "closed" in o["label"]]
             
             len_orders_instrument_transaction_closed: list=  0 if not  orders_instrument_transaction_closed \
-                else len(len_orders_instrument_transaction_closed)
+                else len(orders_instrument_transaction_closed)
         
             len_orders_instrument_perpetual_closed: list=  0 if not  orders_instrument_perpetual_closed \
                 else len(orders_instrument_perpetual_closed)
