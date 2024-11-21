@@ -712,7 +712,8 @@ class ComboAuto (BasicStrategy):
         instrument_attributes_futures: list,
         take_profit_threshold_original: float,
         selected_transaction: dict,
-        server_time: int
+        server_time: int,
+        strategy_params: list = None,
         ) -> dict:
         """ """
         
