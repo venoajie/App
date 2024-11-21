@@ -570,7 +570,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                 tp_threshold,
                                                                 selected_transaction,
                                                                 server_time,
-                                                                strategy_params
                                                                 )
                                                             
                                                     #closing combo auto orders
