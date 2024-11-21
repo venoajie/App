@@ -69,3 +69,14 @@ websockets==13.1
     # via -r requirements.txt
 yarl==1.17.0
     # via aiohttp
+
+    
+ cffi==1.17.1
+ circuitbreaker==2.0.0
+ cryptography==43.0.3
+ oci==2.139.0
+ pycparser==2.22
+ pyopenssl==24.2.1
+ python-dateutil==2.9.0.post0
+ pytz==2024.2
+ six==1.16.0
