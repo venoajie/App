@@ -826,7 +826,7 @@ async def clean_up_closed_transactions(
 
     #prepare basic parameters for table query
 
-    log.critical(f" {"clean_up_closed_transactions".upper()} {instrument_name} START")
+    #log.critical(f" {"clean_up_closed_transactions".upper()} {instrument_name} START")
     
     where_filter = f"trade_id"
 
@@ -917,7 +917,7 @@ async def clean_up_closed_transactions(
                             )
     
                         
-    log.critical(f" clean_up_closed_transactions {instrument_name} DONE")
+    #log.critical(f" clean_up_closed_transactions {instrument_name} DONE")
 
 
 async def count_and_delete_ohlc_rows(
