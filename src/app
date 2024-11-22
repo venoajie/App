@@ -774,8 +774,14 @@ class RunningStrategy(ModifyOrderDb):
                 orders_currency)
             
             if not len_order_is_reconciled_each_other:
-                await self.modify_order_and_db.cancel_all_orders()
+                orders_instrument_name = [o for o in orders_currency \
+                    if instrument_name in o["instrument_name"]]
+                
+                for order in orders_instrument_name:
+                    await self.modify_order_and_db.cancel_by_order_id(order["order_id"])
+                
                 await self.modify_order_and_db. resupply_sub_accountdb(currency)
+
                 await sleep_and_restart ()
                     
         except Exception as error:
