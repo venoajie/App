@@ -820,7 +820,7 @@ async def reconciling_size(
                                     
                                 if my_trades_and_sub_account_size_reconciled_active:
                                     
-                                    unrecorded_data = get_unrecorded_trade_id(instrument_name)
+                                    unrecorded_data = await get_unrecorded_trade_id(instrument_name)
                                     my_trades_instrument_name_archive = ([o for o in my_trades_currency_active\
                                         if instrument_name in o["instrument_name"]]
                                 )
