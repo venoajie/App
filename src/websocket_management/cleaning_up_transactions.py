@@ -830,9 +830,8 @@ async def clean_up_closed_transactions(
     
     where_filter = f"trade_id"
 
-    column_list: str= "instrument_name","label", "amount", where_filter
-        
     if transaction_all is None:
+        column_list: str= "instrument_name","label", "amount", where_filter
         
         #querying tables
         transaction_all: list = await get_query(

@@ -756,6 +756,16 @@ async def reconciling_size(
                         # sub account instruments
                         for instrument_name in sub_account_positions_instrument:
                             
+                            my_trades_instrument_name_active = ([o for o in my_trades_currency_active\
+                            if instrument_name in o["instrument_name"]]
+                            )
+                                
+                            await clean_up_closed_transactions(
+                                instrument_name, 
+                                trade_db_table,
+                                my_trades_instrument_name_active
+                                )
+                            
                             if "FS" not in instrument_name:
                                 
                                 log.debug (f"transaction_log_and_sub_account_size {instrument_name}")
@@ -819,19 +829,19 @@ async def reconciling_size(
                                             timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
                                             archive_db_table
                                             )
+                                    
+                                if not my_trades_and_sub_account_size_reconciled_active:
+                                    
+                                    unrecorded_data = await get_unrecorded_trade_id(instrument_name)
+                                    my_trades_instrument_name_archive = ([o for o in my_trades_currency_active\
+                                        if instrument_name in o["instrument_name"]]
+                                )
+                                    for data in unrecorded_data:
                                         
-                                    if my_trades_and_sub_account_size_reconciled_active:
-                                        
-                                        unrecorded_data = await get_unrecorded_trade_id(instrument_name)
-                                        my_trades_instrument_name_archive = ([o for o in my_trades_currency_active\
-                                            if instrument_name in o["instrument_name"]]
-                                    )
-                                        for data in unrecorded_data:
-                                            
-                                            await saving_traded_orders(
-                                                data, 
-                                                trade_db_table, 
-                                                order_db_table)                      
+                                        await saving_traded_orders(
+                                            data, 
+                                            trade_db_table, 
+                                            order_db_table)                      
 
              
             await asyncio.sleep(idle_time)
