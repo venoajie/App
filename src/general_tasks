@@ -788,7 +788,7 @@ async def reconciling_size(
                                     my_trades_currency_archive,
                                     sub_account
                                     )
-                                log.debug (f"my_trades_and_sub_account_size_reconciled_archive {my_trades_and_sub_account_size_reconciled_archive}")
+                                log.info (f"my_trades_and_sub_account_size_reconciled_archive {my_trades_and_sub_account_size_reconciled_archive}")
                                 
                                 if not my_trades_and_sub_account_size_reconciled_archive:
                                     
@@ -824,7 +824,7 @@ async def reconciling_size(
                                     my_trades_currency_active,
                                     sub_account
                                     )
-                                log.debug (f"my_trades_and_sub_account_size_reconciled_active {my_trades_and_sub_account_size_reconciled_active}")
+                                log.warning (f"my_trades_and_sub_account_size_reconciled_active {my_trades_and_sub_account_size_reconciled_active}")
                                                                     
                                 if not my_trades_and_sub_account_size_reconciled_active:
                                     
