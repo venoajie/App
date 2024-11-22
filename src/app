@@ -471,8 +471,7 @@ class RunningStrategy(ModifyOrderDb):
                                         THRESHOLD_DELTA_TIME_SECONDS = 60 
                                 
                                         if  index_price is not None \
-                                            and equity > 0 \
-                                                and  len_order_is_reconciled_each_other:
+                                            and equity > 0 :
                                 
                                             notional: float = compute_notional_value(index_price, equity)
 
