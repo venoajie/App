@@ -454,7 +454,6 @@ class ModifyOrderDb(SendApiRequest):
                 if f"-FS-" not in o["instrument_name"])
             
             from_exchange_trade_id = [o["trade_id"] for o in trades_from_exchange_without_futures_combo]
-            
                     
             column_trade: str= "instrument_name","timestamp","trade_id"                    
 
@@ -469,6 +468,7 @@ class ModifyOrderDb(SendApiRequest):
                                               my_trades_instrument_name_archive_trade_id)
             
             log.critical (f"unrecorded_trade_id exchaneg vs archive {unrecorded_trade_id}")
+            log.critical (f"trades_from_exchange_without_futures_combo  {trades_from_exchange_without_futures_combo}")
             
             if unrecorded_trade_id:
                 
