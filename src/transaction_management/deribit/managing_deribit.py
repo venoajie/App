@@ -436,7 +436,7 @@ class ModifyOrderDb(SendApiRequest):
         instrument_name: str,
         start_timestamp: int,
         archive_db_table,
-        count: int =  100
+        count: int =  500
         )-> None:
         """
         """
@@ -456,7 +456,7 @@ class ModifyOrderDb(SendApiRequest):
                 
                 for trade in trades_from_exchange_without_futures_combo:
                     
-                    log.error (f"trades_from_exchange {trade}")
+                    log.error (f"trades_from_exchange {trade["trade_id"]}")
 
                     await saving_traded_orders(
                         trade,
