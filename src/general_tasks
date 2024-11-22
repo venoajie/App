@@ -759,13 +759,7 @@ async def reconciling_size(
                             my_trades_instrument_name_active = ([o for o in my_trades_currency_active\
                             if instrument_name in o["instrument_name"]]
                             )
-                                
-                            await clean_up_closed_transactions(
-                                instrument_name, 
-                                trade_db_table,
-                                my_trades_instrument_name_active
-                                )
-                            
+                             
                             if "FS" not in instrument_name:
                                 
                                 log.debug (f"transaction_log_and_sub_account_size {instrument_name}")
@@ -842,7 +836,13 @@ async def reconciling_size(
                                             data, 
                                             trade_db_table, 
                                             order_db_table)                      
-
+   
+                            await clean_up_closed_transactions(
+                                instrument_name, 
+                                trade_db_table,
+                                my_trades_instrument_name_active
+                                )
+                            
              
             await asyncio.sleep(idle_time)
             
