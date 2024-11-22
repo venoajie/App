@@ -772,11 +772,6 @@ async def reconciling_size_and_orders(
                             order_db_table
                             )
                     
-                    
-                    
-                    
-                    
-                    
                     sub_account_orders = sub_account["open_orders"]
                     
                     sub_account_orders_instrument = remove_redundant_elements(
