@@ -813,8 +813,7 @@ async def reconciling_size_and_orders(
                         
                         # avoid too much loop
                         await modify_order_and_db. resupply_sub_accountdb(currency)
-                                             
-
+                            
                     if my_trades_instrument_name_only:
                         
                         # avoid too much loop
@@ -829,13 +828,16 @@ async def reconciling_size_and_orders(
                                 archive_db_table,
                                 trade_db_table,)
 
-                            log.error (f"{instrument_name} archive_trade_reconciled {archive_trade_reconciled}")
-                            
                             if archive_trade_reconciled != archive_trade_reconciled:
+                                
+                                log.error (f"{instrument_name} archive_trade_reconciled {archive_trade_reconciled}")
                         
                                 unrecorded_transactions = await get_unrecorded_trade_id (instrument_name)  
+                                log.warning (f"{unrecorded_transactions}")
                                 
                                 for transaction  in unrecorded_transactions:
+                                    
+                                    log.debug (f"{transaction}")
 
                                     await insert_tables(
                                         trade_db_table,
@@ -847,7 +849,6 @@ async def reconciling_size_and_orders(
                                     trade_db_table
                                             )      
                             
-                                
                                     
             await asyncio.sleep(idle_time)
             
