@@ -230,22 +230,25 @@ async def get_result_from_db_queries_all_and_instrument (
     ) -> list:
     
 
-    column_trade: str= "instrument_name","label", "amount"
+    column_trade: str= "instrument_name","timestamp"
     my_trades_instrument_name_trade: list= await get_query(trade_db_table, 
                                                 instrument_name, 
                                                 "all", 
                                                 "all", 
                                                 column_trade)
+    
+    max_timestamp = max([o["timestamp"]  for o in my_trades_instrument_name_trade])
               
 
     my_trades_instrument_name_archive: list= await get_query(archive_db_table, 
                                                 instrument_name, 
                                                 "all", 
-                                                "all", 
+                                                "all",
                                                 column_trade)
+    balance_archive = max([o["balance"]  for o in my_trades_instrument_name_archive if o["timestamp"] == max_timestamp])
               
-    return dict(my_trades_instrument_name_trade=my_trades_instrument_name_trade,
-                my_trades_instrument_name_archive=my_trades_instrument_name_archive,)
+    return dict(balance_archive=balance_archive,
+                balance_trade= max([o["balance"]  for o in my_trades_instrument_name_trade if o["timestamp"] == max_timestamp]),)
     
 async def clean_up_databases(idle_time) -> None:
     """ """
@@ -810,6 +813,7 @@ async def reconciling_size_and_orders(
                         
                         # avoid too much loop
                         await modify_order_and_db. resupply_sub_accountdb(currency)
+                                    
                                             
 
                     if my_trades_instrument_name_only:
