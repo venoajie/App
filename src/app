@@ -40,7 +40,6 @@ from websocket_management.ws_management import (
     )
 from websocket_management.cleaning_up_transactions import (
     check_whether_order_db_reconciled_each_other,
-    check_whether_size_db_reconciled_each_other,
     )
 
 # Using the LRUCache decorator function with a maximum cache size of 3
@@ -457,21 +456,14 @@ class RunningStrategy(ModifyOrderDb):
                                         from_transaction_log = result_from_db_queries["from_transaction_log"]                          
 
                                         orders_currency = result_from_db_queries["orders_currency"]     
-                                    
-                                        len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
-                                            sub_account,
-                                            instrument_name_perpetual,
-                                            orders_currency)
-                    
-                                        size_is_reconciled_each_other = await check_whether_size_db_reconciled_each_other(
-                                            sub_account,
-                                            instrument_name_perpetual,
-                                            my_trades_currency,
-                                            from_transaction_log,
-                                            archive_db_table,
-                                            trade_db_table
-                                            )
                                         
+                                        await self.reconciling_orders(
+                                            instrument_name_perpetual,
+                                            currency,
+                                            sub_account,
+                                            orders_currency
+                                            )
+                                    
                                         server_time = get_now_unix_time()  
                                                                                 
                                         delta_time_expiration = min_expiration_timestamp - server_time  
@@ -480,8 +472,7 @@ class RunningStrategy(ModifyOrderDb):
                                 
                                         if  index_price is not None \
                                             and equity > 0 \
-                                                and  size_is_reconciled_each_other\
-                                                    and  len_order_is_reconciled_each_other:
+                                                and  len_order_is_reconciled_each_other:
                                 
                                             notional: float = compute_notional_value(index_price, equity)
 
@@ -553,12 +544,21 @@ class RunningStrategy(ModifyOrderDb):
                                                         
                                                         selected_transaction = selected_transaction[0]
                                                         
+                                                        selected_transaction_instrument_name = selected_transaction["instrument_name"]
+                                                        
                                                         ticker_future= reading_from_pkl_data(
                                                             "ticker",
-                                                            selected_transaction["instrument_name"]
+                                                            selected_transaction_instrument_name
                                                             )
                                                         
                                                         if ticker_future:
+                                                            
+                                                            await self.reconciling_orders(
+                                                                selected_transaction_instrument_name,
+                                                                currency,
+                                                                sub_account,
+                                                                orders_currency
+                                                                )
                                                             
                                                         # closing unpaired transactions
                                                             if sum_selected_transaction != 0:
@@ -625,6 +625,21 @@ class RunningStrategy(ModifyOrderDb):
                                                         if  instrument_name_combo is not None and currency_upper in instrument_name_combo:
                                                                                                                   
                                                             instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
+                                                            
+                                                            await self.reconciling_orders(
+                                                                instrument_name_combo,
+                                                                currency,
+                                                                sub_account,
+                                                                orders_currency
+                                                                )
+                  
+                                                            await self.reconciling_orders(
+                                                                instrument_name_future,
+                                                                currency,
+                                                                sub_account,
+                                                                orders_currency
+                                                                )
+                                                            
                                                             
                                                             size_instrument = ([abs(o["size"]) for o in position_without_combo \
                                                                 if instrument_name_future in o["instrument_name"]])
@@ -739,6 +754,34 @@ class RunningStrategy(ModifyOrderDb):
                     error,
                     "general_error")
                             
+                            
+                            
+    async def reconciling_orders(
+        self,
+        instrument_name: str,
+        currency: str,
+        sub_account: list,
+        orders_currency: list
+        ,
+        ) -> None:
+        """
+        """
+        
+        try:
+
+            len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
+                sub_account,
+                instrument_name,
+                orders_currency)
+            
+            if not len_order_is_reconciled_each_other:
+                await self.modify_order_and_db.cancel_all_orders()
+                await self.modify_order_and_db. resupply_sub_accountdb(currency)
+                await sleep_and_restart ()
+                    
+        except Exception as error:
+            log.warning(error)
+
     async def establish_heartbeat(self) -> None:
         """
         Requests DBT's `public/set_heartbeat` to

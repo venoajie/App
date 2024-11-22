@@ -44,8 +44,7 @@ def get_label_main(
         if parsing_label(strategy_label)["main"]\
                     == parsing_label(o["label"])["main"]
                 ]
-
-
+    
     
 async def saving_traded_orders (
     trade: str,
@@ -425,7 +424,6 @@ def is_transaction_log_and_sub_account_size_reconciled_each_other(
     return reconciled
     
     
-    
 def is_my_trades_and_sub_account_size_reconciled_each_other(
     instrument_name: str,
     my_trades_currency: list,
@@ -466,68 +464,6 @@ def get_my_trades_size_per_instrument(
         else sum([o["amount"] for o in my_trades_instrument])
         
     return  0 if not sum_my_trades_instrument else sum_my_trades_instrument
-    
-    
-async def check_whether_size_db_reconciled_each_other(
-    sub_account,
-    instrument_name,
-    my_trades_currency,
-    from_transaction_log,
-    archive_db_table,
-    trade_db_table,
-    need_update: bool = False) -> None:
-    """ """
-    
-        sum_my_trades_instrument = get_my_trades_size_per_instrument(
-            instrument_name,
-            my_trades_currency,
-            )
-        
-        
-        different_from_sub_accont_and_trans_log = current_position_log == sub_account_size_instrument
-        
-        different_from_all_db_sources = current_position_log == sub_account_size_instrument  == sum_my_trades_instrument 
-        
-        if not different_from_all_db_sources:
-            #log.info (f"from_transaction_log_instrument {from_transaction_log_instrument}")
-            log.critical(f"{instrument_name} different_from_all_db_sources {different_from_all_db_sources} different_from_sub_accont_and_trans_log {different_from_sub_accont_and_trans_log} sum_my_trades_currency {sum_my_trades_instrument}  sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
-            if need_update \
-                and (sum_my_trades_instrument != current_position_log or sum_my_trades_instrument != sub_account_size_instrument):
-                                
-                column_trade: str= "data", "timestamp"
-                my_trades_instrument_name: list= await get_query(archive_db_table, 
-                                                            instrument_name, 
-                                                            "all", 
-                                                            "all", 
-                                                            column_trade)
-                
-                my_trades_data = sorting_list(parsing_sqlite_json_output(
-                    [o["data"] for o in my_trades_instrument_name]),
-                                                "timestamp",
-                                                False)
-                
-                for trade in my_trades_data:                                        
-                    await saving_traded_orders(
-                    trade,
-                    trade_db_table
-                    )      
-                    
-                    if   "closed" in trade["label"]:
-                                                
-                            await clean_up_closed_transactions(
-                                instrument_name,
-                                trade_db_table
-                                )                
-
-
-        # combining result
-        return dict(different_from_all_db_sources = different_from_all_db_sources,
-                    different_from_sub_accont_and_trans_log = different_from_sub_accont_and_trans_log)
-    
-
-    else :        
-        return dict(different_from_all_db_sources = False,
-                    different_from_sub_accont_and_trans_log = False == sub_account_size_instrument)
     
                     
 def check_if_label_open_still_in_active_transaction(
