@@ -24,7 +24,8 @@ from transaction_management.deribit.api_requests import (
     SendApiRequest,)
 from utilities.pickling import replace_data
 from utilities.string_modification import (
-    extract_currency_from_text,)
+    extract_currency_from_text,
+    get_unique_elements)
 from utilities.system_tools import (
     provide_path_for_file)
 
@@ -451,12 +452,31 @@ class ModifyOrderDb(SendApiRequest):
             
             trades_from_exchange_without_futures_combo = (o for o in trades_from_exchange \
                 if f"-FS-" not in o["instrument_name"])
+            
+            from_exchange_trade_id = [o["trade_id"] for o in trades_from_exchange_without_futures_combo]
+            
+                    
+            column_trade: str= "instrument_name","timestamp","trade_id"                    
+
+            my_trades_instrument_name_archive: list= await get_query(archive_db_table, 
+                                                        instrument_name, 
+                                                        "all", 
+                                                        "all",
+                                                        column_trade)
+            
+            my_trades_instrument_name_archive_trade_id = [o["trade_id"] for o in my_trades_instrument_name_archive]
+            unrecorded_trade_id = get_unique_elements(from_exchange_trade_id, 
+                                              my_trades_instrument_name_archive_trade_id)
+            
+            log.critical (f"unrecorded_trade_id {unrecorded_trade_id}")
+            
+            asyncio.sleep (10)
 
             if trades_from_exchange_without_futures_combo:
                 
                 for trade in trades_from_exchange_without_futures_combo:
                     
-                    log.error (f"trades_from_exchange {trade["trade_id"]}")
+                    log.error (f"{trade["trade_id"]}")
 
                     await saving_traded_orders(
                         trade,
