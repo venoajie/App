@@ -468,7 +468,7 @@ class ModifyOrderDb(SendApiRequest):
             unrecorded_trade_id = get_unique_elements(from_exchange_trade_id, 
                                               my_trades_instrument_name_archive_trade_id)
             
-            log.critical (f"unrecorded_trade_id {unrecorded_trade_id}")
+            log.critical (f"unrecorded_trade_id exchaneg vs archive {unrecorded_trade_id}")
             
             if unrecorded_trade_id:
                 

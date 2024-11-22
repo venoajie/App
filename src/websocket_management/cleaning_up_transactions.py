@@ -341,6 +341,133 @@ def check_whether_order_db_reconciled_each_other(
     else :        
         return  False
 
+
+def get_transaction_log_position_per_instrument(
+    instrument_name: str,
+    from_transaction_log: list,
+    ) -> float:
+    """ """
+    
+    from_transaction_log_instrument =([o for o in from_transaction_log \
+        if o["instrument_name"] == instrument_name])    
+    
+    #timestamp could be double-> come from combo transaction. hence, trade_id is used to distinguish
+    # other possibilities (instrument name beyond those in config):
+    #from_transaction_log_instrument_example = [{'instrument_name': 'ETH_USDC', 'position': None, 'timestamp': 1730159747908, 'trade_id': 'ETH_USDC-3685325', 'user_seq': #1730159747919678, 'balance': 3987.0432}]
+    
+    try:
+
+        last_time_stamp_log = [] if from_transaction_log_instrument == []\
+            else (max([(o["user_seq"]) for o in from_transaction_log_instrument ]))        
+
+        current_position_log = 0 if not from_transaction_log_instrument \
+            else [o["position"] for o in from_transaction_log_instrument \
+                if  last_time_stamp_log == o["user_seq"]][0]
+                    # just in case, trade id = None(because of settlement)
+    except:
+            
+        examples_from_transaction_log_instrument = [
+            {'instrument_name': 'BTC-18OCT24', 'position': 0, 'timestamp': 1729238400029, 'trade_id': None},
+            {'instrument_name': 'BTC-18OCT24', 'position': 0, 'timestamp': 1729231480754, 'trade_id': '321441856'}, 
+            {'instrument_name': 'BTC-18OCT24', 'position': -100, 'timestamp': 1728904931445, 'trade_id': '320831413'}
+            ]
+        
+        last_time_stamp_log = [] if from_transaction_log_instrument == []\
+            else str(max([extract_integers_from_text(o["trade_id"]) for o in from_transaction_log_instrument ]))
+
+        #log.error(f"last_time_stamp_log {last_time_stamp_log}")
+        current_position_log = 0 if not from_transaction_log_instrument \
+            else [o["position"] for o in from_transaction_log_instrument \
+                if  str(last_time_stamp_log) in o["trade_id"]][0]
+
+    return 0 if not current_position_log else current_position_log
+    
+    
+def get_sub_account_size_per_instrument(
+    instrument_name: str,
+    sub_account: list,
+    ) -> float:
+    """ """
+    
+    sub_account_size_instrument = [o["size"] for o in sub_account ["positions"] \
+        if o["instrument_name"] == instrument_name ]
+    
+    sub_account_size_instrument = 0 if sub_account_size_instrument == [] \
+        else sub_account_size_instrument [0]
+
+    return 0 if not sub_account_size_instrument else sub_account_size_instrument
+    
+    
+def is_transaction_log_and_sub_account_size_reconciled_each_other(
+    instrument_name: str,
+    from_transaction_log: list,
+    sub_account: list,
+    ) -> bool:
+    """ """
+    
+    if sub_account :
+ 
+        current_position_log = get_transaction_log_position_per_instrument(
+            instrument_name,
+            from_transaction_log,
+            )
+        
+        sub_account_size_instrument = get_sub_account_size_per_instrument(
+            instrument_name,
+            sub_account
+            )
+    
+    reconciled = current_position_log == sub_account_size_instrument
+    
+    if not reconciled:
+        log.critical(f"{instrument_name} reconciled {reconciled} sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
+
+    return reconciled
+    
+    
+    
+def is_my_trades_and_sub_account_size_reconciled_each_other(
+    instrument_name: str,
+    my_trades_currency: list,
+    sub_account: list,
+    ) -> bool:
+    """ """
+    
+    if sub_account :
+ 
+        my_trades_size_instrument = get_my_trades_size_per_instrument(
+            instrument_name,
+            my_trades_currency,
+            )
+        
+        sub_account_size_instrument = get_sub_account_size_per_instrument(
+            instrument_name,
+            sub_account
+            )
+    
+    reconciled = my_trades_size_instrument == sub_account_size_instrument
+    
+    if not reconciled:
+        log.critical(f"{instrument_name} reconciled {reconciled} sub_account_size_instrument {sub_account_size_instrument} my_trades_size_instrument {my_trades_size_instrument}")
+
+    return reconciled
+    
+def get_my_trades_size_per_instrument(
+    instrument_name: str,
+    my_trades_currency: list,
+    ) -> float:
+    """ """
+
+    my_trades_instrument = 0 if not my_trades_currency \
+        else [o for o in my_trades_currency \
+        if o["instrument_name"] == instrument_name]  
+              
+    sum_my_trades_instrument = 0 if not my_trades_instrument \
+        else sum([o["amount"] for o in my_trades_instrument])
+        
+    return  0 if not sum_my_trades_instrument else sum_my_trades_instrument
+    
+    
 async def check_whether_size_db_reconciled_each_other(
     sub_account,
     instrument_name,
@@ -351,59 +478,11 @@ async def check_whether_size_db_reconciled_each_other(
     need_update: bool = False) -> None:
     """ """
     
-    if sub_account :
+        sum_my_trades_instrument = get_my_trades_size_per_instrument(
+            instrument_name,
+            my_trades_currency,
+            )
         
-        sub_account_size_instrument = [o["size"] for o in sub_account ["positions"] \
-            if o["instrument_name"] == instrument_name ]
-        sub_account_size_instrument = 0 if sub_account_size_instrument == [] \
-            else sub_account_size_instrument [0]
-
-        from_transaction_log_instrument =([o for o in from_transaction_log \
-            if o["instrument_name"] == instrument_name])
-        
-        
-        #timestamp could be double-> come from combo transaction. hence, trade_id is used to distinguish
-        # other possibilities (instrument name beyond those in config):
-        #from_transaction_log_instrument_example = [{'instrument_name': 'ETH_USDC', 'position': None, 'timestamp': 1730159747908, 'trade_id': 'ETH_USDC-3685325', 'user_seq': #1730159747919678, 'balance': 3987.0432}]
-        
-        try:
-
-            last_time_stamp_log = [] if from_transaction_log_instrument == []\
-                else (max([(o["user_seq"]) for o in from_transaction_log_instrument ]))
-                
-
-            current_position_log = 0 if not from_transaction_log_instrument \
-                else [o["position"] for o in from_transaction_log_instrument \
-                    if  last_time_stamp_log == o["user_seq"]][0]
-                        # just in case, trade id = None(because of settlement)
-        except:
-                
-            examples_from_transaction_log_instrument = [
-                {'instrument_name': 'BTC-18OCT24', 'position': 0, 'timestamp': 1729238400029, 'trade_id': None},
-                {'instrument_name': 'BTC-18OCT24', 'position': 0, 'timestamp': 1729231480754, 'trade_id': '321441856'}, 
-                {'instrument_name': 'BTC-18OCT24', 'position': -100, 'timestamp': 1728904931445, 'trade_id': '320831413'}
-                ]
-            
-            last_time_stamp_log = [] if from_transaction_log_instrument == []\
-                else str(max([extract_integers_from_text(o["trade_id"]) for o in from_transaction_log_instrument ]))
-    
-            #log.error(f"last_time_stamp_log {last_time_stamp_log}")
-            current_position_log = 0 if not from_transaction_log_instrument \
-                else [o["position"] for o in from_transaction_log_instrument \
-                    if  str(last_time_stamp_log) in o["trade_id"]][0]
-            #log.error(f"current_position_log {current_position_log}")
-    
-        my_trades_instrument = 0 if not my_trades_currency \
-            else [o for o in my_trades_currency \
-            if o["instrument_name"] == instrument_name]        
-        sum_my_trades_instrument = 0 if not my_trades_instrument \
-            else sum([o["amount"] for o in my_trades_instrument])
-        
-            
-        # comparing the result
-        current_position_log = 0 if not current_position_log else current_position_log
-        sum_my_trades_instrument = 0 if not sum_my_trades_instrument else sum_my_trades_instrument
-        sub_account_size_instrument = 0 if not sub_account_size_instrument else sub_account_size_instrument
         
         different_from_sub_accont_and_trans_log = current_position_log == sub_account_size_instrument
         
