@@ -470,11 +470,11 @@ class ModifyOrderDb(SendApiRequest):
             
             log.critical (f"unrecorded_trade_id {unrecorded_trade_id}")
             
-            asyncio.sleep (10)
-
-            if trades_from_exchange_without_futures_combo:
+            if unrecorded_trade_id:
                 
-                for trade in trades_from_exchange_without_futures_combo:
+                for trade_id in unrecorded_trade_id:
+                    
+                    trade = [o for o in trades_from_exchange_without_futures_combo if trade_id == o["trade_id"]][0]
                     
                     log.error (f"{trade["trade_id"]}")
 
