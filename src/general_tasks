@@ -755,7 +755,13 @@ async def reconciling_size(
                         
                         # sub account instruments
                         for instrument_name in sub_account_positions_instrument:
-                            
+             
+                            await clean_up_closed_transactions(
+                                instrument_name, 
+                                trade_db_table,
+                                my_trades_instrument_name_active
+                                )
+             
                             my_trades_instrument_name_active = ([o for o in my_trades_currency_active\
                                 if instrument_name in o["instrument_name"]]
                             )
@@ -839,13 +845,6 @@ async def reconciling_size(
                                             trade_db_table, 
                                             order_db_table)                      
    
-                            await clean_up_closed_transactions(
-                                instrument_name, 
-                                trade_db_table,
-                                my_trades_instrument_name_active
-                                )
-                            
-             
             await asyncio.sleep(idle_time)
             
     except Exception as error:
