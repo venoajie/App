@@ -446,9 +446,7 @@ def is_my_trades_and_sub_account_size_reconciled_each_other(
             )
     
     reconciled = my_trades_size_instrument == sub_account_size_instrument
-    
-    log.critical(f"{instrument_name} reconciled {reconciled} sub_account_size_instrument {sub_account_size_instrument} my_trades_size_instrument {my_trades_size_instrument}")
-    
+        
     if not reconciled:
         log.critical(f"{instrument_name} reconciled {reconciled} sub_account_size_instrument {sub_account_size_instrument} my_trades_size_instrument {my_trades_size_instrument}")
 
