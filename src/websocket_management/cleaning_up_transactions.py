@@ -390,8 +390,10 @@ def get_sub_account_size_per_instrument(
     
     log.error (f"sub_account {sub_account}")
     
-    sub_account_size_instrument = [o["size"] for o in sub_account ["positions"] \
+    sub_account_instrument = [o for o in sub_account ["positions"] \
         if o["instrument_name"] == instrument_name ]
+    
+    sub_account_size_instrument = [o["size"] for o in sub_account_instrument ]
     
     sub_account_size_instrument = 0 if sub_account_size_instrument == [] \
         else sub_account_size_instrument [0]
