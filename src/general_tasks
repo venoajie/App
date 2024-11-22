@@ -511,7 +511,8 @@ async def hedging_spot_currency(
             log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             
                             
-            if  equity > 0\
+            if  portfolio \
+                and equity > 0\
                     and instrument_ticker:
                 
                     
