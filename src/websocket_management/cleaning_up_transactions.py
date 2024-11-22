@@ -211,7 +211,7 @@ async def reconciling_sub_account_and_db_open_orders(
                                 )
 
 
-async def get_unrecorded_trade_and_order_id(instrument_name: str) -> dict:
+async def get_unrecorded_trade_id(instrument_name: str) -> dict:
     
     currency = extract_currency_from_text(instrument_name)       
     
