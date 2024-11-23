@@ -121,8 +121,6 @@ futures_instruments= get_futures_instruments (currencies,
 
 active_futures = futures_instruments["active_futures"]   
 
-active_combo_perp = futures_instruments["active_combo_perp"]  
-
 async def get_db_trade():
                 
     column_trade: str= "instrument_name","label", "amount", "price","trade_id"
