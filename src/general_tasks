@@ -834,7 +834,7 @@ async def reconciling_size(
                 
                                     my_trades_archive_closed = [o for o in my_trades_instrument_name_archive \
                                         if str( (parsing_label(o["label"])["int"])) in o["label"] \
-                                            and sum(o["amount"])==0]
+                                            and int(o["amount"])==0]
                                     
                                     log.debug (f"my_trades_archive_closed {my_trades_archive_closed}")
                                     
