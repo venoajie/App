@@ -832,9 +832,9 @@ async def reconciling_size(
                                     
                                     unrecorded_data = await get_unrecorded_trade_id(instrument_name)
                 
-                                    my_trades_archive_closed = [o for o in my_trades_instrument_name_archive \
-                                        if str(parsing_label (parsing_label(o["label"])["int"])) in o["label"] \
-                                            and sum(o["amount"])==0]
+                                    my_trades_archive_closed = [o for o in my_trades_instrument_name_archive] \
+                                        #if str(parsing_label (parsing_label(o["label"])["int"])) in o["label"] \
+                                        #    and sum(o["amount"])==0]
                                     
                                     log.debug (f"my_trades_archive_closed {my_trades_archive_closed}")
                                     
