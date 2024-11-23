@@ -7,11 +7,11 @@ from loguru import logger as log
 from db_management.sqlite_management import(
     deleting_row,
     insert_tables)
-from websocket_management.cleaning_up_transactions import (
+from websocket_management.cleaning_up_transactions import(
     clean_up_closed_transactions,)
 
 def telegram_bot_sendtext(
-    bot_message,
+    bot_message: str,
     purpose: str = "general_error"
     ) -> None:
     
@@ -22,7 +22,7 @@ def telegram_bot_sendtext(
         purpose)
     
     
-async def saving_traded_orders (
+async def saving_traded_orders(
     trade: str,
     table: str,
     order_db_table: str = "orders_all_json"
@@ -70,8 +70,8 @@ async def saving_traded_orders (
     
 
 async def saving_orders(
-    order_table,
-    order
+    order_table: str,
+    order: dict
     ) -> None:
     
     """_summary_

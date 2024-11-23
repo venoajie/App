@@ -29,7 +29,6 @@ from utilities.string_modification import(
     extract_integers_from_text,
     get_unique_elements, 
     parsing_label,
-    parsing_sqlite_json_output,
     remove_redundant_elements,
     )
 
@@ -92,33 +91,6 @@ async def saving_traded_orders (
             )
         
     
-
-def sorting_list(
-    listing: list,
-    item_reference: str = "price",
-    is_reversed: bool=True
-    ) -> list:
-    """
-    https://sparkbyexamples.com/python/sort-list-of-dictionaries-by-value-in-python/
-
-    Args:
-        listing (list): _description_
-        item_reference (str, optional): _description_. Defaults to "price".
-        is_reversed (bool, optional): _description_. Defaults to True.
-                                    True = from_highest_to_lowest
-                                    False = from_lowest_to_highest
-
-    Returns:
-        list: _description_
-    """
-    import operator
-
-    return sorted(
-        listing, 
-        key=operator.itemgetter(item_reference), 
-        reverse = is_reversed)
-
-
 async def reconciling_sub_account_and_db_open_orders(
     instrument_name: str,
     order_db_table: str,

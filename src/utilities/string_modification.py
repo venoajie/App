@@ -527,3 +527,30 @@ def filtering_list_with_missing_key(
 
     """
     return [o for o in list_examples if missing_key not in o]
+
+
+
+def sorting_list(
+    listing: list,
+    item_reference: str = "price",
+    is_reversed: bool=True
+    ) -> list:
+    """
+    https://sparkbyexamples.com/python/sort-list-of-dictionaries-by-value-in-python/
+
+    Args:
+        listing (list): _description_
+        item_reference (str, optional): _description_. Defaults to "price".
+        is_reversed (bool, optional): _description_. Defaults to True.
+                                    True = from_highest_to_lowest
+                                    False = from_lowest_to_highest
+
+    Returns:
+        list: _description_
+    """
+    import operator
+
+    return sorted(
+        listing, 
+        key=operator.itemgetter(item_reference), 
+        reverse = is_reversed)

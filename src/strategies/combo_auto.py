@@ -62,30 +62,6 @@ def convert_list_to_dict (transaction: list) -> dict:
 
     return transaction
 
-def sorting_list(
-    listing: list,
-    item_reference: str = "price",
-    is_reversed: bool=True
-    ) -> list:
-    """
-    https://sparkbyexamples.com/python/sort-list-of-dictionaries-by-value-in-python/
-
-    Args:
-        listing (list): _description_
-        item_reference (str, optional): _description_. Defaults to "price".
-        is_reversed (bool, optional): _description_. Defaults to True.
-                                    True = from_highest_to_lowest
-                                    False = from_lowest_to_highest
-
-    Returns:
-        list: _description_
-    """
-
-    return sorted(
-        listing, 
-        key=operator.itemgetter(item_reference), 
-        reverse = is_reversed)
-
 def determine_opening_size(
     instrument_name: str,
     instrument_attributes_futures,
