@@ -561,9 +561,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                         # closing unpaired transactions
                                                             if sum_selected_transaction != 0:
-                                                                
-                                                                log.info (f"selected_transaction {selected_transaction}")
-                                                                
+                                                                                                                                
                                                                 send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                                 ticker_future[0],
                                                                 instrument_attributes_futures_all,
