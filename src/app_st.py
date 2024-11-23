@@ -163,21 +163,6 @@ async def get_ticker():
 
     return (ticker)
 
-#@st.experimental_fragment(run_every=2)
-async def rerun_ticker():
-    
-    """
-    https://st-experimental-fragment.streamlit.app/Job_status
-    """
-
-    data_ticker = await (get_ticker())
-    st.subheader("Ticker")
-    st.dataframe(data_ticker)
-    st.markdown("##")
-
-    st.caption(f"Last updated {datetime.datetime.now()}")        
-    st.rerun()
-
 async def get_db_trade():
                 
     column_trade: str= "instrument_name","label", "amount", "price","trade_id"
