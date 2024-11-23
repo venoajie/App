@@ -123,46 +123,6 @@ active_futures = futures_instruments["active_futures"]
 
 active_combo_perp = futures_instruments["active_combo_perp"]  
 
-
-async def get_ticker():
-    
-    log.critical("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-                
-    
-    ticker = []
-    for combo in active_combo_perp:
-        
-        instrument_name = combo["instrument_name"]
-            
-        instrument_ticker: list = await get_tickers(
-        instrument_name
-        )
-        
-        elements_to_be_removed=["stats", "combo_state", "state","timestamp"]
-        
-        modified_dict = remove_dict_elements(
-                instrument_ticker,
-                "stats"
-                )
-        modified_dict = remove_dict_elements(
-                modified_dict,
-                "combo_state"
-                )
-        modified_dict = remove_dict_elements(
-                modified_dict,
-                "state"
-                )
-        modified_dict = remove_dict_elements(
-                modified_dict,
-                "timestamp"
-                )
-        log.error (modified_dict)
-        
-        
-        ticker.append (modified_dict)
-
-    return (ticker)
-
 async def get_db_trade():
                 
     column_trade: str= "instrument_name","label", "amount", "price","trade_id"
