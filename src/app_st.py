@@ -230,10 +230,6 @@ async def main():
         st.table()
         
         st.markdown("""---""")
-
-        st.subheader("Positions")
-        st.dataframe(data_trade)
-        st.markdown("##")
         
         left_column, right_column = st.columns(2)
             
