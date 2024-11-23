@@ -344,10 +344,11 @@ class ComboAuto (BasicStrategy):
     def __post_init__(self):
         
         self.delta: float = get_delta (self.my_trades_currency_strategy)
-        log.critical (f"delta {self.delta}")
         self.basic_params: str = BasicStrategy (
             self.strategy_label,
             self.strategy_parameters)
+
+        log.critical (f"delta {self.delta}")
         
 
     async def is_send_open_order_constructing_manual_combo_allowed(
@@ -362,7 +363,7 @@ class ComboAuto (BasicStrategy):
         order_allowed = False
         
         delta = self.delta
-        log.critical (f"is_send_open_order_allowed_constructing_manual_combo")
+        log.warning (f"constructing_manual_combo")
 
         if delta == 0:            
 
@@ -724,7 +725,7 @@ class ComboAuto (BasicStrategy):
         
         ticker_perpetual = self.ticker_perpetual
         
-        log.error (f"strategy_label {strategy_label}")
+        log.warning (f"contra order")
                 
         log.info (selected_transaction)
 
