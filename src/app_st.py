@@ -163,7 +163,7 @@ async def get_ticker():
 
     return (ticker)
 
-@st.experimental_fragment(run_every=2)
+#@st.experimental_fragment(run_every=2)
 async def rerun_ticker():
     
     """
