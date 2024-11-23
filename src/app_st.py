@@ -110,6 +110,8 @@ cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
 
 trade_db_table= "my_trades_all_json"
 
+archive_db_table= f"my_trades_all_btc_json"
+
 order_db_table= "orders_all_json"         
                 
 settlement_periods= get_settlement_period (strategy_attributes)
@@ -169,8 +171,6 @@ async def rerun_ticker():
     """
 
     data_ticker = await (get_ticker())
-    df = pd.DataFrame (data_ticker)
-    edited_df = st.data_editor(df)
     st.subheader("Ticker")
     st.dataframe(data_ticker)
     st.markdown("##")
@@ -178,10 +178,21 @@ async def rerun_ticker():
     st.caption(f"Last updated {datetime.datetime.now()}")        
     st.rerun()
 
-async def get_db_table():
+async def get_db_trade():
                 
-    column_trade: str= "instrument_name","label", "amount", "price"
+    column_trade: str= "instrument_name","label", "amount", "price","trade_id"
     my_trades_currency: list= await get_query(trade_db_table, 
+                                                "BTC", 
+                                                "all", 
+                                                "all", 
+                                                column_trade)
+    
+    return [o for o in my_trades_currency if "futureSpread" in o["label"]]
+
+async def get_db_archive():
+                
+    column_trade: str= "instrument_name","label", "amount", "price","trade_id"
+    my_trades_currency: list= await get_query(archive_db_table, 
                                                 "BTC", 
                                                 "all", 
                                                 "all", 
@@ -208,7 +219,9 @@ async def main():
     try:
         st.title("Current ")
         
-        data = await get_db_table()
+        data_trade = await get_db_trade()
+
+        data_archive = await get_db_archive()
 
         data_order = await get_open_orders()
         st.title("Current ")
@@ -219,19 +232,19 @@ async def main():
         st.markdown("""---""")
 
         st.subheader("Positions")
-        st.dataframe(data)
+        st.dataframe(data_trade)
         st.markdown("##")
         
         left_column, right_column = st.columns(2)
             
         with left_column:
-            st.subheader("Trades")
-            st.dataframe (data)
+            st.subheader("Trades-archive")
+            st.dataframe (data_archive)
         with right_column:
-            st.subheader("Open orders")
-            st.dataframe (data_order)
+            st.subheader("Trades orders")
+            st.dataframe (data_trade)
     
-        await  rerun_ticker ()
+        #await  rerun_ticker ()
         #st.rerun()
 
         
