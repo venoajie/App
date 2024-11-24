@@ -533,6 +533,8 @@ async def hedging_spot_currency(
                 else:   #ensure freshness of ta
                     
                     my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy if "open" in (o["label"])]
+                    
+                    log.info (f"my_trades_currency_strategy_open {my_trades_currency_strategy_open}")
 
                     orders_currency_strategy = [o for o in orders_currency if strategy in (o["label"]) ]
                     
