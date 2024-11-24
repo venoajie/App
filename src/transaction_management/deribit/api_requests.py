@@ -252,7 +252,7 @@ class SendApiRequest:
 
         log.warning(f'order_result {order_result}')
 
-        if order_result != None and ("error" in order_result):
+        if order_result != None and ("error" in order_result or "settlement_in_progress" in order_result["message"] ) :
             error = order_result ["error"]
             message = error ["message"]
 
