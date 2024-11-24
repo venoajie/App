@@ -619,25 +619,28 @@ async def hedging_spot_currency(
                                 )
 
                             log.error (f"send_closing_order {send_closing_order}")
-                            result_order = await modify_order_and_db.if_order_is_true(
-                                non_checked_strategies,
-                                send_closing_order, 
-                                )
                             
-                            if result_order:
-                                log.error (f"result_order {result_order}")
-                                data_orders = result_order["result"]
-
-                                await modify_order_and_db.update_user_changes_non_ws(
+                            if send_order["order_allowed"]:
+                                
+                                result_order = await modify_order_and_db.if_order_is_true(
                                     non_checked_strategies,
-                                    data_orders, 
-                                    currency, 
-                                    order_db_table,
-                                    trade_db_table, 
-                                    archive_db_table,
-                                    transaction_log_trading_table)
+                                    send_closing_order, 
+                                    )
+                                
+                                if result_order:
+                                    log.error (f"result_order {result_order}")
+                                    data_orders = result_order["result"]
 
-                                await sleep_and_restart ()
+                                    await modify_order_and_db.update_user_changes_non_ws(
+                                        non_checked_strategies,
+                                        data_orders, 
+                                        currency, 
+                                        order_db_table,
+                                        trade_db_table, 
+                                        archive_db_table,
+                                        transaction_log_trading_table)
+
+                                    await sleep_and_restart ()
                                 
                 log.debug (f"strategy {strategy}-DONE")
     
