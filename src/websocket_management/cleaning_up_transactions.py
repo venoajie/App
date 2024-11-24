@@ -398,6 +398,32 @@ def is_transaction_log_and_sub_account_size_reconciled_each_other(
     return reconciled
     
     
+def is_my_trades_active_archived_reconciled_each_other(
+    instrument_name: str,
+    my_trades_active: list,
+    my_trades_archived: list,
+    ) -> bool:
+    """ """
+ 
+    my_trades_active_size_instrument = get_my_trades_size_per_instrument(
+        instrument_name,
+        my_trades_active,
+        )
+    
+    my_trades_archived_size_instrument = get_my_trades_size_per_instrument(
+        instrument_name,
+        my_trades_archived,
+        )
+    
+    
+    reconciled = my_trades_archived_size_instrument == my_trades_active_size_instrument
+        
+    if not reconciled:
+        log.critical(f"{instrument_name} reconciled {reconciled} sub_account_size_instrument {sub_account_size_instrument} my_trades_size_instrument {my_trades_size_instrument}")
+
+    return reconciled
+
+
 def is_my_trades_and_sub_account_size_reconciled_each_other(
     instrument_name: str,
     my_trades_currency: list,

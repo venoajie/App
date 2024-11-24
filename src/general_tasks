@@ -51,11 +51,10 @@ from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     last_tick_fr_sqlite,)
 from websocket_management.cleaning_up_transactions import (
-    check_whether_order_db_reconciled_each_other,
     clean_up_closed_transactions,
     count_and_delete_ohlc_rows,
     get_unrecorded_trade_transactions,
-    get_unrecorded_trade_id,
+    is_my_trades_active_archived_reconciled_each_other,
     is_my_trades_and_sub_account_size_reconciled_each_other,
     is_transaction_log_and_sub_account_size_reconciled_each_other,
     reconciling_sub_account_and_db_open_orders)
@@ -748,18 +747,19 @@ async def reconciling_size(
                                 if instrument_name in o["instrument_name"]]
                                     )
 
-                                my_trades_and_sub_account_size_reconciled_active = is_my_trades_and_sub_account_size_reconciled_each_other(
+                                my_trades_active_archived_reconciled_each_other = is_my_trades_active_archived_reconciled_each_other(
                                     instrument_name,
                                     my_trades_currency_active,
-                                    sub_account
+                                    my_trades_currency_archive,
                                     )
                                 
-                                                                                            
-                                if not my_trades_and_sub_account_size_reconciled_active:
+                                log.critical (f"my_trades_active_archived_reconciled_each_other {my_trades_active_archived_reconciled_each_other}")
+                                
+                                if not my_trades_active_archived_reconciled_each_other:
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
                                     
-                                    log.critical (f"my_trades_and_sub_account_size_reconciled_active {my_trades_and_sub_account_size_reconciled_active}")
+                                    
                                     
                                     my_trades_archive_instrument_label = remove_redundant_elements([ o["label"] for o in my_trades_instrument_name_archive ])
                                                                         
