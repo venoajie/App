@@ -831,7 +831,8 @@ async def reconciling_size(
                                     sub_account
                                     )
                                                                 
-                                if not my_trades_and_sub_account_size_reconciled_archive:
+                                if transaction_log_and_sub_account_size_reconciled \
+                                    and not my_trades_and_sub_account_size_reconciled_archive:
                                  
                                     from_transaction_log_instrument_name = (
                                         [o for o in from_transaction_log if o["instrument_name"] == instrument_name]
@@ -853,7 +854,8 @@ async def reconciling_size(
                                         await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
                                             instrument_name,
                                             timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
-                                            archive_db_table
+                                            archive_db_table,
+                                            trade_db_table
                                             )
                             
                     log.error("clean_up_closed_transactions")

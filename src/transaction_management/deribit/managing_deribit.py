@@ -437,6 +437,7 @@ class ModifyOrderDb(SendApiRequest):
         instrument_name: str,
         start_timestamp: int,
         archive_db_table,
+        trade_db_table,
         count: int =  500
         )-> None:
         """
@@ -475,13 +476,18 @@ class ModifyOrderDb(SendApiRequest):
                 
                 for trade_id in unrecorded_trade_id:
                     
-                    trade = [o for o in trades_from_exchange_without_futures_combo if trade_id == o["trade_id"]][0]
+                    trade = [o for o in trades_from_exchange_without_futures_combo if trade_id in o["trade_id"]][0]
                     
                     log.error (f"{trade["trade_id"]}")
 
                     await saving_traded_orders(
                         trade,
                         archive_db_table
+                        )
+
+                    await saving_traded_orders(
+                        trade,
+                        trade_db_table
                         )
 
     async def send_triple_orders(
