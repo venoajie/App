@@ -211,33 +211,6 @@ async def get_result_from_db_queries (
                 orders_currency=orders_currency)
     
 
-async def get_result_from_db_queries_all_and_instrument (
-    instrument_name,
-    archive_db_table,
-    trade_db_table,
-    ) -> list:
-    
-
-    column_trade: str= "instrument_name","timestamp"
-    my_trades_instrument_name_trade: list= await get_query(trade_db_table, 
-                                                instrument_name, 
-                                                "all", 
-                                                "all", 
-                                                column_trade)
-    
-    max_timestamp = max([o["timestamp"]  for o in my_trades_instrument_name_trade])
-              
-
-    my_trades_instrument_name_archive: list= await get_query(archive_db_table, 
-                                                instrument_name, 
-                                                "all", 
-                                                "all",
-                                                column_trade)
-    balance_archive = max([o["balance"]  for o in my_trades_instrument_name_archive if o["timestamp"] == max_timestamp])
-              
-    return dict(balance_archive=balance_archive,
-                balance_trade= max([o["balance"]  for o in my_trades_instrument_name_trade if o["timestamp"] == max_timestamp]),)
-    
 async def clean_up_databases(idle_time) -> None:
     """ """
 
@@ -787,12 +760,16 @@ async def reconciling_size(
                                     my_trades_currency_active,
                                     sub_account
                                     )
-                                log.critical (f"my_trades_and_sub_account_size_reconciled_active {my_trades_and_sub_account_size_reconciled_active}")
+                                
                                                                                             
                                 if not my_trades_and_sub_account_size_reconciled_active:
                                     
-                                    my_trades_archive_closed_label = remove_redundant_elements([ o["label"] for o in my_trades_instrument_name_archive ])
+                                    log.critical (f"my_trades_and_sub_account_size_reconciled_active {my_trades_and_sub_account_size_reconciled_active}")
+                                    
+                                    my_trades_archive_instrument_label = remove_redundant_elements([ o["label"] for o in my_trades_instrument_name_archive ])
                                                                         
+                                    log.critical (f"my_trades_and_sub_account_size_reconciled_active {my_trades_and_sub_account_size_reconciled_active}")
+
                                     where_filter = "instrument_name"
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
@@ -817,22 +794,21 @@ async def reconciling_size(
                                     column_trade: str= "instrument_name","label", "data","amount"
                                                                     
                                     my_trades_currency_archive: list= await get_query(archive_db_table, 
-                                                                                currency, 
+                                                                                instrument_name, 
                                                                                 "all", 
                                                                                 "all", 
                                                                                 column_trade)
                                     
 
-                                    for label in my_trades_archive_closed_label:
+                                    for label in my_trades_archive_instrument_label:
                                         
                                         label_integer = (parsing_label(label)["int"])
                                         
                                         selected_transactions = [o for o in my_trades_currency_archive \
                                             if str(label_integer) in o["label"]]
-                                        
+                                        log.critical (f"selected_transactions len{len(selected_transactions)}")
                                         sum_selected_transaction = sum([o["amount"] for o in selected_transactions])
                                         selected_transactions = [o["data"] for o in selected_transactions]
-                                        
                                         
                                         if sum_selected_transaction == 0:
                                             
