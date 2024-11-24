@@ -753,7 +753,7 @@ async def reconciling_size(
                                     my_trades_currency_archive,
                                     )
                                 
-                                log.critical (f"my_trades_active_archived_reconciled_each_other {my_trades_active_archived_reconciled_each_other}")
+                                log.critical (f" {instrument_name} my_trades_active_archived_reconciled_each_other {my_trades_active_archived_reconciled_each_other}")
                                 
                                 if not my_trades_active_archived_reconciled_each_other:
                                     
