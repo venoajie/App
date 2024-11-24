@@ -752,9 +752,7 @@ async def reconciling_size(
                                     my_trades_currency_active,
                                     my_trades_currency_archive,
                                     )
-                                
-                                log.critical (f" {instrument_name} my_trades_active_archived_reconciled_each_other {my_trades_active_archived_reconciled_each_other}")
-                                
+                                                                
                                 if not my_trades_active_archived_reconciled_each_other:
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
@@ -833,9 +831,7 @@ async def reconciling_size(
                                     my_trades_currency_active,
                                     sub_account
                                     )
-                                
-                                log.critical (f"my_trades_and_sub_account_size_reconciled_active {my_trades_and_sub_account_size_reconciled_active}")
-                                    
+                                                                    
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
                                     instrument_name,
                                     my_trades_currency_archive,
