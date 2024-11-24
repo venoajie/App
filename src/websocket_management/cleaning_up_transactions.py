@@ -854,7 +854,7 @@ async def clean_up_closed_transactions(
                                
         labels_only = remove_redundant_elements([o["label"] for o in transaction_with_closed_labels])
 
-        #log.error(f"closing transactions {labels_only}")
+        log.error(f"transaction_with_closed_labels {transaction_with_closed_labels}")
 
         if transaction_with_closed_labels:
 
@@ -875,6 +875,8 @@ async def clean_up_closed_transactions(
                 size_to_close = closed_transactions_all["summing_closed_transaction"]
                 
                 transaction_closed_under_the_same_label_int = closed_transactions_all["closed_transactions"]
+                
+                log.error(f"size_to_close {size_to_close}")
 
                 if size_to_close == 0:
                     
