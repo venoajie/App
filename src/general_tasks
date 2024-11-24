@@ -853,6 +853,7 @@ async def reconciling_size(
                                             archive_db_table
                                             )
                              
+                            log.error("clean_up_closed_transactions")
                             await clean_up_closed_transactions(
                                 instrument_name, 
                                 trade_db_table,
