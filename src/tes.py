@@ -48,7 +48,7 @@ dtype = [
     ("order_id", "U12"), 
     ("price", "f4"), 
     ("state", "U10"),
-    ("timestamp", "i4"), 
+    ("timestamp", "i8"), 
     ("label", "U20")
     ]
 
