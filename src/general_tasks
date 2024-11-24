@@ -829,16 +829,8 @@ async def reconciling_size(
                                         instrument_name,
                                         my_trades_currency_active,
                                         my_trades_currency_archive,
-                                        )               
-                                    log.critical ("SLEEEp")
-                                    await sleep_and_restart (10)
-                                                
+                                        )                                            
         
-                                my_trades_and_sub_account_size_reconciled_active = is_my_trades_and_sub_account_size_reconciled_each_other(
-                                    instrument_name,
-                                    my_trades_currency_active,
-                                    sub_account
-                                    )
                                                                     
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
                                     instrument_name,
