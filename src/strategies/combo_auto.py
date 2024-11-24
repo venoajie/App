@@ -594,9 +594,7 @@ class ComboAuto (BasicStrategy):
             
             transactions = [o for o in my_trades_currency \
                 if str(label_integer) in o["label"]]
-            
-            log.error (f"transactions {transactions}")
-            
+                        
             
             transactions_sum = sum([ o["amount"] for o in transactions])
             transactions_len = len(transactions) # sum product function applied only for 2 items.
@@ -605,7 +603,11 @@ class ComboAuto (BasicStrategy):
                 and transactions_len==2:
             
                 traded_future = [o for o in transactions \
-                    if "PERPETUAL" not  in o["instrument_name"]][0]
+                    if "PERPETUAL" not  in o["instrument_name"]]
+                
+                if traded_future:
+                    
+                    traded_future = traded_future[0]
                 
                 traded_instrument_name_future = traded_future["instrument_name"] 
                 
