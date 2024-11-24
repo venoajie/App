@@ -462,6 +462,9 @@ def get_my_trades_size_per_instrument(
               
     sum_my_trades_instrument = 0 if not my_trades_instrument \
         else sum([o["amount"] for o in my_trades_instrument])
+    
+    log.warning ([o["amount"] for o in my_trades_instrument])
+    log.info ([o["label"] for o in my_trades_instrument])
         
     return  0 if not sum_my_trades_instrument else sum_my_trades_instrument
     
