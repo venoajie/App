@@ -808,9 +808,26 @@ async def reconciling_size(
                                     
                                     my_trades_archive_closed_label = remove_redundant_elements([ o["label"] for o in my_trades_instrument_name_archive ])
                                     
-                                    await deleting_row("my_trades_closed_json")
-                                    await deleting_row(trade_db_table)
+                                    log.error (f"my_trades_archive_closed_label {my_trades_archive_closed_label}")
                                     
+                                    where_filter = "instrument_name"
+                                    
+                                    await deleting_row (
+                                        "my_trades_closed_json",
+                                        "databases/trading.sqlite3",
+                                        where_filter,
+                                        "=",
+                                        instrument_name,
+                                        )
+
+                                    await deleting_row (
+                                        trade_db_table,
+                                        "databases/trading.sqlite3",
+                                        where_filter,
+                                        "=",
+                                        instrument_name,
+                                        )
+
                                     for label in my_trades_archive_closed_label:
                                         
                                         label_integer = (parsing_label(label)["int"])
