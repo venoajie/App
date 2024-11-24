@@ -757,8 +757,6 @@ async def reconciling_size(
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
                                     
-                                    
-                                    
                                     my_trades_archive_instrument_label = remove_redundant_elements([ o["label"] for o in my_trades_instrument_name_archive ])
                                                                         
                                     where_filter = "instrument_name"
@@ -821,7 +819,12 @@ async def reconciling_size(
                                                 transaction
                                                 )  
                                                 
-                                                    
+                                        
+                                    my_trades_active_archived_reconciled_each_other = is_my_trades_active_archived_reconciled_each_other(
+                                        instrument_name,
+                                        my_trades_currency_active,
+                                        my_trades_currency_archive,
+                                        )               
                                     log.critical ("SLEEEp")
                                     await sleep_and_restart (10)
                                                 
