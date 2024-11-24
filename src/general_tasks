@@ -835,9 +835,9 @@ async def reconciling_size(
                                             if str(label_integer) in o["label"]]
                                         
                                         sum_selected_transaction = sum([o["amount"] for o in selected_transactions])
-                                        
+                                        selected_transactions = [o["data"] for o in selected_transactions]
                                         if sum_selected_transaction == 0:
-                                            selected_transactions = [o["data"] for o in selected_transactions]
+                                            
                                             
                                             await insert_tables(
                                                 "my_trades_closed_json",
@@ -845,7 +845,7 @@ async def reconciling_size(
                                                 )                      
    
                                         else:
-                                            log.critical (f"selected_transactions {selected_transactions}")
+                                            
                                             await insert_tables(
                                                 trade_db_table,
                                                 selected_transactions
