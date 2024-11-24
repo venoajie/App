@@ -23,7 +23,7 @@ vtr1 = np.array(nump)
 dtype = [
     ("liquidity","U1"), 
     ("risk_reducing", "?"),
-    ("order_type","U"),
+    ("order_type","U5"),
     ("trade_id", "U12"), 
     ("fee_currency", "U5"), 
     ("contracts", "f4"), 
