@@ -850,13 +850,13 @@ async def reconciling_size(
                                             archive_db_table
                                             )
                             
-                        log.error("clean_up_closed_transactions")
-                        await clean_up_closed_transactions(
-                            currency, 
-                            trade_db_table,
-                            my_trades_instrument_name_active
-                            )
-                            
+                    log.error("clean_up_closed_transactions")
+                    await clean_up_closed_transactions(
+                        currency, 
+                        trade_db_table,
+                        my_trades_instrument_name_active
+                        )
+                        
              
             await asyncio.sleep(idle_time)
             
