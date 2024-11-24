@@ -183,7 +183,7 @@ async def get_result_from_db_queries (
                                                 "all", 
                                                 column_trade)
     
-    log.warning (f"my_trades_currency_active {my_trades_currency_active}")
+    #log.warning (f"my_trades_currency_active {my_trades_currency_active}")
                                     
     my_trades_currency_archive: list= await get_query(archive_db_table, 
                                                 currency, 
@@ -509,7 +509,7 @@ async def hedging_spot_currency(
                     
                     my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy if "open" in (o["label"])]
                     
-                    log.info (f"my_trades_currency_strategy_open {my_trades_currency_strategy_open}")
+                    #log.info (f"my_trades_currency_strategy_open {my_trades_currency_strategy_open}")
 
                     orders_currency_strategy = [o for o in orders_currency if strategy in (o["label"]) ]
                     
