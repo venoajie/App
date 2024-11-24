@@ -612,6 +612,7 @@ async def hedging_spot_currency(
                             nearest_transaction_to_index[0]["instrument_name"])
                         
                         if instrument_ticker:
+                            log.error (f"nearest_transaction_to_index {nearest_transaction_to_index}")
                             send_closing_order: dict = await hedging.is_send_exit_order_allowed(
                                 orders_currency_strategy_label_closed,
                                 instrument_ticker[0]["best_bid_price"],
