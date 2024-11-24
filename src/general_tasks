@@ -620,7 +620,7 @@ async def hedging_spot_currency(
 
                             log.error (f"send_closing_order {send_closing_order}")
                             
-                            if send_order["order_allowed"]:
+                            if send_closing_order["order_allowed"]:
                                 
                                 result_order = await modify_order_and_db.if_order_is_true(
                                     non_checked_strategies,
@@ -810,9 +810,7 @@ async def reconciling_size(
                                 if not my_trades_and_sub_account_size_reconciled_active:
                                     
                                     my_trades_archive_closed_label = remove_redundant_elements([ o["label"] for o in my_trades_instrument_name_archive ])
-                                    
-                                    log.error (f"my_trades_archive_closed_label {my_trades_archive_closed_label}")
-                                    
+                                                                        
                                     where_filter = "instrument_name"
                                     
                                     await deleting_row (
