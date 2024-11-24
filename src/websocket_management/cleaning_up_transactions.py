@@ -812,7 +812,7 @@ async def closing_one_to_many(
                     
                     
 async def clean_up_closed_transactions(
-    instrument_name, 
+    currency, 
     trade_table,
     transaction_all: list = None
     ) -> None:
@@ -834,7 +834,7 @@ async def clean_up_closed_transactions(
         #querying tables
         transaction_all: list = await get_query(
             trade_table,
-            instrument_name, 
+            currency, 
             "all",
             "all",
             column_list,
@@ -845,7 +845,7 @@ async def clean_up_closed_transactions(
         if transaction_all:
                         
             transaction_all: list = [o for o in transaction_all \
-            if instrument_name in o["instrument_name"]]
+            if currency in o["instrument_name"]]
 
     # filtered transactions with closing labels
     if transaction_all:
