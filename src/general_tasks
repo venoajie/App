@@ -806,18 +806,24 @@ async def reconciling_size(
                                         
                                         selected_transactions = [o for o in my_trades_currency_archive \
                                             if str(label_integer) in o["label"]]
-                                        log.critical (f"selected_transactions len{len(selected_transactions)}")
-                                        sum_selected_transaction = sum([o["amount"] for o in selected_transactions])
+                                        #log.critical (f"selected_transactions len{len(selected_transactions)}")
                                         selected_transactions = [o["data"] for o in selected_transactions]
                                         
                                         for transaction in selected_transactions:
-                                                log.warning (f"transaction {transaction} sum_selected_transaction {sum_selected_transaction}")
+                                                #log.warning (f"transaction {transaction} sum_selected_transaction {sum_selected_transaction}")
                                                 
                                                 await insert_tables(
                                                 trade_db_table,
                                                 transaction
                                                 )  
                                                 
+                                    my_trades_curr_act: list= await get_query(trade_db_table, 
+                                                                                instrument_name, 
+                                                                                "all", 
+                                                                                "all", 
+                                                                                column_trade)
+                                    log.critical (f"my_trades_curr_act {my_trades_curr_act}")
+                                    
                                                                     
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
                                     instrument_name,
