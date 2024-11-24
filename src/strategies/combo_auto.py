@@ -595,6 +595,8 @@ class ComboAuto (BasicStrategy):
             transactions = [o for o in my_trades_currency \
                 if str(label_integer) in o["label"]]
             
+            log.error (f"transactions {transactions}")
+            
             
             transactions_sum = sum([ o["amount"] for o in transactions])
             transactions_len = len(transactions) # sum product function applied only for 2 items.
