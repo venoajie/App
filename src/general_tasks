@@ -38,6 +38,7 @@ from utilities.pickling import (
 from utilities.string_modification import (
     parsing_label,
     parsing_sqlite_json_output,
+    parsing_sqlite_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
     transform_nested_dict_to_list,)
@@ -189,7 +190,7 @@ async def get_result_from_db_queries (
                                                 "all", 
                                                 "all", 
                                                 column_trade)
-    log.warning ([o["data"] for o in my_trades_currency_archive])
+    log.warning (parsing_sqlite_json_output([o["data"] for o in my_trades_currency_archive]))
                                                     
     column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
     from_transaction_log = await get_query (transaction_log_trading, 
