@@ -780,7 +780,13 @@ async def reconciling_size(
                                 my_trades_instrument_name_archive = ([o for o in my_trades_currency_archive\
                                 if instrument_name in o["instrument_name"]]
                                     )
-                                                            
+
+                                my_trades_and_sub_account_size_reconciled_active = is_my_trades_and_sub_account_size_reconciled_each_other(
+                                    instrument_name,
+                                    my_trades_currency_active,
+                                    sub_account
+                                    )
+                                                                                            
                                 if not my_trades_and_sub_account_size_reconciled_active:
                                     
                                     my_trades_archive_closed_label = remove_redundant_elements([ o["label"] for o in my_trades_instrument_name_archive ])
@@ -863,13 +869,7 @@ async def reconciling_size(
                                             timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
                                             archive_db_table
                                             )
-
-                                my_trades_and_sub_account_size_reconciled_active = is_my_trades_and_sub_account_size_reconciled_each_other(
-                                    instrument_name,
-                                    my_trades_currency_active,
-                                    sub_account
-                                    )
-                                                             
+                             
                             await clean_up_closed_transactions(
                                 instrument_name, 
                                 trade_db_table,
