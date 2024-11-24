@@ -14,7 +14,7 @@ users_data = [
     {"user_id": 3, "plan_type": "basic", "data_usage": 100},
     {"user_id": 4, "plan_type": "premium", "data_usage": 800}
 ]# Converting list of dictionaries to a structured NumPy array
-dtype = [('user_id', 'i4'), ('plan_type', 'U10'), ('data_usage', 'i4')]
+dtype = [("user_id", "i4"), ("plan_type", "U10"), ("data_usage", "i4")]
 np_users_data = np.array([tuple(user.values()) for user in users_data], dtype=dtype)
 print (np_users_data)
 
