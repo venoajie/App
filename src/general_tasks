@@ -721,7 +721,7 @@ async def reconciling_size(
                             #eliminating combo transactions as they're not recorded in the book
                             if "-FS-" not in instrument_name:
                                 
-                                log.debug (f"transaction_log_and_sub_account_size {instrument_name}")
+                                #log.debug (f"transaction_log_and_sub_account_size {instrument_name}")
                         
                                 transaction_log_and_sub_account_size_reconciled = is_transaction_log_and_sub_account_size_reconciled_each_other(
                                     instrument_name,
@@ -806,6 +806,7 @@ async def reconciling_size(
                                         if sum_selected_transaction == 0:
                                             
                                             for transaction in selected_transactions:
+                                                log.debug (f"transaction {transaction} sum_selected_transaction {sum_selected_transaction}")
                                                 
                                                 await insert_tables(
                                                 "my_trades_closed_json",
@@ -815,7 +816,7 @@ async def reconciling_size(
                                         else:
                                             
                                             for transaction in selected_transactions:
-                                                log.info (f"selected_transactions {transaction} sum_selected_transaction {sum_selected_transaction}")
+                                                log.warning (f"transaction {transaction} sum_selected_transaction {sum_selected_transaction}")
                                                 
                                                 await insert_tables(
                                                 trade_db_table,
@@ -828,8 +829,6 @@ async def reconciling_size(
                                     my_trades_currency_archive,
                                     sub_account
                                     )
-                                
-                                log.debug (f"{instrument_name} my_trades_and_sub_account_size_reconciled_archive {my_trades_and_sub_account_size_reconciled_archive}")
                                                                 
                                 if not my_trades_and_sub_account_size_reconciled_archive:
                                  
