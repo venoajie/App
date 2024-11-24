@@ -814,6 +814,14 @@ async def reconciling_size(
                                                                         
                                     where_filter = "instrument_name"
                                     
+                                    await modify_order_and_db. resupply_sub_accountdb(currency)
+                                    await modify_order_and_db.resupply_transaction_log(
+                                            currency,
+                                            transaction_log_trading_table,
+                                            instrument_name,
+                                            100 #random number
+                                            )
+                                    
                                     await deleting_row (
                                         "my_trades_closed_json",
                                         "databases/trading.sqlite3",
