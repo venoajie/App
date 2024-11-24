@@ -7,6 +7,17 @@ nump= [
     {"liquidity": "M", "risk_reducing": False, "order_type": "limit", "trade_id": "328935563", "fee_currency": "BTC", "contracts": 1.0, "self_trade": False, "reduce_only": False, "post_only": True, "mmp": False, "fee": -1e-08, "tick_direction": 3, "matching_id": None, "mark_price": 98433.87, "api": True, "trade_seq": 1256, "instrument_name": "BTC-6DEC24", "profit_loss": 0.0, "index_price": 97705.94, "direction": "sell", "amount": 10.0, "order_id": "81422720796", "price": 98435.0, "state": "filled", "timestamp": 1732284144654, "label": "hedgingSpot-open-1732284137844"}
        ]
 
+
+users_data = [
+    {"user_id": 1, "plan_type": "basic", "data_usage": 300},
+    {"user_id": 2, "plan_type": "premium", "data_usage": 500},
+    {"user_id": 3, "plan_type": "basic", "data_usage": 100},
+    {"user_id": 4, "plan_type": "premium", "data_usage": 800}
+]# Converting list of dictionaries to a structured NumPy array
+dtype = [('user_id', 'i4'), ('plan_type', 'U10'), ('data_usage', 'i4')]
+np_users_data = np.array([tuple(user.values()) for user in users_data], dtype=dtype)
+print (np_users_data)
+
 vtr1 = np.array(nump)   
 
 dtype = [
