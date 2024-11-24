@@ -422,13 +422,13 @@ def is_my_trades_active_archived_reconciled_each_other(
         log.critical(f"{instrument_name} reconciled {reconciled} my_trades_active_size_instrument {my_trades_active_size_instrument} my_trades_archived_size_instrument {my_trades_archived_size_instrument}")
         log.warning ([o["amount"] for o in my_trades_active \
         if instrument_name in o["instrument_name"]])
+        log.debug ([o["amount"] for o in my_trades_archived \
+        if instrument_name in o["instrument_name"]])
+
+        log.warning  ([o["label"] for o in my_trades_active \
+        if instrument_name in o["instrument_name"]])
+
         log.debug ([o["label"] for o in my_trades_archived \
-        if instrument_name in o["instrument_name"]])
-
-        log.warning ([o["amount"] for o in my_trades_active \
-        if instrument_name in o["instrument_name"]])
-
-        log.debug  ([o["label"] for o in my_trades_archived \
         if instrument_name in o["instrument_name"]])
 
     return reconciled
