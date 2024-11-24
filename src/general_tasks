@@ -789,12 +789,6 @@ async def reconciling_size(
                                                                                 "all", 
                                                                                 column_trade)
                                     log.debug (f"my_trades_curr_act {my_trades_curr_act}")
-                                    my_trades_curr_closed: list= await get_query("my_trades_closed_json", 
-                                                                                instrument_name, 
-                                                                                "all", 
-                                                                                "all", 
-                                                                                column_trade)
-                                    log.debug (f"my_trades_curr_closed {my_trades_curr_closed}")
                                     
                                     
                                     column_trade: str= "instrument_name","label", "data","amount"
@@ -824,13 +818,6 @@ async def reconciling_size(
                                                 transaction
                                                 )  
                                                 
-                                        
-                                    my_trades_active_archived_reconciled_each_other = is_my_trades_active_archived_reconciled_each_other(
-                                        instrument_name,
-                                        my_trades_currency_active,
-                                        my_trades_currency_archive,
-                                        )                                            
-        
                                                                     
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
                                     instrument_name,
