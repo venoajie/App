@@ -816,12 +816,22 @@ async def reconciling_size(
                                         "=",
                                         instrument_name,
                                         )
+                                    
+                                    
+                                    column_trade: str= "instrument_name","label", "data","amount"
+                                                                    
+                                    my_trades_currency_archive: list= await get_query(archive_db_table, 
+                                                                                currency, 
+                                                                                "all", 
+                                                                                "all", 
+                                                                                column_trade)
+                                    
 
                                     for label in my_trades_archive_closed_label:
                                         
                                         label_integer = (parsing_label(label)["int"])
                                         
-                                        selected_transactions = [o for o in my_trades_instrument_name_archive \
+                                        selected_transactions = [o["data"] for o in my_trades_currency_archive \
                                             if str(label_integer) in o["label"]]
                                         
                                         sum_selected_transaction = sum([o["amount"] for o in selected_transactions])
