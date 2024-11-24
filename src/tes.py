@@ -23,7 +23,7 @@ nump = [{"liquidity": "M", "order_type": "limit"},
 vtr1 = np.array(nump)   
 
 dtype = [
-    ("liquidity","U1")
+    ("liquidity","U1"),
     ("order_type", "U5")
     ]
 
