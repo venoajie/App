@@ -876,7 +876,7 @@ async def clean_up_closed_transactions(
                 
                 transaction_closed_under_the_same_label_int = closed_transactions_all["closed_transactions"]
                 
-                log.error(f"size_to_close {size_to_close}")
+                log.error(f"size_to_close {size_to_close} {label_integer}")
 
                 if size_to_close == 0:
                     
