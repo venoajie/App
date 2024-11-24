@@ -17,14 +17,14 @@ users_data = [
 dtype = [("user_id", "i4"), ("plan_type", "U10"), ("data_usage", "i4")]
 np_users_data = np.array([tuple(user.values()) for user in users_data], dtype=dtype)
 print (np_users_data)
-nump = [{"liquidity": "M", "risk_reducing": False}, 
-    {"liquidity": "M", "risk_reducing": False}
+nump = [{"liquidity": "M", "order_type": "limit"}, 
+        {"liquidity": "M", "order_type": "limit"}
        ]
 vtr1 = np.array(nump)   
 
 dtype = [
     ("liquidity","U1")
-    ("risk_reducing", "bool")
+    ("order_type", "U5")
     ]
 
 np_users_data = np.array([tuple(user.values()) for user in vtr1], dtype=dtype)
