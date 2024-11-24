@@ -231,10 +231,10 @@ class StreamAccountData(ModifyOrderDb):
                         if my_trades_instrument_name_only:
 
                             for instrument_name in my_trades_instrument_name_only:
-                                await clean_up_closed_transactions(
-                                    instrument_name, 
-                                    trade_db_table
-                                            )      
+                                #await clean_up_closed_transactions(
+                                #    instrument_name, 
+                                #    trade_db_table
+                                #            )      
                                                         
                                 await self.modify_order_and_db.resupply_transaction_log(
                                     currency,
@@ -547,10 +547,10 @@ class StreamAccountData(ModifyOrderDb):
                             order_db_table
                             )
                         
-                await clean_up_closed_transactions(
-                    instrument_name, 
-                    trade_db_table
-                    )
+                #await clean_up_closed_transactions(
+                #    instrument_name, 
+                #    trade_db_table
+                #    )
                    
                 await self.modify_order_and_db.cancel_all_orders()    
                 
