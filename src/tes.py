@@ -23,10 +23,33 @@ nump = [{"liquidity": "M", "order_type": "limit", "tick_direction": 3,"risk_redu
 vtr1 = np.array(nump)   
 
 dtype = [
-    ("liquidity","U1"),
+    
+    ("liquidity","U1"), 
     ("risk_reducing", "bool"),
-    ("tick_direction", "14"), 
-    ("order_type", "U5")
+    ("order_type","U5"),
+    ("trade_id", "U12"), 
+    ("fee_currency", "U5"), 
+    ("contracts", "f4"), 
+    ("self_trade", "bool"),
+    ("reduce_only", "bool"),
+    ("post_only", "bool"), 
+    ("mmp", "bool"),
+    ("fee", "f4"),
+    ("tick_direction", "i4"), 
+    ("matching_id", "bool"),
+    ("mark_price", "f4"),
+    ("api", "bool"),
+    ("trade_seq", "i4"), 
+    ("instrument_name", "U20"), 
+    ("profit_loss", "f4"), 
+    ("index_price", "f4"),
+    ("direction", "U5"), 
+    ("amount", "f4"), 
+    ("order_id", "U12"), 
+    ("price", "f4"), 
+    ("state", "U10"),
+    ("timestamp", "i4"), 
+    ("label", "U20")
     ]
 
 np_users_data = np.array([tuple(user.values()) for user in vtr1], dtype=dtype)
@@ -45,7 +68,7 @@ dtype = [
     ("post_only", "bool"), 
     ("mmp", "bool"),
     ("fee", "f4"),
-    ("tick_direction", "14"), 
+    ("tick_direction", "i4"), 
     ("matching_id", "bool"),
     ("mark_price", "f4"),
     ("api", "bool"),
