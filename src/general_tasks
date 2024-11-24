@@ -833,20 +833,24 @@ async def reconciling_size(
                                         sum_selected_transaction = sum([o["amount"] for o in selected_transactions])
                                         selected_transactions = [o["data"] for o in selected_transactions]
                                         
-                                        log.info (f"selected_transactions {selected_transactions} sum_selected_transaction {sum_selected_transaction}")
+                                        
                                         if sum_selected_transaction == 0:
                                             
-                                            
-                                            await insert_tables(
+                                            for transaction in selected_transactions:
+                                                
+                                                await insert_tables(
                                                 "my_trades_closed_json",
-                                                selected_transactions
+                                                transaction
                                                 )                      
    
                                         else:
                                             
-                                            await insert_tables(
+                                            for transaction in selected_transactions:
+                                                log.info (f"selected_transactions {transaction} sum_selected_transaction {sum_selected_transaction}")
+                                                
+                                                await insert_tables(
                                                 trade_db_table,
-                                                selected_transactions
+                                                transaction
                                                 )  
                                                 
                                     await clean_up_closed_transactions(
