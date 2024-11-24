@@ -743,13 +743,6 @@ async def reconciling_size(
                                     if instrument_name in o["instrument_name"]]
                                     )
         
-                                my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
-                                    instrument_name,
-                                    my_trades_currency_archive,
-                                    sub_account
-                                    )
-                                log.debug (f"my_trades_and_sub_account_size_reconciled_archive {my_trades_and_sub_account_size_reconciled_archive}")
-                                
                                 
                                 my_trades_instrument_name_archive = ([o for o in my_trades_currency_archive\
                                 if instrument_name in o["instrument_name"]]
@@ -763,6 +756,8 @@ async def reconciling_size(
                                 
                                                                                             
                                 if not my_trades_and_sub_account_size_reconciled_active:
+                                    
+                                    await modify_order_and_db. resupply_sub_accountdb(currency)
                                     
                                     log.critical (f"my_trades_and_sub_account_size_reconciled_active {my_trades_and_sub_account_size_reconciled_active}")
                                     
@@ -827,7 +822,15 @@ async def reconciling_size(
                                                 transaction
                                                 )  
                                                 
-                                        
+        
+                                my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
+                                    instrument_name,
+                                    my_trades_currency_archive,
+                                    sub_account
+                                    )
+                                
+                                log.debug (f"{instrument_name} my_trades_and_sub_account_size_reconciled_archive {my_trades_and_sub_account_size_reconciled_archive}")
+                                                                
                                 if not my_trades_and_sub_account_size_reconciled_archive:
                                  
                                     from_transaction_log_instrument_name = (
