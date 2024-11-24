@@ -768,8 +768,6 @@ async def reconciling_size(
                                     
                                     my_trades_archive_instrument_label = remove_redundant_elements([ o["label"] for o in my_trades_instrument_name_archive ])
                                                                         
-                                    log.critical (f"my_trades_and_sub_account_size_reconciled_active {my_trades_and_sub_account_size_reconciled_active}")
-
                                     where_filter = "instrument_name"
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
@@ -829,10 +827,6 @@ async def reconciling_size(
                                                 transaction
                                                 )  
                                                 
-                                    await clean_up_closed_transactions(
-                                        instrument_name,
-                                        trade_db_table
-                                        )                    
                                         
                                 if not my_trades_and_sub_account_size_reconciled_archive:
                                  
