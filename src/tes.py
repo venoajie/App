@@ -24,7 +24,7 @@ vtr1 = np.array(nump)
 
 dtype = [
     ("liquidity","U1")
-    ("risk_reducing", "bool"),
+    ("risk_reducing", "bool")
     ]
 
 np_users_data = np.array([tuple(user.values()) for user in vtr1], dtype=dtype)
