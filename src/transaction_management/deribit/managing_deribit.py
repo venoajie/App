@@ -478,7 +478,7 @@ class ModifyOrderDb(SendApiRequest):
                     
                     trade = [o for o in trades_from_exchange_without_futures_combo if trade_id in o["trade_id"]][0]
                     
-                    log.error (f"{trade["trade_id"]}")
+                    log.error (f"{trade}")
 
                     await saving_traded_orders(
                         trade,
