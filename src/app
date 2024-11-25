@@ -704,10 +704,8 @@ class RunningStrategy(ModifyOrderDb):
                                                     TA_result_data_all = await querying_table("market_analytics_json")
                                                     
                                                     TA_result_data_only=  TA_result_data_all["list_data_only"]
-                                                    log.debug (f"TA_result_data_only {TA_result_data_only}")
 
                                                     TA_result_data = [o for o in TA_result_data_only if currency_upper in o["instrument"]]                                                                                                    
-                                                    log.warning (f"TA_result_data {TA_result_data}")
                                                                                                     
                                                     tick_TA=  max([o["tick"] for o in TA_result_data])
                                                     
@@ -718,11 +716,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                     
                                                     threshold_market_condition: float = strategy_params ["delta_price_pct"]
                                                     
-                                                    index_price_perpetual: float = instrument_ticker ["index_price"] 
-                                                    
                                                     market_condition: dict = await get_market_condition_hedging(
                                                         TA_result_data,
-                                                        index_price_perpetual,
+                                                        index_price,
                                                         threshold_market_condition
                                                         )
                                                     
@@ -730,6 +726,8 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                                     #neutral = market_condition["neutral_price"]
                                                     log.error (f"market_condition {market_condition}")
+                                                    
+                                                    instrument_ticker = ticker_perpetual_instrument_name
                                                     
                                                     if bearish:
                                                                                 
