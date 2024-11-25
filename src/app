@@ -706,7 +706,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     TA_result_data_only=  TA_result_data_all["list_data_only"]
                                                     log.debug (f"TA_result_data_only {TA_result_data_only}")
 
-                                                    TA_result_data = [o for o in TA_result_data_only if currency in o["instrument"]]                                                                                                    
+                                                    TA_result_data = [o for o in TA_result_data_only if currency_upper in o["instrument"]]                                                                                                    
                                                     log.warning (f"TA_result_data {TA_result_data}")
                                                                                                     
                                                     tick_TA=  max([o["tick"] for o in TA_result_data])
