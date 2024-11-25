@@ -459,16 +459,13 @@ class RunningStrategy(ModifyOrderDb):
                                             transaction_log_trading_table,)
                                         
                                         my_trades_currency_all: list= result_from_db_queries["my_trades_currency"]
-                                        sum_my_trades_currency_all: list= 0 if my_trades_currency_all == []\
-                                            else sum([o["amount"] for o in my_trades_currency_all])
                                         
-                                        from_transaction_log = result_from_db_queries["from_transaction_log"]                          
-
                                         orders_currency = result_from_db_queries["orders_currency"]     
 
                                         position = [o for o in sub_account["positions"]]
                                         #log.debug (f"position {position}")
-                                        position_without_combo = [ o for o in position if f"{currency_upper}-FS" not in o["instrument_name"]]
+                                        position_without_combo = [ o for o in position \
+                                            if f"{currency_upper}-FS" not in o["instrument_name"]]
                                                                                 
                                         await self.reconciling_orders(
                                             instrument_name_perpetual,
@@ -525,7 +522,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                     tp_threshold = .001/100
                                                     
-                                                    my_trades_currency_strategy_labels: float = [o["label"] for o in my_trades_currency_strategy  ]
+                                                    my_trades_currency_strategy_labels: list = [o["label"] for o in my_trades_currency_strategy  ]
                                                     
                                                     labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
                                                     
@@ -543,7 +540,8 @@ class RunningStrategy(ModifyOrderDb):
                                                     for label in labels:
                                                         
                                                         label_integer: int = get_label_integer (label)
-                                                        selected_transaction = [o for o in my_trades_currency_strategy if str(label_integer) in o["label"]]
+                                                        selected_transaction = [o for o in my_trades_currency_strategy \
+                                                            if str(label_integer) in o["label"]]
                                                         
                                                         sum_selected_transaction = sum([o["amount"] for o in selected_transaction])
                                                         
