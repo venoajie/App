@@ -695,7 +695,7 @@ class ModifyOrderDb(SendApiRequest):
         order_id= order["order_id"]    
         
         # no label
-        if label:
+        if label == '':
             
             order_attributes = labelling_unlabelled_order (order)                   
 
