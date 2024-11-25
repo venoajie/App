@@ -14,7 +14,8 @@ from db_management.sqlite_management import (
 from strategies.basic_strategy import (
     is_label_and_side_consistent,)
 from transaction_management.deribit.orders_management import (
-    saving_orders,
+    labelling_unlabelled_order,
+    saving_order_based_on_state,
     saving_traded_orders,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
@@ -28,7 +29,6 @@ from utilities.string_modification import (
     get_unique_elements)
 from utilities.system_tools import (
     provide_path_for_file)
-
 
 
 def get_first_tick_query(
@@ -153,8 +153,9 @@ class ModifyOrderDb(SendApiRequest):
 
     async def cancel_the_cancellables(
         self,
-        currency,
-        cancellable_strategies
+        currency: str,
+        cancellable_strategies: list,
+        open_orders_sqlite: list = None
         )-> None:
 
         log.critical(f" cancel_the_cancellables")                           
@@ -163,7 +164,8 @@ class ModifyOrderDb(SendApiRequest):
         
         column_list= "label", where_filter
         
-        open_orders_sqlite: list=  await get_query("orders_all_json", 
+        if open_orders_sqlite is None:
+            open_orders_sqlite: list=  await get_query("orders_all_json", 
                                                     currency.upper(), 
                                                     "all",
                                                     "all",
@@ -610,7 +612,6 @@ class ModifyOrderDb(SendApiRequest):
                         order_db_table
                         )
                         
-
         await self.resupply_transaction_log(
             currency,
             transaction_log_trading,
@@ -625,15 +626,15 @@ class ModifyOrderDb(SendApiRequest):
     
 
     async def update_user_changes_non_ws(
-    self,
-    non_checked_strategies,
-    data_orders, 
-    currency, 
-    order_db_table,
-    trade_db_table, 
-    archive_db_table,
-    transaction_log_trading
-    ) -> None:
+        self,
+        non_checked_strategies,
+        data_orders, 
+        currency, 
+        order_db_table,
+        trade_db_table, 
+        archive_db_table,
+        transaction_log_trading
+        ) -> None:
 
         trades = data_orders["trades"]
         
@@ -641,13 +642,10 @@ class ModifyOrderDb(SendApiRequest):
 
         instrument_name = order["instrument_name"]
         
-        log.debug (f"update_user_changes non ws {instrument_name} -START")
-        
-        log.info (f" {data_orders}")
-
         await self.resupply_sub_accountdb(currency)   
         
         if trades:
+            
             for trade in trades:
                 
                 if f"{currency.upper()}-FS-" not in instrument_name:
@@ -691,30 +689,37 @@ class ModifyOrderDb(SendApiRequest):
         order,
         order_db_table
         ) -> None:
+        
+        label= order["label"]
 
-                    
-        order_state= order["order_state"]
+        order_id= order["order_id"]    
+        
+        # no label
+        if label:
+            
+            order_attributes = labelling_unlabelled_order (order)                   
 
-        if order_state == "cancelled" or order_state == "filled":
-            await saving_orders (
-                order_db_table,
+            await insert_tables(
+                order_db_table, 
                 order
                 )
-        
-        else:
-            
-            label= order["label"]
 
-            order_id= order["order_id"]    
+            await self.modify_order_and_db. cancel_by_order_id (order_id)  
+            
+            await self.modify_order_and_db.if_order_is_true(
+                non_checked_strategies,
+                order_attributes, 
+                )
+                    
+        else:
             
             label_and_side_consistent= is_label_and_side_consistent(
                 non_checked_strategies,
-                order
-                )
+                order)
             
             if label_and_side_consistent and label:
                 
-                await saving_orders (
+                await saving_order_based_on_state (
                     order_db_table, 
                     order
                     )
@@ -723,13 +728,8 @@ class ModifyOrderDb(SendApiRequest):
             if  not label_and_side_consistent:
             
                 await insert_tables(
-                    order_db_table,
+                    order_db_table, 
                     order
                     )
 
-                await self. cancel_by_order_id (order_id)                    
-            
-                await telegram_bot_sendtext(
-                    'size or open order is inconsistent',
-                    "general_error"
-                    )
+                await self.modify_order_and_db. cancel_by_order_id (order_id)                    

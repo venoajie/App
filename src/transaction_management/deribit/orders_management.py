@@ -67,9 +67,8 @@ async def saving_traded_orders(
             order_id,
             )
         
-    
 
-async def saving_orders(
+async def saving_order_based_on_state(
     order_table: str,
     order: dict
     ) -> None:
@@ -99,14 +98,45 @@ async def saving_orders(
             "=",
             order_id,
             )
-        #await update_status_data(order_table, 
-        #                     "order_state", 
-        #                     filter_trade, 
-        #                     order_id, 
-        #                     "cancelled")
-
+        
     if order_state == "open":
         await insert_tables(
             order_table, 
             order
             )
+            
+def get_custom_label(transaction: list) -> str:
+
+    side= transaction["direction"]
+    side_label= "Short" if side== "sell" else "Long"
+    
+    try:
+        last_update= transaction["timestamp"]
+    except:
+        try:
+            last_update= transaction["last_update_timestamp"]
+        except:
+            last_update= transaction["creation_timestamp"]
+    
+    return (f"custom{side_label.title()}-open-{last_update}")
+
+        
+def labelling_unlabelled_order(order: dict) -> None:
+
+    from strategies.basic_strategy import (
+        get_transaction_side,
+        )
+    
+    side= get_transaction_side(order)
+    order.update({"everything_is_consistent": True})
+    order.update({"order_allowed": True})
+    order.update({"entry_price": order["price"]})
+    order.update({"size": order["amount"]})
+    order.update({"type": "limit"})
+    order.update({"side": side})
+    
+    label_open: str = get_custom_label(order)
+    order.update({"label": label_open})
+    
+    return order
+

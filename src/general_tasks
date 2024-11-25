@@ -3,7 +3,6 @@
 
 import asyncio
 import os
-from secrets import randbelow
 
 import httpx
 from loguru import logger as log
@@ -15,30 +14,21 @@ from db_management.sqlite_management import (
     deleting_row,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     insert_tables, 
-    querying_arithmetic_operator,
-    querying_table)
+    querying_arithmetic_operator,)
 from market_understanding.technical_analysis import (
     insert_market_condition_result)
-from strategies.hedging_spot import (
-    HedgingSpot,
-    get_market_condition_hedging)
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
-from transaction_management.deribit.orders_management import (
-    saving_traded_orders,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
-from utilities.number_modification import get_closest_value
 from utilities.pickling import (
     read_data,
     replace_data,)
 from utilities.string_modification import (
     parsing_label,
-    parsing_sqlite_json_output,
-    parsing_sqlite_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
     transform_nested_dict_to_list,)
@@ -58,9 +48,7 @@ from websocket_management.cleaning_up_transactions import (
     is_my_trades_active_archived_reconciled_each_other,
     is_my_trades_and_sub_account_size_reconciled_each_other,
     is_transaction_log_and_sub_account_size_reconciled_each_other,
-    reconciling_sub_account_and_db_open_orders)
-from websocket_management.ws_management import (
-    get_futures_instruments,
+    is_my_trades_and_sub_account_size_reconciled_each_other,
     )
     
     
@@ -367,272 +355,9 @@ async def update_instruments(idle_time):
     except Exception as error:
         await async_raise_error_message(error)
 
-async def hedging_spot_currency(
-    currency: str,
-    config_app: list,
-    instrument_attributes_futures_for_hedging: list,
-    modify_order_and_db: object,
-    orders_currency: list,
-    my_trades_currency: str,
-    order_db_table: str,
-    trade_db_table: str,
-    archive_db_table: str,
-    transaction_log_trading_table: str
-    ) -> None:
-    
-    strategy="hedgingSpot"
-
-    log.warning (f"strategy {strategy} {currency.upper()}-START")
-    
-    try:
-        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        instrument_name: str = (f"{currency}-PERPETUAL")
-        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    
-        TA_result_data_all = await querying_table("market_analytics_json")
-        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-
-        TA_result_data_only=  TA_result_data_all["list_data_only"]
-        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        
-        TA_result_data = [o for o in TA_result_data_only if currency in o["instrument"]]                                                                                                    
-                                                        
-        tick_TA=  max([o["tick"] for o in TA_result_data])
-        log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        
-        instrument_ticker: list = reading_from_pkl_data(
-            "ticker",
-            instrument_name
-            )
-        
-        if instrument_ticker:
-            
-            instrument_ticker = instrument_ticker[0]
-
-            index_price_perpetual: float = instrument_ticker ["index_price"] 
-            # get portfolio data  
-            
-            strategy_attributes = config_app["strategies"]
-                    
-            strategy_params= [o for o in strategy_attributes \
-                if o["strategy_label"] == strategy][0]   
-                            
-            threshold_market_condition: float = strategy_params ["delta_price_pct"]
-
-            market_condition: dict = await get_market_condition_hedging(
-                TA_result_data,
-                index_price_perpetual,
-                threshold_market_condition
-                )
-            
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
-        
-            #neutral = market_condition["neutral_price"]
-            log.error (f"market_condition {market_condition}")
-            
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            if bearish:
-                                        
-                instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
-                                                if "PERPETUAL" not in o["instrument_name"]]
-                if len(instrument_attributes_future) > 1:
-                    index_attributes = randbelow(2)
-                    instrument_attributes = instrument_attributes_future[index_attributes]
-                else:
-                    instrument_attributes = instrument_attributes_future[0]
-                
-                instrument_name: str = instrument_attributes ["instrument_name"] 
-                
-                instrument_ticker: list = reading_from_pkl_data(
-                    "ticker",
-                    instrument_name
-                    )
-                                
-                if instrument_ticker:                    
-                    instrument_ticker = instrument_ticker[0]
-
-            portfolio: list = reading_from_pkl_data(
-                "portfolio",
-                currency
-                )
-            
-            equity: float = portfolio[0]["equity"]    
-            
-            log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            
-                            
-            if  portfolio \
-                and equity > 0\
-                    and instrument_ticker:
-                
-                    
-                log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-
-                notional: float = compute_notional_value(
-                    index_price_perpetual, 
-                    equity
-                    )
-                                        
-                
-                log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-                # get strategies that have not short/long attributes in the label 
-                non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                    if o["non_checked_for_size_label_consistency"]==True]
-                
-                cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                    if o["cancellable"]==True]
-                
-                log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-                my_trades_currency_strategy = [o for o in my_trades_currency if strategy in (o["label"]) ]
-                
-                max_position: int = notional * -1
-                
-                server_time = get_now_unix_time()  
-                
-                delta_time = server_time-tick_TA
-                
-                delta_time_seconds = delta_time/1000                                                
-                log.warning ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-                                
-                THRESHOLD_DELTA_TIME_SECONDS = 120
-                log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
-                
-                #something was wrong because perpetuals were actively traded. cancell  orders
-                if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
-                    await modify_order_and_db.cancel_the_cancellables(
-                        currency,
-                        cancellable_strategies
-                        )
-                                                            
-                else:   #ensure freshness of ta
-                    
-                    my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy if "open" in (o["label"])]
-                    
-                    #log.info (f"my_trades_currency_strategy_open {my_trades_currency_strategy_open}")
-
-                    orders_currency_strategy = [o for o in orders_currency if strategy in (o["label"]) ]
-                    
-                    orders_currency_strategy_label_closed = [o for o in orders_currency_strategy if "closed" in (o["label"]) ]
-                    
-                    best_ask_prc: float = instrument_ticker["best_ask_price"] 
-
-                    hedging = HedgingSpot(
-                        strategy,
-                        strategy_params,
-                        max_position,
-                        my_trades_currency_strategy,
-                        TA_result_data,
-                        index_price_perpetual,
-                        )
-                    
-                    for order in orders_currency_strategy:
-                        cancel_allowed: dict = await hedging.is_cancelling_orders_allowed(
-                            order,
-                            orders_currency_strategy,
-                            server_time,
-                            )
-                        
-                        if cancel_allowed["cancel_allowed"]:
-                            await modify_order_and_db.if_cancel_is_true(cancel_allowed)
-                        
-                    send_order: dict = await hedging.is_send_open_order_allowed(
-                        non_checked_strategies,
-                        instrument_name,
-                        instrument_attributes_futures_for_hedging,
-                        orders_currency_strategy,
-                        best_ask_prc,
-                        )
-                    log.error (f"send_order {send_order}")
-                    
-                    if send_order["order_allowed"]:
-                        
-                        result_order = await modify_order_and_db.if_order_is_true(
-                            non_checked_strategies,
-                            send_order, 
-                            )
-
-                        if result_order:
-                            
-                            log.error (f"result_order {result_order}")
-                            
-                            data_orders = result_order["result"]
-                            await modify_order_and_db.update_user_changes_non_ws(
-                                non_checked_strategies,
-                                data_orders, 
-                                currency,
-                                order_db_table,
-                                trade_db_table,
-                                archive_db_table,
-                                transaction_log_trading_table
-                                )
-                            
-                            await sleep_and_restart ()
-                                
-                        
-                    if my_trades_currency_strategy_open !=[]:
-                                                                                                    
-                        best_bid_prc: float = instrument_ticker["best_bid_price"]
-                        
-                        get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_open]
-                        
-                        closest_price = get_closest_value(
-                            get_prices_in_label_transaction_main,
-                            best_bid_prc
-                            )
-
-                        nearest_transaction_to_index = [o for o in my_trades_currency_strategy_open \
-                            if o["price"] == closest_price]
-                        
-                        instrument_ticker: list = reading_from_pkl_data(
-                            "ticker",
-                            nearest_transaction_to_index[0]["instrument_name"])
-                        
-                        if instrument_ticker:
-
-                            send_closing_order: dict = await hedging.is_send_exit_order_allowed(
-                                orders_currency_strategy_label_closed,
-                                instrument_ticker[0]["best_bid_price"],
-                                nearest_transaction_to_index,
-                                )
-
-                            log.error (f"send_closing_order {send_closing_order}")
-                            
-                            if send_closing_order["order_allowed"]:
-                                
-                                result_order = await modify_order_and_db.if_order_is_true(
-                                    non_checked_strategies,
-                                    send_closing_order, 
-                                    )
-                                
-                                if result_order:
-                                    log.error (f"result_order {result_order}")
-                                    data_orders = result_order["result"]
-
-                                    await modify_order_and_db.update_user_changes_non_ws(
-                                        non_checked_strategies,
-                                        data_orders, 
-                                        currency, 
-                                        order_db_table,
-                                        trade_db_table, 
-                                        archive_db_table,
-                                        transaction_log_trading_table)
-
-                                    await sleep_and_restart ()
-                                
-                log.debug (f"strategy {strategy}-DONE")
-    
-    except Exception as error:
-        await telegram_bot_sendtext (
-                    error,
-                    "general_error")
-        await async_raise_error_message(error)
-                
-                
 async def reconciling_size(
     sub_account_id: str,
     config_app: list,
-    instrument_attributes_futures_for_hedging: list,
     idle_time: int
     ) -> None:
 
@@ -643,9 +368,7 @@ async def reconciling_size(
         
         # get tradable currencies
         currencies= [o["spot"] for o in tradable_config_app] [0]
-        
-        strategy_attributes = config_app["strategies"]
-        
+
         modify_order_and_db = ModifyOrderDb(sub_account_id)
             
         while True:
@@ -669,10 +392,6 @@ async def reconciling_size(
                     archive_db_table = f"my_trades_all_{currency_lower}_json"                    
                     
                     transaction_log_trading_table = f"transaction_log_{currency_lower}_json"                                        
-
-                    instrument_attributes_futures_currency = [o for o in instrument_attributes_futures_for_hedging\
-                        if currency in o["instrument_name"]]
-                    
                                     
                     result_from_db_queries = await get_result_from_db_queries (
                         currency,
@@ -687,36 +406,17 @@ async def reconciling_size(
                                                                     
                     from_transaction_log = result_from_db_queries["from_transaction_log"]                          
 
-                    orders_currency = result_from_db_queries["orders_currency"]     
-    
                     sub_account_positions = sub_account["positions"]
                     
                     sub_account_positions_instrument = remove_redundant_elements(
                         [o["instrument_name"] for o in sub_account_positions ]
                         )
                     
-                    await hedging_spot_currency(
-                        currency,
-                        config_app,
-                        instrument_attributes_futures_currency,
-                        modify_order_and_db,
-                        orders_currency,
-                        my_trades_currency_active,
-                        order_db_table,
-                        trade_db_table,
-                        archive_db_table,
-                        transaction_log_trading_table
-                    )
-                    
                     # FROM sub account to other db's
                     if  sub_account_positions_instrument:
                         
                         # sub account instruments
                         for instrument_name in sub_account_positions_instrument:
-                            
-                            my_trades_instrument_name_active = ([o for o in my_trades_currency_active\
-                                if instrument_name in o["instrument_name"]]
-                            )
                             
                             #eliminating combo transactions as they're not recorded in the book
                             if "-FS-" not in instrument_name:
@@ -738,11 +438,6 @@ async def reconciling_size(
                                             instrument_name,
                                             100 #random number
                                             )
-                                
-                                from_transaction_log_instrument = ([o for o in from_transaction_log\
-                                    if instrument_name in o["instrument_name"]]
-                                    )
-        
                                 
                                 my_trades_instrument_name_archive = ([o for o in my_trades_currency_archive\
                                 if instrument_name in o["instrument_name"]]
@@ -771,8 +466,7 @@ async def reconciling_size(
                                         "=",
                                         instrument_name,
                                         )
-                                    
-                                            
+                                                                                
                                     await deleting_row (
                                         trade_db_table,
                                         "databases/trading.sqlite3",
@@ -788,8 +482,8 @@ async def reconciling_size(
                                                                                 "all", 
                                                                                 "all", 
                                                                                 column_trade)
-                                    log.debug (f"my_trades_curr_act {my_trades_curr_act}")
                                     
+                                    log.debug (f"my_trades_curr_act {my_trades_curr_act}")
                                     
                                     column_trade: str= "instrument_name","label", "data","amount"
                                                                     
@@ -799,7 +493,6 @@ async def reconciling_size(
                                                                                 "all", 
                                                                                 column_trade)
                                     
-
                                     for label in my_trades_archive_instrument_label:
                                         
                                         label_integer = (parsing_label(label)["int"])
@@ -823,7 +516,6 @@ async def reconciling_size(
                                                                                 "all", 
                                                                                 column_trade)
                                     log.critical (f"my_trades_curr_act {my_trades_curr_act}")
-                                    
                                                                     
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
                                     instrument_name,
@@ -888,31 +580,11 @@ async def main():
     # get tradable strategies
     tradable_config_app = config_app["tradable"]
     
-    # get tradable currencies
-    currencies= [o["spot"] for o in tradable_config_app] [0]
-    
-    strategy_attributes = config_app["strategies"]
-    
-    settlement_periods = get_settlement_period (strategy_attributes)
-                    
-    futures_instruments = get_futures_instruments (
-        currencies,
-        settlement_periods
-        )  
-    
-    instrument_attributes_futures_for_hedging = [o for o in futures_instruments["active_futures"] \
-        if o["settlement_period"] != "month" and\
-             o["kind"] == "future"] 
-    
-    order_db_table= "orders_all_json"  
-
-
     try:
         await asyncio.gather(
         reconciling_size(
             sub_account_id,
             config_app,
-            instrument_attributes_futures_for_hedging,
             2
             ),
         update_ohlc_and_market_condition(

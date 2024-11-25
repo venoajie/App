@@ -17,18 +17,12 @@ import websockets
 # user defined formula
 from configuration import id_numbering, config
 from db_management.sqlite_management import (
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-    insert_tables,)
-from strategies.basic_strategy import(
-    is_label_and_side_consistent,)
+    executing_query_based_on_currency_or_instrument_and_strategy as get_query)
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
-from transaction_management.deribit.orders_management import (
-    saving_traded_orders,
-    saving_orders,)
 from utilities.pickling import (
     read_data,
     replace_data,)
@@ -66,7 +60,6 @@ def get_config(file_name: str) -> list:
                 return read
     except:
         return []
-
 
 
 async def update_db_pkl(
@@ -341,15 +334,15 @@ class StreamAccountData(ModifyOrderDb):
                                         
                                     if "user.changes.any" in message_channel:
                                         
-                                        await self.update_user_changes(
+                                        await self.modify_order_and_db. update_user_changes(
                                             non_checked_strategies,
                                             data_orders, 
                                             currency, 
                                             order_db_table,
                                             trade_db_table, 
                                             archive_db_table,
-                                            )          
-                                                                  
+                                            transaction_log_trading
+                                            )                                                             
                                     
                                     TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
                                     WHERE_FILTER_TICK: str = "tick"
@@ -506,121 +499,6 @@ class StreamAccountData(ModifyOrderDb):
 
         #log.info(ws_channel)
         await self.websocket_client.send(json.dumps(msg))
-
-
-    async def update_user_changes(
-        self,
-        non_checked_strategies,
-        data_orders, 
-        currency, 
-        order_db_table,
-        trade_db_table,
-        archive_db_table,
-        ) -> None:
-        
-        trades = data_orders["trades"]
-        
-        orders = data_orders["orders"]
-
-        instrument_name = data_orders["instrument_name"]
-        
-        log.critical (f"update_user_changes {instrument_name} -START")
-        
-        log.info (f" {data_orders}")
-        
-        if orders:
-            
-            if trades:
-                for trade in trades:
-                
-                    if f"{currency.upper()}-FS-" not in instrument_name:
-                    
-                        await saving_traded_orders(
-                            trade,
-                            trade_db_table,
-                            order_db_table
-                            )                      
-
-                        await saving_traded_orders(
-                            trade, 
-                            archive_db_table, 
-                            order_db_table
-                            )
-                        
-                #await clean_up_closed_transactions(
-                #    instrument_name, 
-                #    trade_db_table
-                #    )
-                   
-                await self.modify_order_and_db.cancel_all_orders()    
-                
-            else:
-                for order in orders:
-                    
-                    await self.saving_order(
-                        non_checked_strategies,
-                        instrument_name,
-                        order,
-                        order_db_table
-                        )
-                                            
-                await self.modify_order_and_db. resupply_sub_accountdb(currency)               
-
-        await update_db_pkl(
-            "positions", 
-            data_orders,
-            currency)
-        
-        log.info(f"update_user_changes-END")
-    
-
-    async def saving_order (
-        self,
-        non_checked_strategies,
-        instrument_name,
-        order,
-        order_db_table
-        ) -> None:
-
-                    
-        order_state= order["order_state"]
-
-        if order_state == "cancelled" or order_state == "filled":
-            await saving_orders (
-                order_db_table,
-                order
-                )
-        
-        else:
-            
-            label= order["label"]
-
-            order_id= order["order_id"]    
-            
-            label_and_side_consistent= is_label_and_side_consistent(
-                non_checked_strategies,
-                order)
-            
-            if label_and_side_consistent and label:
-                
-                await saving_orders (
-                    order_db_table, 
-                    order
-                    )
-                
-            # check if transaction has label. Provide one if not any
-            if  not label_and_side_consistent:
-            
-                await insert_tables(
-                    order_db_table, 
-                    order
-                    )
-
-                await self.modify_order_and_db. cancel_by_order_id (order_id)                    
-            
-                await telegram_bot_sendtext(
-                    "size or open order is inconsistent",
-                    "general_error")
 
     
 async def distribute_ticker_result_as_per_data_type(
