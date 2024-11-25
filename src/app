@@ -639,7 +639,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                 instrument_name_future
                                                                 )
                                                                 
-                                                                
                                                             size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
                                                                 position_without_combo,
                                                                 my_trades_currency_all,
@@ -694,9 +693,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                     log.warning (f"strategy {strategy}-DONE")
                                                 
-                                                if "hedgingSpot" in strategy \
-                                                    and size_future_reconciled\
-                                                        and size_perpetuals_reconciled:
+                                                if "hedgingSpot" in strategy :
                                                     
                                                     log.warning (f"strategy {strategy}-START")                                                    
                                                     
@@ -751,8 +748,14 @@ class RunningStrategy(ModifyOrderDb):
                                                                         
                                                         if instrument_ticker:                    
                                                             instrument_ticker = instrument_ticker[0]
-                                                        
-                                                    if orders_currency_strategy:
+                                                           
+                                                    size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
+                                                        position_without_combo,
+                                                        my_trades_currency_all,
+                                                        instrument_name)
+                                                            
+                                                    if orders_currency_strategy\
+                                                        and size_future_reconciled:
                                                         
                                                         for order in orders_currency_strategy:
                                                             cancel_allowed: dict = await hedging.is_cancelling_orders_allowed(
