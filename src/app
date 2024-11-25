@@ -481,14 +481,13 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         size_perpetuals_reconciled = is_size_sub_account_and_my_trades_reconciled(
                                             position_without_combo,
-                                            sum_my_trades_currency_all,
+                                            my_trades_currency_all,
                                             instrument_name_perpetual)
                                         
                                         log.error (f"size_perpetuals_reconciled {size_perpetuals_reconciled}")
                                         
                                         if  index_price is not None \
-                                            and equity > 0 \
-                                                and size_perpetuals_reconciled:
+                                            and equity > 0 :
                                     
                                             my_trades_currency: list= [ o for o in my_trades_currency_all \
                                                 if "table" in o] 
@@ -557,17 +556,15 @@ class RunningStrategy(ModifyOrderDb):
                                                             selected_transaction_instrument_name
                                                             )
                                                         
-                                                        
                                                         size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
                                                             position_without_combo,
-                                                            sum_my_trades_currency_all,
+                                                            my_trades_currency_all,
                                                             selected_transaction_instrument_name)
                                                         
                                                         log.error (f"size_future_reconciled {size_future_reconciled}")
                                         
                                                         
-                                                        if ticker_future\
-                                                            and size_future_reconciled:
+                                                        if ticker_future:
                                                             
                                                             await self.reconciling_orders(
                                                                 selected_transaction_instrument_name,
@@ -577,7 +574,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                 )
                                                             
                                                         # closing unpaired transactions
-                                                            if sum_selected_transaction != 0:
+                                                            if sum_selected_transaction != 0\
+                                                                and size_future_reconciled\
+                                                                    and size_perpetuals_reconciled:
                                                                                                                                 
                                                                 send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                                 ticker_future[0],
@@ -643,7 +642,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                             size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
                                                                 position_without_combo,
-                                                                sum_my_trades_currency_all,
+                                                                my_trades_currency_all,
                                                                 instrument_name_future)
                                                             
                                                             log.error (f"size_future_reconciled {size_future_reconciled}")
@@ -674,12 +673,15 @@ class RunningStrategy(ModifyOrderDb):
                                                                     archive_db_table,
                                                                     transaction_log_trading_table)
                                                                 
-                                                                send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
-                                                                    ticker_future,
-                                                                    instrument_attributes_futures_all,
-                                                                    notional,
-                                                                    target_transaction_per_hour
-                                                                    )
+                                                                if size_perpetuals_reconciled\
+                                                                    and size_future_reconciled:
+                                                                        
+                                                                    send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
+                                                                        ticker_future,
+                                                                        instrument_attributes_futures_all,
+                                                                        notional,
+                                                                        target_transaction_per_hour
+                                                                        )
                                                         
                                                                 await self.processing_orders(
                                                                     send_order,
@@ -692,7 +694,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                     log.warning (f"strategy {strategy}-DONE")
                                                 
-                                                if   "hedgingSpot" in strategy :
+                                                if "hedgingSpot" in strategy \
+                                                    and size_future_reconciled\
+                                                        and size_perpetuals_reconciled:
                                                     
                                                     log.warning (f"strategy {strategy}-START")                                                    
                                                     
