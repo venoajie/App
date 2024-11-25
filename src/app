@@ -574,17 +574,17 @@ class RunningStrategy(ModifyOrderDb):
                                                                 )
                                                             
                                                         # closing unpaired transactions
-                                                            if sum_selected_transaction != 0\
-                                                                and size_future_reconciled\
+                                                            if sum_selected_transaction != 0:
+                                                                if size_future_reconciled\
                                                                     and size_perpetuals_reconciled:
-                                                                                                                                
-                                                                send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                ticker_future[0],
-                                                                instrument_attributes_futures_all,
-                                                                tp_threshold,
-                                                                selected_transaction,
-                                                                server_time,
-                                                                )
+                                                                                                                                    
+                                                                    send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                                    ticker_future[0],
+                                                                    instrument_attributes_futures_all,
+                                                                    tp_threshold,
+                                                                    selected_transaction,
+                                                                    server_time,
+                                                                    )
                                                                 
                                                         #closing combo auto orders
                                                             else:
@@ -593,14 +593,15 @@ class RunningStrategy(ModifyOrderDb):
                                                                 instrument_attributes_combo_all,
                                                                 tp_threshold)
                                                             
-                                                            await self.processing_orders(
-                                                                send_order,
-                                                                currency,
-                                                                non_checked_strategies,
-                                                                order_db_table,
-                                                                trade_db_table,
-                                                                archive_db_table,
-                                                                transaction_log_trading_table)
+                                                            if send_order:
+                                                                await self.processing_orders(
+                                                                    send_order,
+                                                                    currency,
+                                                                    non_checked_strategies,
+                                                                    order_db_table,
+                                                                    trade_db_table,
+                                                                    archive_db_table,
+                                                                    transaction_log_trading_table)
                                                             
                                                     # send combo orders-automatic
                                                     for instrument_attributes_combo in instrument_attributes_combo_all:
@@ -647,7 +648,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             log.error (f"size_future_reconciled {size_future_reconciled}")
                                             
                                                             
-                                                            if ticker_future and ticker_combo and size_future_reconciled:
+                                                            if ticker_future and ticker_combo:
                                                                 
                                                                 ticker_combo= ticker_combo[0]
 
@@ -673,7 +674,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                     transaction_log_trading_table)
                                                                 
                                                                 if size_perpetuals_reconciled\
-                                                                    and size_future_reconciled:
+                                                                    and size_future_reconciled\
+                                                                         and size_future_reconciled:
                                                                         
                                                                     send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
                                                                         ticker_future,
@@ -751,6 +753,12 @@ class RunningStrategy(ModifyOrderDb):
                                                         
                                                     instrument_name = instrument_ticker ["instrument_name"]    
                                                            
+                                                    await self.reconciling_orders(
+                                                                instrument_name,
+                                                                currency,
+                                                                sub_account,
+                                                                orders_currency)
+                                                                
                                                     size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
                                                         position_without_combo,
                                                         my_trades_currency_all,
