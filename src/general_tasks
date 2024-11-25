@@ -493,13 +493,15 @@ async def reconciling_size(
                                                                                 "all", 
                                                                                 column_trade)
                                     
+                                    my_trades_archive_free_blanks = [o for o in my_trades_currency_archive\
+                        if "table" in o]
                                     for label in my_trades_archive_instrument_label:
                                         
                                         if label:
                                             
                                             label_integer = (parsing_label(label)["int"])
                                             
-                                            selected_transactions = [o for o in my_trades_currency_archive \
+                                            selected_transactions = [o for o in my_trades_archive_free_blanks \
                                                 if str(label_integer) in o["label"]]
                                             #log.critical (f"selected_transactions len{len(selected_transactions)}")
                                             selected_transactions = [o["data"] for o in selected_transactions]
