@@ -339,7 +339,7 @@ def is_size_sub_account_and_my_trades_reconciled(
                 else sum(my_trades_size_instrument)
                 
         if sub_account_size_instrument != sum_my_trades_size_instrument:
-            log.critical (f"sum_my_trades_size_instrument {sum_my_trades_size_instrument}  {sum_my_trades_size_instrument}")
+            log.critical (f"sum_my_trades_size_instrument {sum_my_trades_size_instrument}  sub_account_size_instrument {sub_account_size_instrument}")
                 
         return sub_account_size_instrument == sum_my_trades_size_instrument
                         
