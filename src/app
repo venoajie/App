@@ -748,6 +748,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                         
                                                         if instrument_ticker:                    
                                                             instrument_ticker = instrument_ticker[0]
+                                                        
+                                                    instrument_name = instrument_ticker ["instrument_name"]    
                                                            
                                                     size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
                                                         position_without_combo,
@@ -798,10 +800,8 @@ class RunningStrategy(ModifyOrderDb):
                                                             max_position,
                                                             my_trades_currency_strategy,
                                                             TA_result_data,
-                                                            index_price_perpetual,
+                                                            index_price,
                                                             )
-                                                        
-                                                        instrument_name = instrument_ticker ["instrument_name"]    
                                                         
                                                         send_order: dict = await hedging.is_send_open_order_allowed(
                                                             non_checked_strategies,
