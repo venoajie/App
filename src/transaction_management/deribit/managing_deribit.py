@@ -704,9 +704,9 @@ class ModifyOrderDb(SendApiRequest):
                 order
                 )
 
-            await self.modify_order_and_db. cancel_by_order_id (order_id)  
+            await self. cancel_by_order_id (order_id)  
             
-            await self.modify_order_and_db.if_order_is_true(
+            await self.if_order_is_true(
                 non_checked_strategies,
                 order_attributes, 
                 )
@@ -732,4 +732,4 @@ class ModifyOrderDb(SendApiRequest):
                     order
                     )
 
-                await self.modify_order_and_db. cancel_by_order_id (order_id)                    
+                await self. cancel_by_order_id (order_id)                    
