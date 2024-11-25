@@ -324,7 +324,7 @@ def is_size_sub_account_and_my_trades_reconciled(
     
     try:
 
-        sub_account_size_instrument = ([abs(o["size"]) for o in position_without_combo \
+        sub_account_size_instrument = ([(o["size"]) for o in position_without_combo \
             if instrument_name in o["instrument_name"]])
                 
         sub_account_size_instrument = 0 \
@@ -337,7 +337,9 @@ def is_size_sub_account_and_my_trades_reconciled(
         sum_my_trades_size_instrument = 0 \
             if my_trades_size_instrument == []\
                 else sum(my_trades_size_instrument)
-        log.debug (f"sum_my_trades_size_instrument {sum_my_trades_size_instrument}  {sum_my_trades_size_instrument}")
+                
+        if sub_account_size_instrument != sum_my_trades_size_instrument:
+            log.critical (f"sum_my_trades_size_instrument {sum_my_trades_size_instrument}  {sum_my_trades_size_instrument}")
                 
         return sub_account_size_instrument == sum_my_trades_size_instrument
                         
