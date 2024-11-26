@@ -498,12 +498,12 @@ async def reconciling_size(
                                     
                                     for trade_id in my_trades_archive_instrument_trade_id:
                                     
-                                        selected_transactions = [o for o in my_trades_archive_free_blanks \
-                                            if str(trade_id) in o["trade_id"]]
-                                        log.critical (f"selected_transactions len{len(selected_transactions)}")
-                                        selected_transactions = [o["data"] for o in selected_transactions]
+                                        selected_transactions = [o for o in my_trades_currency_archive \
+                                            if (trade_id) in o["trade_id"]]
+
+                                        selected_transactions_data = [o["data"] for o in selected_transactions]
                                         
-                                        for transaction in selected_transactions:
+                                        for transaction in selected_transactions_data:
                                             log.warning (f"transaction {transaction} ")
                                             
                                             if transaction:
