@@ -102,7 +102,10 @@ def find_non_repeatable_elements(data1: list, data2: list) -> list:
     return [i for i in data1 if i not in data2]
 
 
-def get_unique_elements(data1: list, data2: list) -> list:
+def get_unique_elements(
+    data1: list, 
+    data2: list
+    ) -> list:
     """
 
     Comparing two lists and picking only unique items between them
