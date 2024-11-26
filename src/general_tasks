@@ -179,7 +179,7 @@ async def get_result_from_db_queries (
                                                 "all", 
                                                 column_trade)
                                                     
-    column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
+    column_list= "instrument_name", "position", "timestamp","trade_id","user_seq","amount"        
     from_transaction_log = await get_query (transaction_log_trading, 
                                                 currency, 
                                                 "all", 

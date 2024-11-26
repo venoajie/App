@@ -374,7 +374,7 @@ def get_unrecorded_trade_transactions(
     """
      
     from_transaction_log_instrument_trade_id = sorted([o["trade_id"] for o in from_transaction_log_instrument] )
-    from_transaction_log_instrument_amount = ([o["amount_dir"] for o in from_transaction_log_instrument] )
+    from_transaction_log_instrument_amount = ([o["amount"] for o in from_transaction_log_instrument] )
     
     #log.error (f"my_trades_instrument_name {my_trades_instrument_name}")
     log.warning (f"from_transaction_log_instrument_amount {from_transaction_log_instrument_amount}")
