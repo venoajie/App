@@ -449,9 +449,22 @@ async def reconciling_size(
                                     my_trades_currency_archive,
                                     )
                                                                 
-                                if not my_trades_active_archived_reconciled_each_other:
+                                if my_trades_active_archived_reconciled_each_other:
+                                            
+                                    log.error("clean_up_closed_transactions")
                                     
-
+                                    my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
+                                        if o["label"] is not None]
+                                    
+                                    await clean_up_closed_transactions(
+                                        currency, 
+                                        trade_db_table,
+                                        my_trades_currency_active_free_blanks
+                                        )
+                                    
+                                    
+                                else:
+                                    
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
                                                
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
@@ -495,17 +508,6 @@ async def reconciling_size(
                                             archive_db_table,
                                             trade_db_table
                                             )
-                            
-                    log.error("clean_up_closed_transactions")
-                    
-                    my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
-                        if o["label"] is not None]
-                    
-                    await clean_up_closed_transactions(
-                        currency, 
-                        trade_db_table,
-                        my_trades_currency_active_free_blanks
-                        )
                         
                     my_trades_currency_active_with_blanks = [o for o in my_trades_currency_active\
                         if o["label"] is  None]
