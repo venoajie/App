@@ -461,6 +461,10 @@ class RunningStrategy(ModifyOrderDb):
                                         my_trades_currency_all: list= result_from_db_queries["my_trades_currency"]
                                         
                                         orders_currency = result_from_db_queries["orders_currency"]     
+                                        
+                                        orders_currency_cancellables = [o for o in orders_currency if cancellable_strategies in o["label"]]       
+                                        
+                                        log.error (f"orders_currency_cancellables {orders_currency_cancellables}")                                
 
                                         position = [o for o in sub_account["positions"]]
                                         #log.debug (f"position {position}")
