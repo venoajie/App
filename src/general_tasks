@@ -472,7 +472,15 @@ async def reconciling_size(
                                         "=",
                                         instrument_name,
                                         )
-                                                                        
+                                    
+                                    column_trade: str= "instrument_name","data"
+                                    
+                                    my_trades_instrument_name_archive = await get_query(archive_db_table, 
+                                                instrument_name, 
+                                                "all", 
+                                                "all", 
+                                                column_trade)
+                                             
                                     my_trades_archive_instrument_data = ([ o["data"] for o in my_trades_instrument_name_archive ])
 
                                     for transaction in my_trades_archive_instrument_data:
