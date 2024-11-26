@@ -1001,7 +1001,9 @@ async def clean_up_closed_transactions(
             "all",
             "all",
             column_list,
-            )           
+            )   
+        transaction_all = [o for o in transaction_all\
+                                        if o["label"] is not None]        
 
     else:      
         
@@ -1014,6 +1016,8 @@ async def clean_up_closed_transactions(
     if transaction_all:
         
         transaction_with_closed_labels = get_transactions_with_closed_label(transaction_all)
+        
+        log.debug(f"transaction_with_closed_labels {transaction_with_closed_labels}")
                                
         labels_only = remove_redundant_elements([o["label"] for o in transaction_with_closed_labels])
 
@@ -1037,6 +1041,7 @@ async def clean_up_closed_transactions(
                 
                 transaction_closed_under_the_same_label_int = closed_transactions_all["closed_transactions"]
                 
+                log.error(f"closed_transactions_all {closed_transactions_all}")
                 log.error(f"size_to_close {size_to_close} {label_integer}")
 
                 if size_to_close == 0:
