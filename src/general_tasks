@@ -472,49 +472,18 @@ async def reconciling_size(
                                         "=",
                                         instrument_name,
                                         )
-                                                            
-                                    column_trade: str= "instrument_name","label"
-                                    
-                                    my_trades_curr_act: list= await get_query(trade_db_table, 
-                                                                                instrument_name, 
-                                                                                "all", 
-                                                                                "all", 
-                                                                                column_trade)
-                                    
-                                    log.debug (f"my_trades_curr_act {my_trades_curr_act}")
-                                    
-                                    column_trade: str= "data","trade_id"
-                                                                    
-                                    my_trades_currency_archive: list= await get_query(archive_db_table, 
-                                                                                instrument_name, 
-                                                                                "all", 
-                                                                                "all", 
-                                                                                column_trade)
                                                                         
-                                    my_trades_archive_instrument_trade_id = ([ o["trade_id"] for o in my_trades_instrument_name_archive ])
+                                    my_trades_archive_instrument_data = ([ o["data"] for o in my_trades_instrument_name_archive ])
 
-                                    for trade_id in my_trades_archive_instrument_trade_id:
+                                    for transaction in my_trades_archive_instrument_data:
                                     
-                                        selected_transactions = [o for o in my_trades_currency_archive \
-                                            if (trade_id) in o["trade_id"]]
-
-                                        selected_transactions_data = [o["data"] for o in selected_transactions]
+                                        log.warning (f"transaction {transaction} ")
                                         
-                                        for transaction in selected_transactions_data:
-                                            log.warning (f"transaction {transaction} ")
-                                            
-                                            if transaction:
-                                                await insert_tables(
-                                                trade_db_table,
-                                                transaction
-                                                )  
-                                                
-                                                my_trades_curr_act: list= await get_query(trade_db_table, 
-                                                                                            instrument_name, 
-                                                                                            "all", 
-                                                                                            "all", 
-                                                                                            column_trade)
-                                                log.critical (f"my_trades_curr_act {my_trades_curr_act}")
+                                        if transaction:
+                                            await insert_tables(
+                                            trade_db_table,
+                                            transaction
+                                            )  
                                                                 
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
                                     instrument_name,
