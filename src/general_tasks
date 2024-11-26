@@ -483,7 +483,7 @@ async def reconciling_size(
                                     
                                     log.debug (f"my_trades_curr_act {my_trades_curr_act}")
                                     
-                                    column_trade: str= "instrument_name","label", "data","amount"
+                                    column_trade: str= "data","trade_id"
                                                                     
                                     my_trades_currency_archive: list= await get_query(archive_db_table, 
                                                                                 instrument_name, 
@@ -493,9 +493,6 @@ async def reconciling_size(
                                                                         
                                     my_trades_archive_instrument_trade_id = ([ o["trade_id"] for o in my_trades_instrument_name_archive ])
 
-                                    my_trades_archive_free_blanks = [o for o in my_trades_currency_archive\
-                                        if "table" in o]
-                                    
                                     for trade_id in my_trades_archive_instrument_trade_id:
                                     
                                         selected_transactions = [o for o in my_trades_currency_archive \
