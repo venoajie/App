@@ -607,7 +607,7 @@ async def refill_db (
     
 
     for id in my_trades_archive_instrument_id:
-        transaction = [o["data"] for o in my_trades_currency_active_with_blanks if id == o["id"]]
+        transaction = [o["data"] for o in my_trades_currency_active_with_blanks if id == o["id"]][0]
         label_open: str = get_custom_label(transaction)
         transaction.update({"label": label_open})
         log.debug (transaction)
