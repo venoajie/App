@@ -49,7 +49,7 @@ def get_transactions_len(result_strategy_label) -> int:
 
 def get_delta(my_trades_currency_strategy) -> int:
     """ """
-    log.error (f"my_trades_currency_strategy {my_trades_currency_strategy}")
+
     return 0 if my_trades_currency_strategy == []\
         else sum([o["amount"] for o in my_trades_currency_strategy])
             
