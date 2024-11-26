@@ -463,6 +463,7 @@ async def reconciling_size(
                         
                         # sub account instruments
                         for instrument_name in sub_account_positions_instrument:
+                            
                             await refill_db (
                                 instrument_name,
                                 archive_db_table,
@@ -566,9 +567,6 @@ async def reconciling_size(
                     error,
                     "general_error")
                 
-
-
-        
 def get_custom_label(transaction: list) -> str:
 
     side= transaction["direction"]
@@ -602,6 +600,7 @@ async def refill_db (
                         if o["label"] is None]
     
     my_trades_archive_instrument_id = ([ o["id"] for o in my_trades_currency_active_with_blanks ])
+    log.error (f"my_trades_archive_instrument_id {my_trades_archive_instrument_id}")
     
     if my_trades_archive_instrument_id:
         for id in my_trades_archive_instrument_id:
