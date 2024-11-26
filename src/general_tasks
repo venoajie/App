@@ -602,13 +602,29 @@ async def refill_db (
     
     if my_trades_archive_instrument_id:
         for id in my_trades_archive_instrument_id:
-            log.warning(id)
-            transaction = parsing_sqlite_json_output([o["data"] for o in my_trades_currency_active_with_blanks if id == o["id"]])[0]
-            log.warning(transaction)
+            transaction = parsing_sqlite_json_output(
+                [o["data"] for o in my_trades_currency_active_with_blanks \
+                    if id == o["id"]])[0]
+
             label_open: str = get_custom_label(transaction)
             transaction.update({"label": label_open})
             log.debug (transaction)
-        
+            
+            where_filter ="id"
+                
+            await deleting_row (
+                archive_db_table,
+                "databases/trading.sqlite3",
+                where_filter,
+                "=",
+                id,
+            )
+            
+            await insert_tables(
+                    archive_db_table, 
+                    transaction
+                )
+       
     
 async def main():
     
