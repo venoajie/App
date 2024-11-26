@@ -726,6 +726,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     log.error (f"market_condition {market_condition}")
                                                     
                                                     instrument_ticker = ticker_perpetual_instrument_name
+                                                    instrument_name = instrument_name_perpetual
                                                     
                                                     if bearish:
                                                                                 
