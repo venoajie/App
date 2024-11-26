@@ -492,9 +492,9 @@ class RunningStrategy(ModifyOrderDb):
                                             and equity > 0 :
                                     
                                             my_trades_currency: list= [ o for o in my_trades_currency_all \
-                                                if "label" in list(my_trades_currency_all)] 
+                                                if "label" in o] 
                                             
-                                            log.warning (f"my_trades_currency_all {my_trades_currency_all}")
+                                            log.warning (f"my_trades_currency {my_trades_currency}")
                                                                                         
                                             notional: float = compute_notional_value(index_price, equity)
 
@@ -502,6 +502,8 @@ class RunningStrategy(ModifyOrderDb):
                             
                                                 my_trades_currency_strategy = [o for o in my_trades_currency \
                                                     if strategy in (o["label"]) ]
+                                                
+                                                log.debug (f"my_trades_currency_strategy {my_trades_currency_strategy}")
                                                 
                                                 orders_currency_strategy = [o for o in orders_currency \
                                                     if strategy in (o["label"]) ]
