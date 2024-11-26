@@ -11,7 +11,6 @@ import tomli
 from configuration.label_numbering import get_now_unix_time
 from db_management.sqlite_management import (
     back_up_db_sqlite,
-    deleting_row,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     insert_tables, 
     querying_arithmetic_operator,)
@@ -28,7 +27,6 @@ from utilities.pickling import (
     read_data,
     replace_data,)
 from utilities.string_modification import (
-    parsing_sqlite_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
     transform_nested_dict_to_list,)
@@ -49,6 +47,8 @@ from websocket_management.cleaning_up_transactions import (
     is_my_trades_and_sub_account_size_reconciled_each_other,
     is_transaction_log_and_sub_account_size_reconciled_each_other,
     is_my_trades_and_sub_account_size_reconciled_each_other,
+    my_trades_active_archived_not_reconciled_each_other,
+    refill_db
     )
     
     
@@ -355,68 +355,6 @@ async def update_instruments(idle_time):
     except Exception as error:
         await async_raise_error_message(error)
 
-
-async def my_trades_active_archived_not_reconciled_each_other(
-    instrument_name: str,
-    trade_db_table: str,
-    archive_db_table: str
-    ) -> None:
-    
-    where_filter = "instrument_name"
-
-    await deleting_row (
-        "my_trades_closed_json",
-        "databases/trading.sqlite3",
-        where_filter,
-        "=",
-        instrument_name,
-        )
-                                                
-    await deleting_row (
-        trade_db_table,
-        "databases/trading.sqlite3",
-        where_filter,
-        "=",
-        instrument_name,
-        )
-    
-    column_trade: str= "instrument_name","data","trade_id"
-    
-    my_trades_instrument_name_active = await get_query(trade_db_table, 
-                instrument_name, 
-                "all", 
-                "all", 
-                column_trade)
-    
-    my_trades_instrument_name_closed = await get_query("my_trades_closed_json", 
-                instrument_name, 
-                "all", 
-                "all", 
-                column_trade)
-    
-    my_trades_instrument_name_archive = await get_query(archive_db_table, 
-                instrument_name, 
-                "all", 
-                "all", 
-                column_trade)
-                
-    my_trades_archive_instrument_data = ([ o["data"] for o in my_trades_instrument_name_archive ])
-
-    if not my_trades_instrument_name_active and not my_trades_instrument_name_closed:
-        
-        for transaction in my_trades_archive_instrument_data:
-        
-            log.warning (f"transaction {transaction} ")
-            
-            if transaction:
-                await insert_tables(
-                trade_db_table,
-                transaction
-                )  
-    else:
-        pass
-
-
 async def reconciling_size(
     sub_account_id: str,
     config_app: list,
@@ -585,65 +523,7 @@ async def reconciling_size(
         await telegram_bot_sendtext (
                     error,
                     "general_error")
-                
-def get_custom_label(transaction: list) -> str:
-
-    side= transaction["direction"]
-    side_label= "Short" if side== "sell" else "Long"
-    
-    try:
-        last_update= transaction["timestamp"]
-    except:
-        try:
-            last_update= transaction["last_update_timestamp"]
-        except:
-            last_update= transaction["creation_timestamp"]
-    
-    return (f"custom{side_label.title()}-open-{last_update}")
-
-async def refill_db (
-    instrument_name,
-    archive_db_table,
-    ) -> list:
-    
-
-    column_trade: str= "id", "instrument_name","data", "label","trade_id"
-                                    
-    my_trades_currency_archive: list= await get_query(archive_db_table, 
-                                                instrument_name, 
-                                                "all", 
-                                                "all", 
-                                                column_trade)
-    
-    my_trades_currency_active_with_blanks = [o for o in (my_trades_currency_archive)\
-                        if o["label"] is None]
-    my_trades_archive_instrument_id = ([ o["id"] for o in my_trades_currency_active_with_blanks ])
-    
-    if my_trades_archive_instrument_id:
-        for id in my_trades_archive_instrument_id:
-            transaction = parsing_sqlite_json_output(
-                [o["data"] for o in my_trades_currency_active_with_blanks \
-                    if id == o["id"]])[0]
-
-            label_open: str = get_custom_label(transaction)
-            transaction.update({"label": label_open})
-            log.debug (transaction)
             
-            where_filter ="id"
-                
-            await deleting_row (
-                archive_db_table,
-                "databases/trading.sqlite3",
-                where_filter,
-                "=",
-                id,
-            )
-            
-            await insert_tables(
-                    archive_db_table, 
-                    transaction
-                )
-       
     
 async def main():
     

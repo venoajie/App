@@ -29,6 +29,7 @@ from utilities.string_modification import(
     extract_integers_from_text,
     get_unique_elements, 
     parsing_label,
+    parsing_sqlite_json_output,
     remove_redundant_elements,
     )
 
@@ -226,6 +227,130 @@ async def get_unrecorded_trade_id(instrument_name: str) -> dict:
     return  [] if not from_sqlite_all \
         else [o["data"] for o in from_sqlite_all\
                     if o["trade_id"] in unrecorded_trade_id]
+
+    
+def get_custom_label(transaction: list) -> str:
+
+    side= transaction["direction"]
+    side_label= "Short" if side== "sell" else "Long"
+    
+    try:
+        last_update= transaction["timestamp"]
+    except:
+        try:
+            last_update= transaction["last_update_timestamp"]
+        except:
+            last_update= transaction["creation_timestamp"]
+    
+    return (f"custom{side_label.title()}-open-{last_update}")
+
+async def refill_db (
+    instrument_name,
+    archive_db_table,
+    ) -> list:
+    
+
+    column_trade: str= "id", "instrument_name","data", "label","trade_id"
+                                    
+    my_trades_currency_archive: list= await get_query(archive_db_table, 
+                                                instrument_name, 
+                                                "all", 
+                                                "all", 
+                                                column_trade)
+    
+    my_trades_currency_active_with_blanks = [o for o in (my_trades_currency_archive)\
+                        if o["label"] is None]
+    my_trades_archive_instrument_id = ([ o["id"] for o in my_trades_currency_active_with_blanks ])
+    
+    if my_trades_archive_instrument_id:
+        for id in my_trades_archive_instrument_id:
+            transaction = parsing_sqlite_json_output(
+                [o["data"] for o in my_trades_currency_active_with_blanks \
+                    if id == o["id"]])[0]
+
+            label_open: str = get_custom_label(transaction)
+            transaction.update({"label": label_open})
+            log.debug (transaction)
+            
+            where_filter ="id"
+                
+            await deleting_row (
+                archive_db_table,
+                "databases/trading.sqlite3",
+                where_filter,
+                "=",
+                id,
+            )
+            
+            await insert_tables(
+                    archive_db_table, 
+                    transaction
+                )
+       
+
+async def my_trades_active_archived_not_reconciled_each_other(
+    instrument_name: str,
+    trade_db_table: str,
+    archive_db_table: str
+    ) -> None:
+    
+    column_trade: str= "instrument_name","data","trade_id"
+    
+    my_trades_instrument_name_active = await get_query(trade_db_table, 
+                instrument_name, 
+                "all", 
+                "all", 
+                column_trade)
+    
+    my_trades_instrument_name_closed = await get_query("my_trades_closed_json", 
+                instrument_name, 
+                "all", 
+                "all", 
+                column_trade)
+    
+    my_trades_instrument_name_archive = await get_query(archive_db_table, 
+                instrument_name, 
+                "all", 
+                "all", 
+                column_trade)
+                
+    my_trades_archive_instrument_data = ([ o["data"] for o in my_trades_instrument_name_archive ])
+
+    if not my_trades_instrument_name_active and not my_trades_instrument_name_closed:
+        
+        for transaction in my_trades_archive_instrument_data:
+        
+            log.warning (f"transaction {transaction} ")
+            
+            if transaction:
+                await insert_tables(
+                trade_db_table,
+                transaction
+                )  
+    else:
+                                        
+        from_sqlite_closed_trade_id = [o["trade_id"] for o in my_trades_instrument_name_closed]
+        from_sqlite_open_trade_id = [o["trade_id"] for o in my_trades_instrument_name_active]  
+                                                
+        from_exchange_trade_id = [o["trade_id"] for o in my_trades_instrument_name_archive]
+
+        combined_trade_closed_open = from_sqlite_open_trade_id + from_sqlite_closed_trade_id
+
+        unrecorded_trade_id = get_unique_elements(from_exchange_trade_id, combined_trade_closed_open)
+        
+        for trade_id in unrecorded_trade_id:
+            
+            transaction = [o for o in my_trades_instrument_name_archive\
+                if trade_id in o["trade_id"]]
+        
+            log.debug (f"transaction {transaction} ")
+            
+            await insert_tables(
+                trade_db_table,
+                transaction
+                )  
+
+
 
 def get_unrecorded_trade_transactions(
     direction: str,
