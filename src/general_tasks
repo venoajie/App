@@ -449,7 +449,7 @@ async def reconciling_size(
                                     my_trades_currency_archive,
                                     )
                                                                 
-                                if my_trades_active_archived_reconciled_each_other:
+                                if False and my_trades_active_archived_reconciled_each_other:
                                             
                                     log.error("clean_up_closed_transactions")
                                     
@@ -463,7 +463,7 @@ async def reconciling_size(
                                         )
                                     
                                     
-                                else:
+                                if not my_trades_active_archived_reconciled_each_other:
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
                                                
