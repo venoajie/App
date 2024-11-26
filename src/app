@@ -492,7 +492,7 @@ class RunningStrategy(ModifyOrderDb):
                                             and equity > 0 :
                                     
                                             my_trades_currency: list= [ o for o in my_trades_currency_all \
-                                                if "table" in o] 
+                                                if "label" in o] 
                                                                                         
                                             notional: float = compute_notional_value(index_price, equity)
 
