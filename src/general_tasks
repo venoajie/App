@@ -452,8 +452,6 @@ async def reconciling_size(
                                 if not my_trades_active_archived_reconciled_each_other:
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
-                                    
-                                    my_trades_archive_instrument_label = remove_redundant_elements([ o["label"] for o in my_trades_instrument_name_archive ])
                                                                         
                                     where_filter = "instrument_name"
                                     
@@ -492,37 +490,35 @@ async def reconciling_size(
                                                                                 "all", 
                                                                                 "all", 
                                                                                 column_trade)
-                                    
+                                                                        
+                                    my_trades_archive_instrument_trade_id = ([ o["trade_id"] for o in my_trades_instrument_name_archive ])
+
                                     my_trades_archive_free_blanks = [o for o in my_trades_currency_archive\
                                         if "table" in o]
-                                    log.debug (f"my_trades_archive_instrument_label {my_trades_archive_instrument_label}")
                                     
-                                    for label in my_trades_archive_instrument_label:
+                                    for trade_id in my_trades_archive_instrument_trade_id:
+                                    
+                                        selected_transactions = [o for o in my_trades_archive_free_blanks \
+                                            if str(trade_id) in o["trade_id"]]
+                                        log.critical (f"selected_transactions len{len(selected_transactions)}")
+                                        selected_transactions = [o["data"] for o in selected_transactions]
                                         
-                                        if label:
+                                        for transaction in selected_transactions:
+                                            log.warning (f"transaction {transaction} ")
                                             
-                                            label_integer = (parsing_label(label)["int"])
-                                            
-                                            selected_transactions = [o for o in my_trades_archive_free_blanks \
-                                                if str(label_integer) in o["label"]]
-                                            log.critical (f"selected_transactions len{len(selected_transactions)}")
-                                            selected_transactions = [o["data"] for o in selected_transactions]
-                                            
-                                            for transaction in selected_transactions:
-                                                    log.warning (f"transaction {transaction} ")
-                                                    
-                                                    await insert_tables(
-                                                    trade_db_table,
-                                                    transaction
-                                                    )  
+                                            if transaction:
+                                                await insert_tables(
+                                                trade_db_table,
+                                                transaction
+                                                )  
                                                 
-                                                    my_trades_curr_act: list= await get_query(trade_db_table, 
-                                                                                                instrument_name, 
-                                                                                                "all", 
-                                                                                                "all", 
-                                                                                                column_trade)
-                                                    log.critical (f"my_trades_curr_act {my_trades_curr_act}")
-                                                                    
+                                                my_trades_curr_act: list= await get_query(trade_db_table, 
+                                                                                            instrument_name, 
+                                                                                            "all", 
+                                                                                            "all", 
+                                                                                            column_trade)
+                                                log.critical (f"my_trades_curr_act {my_trades_curr_act}")
+                                                                
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
                                     instrument_name,
                                     my_trades_currency_archive,
