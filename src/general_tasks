@@ -601,16 +601,20 @@ async def refill_db (
     my_trades_currency_active_with_blanks = [o for o in my_trades_currency_archive\
                         if o["label"] is None]
     
+    log.warning(instrument_name)
+    log.warning(my_trades_currency_active_with_blanks)
+    
                
     my_trades_archive_instrument_id = ([ o["id"] for o in my_trades_currency_active_with_blanks ])
     
-    
-
-    for id in my_trades_archive_instrument_id:
-        transaction = [o["data"] for o in my_trades_currency_active_with_blanks if id == o["id"]][0]
-        label_open: str = get_custom_label(transaction)
-        transaction.update({"label": label_open})
-        log.debug (transaction)
+    if my_trades_archive_instrument_id:
+        for id in my_trades_archive_instrument_id:
+            log.warning(id)
+            transaction = [o["data"] for o in my_trades_currency_active_with_blanks if id == o["id"]][0]
+            log.warning(transaction)
+            label_open: str = get_custom_label(transaction)
+            transaction.update({"label": label_open})
+            log.debug (transaction)
         
     
 async def main():
