@@ -436,7 +436,7 @@ async def reconciling_size(
                                             currency,
                                             transaction_log_trading_table,
                                             instrument_name,
-                                            100 #random number
+                                            500 #random number
                                             )
                                 
                                 my_trades_instrument_name_archive = ([o for o in my_trades_currency_archive\
