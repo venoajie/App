@@ -521,7 +521,7 @@ async def reconciling_size(
                     log.error("clean_up_closed_transactions")
                     
                     my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
-                        if "label" in o]
+                        if o["label"] is not None]
                     
                     await clean_up_closed_transactions(
                         currency, 
