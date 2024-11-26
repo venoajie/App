@@ -34,6 +34,7 @@ from utilities.pickling import (
 from utilities.number_modification import get_closest_value
 from utilities.string_modification import (
     extract_currency_from_text,
+    parsing_label,
     remove_double_brackets_in_list,
     remove_redundant_elements,)
 from utilities.system_tools import (
@@ -462,7 +463,7 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         orders_currency = result_from_db_queries["orders_currency"]     
                                         
-                                        orders_currency_cancellables = [o for o in orders_currency if cancellable_strategies in o["label"]]       
+                                        orders_currency_cancellables = [o for o in orders_currency if parsing_label(o["label"])["super_main"]  in cancellable_strategies]       
                                         
                                         log.error (f"orders_currency_cancellables {orders_currency_cancellables}")                                
 
