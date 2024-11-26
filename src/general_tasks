@@ -355,6 +355,52 @@ async def update_instruments(idle_time):
     except Exception as error:
         await async_raise_error_message(error)
 
+
+async def my_trades_active_archived_not_reconciled_each_other(
+    instrument_name: str,
+    trade_db_table: str,
+    archive_db_table: str
+    ) -> None:
+    
+    where_filter = "instrument_name"
+
+    await deleting_row (
+        "my_trades_closed_json",
+        "databases/trading.sqlite3",
+        where_filter,
+        "=",
+        instrument_name,
+        )
+                                                
+    await deleting_row (
+        trade_db_table,
+        "databases/trading.sqlite3",
+        where_filter,
+        "=",
+        instrument_name,
+        )
+    
+    column_trade: str= "instrument_name","data"
+    
+    my_trades_instrument_name_archive = await get_query(archive_db_table, 
+                instrument_name, 
+                "all", 
+                "all", 
+                column_trade)
+                
+    my_trades_archive_instrument_data = ([ o["data"] for o in my_trades_instrument_name_archive ])
+
+    for transaction in my_trades_archive_instrument_data:
+    
+        log.warning (f"transaction {transaction} ")
+        
+        if transaction:
+            await insert_tables(
+            trade_db_table,
+            transaction
+            )  
+
+
 async def reconciling_size(
     sub_account_id: str,
     config_app: list,
@@ -417,6 +463,10 @@ async def reconciling_size(
                         
                         # sub account instruments
                         for instrument_name in sub_account_positions_instrument:
+                            await refill_db (
+                                instrument_name,
+                                archive_db_table,
+                                )
                             
                             #eliminating combo transactions as they're not recorded in the book
                             if "-FS-" not in instrument_name:
@@ -451,54 +501,24 @@ async def reconciling_size(
                                                                 
                                 if not my_trades_active_archived_reconciled_each_other:
                                     
-                                    await modify_order_and_db. resupply_sub_accountdb(currency)
-                                                                        
-                                    where_filter = "instrument_name"
-                                    
-                                    await modify_order_and_db. resupply_sub_accountdb(currency)
-                                    
-                                    await deleting_row (
-                                        "my_trades_closed_json",
-                                        "databases/trading.sqlite3",
-                                        where_filter,
-                                        "=",
-                                        instrument_name,
-                                        )
-                                                                                
-                                    await deleting_row (
-                                        trade_db_table,
-                                        "databases/trading.sqlite3",
-                                        where_filter,
-                                        "=",
-                                        instrument_name,
-                                        )
-                                    
-                                    column_trade: str= "instrument_name","data"
-                                    
-                                    my_trades_instrument_name_archive = await get_query(archive_db_table, 
-                                                instrument_name, 
-                                                "all", 
-                                                "all", 
-                                                column_trade)
-                                             
-                                    my_trades_archive_instrument_data = ([ o["data"] for o in my_trades_instrument_name_archive ])
 
-                                    for transaction in my_trades_archive_instrument_data:
+                                    await modify_order_and_db. resupply_sub_accountdb(currency)
+                                               
+                                    await modify_order_and_db. resupply_sub_accountdb(currency)
                                     
-                                        log.warning (f"transaction {transaction} ")
-                                        
-                                        if transaction:
-                                            await insert_tables(
-                                            trade_db_table,
-                                            transaction
-                                            )  
+                                    await my_trades_active_archived_not_reconciled_each_other(
+                                        instrument_name,
+                                        trade_db_table,
+                                        archive_db_table
+                                        )
                                                                 
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
                                     instrument_name,
                                     my_trades_currency_archive,
                                     sub_account
-                                    )
-                                                                
+                                    )    
+
+
                                 if transaction_log_and_sub_account_size_reconciled \
                                     and not my_trades_and_sub_account_size_reconciled_archive:
                                  
@@ -546,6 +566,52 @@ async def reconciling_size(
                     error,
                     "general_error")
                 
+
+
+        
+def get_custom_label(transaction: list) -> str:
+
+    side= transaction["direction"]
+    side_label= "Short" if side== "sell" else "Long"
+    
+    try:
+        last_update= transaction["timestamp"]
+    except:
+        try:
+            last_update= transaction["last_update_timestamp"]
+        except:
+            last_update= transaction["creation_timestamp"]
+    
+    return (f"custom{side_label.title()}-open-{last_update}")
+
+async def refill_db (
+    instrument_name,
+    archive_db_table,
+    ) -> list:
+    
+
+    column_trade: str= "id", "instrument_name","data", "label","trade_id"
+                                    
+    my_trades_currency_archive: list= await get_query(archive_db_table, 
+                                                instrument_name, 
+                                                "all", 
+                                                "all", 
+                                                column_trade)
+    
+    my_trades_currency_active_with_blanks = [o for o in my_trades_currency_archive\
+                        if o["label"] is None]
+    
+               
+    my_trades_archive_instrument_id = ([ o["id"] for o in my_trades_currency_active_with_blanks ])
+    
+    
+
+    for id in my_trades_archive_instrument_id:
+        transaction = [o["data"] for o in my_trades_currency_active_with_blanks if id == o["id"]]
+        label_open: str = get_custom_label(transaction)
+        transaction.update({"label": label_open})
+        log.debug (transaction)
+        
     
 async def main():
     
