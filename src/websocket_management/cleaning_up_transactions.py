@@ -31,6 +31,7 @@ from utilities.string_modification import(
     parsing_label,
     parsing_sqlite_json_output,
     remove_redundant_elements,
+    sorting_list
     )
 
 
@@ -294,7 +295,7 @@ async def my_trades_active_archived_not_reconciled_each_other(
     archive_db_table: str
     ) -> None:
     
-    column_trade: str= "instrument_name","data","trade_id"
+    column_trade: str= "instrument_name","data","trade_id","user_seq"
     
     my_trades_instrument_name_active = await get_query(trade_db_table, 
                 instrument_name, 
@@ -314,7 +315,17 @@ async def my_trades_active_archived_not_reconciled_each_other(
                 "all", 
                 column_trade)
                 
-    my_trades_archive_instrument_data = ([ o["data"] for o in my_trades_instrument_name_archive ])
+    my_trades_archive_instrument_sorted = sorting_list(
+        my_trades_instrument_name_archive,
+        "user_seq",
+        False
+        )
+    
+    my_trades_archive_instrument_data = sorting_list(
+        ([ o["data"] for o in my_trades_archive_instrument_sorted ]),
+        "user_seq",
+        False
+    )
 
     if not my_trades_instrument_name_active and not my_trades_instrument_name_closed:
         
