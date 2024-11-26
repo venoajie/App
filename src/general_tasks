@@ -428,7 +428,7 @@ async def reconciling_size(
                                     from_transaction_log,
                                     sub_account
                                     )
-                                log.error (f"transaction_log_and_sub_account_size_reconciled {transaction_log_and_sub_account_size_reconciled}")
+
                                 # transaction log amount is diff vs sub account. update both with data from exchange directly
                                 if not transaction_log_and_sub_account_size_reconciled:
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
@@ -448,7 +448,6 @@ async def reconciling_size(
                                     my_trades_currency_active,
                                     my_trades_currency_archive,
                                     )
-                                log.error (f"my_trades_active_archived_reconciled_each_other {my_trades_active_archived_reconciled_each_other}")
                                                                 
                                 if not my_trades_active_archived_reconciled_each_other:
                                     
@@ -491,7 +490,6 @@ async def reconciling_size(
                                     my_trades_currency_archive,
                                     sub_account
                                     )
-                                log.error (f"my_trades_and_sub_account_size_reconciled_archive {my_trades_and_sub_account_size_reconciled_archive}")
                                                                 
                                 if transaction_log_and_sub_account_size_reconciled \
                                     and not my_trades_and_sub_account_size_reconciled_archive:
