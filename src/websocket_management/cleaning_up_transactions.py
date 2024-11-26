@@ -373,7 +373,7 @@ def get_unrecorded_trade_transactions(
         _type_: _description_
     """
      
-    from_transaction_log_instrument_trade_id = [o["trade_id"] for o in from_transaction_log_instrument]  .sort(False)
+    from_transaction_log_instrument_trade_id = [o["trade_id"] for o in from_transaction_log_instrument]  .sort()
     
     #log.error (f"my_trades_instrument_name {my_trades_instrument_name}")
     log.debug (f"from_transaction_log_instrument_trade_id {from_transaction_log_instrument_trade_id}")
@@ -381,7 +381,7 @@ def get_unrecorded_trade_transactions(
     if direction == "from_trans_log_to_my_trade":
 
         if my_trades_instrument_name:
-            my_trades_instrument_name_trade_id = [o["trade_id"] for o in my_trades_instrument_name].sort(False)
+            my_trades_instrument_name_trade_id = [o["trade_id"] for o in my_trades_instrument_name].sort()
             
             log.debug (f"my_trades_instrument_name_trade_id {my_trades_instrument_name_trade_id}")
             
