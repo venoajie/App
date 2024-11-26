@@ -493,6 +493,8 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                             my_trades_currency: list= [ o for o in my_trades_currency_all \
                                                 if "label" in list(my_trades_currency_all)] 
+                                            
+                                            log.warning (f"my_trades_currency_all {my_trades_currency_all}")
                                                                                         
                                             notional: float = compute_notional_value(index_price, equity)
 
