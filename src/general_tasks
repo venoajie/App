@@ -380,7 +380,19 @@ async def my_trades_active_archived_not_reconciled_each_other(
         instrument_name,
         )
     
-    column_trade: str= "instrument_name","data"
+    column_trade: str= "instrument_name","data","trade_id"
+    
+    my_trades_instrument_name_active = await get_query(trade_db_table, 
+                instrument_name, 
+                "all", 
+                "all", 
+                column_trade)
+    
+    my_trades_instrument_name_closed = await get_query("my_trades_closed_json", 
+                instrument_name, 
+                "all", 
+                "all", 
+                column_trade)
     
     my_trades_instrument_name_archive = await get_query(archive_db_table, 
                 instrument_name, 
@@ -390,15 +402,19 @@ async def my_trades_active_archived_not_reconciled_each_other(
                 
     my_trades_archive_instrument_data = ([ o["data"] for o in my_trades_instrument_name_archive ])
 
-    for transaction in my_trades_archive_instrument_data:
-    
-        log.warning (f"transaction {transaction} ")
+    if not my_trades_instrument_name_active and not my_trades_instrument_name_closed:
         
-        if transaction:
-            await insert_tables(
-            trade_db_table,
-            transaction
-            )  
+        for transaction in my_trades_archive_instrument_data:
+        
+            log.warning (f"transaction {transaction} ")
+            
+            if transaction:
+                await insert_tables(
+                trade_db_table,
+                transaction
+                )  
+    else:
+        pass
 
 
 async def reconciling_size(
@@ -463,11 +479,6 @@ async def reconciling_size(
                         
                         # sub account instruments
                         for instrument_name in sub_account_positions_instrument:
-                            
-                            await refill_db (
-                                instrument_name,
-                                archive_db_table,
-                                )
                             
                             #eliminating combo transactions as they're not recorded in the book
                             if "-FS-" not in instrument_name:
@@ -558,7 +569,15 @@ async def reconciling_size(
                         my_trades_currency_active_free_blanks
                         )
                         
-             
+                    my_trades_currency_active_with_blanks = [o for o in my_trades_currency_active\
+                        if o["label"] is  None]
+                    
+                    if my_trades_currency_active_with_blanks:
+                        await refill_db (
+                            instrument_name,
+                            archive_db_table,
+                                )
+                                         
             await asyncio.sleep(idle_time)
             
     except Exception as error:
