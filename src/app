@@ -499,8 +499,6 @@ class RunningStrategy(ModifyOrderDb):
                                                 my_trades_currency_strategy = [o for o in my_trades_currency \
                                                     if strategy in (o["label"]) ]
                                                 
-                                                log.debug (f"my_trades_currency_strategy {my_trades_currency_strategy}")
-                                                
                                                 orders_currency_strategy = [o for o in orders_currency \
                                                     if strategy in (o["label"]) ]
                             
