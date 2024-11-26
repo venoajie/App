@@ -2,7 +2,7 @@
 
 [[tradable]]
 spot= [
-    "BTC",
+   # "BTC",
     "ETH",
     #"XRP",
     #"SOL",     
