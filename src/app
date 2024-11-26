@@ -756,6 +756,22 @@ class RunningStrategy(ModifyOrderDb):
                                                                 sub_account,
                                                                 orders_currency)
                                                                 
+                                                    size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
+                                                        position_without_combo,
+                                                        my_trades_currency_all,
+                                                        instrument_name)
+   
+                                                    max_position: int = notional * -1
+                                                         
+                                                    hedging = HedgingSpot(
+                                                        strategy,
+                                                        strategy_params,
+                                                        max_position,
+                                                        my_trades_currency_strategy,
+                                                        TA_result_data,
+                                                        index_price,
+                                                        )
+                                                            
                                                     if orders_currency_strategy:
                                                         
                                                         for order in orders_currency_strategy:
@@ -767,12 +783,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                             if cancel_allowed["cancel_allowed"]:
                                                                 await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
-                                                                
-                                                    size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
-                                                        position_without_combo,
-                                                        my_trades_currency_all,
-                                                        instrument_name)
-                                                    
+                                                                                                            
                                                     if size_future_reconciled:                                                        
                                                         delta_time = server_time-tick_TA
                                                         
@@ -791,23 +802,14 @@ class RunningStrategy(ModifyOrderDb):
                                                         else:   #ensure freshness of ta
                                                             log.warning (f"strategy {strategy}-START")                                                    
                                                             
-                                                            max_position: int = notional * -1
+                                                            my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy \
+                                                                if "open" in (o["label"])]
                                                             
-                                                            my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy if "open" in (o["label"])]
-                                                            
-                                                            orders_currency_strategy_label_closed = [o for o in orders_currency_strategy if "closed" in (o["label"]) ]
+                                                            orders_currency_strategy_label_closed = [o for o in orders_currency_strategy \
+                                                                if "closed" in (o["label"]) ]
                                                             
                                                             best_ask_prc: float = instrument_ticker["best_ask_price"] 
-
-                                                            hedging = HedgingSpot(
-                                                                strategy,
-                                                                strategy_params,
-                                                                max_position,
-                                                                my_trades_currency_strategy,
-                                                                TA_result_data,
-                                                                index_price,
-                                                                )
-                                                            
+    
                                                             send_order: dict = await hedging.is_send_open_order_allowed(
                                                                 non_checked_strategies,
                                                                 instrument_name,
