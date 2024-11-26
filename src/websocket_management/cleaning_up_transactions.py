@@ -819,8 +819,10 @@ async def distribute_closed_transactions(
     trade_id = closed_transaction [where_filter]
 
     #insert closed transaction to db for closed transaction
-    await insert_tables("my_trades_closed_json", 
-                        closed_transaction)
+    await insert_tables(
+        "my_trades_closed_json", 
+        closed_transaction
+        )
 
     #delete respective transaction form active db
     await deleting_row(
@@ -1044,7 +1046,7 @@ async def clean_up_closed_transactions(
                 log.error(f"closed_transactions_all {closed_transactions_all}")
                 log.error(f"size_to_close {size_to_close} {label_integer}")
 
-                if size_to_close == 0:
+                if False and size_to_close == 0:
                     
                     log.info(F" closing_one_to_one {transaction_closed_under_the_same_label_int}")
                     
