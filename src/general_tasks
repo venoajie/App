@@ -598,6 +598,7 @@ async def refill_db (
     
     my_trades_currency_active_with_blanks = [o for o in (my_trades_currency_archive)\
                         if o["label"] is None]
+    log.error (f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}")
     my_trades_currency_active_with_blanks = parsing_sqlite_json_output(my_trades_currency_active_with_blanks)
     
     my_trades_archive_instrument_id = ([ o["id"] for o in my_trades_currency_active_with_blanks ])
