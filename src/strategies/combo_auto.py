@@ -2,7 +2,6 @@
 
 # built ins
 import asyncio
-import operator 
 
 # installed
 from dataclassy import dataclass, fields
@@ -11,6 +10,7 @@ from loguru import logger as log
 # user defined formula
 from strategies.basic_strategy import (
     BasicStrategy,
+    delta_pct,
     get_label,
     get_label_integer,
     is_minimum_waiting_time_has_passed,
@@ -306,6 +306,55 @@ def compare_transactions_price_against_threshold(
     return [o for o in transactions 
             if current_price_future < (o["price"] - (o["price"] * tp_threshold)) \
                 and o["side"] == side]
+
+
+async def get_market_condition_(
+    TA_result_data, 
+    index_price, 
+    threshold
+    ) -> dict:
+    
+    """ """
+    neutral_price, rising_price, falling_price = False, False, False
+    strong_rising_price, strong_falling_price = False, False
+    
+    TA_data=[o for o in TA_result_data \
+        if o["tick"] == max([i["tick"] for i in TA_result_data])][0]
+
+    open_60 = TA_data["60_open"]
+
+    fluctuation_exceed_threshold = TA_data["1m_fluctuation_exceed_threshold"]
+
+    delta_price_pct = delta_pct(
+        index_price,
+        open_60
+        )
+    
+    if fluctuation_exceed_threshold or True:
+
+        if index_price > open_60:
+            rising_price = True
+
+            if delta_price_pct > threshold:
+                strong_rising_price = True
+
+        if index_price < open_60:
+            falling_price = True
+
+            if delta_price_pct > threshold:
+                strong_falling_price = True
+
+    if not rising_price  and not falling_price :
+        neutral_price = True
+
+    return dict(
+        rising_price=rising_price,
+        strong_rising_price=strong_rising_price,
+        neutral_price=neutral_price,
+        falling_price=falling_price,
+        strong_falling_price=strong_falling_price,
+    )
+
                         
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto (BasicStrategy):

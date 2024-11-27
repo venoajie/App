@@ -514,6 +514,27 @@ class RunningStrategy(ModifyOrderDb):
 
                                             notional: float = compute_notional_value(index_price, equity)
 
+                                            TA_result_data_all = await querying_table("market_analytics_json")
+                                            
+                                            TA_result_data_only=  TA_result_data_all["list_data_only"]
+
+                                            TA_result_data = [o for o in TA_result_data_only if currency_upper in o["instrument"]]                                                                                                    
+                                                                                            
+                                            tick_TA=  max([o["tick"] for o in TA_result_data])
+                                                        
+                                            delta_time = server_time-tick_TA
+                                            
+                                            delta_time_seconds = delta_time/1000   
+                                            
+                                            THRESHOLD_DELTA_TIME_SECONDS = 120
+                                            log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
+                                                
+                                            if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
+                                                await self.modify_order_and_db.cancel_the_cancellables(
+                                                    currency,
+                                                    cancellable_strategies
+                                                    )
+                                                    
                                             for strategy in active_strategies:
                             
                                                 my_trades_currency_strategy = [o for o in my_trades_currency \
@@ -603,7 +624,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                 send_order = []
                                                                 
                                                                 if size_future_reconciled\
-                                                                    and size_perpetuals_reconciled:
+                                                                    and size_perpetuals_reconciled\
+                                                                        and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
                                                                                                                                     
                                                                     send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                                     ticker_future[0],
@@ -728,14 +750,6 @@ class RunningStrategy(ModifyOrderDb):
                                                         if o["settlement_period"] != "month" and\
                                                             o["kind"] == "future"] 
                                                             
-                                                    TA_result_data_all = await querying_table("market_analytics_json")
-                                                    
-                                                    TA_result_data_only=  TA_result_data_all["list_data_only"]
-
-                                                    TA_result_data = [o for o in TA_result_data_only if currency_upper in o["instrument"]]                                                                                                    
-                                                                                                    
-                                                    tick_TA=  max([o["tick"] for o in TA_result_data])
-                                                    
                                                     strategy_attributes = config_app["strategies"]
                                                             
                                                     strategy_params= [o for o in strategy_attributes \
@@ -813,22 +827,12 @@ class RunningStrategy(ModifyOrderDb):
                                                             if cancel_allowed["cancel_allowed"]:
                                                                 await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
                                                                                                             
-                                                    if size_future_reconciled:                                                        
-                                                        delta_time = server_time-tick_TA
-                                                        
-                                                        delta_time_seconds = delta_time/1000                                                
-                                                                        
-                                                        THRESHOLD_DELTA_TIME_SECONDS = 120
-                                                        log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
+                                                    if size_future_reconciled:      
                                                         
                                                         #something was wrong because perpetuals were actively traded. cancell  orders
-                                                        if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
-                                                            await self.modify_order_and_db.cancel_the_cancellables(
-                                                                currency,
-                                                                cancellable_strategies
-                                                                )
+                                                        if delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
                                                             
-                                                        else:   #ensure freshness of ta
+                                                            #ensure freshness of ta
                                                             log.warning (f"strategy {strategy}-START")                                                    
                                                             
                                                             my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy \
