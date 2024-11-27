@@ -546,7 +546,9 @@ class RunningStrategy(ModifyOrderDb):
                                                         selected_transaction = [o for o in my_trades_currency_strategy \
                                                             if str(label_integer) in o["label"]]
                                                         
-                                                        sum_selected_transaction = sum([o["amount"] for o in selected_transaction])
+                                                        selected_transaction_amount = ([o["amount"] for o in selected_transaction])
+                                                        sum_selected_transaction = sum(selected_transaction_amount)
+                                                        len_selected_transaction = len(selected_transaction_amount)
                                                         
                                                         selected_transaction = selected_transaction[0]
                                                         
@@ -575,8 +577,11 @@ class RunningStrategy(ModifyOrderDb):
                                                                 )
                                                             
                                                         # closing unpaired transactions
-                                                            if sum_selected_transaction != 0:
+                                                            if sum_selected_transaction != 0\
+                                                                and len_selected_transaction:
+                                                                
                                                                 send_order = []
+                                                                
                                                                 if size_future_reconciled\
                                                                     and size_perpetuals_reconciled:
                                                                                                                                     
@@ -588,7 +593,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     server_time,
                                                                     )
                                                                 
-                                                        #closing combo auto orders
+                                                            #closing combo auto orders
                                                             else:
                                                                 send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
                                                                 label,
