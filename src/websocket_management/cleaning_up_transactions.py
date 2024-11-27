@@ -1053,17 +1053,26 @@ async def clean_up_closed_transactions(
                 transaction_closed_under_the_same_label_int = closed_transactions_all["closed_transactions"]
                 
                 #log.error(f"closed_transactions_all {closed_transactions_all}")
-                log.error(f"size_to_close {size_to_close} {label_integer}")
 
                 if size_to_close == 0:
                     
-                    log.info(F" transaction_closed_under_the_same_label_int {transaction_closed_under_the_same_label_int}")
+                    instrument_name_under_the_same_label_int = [o["instrument_name"] for o in transaction_closed_under_the_same_label_int]
                     
-                    await closing_one_to_one(
-                        transaction_closed_under_the_same_label_int,
-                        where_filter,
-                        trade_table
-                        )
+                    for instrument_name in instrument_name_under_the_same_label_int:
+                        
+                        instrument_transactions = ([ o for  o in transaction_closed_under_the_same_label_int\
+                            if instrument_name in o["instrument_name"]])
+                        
+                        sum_instrument_transactions = sum([o["amount"] for o in instrument_transactions])
+                        
+                        if sum_instrument_transactions == 0:
+                            log.info(F" instrument_transactions {instrument_transactions}")
+                            
+                            await closing_one_to_one(
+                                instrument_transactions,
+                                where_filter,
+                                trade_table
+                                )
                     
                 if False and size_to_close != 0:
                     
