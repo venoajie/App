@@ -1028,7 +1028,7 @@ async def clean_up_closed_transactions(
         
         transaction_with_closed_labels = get_transactions_with_closed_label(transaction_all)
         
-        log.debug(f"transaction_with_closed_labels {transaction_with_closed_labels}")
+        #log.debug(f"transaction_with_closed_labels {transaction_with_closed_labels}")
                                
         labels_only = remove_redundant_elements([o["label"] for o in transaction_with_closed_labels])
 
