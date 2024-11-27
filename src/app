@@ -297,7 +297,7 @@ class RunningStrategy(ModifyOrderDb):
                 currencies= [o["spot"] for o in tradable_config_app] [0]
                 
                 strategy_attributes = config_app["strategies"]
-                                        
+                                            
                 active_strategies =   [o["strategy_label"] for o in strategy_attributes \
                     if o["is_active"]==True]
 
@@ -530,7 +530,7 @@ class RunningStrategy(ModifyOrderDb):
                                             
                                             THRESHOLD_MARKET_CONDITIONS_COMBO = .01/100
                                             
-                                            threshold_market_condition_hedging: float = strategy_params ["delta_price_pct"]
+                                            
                                                                 
                                             log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
                                                 
@@ -541,6 +541,11 @@ class RunningStrategy(ModifyOrderDb):
                                                     )
                                                     
                                             for strategy in active_strategies:
+                                                
+                                                strategy_params= [o for o in strategy_attributes \
+                                                if o["strategy_label"] == strategy][0]   
+                                            
+                                                threshold_market_condition: float = strategy_params ["delta_price_pct"]
                             
                                                 my_trades_currency_strategy = [o for o in my_trades_currency \
                                                     if strategy in (o["label"]) ]
@@ -755,19 +760,14 @@ class RunningStrategy(ModifyOrderDb):
                                                     instrument_attributes_futures_for_hedging = [o for o in futures_instruments["active_futures"] \
                                                         if o["settlement_period"] != "month" and\
                                                             o["kind"] == "future"] 
-                                                            
-                                                    strategy_attributes = config_app["strategies"]
-                                                            
-                                                    strategy_params= [o for o in strategy_attributes \
-                                                        if o["strategy_label"] == strategy][0]   
-                                                    
+                                                              
                                                     market_condition: dict = await get_market_condition_hedging(
                                                         TA_result_data,
                                                         index_price,
-                                                        threshold_market_condition_hedging
+                                                        threshold_market_condition
                                                         )
                                                     
-                                                    bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
+                                                    strong_bearish = market_condition["strong_falling_price"]
                                                 
                                                     #neutral = market_condition["neutral_price"]
                                                     log.error (f"market_condition {market_condition}")
@@ -775,7 +775,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     instrument_ticker = ticker_perpetual_instrument_name
                                                     instrument_name = instrument_name_perpetual
                                                     
-                                                    if bearish:
+                                                    if not strong_bearish:
                                                                                 
                                                         instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
                                                                                         if "PERPETUAL" not in o["instrument_name"]]
