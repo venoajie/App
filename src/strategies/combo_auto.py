@@ -308,7 +308,7 @@ def compare_transactions_price_against_threshold(
                 and o["side"] == side]
 
 
-async def get_market_condition_(
+async def get_market_condition_future_spread(
     TA_result_data, 
     index_price, 
     threshold
@@ -746,6 +746,7 @@ class ComboAuto (BasicStrategy):
         take_profit_threshold_original: float,
         selected_transaction: dict,
         server_time: int,
+        threshold_market_condition,
         strategy_params: list = None,
         ) -> dict:
         """ """
@@ -822,6 +823,14 @@ class ComboAuto (BasicStrategy):
             params.update({"type": "limit"})
             
             params.update({"size": selected_transaction_size})
+            
+            
+            market_condition = await get_market_condition_future_spread(
+                self.TA_result_data, 
+                self.index_price, 
+                threshold_market_condition
+                )
+
             
             if instrument_side =="buy":
                 

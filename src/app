@@ -527,6 +527,11 @@ class RunningStrategy(ModifyOrderDb):
                                             delta_time_seconds = delta_time/1000   
                                             
                                             THRESHOLD_DELTA_TIME_SECONDS = 120
+                                            
+                                            THRESHOLD_MARKET_CONDITIONS_COMBO = .01/100
+                                            
+                                            threshold_market_condition_hedging: float = strategy_params ["delta_price_pct"]
+                                                                
                                             log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA} server_time {server_time}")
                                                 
                                             if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
@@ -633,6 +638,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     tp_threshold,
                                                                     selected_transaction,
                                                                     server_time,
+                                                                    THRESHOLD_MARKET_CONDITIONS_COMBO
                                                                     )
                                                                 
                                                             #closing combo auto orders
@@ -754,13 +760,11 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                     strategy_params= [o for o in strategy_attributes \
                                                         if o["strategy_label"] == strategy][0]   
-                                                                    
-                                                    threshold_market_condition: float = strategy_params ["delta_price_pct"]
                                                     
                                                     market_condition: dict = await get_market_condition_hedging(
                                                         TA_result_data,
                                                         index_price,
-                                                        threshold_market_condition
+                                                        threshold_market_condition_hedging
                                                         )
                                                     
                                                     bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
