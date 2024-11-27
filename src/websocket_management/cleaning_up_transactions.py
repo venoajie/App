@@ -1074,7 +1074,7 @@ async def clean_up_closed_transactions(
                                 trade_table
                                 )
                     
-                if  size_to_close != 0:
+                if False and size_to_close != 0:
                     
                     open_label =  ([o for o in transaction_closed_under_the_same_label_int\
                         if "open" in o["label"]])
