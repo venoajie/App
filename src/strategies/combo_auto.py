@@ -826,15 +826,15 @@ class ComboAuto (BasicStrategy):
             
             index_price: float = ticker_perpetual["index_price"]
                     
-            market_condition = await get_market_condition_future_spread(
-                self.TA_result_data, 
-                index_price, 
-                threshold_market_condition
-                )
+            #market_condition = await get_market_condition_future_spread(
+            #    TA_result_data, 
+            #    index_price, 
+            #    threshold_market_condition
+            #    )
             
-            bullish, strong_bullish = market_condition["rising_price"], market_condition["strong_rising_price"]
+            #bullish, strong_bullish = market_condition["rising_price"], market_condition["strong_rising_price"]
 
-            bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
+            #bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
             #neutral = market_condition["neutral_price"]
             
             if instrument_side =="buy":
