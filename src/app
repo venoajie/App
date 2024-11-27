@@ -463,10 +463,6 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         orders_currency = result_from_db_queries["orders_currency"]     
                                         
-                                        orders_currency_cancellables = [o for o in orders_currency if parsing_label(o["label"])["super_main"]  in cancellable_strategies]       
-                                        
-                                        log.error (f"orders_currency_cancellables {orders_currency_cancellables}")                                
-
                                         position = [o for o in sub_account["positions"]]
                                         #log.debug (f"position {position}")
                                         position_without_combo = [ o for o in position \
