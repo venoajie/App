@@ -638,8 +638,10 @@ class HedgingSpot(BasicStrategy):
                 my_trades_orphan = [o for o in self.my_trades_currency_strategy \
                     if "closed" in o["label"]\
                         and "open" not in (o["label"])]
+                
+                log.error (f"my_trades_orphan {my_trades_orphan}")
 
-                if my_trades_orphan !=[]:
+                if False and my_trades_orphan !=[]:
                     
                     max_timestamp = max([o["timestamp"] for o in my_trades_orphan])
                     transaction = [o for o in my_trades_orphan if max_timestamp == o["timestamp"]][0]

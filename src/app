@@ -962,7 +962,7 @@ class RunningStrategy(ModifyOrderDb):
             
             if order_analysis_result["order_allowed"]:
                 
-                log.error (f"send_closing_order {order_analysis_result}")
+                log.error (f"send_order {order_analysis_result}")
                                                                     
                 result_order = await self.modify_order_and_db.if_order_is_true(
                     non_checked_strategies,
