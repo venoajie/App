@@ -589,6 +589,7 @@ class ComboAuto (BasicStrategy):
                 
         order_allowed = False
         my_trades_currency = self.my_trades_currency_strategy
+        
         if my_trades_currency:
             
             label_integer = get_label_integer(label)
@@ -597,6 +598,7 @@ class ComboAuto (BasicStrategy):
                 if str(label_integer) in o["label"]]
                         
             transactions_sum = sum([ o["amount"] for o in transactions])
+        
             transactions_len = len(transactions) # sum product function applied only for 2 items.
                         
             if transactions_sum== 0 \
