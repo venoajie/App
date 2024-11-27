@@ -51,3 +51,6 @@ dtype = [
 np_users_data = np.array([tuple(user.values()) for user in vtr1], dtype=dtype)
 print (np_users_data)
 
+arr = np.array([1, 2, 3, 4, 5])
+result = np.where(arr > 3, 'Large', 'Small')
+print(result)

@@ -441,3 +441,46 @@ def check_file_attributes(filepath: str) -> None:
         https://medium.com/@BetterEverything/automate-removal-of-old-files-in-python-2085381fdf51
     """
     return os.stat(filepath)
+
+def ipdb_sys_excepthook():
+    """
+https://oscar-savolainen.medium.com/my-favourite-python-snippets-794d5653af38
+When called this function will set up the system exception hook.
+    This hook throws one into an ipdb breakpoint if and where a system
+    exception occurs in one's run.
+
+    Example usage:
+    >>> ipdb_sys_excepthook()
+    """
+
+    import traceback, ipdb
+    import sys
+
+
+    def info(type, value, tb):
+        """
+        System excepthook that includes an ipdb breakpoint.
+        """
+        if hasattr(sys, "ps1") or not sys.stderr.isatty():
+            # we are in interactive mode or we don't have a tty-like
+            # device, so we call the default hook
+            sys.__excepthook__(type, value, tb)
+        else:
+            # we are NOT in interactive mode, print the exception...
+            traceback.print_exception(type, value, tb)
+            print
+            # ...then start the debugger in post-mortem mode.
+            # pdb.pm() # deprecated
+            ipdb.post_mortem(tb)  # more "modern"
+
+    sys.excepthook = info
+
+
+
+def main():
+  print("Everything is going swimmingly")
+  raise NotImplementedError("Oh no what happened?")
+
+if __name__ == "__main__":
+  ipdb_sys_excepthook()
+  main()
