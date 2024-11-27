@@ -492,9 +492,9 @@ class RunningStrategy(ModifyOrderDb):
                                             my_trades_currency: list= [ o for o in my_trades_currency_all \
                                                 if o["label"] is not None] 
                                             
-                                            my_trades= [o["instrument_name"] for o in my_trades_currency\
+                                            my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency\
                                 
-                                ]
+                                ])
                                             log.debug (sum([o["amount"] for o in my_trades_currency]))
                                             for instrument in my_trades: 
                                                 log.debug (f"instrument {instrument}")
