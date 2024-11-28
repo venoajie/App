@@ -450,9 +450,7 @@ class ModifyOrderDb(SendApiRequest):
                                 start_timestamp,
                                 count
                                 )
-        
-        log.debug (f"trades_from_exchange {trades_from_exchange}")
-        
+                
         if trades_from_exchange:
             
             trades_from_exchange_without_futures_combo = [o for o in trades_from_exchange \
@@ -501,13 +499,11 @@ class ModifyOrderDb(SendApiRequest):
                         )
                 else:
                             
-                    log.error (f"{trade}")
+                    log.debug (f"{trade}")
                     trade_trd_id = trade["trade_id"]
                     
                     trade_trd_id_not_in_archive = [o for o in my_trades_instrument_name_archive if trade_trd_id in o["trade_id"]]
 
-                    log.error (f"trade_trd_id_not_in_archive {trade_trd_id_not_in_archive}")
-                    
                     if not trade_trd_id_not_in_archive:
                         await saving_traded_orders(
                             trade,
