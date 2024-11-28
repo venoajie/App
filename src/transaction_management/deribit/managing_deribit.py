@@ -451,6 +451,8 @@ class ModifyOrderDb(SendApiRequest):
                                 count
                                 )
         
+        log.debug (f"trades_from_exchange {trades_from_exchange}")
+        
         if trades_from_exchange:
             
             trades_from_exchange_without_futures_combo = [o for o in trades_from_exchange \
