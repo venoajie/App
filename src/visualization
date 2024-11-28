@@ -1,0 +1,44 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+# built ins
+import asyncio
+import pandas as pd
+from db_management.sqlite_management import (
+    executing_query_based_on_currency_or_instrument_and_strategy as get_query)
+
+
+async def get_db_trade():
+                
+    column_trade: str= "instrument_name","label", "amount", "price","trade_id"
+    my_trades_currency: list= await get_query("my_trades_all_json", 
+                                                "BTC", 
+                                                "all", 
+                                                "all", 
+                                                column_trade)
+    
+    return my_trades_currency
+
+
+async def main():
+    #data = await fetch_data('https://www.deribit.com/api/v2/public/ticker?instrument_name=BTC-PERPETUAL')
+    #st.dataframe(data["result"])
+    pd.set_option("display.float_format", "${:,.2f}".format)
+
+    try:
+                
+        data_trading = await get_db_trade ()
+        
+        data_trading.pivot_table(
+            values="price", columns="label",
+            aggfunc="sum", margins=True, margins_name="Totals",
+            )
+        
+    except Exception as error:
+        await print(error)
+        
+        
+if __name__ == '__main__':
+
+
+    asyncio.run(main())
