@@ -767,6 +767,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                                         if "PERPETUAL" not in o["instrument_name"]\
                                                                                             and currency in o["instrument_name"]]
                                                         
+                                                        log.error (f"instrument_attributes_future {instrument_attributes_future}")
+
+                                                        
                                                         if len(instrument_attributes_future) > 1:
                                                             index_attributes = randbelow(2)
                                                             instrument_attributes = instrument_attributes_future[index_attributes]
@@ -780,6 +783,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             instrument_name
                                                             )
                                                                         
+                                                        log.error (f"instrument_ticker {instrument_ticker}")
                                                         if instrument_ticker:                    
                                                             instrument_ticker = instrument_ticker[0]
                                                             
