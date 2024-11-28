@@ -606,6 +606,10 @@ class ModifyOrderDb(SendApiRequest):
                 
                 len_order = len (orders)
                 
+                log.warning (f"orders {orders}")
+                log.error (f"len_order {len_order}")
+                
+                
                 if len_order == 1:
                     
                     await self.saving_order(
@@ -616,6 +620,8 @@ class ModifyOrderDb(SendApiRequest):
                         )
                 else:
                     for order in orders:
+                        
+                        log.warning (f"orders {order}")
                         
                         await self.saving_order(
                             non_checked_strategies,
