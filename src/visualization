@@ -32,7 +32,7 @@ async def main():
         df = pd.DataFrame(data_trading)
         
         df.pivot_table(
-            values="price", column ="label",
+            values="price", columns="label",
             aggfunc="sum", margins=True, margins_name="Totals",
             )
         print (df)
