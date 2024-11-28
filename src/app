@@ -768,7 +768,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                             and currency in o["instrument_name"]]
                                                         
                                                         log.error (f"instrument_attributes_futures_for_hedging {instrument_attributes_futures_for_hedging}")
-                                                        log.error (f"instrument_attributes_future {instrument_attributes_future}")
+                                                        log.error (f"instrument_attributes_future {instrument_attributes_future} {currency}")
 
                                                         
                                                         if len(instrument_attributes_future) > 1:
