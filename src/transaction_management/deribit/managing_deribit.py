@@ -456,12 +456,8 @@ class ModifyOrderDb(SendApiRequest):
             trades_from_exchange_without_futures_combo = [o for o in trades_from_exchange \
                 if f"-FS-" not in o["instrument_name"]]
             
-            from_exchange_trade_id = [o["trade_id"] for o in trades_from_exchange_without_futures_combo]
-            
             from_exchange_timestamp = max([o["timestamp"] for o in trades_from_exchange_without_futures_combo])
             
-            trade_timestamp = [o for o in trade if ["timestamp"] == from_exchange_timestamp]
-                    
             column_trade: str= "instrument_name","timestamp","trade_id"                    
 
             my_trades_instrument_name_archive: list= await get_query(archive_db_table, 
@@ -470,9 +466,6 @@ class ModifyOrderDb(SendApiRequest):
                                                         "all",
                                                         column_trade)
             
-            my_trades_instrument_name_archive_trade_id = [o["trade_id"] for o in my_trades_instrument_name_archive]
-            unrecorded_trade_id = get_unique_elements(from_exchange_trade_id, 
-                                              my_trades_instrument_name_archive_trade_id)
             
             #log.critical (f"unrecorded_trade_id exchaneg vs archive {unrecorded_trade_id}")
             #log.critical (f"trades_from_exchange  {trades_from_exchange}")
