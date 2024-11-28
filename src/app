@@ -776,6 +776,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                 
                                                         instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
                                                                                         if "PERPETUAL" not in o["instrument_name"]]
+                                                        log.info (f"instrument_attributes_future  {instrument_attributes_future}")
                                                         if len(instrument_attributes_future) > 1:
                                                             index_attributes = randbelow(2)
                                                             instrument_attributes = instrument_attributes_future[index_attributes]
@@ -783,6 +784,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             instrument_attributes = instrument_attributes_future[0]
                                                             
                                                             instrument_name: str = instrument_attributes ["instrument_name"] 
+                                                        log.info (f"instrument_attributes  {instrument_attributes}")
 
                                                         instrument_ticker: list = reading_from_pkl_data(
                                                             "ticker",
