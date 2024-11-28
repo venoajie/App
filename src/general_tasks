@@ -496,7 +496,7 @@ async def reconciling_size(
                                         my_trades_instrument_name_archive,
                                         from_transaction_log_instrument_name
                                         )
-                                    log.error (f"unrecorded_trade_id_from_transaction_log {unrecorded_trade_id_from_transaction_log}")
+                                    #log.error (f"unrecorded_trade_id_from_transaction_log {unrecorded_trade_id_from_transaction_log}")
                                     if unrecorded_trade_id_from_transaction_log:
                                         
                                         timestamp_log = min(
@@ -509,7 +509,7 @@ async def reconciling_size(
                                             timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
                                             archive_db_table,
                                             trade_db_table,
-                                            5
+                                            20
                                             )
                         
                     my_trades_currency_active_with_blanks = [o for o in my_trades_currency_active\
