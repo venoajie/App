@@ -2,6 +2,7 @@
 
 # built ins
 import asyncio
+from collections import defaultdict
 
 # installed
 from dataclassy import dataclass
@@ -713,7 +714,7 @@ def get_basic_closing_paramaters(
     transaction: dict = convert_list_to_dict(selected_transaction)
     
     # provide dict placeholder for params
-    params = {}
+    params = defaultdict(list)
 
     # determine side        
     side = provide_side_to_close_transaction(transaction)
@@ -763,7 +764,7 @@ def get_basic_closing_paramaters_combo_pair (selected_transactions: list) -> dic
     """
     
     # provide dict placeholder for params
-    params = {}
+    params = defaultdict(list)
 
     # default type: limit
     params.update({"type": "limit"})
@@ -846,7 +847,7 @@ class BasicStrategy (ManageStrategy):
         """ """
 
         # provide placeholder for params
-        params = {}
+        params = defaultdict(list)
 
         # default type: limit
         params.update({"type": "limit"})

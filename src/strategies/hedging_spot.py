@@ -2,9 +2,11 @@
 
 # built ins
 import asyncio
-from loguru import logger as log
+from collections import defaultdict
+
 # installed
 from dataclassy import dataclass, fields
+from loguru import logger as log
 
 # user defined formula
 from strategies.basic_strategy import (
@@ -668,7 +670,7 @@ class HedgingSpot(BasicStrategy):
                         
                         if transaction_price < best_ask_price:
                                                     
-                            params = {}
+                            params = defaultdict(list)
 
                             # determine side        
                             params.update({"side": "sell"})

@@ -2,6 +2,7 @@
 
 # built ins
 import asyncio
+from collections import defaultdict
 
 # installed
 from dataclassy import dataclass, fields
@@ -215,7 +216,7 @@ def get_basic_opening_parameters(strategy_label):
     """ """
 
     # provide placeholder for params
-    params = {}
+    params = defaultdict(list)
 
     # default type: limit
     params.update({"type": "limit"})
@@ -436,7 +437,7 @@ class ComboAuto (BasicStrategy):
                         order_allowed = True
                         
                         # provide placeholder for params
-                        params = {}
+                        params = defaultdict(list)
                         params.update({"side": "sell"})                                                       
                         params.update({"instrument_name": instrument_name_future})
                         params.update({"size": basic_size})
@@ -525,7 +526,7 @@ class ComboAuto (BasicStrategy):
                 )
                  
             # provide placeholder for params
-            params = {}
+            params = defaultdict(list)
            
             params.update({"instrument_name":instrument_name_combo})
             params.update({"side": "sell"})
@@ -722,7 +723,7 @@ class ComboAuto (BasicStrategy):
                                 traded_side_perpetual,)
             
                             if exit_side:
-                                exit_params = {}            
+                                exit_params = defaultdict(list)
                                 exit_params.update({"type": "limit"})
                                 exit_params.update({"size": abs (traded_perpetual_size)})
                                 exit_params.update({"entry_price": current_premium})
@@ -818,7 +819,7 @@ class ComboAuto (BasicStrategy):
             selected_transaction_size = abs(selected_transaction["amount"])
 
             # provide placeholder for params
-            params = {}
+            params = defaultdict(list)
             # default type: limit
             params.update({"type": "limit"})
             
