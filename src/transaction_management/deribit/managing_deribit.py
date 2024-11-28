@@ -476,15 +476,16 @@ class ModifyOrderDb(SendApiRequest):
             trades_from_exchange_without_futures_combo = [o for o in trades_from_exchange \
                 if f"-FS-" not in o["instrument_name"]]
             
-            
-            from_exchange_timestamp = max([o["timestamp"] for o in trades_from_exchange_without_futures_combo])
-            
-            trade_timestamp = [o for o in trades_from_exchange_without_futures_combo if o["timestamp"] == from_exchange_timestamp]
-            
-            for trade in trade_timestamp:
+            for trade in trades_from_exchange_without_futures_combo:
                 
                 if not my_trades_instrument_name_archive:
                             
+                    from_exchange_timestamp = max([o["timestamp"] for o in trades_from_exchange_without_futures_combo])
+                    
+                    trade_timestamp = [o for o in trades_from_exchange_without_futures_combo if o["timestamp"] == from_exchange_timestamp]
+
+                    trade = trade_timestamp[0]
+            
                     log.error (f"{trade}")
 
                     await saving_traded_orders(
