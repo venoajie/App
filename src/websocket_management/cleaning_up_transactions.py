@@ -567,9 +567,6 @@ def is_my_trades_active_archived_reconciled_each_other(
     ) -> bool:
     """ """
     
-    log.error (f"my_trades_active {my_trades_active}")
-    log.info (f"my_trades_archived {my_trades_archived}")
- 
     my_trades_active_size_instrument = get_my_trades_size_per_instrument(
         instrument_name,
         my_trades_active,
