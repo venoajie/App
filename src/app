@@ -788,6 +788,9 @@ class RunningStrategy(ModifyOrderDb):
                                                             "ticker",
                                                             instrument_name
                                                             )
+                                                        
+                                                        log.info (f"instrument_name  {instrument_name}")
+                                                        log.info (f"instrument_ticker  {instrument_ticker}")
                                                                         
                                                         if instrument_ticker:                    
                                                             instrument_ticker = instrument_ticker[0]
