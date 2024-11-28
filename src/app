@@ -786,10 +786,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                         else:                    
                                                             instrument_ticker =   get_tickers (instrument_name)
-                                                            log.error (f"instrument_ticker {instrument_ticker}")
-                                                            if instrument_ticker:
-                                                                instrument_ticker = instrument_ticker[0]
-
+                                                                
                                                     instrument_name = instrument_ticker ["instrument_name"]    
                                                     
                                                     log.error (f"instrument_ticker {instrument_ticker}")
