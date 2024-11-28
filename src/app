@@ -693,11 +693,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                 instrument_name_future
                                                                 )
                                                                 
-                                                            size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
-                                                                position_without_combo,
-                                                                my_trades_currency_all,
-                                                                instrument_name_future)
-                                                       
                                                             if ticker_future and ticker_combo:
                                                                 
                                                                 ticker_combo= ticker_combo[0]
