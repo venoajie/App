@@ -483,6 +483,11 @@ class ModifyOrderDb(SendApiRequest):
             trades_from_exchange_without_futures_combo = [o for o in trades_from_exchange \
                 if f"-FS-" not in o["instrument_name"]]
             
+            trades_from_exchange_without_futures_combo = get_unique_elements(trades_from_exchange_without_futures_combo, 
+                                                    my_trades_instrument_name_archive)
+            
+            log.error (f"{trades_from_exchange_without_futures_combo}")
+            
             from_exchange_timestamp = max([o["timestamp"] for o in trades_from_exchange_without_futures_combo])
             
             trade_timestamp = [o for o in trades_from_exchange_without_futures_combo if o["timestamp"] == from_exchange_timestamp]
