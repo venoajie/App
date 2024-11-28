@@ -456,50 +456,23 @@ class ModifyOrderDb(SendApiRequest):
             trades_from_exchange_without_futures_combo = [o for o in trades_from_exchange \
                 if f"-FS-" not in o["instrument_name"]]
             
-            from_exchange_trade_id = [o["trade_id"] for o in trades_from_exchange_without_futures_combo]
-                    
-            column_trade: str= "instrument_name","timestamp","trade_id"                    
-
-            my_trades_instrument_name_archive: list= await get_query(archive_db_table, 
-                                                        instrument_name, 
-                                                        "all", 
-                                                        "all",
-                                                        column_trade)
+            from_exchange_timestamp = max([o["timestamp"] for o in trades_from_exchange_without_futures_combo])
             
-            my_trades_instrument_name_archive_trade_id = [o["trade_id"] for o in my_trades_instrument_name_archive]
-            unrecorded_trade_id = get_unique_elements(from_exchange_trade_id, 
-                                              my_trades_instrument_name_archive_trade_id)
+            trade_timestamp = [o for o in trades_from_exchange_without_futures_combo if o["timestamp"] == from_exchange_timestamp]
             
-            #log.critical (f"unrecorded_trade_id exchaneg vs archive {unrecorded_trade_id}")
-            #log.critical (f"trades_from_exchange  {trades_from_exchange}")
-            #log.critical (f"trades_from_exchange_without_futures_combo  {trades_from_exchange_without_futures_combo}")
-            
-            if unrecorded_trade_id:
-                
-                # in new database , this step is important to prevent data from exchange flooded the db
-                min_archive_timestamp = min([o["timestamp"] for o in my_trades_instrument_name_archive])
-                
-                for trade_id in unrecorded_trade_id:
-                    
-                    trade = [o for o in trades_from_exchange_without_futures_combo if trade_id in o["trade_id"]]
-                    
-                    trade_timestamp = [o for o in trade if ["timestamp"] >= min_archive_timestamp]
-                    
-                    if trade_timestamp:
+            for trade in trade_timestamp:
                         
-                        trade = trade_timestamp[0]
-                        
-                        log.error (f"{trade}")
+                log.error (f"{trade}")
 
-                        await saving_traded_orders(
-                            trade,
-                            archive_db_table
-                            )
+                await saving_traded_orders(
+                    trade,
+                    archive_db_table
+                    )
 
-                        await saving_traded_orders(
-                            trade,
-                            trade_db_table
-                            )
+                await saving_traded_orders(
+                    trade,
+                    trade_db_table
+                    )
 
     async def send_triple_orders(
         self,
