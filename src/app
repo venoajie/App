@@ -24,6 +24,7 @@ from strategies.hedging_spot import (
     HedgingSpot,
     get_market_condition_hedging)
 from strategies.combo_auto import ComboAuto
+from transaction_management.deribit.api_requests import get_tickers
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -65,8 +66,7 @@ def cached_ticker_data(currencies):
     """
     #result = (orjson.loads(data))
     
-    from transaction_management.deribit.api_requests import get_tickers
-    log.critical ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    
     
     result=[]
     for currency in currencies:
@@ -769,9 +769,6 @@ class RunningStrategy(ModifyOrderDb):
                                                         instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
                                                                                         if "PERPETUAL" not in o["instrument_name"]]
                                                         
-                                                        log.debug (f"instrument_attributes_future {instrument_attributes_future}")
-
-
                                                         if len(instrument_attributes_future) > 1:
                                                             index_attributes = randbelow(2)
                                                             instrument_attributes = instrument_attributes_future[index_attributes]
@@ -789,6 +786,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                         
                                                         if instrument_ticker:                    
                                                             instrument_ticker = instrument_ticker[0]
+                                                            
+                                                        else:                    
+                                                            instrument_ticker =   get_tickers (instrument_name)[0]
 
                                                     log.error (f"instrument_ticker {instrument_ticker}")
                                                     instrument_name = instrument_ticker ["instrument_name"]    
