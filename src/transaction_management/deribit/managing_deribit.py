@@ -312,7 +312,8 @@ class ModifyOrderDb(SendApiRequest):
         if transaction_log:
             await saving_transaction_log (
                 transaction_log_trading,
-                transaction_log, 
+                {o for o in transaction_log\
+                    if instrument_name in ["instrument_name"]}, 
                 )
             
     async def resupply_transaction_log(
