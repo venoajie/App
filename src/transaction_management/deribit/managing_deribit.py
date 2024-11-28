@@ -611,7 +611,7 @@ class ModifyOrderDb(SendApiRequest):
                     await self.saving_order(
                         non_checked_strategies,
                         instrument_name,
-                        order,
+                        orders[0],
                         order_db_table
                         )
                 else:
