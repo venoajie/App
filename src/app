@@ -770,6 +770,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                     instrument_ticker = ticker_perpetual_instrument_name
                                                     instrument_name = instrument_name_perpetual
+                                                    log.error (f"debug  {instrument_ticker}")
                                                     
                                                     if not strong_bearish:
                                                                                 
@@ -791,6 +792,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         if instrument_ticker:                    
                                                             instrument_ticker = instrument_ticker[0]
                                                         
+                                                    log.warning (f"debug  {instrument_ticker}")
                                                     instrument_name = instrument_ticker ["instrument_name"]    
                                                            
                                                     await self.reconciling_orders(
