@@ -604,32 +604,19 @@ class ModifyOrderDb(SendApiRequest):
                 
             else:
                 
-                len_order = len (orders)
+                log.debug (f"orders {orders}")
                 
-                log.warning (f"orders {orders}")
-                log.error (f"len_order {len_order}")
-                
-                
-                if len_order == 1:
+                for order in orders:
+                        
+                    log.warning (f"orders {order}")
                     
                     await self.saving_order(
                         non_checked_strategies,
                         instrument_name,
-                        orders[0],
+                        order,
                         order_db_table
-                        )
-                else:
-                    for order in orders:
-                        
-                        log.warning (f"orders {order}")
-                        
-                        await self.saving_order(
-                            non_checked_strategies,
-                            instrument_name,
-                            order,
-                            order_db_table
-                        )
-                        
+                    )
+                    
         await self.resupply_transaction_log(
             currency,
             transaction_log_trading,
