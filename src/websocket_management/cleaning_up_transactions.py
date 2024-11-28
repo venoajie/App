@@ -323,7 +323,8 @@ async def my_trades_active_archived_not_reconciled_each_other(
     
     my_trades_archive_instrument_data = [ o["data"] for o in my_trades_archive_instrument_sorted ]
 
-    if not my_trades_instrument_name_active and not my_trades_instrument_name_closed:
+    if not my_trades_instrument_name_active \
+        and not my_trades_instrument_name_closed:
         
         for transaction in my_trades_archive_instrument_data:
         
@@ -442,7 +443,6 @@ def check_whether_order_db_reconciled_each_other(
         return  False
 
           
-                          
 def is_size_sub_account_and_my_trades_reconciled(
     position_without_combo: list,
     sum_my_trades_currency_all: list,
@@ -566,6 +566,9 @@ def is_my_trades_active_archived_reconciled_each_other(
     my_trades_archived: list,
     ) -> bool:
     """ """
+    
+    log.error (f"my_trades_active {my_trades_active}")
+    log.info (f"my_trades_archived {my_trades_archived}")
  
     my_trades_active_size_instrument = get_my_trades_size_per_instrument(
         instrument_name,
