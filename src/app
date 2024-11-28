@@ -608,9 +608,6 @@ class RunningStrategy(ModifyOrderDb):
                                                             my_trades_currency_all,
                                                             selected_transaction_instrument_name)
                                                         
-                                                        log.error (f"size_future_reconciled {size_future_reconciled}")
-                                        
-                                                        
                                                         if ticker_future:
                                                             
                                                             await self.reconciling_orders(
