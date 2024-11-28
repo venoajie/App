@@ -333,9 +333,7 @@ class StreamAccountData(ModifyOrderDb):
                                         await self.modify_order_and_db.resupply_sub_accountdb(currency)    
                                         
                                     if "user.changes.any" in message_channel:
-                                        
-                                        log.debug (f"data_orders {data_orders}")
-                                        
+                                                                                
                                         await self.modify_order_and_db. update_user_changes(
                                             non_checked_strategies,
                                             data_orders, 

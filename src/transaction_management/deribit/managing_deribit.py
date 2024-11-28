@@ -603,13 +603,9 @@ class ModifyOrderDb(SendApiRequest):
                             )
                 
             else:
-                
-                log.debug (f"orders {orders}")
-                
+                                
                 for order in orders:
-                        
-                    log.warning (f"orders {order}")
-                    
+                                            
                     await self.saving_order(
                         non_checked_strategies,
                         instrument_name,
@@ -698,9 +694,11 @@ class ModifyOrderDb(SendApiRequest):
         label= order["label"]
 
         order_id= order["order_id"]    
+        order_state= order["order_state"]    
         
         # no label
-        if label == '':
+        if label == ''\
+            and "open" in order_state:
             
             order_attributes = labelling_unlabelled_order (order)                   
 
