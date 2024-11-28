@@ -603,13 +603,25 @@ class ModifyOrderDb(SendApiRequest):
                             )
                 
             else:
-                for order in orders:
+                
+                len_order = len (orders)
+                
+                if len_order == 1:
                     
                     await self.saving_order(
                         non_checked_strategies,
                         instrument_name,
                         order,
                         order_db_table
+                        )
+                else:
+                    for order in orders:
+                        
+                        await self.saving_order(
+                            non_checked_strategies,
+                            instrument_name,
+                            order,
+                            order_db_table
                         )
                         
         await self.resupply_transaction_log(
