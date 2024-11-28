@@ -476,28 +476,46 @@ class ModifyOrderDb(SendApiRequest):
             trades_from_exchange_without_futures_combo = [o for o in trades_from_exchange \
                 if f"-FS-" not in o["instrument_name"]]
             
-            trades_from_exchange_without_futures_combo = get_unique_elements(trades_from_exchange_without_futures_combo, 
-                                                    my_trades_instrument_name_archive)
-            
-            log.error (f"{trades_from_exchange_without_futures_combo}")
             
             from_exchange_timestamp = max([o["timestamp"] for o in trades_from_exchange_without_futures_combo])
             
             trade_timestamp = [o for o in trades_from_exchange_without_futures_combo if o["timestamp"] == from_exchange_timestamp]
             
             for trade in trade_timestamp:
+                
+                if not my_trades_instrument_name_archive:
+                            
+                    log.error (f"{trade}")
+
+                    await saving_traded_orders(
+                        trade,
+                        archive_db_table
+                        )
+
+                    await saving_traded_orders(
+                        trade,
+                        trade_db_table
+                        )
+                else:
+                            
+                    log.error (f"{trade}")
+                    trade_trd_id = trade["trade_id"]
+                    
+                    trade_trd_id_not_in_archive = [o for o in my_trades_instrument_name_archive if trade_trd_id in o["trade_id"]]
+
+                    log.error (f"trade_trd_id_not_in_archive {trade_trd_id_not_in_archive}")
+                    
+                    if not trade_trd_id_not_in_archive:
+                        await saving_traded_orders(
+                            trade,
+                            archive_db_table
+                            )
+
+                        await saving_traded_orders(
+                            trade,
+                            trade_db_table
+                            )
                         
-                log.error (f"{trade}")
-
-                await saving_traded_orders(
-                    trade,
-                    archive_db_table
-                    )
-
-                await saving_traded_orders(
-                    trade,
-                    trade_db_table
-                    )
     async def send_triple_orders(
         self,
         params)-> None:
