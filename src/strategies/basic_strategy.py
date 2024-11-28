@@ -363,13 +363,6 @@ def is_minimum_waiting_time_has_passed(
     check whether delta time has exceed time threhold
     """
 
-    log.debug (f"delta_time {delta_time(
-            server_time,
-            time_stamp
-            )} time_threshold {time_threshold} {delta_time(
-            server_time,
-            time_stamp
-            ) > time_threshold}")
     return (
         True
         if time_stamp == []

@@ -185,7 +185,7 @@ def check_if_minimum_waiting_time_has_passed(
     minimum_waiting_time_has_passed: bool = is_minimum_waiting_time_has_passed(
         server_time,
         timestamp, 
-        time_interval
+        threshold
     )
     
     #log.warning (f"minimum_waiting_time_has_passed {minimum_waiting_time_has_passed} time_interval {time_interval}")
