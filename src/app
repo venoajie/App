@@ -764,7 +764,8 @@ class RunningStrategy(ModifyOrderDb):
                                                     if not strong_bearish:
                                                                                 
                                                         instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
-                                                                                        if "PERPETUAL" not in o["instrument_name"]]
+                                                                                        if "PERPETUAL" not in o["instrument_name"]\
+                                                                                            and currency in o["instrument_name"]]
                                                         
                                                         if len(instrument_attributes_future) > 1:
                                                             index_attributes = randbelow(2)
@@ -786,6 +787,8 @@ class RunningStrategy(ModifyOrderDb):
                                                             instrument_ticker =   get_tickers (instrument_name)[0]
 
                                                     instrument_name = instrument_ticker ["instrument_name"]    
+                                                    
+                                                    log.error (f"instrument_ticker {instrument_ticker}")
                                                            
                                                     await self.reconciling_orders(
                                                                 instrument_name,
