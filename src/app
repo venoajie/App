@@ -767,6 +767,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                         if "PERPETUAL" not in o["instrument_name"]\
                                                                                             and currency in o["instrument_name"]]
                                                         
+                                                        log.error (f"instrument_attributes_futures_for_hedging {instrument_attributes_futures_for_hedging}")
                                                         log.error (f"instrument_attributes_future {instrument_attributes_future}")
 
                                                         
