@@ -449,19 +449,6 @@ async def reconciling_size(
                                     my_trades_currency_archive,
                                     )
                                                                 
-                                if my_trades_active_archived_reconciled_each_other:
-                                    
-                                    my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
-                                        if o["label"] is not None]
-                                    
-                                    if  my_trades_currency_active_free_blanks:
-                                        
-                                        await clean_up_closed_transactions(
-                                        currency, 
-                                        trade_db_table,
-                                        my_trades_currency_active_free_blanks
-                                        )
-                                    
                                     
                                 if not my_trades_active_archived_reconciled_each_other:
                                     
@@ -475,6 +462,19 @@ async def reconciling_size(
                                         archive_db_table
                                         )
                                                                 
+                                if my_trades_active_archived_reconciled_each_other:
+                                    
+                                    my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
+                                        if o["label"] is not None]
+                                    
+                                    if  my_trades_currency_active_free_blanks:
+                                        
+                                        await clean_up_closed_transactions(
+                                        currency, 
+                                        trade_db_table,
+                                        my_trades_currency_active_free_blanks
+                                        )
+                                    
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
                                     instrument_name,
                                     my_trades_currency_archive,

@@ -322,7 +322,6 @@ async def my_trades_active_archived_not_reconciled_each_other(
         )
     
     my_trades_archive_instrument_data = [ o["data"] for o in my_trades_archive_instrument_sorted ]
-    
 
     if not my_trades_instrument_name_active and not my_trades_instrument_name_closed:
         
