@@ -10,7 +10,7 @@ from db_management.sqlite_management import (
 
 async def get_db_trade():
                 
-    column_trade: str= "instrument_name","label", "amount", "price","trade_id"
+    column_trade: str= "instrument_name","label", "amount", "price"
     my_trades_currency: list= await get_query("my_trades_all_json", 
                                                 "BTC", 
                                                 "all", 
