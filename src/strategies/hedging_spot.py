@@ -182,8 +182,8 @@ def check_if_minimum_waiting_time_has_passed(
         time_interval
     )
     
-    log.warning (f"minimum_waiting_time_has_passed {minimum_waiting_time_has_passed} time_interval {time_interval}")
-    log.warning (f"server_time {server_time} max_tstamp_orders {timestamp}")
+    #log.warning (f"minimum_waiting_time_has_passed {minimum_waiting_time_has_passed} time_interval {time_interval}")
+    #log.warning (f"server_time {server_time} max_tstamp_orders {timestamp}")
     
     if minimum_waiting_time_has_passed:
         cancel_allowed: bool = True

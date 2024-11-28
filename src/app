@@ -773,13 +773,11 @@ class RunningStrategy(ModifyOrderDb):
                                                             instrument_attributes = instrument_attributes_future[0]
                                                             
                                                         instrument_name: str = instrument_attributes ["instrument_name"] 
-                                                        log.debug (f"instrument_name {instrument_name}")
 
                                                         instrument_ticker: list = reading_from_pkl_data(
                                                             "ticker",
                                                             instrument_name
                                                             )
-                                                        log.debug (f"instrument_ticker {instrument_ticker}")
                                                                         
                                                         if instrument_ticker:                    
                                                             instrument_ticker = instrument_ticker[0]
@@ -787,7 +785,6 @@ class RunningStrategy(ModifyOrderDb):
                                                         else:                    
                                                             instrument_ticker =   get_tickers (instrument_name)[0]
 
-                                                    log.error (f"instrument_ticker {instrument_ticker}")
                                                     instrument_name = instrument_ticker ["instrument_name"]    
                                                            
                                                     await self.reconciling_orders(
