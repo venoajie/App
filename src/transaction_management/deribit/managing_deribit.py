@@ -476,21 +476,30 @@ class ModifyOrderDb(SendApiRequest):
             
             if unrecorded_trade_id:
                 
+                # in new database , this step is important to prevent data from exchange flooded the db
+                min_archive_timestamp = min([o["timestamp"] for o in my_trades_instrument_name_archive])
+                
                 for trade_id in unrecorded_trade_id:
                     
-                    trade = [o for o in trades_from_exchange_without_futures_combo if trade_id in o["trade_id"]][0]
+                    trade = [o for o in trades_from_exchange_without_futures_combo if trade_id in o["trade_id"]]
                     
-                    log.error (f"{trade}")
+                    trade_timestamp = [o for o in trade if ["timestamp"] >= min_archive_timestamp]
+                    
+                    if trade_timestamp:
+                        
+                        trade = trade_timestamp[0]
+                        
+                        log.error (f"{trade}")
 
-                    await saving_traded_orders(
-                        trade,
-                        archive_db_table
-                        )
+                        await saving_traded_orders(
+                            trade,
+                            archive_db_table
+                            )
 
-                    await saving_traded_orders(
-                        trade,
-                        trade_db_table
-                        )
+                        await saving_traded_orders(
+                            trade,
+                            trade_db_table
+                            )
 
     async def send_triple_orders(
         self,
