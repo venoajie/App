@@ -315,6 +315,7 @@ class ModifyOrderDb(SendApiRequest):
                 transaction_log_trading,
                 [o for o in transaction_log\
                     if instrument_name in o["instrument_name"]], 
+                first_tick_fr_sqlite
                 )
             
     async def resupply_transaction_log(

@@ -12,6 +12,7 @@ from utilities.string_modification import(
 async def saving_transaction_log(
     transaction_log_trading, 
     transaction_log,
+    first_tick_fr_sqlite,
     ) -> None:
     
     """
@@ -25,6 +26,8 @@ async def saving_transaction_log(
         
         for transaction in transaction_log:
             
+            timestamp = transaction["timestamp"]
+            
             # remove unnecessary element
             modified_dict = remove_dict_elements(
                 transaction,
@@ -35,8 +38,9 @@ async def saving_transaction_log(
             type_log = modified_dict ["type"]
             
             #type: trading
-            if "trade" in type_log \
-                or "delivery" in type_log:
+            if ("trade" in type_log \
+                or "delivery" in type_log)\
+                    and timestamp > first_tick_fr_sqlite:
             
                 # save to trading db
                 await insert_tables(
