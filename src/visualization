@@ -29,7 +29,9 @@ async def main():
                 
         data_trading = await get_db_trade ()
         
-        data_trading.pivot_table(
+        df = pd.DataFrame(data_trading)
+        
+        df.pivot_table(
             values="price", columns="label",
             aggfunc="sum", margins=True, margins_name="Totals",
             )
