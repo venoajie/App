@@ -556,6 +556,25 @@ class RunningStrategy(ModifyOrderDb):
                                                     strategy_params= [o for o in strategy_attributes \
                                                         if o["strategy_label"] == strategy][0]   
                                                     
+                                                    my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency])
+                                                    
+                                                    for amount in my_trades_amount:
+                                                        my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
+                                                            if amount == abs(o["amount"])]
+                                                        
+                                                        my_trades_with_the_same_amount_label = remove_redundant_elements(
+                                                            [get_label_integer(o["label"]) for o in my_trades_with_the_same_amount])
+                                                        
+                                                        for label in my_trades_with_the_same_amount_label:
+                                                            
+                                                            my_trades = [o for o in my_trades_currency_strategy\
+                                                            if label in (o["label"])]
+                                                            
+                                                            if len(my_trades) >  1:
+                                                                log.critical (label)
+                                                        
+                                                    
+                                                    
                                                     target_transaction_per_hour = 1/10
                                                             
                                                     combo_auto = ComboAuto(
