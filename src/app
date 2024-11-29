@@ -571,6 +571,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         my_trades_currency_strategy,
                                                         ticker_perpetual_instrument_name,
                                                         )
+                                                    
                                                     if my_trades_currency_strategy:
                                                         
                                                         my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
@@ -589,13 +590,24 @@ class RunningStrategy(ModifyOrderDb):
                                                             labels_non_perpetual = [o["label"] for o in my_trades_with_the_same_amount_label_non_perpetual]
                                                             
                                                             for label in labels_non_perpetual:
+                                                                
+                                                                label_integer = get_label_integer (label)
+                                                                
+                                                                transaction_under_label_integer = [o["amount"] for o in my_trades_with_the_same_amount\
+                                                                    if label_integer in o["label"]]
                         
-                                                                paired = await combo_auto.pairing_single_label(
-                                                                trade_db_table,
-                                                                archive_db_table,
-                                                                my_trades_with_the_same_amount_label_non_perpetual,
-                                                                my_trades_with_the_same_amount_label_perpetual,
-                                                                label   )
+                                                                transaction_under_label_integer_sum = sum(transaction_under_label_integer)
+                                                                transaction_under_label_integer_len = len(transaction_under_label_integer)
+                                                                
+                                                                if transaction_under_label_integer_sum !=0\
+                                                                    and transaction_under_label_integer_len ==1:
+                                                                        
+                                                                    paired = await combo_auto.pairing_single_label(
+                                                                        trade_db_table,
+                                                                        archive_db_table,
+                                                                        my_trades_with_the_same_amount_label_non_perpetual,
+                                                                        my_trades_with_the_same_amount_label_perpetual,
+                                                                        label   )
                                                                 
                                                                 if paired:
                                                                     await sleep_and_restart()

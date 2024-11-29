@@ -982,8 +982,7 @@ class ComboAuto (BasicStrategy):
         if label in (o["label"]) \
             and "closed" not in o["label"]]
         
-        if my_trades_future \
-            and len(my_trades_future) == 1:
+        if my_trades_future:
             
             future_trade = my_trades_future[0]
             price_future = future_trade["price"]
