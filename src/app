@@ -23,7 +23,9 @@ from strategies.basic_strategy import (
 from strategies.hedging_spot import (
     HedgingSpot,
     get_market_condition_hedging)
-from strategies.combo_auto import ComboAuto
+from strategies.combo_auto import(
+    ComboAuto, 
+    check_if_minimum_waiting_time_has_passed)
 from transaction_management.deribit.api_requests import get_tickers
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
@@ -552,50 +554,16 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                                 if   "futureSpread" in strategy :
                                                 
-                                                    log.warning (f"strategy {strategy}-START")                                                    
-    
+                                                    log.warning (f"strategy {strategy}-START")    
+                                                    
                                                     strategy_params= [o for o in strategy_attributes \
                                                         if o["strategy_label"] == strategy][0]   
                                                     
-                                                    my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency])
-                                                    
-                                                    for amount in my_trades_amount:
-                                                        my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
-                                                            if amount == abs(o["amount"])]
-                                                        
-                                                        my_trades_with_the_same_amount_label_perpetual = [o for o in my_trades_with_the_same_amount\
-                                                            if "PERPETUAL" in o["instrument_name"]]
-                                                        
-                                                        my_trades_with_the_same_amount_label_non_perpetual = [o for o in my_trades_with_the_same_amount\
-                                                            if "PERPETUAL" not in o["instrument_name"]]
-                                                        
-                                                        labels_non_perpetual = [o["label"] for o in my_trades_with_the_same_amount_label_non_perpetual]
-                                                        
-                                                        for label in labels_non_perpetual:
-                                                            
-                                                            my_trades = [o for o in my_trades_with_the_same_amount_label_non_perpetual\
-                                                            if label in (o["label"]) \
-                                                                and "closed" not in o["label"]]
-                                                            
-                                                            if my_trades and len(my_trades) == 1:
-                                                                my_trades = my_trades[0]
-                                                                price = my_trades["price"]
-                                                                
-                                                                my_trades_perpetual_with_lower_price = [o for o in my_trades_with_the_same_amount_label_perpetual \
-                                                                    if o["price"]< price ]
-                                                                
-                                                                my_trades_perpetual_with_lower_price_sorted = sorting_list(
-                                                                    my_trades_perpetual_with_lower_price,"price",
-                                                                    False)
-                                                                                                                                
-                                                                if my_trades_perpetual_with_lower_price_sorted:
-                                                                    perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]
-                                                                    log.warning (my_trades)
-                                                                    log.debug (perpetual_trade)
-                                                                
-                                                        
-                                                    
-                                                    
+                                                    await self.pairing_single_label(
+                                                        strategy_params,
+                                                        my_trades_currency_strategy,
+                                                        server_time)                                                
+    
                                                     target_transaction_per_hour = 1/10
                                                             
                                                     combo_auto = ComboAuto(
@@ -1031,7 +999,86 @@ class RunningStrategy(ModifyOrderDb):
         except Exception as error:
             log.warning(error)
                                                                 
-                              
+                            
+    async def pairing_single_label(
+        self,
+        strategy_params,
+        my_trades_currency_strategy: list,
+        server_time: int
+        ) -> None:
+        """
+        """
+        
+        try:
+            
+            if my_trades_currency_strategy:
+
+                my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
+                
+                for amount in my_trades_amount:
+                    my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
+                        if amount == abs(o["amount"])]
+                    
+                    my_trades_with_the_same_amount_label_perpetual = [o for o in my_trades_with_the_same_amount\
+                        if "PERPETUAL" in o["instrument_name"]]
+                    
+                    my_trades_with_the_same_amount_label_non_perpetual = [o for o in my_trades_with_the_same_amount\
+                        if "PERPETUAL" not in o["instrument_name"]]
+                    
+                    labels_non_perpetual = [o["label"] for o in my_trades_with_the_same_amount_label_non_perpetual]
+                    
+                    for label in labels_non_perpetual:
+                        
+                        my_trades = [o for o in my_trades_with_the_same_amount_label_non_perpetual\
+                        if label in (o["label"]) \
+                            and "closed" not in o["label"]]
+                        
+                        if my_trades and len(my_trades) == 1:
+                            future_trade = my_trades[0]
+                            price = my_trades["price"]
+                            
+                            my_trades_perpetual_with_lower_price = [o for o in my_trades_with_the_same_amount_label_perpetual \
+                                if o["price"]< price ]
+                            
+                            my_trades_perpetual_with_lower_price_sorted = sorting_list(
+                                my_trades_perpetual_with_lower_price,"price",
+                                False)
+                                                                                            
+                            if my_trades_perpetual_with_lower_price_sorted:                                
+
+                                ONE_SECOND = 1000
+                                ONE_MINUTE = ONE_SECOND * 60
+                                
+                                perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]
+                                
+                                waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
+                                
+                                timestamp_perpetual: int = perpetual_trade["timestamp"]
+                            
+                                waiting_time_for_perpetual_order: bool = check_if_minimum_waiting_time_has_passed(
+                                        waiting_minute_before_cancel,
+                                        timestamp_perpetual,
+                                        server_time,
+                                    )
+                                timestamp_future: int = future_trade["timestamp"]
+                            
+                                waiting_time_for_future_order: bool = check_if_minimum_waiting_time_has_passed(
+                                        waiting_minute_before_cancel,
+                                        timestamp_future,
+                                        server_time,
+                                    )
+                                
+                                if waiting_time_for_perpetual_order and waiting_time_for_future_order:
+
+                                    log.warning (future_trade)
+                                    log.debug (perpetual_trade)
+                                    
+                                    await sleep_and_restart ()
+                    
+        except Exception as error:
+            log.warning(error)
+
+  
     async def establish_heartbeat(self) -> None:
         """
         Requests DBT's `public/set_heartbeat` to
