@@ -33,6 +33,7 @@ async def main():
         df = pd.DataFrame(data_trading)
         df.drop(columns=["amount"])
         df["integer"] = extract_integers_from_text(df["label"])
+        print (df)
         
         df = pd.pivot_table(
             df,
