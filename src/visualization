@@ -39,7 +39,7 @@ async def main():
         df = pd.pivot_table(
             df,
             values="premium",
-            index=["integer","label","instrument_name"],
+            index=["integer"],
             aggfunc="sum", 
             )
         print (df)
