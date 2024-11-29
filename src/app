@@ -569,9 +569,11 @@ class RunningStrategy(ModifyOrderDb):
                                                         my_trades_with_the_same_amount_label_non_perpetual = [o for o in my_trades_with_the_same_amount\
                                                             if "PERPETUAL" not in o["instrument_name"]]
                                                         
-                                                        for label in my_trades_with_the_same_amount_label_non_perpetual:
+                                                        labels_non_perpetual = [o["label"] for o in my_trades_with_the_same_amount_label_non_perpetual]
+                                                        
+                                                        for label in labels_non_perpetual:
                                                             
-                                                            my_trades = [o for o in my_trades_currency_strategy\
+                                                            my_trades = [o for o in my_trades_with_the_same_amount_label_non_perpetual\
                                                             if label in (o["label"]) \
                                                                 and "closed" not in o["label"]]
                                                             
