@@ -308,10 +308,10 @@ class ModifyOrderDb(SendApiRequest):
                         currency, 
                         first_tick_fr_sqlite, 
                         count)
-        
-        log.error (f"instrument_name {instrument_name}")
                 
         if transaction_log:
+            log.error ([o for o in transaction_log\
+                    if o["instrument_name"] is None])
             
             await saving_transaction_log (
                 transaction_log_trading,
