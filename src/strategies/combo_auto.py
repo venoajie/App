@@ -9,6 +9,8 @@ from dataclassy import dataclass, fields
 from loguru import logger as log
 
 # user defined formula
+from db_management.sqlite_management import (
+    update_status_data)
 from strategies.basic_strategy import (
     BasicStrategy,
     delta_pct,
@@ -20,11 +22,10 @@ from utilities.pickling import (
     read_data,)
 from utilities.string_modification import(
     parsing_label,
-    remove_redundant_elements)
+    remove_redundant_elements,
+    sorting_list)
 from utilities.system_tools import (
     provide_path_for_file,)
-
-
 def reading_from_pkl_data(end_point, 
                           currency, 
                           status: str = None) -> dict:
@@ -958,3 +959,93 @@ class ComboAuto (BasicStrategy):
             order_parameters=[] if order_allowed == False else params,
         )
         
+        
+    async def pairing_single_label(
+        self,
+        trade_db_table: str,
+        archive_db_table: str,
+        my_trades_with_the_same_amount_label_non_perpetual,
+        my_trades_with_the_same_amount_label_perpetual,
+        label
+        ) -> None:
+        """
+        
+        
+        """
+        paired_success = False
+        
+        strategy_params =  self.strategy_parameters
+        server_time = self.server_time
+        
+                    
+        my_trades_future = [o for o in my_trades_with_the_same_amount_label_non_perpetual\
+        if label in (o["label"]) \
+            and "closed" not in o["label"]]
+        
+        if my_trades_future \
+            and len(my_trades_future) == 1:
+            
+            future_trade = my_trades_future[0]
+            price_future = future_trade["price"]
+            side_future = future_trade["side"]
+            
+            my_trades_perpetual_with_lower_price = [o for o in my_trades_with_the_same_amount_label_perpetual \
+                if o["price"]< price_future ]
+            
+            my_trades_perpetual_with_lower_price_sorted = sorting_list(
+                my_trades_perpetual_with_lower_price,"price",
+                False)
+                                                                            
+            if side_future == "sell"\
+                and my_trades_perpetual_with_lower_price_sorted:                                
+
+                ONE_SECOND = 1000
+                ONE_MINUTE = ONE_SECOND * 60
+                
+                perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]
+
+                waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
+                
+                timestamp_perpetual: int = perpetual_trade["timestamp"]
+            
+                waiting_time_for_perpetual_order: bool = check_if_minimum_waiting_time_has_passed(
+                        waiting_minute_before_cancel,
+                        timestamp_perpetual,
+                        server_time,
+                    )
+
+                timestamp_future: int = future_trade["timestamp"]
+            
+                waiting_time_for_future_order: bool = check_if_minimum_waiting_time_has_passed(
+                        waiting_minute_before_cancel,
+                        timestamp_future,
+                        server_time,
+                    )
+                
+                paired_success = waiting_time_for_perpetual_order and waiting_time_for_future_order
+                
+                side_perpetual = perpetual_trade["side"]
+                
+                if paired_success \
+                    and side_perpetual == "buy":
+
+                    log.warning (future_trade)
+                    log.debug (perpetual_trade)
+                    trade_id = perpetual_trade["trade_id"]
+                    new_label = future_trade["label"]
+                    
+                    await update_status_data(archive_db_table,
+                                                "label",
+                                                filter,
+                                                trade_id,
+                                                new_label
+                                                )
+                    
+                    await update_status_data(trade_db_table,
+                                                "label",
+                                                filter,
+                                                trade_id,
+                                                new_label
+                                                )
+                    
+                    return paired_success

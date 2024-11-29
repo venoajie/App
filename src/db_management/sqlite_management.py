@@ -296,7 +296,8 @@ async def update_status_data(
     data_column: str, 
     filter: str, 
     filter_value: int, 
-    new_value, operator=None
+    new_value, 
+    operator=None
     ) -> None:
     """
     https://www.beekeeperstudio.io/blog/sqlite-json-with-text
@@ -324,8 +325,10 @@ async def update_status_data(
     try:
 
         async with aiosqlite.connect(
-            "databases/trading.sqlite3", isolation_level=None
-        ) as db:
+            "databases/trading.sqlite3", 
+            isolation_level=None
+            ) as db:
+            
             await db.execute(query)
 
     except Exception as error:
@@ -695,7 +698,7 @@ def query_pd(
 
 
 async def back_up_db_sqlite():
-    import sqlite3
+
     from datetime import datetime
 
     TIMESTAMP = datetime.now().strftime("%Y%m%d-%H-%M-%S")
