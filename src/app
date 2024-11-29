@@ -1036,7 +1036,7 @@ class RunningStrategy(ModifyOrderDb):
                         
                         if my_trades and len(my_trades) == 1:
                             future_trade = my_trades[0]
-                            price = my_trades["price"]
+                            price = future_trade["price"]
                             
                             my_trades_perpetual_with_lower_price = [o for o in my_trades_with_the_same_amount_label_perpetual \
                                 if o["price"]< price ]
