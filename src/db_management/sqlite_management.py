@@ -295,16 +295,16 @@ async def update_status_data(
     table: str, 
     data_column: str, 
     filter: str, 
-    filter_value: int, 
-    new_value, 
-    operator=None
+    filter_value: any, 
+    new_value: any, 
+    operator=None|str
     ) -> None:
     """
     https://www.beekeeperstudio.io/blog/sqlite-json-with-text
     https://www.sqlitetutorial.net/sqlite-json-functions/sqlite-json_replace-function/
     https://stackoverflow.com/questions/75320010/update-json-data-in-sqlite3
     """
-    
+    log.warning (f"filter {filter}")
     if operator==None:
         where_clause= f"WHERE {filter}  LIKE '%{filter_value}%'"
      
