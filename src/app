@@ -1044,8 +1044,6 @@ class RunningStrategy(ModifyOrderDb):
                             my_trades_perpetual_with_lower_price_sorted = sorting_list(
                                 my_trades_perpetual_with_lower_price,"price",
                                 False)
-                            
-                            log.info (f"my_trades_perpetual_with_lower_price_sorted {my_trades_perpetual_with_lower_price_sorted}")
                                                                                             
                             if my_trades_perpetual_with_lower_price_sorted:                                
 
@@ -1053,8 +1051,7 @@ class RunningStrategy(ModifyOrderDb):
                                 ONE_MINUTE = ONE_SECOND * 60
                                 
                                 perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]
-                                
-                                log.critical (f"strategy_params {strategy_params}")
+
                                 waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
                                 
                                 timestamp_perpetual: int = perpetual_trade["timestamp"]
@@ -1064,14 +1061,13 @@ class RunningStrategy(ModifyOrderDb):
                                         timestamp_perpetual,
                                         server_time,
                                     )
-                                log.critical (f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order}")
+
                                 timestamp_future: int = future_trade["timestamp"]
                             
                                 waiting_time_for_future_order: bool = check_if_minimum_waiting_time_has_passed(
                                         waiting_minute_before_cancel,
                                         timestamp_future,
                                         server_time,
-                                log.critical (f"waiting_time_for_future_order {waiting_time_for_future_order}")
                                     )
                                 
                                 if waiting_time_for_perpetual_order and waiting_time_for_future_order:
