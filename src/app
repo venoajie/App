@@ -1051,6 +1051,7 @@ class RunningStrategy(ModifyOrderDb):
                                 
                                 perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]
                                 
+                                log.critical (f"strategy_params {strategy_params}")
                                 waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
                                 
                                 timestamp_perpetual: int = perpetual_trade["timestamp"]
@@ -1060,7 +1061,6 @@ class RunningStrategy(ModifyOrderDb):
                                         timestamp_perpetual,
                                         server_time,
                                     )
-                                log.critical (f"waiting_minute_before_cancel {waiting_minute_before_cancel}")
                                 log.critical (f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order}")
                                 timestamp_future: int = future_trade["timestamp"]
                             
