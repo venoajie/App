@@ -315,8 +315,7 @@ class ModifyOrderDb(SendApiRequest):
             
             await saving_transaction_log (
                 transaction_log_trading,
-                [o for o in transaction_log\
-                    if instrument_name in o["instrument_name"]], 
+                transaction_log, 
                 first_tick_fr_sqlite
                 )
             
