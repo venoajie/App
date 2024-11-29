@@ -585,9 +585,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                     if o["price"]< price ]
                                                                 
                                                                 log.critical (my_trades_perpetual_with_lower_price) 
-                                                                my_trades_perpetual_with_lower_price_sorted = sorting_list([
+                                                                my_trades_perpetual_with_lower_price_sorted = sorting_list(
                                                                     my_trades_perpetual_with_lower_price,"price",
-                                                                    True])
+                                                                    True)
                                                                 for perpetual_trade in my_trades_perpetual_with_lower_price_sorted:
                                                                     log.critical (perpetual_trade)
                                                                     log.critical (my_trades)
