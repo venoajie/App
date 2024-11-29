@@ -1043,6 +1043,8 @@ class RunningStrategy(ModifyOrderDb):
                             my_trades_perpetual_with_lower_price_sorted = sorting_list(
                                 my_trades_perpetual_with_lower_price,"price",
                                 False)
+                            
+                            log.info (f"my_trades_perpetual_with_lower_price_sorted {my_trades_perpetual_with_lower_price_sorted}")
                                                                                             
                             if my_trades_perpetual_with_lower_price_sorted:                                
 
