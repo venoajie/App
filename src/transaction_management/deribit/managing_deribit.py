@@ -308,6 +308,8 @@ class ModifyOrderDb(SendApiRequest):
                         currency, 
                         first_tick_fr_sqlite, 
                         count)
+        
+        log.error (f"transaction_log {transaction_log}")
                 
         if transaction_log:
             
