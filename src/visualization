@@ -20,7 +20,6 @@ async def get_db_trade():
     
     return [{key: value for key, value in dict.items() if key != 'balance'} for dict in my_trades_currency]
 
-
 async def main():
     #data = await fetch_data('https://www.deribit.com/api/v2/public/ticker?instrument_name=BTC-PERPETUAL')
     #st.dataframe(data["result"])
@@ -31,9 +30,10 @@ async def main():
         data_trading = await get_db_trade ()
         
         df = pd.DataFrame(data_trading)
+        
         df.drop(columns=["amount"])
-        df["integer"] = df.apply(extract_integers_from_text(df["label"]), axis=1)
-        print (df)
+
+        df['integer'] = df['label'].str.extract('(\d+)')
         
         df = pd.pivot_table(
             df,
