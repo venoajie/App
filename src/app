@@ -591,9 +591,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                 log.info (my_trades_perpetual_with_lower_price_sorted)
                                                                 
                                                                 if my_trades_perpetual_with_lower_price_sorted:
-                                                                    perpetual_trade = my_trades_perpetual_with_lower_price_sorted[1]
-                                                                    log.debug (perpetual_trade)
+                                                                    perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]
                                                                     log.warning (my_trades)
+                                                                    log.debug (perpetual_trade)
                                                                 
                                                         
                                                     
