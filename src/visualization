@@ -17,6 +17,7 @@ async def get_db_trade():
                                                 "all", 
                                                 column_trade)
     
+    print (my_trades_currency)
     return [{key: value for key, value in dict.items() if key != 'balance'} for dict in my_trades_currency]
 
 
