@@ -1038,14 +1038,16 @@ class ComboAuto (BasicStrategy):
                                                 "label",
                                                 filter,
                                                 trade_id,
-                                                new_label
+                                                new_label,
+                                                "="
                                                 )
                     
                     await update_status_data(trade_db_table,
                                                 "label",
                                                 filter,
                                                 trade_id,
-                                                new_label
+                                                new_label,
+                                                "="
                                                 )
                     
                     return paired_success
