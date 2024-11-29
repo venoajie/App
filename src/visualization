@@ -33,13 +33,13 @@ async def main():
         
         df.drop(columns=["amount"])
 
-        df['integer'] = df['label'].str.extract('(\d+)')
+        df['integer'] = df['label'].str.extract('(d+)')
         df['premium'] = (df['price']*abs(df["amount"]))/df["amount"]
         
         df = pd.pivot_table(
             df,
             values="premium",
-            index=["integer"],
+            index=["integer","label","instrument_name"],
             aggfunc="sum", 
             )
         print (df)
