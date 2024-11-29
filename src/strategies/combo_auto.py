@@ -1028,26 +1028,31 @@ class ComboAuto (BasicStrategy):
                 
                 if paired_success \
                     and side_perpetual == "buy":
-
-                    log.warning (future_trade)
-                    log.debug (perpetual_trade)
-                    trade_id = perpetual_trade["trade_id"]
+                        
+                    filter = "trade_id"
+                    trade_id = perpetual_trade[filter]
                     new_label = future_trade["label"]
                     
-                    await update_status_data(archive_db_table,
-                                                "label",
-                                                filter,
-                                                trade_id,
-                                                new_label,
-                                                "="
-                                                )
+                    await update_status_data(
+                        archive_db_table,
+                        "label",
+                        filter,
+                        trade_id,
+                        new_label,
+                        "="
+                        )
                     
-                    await update_status_data(trade_db_table,
-                                                "label",
-                                                filter,
-                                                trade_id,
-                                                new_label,
-                                                "="
-                                                )
+                    await update_status_data(
+                        trade_db_table,
+                        "label",
+                        filter,
+                        trade_id,
+                        new_label,
+                        "="
+                        )
+
+                    log.warning (paired_success)
+                    log.warning (future_trade)
+                    log.debug (perpetual_trade)
                     
                     return paired_success
