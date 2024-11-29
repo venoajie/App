@@ -1060,12 +1060,15 @@ class RunningStrategy(ModifyOrderDb):
                                         timestamp_perpetual,
                                         server_time,
                                     )
+                                log.critical (f"waiting_minute_before_cancel {waiting_minute_before_cancel}")
+                                log.critical (f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order}")
                                 timestamp_future: int = future_trade["timestamp"]
                             
                                 waiting_time_for_future_order: bool = check_if_minimum_waiting_time_has_passed(
                                         waiting_minute_before_cancel,
                                         timestamp_future,
                                         server_time,
+                                log.critical (f"waiting_time_for_future_order {waiting_time_for_future_order}")
                                     )
                                 
                                 if waiting_time_for_perpetual_order and waiting_time_for_future_order:
