@@ -28,14 +28,14 @@ async def saving_transaction_log(
             
             timestamp = transaction["timestamp"]
             
-            # remove unnecessary element
-            #modified_dict = remove_dict_elements(
-            #    transaction,
-            #    "info"
-            #    )
+            #remove unnecessary element
+            modified_dict = remove_dict_elements(
+                transaction,
+                "info"
+                )
             
             # get Transaction type                        
-            type_log = transaction ["type"]
+            type_log = modified_dict ["type"]
             
             #type: trading
             if ("trade" in type_log \
@@ -45,7 +45,7 @@ async def saving_transaction_log(
                 # save to trading db
                 await insert_tables(
                     transaction_log_trading,
-                    transaction
+                    modified_dict
                     )
             
             #type: non trading
