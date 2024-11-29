@@ -306,10 +306,10 @@ async def update_status_data(
     """
     
     if operator==None:
-        where_clause= f"WHERE JSON_EXTRACT(data,'$.{filter}')  LIKE '%{filter_value}'"
+        where_clause= f"WHERE {filter}  LIKE '%{filter_value}%'"
      
     else:
-        where_clause= f"WHERE  JSON_EXTRACT (data, '$.{filter}') {operator} {filter_value}"
+        where_clause= f"WHERE {filter} {operator} {filter_value}"
 
     query = f"""UPDATE {table} SET data = JSON_REPLACE (data, '$.{data_column}', {new_value}) {where_clause};"""
 
