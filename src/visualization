@@ -30,6 +30,7 @@ async def main():
         data_trading = await get_db_trade ()
         
         df = pd.DataFrame(data_trading)
+        df.drop(columns=["amunt"])
         
         df.pivot_table(
             values="price",

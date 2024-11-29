@@ -137,6 +137,16 @@ def remove_dict_elements(
 
     return {i:original [i] for i in original if i!= item_to_remove}
 
+def remove_list_elements(
+    original: dict, 
+    item_to_remove: str
+    ) -> str:
+    """
+    https://stackoverflow.com/questions/13254241/removing-key-values-pairs-from-a-list-of-dictionaries
+    """
+
+    return [{key: value for key, value in dict.items() if key != item_to_remove} for dict in original]
+
 def extract_currency_from_text(words: str) -> str:
     """
 
