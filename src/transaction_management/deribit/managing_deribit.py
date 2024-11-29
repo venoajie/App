@@ -309,7 +309,7 @@ class ModifyOrderDb(SendApiRequest):
                         first_tick_fr_sqlite, 
                         count)
         
-        log.error (f"transaction_log {transaction_log}")
+        log.error (f"instrument_name {instrument_name}")
                 
         if transaction_log:
             
