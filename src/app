@@ -606,9 +606,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                         my_trades_with_the_same_amount_label_non_perpetual,
                                                                         my_trades_with_the_same_amount_label_perpetual,
                                                                         label   )
-                                                                
-                                                                if paired:
-                                                                    await sleep_and_restart()
+                                                                    
+                                                                    if paired:
+                                                                        await sleep_and_restart()
                                                     
                                                     tp_threshold = .001/100
                                                     
