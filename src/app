@@ -583,6 +583,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                                 my_trades_perpetual_with_lower_price = [o for o in my_trades_with_the_same_amount_label_perpetual \
                                                                     if o["price"]< price ]
+                                                                
+                                                                log.critical (my_trades_perpetual_with_lower_price) 
                                                                 my_trades_perpetual_with_lower_price_sorted = sorting_list([
                                                                     my_trades_perpetual_with_lower_price,"price",
                                                                     True])
