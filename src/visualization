@@ -35,10 +35,8 @@ async def main():
         df = pd.pivot_table(
             df,
             values="price",
-            index="label",
+            index=["label","instrument_name"],
             aggfunc="sum", 
-            margins=True,
-            margins_name="Totals",
             )
         print (df)
     except Exception as error:
