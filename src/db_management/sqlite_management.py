@@ -304,14 +304,14 @@ async def update_status_data(
     https://www.sqlitetutorial.net/sqlite-json-functions/sqlite-json_replace-function/
     https://stackoverflow.com/questions/75320010/update-json-data-in-sqlite3
     """
-    log.warning (f"filter {filter}")
+
     if operator==None:
         where_clause= f"WHERE {filter}  LIKE '%{filter_value}%'"
      
     else:
         where_clause= f"WHERE {filter} {operator} {filter_value}"
 
-    query = f"""UPDATE {table} SET data = JSON_REPLACE (data, '$.{data_column}', {new_value}) {where_clause};"""
+    query = f"""UPDATE {table} SET data = JSON_REPLACE (data, '$.{data_column}', '{new_value}') {where_clause};"""
 
     if "ohlc" in table:
 
@@ -347,7 +347,9 @@ def querying_open_interest(
 
     all_data = f"""SELECT tick, JSON_EXTRACT (data, '$.volume') AS volume, JSON_EXTRACT (data, '$.{price}')  AS close, open_interest, \
         (open_interest - LAG (open_interest, 1, 0) OVER (ORDER BY tick)) as delta_oi FROM {table}"""
-    return all_data if limit == None else f"""{all_data} limit {limit}"""
+    return all_data \
+        if limit == None \
+            else f"""{all_data} limit {limit}"""
 
 
 def querying_ohlc_price_vol(
@@ -358,7 +360,9 @@ def querying_ohlc_price_vol(
 
     all_data = f"""SELECT  tick, JSON_EXTRACT (data, '$.volume') AS volume, JSON_EXTRACT (data, '$.{price}')  AS {price} FROM {table} ORDER BY tick DESC"""
 
-    return all_data if limit == None else f"""{all_data} limit {limit}"""
+    return all_data\
+        if limit == None \
+            else f"""{all_data} limit {limit}"""
 
 
 def querying_hlc_vol(
@@ -368,7 +372,9 @@ def querying_hlc_vol(
 
     all_data = f"""SELECT  tick, JSON_EXTRACT (data, '$.volume') AS volume, JSON_EXTRACT (data, '$.high') AS high, JSON_EXTRACT (data, '$.low') AS low, JSON_EXTRACT (data, '$.close')  AS close FROM {table} ORDER BY tick DESC"""
 
-    return all_data if limit == None else f"""{all_data} limit {limit}"""
+    return all_data \
+        if limit == None\
+            else f"""{all_data} limit {limit}"""
 
 
 def querying_ohlc_closed(
@@ -379,7 +385,9 @@ def querying_ohlc_closed(
 
     all_data = f"""SELECT  JSON_EXTRACT (data, '$.{price}')  AS close FROM {table} ORDER BY tick DESC"""
 
-    return all_data if limit == None else f"""{all_data} limit {limit}"""
+    return all_data \
+        if limit == None \
+            else f"""{all_data} limit {limit}"""
 
 
 def querying_arithmetic_operator(
@@ -507,38 +515,6 @@ def querying_based_on_currency_or_instrument_and_strategy (
 #    log.error (f"table {tab}")
     return tab
 
-def querying_closed_transactions(
-    limit: int = 20, 
-    order: str = "id", 
-    table: str = "my_trades_closed_json"
-    ) -> str:
-    return f"SELECT * FROM {table} ORDER BY {order} DESC LIMIT {limit}"
-
-
-async def executing_closed_transactions(
-    limit: int = 20, 
-    order: str = "id", 
-    table: str = "my_trades_closed_json"
-    ) -> dict:
-    
-    """
-    Provide execution template for querying summary of trading results from sqlite.
-    Consist of transaction label, size, and price only.
-    """
-
-    # get query
-    query = querying_closed_transactions(limit, order, table)
-    # print(f"querying_closed_transactions {query}")
-
-    # execute query
-    result = await executing_query_with_return(query)
-
-    # define none from queries result. If the result=None, return []
-    NONE_DATA: None = [0, None, []]
-
-    return [] if result in NONE_DATA else (result)
-
-
 async def executing_query_based_on_currency_or_instrument_and_strategy(
     table: str, 
     currency_or_instrument,
@@ -614,51 +590,6 @@ async def executing_query_with_return(
         #import traceback
         log.error (f"querying_table {query_table} {error}")
         #traceback.format_exc()
-        await telegram_bot_sendtext("sqlite operation", "failed_order")
-        await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
-
-    return 0 if (combine_result == [] or combine_result == None) else (combine_result)
-
-
-async def executing_general_query(
-    query_table,
-    table: str = "mytrades",
-    database: str = "databases/trading.sqlite3",
-    filter: str = None,
-    operator=None,
-    filter_value=None,
-) -> list:
-    """
-    Reference
-    # https://stackoverflow.com/questions/65934371/return-data-from-sqlite-with-headers-python3
-    """
-
-    filter_val = (f"{filter_value}",)
-
-    if filter == None:
-        query_table = f"SELECT  * FROM {table}"
-
-    combine_result = []
-
-    try:
-        async with aiosqlite.connect(database, isolation_level=None) as db:
-            db = (
-                db.execute(query_table)
-                if filter == None
-                else db.execute(query_table, filter_val)
-            )
-
-            async with db as cur:
-                fetchall = await cur.fetchall()
-
-                head = map(lambda attr: attr[0], cur.description)
-                headers = list(head)
-
-        for i in fetchall:
-            combine_result.append(dict(zip(headers, i)))
-
-    except Exception as error:
-        log.error (f"querying_table {query_table} {error}")
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
