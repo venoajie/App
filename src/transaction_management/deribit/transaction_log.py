@@ -28,7 +28,7 @@ async def saving_transaction_log(
             
             timestamp = transaction["timestamp"]
             
-            #remove unnecessary element
+            #remove unnecessary element (kalau dihapus, error pada saat insert)
             modified_dict = remove_dict_elements(
                 transaction,
                 "info"
