@@ -43,6 +43,7 @@ from utilities.string_modification import (
     sorting_list)
 from utilities.system_tools import (
     async_raise_error_message,
+    ipdb_sys_excepthook,
     provide_path_for_file,
     raise_error_message,
     sleep_and_restart,)
@@ -1217,6 +1218,7 @@ def main():
 if __name__ == "__main__":
     
     try:
+        ipdb_sys_excepthook()
         (main())
         
     except(
