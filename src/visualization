@@ -32,7 +32,8 @@ async def main():
         df = pd.DataFrame(data_trading)
         df.drop(columns=["amount"])
         
-        df.pivot_table(
+        pd.pivot_table(
+            df,
             values="price",
             index="label",
             aggfunc="sum", 
