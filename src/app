@@ -593,14 +593,12 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                                 label_integer = get_label_integer (label)
                                                                 
-                                                                transaction_under_label_integer = [o["amount"] for o in my_trades_with_the_same_amount\
+                                                                transaction_under_label_integer = [o for o in my_trades_with_the_same_amount\
                                                                     if label_integer in o["label"]]
                         
-                                                                transaction_under_label_integer_sum = sum(transaction_under_label_integer)
                                                                 transaction_under_label_integer_len = len(transaction_under_label_integer)
                                                                 
-                                                                if transaction_under_label_integer_sum !=0\
-                                                                    and transaction_under_label_integer_len ==1:
+                                                                if transaction_under_label_integer_len ==1:
                                                                         
                                                                     paired = await combo_auto.pairing_single_label(
                                                                         trade_db_table,
