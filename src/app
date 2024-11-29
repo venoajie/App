@@ -37,7 +37,8 @@ from utilities.string_modification import (
     extract_currency_from_text,
     parsing_label,
     remove_double_brackets_in_list,
-    remove_redundant_elements,)
+    remove_redundant_elements,
+    sorting_list)
 from utilities.system_tools import (
     async_raise_error_message,
     provide_path_for_file,
@@ -563,15 +564,33 @@ class RunningStrategy(ModifyOrderDb):
                                                             if amount == abs(o["amount"])]
                                                         
                                                         my_trades_with_the_same_amount_label = remove_redundant_elements(
-                                                            [get_label_integer(o["label"]) for o in my_trades_with_the_same_amount])
+                                                            [get_label_integer(o["label"]) for o in my_trades_with_the_same_amount\
+                                                                if "closed" not in o["label"]])
                                                         
-                                                        for label in my_trades_with_the_same_amount_label:
+                                                        my_trades_with_the_same_amount_label_perpetual = [o for o in my_trades_with_the_same_amount_label\
+                                                            if "PERPETUAL" in o["instrument_name"]]
+                                                        
+                                                        my_trades_with_the_same_amount_label_non_perpetual = [o for o in my_trades_with_the_same_amount_label\
+                                                            if "PERPETUAL" not in o["instrument_name"]]
+                                                        
+                                                        for label in my_trades_with_the_same_amount_label_non_perpetual:
                                                             
                                                             my_trades = [o for o in my_trades_currency_strategy\
                                                             if label in (o["label"])]
                                                             
-                                                            if len(my_trades) >  1:
-                                                                log.critical (label)
+                                                            if len(my_trades) == 1:
+                                                                my_trades = my_trades[0]
+                                                                price = my_trades["price"]
+                                                                
+                                                                my_trades_perpetual_with_lower_price = [o for o in my_trades_with_the_same_amount_label_perpetual \
+                                                                    if o["price"]< price ]
+                                                                my_trades_perpetual_with_lower_price_sorted = sorting_list([
+                                                                    my_trades_perpetual_with_lower_price,"price",
+                                                                    True])
+                                                                for perpetual_trade in my_trades_perpetual_with_lower_price_sorted:
+                                                                    log.critical (perpetual_trade)
+                                                                    log.critical (my_trades)
+                                                                
                                                         
                                                     
                                                     
