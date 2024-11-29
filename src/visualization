@@ -42,7 +42,7 @@ async def main():
             index=["integer","label","instrument_name"],
             aggfunc="sum", 
             )
-        print (df)
+        print (df.to_string())
     except Exception as error:
         await print(error)
         
