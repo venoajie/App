@@ -310,8 +310,6 @@ class ModifyOrderDb(SendApiRequest):
                         count)
                 
         if transaction_log:
-            log.error ([o for o in transaction_log\
-                    if o["instrument_name"] is None])
             
             await saving_transaction_log (
                 transaction_log_trading,
