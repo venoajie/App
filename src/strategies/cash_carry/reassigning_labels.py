@@ -203,8 +203,7 @@ async def pairing_single_label(
                         if  side_future == "sell"\
                             and side_perpetual == "buy":
                                 
-                            if False:
-                                await updating_db_with_new_label(
+                            await updating_db_with_new_label(
                                 trade_db_table,
                                 archive_db_table,
                                 trade_id,

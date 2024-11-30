@@ -424,7 +424,7 @@ async def reconciling_size(
                         server_time 
                         )
                     
-                    if False and  pairing_label:
+                    if  pairing_label:
                         
                         cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
                             if o["cancellable"]==True]
