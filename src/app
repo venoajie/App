@@ -872,9 +872,6 @@ class RunningStrategy(ModifyOrderDb):
                                                         #something was wrong because perpetuals were actively traded. cancell  orders
                                                         if delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
                                                             
-                                                            #ensure freshness of ta
-                                                            log.warning (f"strategy {strategy}-START")                                                    
-                                                            
                                                             my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy \
                                                                 if "open" in (o["label"])]
                                                             
