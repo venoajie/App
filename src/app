@@ -4,6 +4,7 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 import os
+from collections import defaultdict
 from secrets import randbelow
 
 # installed
@@ -68,7 +69,7 @@ def cached_ticker_data(currencies):
     
     
     
-    result=[]
+    result = defaultdict(list)
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
                         
@@ -622,7 +623,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             if sum_selected_transaction != 0\
                                                                 and len_selected_transaction:
                                                                 
-                                                                send_order = []
+                                                                send_order = defaultdict(list)
                                                                 
                                                                 if size_future_reconciled\
                                                                     and size_perpetuals_reconciled\

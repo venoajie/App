@@ -12,14 +12,12 @@ from configuration.label_numbering import get_now_unix_time
 from data_cleaning.managing_closed_transactions import (
     clean_up_closed_transactions,
     get_unrecorded_trade_transactions,
-    refill_db
-    )
+    refill_db)
 from data_cleaning.reconciling_db import(
     is_my_trades_and_sub_account_size_reconciled_each_other,
     is_my_trades_active_archived_reconciled_each_other,
     is_transaction_log_and_sub_account_size_reconciled_each_other,
-    my_trades_active_archived_not_reconciled_each_other,
-    )
+    my_trades_active_archived_not_reconciled_each_other,)
 from data_cleaning.pruning_db import count_and_delete_ohlc_rows
 from db_management.sqlite_management import (
     back_up_db_sqlite,
@@ -28,6 +26,7 @@ from db_management.sqlite_management import (
     querying_arithmetic_operator,)
 from market_understanding.technical_analysis import (
     insert_market_condition_result)
+from strategies.cash_carry.reassigning_labels import get_the_same_amount
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
@@ -413,6 +412,8 @@ async def reconciling_size(
                         [o["instrument_name"] for o in sub_account_positions ]
                         )
                     
+                    get_the_same = get_the_same_amount(my_trades_currency_active)
+                    log.error (f"get_the_same {get_the_same}")
                     # FROM sub account to other db's
                     if  sub_account_positions_instrument:
                         

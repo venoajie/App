@@ -3,7 +3,7 @@
 # built ins
 import asyncio
 import operator 
-
+from collections import defaultdict
 # installed
 
 from loguru import logger as log
@@ -91,6 +91,44 @@ async def combo_modify_label_unpaired_transaction(
             break
     
     
+def get_the_same_amount(
+    my_trades_currency_strategy: list,    
+    ) -> list:
+    """
+    
+    
+    """
+    
+    if my_trades_currency_strategy:
+        
+        my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
+        
+        result = defaultdict(list)
+        for amount in my_trades_amount:
+            
+            my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
+                                                                if amount == abs(o["amount"])]
+            
+            my_trades_label = remove_redundant_elements(
+                [abs(o["label"]) for o in my_trades_with_the_same_amount]
+                )
+            
+            for label in my_trades_label:
+                
+                label_integer = get_label_integer (label)
+                
+                transaction_under_label_integer = [o for o in my_trades_with_the_same_amount\
+                    if label_integer in o["label"]]
+                
+                transaction_under_label_integer_len = len(transaction_under_label_integer)
+                
+                if transaction_under_label_integer_len == 1:
+                    
+                    result.append (transaction_under_label_integer[0])
+                
+    return result
+
+
 async def pairing_single_label(
     strategy_parameters: list,
     trade_db_table: str,
@@ -110,17 +148,22 @@ async def pairing_single_label(
     
     if my_trades_currency_strategy:
         
-        my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
-                if label in  (o["amount"])]
+        my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
         
-        my_trades_label = remove_redundant_elements([abs(o["label"]) for o in my_trades_with_the_same_amount])
-        
-        for label in my_trades_label:
+        for amount in my_trades_amount:
+            my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
+                                                                if amount == abs(o["amount"])]
             
-            label_integer = get_label_integer (label)
+            my_trades_label = remove_redundant_elements(
+                [abs(o["label"]) for o in my_trades_with_the_same_amount]
+                )
             
-            transaction_under_label_integer = [o for o in my_trades_with_the_same_amount\
-                if label_integer in o["label"]]
+            for label in my_trades_label:
+                
+                label_integer = get_label_integer (label)
+                
+                transaction_under_label_integer = [o for o in my_trades_with_the_same_amount\
+                    if label_integer in o["label"]]
 
             my_trades_with_the_same_label = [o for o in my_trades_currency_strategy\
                 if label in  (o["label"])]
