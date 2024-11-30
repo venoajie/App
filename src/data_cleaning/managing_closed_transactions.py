@@ -497,7 +497,8 @@ async def closing_one_to_many_single_open_order(
     
     closed_label_with_same_size_as_open_label = [
         o for o in transaction_closed_under_the_same_label_int\
-            if "closed" in o["label"] and abs(o["amount"]) == open_label_size]
+            if "closed" in o["label"] \
+                and abs(o["amount"]) == open_label_size]
     
     log.warning(F"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}")
     

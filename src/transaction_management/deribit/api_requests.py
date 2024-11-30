@@ -13,8 +13,6 @@ from loguru import logger as log
 
 # user defined formula
 from configuration import id_numbering, config
-from db_management.sqlite_management import (
-    deleting_row,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from utilities import time_modification
@@ -252,7 +250,9 @@ class SendApiRequest:
 
         log.warning(f'order_result {order_result}')
 
-        if order_result != None and ("error" in order_result or "message" in order_result ) :
+        if order_result != None \
+            and ("error" in order_result or "message" in order_result ) :
+            
             error = order_result ["error"]
             message = error ["message"]
 
