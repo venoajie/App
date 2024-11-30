@@ -103,7 +103,7 @@ def get_the_same_amount(
         
         my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
         
-        result = defaultdict(list)
+        result = []
         for amount in my_trades_amount:
             
             my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\

@@ -69,7 +69,7 @@ def cached_ticker_data(currencies):
     
     
     
-    result = defaultdict(list)
+    result=[]
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
                         
@@ -623,7 +623,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             if sum_selected_transaction != 0\
                                                                 and len_selected_transaction:
                                                                 
-                                                                send_order = defaultdict(list)
+                                                                send_order = []
                                                                 
                                                                 if size_future_reconciled\
                                                                     and size_perpetuals_reconciled\
