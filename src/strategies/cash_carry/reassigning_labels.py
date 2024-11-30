@@ -92,42 +92,37 @@ async def combo_modify_label_unpaired_transaction(
     
     
 def get_the_same_amount(
-    my_trades_currency_strategy: list,    
+    my_trades_currency: list,    
     ) -> list:
     """
     
     
     """
     
+    my_trades_currency_strategy = [o for o in my_trades_currency if "futureSpread" in o["label"]]
+    
     if my_trades_currency_strategy:
         
         my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
         
+        my_trades_label = remove_redundant_elements(
+                [(o["label"]) for o in my_trades_currency_strategy])
+        
         result = []
-        for amount in my_trades_amount:
+        for label in my_trades_label:
             
-            my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
-                                                                if amount == abs(o["amount"])]
+            label_integer = get_label_integer (label)
             
-            my_trades_label = remove_redundant_elements(
-                [(o["label"]) for o in my_trades_with_the_same_amount]
-                )
+            transaction_under_label_integer = [o for o in my_trades_with_the_same_amount\
+                if label_integer in o["label"]]
             
-            for label in my_trades_label:
+            transaction_under_label_integer_len = len(transaction_under_label_integer)
+            
+            if transaction_under_label_integer_len == 1:
                 
-                label_integer = get_label_integer (label)
+                result.append (transaction_under_label_integer[0])
                 
-                transaction_under_label_integer = [o for o in my_trades_with_the_same_amount\
-                    if label_integer in o["label"]]
-                
-                transaction_under_label_integer_len = len(transaction_under_label_integer)
-                
-                if transaction_under_label_integer_len == 1:
-                    
-                    result.append (transaction_under_label_integer[0])
-                
-    return result
-
+        return result
 
 async def pairing_single_label(
     strategy_parameters: list,
