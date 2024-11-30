@@ -11,18 +11,12 @@ from loguru import logger as log
 from db_management.sqlite_management import(
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     insert_tables,
-    deleting_row,
-    querying_duplicated_transactions)
+    deleting_row,)
 from strategies.basic_strategy import(
     get_label_integer,)
-from transaction_management.deribit.telegram_bot import(
-    telegram_bot_sendtext,)
-from utilities.system_tools import(
-    sleep_and_restart,)
 from utilities.string_modification import(
     extract_currency_from_text,
     extract_integers_aggregation_from_text,
-    extract_integers_from_text,
     get_unique_elements, 
     parsing_label,
     parsing_sqlite_json_output,

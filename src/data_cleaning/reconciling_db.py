@@ -48,7 +48,9 @@ def get_my_trades_size_per_instrument(
     sum_my_trades_instrument = 0 if not my_trades_instrument \
         else sum([o["amount"] for o in my_trades_instrument])
         
-    return  0 if not sum_my_trades_instrument else sum_my_trades_instrument
+    return  0 \
+        if not sum_my_trades_instrument \
+            else sum_my_trades_instrument
     
 
 def get_transaction_log_position_per_instrument(
@@ -117,8 +119,6 @@ def is_transaction_log_and_sub_account_size_reconciled_each_other(
         log.critical(f"{instrument_name} reconciled {reconciled} sub_account_size_instrument {sub_account_size_instrument} current_position_log {current_position_log}")
 
     return reconciled
-    
-    
     
     
 def is_my_trades_active_archived_reconciled_each_other(
@@ -223,6 +223,7 @@ async def my_trades_active_archived_not_reconciled_each_other(
     else:
                                         
         from_sqlite_closed_trade_id = [o["trade_id"] for o in my_trades_instrument_name_closed]
+    
         from_sqlite_open_trade_id = [o["trade_id"] for o in my_trades_instrument_name_active]  
                                                 
         from_exchange_trade_id = [o["trade_id"] for o in my_trades_instrument_name_archive]
