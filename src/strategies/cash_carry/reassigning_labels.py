@@ -260,13 +260,13 @@ async def pairing_single_label(
                     new_label
                     )
 
-                log.warning (paired_success)
+                
                 log.warning (future_trade)
                 log.debug (perpetual_trade)
                 log.debug (new_label)
                 
-                
-        if paired_success:
-            break
+                if paired_success:
+                    log.warning (paired_success)
+                    break
     
     return paired_success
