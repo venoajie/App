@@ -2,95 +2,59 @@
 
 # built ins
 import asyncio
-import operator 
-from collections import defaultdict
-# installed
 
+# installed
 from loguru import logger as log
+
 # user defined formula
 from db_management.sqlite_management import (
     update_status_data,)
 from loguru import logger as log
 from utilities.string_modification import (
-    remove_redundant_elements)
+    remove_redundant_elements,
+    sorting_list)
 from strategies.basic_strategy import (
     get_label_integer,)
 from strategies.cash_carry.combo_auto import(
     check_if_minimum_waiting_time_has_passed)
 
-def sorting_list(
-    listing: list,
-    item_reference: str = "price",
-    is_reversed: bool=True
-    ) -> list:
+    
+def waiting_time_has_expired(
+    strategy_params: dict,
+    future_trade: dict,    
+    perpetual_trade: dict,
+    server_time: int
+    ) -> bool:
     """
-    https://sparkbyexamples.com/python/sort-list-of-dictionaries-by-value-in-python/
-
-    Args:
-        listing (list): _description_
-        item_reference (str, optional): _description_. Defaults to "price".
-        is_reversed (bool, optional): _description_. Defaults to True.
-                                    True = from_highest_to_lowest
-                                    False = from_lowest_to_highest
-
-    Returns:
-        list: _description_
+    
+    
     """
 
-    return sorted(
-        listing, 
-        key=operator.itemgetter(item_reference), 
-        reverse = is_reversed)
+    ONE_SECOND = 1000
+    
+    ONE_MINUTE = ONE_SECOND * 60
+            
+    waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
+    
+    timestamp_perpetual: int = perpetual_trade["timestamp"]
 
-def get_unpaired_transaction(
-    my_trades_currency_strategy: list
-    ) -> list:
-    """
-    """
-    unpaired_transactions_all =  [o for o in my_trades_currency_strategy if sum(o["amount"]) != 0]
-    
-    unpaired_transactions_futures =  sorting_list(
-        [o for o in unpaired_transactions_all if "PERPETUAL" not in o["instrument_name"] ],
-        "price",
-        True
-        )
-    
-    unpaired_transactions_perpetual =  sorting_list(
-        [o for o in unpaired_transactions_all if "PERPETUAL" in o["instrument_name"] ],
-        "price",
-        False
-        )
-    
-    log.error (f"unpaired_transactions_futures {unpaired_transactions_futures}")
-    
-    return dict(
-        unpaired_transactions_futures = unpaired_transactions_futures,
-        unpaired_transactions_perpetual = unpaired_transactions_perpetual) 
-    
-    
-async def combo_modify_label_unpaired_transaction(
-    unpaired_transactions_futures: list,
-    unpaired_transactions_perpetual: list
-    ) -> None:
-    """
-    """
-    
-    for transaction_future in unpaired_transactions_futures:
-        log.debug (f"transaction_future {transaction_future}")
-        size_future = transaction_future ["amount"]
-        price_future = transaction_future ["price"]
-        perpetual_with_same_size = sorting_list(
-            [o  for o in unpaired_transactions_perpetual \
-                if o["amount"] == size_future \
-                    and o["price"] < price_future],
-            "price",
-            True
+    waiting_time_for_perpetual_order: bool = check_if_minimum_waiting_time_has_passed(
+            waiting_minute_before_cancel,
+            timestamp_perpetual,
+            server_time,
             )
-        log.error (f"perpetual_with_same_size {perpetual_with_same_size}")
-        if perpetual_with_same_size:
-            break
+
+    timestamp_future: int = future_trade["timestamp"]
+
+    waiting_time_for_future_order: bool = check_if_minimum_waiting_time_has_passed(
+            waiting_minute_before_cancel,
+            timestamp_future,
+            server_time,
+        )
     
+    return waiting_time_for_perpetual_order and waiting_time_for_future_order
     
+                        
 def get_single_transaction(
     my_trades_currency: list,    
     strategy: str,
@@ -113,8 +77,7 @@ def get_single_transaction(
         my_trades_label = remove_redundant_elements(
                 [(o["label"]) for o in my_trades_currency_strategy])
         
-        result = []
-        
+        result = []        
         for label in my_trades_label:
             
             label_integer = get_label_integer (label)
@@ -165,7 +128,7 @@ async def pairing_single_label(
     strategy_attributes: list,
     trade_db_table: str,
     archive_db_table: str,
-    my_trades_currency_active: list,
+    my_trades_currency_active: dict,
     server_time: int 
     ) -> None:
     """
@@ -202,67 +165,54 @@ async def pairing_single_label(
                 True)
         
         if my_trades_future_sorted:
+    
             future_trade = my_trades_future_sorted[0]
+            perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]  
+            
             price_future = future_trade["price"]
-            side_future = future_trade["side"]
             
             my_trades_perpetual_with_lower_price = [o for o in my_trades_with_the_same_amount_label_perpetual \
-                if o["price"]< price_future ]
+                if o["price"] < price_future ]
             
             my_trades_perpetual_with_lower_price_sorted = sorting_list(
                 my_trades_perpetual_with_lower_price,"price",
                 False)
-                                                                            
-            if side_future == "sell"\
-                and my_trades_perpetual_with_lower_price_sorted:                                
-
-                ONE_SECOND = 1000
-                ONE_MINUTE = ONE_SECOND * 60
-                
-                perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]
-
-                waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
-                
-                timestamp_perpetual: int = perpetual_trade["timestamp"]
             
-                waiting_time_for_perpetual_order: bool = check_if_minimum_waiting_time_has_passed(
-                        waiting_minute_before_cancel,
-                        timestamp_perpetual,
-                        server_time,
-                    )
+            paired_success = waiting_time_has_expired(
+                strategy_params,
+                future_trade,
+                perpetual_trade,
+                server_time
+                )
+                                                                    
+            if paired_success:
 
-                timestamp_future: int = future_trade["timestamp"]
-            
-                waiting_time_for_future_order: bool = check_if_minimum_waiting_time_has_passed(
-                        waiting_minute_before_cancel,
-                        timestamp_future,
-                        server_time,
-                    )
-                
-                paired_success = waiting_time_for_perpetual_order and waiting_time_for_future_order
-                
                 side_perpetual = perpetual_trade["side"]
+                side_future = future_trade["side"]
                 
-                if paired_success \
-                    and side_perpetual == "buy":
-                        
-                    filter = "trade_id"
-                    trade_id = perpetual_trade[filter]
-                    new_label = future_trade["label"]
-                    
-                    if False:
+                filter = "trade_id"
+                trade_id = perpetual_trade[filter]
+                new_label = future_trade["label"]
+                                
+                # market contango
+                if my_trades_perpetual_with_lower_price_sorted:                              
+
+                    # market contango    
+                    if  side_future == "sell"\
+                        and side_perpetual == "buy":
+                            
                         await updating_db_with_new_label(
-                        trade_db_table,
-                        archive_db_table,
-                        trade_id,
-                        filter,
-                        new_label
-                        )
-                    
-                    log.warning (future_trade)
-                    log.debug (perpetual_trade)
-                    log.debug (new_label)
-                    
-                    break
+                            trade_db_table,
+                            archive_db_table,
+                            trade_id,
+                            filter,
+                            new_label
+                            )
+                        
+                        log.warning (future_trade)
+                        log.debug (perpetual_trade)
+                        log.debug (new_label)
+                        
+                        break
         
     return paired_success

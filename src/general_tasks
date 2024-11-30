@@ -423,7 +423,18 @@ async def reconciling_size(
                         my_trades_currency_active,
                         server_time 
                         )
-                    log.error (f"pairing_label {pairing_label}")
+                    
+                    if pairing_label:
+                        
+                        cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                            if o["cancellable"]==True]
+                        
+                        await modify_order_and_db.cancel_the_cancellables(
+                                                    currency,
+                                                    cancellable_strategies
+                                                    )
+
+                    
                     # FROM sub account to other db's
                     if  sub_account_positions_instrument:
                         
