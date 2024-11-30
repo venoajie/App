@@ -87,98 +87,6 @@ async def saving_traded_orders (
             order_id,
             )
         
-    
-async def reconciling_sub_account_and_db_open_orders(
-    instrument_name: str,
-    order_db_table: str,
-    orders_currency: list,
-    sub_account: list
-    ) -> None:
-
-    where_filter = f"order_id"
-        
-    sub_account_orders = sub_account["open_orders"]
-    
-    sub_account_orders_instrument = [o for o in sub_account_orders\
-        if instrument_name in o["instrument_name"]]
-    
-    sub_account_orders_instrument_id = [] if sub_account_orders_instrument == [] \
-        else [o["order_id"] for o in sub_account_orders_instrument]
-
-    db_orders_instrument = [o for o in orders_currency \
-        if instrument_name in o["instrument_name"]]
-    
-    db_orders_instrument_id = [] if db_orders_instrument == [] \
-        else [o["order_id"] for o in db_orders_instrument]
-        
-    # sub account contain outstanding order
-    if sub_account_orders_instrument:
-        
-        filter_trade="order_id"
-        
-        # no outstanding order in db. refill with data from sub account
-        if not db_orders_instrument:
-            for order in sub_account_orders_instrument:
-                
-                await insert_tables(order_db_table, order)
-                
-        # both contain orders, but different id
-        else:
-            unrecorded_order_id = get_unique_elements(
-                db_orders_instrument_id,
-                sub_account_orders_instrument_id
-                )
-            
-            log.info(f"unrecorded_order_id {unrecorded_order_id}")
-            
-            if unrecorded_order_id:
-                
-                for order_id in unrecorded_order_id:
-                    
-                    order = [o for o in sub_account_orders_instrument if order_id in ["order_id"]]
-                    
-                    if order_id:
-                        
-                        try:
-                            order = order [0]
-                                                        
-                            order_state= order["order_state"]
-                            
-                            if order_state == "cancelled" \
-                                or order_state == "filled":
-                                    
-                                await deleting_row(
-                                    order_db_table,
-                                    "databases/trading.sqlite3",
-                                    filter_trade,
-                                    "=",
-                                    order_id,
-                                    )
-                        
-                            if order_state == "open":
-                                
-                                await insert_tables(
-                                    order_db_table,
-                                    order
-                                    )
-            
-                        except:
-                            await telegram_bot_sendtext(f"order {order}")
-    # sub account did not contain order from respective instrument
-    else:
-        # if db contain orders, delete them
-        if db_orders_instrument:
-            
-            for open_order_id in db_orders_instrument_id:
-                        
-                await deleting_row("orders_all_json",
-                                    "databases/trading.sqlite3",
-                                    where_filter,
-                                    "=",
-                                    open_order_id,
-                                )
-
-
 async def get_unrecorded_trade_id(instrument_name: str) -> dict:
     
     currency = extract_currency_from_text(instrument_name)       
@@ -397,67 +305,6 @@ def is_size_sub_account_and_my_trades_reconciled(
     except Exception as error:
         log.warning(error)
                 
-def check_if_label_open_still_in_active_transaction(
-    from_sqlite_open: list, 
-    instrument_name: str, 
-    label: str
-    ) -> bool:
-    """_summary_
-    
-    concern: there are highly possibities of one label for multiple instruments for transactions under future spread. 
-    Hence, the testing should be specified for an instrument
-
-    Args:
-        from_sqlite_open(list): _description_
-        instrument_name(str): _description_
-        label(str): _description_
-
-    Returns:
-        bool: _description_
-    """
-    integer_label= extract_integers_from_text(label)
-    
-    log.warning(f"from_sqlite_open {from_sqlite_open}")
-    log.info(f"integer_label {integer_label}")
-    
-    trades_from_sqlite_open = [o for o in from_sqlite_open \
-        if integer_label == extract_integers_from_text(o["label"]) \
-            and "open" in o["label"] \
-                and instrument_name == o["instrument_name"] ] 
-    
-    log.debug(f"trades_from_sqlite_open {trades_from_sqlite_open}")
-    
-    if trades_from_sqlite_open !=[]:
-
-        # get sum of open label only
-        sum_from_open_label_only= sum([o["amount"] for o in trades_from_sqlite_open])
-        log.warning(f"sum_from_open_label_only {sum_from_open_label_only}")
-        
-        # get net sum of label
-        sum_net_trades_from_open_and_closed= sum([o["amount"] for o in from_sqlite_open\
-            if integer_label == extract_integers_from_text(o["label"]) \
-                and instrument_name == o["instrument_name"]])
-        
-        log.warning(f"sum_net_trades_from_open_and_closed {sum_net_trades_from_open_and_closed}")
-        
-        sum_label = sum_from_open_label_only >= sum_net_trades_from_open_and_closed
-        log.warning(f"sum_label {sum_label}")
-        
-    return False if trades_from_sqlite_open==[] else sum_label
-
-
-def get_label_from_respected_id(
-    trades_from_exchange, 
-    unrecorded_id, 
-    marker
-    ) -> str:
-    #log.info(f"trades_from_exchange {trades_from_exchange}")
-    #log.info(f"unrecorded_id {unrecorded_id} marker {marker}")
-    
-    label= [o["label"] for o in trades_from_exchange if o[marker] == unrecorded_id][0]
-    
-    #log.info(f"label {label}")
-    return label
 
 async def clean_up_closed_futures_because_has_delivered(
     instrument_name, 
@@ -514,40 +361,6 @@ async def clean_up_closed_futures_because_has_delivered(
     closing_transaction.update({"timestamp":timestamp_from_transaction_log})
 
     await insert_tables("my_trades_closed_json", closing_transaction)
-
-
-async def remove_duplicated_elements() -> None:
-    """ 
-    
-        # label/order id may be duplicated(consider an order id/label was 
-        # executed couple of times due to lack of liquidity)
-        # There is only one trade_id
-       
-    """
-    
-    label_checked=["my_trades_all_json", "my_trades_closed_json"]
-    
-    where_filter = f"trade_id"
-    
-    for label in label_checked:
-        duplicated_elements_all = await querying_duplicated_transactions(label,where_filter)
-
-        duplicated_elements = 0 if duplicated_elements_all == 0 else [o[where_filter] for o in duplicated_elements_all]
-        
-        log.info(f"duplicated_elements {duplicated_elements}")
-
-        if duplicated_elements != 0:
-
-            for trade_id in duplicated_elements:
-                
-                await deleting_row(
-                    label,
-                    "databases/trading.sqlite3",
-                    where_filter,
-                    "=",
-                    trade_id,
-                )
-                await sleep_and_restart()
 
     
 def get_transactions_with_closed_label(transactions_all: list) -> list:
