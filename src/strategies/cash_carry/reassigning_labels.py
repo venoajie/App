@@ -91,7 +91,7 @@ async def combo_modify_label_unpaired_transaction(
             break
     
     
-def get_the_same_amount(
+def get_single_transaction(
     my_trades_currency: list,    
     ) -> list:
     """
@@ -103,7 +103,9 @@ def get_the_same_amount(
         else [o for o in my_trades_currency
               if o["label"] is  not None]
     
-    my_trades_currency_strategy = [o for o in my_trades_currency_active_with_no_blanks if "futureSpread" in o["label"]]
+    my_trades_currency_strategy = [o for o in my_trades_currency_active_with_no_blanks \
+        if "futureSpread" in o["label"]\
+                and "closed" not in o["label"]]
     
     if my_trades_currency_strategy:
         
@@ -111,6 +113,7 @@ def get_the_same_amount(
                 [(o["label"]) for o in my_trades_currency_strategy])
         
         result = []
+        
         for label in my_trades_label:
             
             label_integer = get_label_integer (label)
@@ -131,7 +134,7 @@ async def pairing_single_label(
     strategy_parameters: list,
     trade_db_table: str,
     archive_db_table: str,
-    my_trades_currency_strategy: list,
+    my_trades_currency_active: list,
     my_trades_with_the_same_amount_label_non_perpetual,
     my_trades_with_the_same_amount_label_perpetual,
     label,
@@ -143,75 +146,33 @@ async def pairing_single_label(
     
     """
     
-    
-    my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
-        
-    for amount in my_trades_amount:
-            
-            my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
-                                                                if amount == abs(o["amount"])]
-    
     paired_success = False
     
-    if my_trades_currency_strategy:
-        
-        my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
-        
-        for amount in my_trades_amount:
-            my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
-                                                                if amount == abs(o["amount"])]
-            
-            my_trades_label = remove_redundant_elements(
-                [abs(o["label"]) for o in my_trades_with_the_same_amount]
-                )
-            
-            for label in my_trades_label:
-                
-                label_integer = get_label_integer (label)
-                
-                transaction_under_label_integer = [o for o in my_trades_with_the_same_amount\
-                    if label_integer in o["label"]]
-
-            my_trades_with_the_same_label = [o for o in my_trades_currency_strategy\
-                if label in  (o["label"])]
-            
-            my_trades_with_the_same_amount_single_label = [o for o in my_trades_with_the_same_amount\
-                if get_label_integer(o["label"] in o["label"])]
-            
-            my_trades_with_the_same_amount_label_perpetual = [o for o in my_trades_with_the_same_amount\
-                if "PERPETUAL" in o["instrument_name"]]
-            
-            my_trades_with_the_same_amount_label_non_perpetual = [o for o in my_trades_with_the_same_amount\
-                if "PERPETUAL" not in o["instrument_name"]]
-            
-            labels_non_perpetual = [o["label"] for o in my_trades_with_the_same_amount_label_non_perpetual]
-            
-            for label in labels_non_perpetual:
-                
-                transaction_under_label_integer_len = len(transaction_under_label_integer)
-                
-                if transaction_under_label_integer_len ==1:
-                        
-                    paired = await combo_auto.pairing_single_label(
-                        trade_db_table,
-                        archive_db_table,
-                        my_trades_with_the_same_amount_label_non_perpetual,
-                        my_trades_with_the_same_amount_label_perpetual,
-                        label   )
-                    
-                    if paired:
-                        await sleep_and_restart()
+    single_label_transaction = get_single_transaction(my_trades_currency_active)
     
-    
+    my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in single_label_transaction])
+        
     strategy_params =  strategy_parameters    
-                
-    my_trades_future = [o for o in my_trades_with_the_same_amount_label_non_perpetual\
-    if label in (o["label"]) \
-        and "closed" not in o["label"]]
-    
-    if my_trades_future:
         
-        future_trade = my_trades_future[0]
+    for amount in my_trades_amount:
+        
+        my_trades_with_the_same_amount = [o for o in single_label_transaction\
+            if amount == abs(o["amount"])]
+        
+        my_trades_with_the_same_amount_label_perpetual = [o for o in my_trades_with_the_same_amount\
+            if "PERPETUAL" in o["instrument_name"]]
+        
+        my_trades_with_the_same_amount_label_non_perpetual = [o for o in my_trades_with_the_same_amount\
+            if "PERPETUAL" not in o["instrument_name"]]
+                    
+        my_trades_future = [o for o in my_trades_with_the_same_amount_label_non_perpetual\
+            if label in (o["label"]) ]
+        
+        my_trades_future_sorted = sorting_list(
+                my_trades_with_the_same_amount_label_non_perpetual,"price",
+                True)
+        
+        future_trade = my_trades_future_sorted[0]
         price_future = future_trade["price"]
         side_future = future_trade["side"]
         
@@ -259,26 +220,9 @@ async def pairing_single_label(
                 trade_id = perpetual_trade[filter]
                 new_label = future_trade["label"]
                 
-                await update_status_data(
-                    archive_db_table,
-                    "label",
-                    filter,
-                    trade_id,
-                    new_label,
-                    "="
-                    )
-                
-                await update_status_data(
-                    trade_db_table,
-                    "label",
-                    filter,
-                    trade_id,
-                    new_label,
-                    "="
-                    )
-
                 log.warning (paired_success)
                 log.warning (future_trade)
                 log.debug (perpetual_trade)
+                log.debug (new_label)
                 
                 return paired_success
