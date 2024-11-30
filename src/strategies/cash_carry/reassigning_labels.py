@@ -103,8 +103,6 @@ def get_the_same_amount(
     
     if my_trades_currency_strategy:
         
-        my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
-        
         my_trades_label = remove_redundant_elements(
                 [(o["label"]) for o in my_trades_currency_strategy])
         
@@ -113,7 +111,7 @@ def get_the_same_amount(
             
             label_integer = get_label_integer (label)
             
-            transaction_under_label_integer = [o for o in my_trades_with_the_same_amount\
+            transaction_under_label_integer = [o for o in my_trades_currency_strategy\
                 if label_integer in o["label"]]
             
             transaction_under_label_integer_len = len(transaction_under_label_integer)
@@ -123,6 +121,7 @@ def get_the_same_amount(
                 result.append (transaction_under_label_integer[0])
                 
         return result
+    
 
 async def pairing_single_label(
     strategy_parameters: list,
