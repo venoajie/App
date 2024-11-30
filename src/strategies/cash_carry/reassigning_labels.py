@@ -175,46 +175,48 @@ async def pairing_single_label(
             my_trades_perpetual_with_lower_price_sorted = sorting_list(
                 my_trades_perpetual_with_lower_price,"price",
                 False)       
-    
-            perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]  
-    
-            paired_success = waiting_time_has_expired(
-                strategy_params,
-                future_trade,
-                perpetual_trade,
-                server_time
-                )
-                                                                    
-            if paired_success:
+            
+            if my_trades_perpetual_with_lower_price_sorted:
 
-                side_perpetual = perpetual_trade["side"]
-                side_future = future_trade["side"]
-                
-                filter = "trade_id"
-                trade_id = perpetual_trade[filter]
-                new_label = future_trade["label"]
+                perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]  
+
+                paired_success = waiting_time_has_expired(
+                    strategy_params,
+                    future_trade,
+                    perpetual_trade,
+                    server_time
+                    )
+                                                                        
+                if paired_success:
+
+                    side_perpetual = perpetual_trade["side"]
+                    side_future = future_trade["side"]
+                    
+                    filter = "trade_id"
+                    trade_id = perpetual_trade[filter]
+                    new_label = future_trade["label"]
+                                    
+                    # market contango
+                    if my_trades_perpetual_with_lower_price_sorted:                              
+
+                        # market contango    
+                        if  side_future == "sell"\
+                            and side_perpetual == "buy":
                                 
-                # market contango
-                if my_trades_perpetual_with_lower_price_sorted:                              
-
-                    # market contango    
-                    if  side_future == "sell"\
-                        and side_perpetual == "buy":
+                            if False:
+                                await updating_db_with_new_label(
+                                trade_db_table,
+                                archive_db_table,
+                                trade_id,
+                                filter,
+                                new_label
+                                )
                             
-                        if False:
-                            await updating_db_with_new_label(
-                            trade_db_table,
-                            archive_db_table,
-                            trade_id,
-                            filter,
-                            new_label
-                            )
-                        
-                        log.warning (future_trade)
-                        log.debug (perpetual_trade)
-                        log.debug (new_label)
-                        
-                        break
+                            log.warning (future_trade)
+                            log.debug (perpetual_trade)
+                            log.debug (new_label)
+                            
+                            break
     if not paired_success:
         log.critical (f"""my_trades_with_the_same_amount {sum([o["amount"] for o in  my_trades_with_the_same_amount])}""")
         
