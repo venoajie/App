@@ -93,6 +93,7 @@ async def combo_modify_label_unpaired_transaction(
     
 def get_single_transaction(
     my_trades_currency: list,    
+    strategy: str,
     ) -> list:
     """
     
@@ -104,7 +105,7 @@ def get_single_transaction(
               if o["label"] is  not None]
     
     my_trades_currency_strategy = [o for o in my_trades_currency_active_with_no_blanks \
-        if "futureSpread" in o["label"]\
+        if strategy in o["label"]\
                 and "closed" not in o["label"]]
     
     if my_trades_currency_strategy:
@@ -128,18 +129,44 @@ def get_single_transaction(
                 result.append (transaction_under_label_integer[0])
                 
         return result
+
+async def updating_db_with_new_label(
+    trade_db_table: str,
+    archive_db_table: str,
+    trade_id: str,
+    filter: str,
+    new_label: str 
+    ) -> None:
+    """
+    
+    
+    """
+                
+    await update_status_data(
+        archive_db_table,
+        "label",
+        filter,
+        trade_id,
+        new_label,
+        "="
+        )
+    
+    await update_status_data(
+        trade_db_table,
+        "label",
+        filter,
+        trade_id,
+        new_label,
+        "="
+        )
     
 
 async def pairing_single_label(
-    strategy_parameters: list,
+    strategy_attributes: list,
     trade_db_table: str,
     archive_db_table: str,
     my_trades_currency_active: list,
-    my_trades_with_the_same_amount_label_non_perpetual,
-    my_trades_with_the_same_amount_label_perpetual,
-    label,
-    server_time 
-    
+    server_time: int 
     ) -> None:
     """
     
@@ -148,11 +175,14 @@ async def pairing_single_label(
     
     paired_success = False
     
+    strategy = "futureSpread"     
+
     single_label_transaction = get_single_transaction(my_trades_currency_active)
     
     my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in single_label_transaction])
-        
-    strategy_params =  strategy_parameters    
+
+    strategy_params =  strategy_params= [o for o in strategy_attributes \
+                                                if o["strategy_label"] == strategy][0]  
         
     for amount in my_trades_amount:
         
@@ -164,9 +194,6 @@ async def pairing_single_label(
         
         my_trades_with_the_same_amount_label_non_perpetual = [o for o in my_trades_with_the_same_amount\
             if "PERPETUAL" not in o["instrument_name"]]
-                    
-        my_trades_future = [o for o in my_trades_with_the_same_amount_label_non_perpetual\
-            if label in (o["label"]) ]
         
         my_trades_future_sorted = sorting_list(
                 my_trades_with_the_same_amount_label_non_perpetual,"price",
@@ -220,6 +247,15 @@ async def pairing_single_label(
                 trade_id = perpetual_trade[filter]
                 new_label = future_trade["label"]
                 
+                if False:
+                    await updating_db_with_new_label(
+                    trade_db_table,
+                    archive_db_table,
+                    trade_id,
+                    filter,
+                    new_label
+                    )
+
                 log.warning (paired_success)
                 log.warning (future_trade)
                 log.debug (perpetual_trade)
