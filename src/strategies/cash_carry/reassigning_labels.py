@@ -216,6 +216,6 @@ async def pairing_single_label(
                         
                         break
     if not paired_success:
-        log.info (f"""my_trades_with_the_same_amount {sum([o["amount"] for o in  my_trades_with_the_same_amount])}""")
+        log.critical (f"""my_trades_with_the_same_amount {sum([o["amount"] for o in  my_trades_with_the_same_amount])}""")
         
     return paired_success
