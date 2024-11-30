@@ -265,4 +265,4 @@ async def pairing_single_label(
                 
                 break
                 
-            return paired_success
+    return paired_success
