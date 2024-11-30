@@ -146,7 +146,7 @@ async def refill_db (
     instrument_name,
     archive_db_table,
     ) -> list:
-    
+    from utilities.string_modification import sorting_list
 
     column_trade: str= "id", "instrument_name","data", "label","trade_id"
                                     
@@ -160,7 +160,7 @@ async def refill_db (
                         if o["label"] is None]
     
     my_trades_archive_instrument_id = ([ o["id"] for o in my_trades_currency_active_with_blanks ])
-    log.warning (f"my_trades_currency_archive {my_trades_currency_archive}")
+    log.warning (f"my_trades_currency_archive {sorting_list(my_trades_currency_archive, "id", True)}")
     log.error (f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}")
     log.error (f"my_trades_archive_instrument_id {my_trades_archive_instrument_id}")
     
