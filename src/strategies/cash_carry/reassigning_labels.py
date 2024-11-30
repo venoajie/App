@@ -177,7 +177,9 @@ async def pairing_single_label(
     
     strategy = "futureSpread"     
 
-    single_label_transaction = get_single_transaction(my_trades_currency_active)
+    single_label_transaction = get_single_transaction(
+        my_trades_currency_active,
+        strategy)
     
     my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in single_label_transaction])
 
