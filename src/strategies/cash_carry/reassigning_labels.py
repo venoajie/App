@@ -100,7 +100,7 @@ def get_the_same_amount(
     """
     
     my_trades_currency_active_with_no_blanks = [] if my_trades_currency == []\
-        else [o for o in my_trades_currency_strategy
+        else [o for o in my_trades_currency
               if o["label"] is  not None]
     
     my_trades_currency_strategy = [o for o in my_trades_currency_active_with_no_blanks if "futureSpread" in o["label"]]
