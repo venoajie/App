@@ -163,6 +163,7 @@ async def refill_db (
     log.warning (f"my_trades_currency_archive {sorting_list(my_trades_currency_archive, "id", True)}")
     log.error (f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}")
     log.error (f"my_trades_archive_instrument_id {my_trades_archive_instrument_id}")
+    log.error (f"archive_db_table {archive_db_table}")
     
     if my_trades_archive_instrument_id:
         for id in my_trades_archive_instrument_id:
