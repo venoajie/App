@@ -15,18 +15,19 @@ import websockets
 
 from configuration import id_numbering, config
 from configuration.label_numbering import get_now_unix_time
+from data_cleaning.managing_closed_transactions import (
+    check_whether_order_db_reconciled_each_other,
+    is_size_sub_account_and_my_trades_reconciled)
 from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-    querying_table,
-    update_status_data)
+    querying_table,)
 from strategies.basic_strategy import (
     get_label_integer,)
 from strategies.hedging_spot import (
     HedgingSpot,
     get_market_condition_hedging)
 from strategies.combo_auto import(
-    ComboAuto, 
-    check_if_minimum_waiting_time_has_passed)
+    ComboAuto)
 from transaction_management.deribit.api_requests import get_tickers
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
@@ -40,8 +41,7 @@ from utilities.string_modification import (
     extract_currency_from_text,
     parsing_label,
     remove_double_brackets_in_list,
-    remove_redundant_elements,
-    sorting_list)
+    remove_redundant_elements)
 from utilities.system_tools import (
     async_raise_error_message,
     provide_path_for_file,
@@ -49,10 +49,6 @@ from utilities.system_tools import (
     sleep_and_restart,)
 from websocket_management.ws_management import (
     get_futures_instruments,
-    )
-from websocket_management.cleaning_up_transactions import (
-    check_whether_order_db_reconciled_each_other,
-    is_size_sub_account_and_my_trades_reconciled
     )
 
 # Using the LRUCache decorator function with a maximum cache size of 3
@@ -580,6 +576,9 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                             my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
                                                                 if amount == abs(o["amount"])]
+                                                            
+                                                            my_trades_with_the_same_amount_single_label = [o for o in my_trades_with_the_same_amount\
+                                                                if get_label_integer(o["label"] in o["label"])]
                                                             
                                                             my_trades_with_the_same_amount_label_perpetual = [o for o in my_trades_with_the_same_amount\
                                                                 if "PERPETUAL" in o["instrument_name"]]

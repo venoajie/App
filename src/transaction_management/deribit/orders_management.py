@@ -7,7 +7,7 @@ from loguru import logger as log
 from db_management.sqlite_management import(
     deleting_row,
     insert_tables)
-from websocket_management.cleaning_up_transactions import(
+from data_cleaning.managing_closed_transactions import(
     clean_up_closed_transactions,)
 
 def telegram_bot_sendtext(

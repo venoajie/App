@@ -9,6 +9,18 @@ from loguru import logger as log
 import tomli
 
 from configuration.label_numbering import get_now_unix_time
+from data_cleaning.managing_closed_transactions import (
+    clean_up_closed_transactions,
+    get_unrecorded_trade_transactions,
+    refill_db
+    )
+from data_cleaning.reconciling_db import(
+    is_my_trades_and_sub_account_size_reconciled_each_other,
+    is_my_trades_active_archived_reconciled_each_other,
+    is_transaction_log_and_sub_account_size_reconciled_each_other,
+    my_trades_active_archived_not_reconciled_each_other,
+    )
+from data_cleaning.pruning_db import count_and_delete_ohlc_rows
 from db_management.sqlite_management import (
     back_up_db_sqlite,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
@@ -39,18 +51,6 @@ from websocket_management.allocating_ohlc import (
     ohlc_end_point, 
     ohlc_result_per_time_frame,
     last_tick_fr_sqlite,)
-from websocket_management.cleaning_up_transactions import (
-    clean_up_closed_transactions,
-    count_and_delete_ohlc_rows,
-    get_unrecorded_trade_transactions,
-    is_my_trades_active_archived_reconciled_each_other,
-    is_my_trades_and_sub_account_size_reconciled_each_other,
-    is_transaction_log_and_sub_account_size_reconciled_each_other,
-    is_my_trades_and_sub_account_size_reconciled_each_other,
-    my_trades_active_archived_not_reconciled_each_other,
-    refill_db
-    )
-    
     
 def get_config(file_name: str) -> list:
     """ """
