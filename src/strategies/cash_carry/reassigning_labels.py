@@ -110,7 +110,7 @@ def get_the_same_amount(
                                                                 if amount == abs(o["amount"])]
             
             my_trades_label = remove_redundant_elements(
-                [abs(o["label"]) for o in my_trades_with_the_same_amount]
+                [(o["label"]) for o in my_trades_with_the_same_amount]
                 )
             
             for label in my_trades_label:
