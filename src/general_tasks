@@ -538,11 +538,12 @@ async def reconciling_size(
                     my_trades_currency_active_with_blanks = [o for o in my_trades_currency_active\
                         if o["label"] is  None]
                     
+                    log.debug (f"{currency} {my_trades_currency_active_with_blanks}")
+                    
                     if my_trades_currency_active_with_blanks:
                         await refill_db (
                             instrument_name,
                             archive_db_table,
-                            my_trades_currency_active_with_blanks
                                 )
                                          
             await asyncio.sleep(idle_time)

@@ -145,7 +145,6 @@ def get_custom_label(transaction: list) -> str:
 async def refill_db (
     instrument_name,
     archive_db_table,
-    my_trades_currency_active_with_blanks
     ) -> list:
     
 
