@@ -201,7 +201,7 @@ async def pairing_single_label(
                 my_trades_with_the_same_amount_label_non_perpetual,"price",
                 True)
         
-        log.warning (f"my_trades_future_sorted {my_trades_future_sorted}")
+        log.warning (f"my_trades_with_the_same_amount {my_trades_with_the_same_amount}")
         
         future_trade = my_trades_future_sorted[0]
         price_future = future_trade["price"]
@@ -265,8 +265,7 @@ async def pairing_single_label(
                 log.debug (perpetual_trade)
                 log.debug (new_label)
                 
-                if paired_success:
-                    log.warning (paired_success)
-                    break
+                log.warning (paired_success)
+                break
     
     return paired_success
