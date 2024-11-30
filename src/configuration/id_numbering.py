@@ -1,5 +1,9 @@
-#!/usr/bin/env python
-def id(operation, ws_channel):
+# -*- coding: utf-8 -*-
+
+def id(
+    operation: str, 
+    ws_channel: str
+    ) -> int:
     """
 
     id convention
