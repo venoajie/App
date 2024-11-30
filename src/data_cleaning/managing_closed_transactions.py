@@ -156,10 +156,11 @@ async def refill_db (
                                                 "all", 
                                                 column_trade)
     
-    my_trades_currency_active_with_blanks = [o for o in (my_trades_currency_archive)\
+    my_trades_currency_active_with_blanks = [o for o in my_trades_currency_archive\
                         if o["label"] is None]
     
     my_trades_archive_instrument_id = ([ o["id"] for o in my_trades_currency_active_with_blanks ])
+    log.warning (f"my_trades_currency_archive {my_trades_currency_archive}")
     log.error (f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}")
     log.error (f"my_trades_archive_instrument_id {my_trades_archive_instrument_id}")
     
