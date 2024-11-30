@@ -101,10 +101,13 @@ def get_the_same_amount(
     
     my_trades_currency_strategy = [o for o in my_trades_currency if "futureSpread" in o["label"]]
     
-    if my_trades_currency_strategy:
+    my_trades_currency_active_with_no_blanks = [o for o in my_trades_currency_strategy\
+                        if o["label"] is  not None]
+    
+    if my_trades_currency_active_with_no_blanks:
         
         my_trades_label = remove_redundant_elements(
-                [(o["label"]) for o in my_trades_currency_strategy])
+                [(o["label"]) for o in my_trades_currency_active_with_no_blanks])
         
         result = []
         for label in my_trades_label:
