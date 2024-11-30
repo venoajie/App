@@ -416,14 +416,14 @@ async def reconciling_size(
                     
                     strategy_attributes = config_app["strategies"]
                     
-                    pairing_single_label = pairing_single_label(
+                    pairing_label = pairing_single_label(
                         strategy_attributes,
                         trade_db_table,
                         archive_db_table,
                         my_trades_currency_active,
                         server_time 
                         )
-                    log.error (f"get_the_same {pairing_single_label}")
+                    log.error (f"pairing_label {pairing_label}")
                     # FROM sub account to other db's
                     if  sub_account_positions_instrument:
                         
