@@ -26,7 +26,7 @@ from strategies.basic_strategy import (
 from strategies.hedging_spot import (
     HedgingSpot,
     get_market_condition_hedging)
-from strategies.combo_auto import(
+from strategies.cash_carry.combo_auto import(
     ComboAuto)
 from transaction_management.deribit.api_requests import get_tickers
 from transaction_management.deribit.managing_deribit import (
@@ -567,47 +567,6 @@ class RunningStrategy(ModifyOrderDb):
                                                         my_trades_currency_strategy,
                                                         ticker_perpetual_instrument_name,
                                                         )
-                                                    
-                                                    if my_trades_currency_strategy:
-                                                        
-                                                        my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
-                                                        
-                                                        for amount in my_trades_amount:
-                                                            
-                                                            my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
-                                                                if amount == abs(o["amount"])]
-                                                            
-                                                            my_trades_with_the_same_amount_single_label = [o for o in my_trades_with_the_same_amount\
-                                                                if get_label_integer(o["label"] in o["label"])]
-                                                            
-                                                            my_trades_with_the_same_amount_label_perpetual = [o for o in my_trades_with_the_same_amount\
-                                                                if "PERPETUAL" in o["instrument_name"]]
-                                                            
-                                                            my_trades_with_the_same_amount_label_non_perpetual = [o for o in my_trades_with_the_same_amount\
-                                                                if "PERPETUAL" not in o["instrument_name"]]
-                                                            
-                                                            labels_non_perpetual = [o["label"] for o in my_trades_with_the_same_amount_label_non_perpetual]
-                                                            
-                                                            for label in labels_non_perpetual:
-                                                                
-                                                                label_integer = get_label_integer (label)
-                                                                
-                                                                transaction_under_label_integer = [o for o in my_trades_with_the_same_amount\
-                                                                    if label_integer in o["label"]]
-                        
-                                                                transaction_under_label_integer_len = len(transaction_under_label_integer)
-                                                                
-                                                                if transaction_under_label_integer_len ==1:
-                                                                        
-                                                                    paired = await combo_auto.pairing_single_label(
-                                                                        trade_db_table,
-                                                                        archive_db_table,
-                                                                        my_trades_with_the_same_amount_label_non_perpetual,
-                                                                        my_trades_with_the_same_amount_label_perpetual,
-                                                                        label   )
-                                                                    
-                                                                    if paired:
-                                                                        await sleep_and_restart()
                                                     
                                                     tp_threshold = .001/100
                                                     

@@ -2,7 +2,7 @@
 import pytest
 
 
-from strategies.combo_auto import (
+from strategies.cash_carry.combo_auto import (
     get_transactions_premium,
     delta_premium_pct
     )
