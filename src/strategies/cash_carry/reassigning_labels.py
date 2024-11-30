@@ -99,15 +99,16 @@ def get_the_same_amount(
     
     """
     
-    my_trades_currency_strategy = [o for o in my_trades_currency if "futureSpread" in o["label"]]
+    my_trades_currency_active_with_no_blanks = [] if my_trades_currency == []\
+        else [o for o in my_trades_currency_strategy
+              if o["label"] is  not None]
     
-    my_trades_currency_active_with_no_blanks = [o for o in my_trades_currency_strategy\
-                        if o["label"] is  not None]
+    my_trades_currency_strategy = [o for o in my_trades_currency_active_with_no_blanks if "futureSpread" in o["label"]]
     
-    if my_trades_currency_active_with_no_blanks:
+    if my_trades_currency_strategy:
         
         my_trades_label = remove_redundant_elements(
-                [(o["label"]) for o in my_trades_currency_active_with_no_blanks])
+                [(o["label"]) for o in my_trades_currency_strategy])
         
         result = []
         for label in my_trades_label:
@@ -141,6 +142,18 @@ async def pairing_single_label(
     
     
     """
+    
+    
+        my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
+        
+    for amount in my_trades_amount:
+            
+            my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
+                                                                if amount == abs(o["amount"])]
+            
+            
+                )
+    
     paired_success = False
     
     if my_trades_currency_strategy:
