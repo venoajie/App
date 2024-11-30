@@ -145,6 +145,7 @@ def get_custom_label(transaction: list) -> str:
 async def refill_db (
     instrument_name,
     archive_db_table,
+    my_trades_currency_active_with_blanks
     ) -> list:
     
 
@@ -158,7 +159,10 @@ async def refill_db (
     
     my_trades_currency_active_with_blanks = [o for o in (my_trades_currency_archive)\
                         if o["label"] is None]
+    
     my_trades_archive_instrument_id = ([ o["id"] for o in my_trades_currency_active_with_blanks ])
+    log.error (f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}")
+    log.error (f"my_trades_archive_instrument_id {my_trades_archive_instrument_id}")
     
     if my_trades_archive_instrument_id:
         for id in my_trades_archive_instrument_id:
