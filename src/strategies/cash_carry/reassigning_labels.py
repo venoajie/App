@@ -265,6 +265,8 @@ async def pairing_single_label(
                 log.debug (perpetual_trade)
                 log.debug (new_label)
                 
-                break
                 
+        if paired_success:
+            break
+    
     return paired_success
