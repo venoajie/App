@@ -165,10 +165,8 @@ async def pairing_single_label(
                 True)
         
         if my_trades_future_sorted:
-    
-            future_trade = my_trades_future_sorted[0]
-            perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]  
             
+            future_trade = my_trades_future_sorted[0]
             price_future = future_trade["price"]
             
             my_trades_perpetual_with_lower_price = [o for o in my_trades_with_the_same_amount_label_perpetual \
@@ -176,8 +174,10 @@ async def pairing_single_label(
             
             my_trades_perpetual_with_lower_price_sorted = sorting_list(
                 my_trades_perpetual_with_lower_price,"price",
-                False)
-            
+                False)       
+    
+            perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]  
+    
             paired_success = waiting_time_has_expired(
                 strategy_params,
                 future_trade,
@@ -201,7 +201,8 @@ async def pairing_single_label(
                     if  side_future == "sell"\
                         and side_perpetual == "buy":
                             
-                        await updating_db_with_new_label(
+                        if False:
+                            await updating_db_with_new_label(
                             trade_db_table,
                             archive_db_table,
                             trade_id,
@@ -214,5 +215,7 @@ async def pairing_single_label(
                         log.debug (new_label)
                         
                         break
+    if not paired_success:
+        log.info (f"my_trades_with_the_same_amount {my_trades_with_the_same_amount}")
         
     return paired_success
