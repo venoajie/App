@@ -144,15 +144,12 @@ async def pairing_single_label(
     """
     
     
-        my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
+    my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in my_trades_currency_strategy])
         
     for amount in my_trades_amount:
             
             my_trades_with_the_same_amount = [o for o in my_trades_currency_strategy\
                                                                 if amount == abs(o["amount"])]
-            
-            
-                )
     
     paired_success = False
     
