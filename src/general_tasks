@@ -560,6 +560,7 @@ async def reconciling_size(
                                         from_transaction_log_instrument_name
                                         )
                         
+                        log.critical (f"my_trade_instrument {my_trade_instrument}")
                         log.debug (f"unrecorded_trade_id_from_transaction_log {unrecorded_trade_id_from_transaction_log}")
                         
                         break
