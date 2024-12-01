@@ -52,7 +52,7 @@ async def clean_up_closed_futures_because_has_delivered(
             log.debug (f" inactive instrument_name {my_trade_instrument}")
         
 
-async def clean_up_closed_futures_because_has_delivered(
+async def clean_up_closed_futures_because_has_delivered_(
     instrument_name, 
     transaction,
     delivered_transaction
