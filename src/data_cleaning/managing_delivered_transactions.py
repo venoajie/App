@@ -26,7 +26,7 @@ def get_settlement_period (strategy_attributes) -> list:
     
 async def clean_up_closed_futures_because_has_delivered(
     currencies: list, 
-    my_trades_currency_active: list,
+    instrument_name: list,
     strategy_attributes: list,
     )-> None:
     
@@ -41,15 +41,11 @@ async def clean_up_closed_futures_because_has_delivered(
     
     active_futures_instrument =  [o["instrument_name"] for o in instrument_attributes_futures_all]
     
-    my_trades_instruments = remove_redundant_elements(
-                        [o["instrument_name"] for o in my_trades_currency_active ]
-                        )
-    
-    for my_trade_instrument in my_trades_instruments:
+    if instrument_name not in active_futures_instrument:
         
-        if my_trade_instrument not in active_futures_instrument:
-            
-            log.debug (f" inactive instrument_name {my_trade_instrument}")
+        log.debug (f" inactive instrument_name {instrument_name}")
+        
+    
         
 
 async def clean_up_closed_futures_because_has_delivered_(

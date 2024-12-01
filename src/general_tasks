@@ -537,11 +537,27 @@ async def reconciling_size(
                                             20
                                             )
                                         
-                    await clean_up_closed_futures_because_has_delivered(
-                        currencies, 
-                        my_trades_currency_active,
-                        strategy_attributes
-                        )
+                    my_trades_instruments = remove_redundant_elements(
+                                        [o["instrument_name"] for o in my_trades_currency_active ]
+                                        )
+                    
+                    for my_trade_instrument in my_trades_instruments:
+                                                    
+                        await clean_up_closed_futures_because_has_delivered(
+                            currencies, 
+                            my_trade_instrument,
+                            strategy_attributes
+                            )
+                        
+                        unrecorded_trade_id_from_transaction_log = get_unrecorded_trade_transactions(
+                                        "from_trans_log_to_my_trade",
+                                        my_trades_currency_active,
+                                        from_transaction_log_instrument_name
+                                        )
+                        
+                        log.debug (f"unrecorded_trade_id_from_transaction_log {unrecorded_trade_id_from_transaction_log}")
+                        
+                        break
                     
                     # handling transactions with no label                    
                     await refill_db(
