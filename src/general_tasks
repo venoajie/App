@@ -550,7 +550,7 @@ async def reconciling_size(
                             )
                         
                         unrecorded_trade_id_from_transaction_log = get_unrecorded_trade_transactions(
-                                        "from_trans_log_to_my_trade",
+                                        "from_my_trade_to_trans_log",
                                         my_trades_currency_active,
                                         from_transaction_log_instrument_name
                                         )
