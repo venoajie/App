@@ -13,6 +13,8 @@ from data_cleaning.managing_closed_transactions import (
     clean_up_closed_transactions,
     get_unrecorded_trade_transactions,
     refill_db)
+from data_cleaning.managing_delivered_transactions import (
+    clean_up_closed_futures_because_has_delivered)
 from data_cleaning.reconciling_db import(
     is_my_trades_and_sub_account_size_reconciled_each_other,
     is_my_trades_active_archived_reconciled_each_other,
@@ -534,16 +536,20 @@ async def reconciling_size(
                                             trade_db_table,
                                             20
                                             )
-                        
-                    my_trades_currency_active_with_blanks = [o for o in my_trades_currency_active\
-                        if o["label"] is  None]
                                         
-                    if my_trades_currency_active_with_blanks:
-                        await refill_db (
-                            currency,
-                            archive_db_table,
-                            trade_db_table
-                                )
+                    await clean_up_closed_futures_because_has_delivered(
+                        currencies, 
+                        my_trades_currency_active,
+                        strategy_attributes
+                        )
+                    
+                    # handling transactions with no label                    
+                    await refill_db(
+                        currency,
+                        my_trades_currency_active,
+                        archive_db_table,
+                        trade_db_table
+                            )
                                          
             await asyncio.sleep(idle_time)
             

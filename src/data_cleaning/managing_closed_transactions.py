@@ -144,64 +144,66 @@ def get_custom_label(transaction: list) -> str:
 
 async def refill_db (
     instrument_name: str,
+    my_trades_currency_active: list,
     archive_db_table: str,
     trade_db_table: str
     ) -> list:
+    
+    my_trades_currency_active_with_blanks = [o for o in my_trades_currency_active\
+                        if o["label"] is  None]
 
-    column_trade: str= "id", "instrument_name","data", "label","trade_id"
-                                    
-    my_trades_currency_archive: list= await get_query(archive_db_table, 
-                                                instrument_name, 
-                                                "all", 
-                                                "all", 
-                                                column_trade)
-    
-    my_trades_currency_active_with_blanks = [o for o in my_trades_currency_archive\
-                        if o["label"] is None]
-    
-    my_trades_archive_instrument_id = ([ o["trade_id"] for o in my_trades_currency_active_with_blanks ])
-    log.error (f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}")
-    log.error (f"my_trades_archive_instrument_id {my_trades_archive_instrument_id}")
-    log.error (f"archive_db_table {archive_db_table}")
-    
-    if my_trades_archive_instrument_id:
-        for id in my_trades_archive_instrument_id:
-            transaction = parsing_sqlite_json_output(
-                [o["data"] for o in my_trades_currency_active_with_blanks \
-                    if id == o["trade_id"]])[0]
+    if my_trades_currency_active_with_blanks:
+        column_trade: str= "id", "instrument_name","data", "label","trade_id"
+                                        
+        my_trades_currency_archive: list= await get_query(archive_db_table, 
+                                                    instrument_name, 
+                                                    "all", 
+                                                    "all", 
+                                                    column_trade)
+        
+        my_trades_currency_active_with_blanks = [o for o in my_trades_currency_archive\
+                            if o["label"] is None]
+        
+        my_trades_archive_instrument_id = ([ o["trade_id"] for o in my_trades_currency_active_with_blanks ])
+        
+        if my_trades_archive_instrument_id:
+            for id in my_trades_archive_instrument_id:
+                transaction = parsing_sqlite_json_output(
+                    [o["data"] for o in my_trades_currency_active_with_blanks \
+                        if id == o["trade_id"]])[0]
 
-            label_open: str = get_custom_label(transaction)
-            transaction.update({"label": label_open})
-            log.debug (transaction)
-            
-            where_filter ="trade_id"
+                label_open: str = get_custom_label(transaction)
+                transaction.update({"label": label_open})
+                log.debug (transaction)
                 
-            await deleting_row (
-                archive_db_table,
-                "databases/trading.sqlite3",
-                where_filter,
-                "=",
-                id,
-            )
-            
-            await deleting_row (
-                trade_db_table,
-                "databases/trading.sqlite3",
-                where_filter,
-                "=",
-                id,
-            )
-            
-            await insert_tables(
-                    archive_db_table, 
-                    transaction
+                where_filter ="trade_id"
+                    
+                await deleting_row (
+                    archive_db_table,
+                    "databases/trading.sqlite3",
+                    where_filter,
+                    "=",
+                    id,
                 )
-       
-            await insert_tables(
-                    trade_db_table, 
-                    transaction
+                
+                await deleting_row (
+                    trade_db_table,
+                    "databases/trading.sqlite3",
+                    where_filter,
+                    "=",
+                    id,
                 )
-       
+                
+                await insert_tables(
+                        archive_db_table, 
+                        transaction
+                    )
+        
+                await insert_tables(
+                        trade_db_table, 
+                        transaction
+                    )
+        
 
 def get_unrecorded_trade_transactions(
     direction: str,
@@ -317,63 +319,6 @@ def is_size_sub_account_and_my_trades_reconciled(
         log.warning(error)
                 
 
-async def clean_up_closed_futures_because_has_delivered(
-    instrument_name, 
-    transaction,
-    delivered_transaction
-    )-> None:
-    
-    log.warning(f"instrument_name {instrument_name}")
-    log.warning(f"transaction {transaction}")
-    try:
-        trade_id_sqlite= int(transaction["trade_id"])
-    
-    except:
-        trade_id_sqlite=(transaction["trade_id"])
-    
-    timestamp= transaction["timestamp"]
-    
-    closed_label=f"futureSpread-closed-{timestamp}"
-    
-    transaction.update({"instrument_name":instrument_name})
-    transaction.update({"timestamp":timestamp})
-    transaction.update({"price":transaction["price"]})
-    transaction.update({"amount":transaction["amount"]})
-    transaction.update({"label":transaction["label"]})
-    transaction.update({"trade_id":trade_id_sqlite})
-    transaction.update({"order_id":transaction["order_id"]})
-
-    #log.warning(f"transaction {transaction}")
-    await insert_tables("my_trades_closed_json", transaction)
-    
-    await deleting_row("my_trades_all_json",
-                    "databases/trading.sqlite3",
-                    "trade_id",
-                    "=",
-                    trade_id_sqlite,
-                )
-
-    delivered_transaction= delivered_transaction[0]
-    
-    timestamp_from_transaction_log= delivered_transaction["timestamp"] 
-
-    try:
-        price_from_transaction_log= delivered_transaction["price"] 
-    
-    except:
-        price_from_transaction_log= delivered_transaction["index_price"] 
-        
-    closing_transaction= transaction
-    closing_transaction.update({"label":closed_label})
-    closing_transaction.update({"amount":(closing_transaction["amount"])*-1})
-    closing_transaction.update({"price":price_from_transaction_log})
-    closing_transaction.update({"trade_id":None})
-    closing_transaction.update({"order_id":None})
-    closing_transaction.update({"timestamp":timestamp_from_transaction_log})
-
-    await insert_tables("my_trades_closed_json", closing_transaction)
-
-    
 def get_transactions_with_closed_label(transactions_all: list) -> list:
     """ """
 

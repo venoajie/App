@@ -4,7 +4,6 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 import os
-from collections import defaultdict
 from secrets import randbelow
 
 # installed
@@ -34,6 +33,8 @@ from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,)
 from utilities.pickling import (
     replace_data,
     read_data,)
@@ -48,9 +49,6 @@ from utilities.system_tools import (
     provide_path_for_file,
     raise_error_message,
     sleep_and_restart,)
-from websocket_management.ws_management import (
-    get_futures_instruments,
-    )
 
 # Using the LRUCache decorator function with a maximum cache size of 3
 def cached_ticker_data(currencies):

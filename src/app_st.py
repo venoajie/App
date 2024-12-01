@@ -28,7 +28,7 @@ from utilities.system_tools import (
     async_raise_error_message,
     raise_error_message,)
 
-from websocket_management.ws_management import (
+from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,)
 from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,)
