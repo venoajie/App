@@ -255,7 +255,7 @@ def get_unrecorded_trade_transactions(
         return unrecorded_trade_id
 
     if direction == "delivered":
-        
+
         delivered_from_transaction_log_instrument = [o for o in from_transaction_log_instrument\
                         if o["type"] == "delivery"]
         

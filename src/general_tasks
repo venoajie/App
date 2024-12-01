@@ -552,6 +552,15 @@ async def reconciling_size(
                             
                             log.debug (f" inactive instrument_name {my_trade_instrument}")
                             
+                            
+                            column_list= "instrument_name", "position", "timestamp","trade_id","user_seq","type"    
+                            from_transaction_log = await get_query (transaction_log_trading_table, 
+                                                                        currency, 
+                                                                        "all", 
+                                                                        "all", 
+                                                                        column_list)                    
+
+                            
                             from_transaction_log_instrument_name = (
                                         [o for o in from_transaction_log if o["instrument_name"] == my_trade_instrument]
                                         )  
