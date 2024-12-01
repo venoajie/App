@@ -29,7 +29,10 @@ async def main():
                 
         data_trading = await get_db_trade ()
         
-        df = pd.DataFrame(data_trading)
+        data_trading_custom = [o for o in data_trading\
+            if "custom" in o["label"]]
+        
+        df = pd.DataFrame(data_trading_custom)
         
         df.drop(columns=["amount"])
 
