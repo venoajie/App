@@ -217,11 +217,7 @@ def get_unrecorded_trade_transactions(
     Returns:
         _type_: _description_
     """
-    log.info (f"from_transaction_log_instrument { [o for o in from_transaction_log_instrument\
-                        if o["trade_id"] is  None]}") 
     
-    
-    #log.error (f"my_trades_instrument_name {my_trades_instrument_name}")
     if direction == "from_trans_log_to_my_trade":
         
         from_transaction_log_instrument_trade_id = sorted([o["trade_id"] for o in from_transaction_log_instrument] )
@@ -260,7 +256,10 @@ def get_unrecorded_trade_transactions(
 
     if direction == "delivered":
         
-        from_transaction_log_instrument_trade_id = sorted(remove_redundant_elements([o["timestamp"] for o in from_transaction_log_instrument] ))
+        delivered_from_transaction_log_instrument = [o for o in from_transaction_log_instrument\
+                        if o["type"] == "delivery"]
+        
+        from_transaction_log_instrument_trade_id = sorted(remove_redundant_elements([o["timestamp"] for o in delivered_from_transaction_log_instrument] ))
 
         if my_trades_instrument_name:
             my_trades_instrument_name_trade_id = sorted([o["timestamp"] for o in my_trades_instrument_name])
