@@ -21,6 +21,8 @@ from db_management.sqlite_management import (
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from utilities.pickling import (
@@ -37,8 +39,6 @@ from utilities.string_modification import (
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
-from websocket_management.ws_management import (
-    get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
