@@ -623,9 +623,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 and len_selected_transaction:
                                                                 
                                                                 send_order = []
-                                                                
-                                                                log.critical (f"mode_full {mode_full}")
-                                                                
+                                                                                                                                
                                                                 if mode_full and\
                                                                     size_future_reconciled\
                                                                     and size_perpetuals_reconciled\
