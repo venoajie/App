@@ -14,7 +14,7 @@ from data_cleaning.managing_closed_transactions import (
     get_unrecorded_trade_transactions,
     refill_db)
 from data_cleaning.managing_delivered_transactions import (
-    clean_up_closed_futures_because_has_delivered)
+    is_instrument_name_has_delivered)
 from data_cleaning.reconciling_db import(
     is_my_trades_and_sub_account_size_reconciled_each_other,
     is_my_trades_active_archived_reconciled_each_other,
@@ -543,26 +543,29 @@ async def reconciling_size(
                     log.error (f"my_trades_instruments {my_trades_instruments}")
                     for my_trade_instrument in my_trades_instruments:
                                                     
-                        await clean_up_closed_futures_because_has_delivered(
+                        instrument_name_has_delivered = is_instrument_name_has_delivered(
                             currencies, 
                             my_trade_instrument,
                             strategy_attributes
                             )
                         
-                        from_transaction_log_instrument_name = (
+                        if instrument_name_has_delivered:
+                            
+                            log.debug (f" inactive instrument_name {my_trade_instrument}")
+                            
+                            from_transaction_log_instrument_name = (
                                         [o for o in from_transaction_log if o["instrument_name"] == my_trade_instrument]
                                         )  
-                                    
-                        
-                        unrecorded_trade_id_from_transaction_log = get_unrecorded_trade_transactions(
-                                        "from_trans_log_to_my_trade",
-                                        my_trades_currency_archive,
-                                        from_transaction_log_instrument_name
-                                        )
-                        
-                        log.critical (f"my_trade_instrument {my_trade_instrument}")
-                        
-                        break
+                                        
+                            unrecorded_trade_id_from_transaction_log = get_unrecorded_trade_transactions(
+                                            "from_trans_log_to_my_trade",
+                                            my_trades_currency_archive,
+                                            from_transaction_log_instrument_name
+                                            )
+                            
+                            log.critical (f"my_trade_instrument {my_trade_instrument}")
+                            
+                            break
                     
                     # handling transactions with no label                    
                     await refill_db(
