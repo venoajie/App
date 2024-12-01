@@ -540,7 +540,7 @@ async def reconciling_size(
                     my_trades_instruments = remove_redundant_elements(
                                         [o["instrument_name"] for o in my_trades_currency_active ]
                                         )
-                    
+                    log.error (f"my_trades_instruments {my_trades_instruments}")
                     for my_trade_instrument in my_trades_instruments:
                                                     
                         await clean_up_closed_futures_because_has_delivered(
