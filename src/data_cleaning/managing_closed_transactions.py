@@ -217,8 +217,8 @@ def get_unrecorded_trade_transactions(
     Returns:
         _type_: _description_
     """
-    log.info (f"""from_transaction_log_instrument { [o for o in from_transaction_log_instrument\
-                        if o["trade_id"] is  None]}""") 
+    log.info (f"from_transaction_log_instrument { [o for o in from_transaction_log_instrument\
+                        if o["trade_id"] is  None]}") 
     from_transaction_log_instrument_trade_id = sorted([o["trade_id"] for o in from_transaction_log_instrument] )
     
     #log.error (f"my_trades_instrument_name {my_trades_instrument_name}")
@@ -232,6 +232,8 @@ def get_unrecorded_trade_transactions(
                                                     my_trades_instrument_name_trade_id)
         else:
             unrecorded_trade_id = from_transaction_log_instrument_trade_id
+
+        log.debug(f"unrecorded_trade_from_transaction_log {unrecorded_trade_id}")
         
         return unrecorded_trade_id
     
@@ -252,6 +254,21 @@ def get_unrecorded_trade_transactions(
 
         return unrecorded_trade_id
 
+    if direction == "delivered":
+
+        if my_trades_instrument_name:
+            my_trades_instrument_name_trade_id = sorted([o["timestamp"] for o in my_trades_instrument_name])
+            
+            if my_trades_instrument_name_trade_id:
+                unrecorded_trade_id = get_unique_elements(from_transaction_log_instrument_trade_id, 
+                                                    my_trades_instrument_name_trade_id)
+        else:
+            unrecorded_trade_id = from_transaction_log_instrument_trade_id
+
+        log.debug(f"unrecorded_trade_from_transaction_log {unrecorded_trade_id}")
+        
+        return unrecorded_trade_id
+    
 def check_whether_order_db_reconciled_each_other(
     sub_account: list,
     instrument_name: str,

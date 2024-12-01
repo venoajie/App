@@ -180,7 +180,7 @@ async def get_result_from_db_queries (
                                                 "all", 
                                                 column_trade)
                                                     
-    column_list= "instrument_name", "position", "timestamp","trade_id","user_seq","data"    
+    column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"    
     from_transaction_log = await get_query (transaction_log_trading, 
                                                 currency, 
                                                 "all", 
@@ -557,7 +557,7 @@ async def reconciling_size(
                                         )  
                                         
                             unrecorded_trade_id_from_transaction_log = get_unrecorded_trade_transactions(
-                                            "from_trans_log_to_my_trade",
+                                            "delivered",
                                             my_trades_currency_archive,
                                             from_transaction_log_instrument_name
                                             )
