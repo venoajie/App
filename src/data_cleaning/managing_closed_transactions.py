@@ -260,7 +260,7 @@ def get_unrecorded_trade_transactions(
 
     if direction == "delivered":
         
-        from_transaction_log_instrument_trade_id = sorted([o["timestamp"] for o in from_transaction_log_instrument] )
+        from_transaction_log_instrument_trade_id = sorted(remove_redundant_elements([o["timestamp"] for o in from_transaction_log_instrument] ))
 
         if my_trades_instrument_name:
             my_trades_instrument_name_trade_id = sorted([o["timestamp"] for o in my_trades_instrument_name])
