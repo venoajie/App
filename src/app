@@ -296,6 +296,8 @@ class RunningStrategy(ModifyOrderDb):
                 # get tradable currencies
                 currencies= [o["spot"] for o in tradable_config_app] [0]
                 
+                mode_full = [o["mode_full"] for o in tradable_config_app] [0]
+                
                 strategy_attributes = config_app["strategies"]
                                             
                 active_strategies =   [o["strategy_label"] for o in strategy_attributes \
@@ -574,8 +576,6 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                     labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
                                                     
-                                                    delta = sum([o["amount"] for o in my_trades_currency_strategy])
-                                                    
                                                     for order in orders_currency_strategy:
                                                         cancel_allowed: dict = await combo_auto.is_cancelling_orders_allowed(
                                                             order,
@@ -624,9 +624,11 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                                 send_order = []
                                                                 
-                                                                if size_future_reconciled\
+                                                                if mode_full and\
+                                                                    size_future_reconciled\
                                                                     and size_perpetuals_reconciled\
-                                                                        and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
+                                                                        and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS\
+                                                                            :
                                                                                                                                     
                                                                     send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                                     ticker_future[0],
@@ -716,9 +718,10 @@ class RunningStrategy(ModifyOrderDb):
                                                                     archive_db_table,
                                                                     transaction_log_trading_table)
                                                                 
-                                                                if size_perpetuals_reconciled\
-                                                                    and size_future_reconciled\
-                                                                         and size_future_reconciled:
+                                                                if mode_full and\
+                                                                    size_perpetuals_reconciled\
+                                                                        and size_future_reconciled\
+                                                                            and size_future_reconciled:
                                                                         
                                                                     send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
                                                                         ticker_future,
