@@ -270,7 +270,7 @@ def get_unrecorded_trade_transactions(
         else:
             unrecorded_trade_id = from_transaction_log_instrument_trade_id
 
-        log.debug(f"unrecorded_trade_from_transaction_log {unrecorded_trade_id}")
+        log.debug(f"unrecorded_trade_from_transaction_log {unrecorded_trade_id} {delivered_from_transaction_log_instrument}")
         
         return unrecorded_trade_id
     
