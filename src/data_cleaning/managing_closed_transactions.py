@@ -217,7 +217,7 @@ def get_unrecorded_trade_transactions(
     Returns:
         _type_: _description_
     """
-     
+    log.info (f"from_transaction_log_instrument {from_transaction_log_instrument}") 
     from_transaction_log_instrument_trade_id = sorted([o["trade_id"] for o in from_transaction_log_instrument] )
     
     #log.error (f"my_trades_instrument_name {my_trades_instrument_name}")
