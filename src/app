@@ -296,7 +296,7 @@ class RunningStrategy(ModifyOrderDb):
                 # get tradable currencies
                 currencies= [o["spot"] for o in tradable_config_app] [0]
                 
-                mode_full = [o["mode_full"] for o in tradable_config_app] [0]
+                mode_full = [o["mode_full"] for o in tradable_config_app] [0][0]
                 
                 strategy_attributes = config_app["strategies"]
                                             
