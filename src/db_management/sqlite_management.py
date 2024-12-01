@@ -305,12 +305,8 @@ async def update_status_data(
     https://stackoverflow.com/questions/75320010/update-json-data-in-sqlite3
     """
 
-    if operator==None:
-        where_clause= f"WHERE {filter}  LIKE '%{filter_value}%'"
-     
-    else:
-        where_clause= f"WHERE {filter} {operator} {filter_value}"
-
+    where_clause= f"WHERE {filter}  LIKE '%{filter_value}%'"
+    
     query = f"""UPDATE {table} SET data = JSON_REPLACE (data, '$.{data_column}', '{new_value}') {where_clause};"""
 
     if "ohlc" in table:
