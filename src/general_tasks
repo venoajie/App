@@ -589,7 +589,7 @@ async def reconciling_size(
                                             from_transaction_log_instrument_name
                                             )
                             
-                            if unrecorded_trade_id_from_transaction_log:
+                            if unrecorded_timestamp_from_transaction_log:
                                 
                                 await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
                                             my_trade_instrument,
