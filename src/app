@@ -16,7 +16,8 @@ import websockets
 from configuration import id_numbering, config
 from configuration.label_numbering import get_now_unix_time
 from data_cleaning.managing_closed_transactions import (
-    check_whether_order_db_reconciled_each_other,
+    check_whether_order_db_reconciled_each_other,)
+from data_cleaning.reconciling_db import (
     is_size_sub_account_and_my_trades_reconciled)
 from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,

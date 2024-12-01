@@ -308,40 +308,7 @@ def check_whether_order_db_reconciled_each_other(
     else :        
         return  False
 
-          
-def is_size_sub_account_and_my_trades_reconciled(
-    position_without_combo: list,
-    sum_my_trades_currency_all: list,
-    instrument_name: str,
-    ) -> bool:
-    """
-    """
     
-    try:
-
-        sub_account_size_instrument = ([(o["size"]) for o in position_without_combo \
-            if instrument_name in o["instrument_name"]])
-                
-        sub_account_size_instrument = 0 \
-            if sub_account_size_instrument == []\
-                else sub_account_size_instrument [0]
-        
-        my_trades_size_instrument = [o["amount"] for o in sum_my_trades_currency_all\
-            if instrument_name in o["instrument_name"]]
-
-        sum_my_trades_size_instrument = 0 \
-            if my_trades_size_instrument == []\
-                else sum(my_trades_size_instrument)
-                
-        if sub_account_size_instrument != sum_my_trades_size_instrument:
-            log.critical (f"sum_my_trades_size_instrument {sum_my_trades_size_instrument}  sub_account_size_instrument {sub_account_size_instrument}")
-                
-        return sub_account_size_instrument == sum_my_trades_size_instrument
-                        
-    except Exception as error:
-        log.warning(error)
-                
-
 def get_transactions_with_closed_label(transactions_all: list) -> list:
     """ """
 
