@@ -44,7 +44,7 @@ async def main():
         data_orders = await get_open_orders ()
         
         data_trading_custom = [o for o in data_trading\
-            if "custom" in o["label"]]
+            if "custom" not in o["label"]]
        
         
         df = pd.DataFrame(data_trading_custom)
