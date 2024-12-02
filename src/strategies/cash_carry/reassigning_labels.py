@@ -9,7 +9,6 @@ from loguru import logger as log
 # user defined formula
 from db_management.sqlite_management import (
     update_status_data,)
-from loguru import logger as log
 from utilities.string_modification import (
     remove_redundant_elements,
     sorting_list)
