@@ -48,6 +48,8 @@ async def main():
         data_orders_custom = [o for o in data_orders\
             if "custom" in o["label"]]
         
+        print (f"data_orders_custom {data_orders_custom}")
+        
         df = pd.DataFrame(data_trading_custom)
         
         df.drop(columns=["amount"])
