@@ -53,7 +53,7 @@ def get_delta(my_trades_currency_strategy) -> int:
     """ """
 
     return 0 if my_trades_currency_strategy == []\
-        else sum([o["amount"] for o in my_trades_currency_strategy])-820
+        else sum([o["amount"] for o in my_trades_currency_strategy])
             
 def convert_list_to_dict (transaction: list) -> dict:
 
@@ -371,7 +371,7 @@ class ComboAuto (BasicStrategy):
             
     def __post_init__(self):
         
-        self.delta: float = get_delta (self.my_trades_currency_strategy)
+        self.delta: float = get_delta (self.my_trades_currency_strategy)#-820
         self.basic_params: str = BasicStrategy (
             self.strategy_label,
             self.strategy_parameters)
