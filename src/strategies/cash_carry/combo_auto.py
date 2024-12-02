@@ -53,7 +53,7 @@ def get_delta(my_trades_currency_strategy) -> int:
     """ """
 
     return 0 if my_trades_currency_strategy == []\
-        else sum([o["amount"] for o in my_trades_currency_strategy])
+        else sum([o["amount"] for o in my_trades_currency_strategy])-820
             
 def convert_list_to_dict (transaction: list) -> dict:
 
