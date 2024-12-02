@@ -370,7 +370,6 @@ class ComboAuto (BasicStrategy):
     
             
     def __post_init__(self):
-        delta = get_delta (self.my_trades_currency_strategy)
         log.error ( (-820 if "BTC" in self.ticker_perpetual["instrument_name"] else 0) )
         log.critical (get_delta (self.my_trades_currency_strategy) )
         self.delta: float = get_delta (self.my_trades_currency_strategy) + (-820 if "BTC" in self.ticker_perpetual["instrument_name"] else 0) 
