@@ -29,6 +29,8 @@ async def get_open_orders():
                                                 "all", 
                                                 column_trade)
     
+    print (f"orders_currency {orders_currency }")
+    
     return [{key: value for key, value in dict.items() if key != 'balance'} for dict in orders_currency]
 
 async def main():
@@ -44,11 +46,7 @@ async def main():
         
         data_trading_custom = [o for o in data_trading\
             if "custom" in o["label"]]
-        
-        data_orders_custom = [o for o in data_orders\
-            if "custom" in o["label"]]
-        
-        print (f"data_orders_custom {data_orders_custom}")
+       
         
         df = pd.DataFrame(data_trading_custom)
         
@@ -66,16 +64,22 @@ async def main():
         print (df.to_string())
         
         
-        df = pd.DataFrame(data_orders_custom)
+        data_orders_custom = [o for o in data_orders\
+            if "custom" in o["label"]]
         
-        df['integer'] = df['label'].str.extract('(\d+)')
+        print (f"data_orders_custom {data_orders_custom }")
         
-        df = pd.pivot_table(
-            df,
-            index=["integer","label","instrument_name","amount"],
-            aggfunc="sum", 
-            )
-        print (df.to_string())
+        if data_orders_custom:
+            df = pd.DataFrame(data_orders_custom)
+            
+            df['integer'] = df['label'].str.extract('(\d+)')
+            
+            df = pd.pivot_table(
+                df,
+                index=["integer","label","instrument_name","amount"],
+                aggfunc="sum", 
+                )
+            print (df.to_string())
         
     except Exception as error:
         await print(error)
