@@ -20,6 +20,17 @@ async def get_db_trade():
     
     return [{key: value for key, value in dict.items() if key != 'balance'} for dict in my_trades_currency]
 
+async def get_open_orders():
+                
+    column_trade: str= "instrument_name","label", "amount", "price"
+    orders_currency: list= await get_query("orders_all_json", 
+                                                "BTC", 
+                                                "all", 
+                                                "all", 
+                                                column_trade)
+    
+    return [{key: value for key, value in dict.items() if key != 'balance'} for dict in orders_currency]
+
 async def main():
     #data = await fetch_data('https://www.deribit.com/api/v2/public/ticker?instrument_name=BTC-PERPETUAL')
     #st.dataframe(data["result"])
@@ -29,7 +40,12 @@ async def main():
                 
         data_trading = await get_db_trade ()
         
+        data_orders = await get_open_orders ()
+        
         data_trading_custom = [o for o in data_trading\
+            if "custom" in o["label"]]
+        
+        data_orders_custom = [o for o in data_orders\
             if "custom" in o["label"]]
         
         df = pd.DataFrame(data_trading_custom)
@@ -46,6 +62,23 @@ async def main():
             aggfunc="sum", 
             )
         print (df.to_string())
+        
+        
+        df = pd.DataFrame(data_orders_custom)
+        
+        df.drop(columns=["amount"])
+
+        df['integer'] = df['label'].str.extract('(\d+)')
+        df['premium'] = ((df['price']*abs(df["amount"]))/df["amount"])
+        
+        df = pd.pivot_table(
+            df,
+            values="premium",
+            index=["integer","label","instrument_name","amount"],
+            aggfunc="sum", 
+            )
+        print (df.to_string())
+        
     except Exception as error:
         await print(error)
         
