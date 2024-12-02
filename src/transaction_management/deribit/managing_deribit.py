@@ -148,11 +148,6 @@ class ModifyOrderDb(SendApiRequest):
 
             log.critical(f"""CANCEL_by_order_id {result["result"]} {open_order_id}""")
 
-            
-            if "custom" in result["error"]["label"] :
-                await telegram_bot_sendtext(result)
-            
-
             return result
 
     async def cancel_the_cancellables(
