@@ -62,9 +62,9 @@ if __name__ == '__main__':
     
     filter = "trade_id"
     
-    trade_id = "330874949"
+    trade_id = "330875467"
     
-    new_label = "futureSpread-open-1733117896165"
+    new_label = "futureSpread-open-1733118518537"
                   
     asyncio.run(updating_db_with_new_label(
     trade_db_table,
