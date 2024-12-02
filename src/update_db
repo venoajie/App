@@ -62,7 +62,7 @@ if __name__ == '__main__':
     
     filter = "trade_id"
     
-    trade_id = "330867381"
+    trade_id = "330866899"
     
     new_label = "customLong-closed-1732869258222"
                   
