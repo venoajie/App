@@ -139,8 +139,6 @@ class ModifyOrderDb(SendApiRequest):
 
         result = await self.private_data.get_cancel_order_byOrderId(open_order_id)
         
-        await telegram_bot_sendtext(result)
-        
         try:
             if (result["error"]["message"])=="not_open_order":
                 log.critical(f"CANCEL non-existing order_id {result} {open_order_id}")
@@ -150,6 +148,10 @@ class ModifyOrderDb(SendApiRequest):
 
             log.critical(f"""CANCEL_by_order_id {result["result"]} {open_order_id}""")
 
+            
+            if "custom" in result["error"]["label"] :
+                await telegram_bot_sendtext(result)
+            
 
             return result
 
