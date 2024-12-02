@@ -66,14 +66,10 @@ async def main():
         
         df = pd.DataFrame(data_orders_custom)
         
-        df.drop(columns=["amount"])
-
         df['integer'] = df['label'].str.extract('(\d+)')
-        df['premium'] = ((df['price']*abs(df["amount"]))/df["amount"])
         
         df = pd.pivot_table(
             df,
-            values="premium",
             index=["integer","label","instrument_name","amount"],
             aggfunc="sum", 
             )
