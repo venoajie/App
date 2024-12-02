@@ -29,7 +29,6 @@ async def get_open_orders():
                                                 "all", 
                                                 column_trade)
     
-    print (f"orders_currency {orders_currency }")
     
     return [{key: value for key, value in dict.items() if key != 'balance'} for dict in orders_currency]
 
@@ -66,8 +65,6 @@ async def main():
         
         data_orders_custom = [o for o in data_orders\
             if "custom" in o["label"]]
-        
-        print (f"data_orders_custom {data_orders_custom }")
         
         if data_orders_custom:
             df = pd.DataFrame(data_orders_custom)
