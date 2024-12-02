@@ -62,9 +62,9 @@ if __name__ == '__main__':
     
     filter = "trade_id"
     
-    trade_id = "330849449"
+    trade_id = "330854111"
     
-    new_label = "customLong-closed-1733103883678"
+    new_label = "customLong-closed-1733096367100"
                   
     asyncio.run(updating_db_with_new_label(
     trade_db_table,
