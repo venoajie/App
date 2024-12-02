@@ -734,6 +734,8 @@ class ModifyOrderDb(SendApiRequest):
                 order_db_table, 
                 order
                 )
+            
+            log.warning (f" label == None {order}")
 
             await self. cancel_by_order_id (order_id)  
             
@@ -757,6 +759,8 @@ class ModifyOrderDb(SendApiRequest):
                 
             # check if transaction has label. Provide one if not any
             if  not label_and_side_consistent:
+                
+                log.warning (f" not label_and_side_consistent {order}")
             
                 await insert_tables(
                     order_db_table, 
