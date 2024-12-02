@@ -627,8 +627,12 @@ class ModifyOrderDb(SendApiRequest):
                             )
                 
             else:
+                
+                log.debug (f"orders {orders}")
                                 
                 for order in orders:
+                    
+                    log.critical (f"order {order}")
                                             
                     await self.saving_order(
                         non_checked_strategies,
