@@ -619,7 +619,8 @@ def is_label_and_side_consistent(
             if side == "sell":
                 
                 is_consistent = True if ("Short" in label \
-                                        or "hedging" in label) \
+                                        or "hedging" in label\
+                                            or "custom" in label) \
                                             else False
 
             if side == "buy":

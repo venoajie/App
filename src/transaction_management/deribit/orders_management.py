@@ -227,7 +227,5 @@ def labelling_unlabelled_order_oto(transaction_main: list,
 
     params.update({"side": transaction_main ["direction"]})
     params.update({"otoco_config": secondary_params})
-    
-    log.debug (f"params {params}")
-        
+            
     return params
