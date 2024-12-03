@@ -15,6 +15,7 @@ from strategies.basic_strategy import (
     is_label_and_side_consistent,)
 from transaction_management.deribit.orders_management import (
     labelling_unlabelled_order,
+    labelling_unlabelled_order_oto,
     saving_order_based_on_state,
     saving_traded_orders,)
 from transaction_management.deribit.telegram_bot import (
@@ -629,17 +630,38 @@ class ModifyOrderDb(SendApiRequest):
             else:
                 
                 log.debug (f"orders {orders}")
-                                
-                for order in orders:
+                
+                if ("oto_order_ids" in (orders[0])):
+                    order_attributes = labelling_unlabelled_order_oto (orders)   
                     
-                    log.critical (f"order {order}")
-                                            
-                    await self.saving_order(
-                        non_checked_strategies,
-                        instrument_name,
-                        order,
-                        order_db_table
-                    )
+                    
+                    for order in orders:
+                        
+                        label= order["label"]
+                        
+                        order_state= order["order_state"]    
+                                    
+                        # no label
+                        if label == ''\
+                            and "open" in order_state:
+                                if ("oto_order_ids"  in (order["order_id"])):
+                                    pass
+                                else:
+                                    pass
+                    
+                
+                else:
+                                    
+                    for order in orders:
+                        
+                        log.critical (f"order {order}")
+                                                
+                        await self.saving_order(
+                            non_checked_strategies,
+                            instrument_name,
+                            order,
+                            order_db_table
+                        )
                     
         await self.resupply_transaction_log(
             currency,
@@ -735,9 +757,11 @@ class ModifyOrderDb(SendApiRequest):
                 order
                 )
             
+            
             log.warning (f" label == None {order}")
 
-            await self. cancel_by_order_id (order_id)  
+            if "OTO" not in order ["order_id"]:
+                await self. cancel_by_order_id (order_id)  
             
             await self.if_order_is_true(
                 non_checked_strategies,

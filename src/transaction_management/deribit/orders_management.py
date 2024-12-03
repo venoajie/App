@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collections import defaultdict
+
 # installed
 from loguru import logger as log
 
@@ -132,6 +134,26 @@ def get_custom_label(transaction: list) -> str:
     
     return (f"custom{side_label.title()}-open-{last_update}")
 
+
+def get_custom_label_oto(transactions: list) -> dict:
+    
+    transaction = [o for o in transactions if "OTO" not in o["order_id"]][0]
+
+    side= transaction["direction"]
+    side_label= "Short" if side== "sell" else "Long"
+    
+    try:
+        last_update= transaction["timestamp"]
+    except:
+        try:
+            last_update= transaction["last_update_timestamp"]
+        except:
+            last_update= transaction["creation_timestamp"]
+    
+    return dict(open = (f"custom{side_label.title()}-open-{last_update}"),
+                closed= (f"custom{side_label.title()}-closed-{last_update}") )
+
+
         
 def labelling_unlabelled_order(order: dict) -> None:
 
@@ -152,3 +174,71 @@ def labelling_unlabelled_order(order: dict) -> None:
     
     return order
 
+
+def labelling_unlabelled_order_oto(orders: list) -> None:
+
+    """
+    
+    orders_example= [
+        {
+            'oto_order_ids': ['OTO-80322590'], 'is_liquidation': False, 'risk_reducing': False,
+            'order_type': 'limit', 'creation_timestamp': 1733172624209, 'order_state': 'open',
+            'reject_post_only': False, 'contracts': 1.0, 'average_price': 0.0, 'reduce_only': False, 
+            'trigger_fill_condition': 'incremental', 'last_update_timestamp': 1733172624209, 
+            'filled_amount': 0.0, 'replaced': False, 'post_only': True, 'mmp': False, 'web': True, 
+            'api': False, 'instrument_name': 'BTC-PERPETUAL', 'max_show': 10.0, 'time_in_force': 'good_til_cancelled', 
+            'direction': 'buy', 'amount': 10.0, 'order_id': '81944428472', 'price': 90000.0, 'label': ''},
+        {
+            'is_liquidation': False, 'risk_reducing': False, 'order_type': 'limit', 
+            'creation_timestamp': 1733172624177, 'order_state': 'untriggered', 'average_price': 0.0, 
+            'reduce_only': False, 'trigger_fill_condition': 'incremental', 'last_update_timestamp': 1733172624177, 
+            'filled_amount': 0.0, 'is_secondary_oto': True, 'replaced': False, 'post_only': False, 'mmp': False, 
+            'web': True, 'api': False, 'instrument_name': 'BTC-PERPETUAL', 'max_show': 10.0, 
+            'time_in_force': 'good_til_cancelled', 'direction': 'sell', 'amount': 10.0, 
+            'order_id': 'OTO-80322590', 'price': 100000.0, 'label': ''}
+        ]
+    
+    
+    """
+    
+    from strategies.basic_strategy import (
+        get_transaction_side,
+        )
+    
+    label: str = get_custom_label_oto(orders)
+    
+    
+    label_open: str = label["open"]
+    label_closed: str = label["closed"]
+        
+    
+    params =  {}
+        
+    params.update({"everything_is_consistent": True})
+    params.update({"order_allowed": True})
+    
+    result =[]
+    for order in orders:
+        order_state= order["order_state"]   
+        if "OTO"  in order["order_id"]: 
+            
+                    
+            side= get_transaction_side(order)
+            params.update({"entry_price": order["price"]})
+            params.update({"size": order["amount"]})
+            params.update({"type": "limit"})
+            params.update({"side": side})
+            
+            
+            params.update({"label": label_open})
+            
+        else: 
+            
+            side= get_transaction_side(order)
+            
+            params.update({"label": label_closed})
+        
+        result.append (params)
+
+    
+    return result
