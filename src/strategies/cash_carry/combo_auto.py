@@ -795,7 +795,8 @@ class ComboAuto (BasicStrategy):
             orders_instrument_transaction: list=  [o for o in orders_currency 
                                             if instrument_name_transaction in o["instrument_name"]]
             
-            orders_instrument_transaction_net: int=  [o["amount"] for o in orders_instrument_transaction]
+            orders_instrument_transaction_net: int= 0 if orders_instrument_transaction == []\
+                else sum([o["amount"] for o in orders_instrument_transaction])
             
             orders_instrument_perpetual: list=  [o for o in orders_currency 
                                                 if instrument_name_perpetual in o["instrument_name"]]

@@ -637,7 +637,8 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                         # closing unpaired transactions
                                                             if sum_selected_transaction != 0\
-                                                                and len_selected_transaction:
+                                                                and len_selected_transaction == 1\
+                                                                    and "closed" not in label:
                                                                 
                                                                 send_order = []
                                                                                                                                 
