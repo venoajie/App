@@ -197,6 +197,29 @@ class SendApiRequest:
         return result
 
 
+    async def get_open_orders(
+        self,
+        kind: str,
+        type: str
+        )-> list:
+        
+        
+        # Set endpoint
+        endpoint: str = "private/get_open_orders"
+
+        params = {"kind": kind, 
+                  "type": type
+                  }
+    
+        result_open_order = await private_connection (self.sub_account_id,
+                                                       endpoint=endpoint, 
+                                                       params=params,)
+        
+        log.error (f"result_open_order {result_open_order}")
+        return result_open_order["result"]
+
+
+
     async def send_limit_order(
         self, 
         params
@@ -266,7 +289,7 @@ class SendApiRequest:
 
     async def get_subaccounts_details(
         self,
-        currency
+        currency: str
         )-> list:
         
         
@@ -282,7 +305,6 @@ class SendApiRequest:
                                                        params=params,)
         
         return result_sub_account["result"]
-
 
     async def get_user_trades_by_currency(
         self,

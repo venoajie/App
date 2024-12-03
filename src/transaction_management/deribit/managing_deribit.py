@@ -15,7 +15,6 @@ from strategies.basic_strategy import (
     is_label_and_side_consistent,)
 from transaction_management.deribit.orders_management import (
     labelling_unlabelled_order,
-    labelling_unlabelled_order_oto,
     saving_order_based_on_state,
     saving_traded_orders,)
 from transaction_management.deribit.telegram_bot import (
@@ -26,8 +25,7 @@ from transaction_management.deribit.api_requests import (
     SendApiRequest,)
 from utilities.pickling import replace_data
 from utilities.string_modification import (
-    extract_currency_from_text,
-    get_unique_elements)
+    extract_currency_from_text,)
 from utilities.system_tools import (
     provide_path_for_file)
 
@@ -636,7 +634,12 @@ class ModifyOrderDb(SendApiRequest):
                     
                     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
                     log.debug (f"transaction_main {transaction_main}")
-                    transaction_secondary = [o for o in orders if "OTO" in o["order_id"]][0]
+                    kind= "future"
+                    type = "trigger_all"
+                    
+                    open_orders_from_exchange =  await self.private_data.get_open_orders(kind, type)
+                    log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
+                    transaction_secondary = open_orders_from_exchange [0]
                     log.debug (f"transaction_secondary {transaction_secondary}")
                     
                     # no label
