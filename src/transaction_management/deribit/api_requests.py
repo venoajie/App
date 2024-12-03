@@ -215,7 +215,6 @@ class SendApiRequest:
                                                        endpoint=endpoint, 
                                                        params=params,)
         
-        log.error (f"result_open_order {result_open_order}")
         return result_open_order["result"]
 
 
@@ -226,6 +225,7 @@ class SendApiRequest:
         )-> None:
         """ """
 
+        # basic params
         side = params["side"]
         instrument = params["instrument_name"]
         label_numbered = params["label"]

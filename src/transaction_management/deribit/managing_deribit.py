@@ -15,6 +15,7 @@ from strategies.basic_strategy import (
     is_label_and_side_consistent,)
 from transaction_management.deribit.orders_management import (
     labelling_unlabelled_order,
+    labelling_unlabelled_order_oto,
     saving_order_based_on_state,
     saving_traded_orders,)
 from transaction_management.deribit.telegram_bot import (
@@ -646,7 +647,7 @@ class ModifyOrderDb(SendApiRequest):
                     if transaction_main["label"] == ''\
                         and "open" in transaction_main["order_state"]:
                         
-                        order_attributes = labelling_unlabelled_order (transaction_main,
+                        order_attributes = labelling_unlabelled_order_oto (transaction_main,
                                                                        transaction_secondary)                   
 
                         await insert_tables(
