@@ -135,10 +135,8 @@ def get_custom_label(transaction: list) -> str:
     return (f"custom{side_label.title()}-open-{last_update}")
 
 
-def get_custom_label_oto(transactions: list) -> dict:
+def get_custom_label_oto(transaction: list) -> dict:
     
-    transaction = [o for o in transactions if "OTO" not in o["order_id"]][0]
-
     side= transaction["direction"]
     side_label= "Short" if side== "sell" else "Long"
     
@@ -205,28 +203,30 @@ def labelling_unlabelled_order_oto(orders: list) -> None:
         get_transaction_side,
         )
     
-    label: str = get_custom_label_oto(orders)
-    
+    transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
+    transaction_secondary = [o for o in orders if "OTO" in o["order_id"]][0]
+
+    label: str = get_custom_label_oto(transaction_main)
     
     label_open: str = label["open"]
     label_closed: str = label["closed"]
-        
     
     params =  {}
-        
     params.update({"everything_is_consistent": True})
     params.update({"order_allowed": True})
+    params.update({"type": "limit"})
     
     result =[]
     for order in orders:
+        
         order_state= order["order_state"]   
         if "OTO"  in order["order_id"]: 
             
                     
             side= get_transaction_side(order)
-            params.update({"entry_price": order["price"]})
-            params.update({"size": order["amount"]})
-            params.update({"type": "limit"})
+            params.update({"entry_price": transaction_main["price"]})
+            params.update({"size": transaction_main["amount"]})
+            
             params.update({"side": side})
             
             

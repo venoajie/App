@@ -16,7 +16,7 @@ strategy_labels= [#represert strategy
     #"marketMakerShort",
     #"marketMakerLong",
        ]
-mode_full=[false]
+mode_full=[true]
        
 [[strategies]]
 strategy_label = "hedgingSpot"
