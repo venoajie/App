@@ -64,10 +64,6 @@ async def private_connection (
             # RESToverHTTP Response Content
             response: Dict = await response.json()
 
-        log.warning (f"response {response}")
-        log.warning (f"payload {payload}")
-        log.warning (f"params {params}")
-        log.warning (f"connection_url + endpoint {connection_url + endpoint}")
         return response
         
 async def public_connection (
@@ -182,10 +178,10 @@ class SendApiRequest:
         else:
             params.update({"valid_until": valid_until})
 
-        log.debug (f"otoco_config {otoco_config}")
+        #log.debug (f"otoco_config {otoco_config}")
         if otoco_config:
             params.update({"otoco_config": otoco_config})
-        log.debug (f"params {params}")
+        #log.debug (f"params {params}")
         
         result = None
         

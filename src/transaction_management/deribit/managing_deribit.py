@@ -382,7 +382,7 @@ class ModifyOrderDb(SendApiRequest):
         non_checked_strategies,
         order,)-> None:
         """ """
-        log.error (f"order {order}")
+
         if order["order_allowed"]:
 
             # get parameter orders
@@ -391,8 +391,6 @@ class ModifyOrderDb(SendApiRequest):
             except:
                 params = order
 
-            log.warning (f"order {order}")
-            log.error (f"params {params}")
             label_and_side_consistent = is_label_and_side_consistent(
                 non_checked_strategies,
                 params
