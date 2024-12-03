@@ -219,7 +219,6 @@ def labelling_unlabelled_order_oto(transaction_main: list,
 
     params =  defaultdict(dict)
     params.update({"everything_is_consistent": True})
-    params.update({"order_allowed": True})
     params.update({"type": "limit"})
     params.update({"entry_price": transaction_main["price"]})
     params.update({"size": transaction_main["amount"]})
@@ -228,4 +227,7 @@ def labelling_unlabelled_order_oto(transaction_main: list,
     params.update({"side": transaction_main ["direction"]})
     params.update({"otoco_config": secondary_params})
             
-    return params
+    return dict(
+            order_allowed=True,
+            order_parameters =  params,
+        )
