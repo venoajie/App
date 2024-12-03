@@ -582,6 +582,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             server_time,
                                                             )
                                                         
+                                                        log.critical (f"order {order}")
                                                         log.critical (f"cancel_allowed {cancel_allowed}")
 
                                                         if cancel_allowed["cancel_allowed"]:
