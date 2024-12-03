@@ -582,9 +582,6 @@ class RunningStrategy(ModifyOrderDb):
                                                             server_time,
                                                             )
                                                         
-                                                        log.critical (f"order {order}")
-                                                        log.critical (f"cancel_allowed {cancel_allowed}")
-
                                                         if cancel_allowed["cancel_allowed"]:
                                                             await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
 
@@ -931,6 +928,9 @@ class RunningStrategy(ModifyOrderDb):
                 sub_account,
                 instrument_name,
                 orders_currency)
+            
+            log.error (f"len_order_is_reconciled_each_other {len_order_is_reconciled_each_other}")
+            log.error (f"sub_account {sub_account}")
             
             if not len_order_is_reconciled_each_other:
                 orders_instrument_name = [o for o in orders_currency \
