@@ -284,8 +284,6 @@ def check_whether_order_db_reconciled_each_other(
     if sub_account :
         
         sub_account_orders = sub_account["open_orders"]
-        log.info (f"sub_account_orders {sub_account_orders}")
-        log.debug (f"instrument_name {instrument_name}")
         
         sub_account_instrument = [o for o in sub_account_orders \
             if o["instrument_name"] == instrument_name ]
@@ -302,8 +300,6 @@ def check_whether_order_db_reconciled_each_other(
         result = len_orders_instrument == len_sub_account_instrument
         #log.debug (f"result {result} ")
         
-        log.info(f" {sub_account_instrument}")
-        log.critical(f"len_order equal {result} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
         if not result:
             log.critical(f"len_order equal {result} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
         # comparing and return the result
