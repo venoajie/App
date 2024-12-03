@@ -332,6 +332,8 @@ async def update_instruments(idle_time):
 
             get_currencies_all = await get_currencies_from_deribit()
             
+            log.error (f"get_currencies_all {get_currencies_all}")
+            
             currencies = [o["currency"] for o in get_currencies_all["result"]]
 
             for currency in currencies:
