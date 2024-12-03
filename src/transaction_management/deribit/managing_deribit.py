@@ -634,33 +634,44 @@ class ModifyOrderDb(SendApiRequest):
                     log.debug (f"oto_order_ids {orders}")
                     
                     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
+                    transaction_main_oto = transaction_main ["oto_order_ids"][0]
+                    
                     log.debug (f"transaction_main {transaction_main}")
                     kind= "future"
                     type = "trigger_all"
                     
                     open_orders_from_exchange =  await self.private_data.get_open_orders(kind, type)
                     log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
-                    transaction_secondary = open_orders_from_exchange [0]
+                    transaction_secondary = [o for o in open_orders_from_exchange\
+                        if transaction_main_oto in o["order_d"]][0]
                     log.debug (f"transaction_secondary {transaction_secondary}")
                     
-                    # no label
-                    if transaction_main["label"] == ''\
-                        and "open" in transaction_main["order_state"]:
+                    if transaction_secondary:
                         
-                        order_attributes = labelling_unlabelled_order_oto (transaction_main,
-                                                                       transaction_secondary)                   
+                        # no label
+                        if transaction_main["label"] == ''\
+                            and "open" in transaction_main["order_state"]:
+                            
+                            order_attributes = labelling_unlabelled_order_oto (transaction_main,
+                                                                        transaction_secondary)                   
 
-                        await insert_tables(
-                            order_db_table, 
-                            orders[0]
-                            )
-                        
-                        await self. cancel_by_order_id (transaction_main["order_id"])  
-                        
-                        await self.if_order_is_true(
-                            non_checked_strategies,
-                            order_attributes, 
-                            )
+                            await insert_tables(
+                                order_db_table, 
+                                orders[0]
+                                )
+                            
+                            await self. cancel_by_order_id (transaction_main["order_id"])  
+                            
+                            await self.if_order_is_true(
+                                non_checked_strategies,
+                                order_attributes, 
+                                )
+
+                        else:
+                            await insert_tables(
+                                order_db_table, 
+                                transaction_main
+                                )
                                 
                 else:
                                     
