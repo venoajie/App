@@ -632,19 +632,19 @@ class ModifyOrderDb(SendApiRequest):
                 
                 if ("oto_order_ids" in (orders[0])):
                     
-                    log.debug (f"oto_order_ids {orders}")
-                    
                     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
                     transaction_main_oto = transaction_main ["oto_order_ids"][0]
                     
-                    log.debug (f"transaction_main {transaction_main}")
                     kind= "future"
                     type = "trigger_all"
                     
                     open_orders_from_exchange =  await self.private_data.get_open_orders(kind, type)
-                    log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
+
                     transaction_secondary = [o for o in open_orders_from_exchange\
                         if transaction_main_oto in o["order_id"]][0]
+
+                    
+                    log.debug (f"transaction_main {transaction_main}")
                     log.debug (f"transaction_secondary {transaction_secondary}")
                     
                     if transaction_secondary:
@@ -656,9 +656,10 @@ class ModifyOrderDb(SendApiRequest):
                             order_attributes = labelling_unlabelled_order_oto (transaction_main,
                                                                         transaction_secondary)                   
 
+                            log.debug (f"order_attributes {order_attributes}")
                             await insert_tables(
                                 order_db_table, 
-                                orders[0]
+                                transaction_main
                                 )
                             
                             await self. cancel_by_order_id (transaction_main["order_id"])  
