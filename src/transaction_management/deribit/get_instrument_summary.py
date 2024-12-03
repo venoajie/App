@@ -39,7 +39,7 @@ def get_instruments_kind(
     )
 
     instruments_raw = read_data(my_path_instruments)
-    print (f" instruments_raw {instruments_raw}")
+
     instruments = instruments_raw[0]["result"]
     non_spot_instruments=  [
         o for o in instruments if o["kind"] != "spot"]
