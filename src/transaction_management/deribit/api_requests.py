@@ -64,7 +64,10 @@ async def private_connection (
             # RESToverHTTP Response Content
             response: Dict = await response.json()
 
-        log.info (f"connection_url + endpoint {connection_url + endpoint}")
+        log.warning (f"response {response}")
+        log.warning (f"payload {payload}")
+        log.warning (f"params {params}")
+        log.warning (f"connection_url + endpoint {connection_url + endpoint}")
         return response
         
 async def public_connection (
