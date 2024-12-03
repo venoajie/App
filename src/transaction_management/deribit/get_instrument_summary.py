@@ -39,7 +39,6 @@ def get_instruments_kind(
     )
 
     instruments_raw = read_data(my_path_instruments)
-    print (f" instruments_raw {instruments_raw}")
     instruments = instruments_raw[0]["result"]
     non_spot_instruments=  [
         o for o in instruments if o["kind"] != "spot"]
@@ -66,16 +65,13 @@ def get_futures_for_active_currencies(
                                                   settlement_periods,
                                                   "future" )
 
-        print (f" future_instruments {future_instruments}")
         future_combo_instruments= get_instruments_kind (currency,
                                                   settlement_periods,
                                                   "future_combo" )
         
-        print (f" future_combo_instruments {future_combo_instruments}")
         active_combo_perp = [o for o in future_combo_instruments \
             if "_PERP" in o["instrument_name"]]
         
-        print (f" active_combo_perp {active_combo_perp}")
         combined_instruments = future_instruments + active_combo_perp
         instruments_holder_place.append(combined_instruments)    
     
