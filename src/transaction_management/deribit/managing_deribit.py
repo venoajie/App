@@ -635,7 +635,9 @@ class ModifyOrderDb(SendApiRequest):
                     log.debug (f"oto_order_ids {orders}")
                     
                     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
+                    log.debug (f"transaction_main {transaction_main}")
                     transaction_secondary = [o for o in orders if "OTO" in o["order_id"]][0]
+                    log.debug (f"transaction_secondary {transaction_secondary}")
                     
                     # no label
                     if transaction_main["label"] == ''\
