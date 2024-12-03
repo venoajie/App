@@ -911,7 +911,7 @@ class ComboAuto (BasicStrategy):
                 params.update({"side": counter_side})
                 
                 instrument_current_size = sum([ o["amount"] for o in (self.my_trades_currency_strategy)\
-                    if instrument_name_transaction in o["amount"]])
+                    if instrument_name_transaction in o["instrument_name"]])
                 
                 instrument_proforma_size  = proforma_size(
                     instrument_current_size, 
