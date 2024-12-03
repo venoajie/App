@@ -583,7 +583,12 @@ class RunningStrategy(ModifyOrderDb):
                                                             order,
                                                             server_time,
                                                             )
-                                                        
+                                                        await self.reconciling_orders(
+                                                                order["instrument_name"],
+                                                                currency,
+                                                                sub_account,
+                                                                orders_currency
+                                                                )
                                                         if cancel_allowed["cancel_allowed"]:
                                                             await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
 
