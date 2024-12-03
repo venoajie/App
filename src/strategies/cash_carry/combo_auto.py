@@ -913,6 +913,8 @@ class ComboAuto (BasicStrategy):
                 instrument_current_size = sum([ o["amount"] for o in (self.my_trades_currency_strategy)\
                     if instrument_name_transaction in o["instrument_name"]])
                 
+                log.error (f"instrument_current_size {instrument_current_size} orders_instrument_transaction_net {orders_instrument_transaction_net} selected_transaction_size {selected_transaction_size}")
+
                 instrument_proforma_size  = proforma_size(
                     instrument_current_size, 
                     orders_instrument_transaction_net,
