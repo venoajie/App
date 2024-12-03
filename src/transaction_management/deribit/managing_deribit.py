@@ -391,6 +391,7 @@ class ModifyOrderDb(SendApiRequest):
             except:
                 params = order
 
+            log.error (f"params {params}")
             label_and_side_consistent = is_label_and_side_consistent(
                 non_checked_strategies,
                 params
