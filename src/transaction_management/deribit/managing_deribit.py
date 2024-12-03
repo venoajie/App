@@ -629,9 +629,10 @@ class ModifyOrderDb(SendApiRequest):
                 
             else:
                 
-                log.debug (f"oto_order_ids {orders}")
                 
                 if ("oto_order_ids" in (orders[0])):
+                    
+                    log.debug (f"oto_order_ids {orders}")
                     
                     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
                     transaction_secondary = [o for o in orders if "OTO" in o["order_id"]][0]
