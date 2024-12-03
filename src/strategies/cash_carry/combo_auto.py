@@ -9,26 +9,32 @@ from dataclassy import dataclass, fields
 from loguru import logger as log
 
 # user defined formula
-from db_management.sqlite_management import (
-    update_status_data)
+
 from strategies.basic_strategy import (
     BasicStrategy,
+    check_if_next_closing_size_will_not_exceed_the_original,
     delta_pct,
+    ensure_sign_consistency,
     get_label,
     get_label_integer,
     is_minimum_waiting_time_has_passed,
-    size_rounding,)
+    proforma_size,
+    provide_size_to_close_transaction,
+    size_rounding,
+    sum_order_under_closed_label_int)
 from utilities.pickling import (
     read_data,)
 from utilities.string_modification import(
-    parsing_label,
-    remove_redundant_elements,
-    sorting_list)
+    parsing_label,)
 from utilities.system_tools import (
     provide_path_for_file,)
-def reading_from_pkl_data(end_point, 
-                          currency, 
-                          status: str = None) -> dict:
+
+
+def reading_from_pkl_data(
+    end_point: str, 
+    currency: str, 
+    status: str = None
+    ) -> dict:
     """ """
 
     path: str = provide_path_for_file(end_point, 
@@ -370,14 +376,13 @@ class ComboAuto (BasicStrategy):
     
             
     def __post_init__(self):
-        log.error ( (-820 if "BTC" in self.ticker_perpetual["instrument_name"] else 0) )
-        log.critical (get_delta (self.my_trades_currency_strategy) )
+
         self.delta: float = get_delta (self.my_trades_currency_strategy) + (-(820*70/100) if "BTC" in self.ticker_perpetual["instrument_name"] else 0) 
         self.basic_params: str = BasicStrategy (
             self.strategy_label,
             self.strategy_parameters)
 
-        log.critical (f"delta {self.delta}")
+        log.critical (f"""delta actual {self.delta} delta system {(-820 if "BTC" in self.ticker_perpetual["instrument_name"] else 0)}""")
         
 
     async def is_send_open_order_constructing_manual_combo_allowed(
@@ -790,6 +795,8 @@ class ComboAuto (BasicStrategy):
             orders_instrument_transaction: list=  [o for o in orders_currency 
                                             if instrument_name_transaction in o["instrument_name"]]
             
+            orders_instrument_transaction_net: int=  [o["amount"] for o in orders_instrument_transaction]
+            
             orders_instrument_perpetual: list=  [o for o in orders_currency 
                                                 if instrument_name_perpetual in o["instrument_name"]]
             
@@ -840,22 +847,45 @@ class ComboAuto (BasicStrategy):
             #bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
             #neutral = market_condition["neutral_price"]
             
+            label_integer = get_label_integer (selected_transaction["label"])
+            
+            basic_size = selected_transaction["amount"]
+                
             if instrument_side =="buy":
                 
                 counter_side = "sell"
                 
                 params.update({"side": counter_side})
                 
-                
                 if "PERPETUAL" in instrument_name_transaction:
-                                        
+                    
+                    sum_order_under_closed_label = sum_order_under_closed_label_int (
+                    orders_instrument_perpetual_closed,
+                    label_integer
+                    )
+                    
+                    net_size = (basic_size + sum_order_under_closed_label)
+                    
+                    size_abs = abs(basic_size)
+                    
+                    size = size_abs * ensure_sign_consistency(instrument_side)   
+                    
+                    closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
+                        basic_size,
+                        net_size,
+                        size
+                        )
+                    
+                    log.error (f"closing_size_ok {closing_size_ok}")
+                                            
                     if delta > 0:
                         transaction_in_profit = bid_price_perpetual >= (selected_transaction_price)
 
                     else:
                         transaction_in_profit = bid_price_perpetual > selected_transaction_price + (selected_transaction_price * tp_threshold)
 
-                    if transaction_in_profit:
+                    if transaction_in_profit\
+                        and closing_size_ok:
 
                         if len_orders_instrument_perpetual_closed == 0:
                             
@@ -879,8 +909,38 @@ class ComboAuto (BasicStrategy):
                 counter_side = "buy"
                 
                 params.update({"side": counter_side})
+                
+                instrument_current_size = sum([ o["amount"] for o in (self.my_trades_currency_strategy)\
+                    if instrument_name_transaction in o["amount"]])
+                
+                instrument_proforma_size  = proforma_size(
+                    instrument_current_size, 
+                    orders_instrument_transaction_net,
+                    selected_transaction_size
+                    )
+                
+                sum_order_under_closed_label = sum_order_under_closed_label_int (
+                    orders_instrument_transaction_closed,
+                    label_integer
+                    )
+                
+                net_size = (basic_size + sum_order_under_closed_label)
+                
+                size_abs = abs(basic_size)
+                
+                size = size_abs * ensure_sign_consistency(instrument_side)   
+                
+                closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
+                    basic_size,
+                    net_size,
+                    size
+                    )
+                
+                log.error (f"closing_size_ok {closing_size_ok} instrument_proforma_size <=0 {instrument_proforma_size <=0}")
             
-                if "PERPETUAL" not in instrument_name_transaction:
+                if "PERPETUAL" not in instrument_name_transaction\
+                    and instrument_proforma_size <=0\
+                        and closing_size_ok:
                     
                     transaction_in_profit = bid_price_future < (selected_transaction_price - selected_transaction_price * tp_threshold)
 
@@ -894,7 +954,7 @@ class ComboAuto (BasicStrategy):
 
                             params.update({"instrument_name": instrument_name_transaction})
                         
-                            label_integer = get_label_integer (selected_transaction["label"])
+                            
                             
                             label = f"{strategy_label}-closed-{label_integer}"
                         

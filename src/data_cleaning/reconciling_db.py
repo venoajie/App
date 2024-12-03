@@ -276,3 +276,38 @@ def is_size_sub_account_and_my_trades_reconciled(
     except Exception as error:
         log.warning(error)
                 
+
+
+def check_whether_order_db_reconciled_each_other(
+    sub_account: list,
+    instrument_name: str,
+    orders_currency: list
+    ) -> None:
+    """ """
+    
+    if sub_account :
+        
+        sub_account_orders = sub_account["open_orders"]
+        
+        sub_account_instrument = [o for o in sub_account_orders \
+            if o["instrument_name"] == instrument_name ]
+                
+        len_sub_account_instrument = 0 if not sub_account_instrument \
+            else len([o["amount"] for o in sub_account_instrument])
+            
+        orders_instrument = [o for o in orders_currency \
+            if instrument_name in o["instrument_name"] ]
+        
+        len_orders_instrument = 0 if not orders_instrument \
+            else len([o["amount"] for o in orders_instrument])    
+        
+        result = len_orders_instrument == len_sub_account_instrument
+        #log.debug (f"result {result} ")
+        
+        if not result:
+            log.critical(f"len_order equal {result} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
+        # comparing and return the result
+        return  result
+
+    else :        
+        return  False

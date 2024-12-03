@@ -134,7 +134,8 @@ def ensure_sign_consistency(side) -> float:
     return -1 if side == "sell" else 1
 
 def proforma_size(
-    current_size: int, current_orders_size: int, 
+    current_size: int, 
+    current_orders_size: int, 
     next_orders_size: int
     ) -> int:
     """ """
