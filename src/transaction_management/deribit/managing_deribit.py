@@ -643,7 +643,7 @@ class ModifyOrderDb(SendApiRequest):
                     open_orders_from_exchange =  await self.private_data.get_open_orders(kind, type)
                     log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
                     transaction_secondary = [o for o in open_orders_from_exchange\
-                        if transaction_main_oto in o["order_d"]][0]
+                        if transaction_main_oto in o["order_id"]][0]
                     log.debug (f"transaction_secondary {transaction_secondary}")
                     
                     if transaction_secondary:
