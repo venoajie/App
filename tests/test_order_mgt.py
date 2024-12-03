@@ -23,26 +23,40 @@ orders = [
             'time_in_force': 'good_til_cancelled', 'direction': 'sell', 'amount': 10.0, 
             'order_id': 'OTO-80322590', 'price': 100000.0, 'label': ''}
         ]
+
+transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
+
+transaction_secondary = [o for o in orders if "OTO" in o["order_id"]][0]
+
     
-@pytest.mark.parametrize("orders, expected", [
-    (orders,  {'closed': 'customLong-closed-1733172624209', 
+@pytest.mark.parametrize("transaction_main, expected", [
+    (transaction_main,  {'closed': 'customLong-closed-1733172624209', 
                'open': 'customLong-open-1733172624209'}),
     ])
-def test_get_custom_label_oto (orders,
+def test_get_custom_label_oto (transaction_main,
                                expected):
     
-    result = get_custom_label_oto (orders)
+    result = get_custom_label_oto (transaction_main)
 
     assert result == expected
     
-    
-@pytest.mark.parametrize("orders, expected", [
-    (orders,   False),
+        
+@pytest.mark.parametrize("transaction_main, transaction_secondary, expected", [
+    (transaction_main,  transaction_secondary, {'everything_is_consistent': True, 'order_allowed': True, 'type': 'limit', 
+         'entry_price': 90000.0, 'size': 10.0, 'label': 'customLong-open-1733172624209', 'side': 'buy', 
+         'otoco_config': [{'amount': 10.0, 'direction': 'sell', 'type': 'limit', 
+                           'label': 'customLong-closed-1733172624209', 'price': 100000,
+                           'time_in_force': 'good_til_cancelled', 'post_only': True}]
+         }),
     ])
-def test_labelling_unlabelled_order_oto (orders,
-                               expected):
+def test_labelling_unlabelled_order_oto (
+    transaction_main,
+    transaction_secondary,
+    expected):
     
-    result = labelling_unlabelled_order_oto (orders)
+    result = labelling_unlabelled_order_oto (
+        transaction_main,
+        transaction_secondary)
 
     assert result == expected
     

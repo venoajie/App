@@ -629,27 +629,32 @@ class ModifyOrderDb(SendApiRequest):
                 
             else:
                 
-                log.debug (f"orders {orders}")
+                log.debug (f"oto_order_ids {orders}")
                 
                 if ("oto_order_ids" in (orders[0])):
-                    order_attributes = labelling_unlabelled_order_oto (orders)   
                     
+                    transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
+                    transaction_secondary = [o for o in orders if "OTO" in o["order_id"]][0]
                     
-                    for order in orders:
+                    # no label
+                    if transaction_main["label"] == ''\
+                        and "open" in transaction_main["order_state"]:
                         
-                        label= order["label"]
+                        order_attributes = labelling_unlabelled_order (transaction_main,
+                                                                       transaction_secondary)                   
+
+                        await insert_tables(
+                            order_db_table, 
+                            orders[0]
+                            )
                         
-                        order_state= order["order_state"]    
-                                    
-                        # no label
-                        if label == ''\
-                            and "open" in order_state:
-                                if ("oto_order_ids"  in (order["order_id"])):
-                                    pass
-                                else:
-                                    pass
-                    
-                
+                        await self. cancel_by_order_id (transaction_main["order_id"])  
+                        
+                        await self.if_order_is_true(
+                            non_checked_strategies,
+                            order_attributes, 
+                            )
+                                
                 else:
                                     
                     for order in orders:
@@ -757,9 +762,6 @@ class ModifyOrderDb(SendApiRequest):
                 order
                 )
             
-            
-            log.warning (f" label == None {order}")
-
             if "OTO" not in order ["order_id"]:
                 await self. cancel_by_order_id (order_id)  
             

@@ -2,6 +2,7 @@
 import asyncio
 from datetime import datetime
 from typing import Dict
+from collections import defaultdict
 
 # installed
 from dataclassy import dataclass
@@ -136,6 +137,7 @@ class SendApiRequest:
         label: str = None,
         price: float = None,
         type: str = "limit",
+        otoco_config: list = None,
         trigger_price: float = None,
         trigger: str = "last_price",
         time_in_force: str = "fill_or_kill",
@@ -143,77 +145,50 @@ class SendApiRequest:
         valid_until: int = False,
         post_only: bool = True,
         reject_post_only: bool = False,
-    ):
+        ) ->None:
 
+        params =  defaultdict(dict)
+        
+        params.update({"instrument_name": instrument})
+        params.update({"amount": amount})
+        params.update({"label": label})
+        params.update({"instrument_name": instrument})
+        params.update({"type": type})
+        
         if valid_until == False:
             if trigger_price is None:
+                
                 if "market" in type:
-                    params = {
-                        "instrument_name": instrument,
-                        "amount": amount,
-                        "label": label,
-                        # "time_in_force": time_in_force, fik can not apply to post only
-                        "type": type,
-                        "reduce_only": reduce_only,
-                    }
+                    params.update({"reduce_only": reduce_only})
                 else:
-                    params = {
-                        "instrument_name": instrument,
-                        "amount": amount,
-                        "label": label,
-                        "price": price,
-                        # "time_in_force": time_in_force, fik can not apply to post only
-                        "type": type,
-                        "reduce_only": reduce_only,
-                        "post_only": post_only,
-                        "reject_post_only": reject_post_only,
-                    }
+                    params.update({"price": price})
+                    params.update({"reduce_only": reduce_only})
+                    params.update({"post_only": post_only})
+                    params.update({"reject_post_only": reject_post_only})
             else:
-                if "market" in type:
-                    params = {
-                        "instrument_name": instrument,
-                        "amount": amount,
-                        "label": label,
-                        # "time_in_force": time_in_force, fik can not apply to post only
-                        "type": type,
-                        "trigger": trigger,
-                        "trigger_price": trigger_price,
-                        "reduce_only": reduce_only,
-                    }
-                else:
-
-                    params = {
-                        "instrument_name": instrument,
-                        "amount": amount,
-                        "label": label,
-                        "price": price,
-                        # "time_in_force": time_in_force, fik can not apply to post only
-                        "type": type,
-                        "trigger": trigger,
-                        "trigger_price": trigger_price,
-                        "reduce_only": reduce_only,
-                        "post_only": post_only,
-                        "reject_post_only": reject_post_only,
-                    }
+                
+                params.update({"trigger": trigger})
+                params.update({"trigger_price": trigger_price})
+                params.update({"reduce_only": reduce_only})
+                
+                if "market" not in type:
+                    params.update({"post_only": post_only})
+                    params.update({"reject_post_only": reject_post_only})
+                    
         else:
-            params = {
-                "instrument_name": instrument,
-                "amount": amount,
-                "price": price,
-                "label": label,
-                "valid_until": valid_until,
-                # "time_in_force": time_in_force, fik can not apply to post only
-                "type": type,
-                "reduce_only": reduce_only,
-                "post_only": post_only,
-                "reject_post_only": reject_post_only,
-            }
+            params.update({"valid_until": valid_until})
 
+        if otoco_config:
+            params.update({"otoco_config": otoco_config})
+        
         result = None
+        
         if side == "buy":
             endpoint: str = "private/buy"
+        
         if side == "sell":
             endpoint: str = "private/sell"
+        
         if side is not None:
             result = await private_connection (self.sub_account_id,
                                                endpoint=endpoint, 
@@ -234,6 +209,12 @@ class SendApiRequest:
         size = params["size"]
         type = params["type"]
         
+        try:
+            otoco_config = params["otoco_config"]
+        
+        except:
+            otoco_config = None
+        
         limit_prc = params["entry_price"]
 
         order_result = None
@@ -246,6 +227,7 @@ class SendApiRequest:
                 label_numbered,
                 limit_prc,
                 type,
+                otoco_config
             )
 
         log.warning(f'order_result {order_result}')

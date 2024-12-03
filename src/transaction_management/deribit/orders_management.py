@@ -173,7 +173,8 @@ def labelling_unlabelled_order(order: dict) -> None:
     return order
 
 
-def labelling_unlabelled_order_oto(orders: list) -> None:
+def labelling_unlabelled_order_oto(transaction_main: list,
+                                   transaction_secondary: list) -> None:
 
     """
     
@@ -199,46 +200,32 @@ def labelling_unlabelled_order_oto(orders: list) -> None:
     
     """
     
-    from strategies.basic_strategy import (
-        get_transaction_side,
-        )
-    
-    transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
-    transaction_secondary = [o for o in orders if "OTO" in o["order_id"]][0]
-
     label: str = get_custom_label_oto(transaction_main)
     
     label_open: str = label["open"]
     label_closed: str = label["closed"]
     
-    params =  {}
+    secondary_params = [
+                {
+                    "amount": transaction_secondary["amount"],
+                    "direction": (transaction_secondary["direction"]),
+                    "type": "limit",
+                    "label": label_closed,
+                    "price": 100000,
+                    "time_in_force": "good_til_cancelled",
+                    "post_only": True
+                    }
+                ]
+
+    params =  defaultdict(dict)
     params.update({"everything_is_consistent": True})
     params.update({"order_allowed": True})
     params.update({"type": "limit"})
-    
-    result =[]
-    for order in orders:
-        
-        order_state= order["order_state"]   
-        if "OTO"  in order["order_id"]: 
-            
-                    
-            side= get_transaction_side(order)
-            params.update({"entry_price": transaction_main["price"]})
-            params.update({"size": transaction_main["amount"]})
-            
-            params.update({"side": side})
-            
-            
-            params.update({"label": label_open})
-            
-        else: 
-            
-            side= get_transaction_side(order)
-            
-            params.update({"label": label_closed})
-        
-        result.append (params)
+    params.update({"entry_price": transaction_main["price"]})
+    params.update({"size": transaction_main["amount"]})
+    params.update({"label": label_open})
 
-    
-    return result
+    params.update({"side": transaction_main ["direction"]})
+    params.update({"otoco_config": secondary_params})
+        
+    return params
