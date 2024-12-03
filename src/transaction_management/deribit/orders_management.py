@@ -204,12 +204,13 @@ def labelling_unlabelled_order_oto(transaction_main: list,
     
     label_open: str = label["open"]
     label_closed: str = label["closed"]
-    
+    instrument_name = transaction_main["instrument_name"]
     secondary_params = [
                 {
                     "amount": transaction_secondary["amount"],
                     "direction": (transaction_secondary["direction"]),
                     "type": "limit",
+                    "instrument_name": instrument_name,
                     "label": label_closed,
                     "price": 100000,
                     "time_in_force": "good_til_cancelled",
@@ -219,6 +220,7 @@ def labelling_unlabelled_order_oto(transaction_main: list,
 
     params =  defaultdict(dict)
     params.update({"everything_is_consistent": True})
+    params.update({"instrument_name": instrument_name})
     params.update({"type": "limit"})
     params.update({"entry_price": transaction_main["price"]})
     params.update({"size": transaction_main["amount"]})
