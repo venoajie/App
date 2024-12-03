@@ -178,6 +178,7 @@ class SendApiRequest:
         else:
             params.update({"valid_until": valid_until})
 
+        log.debug (f"otoco_config {otoco_config}")
         if otoco_config:
             params.update({"otoco_config": otoco_config})
         
@@ -231,14 +232,18 @@ class SendApiRequest:
         label_numbered = params["label"]
         size = params["size"]
         type = params["type"]
+        limit_prc = params["entry_price"]
+
+        log.warning(f'params {params}')
         
         try:
             otoco_config = params["otoco_config"]
         
         except:
             otoco_config = None
+
+        log.warning(f'otoco_config {otoco_config}')
         
-        limit_prc = params["entry_price"]
 
         order_result = None
 
