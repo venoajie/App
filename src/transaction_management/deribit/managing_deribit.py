@@ -806,11 +806,13 @@ class ModifyOrderDb(SendApiRequest):
             # check if transaction has label. Provide one if not any
             if  not label_and_side_consistent:
                 
-                log.warning (f" not label_and_side_consistent {order}")
-            
-                await insert_tables(
-                    order_db_table, 
-                    order
-                    )
+                if order_state != "cancelled" or order_state != "filled":
+                    
+                    log.warning (f" not label_and_side_consistent {order}")
+                
+                    await insert_tables(
+                        order_db_table, 
+                        order
+                        )
 
-                await self. cancel_by_order_id (order_id)                    
+                    await self. cancel_by_order_id (order_id)                    
