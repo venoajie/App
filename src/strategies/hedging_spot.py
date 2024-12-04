@@ -453,7 +453,8 @@ class HedgingSpot(BasicStrategy):
         self,
         transaction: dict,
         orders_currency_strategy: list,
-        server_time: int
+        server_time: int,
+        strategy_params: list = None,
     ) -> bool:
         
         """ """
@@ -463,8 +464,11 @@ class HedgingSpot(BasicStrategy):
         ONE_SECOND = 1000
         ONE_MINUTE = ONE_SECOND * 60
 
-        hedging_attributes: dict = self.strategy_parameters
-        
+        if strategy_params is None:
+            hedging_attributes: dict = self.strategy_parameters
+        else:
+            hedging_attributes: dict = strategy_params
+               
         threshold_market_condition: float = hedging_attributes ["delta_price_pct"]
         
         waiting_minute_before_cancel= hedging_attributes["waiting_minute_before_cancel"] * ONE_MINUTE
