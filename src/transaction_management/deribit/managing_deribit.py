@@ -643,11 +643,13 @@ class ModifyOrderDb(SendApiRequest):
                     log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
 
                     transaction_secondary = [o for o in open_orders_from_exchange\
-                        if transaction_main_oto in o["order_id"]][0]
+                        if transaction_main_oto in o["order_id"]]
                     
                     log.warning (f"transaction_secondary {transaction_secondary}")
                     
                     if transaction_secondary:
+                        
+                        transaction_secondary = transaction_secondary[0]
                         
                         # no label
                         if transaction_main["label"] == ''\

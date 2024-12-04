@@ -54,3 +54,18 @@ print (np_users_data)
 arr = np.array([1, 2, 3, 4, 5])
 result = np.where(arr > 3, 'Large', 'Small')
 print(result)
+
+open_orders_from_exchange = [{'label': 'customShort-closed-1733298772383', 'price': 100000.0, 'direction': 'buy', 'time_in_force': 'good_til_cancelled', 'max_show': 50.0, 'instrument_name': 'BTC-PERPETUAL', 'order_id': 'OTO-80328461', 'amount': 50.0, 'api': True, 'web': False, 'triggered': False, 'mmp': False, 'is_secondary_oto': True, 'replaced': False, 'filled_amount': 0.0, 'last_update_timestamp': 1733298772468, 'trigger_fill_condition': 'incremental', 'post_only': True, 'reduce_only': False, 'average_price': 0.0, 'reject_post_only': False, 'order_state': 'untriggered', 'creation_timestamp': 1733298772468, 'order_type': 'limit', 'risk_reducing': False, 'is_liquidation': False}, {'label': '', 'price': 96400.0, 'direction': 'buy', 'time_in_force': 'good_til_cancelled', 'max_show': 50.0, 'instrument_name': 'BTC-PERPETUAL', 'order_id': 'OTO-80328441', 'amount': 50.0, 'api': False, 'web': True, 'triggered': False, 'mmp': False, 'is_secondary_oto': True, 'replaced': False, 'filled_amount': 0.0, 'last_update_timestamp': 1733298275780, 'trigger_fill_condition': 'incremental', 'post_only': False, 'reduce_only': False, 'average_price': 0.0, 'order_state': 'untriggered', 'creation_timestamp': 1733298275780, 'order_type': 'limit', 'risk_reducing': False, 'is_liquidation': False}, {'label': '', 'price': 96400.0, 'direction': 'buy', 'time_in_force': 'good_til_cancelled', 'max_show': 50.0, 'instrument_name': 'BTC-PERPETUAL', 'order_id': 'OTO-80328438', 'amount': 50.0, 'api': False, 'web': True, 'triggered': False, 'mmp': False, 'is_secondary_oto': True, 'replaced': False, 'filled_amount': 0.0, 'last_update_timestamp': 1733298236687, 'trigger_fill_condition': 'incremental', 'post_only': False, 'reduce_only': False, 'average_price': 0.0, 'order_state': 'untriggered', 'creation_timestamp': 1733298236687, 'order_type': 'limit', 'risk_reducing': False, 'is_liquidation': False}]
+
+transaction_main_oto = "OTO-80328460"
+
+transaction_secondary = [o for o in open_orders_from_exchange\
+                        if transaction_main_oto in o["order_id"]]
+
+print (f"transaction_secondary {transaction_secondary}")
+
+
+transaction_secondary = [o for o in open_orders_from_exchange\
+                        if transaction_main_oto in o["order_id"]][0]
+
+print (f"transaction_secondary {transaction_secondary}")
