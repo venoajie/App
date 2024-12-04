@@ -178,7 +178,7 @@ def basic_ordering (
                         orders_currency, 
                         label_integer
                         )
-        log.debug (f" outstanding_closed_orders { outstanding_closed_orders}")
+        #log.debug (f" outstanding_closed_orders { outstanding_closed_orders}")
     
     no_orders_at_all = not orders_currency
     
@@ -642,7 +642,7 @@ class ComboAuto (BasicStrategy):
             dict: _description_
         """
 
-        log.info (f"is_send_exit_order_allowed_combo_auto {label}")
+        #log.info (f"is_send_exit_order_allowed_combo_auto {label}")
                 
         order_allowed = False
         my_trades_currency = self.my_trades_currency_strategy
