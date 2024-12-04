@@ -534,13 +534,11 @@ class RunningStrategy(ModifyOrderDb):
                                                     cancellable_strategies
                                                     )
                                                 
-                                                for order in orders_currency:
-                                                    
-                                                    await self.reconciling_orders(
-                                                            sub_account,
-                                                            orders_currency
-                                                            )
-                                                
+                                                await self.reconciling_orders(
+                                                        sub_account,
+                                                        orders_currency
+                                                        )
+                                            
                                                     
                                             for strategy in active_strategies:
                                                 
@@ -591,12 +589,12 @@ class RunningStrategy(ModifyOrderDb):
                                                         if cancel_allowed["cancel_allowed"]:
                                                             await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
 
-                                                        await self.reconciling_orders(
-                                                                order["instrument_name"],
-                                                                currency,
-                                                                sub_account,
-                                                                orders_currency
-                                                                )
+                                                        #await self.reconciling_orders(
+                                                        #        order["instrument_name"],
+                                                        #        currency,
+                                                        #        sub_account,
+                                                        #        orders_currency
+                                                        #        )
                                                         
                                                     for label in labels:
                                                         
