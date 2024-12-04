@@ -613,7 +613,7 @@ async def reconciling_size(
                     orders_currency = from_transaction_log = result_from_db_queries["orders_currency"]                           
                     
                     await reconciling_orders(
-                        ModifyOrderDb(sub_account_id),
+                        modify_order_and_db,
                         sub_account,
                         orders_currency,
                         "from_sub_account_to_order_db"
