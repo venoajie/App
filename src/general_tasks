@@ -512,7 +512,7 @@ async def reconciling_size(
                                     and not my_trades_and_sub_account_size_reconciled_archive:
                                         
                                  
-                                    log.info (f"my_trades_instrument_name_archive {my_trades_instrument_name_archive}")
+                                    #log.info (f"my_trades_instrument_name_archive {my_trades_instrument_name_archive}")
                                     from_transaction_log_instrument_name = (
                                         [o for o in from_transaction_log if o["instrument_name"] == instrument_name]
                                         )  
