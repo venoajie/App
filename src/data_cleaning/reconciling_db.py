@@ -330,7 +330,7 @@ async def reconciling_orders(
     
     try:
         
-        log ("TEST")
+        log.error ("TEST")
         await modify_order_and_db.modify_order_and_db.resupply_sub_accountdb(currency)
         if direction == "from_order_db_to_sub_account":
             orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in orders_currency  ])
