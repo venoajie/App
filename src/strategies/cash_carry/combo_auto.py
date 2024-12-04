@@ -671,7 +671,7 @@ class ComboAuto (BasicStrategy):
                     
                     instrument_name_combo = creating_instrument_name_combo(traded_instrument_name_future)
                     
-                    log.warning (f"instrument_name_combo {instrument_name_combo} ")
+                    #log.warning (f"instrument_name_combo {instrument_name_combo} ")
                             
                     combo_ticker= reading_from_pkl_data(
                         "ticker", 
