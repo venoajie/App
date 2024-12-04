@@ -20,7 +20,8 @@ from data_cleaning.reconciling_db import (
     is_size_sub_account_and_my_trades_reconciled)
 from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-    querying_table,)
+    querying_table,
+    update_status_data)
 from strategies.basic_strategy import (
     get_label_integer,)
 from strategies.hedging_spot import (
@@ -530,7 +531,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 amount = sum([o["amount"] for o in my_trades_currency if instrument in o["instrument_name"]])
                                                                                                                                     
                                                 log.debug (f"amount {amount}")
-
+                                                
                                             notional: float = compute_notional_value(index_price, equity)
 
                                             TA_result_data_all = await querying_table("market_analytics_json")
@@ -589,7 +590,6 @@ class RunningStrategy(ModifyOrderDb):
                                                     strategy_params= [o for o in strategy_attributes \
                                                         if o["strategy_label"] == strategy][0]   
                                                                                                  
-    
                                                     target_transaction_per_hour = 1/10
                                                             
                                                     combo_auto = ComboAuto(
@@ -601,12 +601,14 @@ class RunningStrategy(ModifyOrderDb):
                                                         ticker_perpetual_instrument_name,
                                                         )
                                                     
-                                                    tp_threshold = .001/100
+                                                    TP_THRESHOLD = .001/100
                                                     
                                                     my_trades_currency_strategy_labels: list = [o["label"] for o in my_trades_currency_strategy  ]
                                                     
+                                                    # get labels from active trades
                                                     labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
                                                     
+                                                    #! closing active trades
                                                     for label in labels:
                                                         
                                                         label_integer: int = get_label_integer (label)
@@ -631,37 +633,65 @@ class RunningStrategy(ModifyOrderDb):
                                                             my_trades_currency_all,
                                                             selected_transaction_instrument_name)
                                                         
-                                                        if ticker_future:
-                                                            
-                                                        # closing unpaired transactions
-                                                            if sum_selected_transaction != 0\
-                                                                and len_selected_transaction == 1\
-                                                                    and "closed" not in label:
+                                                        if ticker_future \
+                                                            and "closed" not in label:
+                                                                                                                
+                                                            #! closing combo auto trading
+                                                            if "Auto" in label:
                                                                 
-                                                                send_order = []
-                                                                                                                                
-                                                                if mode_full and\
-                                                                    size_future_reconciled\
-                                                                    and size_perpetuals_reconciled\
-                                                                        and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS\
-                                                                            :
-                                                                                                                                    
-                                                                    send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                    ticker_future[0],
-                                                                    instrument_attributes_futures_all,
-                                                                    tp_threshold,
-                                                                    selected_transaction,
-                                                                    server_time,
-                                                                    THRESHOLD_MARKET_CONDITIONS_COMBO
-                                                                    )
-                                                                
-                                                            #closing combo auto orders
-                                                            else:
                                                                 send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
                                                                 label,
                                                                 instrument_attributes_combo_all,
-                                                                tp_threshold)
-                                                            
+                                                                TP_THRESHOLD)
+
+                                                            #! renaming combo auto trading
+                                                            else:
+                                                                
+                                                                if sum_selected_transaction == 0:
+                                                                    
+                                                                    new_label = f"futureSpreadAuto-open-{label_integer}"
+                                                                
+                                                                    filter = "label"
+                                                                    
+                                                                    await update_status_data(
+                                                                        archive_db_table,
+                                                                        "label",
+                                                                        filter,
+                                                                        label,
+                                                                        new_label,
+                                                                        "="
+                                                                        )
+                                                                
+                                                                    await update_status_data(
+                                                                            trade_db_table,
+                                                                            "label",
+                                                                            filter,
+                                                                            label,
+                                                                            new_label,
+                                                                            "="
+                                                                            )
+                                                                    
+                                                                #! closing unpaired transactions                                                            
+                                                                else:
+                                                                    if len_selected_transaction == 1:
+                                                                        
+                                                                        send_order = []
+                                                                                                                                        
+                                                                        if mode_full and\
+                                                                            size_future_reconciled\
+                                                                            and size_perpetuals_reconciled\
+                                                                                and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS\
+                                                                                    :
+                                                                                                                                            
+                                                                            send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                                            ticker_future[0],
+                                                                            instrument_attributes_futures_all,
+                                                                            TP_THRESHOLD,
+                                                                            selected_transaction,
+                                                                            server_time,
+                                                                            THRESHOLD_MARKET_CONDITIONS_COMBO
+                                                                            )
+                                                                                                                            
                                                             if send_order:
                                                                 await self.processing_orders(
                                                                         send_order,
@@ -670,9 +700,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                         order_db_table,
                                                                         trade_db_table,
                                                                         archive_db_table,
-                                                                    transaction_log_trading_table)
+                                                                        transaction_log_trading_table)
                                                             
-                                                    # send combo orders-automatic
+                                                    # send combo orders
                                                     for instrument_attributes_combo in instrument_attributes_combo_all:
                                                         
                                                         try:

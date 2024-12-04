@@ -876,7 +876,7 @@ class ComboAuto (BasicStrategy):
                         size
                         )
                     
-                    log.error (f"closing_size_ok {closing_size_ok}")
+                    log.error (f"closing_size_ok {closing_size_ok} basic_size {basic_size} net_size {net_size} size {size}")
                                             
                     if delta > 0:
                         transaction_in_profit = bid_price_perpetual >= (selected_transaction_price)
