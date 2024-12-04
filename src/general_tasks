@@ -331,9 +331,7 @@ async def update_instruments(idle_time):
         while True:
 
             get_currencies_all = await get_currencies_from_deribit()
-            
-            log.error (f"get_currencies_all {get_currencies_all}")
-            
+                        
             currencies = [o["currency"] for o in get_currencies_all["result"]]
 
             for currency in currencies:
@@ -635,11 +633,11 @@ async def main():
     
     try:
         await asyncio.gather(
-        #reconciling_size(
-        #    sub_account_id,
-        #    config_app,
-        #    2
-        #    ),
+        reconciling_size(
+            sub_account_id,
+            config_app,
+            2
+            ),
         update_ohlc_and_market_condition(
             tradable_config_app, 
             15), 
