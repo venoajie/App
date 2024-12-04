@@ -524,7 +524,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     )
                                                 
                                                 await self.reconciling_orders(
-                                                    await self.modify_order_and_db,
+                                                    self.modify_order_and_db,
                                                     sub_account,
                                                     orders_currency,
                                                     "from_order_db_to_sub_account"

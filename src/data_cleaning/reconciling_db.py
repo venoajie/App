@@ -351,9 +351,7 @@ async def reconciling_orders(
                 orders_currency)
             
             if not len_order_is_reconciled_each_other:
-                
-                log.critical (f"len_order_is_NOT_reconciled_each_other {len_order_is_reconciled_each_other}")
-                
+                                
                 orders_instrument_name = [o for o in orders_currency \
                     if instrument_name in o["instrument_name"]]
                 
