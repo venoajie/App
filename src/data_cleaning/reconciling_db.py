@@ -343,8 +343,6 @@ async def reconciling_orders(
             
             currency = extract_currency_from_text (instrument_name)
 
-            log.error ("TEST")
-            await modify_order_and_db.resupply_sub_accountdb(currency)
             len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
                 sub_account,
                 instrument_name,
@@ -361,7 +359,6 @@ async def reconciling_orders(
                 await modify_order_and_db. resupply_sub_accountdb(currency)
                 
                 await sleep_and_restart ()
-
                 
     except Exception as error:
         log.warning(error)
