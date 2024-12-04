@@ -808,7 +808,7 @@ class ModifyOrderDb(SendApiRequest):
                 
                 if order_state != "cancelled" or order_state != "filled":
                     
-                    log.warning (f" not label_and_side_consistent {order}")
+                    log.warning (f" not label_and_side_consistent {order} {order_state}")
                 
                     await insert_tables(
                         order_db_table, 
