@@ -13,7 +13,7 @@ from db_management.sqlite_management import (
 from utilities.system_tools import (
     async_raise_error_message,)
 
-async def updating_db_with_new_label(
+async def updating_db_with_new_data(
     trade_db_table: str,
     archive_db_table: str,
     trade_id: str,
@@ -26,14 +26,6 @@ async def updating_db_with_new_label(
     """
                 
     try:
-        await update_status_data(
-        archive_db_table,
-        "label",
-        filter,
-        trade_id,
-        new_label,
-        "="
-        )
     
         await update_status_data(
         trade_db_table,
@@ -45,6 +37,15 @@ async def updating_db_with_new_label(
         )
     
     
+        where_filter = f"order_id"
+        
+        await deleting_row (
+            "orders_all_json",
+            "databases/trading.sqlite3",
+            where_filter,
+            "=",
+            open_order_id,
+        )
     except Exception as error:
         await async_raise_error_message(error)
         
@@ -66,7 +67,7 @@ if __name__ == '__main__':
     
     new_label = "futureSpread-open-1733120308427"
                   
-    asyncio.run(updating_db_with_new_label(
+    asyncio.run(updating_db_with_new_data(
     trade_db_table,
     archive_db_table,
     trade_id,

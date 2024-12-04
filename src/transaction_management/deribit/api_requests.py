@@ -181,6 +181,7 @@ class SendApiRequest:
         #log.debug (f"otoco_config {otoco_config}")
         if otoco_config:
             params.update({"otoco_config": otoco_config})
+            params.update({"linked_order_type": "one_triggers_other"})
         #log.debug (f"params {params}")
         
         result = None
