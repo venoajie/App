@@ -54,3 +54,10 @@ print (np_users_data)
 arr = np.array([1, 2, 3, 4, 5])
 result = np.where(arr > 3, 'Large', 'Small')
 print(result)
+
+from functools import reduce
+
+data = [1, 2, 3, 4, 5]
+product = reduce(lambda x, y: x * y, data)  # Calculates
+
+print (product)

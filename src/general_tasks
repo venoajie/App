@@ -16,6 +16,7 @@ from data_cleaning.managing_closed_transactions import (
 from data_cleaning.managing_delivered_transactions import (
     is_instrument_name_has_delivered)
 from data_cleaning.reconciling_db import(
+    check_whether_order_db_reconciled_each_other,
     is_my_trades_and_sub_account_size_reconciled_each_other,
     is_my_trades_active_archived_reconciled_each_other,
     is_transaction_log_and_sub_account_size_reconciled_each_other,
@@ -41,6 +42,7 @@ from utilities.pickling import (
     read_data,
     replace_data,)
 from utilities.string_modification import (
+    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
     transform_nested_dict_to_list,)
@@ -597,8 +599,7 @@ async def reconciling_size(
                                             archive_db_table,
                                             trade_db_table,
                                             5
-                                            )
-                            
+                                            )                
                             break
                     
                     # handling transactions with no label                    
@@ -608,6 +609,14 @@ async def reconciling_size(
                         archive_db_table,
                         trade_db_table
                             )
+                    
+                    orders_currency = from_transaction_log = result_from_db_queries["orders_currency"]                           
+                    
+                    await reconciling_orders(
+                        sub_account,
+                        orders_currency,
+                        modify_order_and_db
+                        )
                                          
             await asyncio.sleep(idle_time)
             
@@ -618,6 +627,46 @@ async def reconciling_size(
                     "general_error")
             
     
+async def reconciling_orders(
+    sub_account: list,
+    orders_currency: list,
+    modify_order_and_db: object
+    ,
+    ) -> None:
+    """
+    """
+    
+    try:
+        
+        sub_account_orders = sub_account["open_orders"]
+        
+        orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in sub_account_orders  ])
+        
+        for instrument_name in orders_instrument_name:
+            
+            currency = extract_currency_from_text (instrument_name)
+
+            len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
+                sub_account,
+                instrument_name,
+                orders_currency)
+            
+            if not len_order_is_reconciled_each_other:
+                
+                log.critical (f"len_order_is_NOT_reconciled_each_other {len_order_is_reconciled_each_other}")
+                
+                orders_instrument_name = [o for o in orders_currency \
+                    if instrument_name in o["instrument_name"]]
+                
+                for order in orders_instrument_name:
+                    await modify_order_and_db.cancel_by_order_id(order["order_id"])
+                
+                await modify_order_and_db. resupply_sub_accountdb(currency)
+                
+    except Exception as error:
+        log.warning(error)
+
+
 async def main():
     
     sub_account_id = "deribit-148510"    
