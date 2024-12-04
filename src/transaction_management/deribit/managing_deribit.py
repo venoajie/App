@@ -632,7 +632,9 @@ class ModifyOrderDb(SendApiRequest):
                 if ("oto_order_ids" in (orders[0])):
                     
                     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
+                    log.debug (f"transaction_main {transaction_main}")
                     transaction_main_oto = transaction_main ["oto_order_ids"][0]
+                    log.warning (f"transaction_main_oto {transaction_main_oto}")
                     
                     kind= "future"
                     type = "trigger_all"
@@ -642,10 +644,8 @@ class ModifyOrderDb(SendApiRequest):
 
                     transaction_secondary = [o for o in open_orders_from_exchange\
                         if transaction_main_oto in o["order_id"]][0]
-
                     
-                    log.debug (f"transaction_main {transaction_main}")
-                    log.debug (f"transaction_secondary {transaction_secondary}")
+                    log.warning (f"transaction_secondary {transaction_secondary}")
                     
                     if transaction_secondary:
                         
