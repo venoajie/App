@@ -523,7 +523,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     cancellable_strategies
                                                     )
                                             
-                                            await self.reconciling_orders(
+                                            await reconciling_orders(
                                                 self.modify_order_and_db,
                                                 sub_account,
                                                 orders_currency,
