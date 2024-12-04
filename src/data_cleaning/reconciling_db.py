@@ -13,10 +13,12 @@ from db_management.sqlite_management import(
     insert_tables,)
 from utilities.string_modification import(
     extract_integers_from_text,
+    extract_currency_from_text,
     get_unique_elements, 
-    sorting_list
-    )
-    
+    remove_redundant_elements,
+    sorting_list)
+from utilities.system_tools import (
+    sleep_and_restart,)
     
 def get_sub_account_size_per_instrument(
     instrument_name: str,
@@ -311,3 +313,58 @@ def check_whether_order_db_reconciled_each_other(
 
     else :        
         return  False
+    
+    
+    
+async def reconciling_orders(
+    modify_order_and_db: object,
+    sub_account: list,
+    orders_currency: list,
+    direction: str
+    ) -> None:
+    """
+    direction: 
+            "from_sub_account_to_order_db"
+            "from_order_db_to_sub_account"
+    """
+    
+    try:
+        
+        log ("TEST")
+        modify_order_and_db.modify_order_and_db.resupply_sub_accountdb(currency)
+        if direction == "from_order_db_to_sub_account":
+            orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in orders_currency  ])
+        
+        if direction == "from_sub_account_to_order_db":
+
+            sub_account_orders = sub_account["open_orders"]
+            
+            orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in sub_account_orders  ])
+                    
+        for instrument_name in orders_instrument_name:
+            
+            currency = extract_currency_from_text (instrument_name)
+
+            len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
+                sub_account,
+                instrument_name,
+                orders_currency)
+            
+            if not len_order_is_reconciled_each_other:
+                
+                log.critical (f"len_order_is_NOT_reconciled_each_other {len_order_is_reconciled_each_other}")
+                
+                orders_instrument_name = [o for o in orders_currency \
+                    if instrument_name in o["instrument_name"]]
+                
+                for order in orders_instrument_name:
+                    modify_order_and_db.cancel_by_order_id(order["order_id"])
+                
+                modify_order_and_db. resupply_sub_accountdb(currency)
+                
+                await sleep_and_restart ()
+
+                
+    except Exception as error:
+        log.warning(error)
+

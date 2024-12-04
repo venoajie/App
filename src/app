@@ -16,7 +16,7 @@ import websockets
 from configuration import id_numbering, config
 from configuration.label_numbering import get_now_unix_time
 from data_cleaning.reconciling_db import (
-    check_whether_order_db_reconciled_each_other,
+    reconciling_orders,
     is_size_sub_account_and_my_trades_reconciled)
 from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
@@ -467,13 +467,6 @@ class RunningStrategy(ModifyOrderDb):
                                         position_without_combo = [ o for o in position \
                                             if f"{currency_upper}-FS" not in o["instrument_name"]]
                                                                                 
-                                        #await self.reconciling_orders(
-                                        #    instrument_name_perpetual,
-                                        #    currency,
-                                        #    sub_account,
-                                        #    orders_currency
-                                        #    )
-                                    
                                         server_time = get_now_unix_time()  
                                         
                                         size_perpetuals_reconciled = is_size_sub_account_and_my_trades_reconciled(
@@ -487,12 +480,8 @@ class RunningStrategy(ModifyOrderDb):
                                             my_trades_currency: list= [ o for o in my_trades_currency_all \
                                                 if o["label"] is not None] 
                                             
-                                            my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency\
-                                
-                                ])
-                                            my_labels= remove_redundant_elements([parsing_label(o["label"])["main"] for o in my_trades_currency\
-                                
-                                ])
+                                            my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency ])
+                                            my_labels= remove_redundant_elements([parsing_label(o["label"])["main"] for o in my_trades_currency ])
                                             
                                             for label in my_labels: 
                                                 log.debug (f"label {label}")
@@ -535,9 +524,11 @@ class RunningStrategy(ModifyOrderDb):
                                                     )
                                                 
                                                 await self.reconciling_orders(
-                                                        sub_account,
-                                                        orders_currency
-                                                        )
+                                                    await self.modify_order_and_db,
+                                                    sub_account,
+                                                    orders_currency,
+                                                    "from_order_db_to_sub_account"
+                                                    )
                                             
                                                     
                                             for strategy in active_strategies:
@@ -588,13 +579,6 @@ class RunningStrategy(ModifyOrderDb):
                                                             )
                                                         if cancel_allowed["cancel_allowed"]:
                                                             await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
-
-                                                        #await self.reconciling_orders(
-                                                        #        order["instrument_name"],
-                                                        #        currency,
-                                                        #        sub_account,
-                                                        #        orders_currency
-                                                        #        )
                                                         
                                                     for label in labels:
                                                         
@@ -621,13 +605,6 @@ class RunningStrategy(ModifyOrderDb):
                                                             selected_transaction_instrument_name)
                                                         
                                                         if ticker_future:
-                                                            
-                                                            #await self.reconciling_orders(
-                                                            #    selected_transaction_instrument_name,
-                                                            #    currency,
-                                                            #    sub_account,
-                                                            #    orders_currency
-                                                            #    )
                                                             
                                                         # closing unpaired transactions
                                                             if sum_selected_transaction != 0\
@@ -680,20 +657,6 @@ class RunningStrategy(ModifyOrderDb):
                                                         if  instrument_name_combo is not None and currency_upper in instrument_name_combo:
                                                                                                                   
                                                             instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
-                                                            
-                                                            #await self.reconciling_orders(
-                                                            #    instrument_name_combo,
-                                                            #    currency,
-                                                            #    sub_account,
-                                                            #    orders_currency
-                                                            #    )
-                  
-                                                            #await self.reconciling_orders(
-                                                            #    instrument_name_future,
-                                                            #    currency,
-                                                            #    sub_account,
-                                                            #    orders_currency
-                                                            #    )                                                            
                                                                                                                 
                                                             ticker_combo= reading_from_pkl_data(
                                                                 "ticker",
@@ -804,15 +767,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             instrument_ticker =   get_tickers (instrument_name)
                                                                 
                                                     instrument_name = instrument_ticker ["instrument_name"]    
-                                                    
-                                                    #log.error (f"instrument_ticker {instrument_ticker}")
-                                                           
-                                                    #await self.reconciling_orders(
-                                                    #            instrument_name,
-                                                    #            currency,
-                                                    #            sub_account,
-                                                    #            orders_currency)
-                                                                
+                                                        
                                                     size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
                                                         position_without_combo,
                                                         my_trades_currency_all,
@@ -922,47 +877,7 @@ class RunningStrategy(ModifyOrderDb):
                     error,
                     "general_error")
                             
-                            
-    async def reconciling_orders(
-        self,
-        sub_account: list,
-        orders_currency: list
-        ,
-        ) -> None:
-        """
-        """
-        
-        try:
-            
-            orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in orders_currency  ])
-            
-            for instrument_name in orders_instrument_name:
-                
-                currency = extract_currency_from_text (instrument_name)
-
-                len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
-                    sub_account,
-                    instrument_name,
-                    orders_currency)
-                
-                if not len_order_is_reconciled_each_other:
-                    
-                    log.critical (f"len_order_is_NOT_reconciled_each_other {len_order_is_reconciled_each_other}")
-                    
-                    orders_instrument_name = [o for o in orders_currency \
-                        if instrument_name in o["instrument_name"]]
-                    
-                    for order in orders_instrument_name:
-                        await self.modify_order_and_db.cancel_by_order_id(order["order_id"])
-                    
-                    await self.modify_order_and_db. resupply_sub_accountdb(currency)
-
-                    await sleep_and_restart ()
-                    
-        except Exception as error:
-            log.warning(error)
-
-
+              
     async def processing_orders(
         self,
         order_analysis_result: dict,
