@@ -556,9 +556,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                                 orders_currency_strategy = [o for o in orders_currency \
                                                     if strategy in (o["label"]) ]
-                                                
-                                                log.debug (f"orders_currency_strategy {orders_currency_strategy}")
-                            
+                                                                            
                                                 #get_unpaired_transaction = get_unpaired_transaction(
                                                 #my_trades_currency_strategy)
                                                 
