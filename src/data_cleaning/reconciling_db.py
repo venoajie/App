@@ -356,9 +356,9 @@ async def reconciling_orders(
                     if instrument_name in o["instrument_name"]]
                 
                 for order in orders_instrument_name:
-                    modify_order_and_db.cancel_by_order_id(order["order_id"])
+                    await modify_order_and_db.cancel_by_order_id(order["order_id"])
                 
-                modify_order_and_db. resupply_sub_accountdb(currency)
+                await modify_order_and_db. resupply_sub_accountdb(currency)
                 
                 await sleep_and_restart ()
 
