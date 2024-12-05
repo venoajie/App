@@ -361,7 +361,7 @@ async def reconciling_orders(
                     "databases/trading.sqlite3",
                     where_filter,
                     "=",
-                    order["instrument_name"],
+                    instrument_name,
                 )
                 for order in orders_instrument_name:
                                 
