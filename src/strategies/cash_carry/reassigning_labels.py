@@ -147,77 +147,78 @@ async def pairing_single_label(
         my_trades_currency_active,
         strategy)
     
-    my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in single_label_transaction])
+    if single_label_transaction:
+        my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in single_label_transaction])
 
-    strategy_params =  strategy_params= [o for o in strategy_attributes \
-                                                if o["strategy_label"] == strategy][0]  
-        
-    for amount in my_trades_amount:
-        
-        my_trades_with_the_same_amount = [o for o in single_label_transaction\
-            if amount == abs(o["amount"])]
-        
-        my_trades_with_the_same_amount_label_perpetual = [o for o in my_trades_with_the_same_amount\
-            if "PERPETUAL" in o["instrument_name"]]
-        
-        my_trades_with_the_same_amount_label_non_perpetual = [o for o in my_trades_with_the_same_amount\
-            if "PERPETUAL" not in o["instrument_name"]]
-        
-        my_trades_future_sorted = sorting_list(
-                my_trades_with_the_same_amount_label_non_perpetual,"price",
-                True)
-        
-        if my_trades_future_sorted:
+        strategy_params =  strategy_params= [o for o in strategy_attributes \
+                                                    if o["strategy_label"] == strategy][0]  
             
-            future_trade = my_trades_future_sorted[0]
-            price_future = future_trade["price"]
+        for amount in my_trades_amount:
             
-            my_trades_perpetual_with_lower_price = [o for o in my_trades_with_the_same_amount_label_perpetual \
-                if o["price"] < price_future ]
+            my_trades_with_the_same_amount = [o for o in single_label_transaction\
+                if amount == abs(o["amount"])]
             
-            my_trades_perpetual_with_lower_price_sorted = sorting_list(
-                my_trades_perpetual_with_lower_price,"price",
-                False)       
+            my_trades_with_the_same_amount_label_perpetual = [o for o in my_trades_with_the_same_amount\
+                if "PERPETUAL" in o["instrument_name"]]
             
-            if my_trades_perpetual_with_lower_price_sorted:
+            my_trades_with_the_same_amount_label_non_perpetual = [o for o in my_trades_with_the_same_amount\
+                if "PERPETUAL" not in o["instrument_name"]]
+            
+            my_trades_future_sorted = sorting_list(
+                    my_trades_with_the_same_amount_label_non_perpetual,"price",
+                    True)
+            
+            if my_trades_future_sorted:
+                
+                future_trade = my_trades_future_sorted[0]
+                price_future = future_trade["price"]
+                
+                my_trades_perpetual_with_lower_price = [o for o in my_trades_with_the_same_amount_label_perpetual \
+                    if o["price"] < price_future ]
+                
+                my_trades_perpetual_with_lower_price_sorted = sorting_list(
+                    my_trades_perpetual_with_lower_price,"price",
+                    False)       
+                
+                if my_trades_perpetual_with_lower_price_sorted:
 
-                perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]  
+                    perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]  
 
-                paired_success = waiting_time_has_expired(
-                    strategy_params,
-                    future_trade,
-                    perpetual_trade,
-                    server_time
-                    )
-                                                                        
-                if paired_success:
+                    paired_success = waiting_time_has_expired(
+                        strategy_params,
+                        future_trade,
+                        perpetual_trade,
+                        server_time
+                        )
+                                                                            
+                    if paired_success:
 
-                    side_perpetual = perpetual_trade["side"]
-                    side_future = future_trade["side"]
-                    
-                    filter = "trade_id"
-                    trade_id = perpetual_trade[filter]
-                    new_label = future_trade["label"]
+                        side_perpetual = perpetual_trade["side"]
+                        side_future = future_trade["side"]
+                        
+                        filter = "trade_id"
+                        trade_id = perpetual_trade[filter]
+                        new_label = future_trade["label"]
+                                        
+                        # market contango
+                        if my_trades_perpetual_with_lower_price_sorted:                              
+
+                            # market contango    
+                            if  side_future == "sell"\
+                                and side_perpetual == "buy":
                                     
-                    # market contango
-                    if my_trades_perpetual_with_lower_price_sorted:                              
-
-                        # market contango    
-                        if  side_future == "sell"\
-                            and side_perpetual == "buy":
+                                await updating_db_with_new_label(
+                                    trade_db_table,
+                                    archive_db_table,
+                                    trade_id,
+                                    filter,
+                                    new_label
+                                    )
                                 
-                            await updating_db_with_new_label(
-                                trade_db_table,
-                                archive_db_table,
-                                trade_id,
-                                filter,
-                                new_label
-                                )
-                            
-                            log.warning (future_trade)
-                            log.debug (perpetual_trade)
-                            log.debug (new_label)
-                            
-                            break
+                                log.warning (future_trade)
+                                log.debug (perpetual_trade)
+                                log.debug (new_label)
+                                
+                                break
         
     return paired_success
