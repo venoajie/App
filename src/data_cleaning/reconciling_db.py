@@ -331,14 +331,14 @@ async def reconciling_orders(
     """
     
     try:
-        
+
+        sub_account_orders = sub_account["open_orders"]
+                    
         if direction == "from_order_db_to_sub_account":
             orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in orders_currency  ])
         
         if direction == "from_sub_account_to_order_db":
 
-            sub_account_orders = sub_account["open_orders"]
-            
             orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in sub_account_orders  ])
                     
         for instrument_name in orders_instrument_name:
@@ -351,14 +351,11 @@ async def reconciling_orders(
                 orders_currency)
             
             if not len_order_is_reconciled_each_other:
-                                
-                orders_instrument_name = [o for o in orders_currency \
+                               
+                sub_account_instrument_name = [o for o in sub_account_orders \
                     if instrument_name in o["instrument_name"]]
                         
                 where_filter = f"instrument_name"
-                
-                log.info (f" orders_instrument_name {orders_instrument_name}")
-                log.warning (f" deleting_row {instrument_name}")
                 
                 await deleting_row (
                     "orders_all_json",
@@ -368,8 +365,7 @@ async def reconciling_orders(
                     instrument_name,
                 )
                 
-                for order in orders_instrument_name:
-                    
+                for order in sub_account_instrument_name:
                     
                     log.warning (f" inserting new order {order}")
                                 
