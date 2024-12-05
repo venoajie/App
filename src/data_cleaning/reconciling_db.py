@@ -357,6 +357,7 @@ async def reconciling_orders(
                         
                 where_filter = f"instrument_name"
                 
+                log.info (f" orders_instrument_name {orders_instrument_name}")
                 log.warning (f" deleting_row {instrument_name}")
                 
                 await deleting_row (
