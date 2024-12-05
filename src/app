@@ -218,6 +218,7 @@ async def get_result_from_db_queries (
 def modify_hedging_instrument (
     strong_bearish:  bool,
     instrument_attributes_futures_for_hedging: list,
+    ticker_perpetual_instrument_name: dict,
     currency_upper: str,
     ) -> dict:
     
@@ -252,6 +253,9 @@ def modify_hedging_instrument (
             
         return instrument_ticker
 
+    else:
+        return   ticker_perpetual_instrument_name
+    
                 
 def future_spread_attributes (
     position_without_combo:  list,
@@ -817,7 +821,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     strong_bearish = market_condition["strong_falling_price"]
                                                 
                                                     #neutral = market_condition["neutral_price"]
-                                                    #log.error (f"market_condition {market_condition}")
+                                                    log.error (f"market_condition {market_condition}")
                                                     
                                                     instrument_ticker = ticker_perpetual_instrument_name
 
@@ -826,6 +830,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     instrument_ticker =   modify_hedging_instrument (
                                                         strong_bearish,
                                                         instrument_attributes_futures_for_hedging,
+                                                        ticker_perpetual_instrument_name,
                                                         currency_upper)
                                                                 
                                                     instrument_name = instrument_ticker ["instrument_name"]    
