@@ -84,9 +84,13 @@ def get_single_transaction(
             transaction_under_label_integer = [o for o in my_trades_currency_strategy\
                 if label_integer in o["label"]]
             
+            # additional filter 
+            sum_transaction_under_label_integer = sum([o["amount"] for o in transaction_under_label_integer])
+            
             transaction_under_label_integer_len = len(transaction_under_label_integer)
             
-            if transaction_under_label_integer_len == 1:
+            if sum_transaction_under_label_integer == 0\
+                and transaction_under_label_integer_len == 1:
                 
                 result.append (transaction_under_label_integer[0])
                 
