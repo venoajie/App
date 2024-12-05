@@ -9,6 +9,7 @@ from loguru import logger as log
 
 # user defined formula
 from db_management.sqlite_management import(
+    deleting_row,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     insert_tables,)
 from utilities.string_modification import(
@@ -354,7 +355,20 @@ async def reconciling_orders(
                     if instrument_name in o["instrument_name"]]
                 
                 for order in orders_instrument_name:
+                    
                     await modify_order_and_db.cancel_by_order_id(order["order_id"])
+                    
+                    log.critical(f" cancel for imbalance {order}")
+                                
+                    where_filter = f"order_id"
+                    
+                    await deleting_row (
+                        "orders_all_json",
+                        "databases/trading.sqlite3",
+                        where_filter,
+                        "=",
+                        order["order_id"],
+                    )
                 
                 await modify_order_and_db. resupply_sub_accountdb(currency)
                 
