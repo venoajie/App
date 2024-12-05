@@ -222,6 +222,7 @@ def modify_hedging_instrument (
     currency_upper: str,
     ) -> dict:
     
+    log.error (f"not strong_bearish {not strong_bearish}")
     if not strong_bearish:
                                 
         instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
@@ -255,7 +256,6 @@ def modify_hedging_instrument (
 
     else:
         return   ticker_perpetual_instrument_name
-    
                 
 def future_spread_attributes (
     position_without_combo:  list,
