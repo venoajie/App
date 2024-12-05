@@ -941,8 +941,17 @@ class RunningStrategy(ModifyOrderDb):
                                                                 await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
                                                         
                                                     log.warning (f"strategy {strategy}-DONE")
-                                                    
-                                                    
+                                            
+                                            
+                                            #my_trades_currency_active_free_blanks = [o for o in my_trades_currency\
+                                            #if o["label"] is not None]
+                                            
+                                            #await clean_up_closed_transactions(
+                                            #    currency, 
+                                            #    trade_db_table,
+                                            #    my_trades_currency_active_free_blanks
+                                            #    )
+                                                        
                         except Exception as error:
                             await raise_error_message (error)
                             await telegram_bot_sendtext (
