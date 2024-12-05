@@ -357,6 +357,8 @@ async def reconciling_orders(
                         
                 where_filter = f"instrument_name"
                 
+                log.warning (f" deleting_row {instrument_name}")
+                
                 await deleting_row (
                     "orders_all_json",
                     "databases/trading.sqlite3",
@@ -364,7 +366,11 @@ async def reconciling_orders(
                     "=",
                     instrument_name,
                 )
+                
                 for order in orders_instrument_name:
+                    
+                    
+                    log.warning (f" inserting new order {order}")
                                 
                     await insert_tables(
                                 order_db_table, 
