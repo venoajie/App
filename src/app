@@ -681,8 +681,11 @@ class RunningStrategy(ModifyOrderDb):
                                                             else:
                                                                 
                                                                 if sum_selected_transaction == 0:
-                                                                    
-                                                                    new_label = f"futureSpreadAuto-open-{label_integer}"
+                                                                    if "open" in label:
+                                                                        new_label = f"futureSpreadAuto-open-{label_integer}"
+                                                                
+                                                                    if "closed" in label:
+                                                                        new_label = f"futureSpreadAuto-closed-{label_integer}"
                                                                 
                                                                     filter = "label"
                                                                     
