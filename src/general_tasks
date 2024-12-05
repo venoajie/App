@@ -457,7 +457,6 @@ async def reconciling_size(
                                     from_transaction_log,
                                     sub_account
                                     )
-                                log.debug (f"transaction_log_and_sub_account_size {instrument_name} {transaction_log_and_sub_account_size_reconciled}")
 
                                 # transaction log amount is diff vs sub account. update both with data from exchange directly
                                 if not transaction_log_and_sub_account_size_reconciled:
