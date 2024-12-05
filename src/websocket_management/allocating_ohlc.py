@@ -169,6 +169,8 @@ async def ohlc_result_per_time_frame(
     insert_new_ohlc_and_replace_previous_ohlc_using_fix_data = last_tick_fr_data_orders > last_tick1_fr_sqlite
     
     if refilling_current_ohlc_table_with_updated_streaming_data:
+        
+        print (refilling_current_ohlc_table_with_updated_streaming_data)
     
         await update_status_data(
             TABLE_OHLC1, 
@@ -180,6 +182,8 @@ async def ohlc_result_per_time_frame(
     
     if insert_new_ohlc_and_replace_previous_ohlc_using_fix_data:
         
+        print (insert_new_ohlc_and_replace_previous_ohlc_using_fix_data)
+    
         await insert_tables(
             TABLE_OHLC1,
             data_orders
