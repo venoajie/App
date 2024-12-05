@@ -421,7 +421,9 @@ async def reconciling_size(
                     
                     strategy_attributes = config_app["strategies"]
                     
-                    pairing_label = await pairing_single_label(
+                    if my_trades_currency_active:
+                        
+                        pairing_label = await pairing_single_label(
                         strategy_attributes,
                         trade_db_table,
                         archive_db_table,
