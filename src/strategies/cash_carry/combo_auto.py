@@ -381,7 +381,7 @@ class ComboAuto (BasicStrategy):
             self.strategy_label,
             self.strategy_parameters)
 
-        log.critical (f"""delta actual {self.delta} delta system {(-(820*80/100) if "BTC" in self.ticker_perpetual["instrument_name"] else 0)}""")
+        log.critical (f"""delta  {self.delta} """)
         
 
     async def is_send_open_order_constructing_manual_combo_allowed(
