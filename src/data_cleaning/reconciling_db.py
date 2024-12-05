@@ -353,22 +353,22 @@ async def reconciling_orders(
                                 
                 orders_instrument_name = [o for o in orders_currency \
                     if instrument_name in o["instrument_name"]]
+                        
+                where_filter = f"instrument_name"
                 
+                await deleting_row (
+                    "orders_all_json",
+                    "databases/trading.sqlite3",
+                    where_filter,
+                    "=",
+                    order["instrument_name"],
+                )
                 for order in orders_instrument_name:
-                    
-                    await modify_order_and_db.cancel_by_order_id(order["order_id"])
-                    
-                    log.critical(f" cancel for imbalance {order}")
                                 
-                    where_filter = f"order_id"
-                    
-                    await deleting_row (
-                        "orders_all_json",
-                        "databases/trading.sqlite3",
-                        where_filter,
-                        "=",
-                        order["order_id"],
-                    )
+                    await insert_tables(
+                                order_db_table, 
+                                order
+                                )
                 
                 await modify_order_and_db. resupply_sub_accountdb(currency)
                 
