@@ -234,6 +234,9 @@ def modify_hedging_instrument (
             instrument_attributes = instrument_attributes_future[0]
             
         instrument_name: str = instrument_attributes ["instrument_name"] 
+        
+        log.error (f"instrument_attributes_future {instrument_attributes_future}")
+        log.error (f"instrument_attributes {instrument_attributes}")
 
         instrument_ticker: list = reading_from_pkl_data(
             "ticker",
