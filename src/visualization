@@ -44,7 +44,7 @@ async def main():
         data_orders = await get_open_orders ()
         
         data_trading_custom = [o for o in data_trading\
-            if "custom" in o["label"]]
+            if "Auto" in o["label"]]
        
         
         df = pd.DataFrame(data_trading_custom)
@@ -76,7 +76,7 @@ async def main():
                 index=["integer","label","instrument_name","amount"],
                 aggfunc="sum", 
                 )
-            print (df.to_string())
+            #print (df.to_string())
         
     except Exception as error:
         await print(error)
