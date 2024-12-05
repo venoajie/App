@@ -646,8 +646,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             my_trades_currency_all,
                                                             selected_transaction_instrument_name)
                                                         
-                                                        if ticker_future \
-                                                            and "closed" not in label:
+                                                        if ticker_future:
                                                                                                                 
                                                             #! closing combo auto trading
                                                             if "Auto" in label:
@@ -707,12 +706,12 @@ class RunningStrategy(ModifyOrderDb):
                                                                     
                                                                 #! closing unpaired transactions                                                            
                                                                 else:
-                                                                    if len_selected_transaction == 1:
+                                                                    if len_selected_transaction == 1 \
+                                                                        and "closed" not in label:
                                                                         
                                                                         send_order = []
                                                                                                                                         
-                                                                        if mode_full and\
-                                                                            size_future_reconciled\
+                                                                        if size_future_reconciled\
                                                                             and size_perpetuals_reconciled\
                                                                                 and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS\
                                                                                     :
