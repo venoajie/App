@@ -307,7 +307,7 @@ def check_whether_order_db_reconciled_each_other(
         #log.debug (f"result {result} ")
         
         if not result:
-            log.critical(f"len_order equal {result} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
+            log.critical(f" {instrument_name} len_order equal {result} len_sub_account_instrument {len_sub_account_instrument} len_orders_instrument {len_orders_instrument}")
         # comparing and return the result
         return  result
 
