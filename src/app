@@ -247,7 +247,7 @@ def modify_hedging_instrument (
         else:                    
             instrument_ticker =   get_tickers (instrument_name)
             
-    return instrument_ticker
+        return instrument_ticker
 
                 
 def future_spread_attributes (
