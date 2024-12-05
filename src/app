@@ -217,13 +217,14 @@ async def get_result_from_db_queries (
     
 def modify_hedging_instrument (
     strong_bearish:  bool,
+    bearish:  bool,
     instrument_attributes_futures_for_hedging: list,
     ticker_perpetual_instrument_name: dict,
     currency_upper: str,
     ) -> dict:
     
-    log.error (f"not strong_bearish {not strong_bearish}")
-    if not strong_bearish:
+
+    if bearish or not strong_bearish:
                                 
         instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
                                         if "PERPETUAL" not in o["instrument_name"]\
@@ -237,9 +238,6 @@ def modify_hedging_instrument (
             
         instrument_name: str = instrument_attributes ["instrument_name"] 
         
-        log.error (f"instrument_attributes_future {instrument_attributes_future}")
-        log.error (f"instrument_attributes {instrument_attributes}")
-
         instrument_ticker: list = reading_from_pkl_data(
             "ticker",
             instrument_name
@@ -820,15 +818,12 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                     strong_bearish = market_condition["strong_falling_price"]
                                                 
-                                                    #neutral = market_condition["neutral_price"]
+                                                    bearish = market_condition["falling_price"]
                                                     log.error (f"market_condition {market_condition}")
-                                                    
-                                                    instrument_ticker = ticker_perpetual_instrument_name
-
-                                                    instrument_name = instrument_name_perpetual
-                                                    
+                                                                                                        
                                                     instrument_ticker =   modify_hedging_instrument (
                                                         strong_bearish,
+                                                        bearish,
                                                         instrument_attributes_futures_for_hedging,
                                                         ticker_perpetual_instrument_name,
                                                         currency_upper)
