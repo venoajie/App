@@ -330,7 +330,7 @@ class StreamAccountData(ModifyOrderDb):
                                     if "chart.trades" in message_channel:
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                         
-                                        log.warning(f"data_orders {data_orders}")
+                                        #log.warning(f"data_orders {data_orders}")
                                                                                                     
                                         await ohlc_result_per_time_frame(
                                             instrument_ticker,
@@ -427,8 +427,8 @@ class StreamAccountData(ModifyOrderDb):
                 "client_secret": self.client_secret,
             },
         }
-        log.debug (f" msg {msg}")
-        log.error (f" json.dumps(msg) {json.dumps(msg)}")
+        #log.debug (f" msg {msg}")
+        #log.error (f" json.dumps(msg) {json.dumps(msg)}")
         
         await self.websocket_client.send(json.dumps(msg))
 
