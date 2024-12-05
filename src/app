@@ -639,11 +639,32 @@ class RunningStrategy(ModifyOrderDb):
                                                             #! closing combo auto trading
                                                             if "Auto" in label:
                                                                 
-                                                                send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
-                                                                label,
-                                                                instrument_attributes_combo_all,
-                                                                TP_THRESHOLD)
-
+                                                                if sum_selected_transaction == 0:                                                               
+                                                                    send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
+                                                                    label,
+                                                                    instrument_attributes_combo_all,
+                                                                    TP_THRESHOLD)
+                                                                    
+                                                                else:                                                               
+                                                                    
+                                                                    new_label = f"futureSpread-open-{label_integer}"
+                                                                
+                                                                    filter = "label"
+                                                                    
+                                                                    await update_status_data(
+                                                                        archive_db_table,
+                                                                        "label",
+                                                                        filter,
+                                                                        label,
+                                                                        new_label,
+                                                                        "="
+                                                                        )
+                                                                    
+                                                                    await self.modify_order_and_db.cancel_the_cancellables(
+                                                                        currency,
+                                                                        cancellable_strategies
+                                                                        )
+                                                                
                                                             #! renaming combo auto trading
                                                             else:
                                                                 
