@@ -564,7 +564,22 @@ class RunningStrategy(ModifyOrderDb):
                                                     cancellable_strategies
                                                     )
                                             
-                                                    
+                                            await reconciling_orders(
+                                                self.modify_order_and_db,
+                                                sub_account,
+                                                orders_currency,
+                                                "from_sub_account_to_order_db",
+                                                order_db_table
+                                                )
+                                            
+
+                                            await reconciling_orders(
+                                                self.modify_order_and_db,
+                                                sub_account,
+                                                orders_currency,
+                                                "from_order_db_to_sub_account",
+                                                order_db_table
+                                                )                   
                                             for strategy in active_strategies:
                                                 
                                                 strategy_params= [o for o in strategy_attributes \
