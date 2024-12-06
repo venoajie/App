@@ -673,10 +673,10 @@ class ComboAuto (BasicStrategy):
 
     async def is_send_open_order_constructing_manual_combo_allowed(
         self,
-        ticker_future,
-        instrument_attributes_futures,
-        notional,
-        target_transaction_per_hour,
+        ticker_future: dict,
+        instrument_attributes_futures: list,
+        notional: float,
+        target_transaction_per_hour: int,
         max_order_currency: int
         ) -> dict:
         """ """

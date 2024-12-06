@@ -810,7 +810,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                         ticker_future,
                                                                         instrument_attributes_futures_all,
                                                                         notional,
-                                                                        target_transaction_per_hour
+                                                                        target_transaction_per_hour,
+                                                                        max_order_currency
                                                                         )
                                                         
                                                                 if send_order:
