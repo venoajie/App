@@ -632,98 +632,98 @@ class RunningStrategy(ModifyOrderDb):
                                                         selected_transaction_amount = ([o["amount"] for o in selected_transaction])
                                                         sum_selected_transaction = sum(selected_transaction_amount)
                                                         len_selected_transaction = len(selected_transaction_amount)
-                                                        log.warning (f"selected_transaction {selected_transaction}")
-                                                        selected_transaction = selected_transaction[0]
-                                                        
-                                                        selected_transaction_instrument_name = selected_transaction["instrument_name"]
-                                                        
-                                                        ticker_future= reading_from_pkl_data(
-                                                            "ticker",
-                                                            selected_transaction_instrument_name
-                                                            )
-                                                        
-                                                        size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
-                                                            position_without_combo,
-                                                            my_trades_currency_all,
-                                                            selected_transaction_instrument_name)
-                                                        
-                                                        if ticker_future:
-                                                                                                                
-                                                            #! closing combo auto trading
-                                                            if "Auto" in label:
+                                                                 
+                                                        #! closing combo auto trading
+                                                        if "Auto" in label:
+                                                            
+                                                            log.info (f"selected_transaction {selected_transaction}")
+                                                            
+                                                            if sum_selected_transaction == 0:                                                               
+                                                                send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
+                                                                label,
+                                                                instrument_attributes_combo_all,
+                                                                TP_THRESHOLD)
                                                                 
-                                                                log.info (f"selected_transaction {selected_transaction}")
+                                                            else:                                                               
                                                                 
-                                                                if sum_selected_transaction == 0:                                                               
-                                                                    send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
+                                                                new_label = f"futureSpread-open-{label_integer}"
+                                                            
+                                                                filter = "label"
+                                                                
+                                                                await update_status_data(
+                                                                    archive_db_table,
+                                                                    "label",
+                                                                    filter,
                                                                     label,
-                                                                    instrument_attributes_combo_all,
-                                                                    TP_THRESHOLD)
-                                                                    
-                                                                else:                                                               
-                                                                    
-                                                                    new_label = f"futureSpread-open-{label_integer}"
+                                                                    new_label,
+                                                                    "="
+                                                                    )
                                                                 
-                                                                    filter = "label"
-                                                                    
-                                                                    await update_status_data(
-                                                                        archive_db_table,
+                                                                await update_status_data(
+                                                                        trade_db_table,
                                                                         "label",
                                                                         filter,
                                                                         label,
                                                                         new_label,
                                                                         "="
                                                                         )
-                                                                    
-                                                                    log.debug ("renaming combo Auto done")
-                                                                    
-                                                                    await self.modify_order_and_db.cancel_the_cancellables(
-                                                                        currency,
-                                                                        cancellable_strategies
+                                                                
+                                                                log.debug ("renaming combo Auto done")
+                                                                
+                                                                await self.modify_order_and_db.cancel_the_cancellables(
+                                                                    currency,
+                                                                    cancellable_strategies
+                                                                    )
+                                                            
+                                                        #! renaming combo auto trading
+                                                        else:
+                                                            
+                                                            if sum_selected_transaction == 0:
+                                                                if "open" in label:
+                                                                    new_label = f"futureSpreadAuto-open-{label_integer}"
+                                                            
+                                                                if "closed" in label:
+                                                                    new_label = f"futureSpreadAuto-closed-{label_integer}"
+                                                            
+                                                                filter = "label"
+                                                                
+                                                                await update_status_data(
+                                                                    archive_db_table,
+                                                                    "label",
+                                                                    filter,
+                                                                    label,
+                                                                    new_label,
+                                                                    "="
+                                                                    )
+                                                            
+                                                                await update_status_data(
+                                                                        trade_db_table,
+                                                                        "label",
+                                                                        filter,
+                                                                        label,
+                                                                        new_label,
+                                                                        "="
                                                                         )
                                                                 
-                                                            #! renaming combo auto trading
+                                                            #! closing unpaired transactions                                                            
                                                             else:
-                                                                
-                                                                if sum_selected_transaction == 0:
-                                                                    if "open" in label:
-                                                                        new_label = f"futureSpreadAuto-open-{label_integer}"
-                                                                
-                                                                    if "closed" in label:
-                                                                        new_label = f"futureSpreadAuto-closed-{label_integer}"
-                                                                
-                                                                    filter = "label"
+                                                                if len_selected_transaction == 1 \
+                                                                    and "closed" not in label:
                                                                     
-                                                                    await update_status_data(
-                                                                        archive_db_table,
-                                                                        "label",
-                                                                        filter,
-                                                                        label,
-                                                                        new_label,
-                                                                        "="
-                                                                        )
-                                                                
-                                                                    await update_status_data(
-                                                                            trade_db_table,
-                                                                            "label",
-                                                                            filter,
-                                                                            label,
-                                                                            new_label,
-                                                                            "="
-                                                                            )
-                                                                    
-                                                                #! closing unpaired transactions                                                            
-                                                                else:
-                                                                    if len_selected_transaction == 1 \
-                                                                        and "closed" not in label:
-                                                                        
-                                                                        send_order = []
-                                                                                                                                        
-                                                                        if size_future_reconciled\
-                                                                            and size_perpetuals_reconciled\
-                                                                                and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS\
-                                                                                    :
-                                                                                                                                            
+                                                                    send_order = []
+                                                                                                                                    
+                                                                    if size_future_reconciled\
+                                                                        and size_perpetuals_reconciled\
+                                                                            and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
+                                                                          
+                                                                        for transaction in selected_transaction:
+                                                                            instrument_name = transaction["instrument_name"]
+                                                                            
+                                                                            ticker_future= reading_from_pkl_data(
+                                                                                "ticker",
+                                                                                instrument_name
+                                                                                )
+                                                                                                                                                            
                                                                             send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                                             ticker_future[0],
                                                                             instrument_attributes_futures_all,
@@ -732,7 +732,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                             server_time,
                                                                             THRESHOLD_MARKET_CONDITIONS_COMBO
                                                                             )
-                                                                                                                            
+                                                                            
+                                                                            break
+                                                                                                                        
                                                             if send_order:
                                                                 await self.processing_orders(
                                                                         send_order,
@@ -749,12 +751,22 @@ class RunningStrategy(ModifyOrderDb):
                                                         try:
                                                             instrument_name_combo = instrument_attributes_combo["instrument_name"]
                                                         
+                                                            size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
+                                                                position_without_combo,
+                                                                my_trades_currency_all,
+                                                                instrument_name_combo)
+                                                        
                                                         except:
                                                             instrument_name_combo = None
                                                             
                                                         if  instrument_name_combo is not None and currency_upper in instrument_name_combo:
                                                             
                                                             instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
+                                                        
+                                                            size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
+                                                                position_without_combo,
+                                                                my_trades_currency_all,
+                                                                instrument_name_future)
                                                                                                                 
                                                             ticker_combo= reading_from_pkl_data(
                                                                 "ticker",
