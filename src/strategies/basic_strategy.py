@@ -472,6 +472,7 @@ def is_label_and_side_consistent(
                                         or "hedging" in label\
                                             or "custom" in label) \
                                             else False
+                log.error (f"""params {params} """)
                 log.error (f"""is_consistent {is_consistent} """)
 
             if side == "buy":
