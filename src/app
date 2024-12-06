@@ -673,6 +673,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                         "="
                                                                         )
                                                                     
+                                                                    log.debug ("renaming combo Auto done")
+                                                                    
                                                                     await self.modify_order_and_db.cancel_the_cancellables(
                                                                         currency,
                                                                         cancellable_strategies
