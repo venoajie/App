@@ -464,7 +464,7 @@ def is_label_and_side_consistent(
             
             side = get_transaction_side(params)
             
-            log.error (f"""label {label} hedging in label {"hedging" in label}""")
+            log.error (f"""side {side} label {label} hedging in label {"hedging" in label}""")
 
             if side == "sell":
                 
@@ -472,6 +472,7 @@ def is_label_and_side_consistent(
                                         or "hedging" in label\
                                             or "custom" in label) \
                                             else False
+                log.error (f"""is_consistent {is_consistent} """)
 
             if side == "buy":
                 is_consistent = True \
