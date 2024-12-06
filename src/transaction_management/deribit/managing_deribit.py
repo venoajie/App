@@ -784,7 +784,7 @@ class ModifyOrderDb(SendApiRequest):
         # no label
         if label == '':
             if"open" in order_state\
-                or "SLTS" in order_id:
+                or "untriggered" in order_state:
                 
                 order_attributes = labelling_unlabelled_order (order)                   
 
