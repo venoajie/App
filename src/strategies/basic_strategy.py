@@ -317,18 +317,17 @@ def get_transactions_sum(result_strategy_label) -> int:
 
 def get_transaction_side(transaction: dict) -> str:
     """ 
-    status: open/closed
     """
     #log.error (f"transaction {transaction}")    
     try:
         transaction =  transaction["direction"] 
+        
+        if transaction == []:
+            return transaction["side"]
     
     except:        
         return transaction["side"]
     
-    return transaction    
-
-
 def get_transaction_size(transaction: dict) -> int:
     """ """
     return transaction["amount"]
