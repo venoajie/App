@@ -463,6 +463,8 @@ def is_label_and_side_consistent(
         if "open" in label:
             
             side = get_transaction_side(params)
+            
+            log.error (f"""label {label} hedging in label {"hedging" in label}""")
 
             if side == "sell":
                 
