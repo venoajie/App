@@ -105,12 +105,8 @@ def check_if_next_closing_size_will_not_exceed_the_original (
     if basic_size < 0:
         basic_size_sign_diff_than_next_size = basic_size_plus_next_size > basic_size 
 
-    log.debug (f"basic_size_higher_than_next_closing_size {basic_size_higher_than_next_closing_size} basic_size_higher_than_net_size {basic_size_higher_than_net_size} basic_size_plus_next_size {basic_size_plus_next_size} basic_size_sign_diff_than_next_size {basic_size_sign_diff_than_next_size}")
+    #log.debug (f"basic_size_higher_than_next_closing_size {basic_size_higher_than_next_closing_size} basic_size_higher_than_net_size {basic_size_higher_than_net_size} basic_size_plus_next_size {basic_size_plus_next_size} basic_size_sign_diff_than_next_size {basic_size_sign_diff_than_next_size}")
     
-    #log.warning (f"basic_size {basic_size} net_size {net_size}  {basic_size_higher_than_next_closing_size  \
-    #    and basic_size_higher_than_net_size\
-    #       and basic_size_sign_diff_than_next_size}")
-    #log.error (f" net_size_exceeding_the_basic_size {net_size_exceeding_the_basic_size} next_closing_size_higher_than_basic_size  {next_closing_size_higher_than_basic_size } combined_size {basic_size} basic_size {basic_size}")
     return  basic_size_higher_than_next_closing_size  \
         and basic_size_higher_than_net_size\
            and basic_size_sign_diff_than_next_size# and net_size_exceeding_the_basic_size

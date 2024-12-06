@@ -948,8 +948,8 @@ class ComboAuto (BasicStrategy):
                     size
                     )
                 
-                log.error (f"closing_size_ok {closing_size_ok} instrument_proforma_size <=0 {instrument_proforma_size <=0}")
-                log.error (f"basic_size {basic_size} net_size {net_size} size {size} sum_order_under_closed_label {sum_order_under_closed_label}")
+                #log.error (f"closing_size_ok {closing_size_ok} instrument_proforma_size <=0 {instrument_proforma_size <=0}")
+                #log.error (f"basic_size {basic_size} net_size {net_size} size {size} sum_order_under_closed_label {sum_order_under_closed_label}")
             
                 if "PERPETUAL" not in instrument_name_transaction\
                     and instrument_proforma_size <=0\
@@ -978,7 +978,8 @@ class ComboAuto (BasicStrategy):
                         sum_orders_instrument_perpetual_open = 0 if orders_instrument_perpetual_open == []\
                             else sum([o["amount"] for o in orders_instrument_perpetual_open])
                             
-                        log.debug (f"sum_orders_instrument_perpetual_open {sum_orders_instrument_perpetual_open} {selected_transaction_price <= bid_price_perpetual}")
+                        log.debug (f"sum_orders_instrument_perpetual_open {sum_orders_instrument_perpetual_open} ")
+                        log.error (f"selected_transaction_price <= bid_price_perpetual {selected_transaction_price <= bid_price_perpetual} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}")
                             
                         if sum_orders_instrument_perpetual_open < abs(delta)  and delta <=0 :
                         
