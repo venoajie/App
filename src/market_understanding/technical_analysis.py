@@ -8,7 +8,6 @@ from loguru import logger as log
 
 # user defined formula
 from db_management.sqlite_management import (
-    querying_hlc_vol,
     executing_query_with_return,
     querying_table,
     querying_ohlc_price_vol,
@@ -20,21 +19,10 @@ from utilities.system_tools import (
 # from loguru import logger as log
 
 
-async def get_hlc_vol(window: int = 9, table: str = "ohlc1_eth_perp_json") -> list:
-    """ """
-
-    # get query for close price
-    get_ohlc_query = querying_hlc_vol(table, window)
-
-    # executing query above
-    ohlc_all = await executing_query_with_return(get_ohlc_query)
-    # log.info(ohlc_all)
-
-    return ohlc_all
-
-
 async def get_price_ohlc(
-    price: str, table: str, window: int = 100
+    price: str, 
+    table: str, 
+    window: int = 100
 ) -> list:
     """ """
 
@@ -76,7 +64,10 @@ async def cleaned_up_ohlc(
     )
 
 
-async def get_ema(ohlc, ratio: float = 0.9) -> dict:
+async def get_ema(
+    ohlc,
+    ratio: float = 0.9
+    ) -> dict:
     """
     https://stackoverflow.com/questions/488670/calculate-exponential-moving-average-in-python
     https://stackoverflow.com/questions/59294024/in-python-what-is-the-faster-way-to-calculate-an-ema-by-reusing-the-previous-ca
@@ -87,7 +78,10 @@ async def get_ema(ohlc, ratio: float = 0.9) -> dict:
     )
 
 
-async def get_vwap(ohlc_all, vwap_period) -> dict:
+async def get_vwap(
+    ohlc_all,
+    vwap_period
+    ) -> dict:
     """
     https://github.com/vishnugovind10/emacrossover/blob/main/emavwap1.0.py
     https://stackoverflow.com/questions/44854512/how-to-calculate-vwap-volume-weighted-average-price-using-groupby-and-apply
@@ -128,8 +122,10 @@ def get_last_tick_from_prev_TA(TA_result_data) -> int:
 
 
 def is_ohlc_fluctuation_exceed_threshold(
-    ohlc: list, current_price: float, fluctuation_threshold: float
-) -> bool:
+    ohlc: list, 
+    current_price: float,
+    fluctuation_threshold: float
+    ) -> bool:
     """
     one of ohlc item exceed threshold
     """
@@ -143,7 +139,8 @@ def is_ohlc_fluctuation_exceed_threshold(
     )
 
 
-async def get_market_condition(instrument,
+async def get_market_condition(
+    instrument,
                                limit: int = 100, 
                                ratio: float = 0.9,
                                fluctuation_threshold=0.4 / 100

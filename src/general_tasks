@@ -619,9 +619,7 @@ async def reconciling_size(
                         trade_db_table,
                         my_trades_currency_active_free_blanks
                         )
-                    
-                
-                                         
+                               
             await asyncio.sleep(idle_time)
             
     except Exception as error:
@@ -646,17 +644,23 @@ async def main():
     
     try:
         await asyncio.gather(
+            
         reconciling_size(
             sub_account_id,
             config_app,
             2
             ),
+        
         update_ohlc_and_market_condition(
             tradable_config_app, 
             15), 
+        
         back_up_db(60*10),
+        
         clean_up_databases(60), 
+        
         update_instruments(60),
+        
         return_exceptions=True)
     
     except Exception as error:
