@@ -358,9 +358,7 @@ async def reconciling_orders(
     
     try:
 
-
         sub_account_orders = sub_account["open_orders"]
-        log.debug(f"sub_account_test-before {sub_account_orders}")
                     
         if direction == "from_order_db_to_sub_account":
             orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in orders_currency  ])
@@ -403,17 +401,6 @@ async def reconciling_orders(
                                 )
                 
                 await modify_order_and_db. resupply_sub_accountdb(currency)
-                
-                sub_account_test = reading_from_pkl_data(
-                    "sub_accounts",
-                    currency
-                    )
-                
-                sub_account_test = sub_account_test[0]
-                sub_account_orders = sub_account["open_orders"]
-                log.debug(f"sub_account_test-after {sub_account_orders}")
-
-                await sleep_and_restart ()
                 
     except Exception as error:
         log.warning(error)
