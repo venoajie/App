@@ -374,10 +374,6 @@ class RunningStrategy(ModifyOrderDb):
                 #log.info (instrument_attributes_combo)
 
                 instruments_name = futures_instruments["instruments_name"]   
-
-                random_instruments_name = shuffled ([o for o in instruments_name if "-FS-" not in o])
-                
-                log.critical (f"random_instruments_name {random_instruments_name}")
                 
                 min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]    
                 
@@ -465,6 +461,13 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     currency_upper: str = currency.upper()
                                     currency_lower: str =currency
+                                    
+                                    
+
+                                    random_instruments_name = shuffled ([o for o in instruments_name\
+                                        if "-FS-" not in o and currency_upper in o])
+                                    
+                                    log.critical (f"random_instruments_name {random_instruments_name}")
                                     
                                     archive_db_table= f"my_trades_all_{currency_lower}_json"
                                     
