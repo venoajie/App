@@ -212,7 +212,7 @@ def labelling_unlabelled_order_oto(transaction_main: list,
                     "type": "limit",
                     "instrument_name": instrument_name,
                     "label": label_closed,
-                    "price": 100000,
+                    "price": transaction_secondary["price"],
                     "time_in_force": "good_til_cancelled",
                     "post_only": True
                     }

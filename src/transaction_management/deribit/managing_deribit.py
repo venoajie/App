@@ -629,7 +629,7 @@ class ModifyOrderDb(SendApiRequest):
             else:
                 
                 
-                if ("oto_order_ids" in (orders[0])):
+                if "oto_order_ids" in (orders[0]):
                     
                     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
                     log.debug (f"transaction_main {transaction_main}")
@@ -681,14 +681,16 @@ class ModifyOrderDb(SendApiRequest):
                                     
                     for order in orders:
                         
-                        log.critical (f"order {order}")
-                                                
-                        await self.saving_order(
-                            non_checked_strategies,
-                            instrument_name,
-                            order,
-                            order_db_table
-                        )
+                        if  'OTO' not in order["label"]:
+                            
+                            log.warning (f"order {order}")
+                                                    
+                            await self.saving_order(
+                                non_checked_strategies,
+                                instrument_name,
+                                order,
+                                order_db_table
+                            )
                     
         await self.resupply_transaction_log(
             currency,
