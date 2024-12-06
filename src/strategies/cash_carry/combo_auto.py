@@ -677,6 +677,7 @@ class ComboAuto (BasicStrategy):
         instrument_attributes_futures,
         notional,
         target_transaction_per_hour,
+        max_order_currency: int
         ) -> dict:
         """ """
         
@@ -721,7 +722,7 @@ class ComboAuto (BasicStrategy):
                         else len(orders_instrument_open)
                         
                     if len_orders_instrument == 0 \
-                        and len_orders_instrument_future_open_all < 4:
+                        and len_orders_instrument_future_open_all <= max_order_currency:
             
                         basic_size = determine_opening_size(
                             instrument_name_future, 

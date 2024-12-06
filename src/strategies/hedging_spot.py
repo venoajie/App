@@ -335,7 +335,9 @@ class HedgingSpot(BasicStrategy):
             bearish = market_condition["falling_price"]
 
             #strong_bullish = market_condition["strong_rising_price"]
-            strong_bearish = market_condition["strong_falling_price"]                   
+            strong_bearish = market_condition["strong_falling_price"]     
+            
+            neutral = market_condition["neutral_price"]              
         
             max_position = self.max_position
             
@@ -364,7 +366,7 @@ class HedgingSpot(BasicStrategy):
             
             order_allowed: bool = (
                     (size_and_order_appropriate_for_ordering or over_hedged_cls)
-                    and (bearish or strong_bearish)
+                    and (bearish or strong_bearish or neutral)
                     and fluctuation_exceed_threshold
                 )
             
