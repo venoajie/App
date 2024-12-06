@@ -375,7 +375,7 @@ class RunningStrategy(ModifyOrderDb):
 
                 instruments_name = futures_instruments["instruments_name"]   
 
-                random_instruments_name = shuffled (instruments_name)
+                random_instruments_name = shuffled ([o for o in instruments_name if "-FS-" not in o])
                 
                 log.critical (f"random_instruments_name {random_instruments_name}")
                 
