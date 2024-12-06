@@ -636,8 +636,6 @@ class RunningStrategy(ModifyOrderDb):
                                                         #! closing combo auto trading
                                                         if "Auto" in label:
                                                             
-                                                            log.info (f"selected_transaction {selected_transaction}")
-                                                            
                                                             if sum_selected_transaction == 0:                                                               
                                                                 send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
                                                                 label,
@@ -715,6 +713,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                     if size_future_reconciled\
                                                                         and size_perpetuals_reconciled\
                                                                             and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
+                                                            
+                                                                        log.critical (f"selected_transaction {selected_transaction}")
                                                                           
                                                                         for transaction in selected_transaction:
                                                                             instrument_name = transaction["instrument_name"]
