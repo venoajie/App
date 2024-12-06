@@ -143,7 +143,6 @@ class SendApiRequest:
         trigger: str = "last_price",
         time_in_force: str = "fill_or_kill",
         reduce_only: bool = False,
-        valid_until: int = False,
         post_only: bool = True,
         reject_post_only: bool = False,
         ) ->None:
@@ -156,33 +155,17 @@ class SendApiRequest:
         params.update({"instrument_name": instrument})
         params.update({"type": type})
         
-        log.warning(f'trigger {trigger}')
-        log.warning(f'trigger_price {trigger_price}')
-        
-        if valid_until == False:
-            if trigger_price is None:
-                
-                if "market" in type:
-                    params.update({"reduce_only": reduce_only})
-                else:
-                    params.update({"price": price})
-                    params.update({"reduce_only": reduce_only})
-                    params.update({"post_only": post_only})
-                    params.update({"reject_post_only": reject_post_only})
-            else:
-                
-                params.update({"trigger": trigger})
-                params.update({"trigger_price": trigger_price})
-                params.update({"reduce_only": reduce_only})
-                
-                if "market" not in type:
-                    params.update({"post_only": post_only})
-                    params.update({"reject_post_only": reject_post_only})
+        if trigger_price is not None:
+            
+            params.update({"trigger": trigger})
+            params.update({"trigger_price": trigger_price})
+            params.update({"reduce_only": reduce_only})
+    
+        if "market" not in type:
+            params.update({"price": price})
+            params.update({"post_only": post_only})
+            params.update({"reject_post_only": reject_post_only})
                     
-        else:
-            params.update({"valid_until": valid_until})
-
-        #log.debug (f"otoco_config {otoco_config}")
         if otoco_config:
             params.update({"otoco_config": otoco_config})
             if linked_order_type is not None: 
