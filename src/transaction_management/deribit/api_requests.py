@@ -156,6 +156,7 @@ class SendApiRequest:
         params.update({"instrument_name": instrument})
         params.update({"type": type})
         
+        log.warning(f'trigger {trigger}')
         log.warning(f'trigger_price {trigger_price}')
         
         if valid_until == False:
@@ -251,6 +252,12 @@ class SendApiRequest:
         except:
             otoco_config = None
 
+        try:
+            linked_order_type = params["linked_order_type"]
+        
+        except:
+            linked_order_type = None
+
         order_result = None
 
         if side != None:
@@ -270,8 +277,8 @@ class SendApiRequest:
             
             else:
                         
-                trigger_price= params["trigger_price"]
-                trigger= params["trigger"]    
+                trigger_price = params["trigger_price"]
+                trigger = params["trigger"]    
                 
                 order_result = await self.send_order(
                     side,
@@ -281,6 +288,7 @@ class SendApiRequest:
                     limit_prc,
                     type,
                     otoco_config,
+                    linked_order_type,
                     trigger_price,
                     trigger
                     
