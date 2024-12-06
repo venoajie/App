@@ -316,6 +316,32 @@ def check_whether_order_db_reconciled_each_other(
         return  False
     
     
+def reading_from_pkl_data(
+    end_point, 
+    currency,
+    status: str = None
+    ) -> dict:
+    """ """
+                
+    from utilities.pickling import (
+        replace_data,
+        read_data,)
+        
+    from utilities.system_tools import (
+        async_raise_error_message,
+        provide_path_for_file,
+        raise_error_message,
+        sleep_and_restart,)
+
+    path: str = provide_path_for_file (end_point,
+                                      currency,
+                                      status)
+    data = read_data(path)
+
+    return data
+
+
+
     
 async def reconciling_orders(
     modify_order_and_db: object,
@@ -331,6 +357,14 @@ async def reconciling_orders(
     """
     
     try:
+
+        sub_account_test = reading_from_pkl_data(
+            "sub_accounts",
+            currency
+            )
+        
+        sub_account_test = sub_account_test[0]
+        log.debug(f"sub_account_test-before {sub_account_test}")
 
         sub_account_orders = sub_account["open_orders"]
                     
@@ -376,7 +410,15 @@ async def reconciling_orders(
                 
                 await modify_order_and_db. resupply_sub_accountdb(currency)
                 
-                #await sleep_and_restart ()
+                sub_account_test = reading_from_pkl_data(
+                    "sub_accounts",
+                    currency
+                    )
+                
+                sub_account_test = sub_account_test[0]
+                log.debug(f"sub_account_test-after {sub_account_test}")
+
+                await sleep_and_restart ()
                 
     except Exception as error:
         log.warning(error)
