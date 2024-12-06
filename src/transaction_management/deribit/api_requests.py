@@ -138,6 +138,7 @@ class SendApiRequest:
         price: float = None,
         type: str = "limit",
         otoco_config: list = None,
+        linked_order_type: str = None,
         trigger_price: float = None,
         trigger: str = "last_price",
         time_in_force: str = "fill_or_kill",
@@ -181,7 +182,10 @@ class SendApiRequest:
         #log.debug (f"otoco_config {otoco_config}")
         if otoco_config:
             params.update({"otoco_config": otoco_config})
-            params.update({"linked_order_type": "one_triggers_other"})
+            if linked_order_type is not None: 
+                params.update({"linked_order_type": linked_order_type})
+            else:
+                params.update({"linked_order_type": "one_triggers_other"})
             params.update({"trigger_fill_condition": "incremental"})
             
             log.debug (f"params otoco_config {params}")

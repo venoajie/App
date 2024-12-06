@@ -225,8 +225,8 @@ def labelling_unlabelled_order_oto(transaction_main: list,
     params.update({"entry_price": transaction_main["price"]})
     params.update({"size": transaction_main["amount"]})
     params.update({"label": label_open})
-
     params.update({"side": transaction_main ["direction"]})
+    params.update({"linked_order_type": transaction_main ["linked_order_type"]})
     params.update({"otoco_config": secondary_params})
             
     return dict(
