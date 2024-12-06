@@ -878,7 +878,7 @@ class ComboAuto (BasicStrategy):
                     
                     size_abs = abs(basic_size)
                     
-                    size = size_abs * ensure_sign_consistency(instrument_side)   
+                    size = size_abs * ensure_sign_consistency(counter_side)   
                     
                     closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
                         basic_size,
@@ -940,7 +940,7 @@ class ComboAuto (BasicStrategy):
                 
                 size_abs = abs(basic_size)
                 
-                size = size_abs * ensure_sign_consistency(instrument_side)   
+                size = size_abs * ensure_sign_consistency(counter_side)   
                 
                 closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
                     basic_size,
@@ -967,8 +967,6 @@ class ComboAuto (BasicStrategy):
 
                             params.update({"instrument_name": instrument_name_transaction})
                         
-                            
-                            
                             label = f"{strategy_label}-closed-{label_integer}"
                         
                             params.update({"label": label})
