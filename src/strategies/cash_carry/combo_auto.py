@@ -383,82 +383,7 @@ class ComboAuto (BasicStrategy):
 
         log.critical (f"""delta  {self.delta} """)
         
-
-    async def is_send_open_order_constructing_manual_combo_allowed(
-        self,
-        ticker_future,
-        instrument_attributes_futures,
-        notional,
-        target_transaction_per_hour,
-        ) -> dict:
-        """ """
         
-        order_allowed = False
-        
-        delta = self.delta
-        log.warning (f"constructing_manual_combo")
-
-        if delta == 0:            
-
-            ask_price_future = ticker_future ["best_ask_price"]
-            bid_price_perpetual = self.ticker_perpetual ["best_bid_price"]        
-                             
-            contango = is_contango(
-                ask_price_future,
-                bid_price_perpetual,
-                )
-            
-            if contango: 
-                
-                    instrument_name_future = ticker_future["instrument_name"]       
-                      
-                    orders_currency = self.orders_currency_strategy
-        
-                    orders_instrument_future: list=  [o for o in orders_currency 
-                                                        if instrument_name_future in o["instrument_name"]]
-                                        
-                    orders_instrument_future_open: list=  [o for o in orders_instrument_future 
-                                                           if "open" in o["label"]]
-                      
-                    orders_instrument_open: list=  [o for o in orders_instrument_future_open 
-                                                if instrument_name_future in o["instrument_name"]]
-                    
-                    len_orders_instrument: list=  0 if not  orders_instrument_open \
-                        else len(orders_instrument_open)
-                        
-                    if len_orders_instrument == 0:
-            
-                        basic_size = determine_opening_size(
-                            instrument_name_future, 
-                            instrument_attributes_futures, 
-                            notional,
-                            target_transaction_per_hour
-                            )
-                        
-                        label_open: str = get_label(
-                            "open", 
-                            self.strategy_label
-                            )
-                        
-                        order_allowed = True
-                        
-                        # provide placeholder for params
-                        params = defaultdict(list)
-                        params.update({"side": "sell"})                                                       
-                        params.update({"instrument_name": instrument_name_future})
-                        params.update({"size": basic_size})
-                        params.update({"label": label_open})
-                        params.update({"entry_price": ask_price_future})
-                                
-                        # default type: limit
-                        params.update({"type": "limit"})
-        
-        return dict(
-            order_allowed=order_allowed,
-            order_parameters=[] if order_allowed == False else params,
-        )
-        
-     
     async def is_send_open_order_allowed_auto_combo(
         self,
         ticker_future,
@@ -743,8 +668,92 @@ class ComboAuto (BasicStrategy):
             order_allowed= order_allowed,
             order_parameters=(
                 [] if order_allowed == False else exit_params),
+        ) 
+        
+
+    async def is_send_open_order_constructing_manual_combo_allowed(
+        self,
+        ticker_future,
+        instrument_attributes_futures,
+        notional,
+        target_transaction_per_hour,
+        ) -> dict:
+        """ """
+        
+        order_allowed = False
+        
+        delta = self.delta
+        log.warning (f"constructing_manual_combo")
+
+        if delta == 0:            
+
+            ask_price_future = ticker_future ["best_ask_price"]
+            bid_price_perpetual = self.ticker_perpetual ["best_bid_price"]        
+                             
+            contango = is_contango(
+                ask_price_future,
+                bid_price_perpetual,
+                )
+            
+            if contango: 
+                
+                    instrument_name_future = ticker_future["instrument_name"]       
+                      
+                    orders_currency = self.orders_currency_strategy
+        
+                    orders_instrument_future: list=  [o for o in orders_currency 
+                                                        if instrument_name_future in o["instrument_name"]]
+                                        
+                    orders_instrument_future_open_all: list=  [o for o in orders_currency 
+                                                        if "PERPETUAL" not in o["instrument_name"]\
+                                                            and "open" in o["label"]]
+                                        
+                    len_orders_instrument_future_open_all = 0 if orders_instrument_future_open_all == []\
+                        else len(orders_instrument_future_open_all)
+                    
+                    orders_instrument_future_open: list=  [o for o in orders_instrument_future 
+                                                           if "open" in o["label"]]
+                      
+                    orders_instrument_open: list=  [o for o in orders_instrument_future_open 
+                                                if instrument_name_future in o["instrument_name"]]
+                    
+                    len_orders_instrument: list=  0 if not  orders_instrument_open \
+                        else len(orders_instrument_open)
+                        
+                    if len_orders_instrument == 0 \
+                        and len_orders_instrument_future_open_all < 4:
+            
+                        basic_size = determine_opening_size(
+                            instrument_name_future, 
+                            instrument_attributes_futures, 
+                            notional,
+                            target_transaction_per_hour
+                            )
+                        
+                        label_open: str = get_label(
+                            "open", 
+                            self.strategy_label
+                            )
+                        
+                        order_allowed = True
+                        
+                        # provide placeholder for params
+                        params = defaultdict(list)
+                        params.update({"side": "sell"})                                                       
+                        params.update({"instrument_name": instrument_name_future})
+                        params.update({"size": basic_size})
+                        params.update({"label": label_open})
+                        params.update({"entry_price": ask_price_future})
+                                
+                        # default type: limit
+                        params.update({"type": "limit"})
+        
+        return dict(
+            order_allowed=order_allowed,
+            order_parameters=[] if order_allowed == False else params,
         )
         
+     
         
     async def is_send_contra_order_for_unpaired_transaction_allowed(
         self,
@@ -965,6 +974,7 @@ class ComboAuto (BasicStrategy):
             
                     # using perpetual to balancing delta    
                     else:
+        
                         sum_orders_instrument_perpetual_open = 0 if orders_instrument_perpetual_open == []\
                             else sum([o["amount"] for o in orders_instrument_perpetual_open])
                             

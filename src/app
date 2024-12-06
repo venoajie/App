@@ -5,6 +5,7 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 import os
 from secrets import randbelow
+from random import sample
 
 # installed
 from dataclassy import dataclass, fields
@@ -106,6 +107,7 @@ def update_cached_ticker_data(
     instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
     
     if instrument_ticker:
+        
         for item in data_orders:
             if "stats" not in item and "instrument_name" not in item and "type" not in item:
                 [o for o in ticker if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
@@ -368,6 +370,10 @@ class RunningStrategy(ModifyOrderDb):
                 #log.info (instrument_attributes_combo)
 
                 instruments_name = futures_instruments["instruments_name"]   
+
+                random_instruments_name = [''.join(sample(0, len(3))) for 0 in instruments_name]
+                
+                log.critical (f"random_instruments_name {random_instruments_name}")
                 
                 min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]    
                 

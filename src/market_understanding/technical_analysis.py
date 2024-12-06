@@ -141,10 +141,10 @@ def is_ohlc_fluctuation_exceed_threshold(
 
 async def get_market_condition(
     instrument,
-                               limit: int = 100, 
-                               ratio: float = 0.9,
-                               fluctuation_threshold=0.4 / 100
-) -> dict:
+    limit: int = 100, 
+    ratio: float = 0.9,
+    fluctuation_threshold=0.4 / 100
+    ) -> dict:
     """ """
     currency_lower= extract_currency_from_text(instrument).lower()
     currency_upper= extract_currency_from_text(instrument).upper()
@@ -210,10 +210,12 @@ async def get_market_condition(
             return result
 
 
-async def insert_market_condition_result(instrument_name,
-                                         limit: int = 100,
-                                         ratio: float = 0.9,
-                                         fluctuation_threshold=(0.4 / 100)) -> dict:
+async def insert_market_condition_result(
+    instrument_name,
+    limit: int = 100,
+    ratio: float = 0.9,
+    fluctuation_threshold=(0.4 / 100)
+    ) -> dict:
     """ """
     result = await get_market_condition(instrument_name, 
                                         limit, 
