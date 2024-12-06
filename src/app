@@ -463,9 +463,9 @@ class RunningStrategy(ModifyOrderDb):
                                     currency_lower: str =currency
                                     
                                     
-
-                                    random_instruments_name = shuffled ([o for o in instruments_name\
-                                        if "-FS-" not in o and currency_upper in o])
+ 
+                                    random_instruments_name = random.sample( ([o for o in instruments_name\
+                                        if "-FS-" not in o and currency_upper in o]),3)
                                     
                                     log.critical (f"random_instruments_name {random_instruments_name}")
                                     
