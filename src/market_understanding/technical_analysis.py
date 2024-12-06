@@ -166,7 +166,9 @@ async def get_market_condition(
         ohlc_open_price = ohlc_1_open_3["ohlc_price"]
 
         ohlc_fluctuation_exceed_threshold = is_ohlc_fluctuation_exceed_threshold(
-            ohlc_1_open_3["ohlc"], last_price, fluctuation_threshold
+            ohlc_1_open_3["ohlc"], 
+            last_price, 
+            fluctuation_threshold
         )
 
 

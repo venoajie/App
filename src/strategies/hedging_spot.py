@@ -344,7 +344,8 @@ class HedgingSpot(BasicStrategy):
             over_hedged_cls  =  self.over_hedged_closing
             
             log.info (f"over_hedged_closing {over_hedged_cls} max_position {max_position}")
-            fluctuation_exceed_threshold = True#TA_result_data["1m_fluctuation_exceed_threshold"]
+            
+            fluctuation_exceed_threshold = True #TA_result_data["1m_fluctuation_exceed_threshold"]
 
             size = determine_opening_size(instrument_name, 
                                         futures_instruments, 
@@ -370,11 +371,15 @@ class HedgingSpot(BasicStrategy):
                     and fluctuation_exceed_threshold
                 )
             
+            log.info (f"order_allowed {order_allowed} size_and_order_appropriate_for_ordering {size_and_order_appropriate_for_ordering} over_hedged_cls {over_hedged_cls}")
+            log.info (f"bearish or strong_bearish or neutral {bearish or strong_bearish or neutral} fluctuation_exceed_threshold {fluctuation_exceed_threshold} ")
+
             if order_allowed :
                 
                 label_and_side_consistent= is_label_and_side_consistent(
                     non_checked_strategies,
                     params)
+                log.info (f"label_and_side_consistent {label_and_side_consistent} ")
                 
                 if label_and_side_consistent:# and not order_has_sent_before:
                     
@@ -612,7 +617,6 @@ class HedgingSpot(BasicStrategy):
             threshold_market_condition
             )
 
-        
         #bullish = market_condition["rising_price"]
         bearish = market_condition["falling_price"]
 
