@@ -156,6 +156,8 @@ class SendApiRequest:
         params.update({"instrument_name": instrument})
         params.update({"type": type})
         
+        log.warning(f'trigger_price {trigger_price}')
+        
         if valid_until == False:
             if trigger_price is None:
                 
@@ -241,8 +243,6 @@ class SendApiRequest:
         size = params["size"]
         type = params["type"]
         limit_prc = params["entry_price"]
-
-        log.warning(f'params {params}')
         
         try:
             otoco_config = params["otoco_config"]
@@ -271,7 +271,7 @@ class SendApiRequest:
             else:
                         
                 trigger_price= params["trigger_price"]
-                trigger= params["trigger"]            
+                trigger= params["trigger"]    
                 
                 order_result = await self.send_order(
                     side,

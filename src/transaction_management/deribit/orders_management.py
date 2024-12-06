@@ -171,7 +171,7 @@ def labelling_unlabelled_order(order: dict) -> None:
     if  type != "limit": # limit has various state
         order.update({"trigger_price": order ["trigger_price"]})
         order.update({"trigger": order ["trigger"]})
-        log.critical (f"order {order}")
+        
     
     order.update({"side": side})
     
