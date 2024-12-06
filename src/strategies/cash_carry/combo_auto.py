@@ -19,7 +19,6 @@ from strategies.basic_strategy import (
     get_label_integer,
     is_minimum_waiting_time_has_passed,
     proforma_size,
-    provide_size_to_close_transaction,
     size_rounding,
     sum_order_under_closed_label_int)
 from utilities.pickling import (
@@ -444,17 +443,21 @@ class ComboAuto (BasicStrategy):
                    
         if order_allowed:
             
-            size = determine_opening_size(
+            size: int = determine_opening_size(
                 instrument_name_future, 
                 instrument_attributes_futures, 
                 notional,
                 target_transaction_per_hour
                 )
            
-            label_open: str = get_label(
+            label_open_minus_auto: str = get_label(
                 "open", 
                 self.strategy_label
                 )
+            
+            label_integer: int = get_label_integer (label_open_minus_auto)
+            
+            label_open: str = f"{self.strategy_label}Auto-open-{label_integer}"
                  
             # provide placeholder for params
             params = defaultdict(list)
