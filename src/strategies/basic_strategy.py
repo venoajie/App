@@ -322,7 +322,7 @@ def get_transaction_side(transaction: dict) -> str:
     try:
         transaction =  transaction["direction"] 
         
-        if transaction == []:
+        if not transaction:
             return transaction["side"]
     
     except:        
@@ -567,7 +567,7 @@ def get_basic_closing_paramaters(
     transaction: dict = convert_list_to_dict(selected_transaction)
     
     # provide dict placeholder for params
-    params = defaultdict(list)
+    params = defaultdict(dict)
 
     # determine side        
     side = provide_side_to_close_transaction(transaction)
@@ -617,7 +617,7 @@ def get_basic_closing_paramaters_combo_pair (selected_transactions: list) -> dic
     """
     
     # provide dict placeholder for params
-    params = defaultdict(list)
+    params = defaultdict(dict)
 
     # default type: limit
     params.update({"type": "limit"})
