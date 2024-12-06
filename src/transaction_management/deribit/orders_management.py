@@ -159,12 +159,19 @@ def labelling_unlabelled_order(order: dict) -> None:
         get_transaction_side,
         )
     
+    type = order ["type"]
+    
     side= get_transaction_side(order)
     order.update({"everything_is_consistent": True})
     order.update({"order_allowed": True})
     order.update({"entry_price": order["price"]})
     order.update({"size": order["amount"]})
-    order.update({"type": "limit"})
+    order.update({"type": type})
+    
+    if  order ["type"] != "limit": # limit has various state
+        order.update({"trigger_price": order ["trigger_price"]})
+        order.update({"trigger": order ["trigger"]})
+    
     order.update({"side": side})
     
     label_open: str = get_custom_label(order)

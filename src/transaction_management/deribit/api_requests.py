@@ -246,25 +246,45 @@ class SendApiRequest:
         
         try:
             otoco_config = params["otoco_config"]
+            log.warning(f'otoco_config {otoco_config}')
         
         except:
             otoco_config = None
 
-        log.warning(f'otoco_config {otoco_config}')
-        
-
         order_result = None
 
         if side != None:
-            order_result = await self.send_order(
-                side,
-                instrument,
-                size,
-                label_numbered,
-                limit_prc,
-                type,
-                otoco_config
-            )
+            
+            
+            if  type == "limit": # limit has various state
+                
+                order_result = await self.send_order(
+                    side,
+                    instrument,
+                    size,
+                    label_numbered,
+                    limit_prc,
+                    type,
+                    otoco_config
+                )
+            
+            else:
+                        
+                trigger_price= params["trigger_price"]
+                trigger= params["trigger"]            
+                
+                order_result = await self.send_order(
+                    side,
+                    instrument,
+                    size,
+                    label_numbered,
+                    limit_prc,
+                    type,
+                    otoco_config,
+                    trigger_price,
+                    trigger
+                    
+                )
 
         log.warning(f'order_result {order_result}')
 

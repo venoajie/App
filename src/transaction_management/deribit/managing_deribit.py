@@ -605,8 +605,6 @@ class ModifyOrderDb(SendApiRequest):
         
         log.info (f" {data_orders}")
 
-        await self.resupply_sub_accountdb(currency)       
-        
         if orders:
             
             if trades:
@@ -631,8 +629,14 @@ class ModifyOrderDb(SendApiRequest):
                 
                 if "oto_order_ids" in (orders[0]):
                     
+                    len_oto_order_ids = len(orders["oto_order_ids"])
+                    
                     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
                     log.debug (f"transaction_main {transaction_main}")
+                    
+                    if len_oto_order_ids==1:
+                        pass
+                    
                     transaction_main_oto = transaction_main ["oto_order_ids"][0]
                     log.warning (f"transaction_main_oto {transaction_main_oto}")
                     
@@ -691,7 +695,9 @@ class ModifyOrderDb(SendApiRequest):
                                 order,
                                 order_db_table
                             )
-                    
+
+        await self.resupply_sub_accountdb(currency)       
+        
         await self.resupply_transaction_log(
             currency,
             transaction_log_trading,
