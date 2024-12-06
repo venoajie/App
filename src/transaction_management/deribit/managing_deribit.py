@@ -782,23 +782,24 @@ class ModifyOrderDb(SendApiRequest):
         order_state= order["order_state"]    
         
         # no label
-        if label == ''\
-            and "open" in order_state:
-            
-            order_attributes = labelling_unlabelled_order (order)                   
+        if label == '':
+            if"open" in order_state\
+                or "SLTS" in order_id:
+                
+                order_attributes = labelling_unlabelled_order (order)                   
 
-            await insert_tables(
-                order_db_table, 
-                order
-                )
-            
-            if "OTO" not in order ["order_id"]:
-                await self. cancel_by_order_id (order_id)  
-            
-            await self.if_order_is_true(
-                non_checked_strategies,
-                order_attributes, 
-                )
+                await insert_tables(
+                    order_db_table, 
+                    order
+                    )
+                
+                if "OTO" not in order ["order_id"]:
+                    await self. cancel_by_order_id (order_id)  
+                
+                await self.if_order_is_true(
+                    non_checked_strategies,
+                    order_attributes, 
+                    )
                     
         else:
             
