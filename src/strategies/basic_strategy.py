@@ -700,7 +700,7 @@ class BasicStrategy (ManageStrategy):
         """ """
 
         # provide placeholder for params
-        params = defaultdict(list)
+        params = defaultdict(dict)
 
         # default type: limit
         params.update({"type": "limit"})
