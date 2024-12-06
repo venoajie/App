@@ -318,7 +318,7 @@ def get_transactions_sum(result_strategy_label) -> int:
 def get_transaction_side(transaction: dict) -> str:
     """ 
     """
-    #log.error (f"transaction {transaction}")    
+    log.error (f"transaction {transaction}")    
     try:
         transaction =  transaction["direction"] 
         
