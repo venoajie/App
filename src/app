@@ -371,7 +371,7 @@ class RunningStrategy(ModifyOrderDb):
 
                 instruments_name = futures_instruments["instruments_name"]   
 
-                random_instruments_name = [''.join(sample(0, len(3))) for 0 in instruments_name]
+                random_instruments_name = [''.join(sample(o, len(3))) for o in instruments_name]
                 
                 log.critical (f"random_instruments_name {random_instruments_name}")
                 
