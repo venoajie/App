@@ -621,12 +621,12 @@ class HedgingSpot(BasicStrategy):
 
         #strong_bullish = market_condition["strong_rising_price"]
         strong_bearish = market_condition["strong_falling_price"]
-        #neutral = market_condition["neutral_price"]
+        neutral = market_condition["neutral_price"]
         params: dict = self.get_basic_params().get_basic_opening_parameters(ask_price)
         
         weighted_factor= hedging_attributes["weighted_factor"]
 
-        log.warning (f"bearish {bearish}  strong_bearish {strong_bearish}" )
+        log.warning (f"bearish {bearish}  strong_bearish {strong_bearish} neutral {neutral}" )
         log.debug (f"len_orders  {len_open_orders} len_orders == 0 {len_open_orders == 0} sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} not over_hedged {not self.over_hedged_opening}" )
         
         SIZE_FACTOR = get_waiting_time_factor(
