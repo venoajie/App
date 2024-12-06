@@ -226,8 +226,14 @@ def labelling_unlabelled_order_oto(transaction_main: list,
     params.update({"size": transaction_main["amount"]})
     params.update({"label": label_open})
     params.update({"side": transaction_main ["direction"]})
-    params.update({"linked_order_type": transaction_main ["linked_order_type"]})
     params.update({"otoco_config": secondary_params})
+    
+    try:
+        params.update({"linked_order_type": transaction_main ["linked_order_type"]})
+
+    except:
+        pass #default: one_triggers_other at API request
+    
             
     return dict(
             order_allowed=True,
