@@ -5,7 +5,7 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 import os
 from secrets import randbelow
-from random import sample
+import random
 
 # installed
 from dataclassy import dataclass, fields
@@ -87,6 +87,10 @@ def cached_ticker_data(currencies):
 
 
     return result
+
+def shuffled(instruments):
+    random.shuffle(instruments)
+    return instruments
 
 
 def update_cached_ticker_data(
@@ -371,7 +375,7 @@ class RunningStrategy(ModifyOrderDb):
 
                 instruments_name = futures_instruments["instruments_name"]   
 
-                random_instruments_name = [''.join(sample(o, len(o))) for o in instruments_name]
+                random_instruments_name = shuffled (instruments_name)
                 
                 log.critical (f"random_instruments_name {random_instruments_name}")
                 
