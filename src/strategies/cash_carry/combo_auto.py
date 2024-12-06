@@ -1004,15 +1004,16 @@ class ComboAuto (BasicStrategy):
                                 if strategy_params is None:
                                     strategy_params: dict = self.strategy_parameters
                 
-                                waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
+                                waiting_minute_before_ordering = strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
                                 
                                 timestamp: int = selected_transaction["timestamp"]
                             
                                 waiting_time_for_perpetual_order: bool = check_if_minimum_waiting_time_has_passed(
-                                        waiting_minute_before_cancel,
+                                        waiting_minute_before_ordering,
                                         timestamp,
                                         server_time,
                                     )
+                                log.debug (f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order} waiting_minute_before_ordering {waiting_minute_before_ordering}")
                         
                                 if waiting_time_for_perpetual_order:
                                     order_allowed = True
