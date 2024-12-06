@@ -2,7 +2,6 @@
 
 # built ins
 import asyncio
-from collections import defaultdict
 
 # installed
 from dataclassy import dataclass, fields
@@ -679,7 +678,7 @@ class HedgingSpot(BasicStrategy):
                         
                         if transaction_price < best_ask_price:
                                                     
-                            params = defaultdict(list)
+                            params = {}
 
                             # determine side        
                             params.update({"side": "sell"})

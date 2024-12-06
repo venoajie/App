@@ -2,8 +2,6 @@
 import asyncio
 from datetime import datetime
 from typing import Dict
-from collections import defaultdict
-
 # installed
 from dataclassy import dataclass
 
@@ -147,7 +145,7 @@ class SendApiRequest:
         reject_post_only: bool = False,
         ) ->None:
 
-        params =  defaultdict(dict)
+        params = {}
         
         params.update({"instrument_name": instrument})
         params.update({"amount": amount})

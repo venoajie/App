@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from collections import defaultdict
-
 # installed
 from loguru import logger as log
 
@@ -226,7 +224,7 @@ def labelling_unlabelled_order_oto(transaction_main: list,
                     }
                 ]
 
-    params =  defaultdict(dict)
+    params =  {}
     params.update({"everything_is_consistent": True})
     params.update({"instrument_name": instrument_name})
     params.update({"type": "limit"})
