@@ -393,8 +393,6 @@ async def reconciling_orders(
                 
                 for order in sub_account_instrument_name:
                     
-                    log.warning (f" inserting new order {order}")
-                                
                     await insert_tables(
                                 order_db_table, 
                                 order

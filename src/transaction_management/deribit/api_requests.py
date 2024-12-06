@@ -230,8 +230,6 @@ class SendApiRequest:
         
         try:
             otoco_config = params["otoco_config"]
-            log.warning(f'otoco_config {otoco_config}')
-        
         except:
             otoco_config = None
 
