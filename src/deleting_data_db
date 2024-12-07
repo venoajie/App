@@ -62,21 +62,28 @@ async def updating_db_with_new_data(
                 label = data ["label"]
                 
                 label_integer: int = get_label_integer (label) 
-                    
-                where_filter = f"label"
                 
-                await insert_tables(
-                    "my_trades_closed_json", 
-                    data
-                    )
+                data_under_label_integer = [ o for o in my_trades_currency\
+                    if str(label_integer) in o["label"]]
+                
+                for data_selected in data_under_label_integer:
+                    
+                    label = data_selected ["label"]
+                        
+                    where_filter = f"label"
+                    
+                    await insert_tables(
+                        "my_trades_closed_json", 
+                        data_selected
+                        )
 
-                await deleting_row (
-                    "my_trades_all_json",
-                    "databases/trading.sqlite3",
-                    where_filter,
-                    "LIKE",
-                    label_integer,
-                )
+                    await deleting_row (
+                        "my_trades_all_json",
+                        "databases/trading.sqlite3",
+                        where_filter,
+                        "=",
+                        label,
+                    )
                 
     except Exception as error:
         await async_raise_error_message(error)
