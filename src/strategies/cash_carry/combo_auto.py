@@ -297,7 +297,7 @@ def modified_tp_threshold(
     
     return take_profit_threshold_original * 2 \
         if settlement_period == "week" \
-            else take_profit_threshold_original * 1000 #0.05%
+            else take_profit_threshold_original * 5 #0.05%
                 
         
 def compare_transactions_price_against_threshold(
