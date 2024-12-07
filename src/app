@@ -640,10 +640,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         selected_transaction_amount = ([o["amount"] for o in selected_transaction])
                                                         sum_selected_transaction = sum(selected_transaction_amount)
                                                         len_selected_transaction = len(selected_transaction_amount)
-                                                        
-                                                        log.debug (f"selected_transaction {selected_transaction}")
-                                                        log.critical (f"sum_selected_transaction {sum_selected_transaction}")
-                                                                 
+                                                         
                                                         #! closing combo auto trading
                                                         if "Auto" in label:
                                                             
@@ -686,7 +683,10 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                         #! renaming combo auto trading
                                                         else:
-                                                            
+                                                        
+                                                            log.debug (f"selected_transaction {selected_transaction}")
+                                                            log.critical (f"sum_selected_transaction {sum_selected_transaction}")
+                                                                        
                                                             if sum_selected_transaction == 0:
                                                                 if "open" in label:
                                                                     new_label = f"futureSpreadAuto-open-{label_integer}"
