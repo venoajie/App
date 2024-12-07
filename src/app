@@ -730,7 +730,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                             ticker_future[0],
                                                                             instrument_attributes_futures_all,
                                                                             TP_THRESHOLD,
-                                                                            selected_transaction,
+                                                                            transaction,
                                                                             server_time,
                                                                             THRESHOLD_MARKET_CONDITIONS_COMBO
                                                                             )

@@ -584,27 +584,29 @@ async def clean_up_closed_transactions(
                             if "closed" in o["label"] \
                                 and abs(o["amount"]) == abs(open_transaction_size)]
                         
-                        for closed_transaction in closed_transaction_with_same_size_as_open_label:
-                                                        
-                            closed_transaction_size = closed_transaction["amount"]
-                            closed_transaction_instrument_name = closed_transaction["instrument_name"]
+                        if closed_transaction_with_same_size_as_open_label:
                             
-                            if closed_transaction_instrument_name == open_transaction_instrument_name\
-                                and closed_transaction_size + open_transaction_size == 0:
+                            for closed_transaction in closed_transaction_with_same_size_as_open_label:
+                                                            
+                                closed_transaction_size = closed_transaction["amount"]
+                                closed_transaction_instrument_name = closed_transaction["instrument_name"]
                                 
-                                transactions.append (open_transaction)
-                                transactions.append (closed_transaction)
-                                
-                                log.critical (f"transactions {transactions}")
-                            
-                                await closing_one_to_one(
-                                    transactions,
-                                    where_filter,
-                                    trade_table
-                                    )
-                                
-                                if closed_transaction_instrument_name == open_transaction_instrument_name:
+                                if closed_transaction_instrument_name == open_transaction_instrument_name\
+                                    and closed_transaction_size + open_transaction_size == 0:
                                     
-                                    break
-                    
+                                    transactions.append (open_transaction)
+                                    transactions.append (closed_transaction)
+                                    
+                                    log.critical (f"transactions {transactions}")
+                                
+                                    await closing_one_to_one(
+                                        transactions,
+                                        where_filter,
+                                        trade_table
+                                        )
+                                    
+                                    if closed_transaction_instrument_name == open_transaction_instrument_name:
                                         
+                                        break
+                        
+                                            
