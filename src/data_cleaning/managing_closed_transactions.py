@@ -573,6 +573,8 @@ async def clean_up_closed_transactions(
                     open_label =  ([o for o in transaction_closed_under_the_same_label_int\
                         if "open" in o["label"]])
                     
+                    log.critical (f"transaction_closed_under_the_same_label_int {transaction_closed_under_the_same_label_int}")
+                    
                     for open_transaction in open_label:
                         
                         open_transaction_size = open_transaction["amount"]
