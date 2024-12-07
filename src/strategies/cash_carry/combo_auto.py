@@ -715,6 +715,9 @@ class ComboAuto (BasicStrategy):
             else len(orders_instrument_open)
         
         if selected_transaction:    
+            log.error (f"selected_transaction {selected_transaction}")
+            log.error (f"len_orders_instrument == 0 {len_orders_instrument == 0}")
+            log.error (f"len_orders_instrument_future_open_all <= max_order_currency {len_orders_instrument_future_open_all <= max_order_currency}")
 
             if len_orders_instrument == 0 \
                 and len_orders_instrument_future_open_all <= max_order_currency:
