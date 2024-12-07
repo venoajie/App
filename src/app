@@ -622,7 +622,13 @@ class RunningStrategy(ModifyOrderDb):
                                                     
                                                     # get labels from active trades
                                                     labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
+                        
+                                                    max_order_currency = 3
                                                     
+                                                    random_instruments_name = random.sample(([o for o in instruments_name\
+                                                                                                if "-FS-" not in o and currency_upper in o]),
+                                                                                            max_order_currency)
+                                                                
                                                     #! closing active trades
                                                     for label in labels:
                                                         
@@ -818,13 +824,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                     archive_db_table,
                                                                     transaction_log_trading_table)
                                     
-                                                                max_order_currency = 3
-                                                                
-                                                                random_instruments_name = random.sample( 
-                                                                                                        ([o for o in instruments_name\
-                                                                                                            if "-FS-" not in o and currency_upper in o]),
-                                                                                                        max_order_currency)
-                                                            
                                                                 send_order = []                           
                                                                                         
                                                                 if instrument_name_future in  random_instruments_name \
