@@ -1055,7 +1055,8 @@ class ComboAuto (BasicStrategy):
                                 else sum([o["amount"] for o in orders_instrument_perpetual_open])
                                 
                             log.debug (f"sum_orders_instrument_perpetual_open {sum_orders_instrument_perpetual_open} ")
-                            log.error (f"selected_transaction_price <= bid_price_perpetual {selected_transaction_price <= bid_price_perpetual} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}")
+                            log.error (f"selected_transaction_price <= bid_price_perpetual {selected_transaction_price <= bid_price_perpetual} ")
+                            log.warning (f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}")
                                 
                             if sum_orders_instrument_perpetual_open < abs(delta)  and delta <=0 :
                     
