@@ -577,6 +577,7 @@ async def clean_up_closed_transactions(
                     
                     transactions = []
                     for open_transaction in open_label:
+                        log.error (f"open_transaction {open_transaction}")  
                         
                         open_transaction_size = open_transaction["amount"]
                         open_transaction_instrument_name = open_transaction["instrument_name"]
