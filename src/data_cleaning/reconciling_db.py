@@ -216,7 +216,7 @@ async def my_trades_active_archived_not_reconciled_each_other(
         
         for transaction in my_trades_archive_instrument_data:
         
-            log.warning (f"transaction {transaction} ")
+            log.warning (f"my_trades_active_archived_not_reconciled_each_other {transaction} ")
             
             if transaction:
                 await insert_tables(
@@ -240,7 +240,7 @@ async def my_trades_active_archived_not_reconciled_each_other(
             transaction = [o for o in my_trades_instrument_name_archive\
                 if trade_id in o["trade_id"]]
         
-            log.debug (f"transaction {transaction} ")
+            log.debug (f"my_trades_active_archived_not_reconciled_each_other {transaction} ")
             
             await insert_tables(
                 trade_db_table,
