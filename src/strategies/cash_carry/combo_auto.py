@@ -338,6 +338,7 @@ def is_new_transaction_will_reduce_delta(
         selected_transaction_size,
         side
         )
+    log.warning (f"proforma {proforma} delta {delta} side {side} selected_transaction_size {selected_transaction_size}")
     
     if delta > 0:
         return proforma < delta 
