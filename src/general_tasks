@@ -422,7 +422,6 @@ async def reconciling_size(
                     strategy_attributes = config_app["strategies"]
                     
                     if my_trades_currency_active:
-                        log.error (f"pairing_single_label {pairing_single_label}")
                         pairing_label = await pairing_single_label(
                         strategy_attributes,
                         trade_db_table,
@@ -430,6 +429,7 @@ async def reconciling_size(
                         my_trades_currency_active,
                         server_time 
                         )
+                        log.error (f"pairing_label {pairing_label}")
                         
                         if  pairing_label:
                             
