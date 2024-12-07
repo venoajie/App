@@ -45,7 +45,7 @@ async def updating_db_with_new_data(
 
 
         my_trades_instrument_name =  remove_redundant_elements([o["instrument_name"] for o in my_trades_currency\
-            if "PERPE" not in o["instrument_name"]])
+            if "PERPE"  in o["instrument_name"]])
         
         log.error (f"my_trades_instrument_name {my_trades_instrument_name}")
         
