@@ -575,6 +575,7 @@ async def clean_up_closed_transactions(
                     
                     log.critical (f"transaction_closed_under_the_same_label_int {transaction_closed_under_the_same_label_int}")
                     
+                    transaction = []
                     for open_transaction in open_label:
                         
                         open_transaction_size = open_transaction["amount"]
@@ -584,14 +585,16 @@ async def clean_up_closed_transactions(
                             if "closed" in o["label"] \
                                 and abs(o["amount"]) == open_transaction_size]
                         
+                        
+                        
                         for closed_transaction in closed_transaction_with_same_size_as_open_label:
                             
                             closed_transaction_size = closed_transaction["amount"]
                             
                             if closed_transaction_size + open_transaction_size == 0:
-                                
-                                instrument_transactions = open_transaction + closed_transaction
-                                log.info(F" instrument_transactions {instrument_transactions}")
+                                transaction.append (open_transaction)
+                                transaction.append (open_transaction)
+                                log.info(F" instrument_transactions {transaction}")
                             
                                 #await closing_one_to_one(
                                 #    instrument_transactions,
