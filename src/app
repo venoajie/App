@@ -757,6 +757,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     THRESHOLD_MARKET_CONDITIONS_COMBO
                                                                                     )
                                                                                 
+                                                                                log.error (f"send_order {send_order}")
+                                                                                
                                                                                 if send_order["order_allowed"]:
                                                                                     break            
                                                                                                                                                     
