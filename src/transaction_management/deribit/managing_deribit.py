@@ -310,9 +310,13 @@ class ModifyOrderDb(SendApiRequest):
                 
         if transaction_log:
             
+            transaction_log_instrument_name = [o for o in transaction_log \
+                if instrument_name in  o["instrument_name"]\
+                    and o["timestamp"] > first_tick_fr_sqlite]
+            
             await saving_transaction_log (
                 transaction_log_trading,
-                transaction_log, 
+                transaction_log_instrument_name, 
                 first_tick_fr_sqlite
                 )
             
