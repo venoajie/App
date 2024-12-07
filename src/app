@@ -760,21 +760,20 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     THRESHOLD_MARKET_CONDITIONS_COMBO,
                                                                                     random_instruments_name
                                                                                     )
-                                                                                
-                                                                                if send_order["order_allowed"]:
-                                                                                    break            
-                                                                                 
-                                                                                                                        
-                                                            if send_order:
-                                                                await self.processing_orders(
-                                                                        send_order,
-                                                                        currency,
-                                                                        non_checked_strategies,
-                                                                        order_db_table,
-                                                                        trade_db_table,
-                                                                        archive_db_table,
-                                                                        transaction_log_trading_table)
                                                             
+                                                                                if send_order["order_allowed"]:
+                                                                                
+                                                                                    await self.processing_orders(
+                                                                                            send_order,
+                                                                                            currency,
+                                                                                            non_checked_strategies,
+                                                                                            order_db_table,
+                                                                                            trade_db_table,
+                                                                                            archive_db_table,
+                                                                                            transaction_log_trading_table)
+                                                        
+                                                                                    break            
+                                                                        
                                                     # send combo orders
                                                     for instrument_attributes_combo in instrument_attributes_combo_all:
                                                         
