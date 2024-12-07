@@ -606,6 +606,8 @@ async def clean_up_closed_transactions(
                                     trade_table
                                     )
                                 
-                                break
+                                if closed_transaction_instrument_name == open_transaction_instrument_name:
+                                    
+                                    break
                     
                                         
