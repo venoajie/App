@@ -736,8 +736,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     server_time,
                                                                                     THRESHOLD_MARKET_CONDITIONS_COMBO
                                                                                     )
-                                                                                log.critical (f"send_order {send_order}")
-                                                                                if not send_order:
+                                                                                log.critical (f"""send_order {not send_order["order_allowed"]}""")
+                                                                                if not send_order["order_allowed"]:
                                                                                     
                                                                                     send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
                                                                                         ticker_future,
