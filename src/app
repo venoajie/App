@@ -581,6 +581,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 "from_order_db_to_sub_account",
                                                 order_db_table
                                                 )                   
+
                                             for strategy in active_strategies:
                                                 
                                                 strategy_params= [o for o in strategy_attributes \

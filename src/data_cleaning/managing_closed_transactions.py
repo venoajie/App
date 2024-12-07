@@ -568,34 +568,26 @@ async def clean_up_closed_transactions(
                                 trade_table
                                 )
                     
-                if False and size_to_close != 0:
+                if size_to_close != 0:
                     
                     open_label =  ([o for o in transaction_closed_under_the_same_label_int\
                         if "open" in o["label"]])
-                                        
-                    if open_label:
-                         
-                        log.warning(F" closing_one_to_many {open_label}")
-                        
-                        await closing_one_to_many(
-                            open_label,
-                            transaction_closed_under_the_same_label_int,
-                            where_filter,
-                            trade_table)
                     
-                    #orphan label
-                    else:
-                                    
-                        log.error(F" closing_orphan_order {label}")
+                    for open_transaction in open_label:
                         
-                        await closing_orphan_order(
-                            label,
-                            label_integer,
-                            trade_table,
-                            where_filter,
-                            transactions_under_label_main
-                            )
-    
+                        open_transaction_size = open_transaction["amount"]
                         
-    #log.critical(f" clean_up_closed_transactions {instrument_name} DONE")
-
+                        closed_transaction_with_same_size_as_open_label = [
+                        o for o in transaction_closed_under_the_same_label_int\
+                            if "closed" in o["label"] \
+                                and abs(o["amount"]) == open_transaction_size]
+                        
+                        for closed_transaction in closed_transaction_with_same_size_as_open_label:
+                            
+                            closed_transaction_size = closed_transaction["amount"]
+                            
+                            if closed_transaction_size + open_transaction_size == 0:
+                                
+                                log.critical ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                    
+                                        
