@@ -681,7 +681,6 @@ class ComboAuto (BasicStrategy):
         target_transaction_per_hour: int,
         max_order_currency: int,
         selected_transaction: dict = None,
-        server_time: int = None
         ) -> dict:
         """ """
         
@@ -715,53 +714,35 @@ class ComboAuto (BasicStrategy):
         len_orders_instrument: list=  0 if not  orders_instrument_open \
             else len(orders_instrument_open)
         
-        if selected_transaction and server_time:    
+        if selected_transaction:    
 
-            ONE_SECOND = 1000
-            ONE_MINUTE = ONE_SECOND * 60
-                            
-            if strategy_params is None:
-                strategy_params: dict = self.strategy_parameters
-
-            waiting_minute_before_ordering = strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE * 3
-            
-            timestamp: int = selected_transaction["timestamp"]
-        
-            waiting_time_for_selected_transaction: bool = check_if_minimum_waiting_time_has_passed(
-                    waiting_minute_before_ordering,
-                    timestamp,
-                    server_time,
-                )
-            
-            if waiting_time_for_selected_transaction:
-
-                if len_orders_instrument == 0 \
-                    and len_orders_instrument_future_open_all <= max_order_currency:
-        
-                    basic_size = determine_opening_size(
-                        instrument_name_future, 
-                        instrument_attributes_futures, 
-                        notional,
-                        target_transaction_per_hour
-                        )
-                    
-                    label_open: str = get_label(
-                        "open", 
-                        self.strategy_label
-                        )
-                    
-                    order_allowed = True
-                    
-                    # provide placeholder for params
-                    params = {}
-                    params.update({"side": "sell"})                                                       
-                    params.update({"instrument_name": instrument_name_future})
-                    params.update({"size": basic_size})
-                    params.update({"label": label_open})
-                    params.update({"entry_price": ask_price_future})
-                            
-                    # default type: limit
-                    params.update({"type": "limit"})
+            if len_orders_instrument == 0 \
+                and len_orders_instrument_future_open_all <= max_order_currency:
+    
+                basic_size = determine_opening_size(
+                    instrument_name_future, 
+                    instrument_attributes_futures, 
+                    notional,
+                    target_transaction_per_hour
+                    )
+                
+                label_open: str = get_label(
+                    "open", 
+                    self.strategy_label
+                    )
+                
+                order_allowed = True
+                
+                # provide placeholder for params
+                params = {}
+                params.update({"side": "sell"})                                                       
+                params.update({"instrument_name": instrument_name_future})
+                params.update({"size": basic_size})
+                params.update({"label": label_open})
+                params.update({"entry_price": ask_price_future})
+                        
+                # default type: limit
+                params.update({"type": "limit"})
 
         else:
             
@@ -818,7 +799,7 @@ class ComboAuto (BasicStrategy):
         instrument_attributes_futures: list,
         take_profit_threshold_original: float,
         selected_transaction: dict,
-        server_time: int,
+        waiting_time_for_perpetual_order: bool,
         threshold_market_condition,
         strategy_params: list = None,
         ) -> dict:
@@ -1055,23 +1036,6 @@ class ComboAuto (BasicStrategy):
                             if selected_transaction_price > bid_price_perpetual:
                                 params.update({"label": selected_transaction["label"]})
                             
-                                ONE_SECOND = 1000
-                                ONE_MINUTE = ONE_SECOND * 60
-                                                
-                                if strategy_params is None:
-                                    strategy_params: dict = self.strategy_parameters
-                
-                                waiting_minute_before_ordering = strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
-                                
-                                timestamp: int = selected_transaction["timestamp"]
-                            
-                                waiting_time_for_perpetual_order: bool = check_if_minimum_waiting_time_has_passed(
-                                        waiting_minute_before_ordering,
-                                        timestamp,
-                                        server_time,
-                                    )
-                                log.debug (f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order} waiting_minute_before_ordering {waiting_minute_before_ordering}")
-                        
                                 if waiting_time_for_perpetual_order:
                                     order_allowed = True
                                     

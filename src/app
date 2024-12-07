@@ -29,7 +29,8 @@ from strategies.hedging_spot import (
     HedgingSpot,
     get_market_condition_hedging)
 from strategies.cash_carry.combo_auto import(
-    ComboAuto)
+    ComboAuto,
+    check_if_minimum_waiting_time_has_passed)
 from transaction_management.deribit.api_requests import get_tickers
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
@@ -724,6 +725,19 @@ class RunningStrategy(ModifyOrderDb):
                                                                             and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
                                                             
                                                                         for transaction in selected_transaction:
+                                                                                                                   
+                                                                            ONE_SECOND = 1000
+                                                                            ONE_MINUTE = ONE_SECOND * 60    
+                                                                                                                                  
+                                                                            waiting_minute_before_ordering = strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE 
+                                                                            
+                                                                            timestamp: int = selected_transaction["timestamp"]
+                                                                        
+                                                                            waiting_time_for_selected_transaction: bool = check_if_minimum_waiting_time_has_passed(
+                                                                                    waiting_minute_before_ordering,
+                                                                                    timestamp,
+                                                                                    server_time,
+                                                                                )
                                                                             
                                                                             instrument_name = transaction["instrument_name"]
                                                                             
@@ -739,20 +753,46 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     instrument_attributes_futures_all,
                                                                                     TP_THRESHOLD,
                                                                                     transaction,
-                                                                                    server_time,
+                                                                                    waiting_time_for_selected_transaction,
                                                                                     THRESHOLD_MARKET_CONDITIONS_COMBO
                                                                                     )
-                                                                                log.critical (f"""send_order {not send_order["order_allowed"]}""")
-                                                                                if not send_order["order_allowed"]:
+                                                                                                                                                                
+                                                                                if not send_order["order_allowed"] \
+                                                                                    and waiting_time_for_selected_transaction :
                                                                                     
-                                                                                    send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
-                                                                                        ticker_future,
-                                                                                        instrument_attributes_futures_all,
-                                                                                        notional,
-                                                                                        target_transaction_per_hour,
-                                                                                        max_order_currency
-                                                                                        )
-                                                                        
+                                                                                    for instrument_attributes_combo in instrument_attributes_combo_all:
+                                                                                        
+                                                                                        instrument_name_combo = instrument_attributes_combo["instrument_name"]
+                                                                                        
+                                                                                        instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
+                                                                                    
+                                                                                                                                                                
+                                                                                        ticker_combo= reading_from_pkl_data(
+                                                                                            "ticker",
+                                                                                            instrument_name_combo
+                                                                                            )
+                                                                                        
+                                                                                        ticker_future= reading_from_pkl_data(
+                                                                                            "ticker",
+                                                                                            instrument_name_future
+                                                                                            )
+                                                                    
+                                                                                        if ticker_future and ticker_combo:
+                                                                                            
+                                                                                            ticker_combo= ticker_combo[0]
+
+                                                                                            ticker_future= ticker_future[0]
+                                                                                    
+                                                                                            
+                                                                                            send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
+                                                                                                ticker_future,
+                                                                                                instrument_attributes_futures_all,
+                                                                                                notional,
+                                                                                                target_transaction_per_hour,
+                                                                                                max_order_currency,
+                                                                                                transaction
+                                                                                                )
+                                                                            
                                                                                 
                                                                                 break
                                                                                                                         
