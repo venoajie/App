@@ -725,6 +725,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                                 "ticker",
                                                                                 instrument_name
                                                                                 )
+                                                                            
+                                                                            log.inf(f" instrument_name {instrument_name} ticker_future {ticker_future}")
+                                                                            
                                                                                                                                                             
                                                                             send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                                             ticker_future[0],
