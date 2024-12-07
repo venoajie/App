@@ -570,8 +570,6 @@ async def clean_up_closed_transactions(
                 log.error (f"size_to_close {size_to_close}")    
                 if size_to_close != 0:
                     
-                    
-                    
                     open_label =  ([o for o in transaction_closed_under_the_same_label_int\
                         if "open" in o["label"]])
                     
@@ -594,6 +592,7 @@ async def clean_up_closed_transactions(
                             closed_transaction_size = closed_transaction["amount"]
                             closed_transaction_instrument_name = closed_transaction["instrument_name"]
                             log.debug (f"closed_transaction_instrument_name == open_transaction_instrument_name {closed_transaction_instrument_name == open_transaction_instrument_name}")  
+                            log.debug (f"closed_transaction_instrument_name {closed_transaction_instrument_name} open_transaction_instrument_name {open_transaction_instrument_name}")  
                             log.debug (f"closed_transaction_size + open_transaction_size == 0 {closed_transaction_size + open_transaction_size == 0}")  
                             log.debug (f"closed_transaction_size {closed_transaction_size} open_transaction_size {open_transaction_size}")  
                             
