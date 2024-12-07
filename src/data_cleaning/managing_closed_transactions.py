@@ -595,7 +595,9 @@ async def clean_up_closed_transactions(
                                 and closed_transaction_size + open_transaction_size == 0:
                                 
                                 transactions.append (open_transaction)
-                                transactions.append (open_transaction)
+                                transactions.append (closed_transaction)
+                                
+                                log.critical (f"transactions {transactions}")
                             
                                 await closing_one_to_one(
                                     transactions,
