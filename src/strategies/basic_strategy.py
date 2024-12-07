@@ -317,13 +317,10 @@ def get_transactions_sum(result_strategy_label) -> int:
 def get_transaction_side(transaction: dict) -> str:
     """ 
     """
-    log.error (f"transaction {transaction}")    
+
     try:
-        transaction =  transaction["direction"] 
+        return transaction["direction"] 
         
-        if not transaction:
-            return transaction["side"]
-    
     except:        
         return transaction["side"]
     
@@ -461,9 +458,6 @@ def is_label_and_side_consistent(
         if "open" in label:
             
             side = get_transaction_side(params)
-            
-            log.error (f"""side {side} label {label} hedging in label {"hedging" in label}""")
-            log.error (f"""params {params} """)
 
             if side == "sell":
                 
@@ -471,8 +465,6 @@ def is_label_and_side_consistent(
                                         or "hedging" in label\
                                             or "custom" in label) \
                                             else False
-                
-                log.error (f"""is_consistent {is_consistent} """)
 
             if side == "buy":
                 is_consistent = True \
