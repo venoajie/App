@@ -741,67 +741,26 @@ class RunningStrategy(ModifyOrderDb):
                                                                             
                                                                             instrument_name = transaction["instrument_name"]
                                                                             
-                                                                            ticker_future= reading_from_pkl_data(
+                                                                            ticker_transaction= reading_from_pkl_data(
                                                                                 "ticker",
                                                                                 instrument_name
                                                                                 )
                                                                             
-                                                                            if ticker_future:
+                                                                            if ticker_transaction:
                                                                                 
                                                                                 send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                                    ticker_future[0],
+                                                                                    ticker_transaction[0],
                                                                                     instrument_attributes_futures_all,
                                                                                     TP_THRESHOLD,
                                                                                     transaction,
                                                                                     waiting_time_for_selected_transaction,
-                                                                                    THRESHOLD_MARKET_CONDITIONS_COMBO
+                                                                                    THRESHOLD_MARKET_CONDITIONS_COMBO,
+                                                                                    random_instruments_name
                                                                                     )
-                                                                                
-                                                                                log.error (f"send_order {send_order}")
                                                                                 
                                                                                 if send_order["order_allowed"]:
                                                                                     break            
-                                                                                                                                                    
-                                                                                else:
-                                                                                
-                                                                                    if waiting_time_for_selected_transaction :
-                                                                                        
-                                                                                        for instrument_attributes_combo in instrument_attributes_combo_all:
-                                                                                            
-                                                                                            instrument_name_combo = instrument_attributes_combo["instrument_name"]
-                                                                                            
-                                                                                            instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
-                                                                                        
-                                                                                                                                                                    
-                                                                                            ticker_combo= reading_from_pkl_data(
-                                                                                                "ticker",
-                                                                                                instrument_name_combo
-                                                                                                )
-                                                                                            
-                                                                                            ticker_future= reading_from_pkl_data(
-                                                                                                "ticker",
-                                                                                                instrument_name_future
-                                                                                                )
-                                                                        
-                                                                                            if ticker_future and ticker_combo:
-                                                                                                
-                                                                                                ticker_combo= ticker_combo[0]
-
-                                                                                                ticker_future= ticker_future[0]
-                                                                                        
-                                                                                                send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
-                                                                                                    ticker_future,
-                                                                                                    instrument_attributes_futures_all,
-                                                                                                    notional,
-                                                                                                    target_transaction_per_hour,
-                                                                                                    max_order_currency,
-                                                                                                    transaction
-                                                                                                    )
-                                                                                                
-                                                                                                log.error (f"send_order {send_order}")
-                                                                                                
-                                                                                                if send_order["order_allowed"]:
-                                                                                                    break            
+                                                                                 
                                                                                                                         
                                                             if send_order:
                                                                 await self.processing_orders(

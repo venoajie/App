@@ -18,6 +18,7 @@ from strategies.basic_strategy import (
     get_label_integer,
     is_minimum_waiting_time_has_passed,
     proforma_size,
+    provide_side_to_close_transaction,
     size_rounding,
     sum_order_under_closed_label_int)
 from utilities.pickling import (
@@ -312,6 +313,37 @@ def compare_transactions_price_against_threshold(
             if current_price_future < (o["price"] - (o["price"] * tp_threshold)) \
                 and o["side"] == side]
 
+def proforma_delta(
+    delta: float,
+    selected_transaction_size: int,
+    side: str
+    )-> float: 
+    
+    selected_transaction = (abs(selected_transaction_size))
+    
+    if side == "sell":
+        selected_transaction = selected_transaction * -1
+    
+    return (delta + selected_transaction)
+                
+                
+def is_new_transaction_will_reduce_delta(
+    delta: float,
+    selected_transaction_size: int,
+    side: str
+    )-> float: 
+    
+    proforma = proforma_delta(
+        delta,
+        selected_transaction_size,
+        side
+        )
+    
+    if delta > 0:
+        return proforma < delta 
+    
+    if delta < 0:
+        return delta < proforma
 
 async def get_market_condition_future_spread(
     TA_result_data, 
@@ -680,7 +712,6 @@ class ComboAuto (BasicStrategy):
         notional: float,
         target_transaction_per_hour: int,
         max_order_currency: int,
-        selected_transaction: dict = None,
         ) -> dict:
         """ """
         
@@ -715,78 +746,47 @@ class ComboAuto (BasicStrategy):
         len_orders_instrument: list=  0 if not  orders_instrument_open \
             else len(orders_instrument_open)
         
-        if selected_transaction:    
-            
-            if len_orders_instrument == 0 \
-                and len_orders_instrument_future_open_all <= max_order_currency:
-    
-                basic_size = determine_opening_size(
-                    instrument_name_future, 
-                    instrument_attributes_futures, 
-                    notional,
-                    target_transaction_per_hour
-                    )
-                
-                label_open: str = get_label(
-                    "open", 
-                    self.strategy_label
-                    )
-                
-                order_allowed = True
-                
-                # provide placeholder for params
-                params = {}
-                params.update({"side": "sell"})                                                       
-                params.update({"instrument_name": instrument_name_future})
-                params.update({"size": basic_size})
-                params.update({"label": label_open})
-                params.update({"entry_price": ask_price_future})
-                        
-                # default type: limit
-                params.update({"type": "limit"})
-
-        else:
-            
-            if delta == 0:            
-
-                bid_price_perpetual = self.ticker_perpetual ["best_bid_price"]        
-                                
-                contango = is_contango(
-                    ask_price_future,
-                    bid_price_perpetual,
-                    )
-                log.debug (f"contango {contango}")
-                
-                if contango: 
-                            
-                    if len_orders_instrument == 0 \
-                        and len_orders_instrument_future_open_all <= max_order_currency:
-            
-                        basic_size = determine_opening_size(
-                            instrument_name_future, 
-                            instrument_attributes_futures, 
-                            notional,
-                            target_transaction_per_hour
-                            )
-                        
-                        label_open: str = get_label(
-                            "open", 
-                            self.strategy_label
-                            )
-                        
-                        order_allowed = True
-                        
-                        # provide placeholder for params
-                        params = {}
-                        params.update({"side": "sell"})                                                       
-                        params.update({"instrument_name": instrument_name_future})
-                        params.update({"size": basic_size})
-                        params.update({"label": label_open})
-                        params.update({"entry_price": ask_price_future})
-                                
-                        # default type: limit
-                        params.update({"type": "limit"})
         
+        if delta == 0:            
+
+            bid_price_perpetual = self.ticker_perpetual ["best_bid_price"]        
+                            
+            contango = is_contango(
+                ask_price_future,
+                bid_price_perpetual,
+                )
+            log.debug (f"contango {contango}")
+            
+            if contango: 
+                        
+                if len_orders_instrument == 0 \
+                    and len_orders_instrument_future_open_all <= max_order_currency:
+        
+                    basic_size = determine_opening_size(
+                        instrument_name_future, 
+                        instrument_attributes_futures, 
+                        notional,
+                        target_transaction_per_hour
+                        )
+                    
+                    label_open: str = get_label(
+                        "open", 
+                        self.strategy_label
+                        )
+                    
+                    order_allowed = True
+                    
+                    # provide placeholder for params
+                    params = {}
+                    params.update({"side": "sell"})                                                       
+                    params.update({"instrument_name": instrument_name_future})
+                    params.update({"size": basic_size})
+                    params.update({"label": label_open})
+                    params.update({"entry_price": ask_price_future})
+                            
+                    # default type: limit
+                    params.update({"type": "limit"})
+    
         return dict(
             order_allowed=order_allowed,
             order_parameters=[] if order_allowed == False else params,
@@ -802,6 +802,7 @@ class ComboAuto (BasicStrategy):
         selected_transaction: dict,
         waiting_time_for_perpetual_order: bool,
         threshold_market_condition,
+        random_instruments_name: list,
         strategy_params: list = None,
         ) -> dict:
         """ """
@@ -884,6 +885,10 @@ class ComboAuto (BasicStrategy):
             
             index_price: float = ticker_perpetual["index_price"]
                     
+            label_open: str = get_label(
+                "open", 
+                strategy_label
+                )
             #market_condition = await get_market_condition_future_spread(
             #    TA_result_data, 
             #    index_price, 
@@ -898,19 +903,114 @@ class ComboAuto (BasicStrategy):
             label_integer = get_label_integer (selected_transaction["label"])
             
             basic_size = selected_transaction["amount"]
-                
+            
             if instrument_side =="buy":
                 
                 counter_side = "sell"
                 
                 params.update({"side": counter_side})
+                    
+                new_transaction_will_reduce_delta = is_new_transaction_will_reduce_delta(
+                    delta,
+                    selected_transaction_size,
+                    counter_side
+                    )
                 
-                if "PERPETUAL" in instrument_name_transaction:
+                log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta}")
+                
+                if new_transaction_will_reduce_delta:
+                    
+                    if "PERPETUAL" in instrument_name_transaction:
+                        
+                        sum_order_under_closed_label = sum_order_under_closed_label_int (
+                        orders_instrument_perpetual_closed,
+                        label_integer
+                        )
+                        
+                        net_size = (basic_size + sum_order_under_closed_label)
+                        
+                        size_abs = abs(basic_size)
+                        
+                        size = size_abs * ensure_sign_consistency(counter_side)   
+                        
+                        closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
+                            basic_size,
+                            net_size,
+                            size
+                            )
+                        
+                        if closing_size_ok:
+                                                    
+                            if delta > 0:
+                                transaction_in_profit = bid_price_perpetual >= (selected_transaction_price)
+
+                            else:
+                                transaction_in_profit = bid_price_perpetual > selected_transaction_price + (selected_transaction_price * tp_threshold)
+
+                            log.error (f"closing_size_ok {closing_size_ok} basic_size {basic_size} net_size {net_size} size {size} transaction_in_profit {transaction_in_profit}")
+                            
+                            order_allowed = True      
+
+                            if transaction_in_profit:
+
+                                if len_orders_instrument_perpetual_closed == 0:
+                                    
+                                    params.update({"instrument_name": instrument_name_transaction})
+                                
+                                    label_integer = get_label_integer (selected_transaction["label"])
+                                    
+                                    label = f"{strategy_label}-closed-{label_integer}"
+                                
+                                    params.update({"label": label})
+                                    params.update({"entry_price": ask_price_perpetual})
+                    
+                            else:
+                                instrument_name = random_instruments_name[0]
+
+                                log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name}")
+                                
+                                ticker_instrument = reading_from_pkl_data(
+                                    "ticker",
+                                    instrument_name
+                                    )[0]
+                                
+                                params.update({"label": label_open})
+                                
+                                params.update({"entry_price": ticker_instrument["best_ask_price"]})
+                                
+                                params.update({"instrument_name": instrument_name})
+                            
+            if instrument_side =="sell":
+                
+                counter_side = "buy"
+                
+                new_transaction_will_reduce_delta = is_new_transaction_will_reduce_delta(
+                    delta,
+                    selected_transaction_size,
+                    counter_side
+                    )
+
+                log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta}")
+                    
+                if new_transaction_will_reduce_delta:
+                    
+                    params.update({"side": counter_side})
+                    
+                    instrument_current_size = sum([ o["amount"] for o in (self.my_trades_currency_strategy)\
+                        if instrument_name_transaction in o["instrument_name"]])
+                    
+                    log.error (f"instrument_current_size {instrument_current_size} orders_instrument_transaction_net {orders_instrument_transaction_net} selected_transaction_size {selected_transaction_size}")
+
+                    instrument_proforma_size  = proforma_size(
+                        instrument_current_size, 
+                        orders_instrument_transaction_net,
+                        selected_transaction_size
+                        )
                     
                     sum_order_under_closed_label = sum_order_under_closed_label_int (
-                    orders_instrument_perpetual_closed,
-                    label_integer
-                    )
+                        orders_instrument_transaction_closed,
+                        label_integer
+                        )
                     
                     net_size = (basic_size + sum_order_under_closed_label)
                     
@@ -924,132 +1024,64 @@ class ComboAuto (BasicStrategy):
                         size
                         )
                     
-                    if closing_size_ok:
-                                                
-                        if delta > 0:
-                            transaction_in_profit = bid_price_perpetual >= (selected_transaction_price)
+                    #log.error (f"closing_size_ok {closing_size_ok} instrument_proforma_size <=0 {instrument_proforma_size <=0}")
+                    #log.error (f"basic_size {basic_size} net_size {net_size} size {size} sum_order_under_closed_label {sum_order_under_closed_label}")
+                
+                    if "PERPETUAL" not in instrument_name_transaction\
+                        and instrument_proforma_size <=0\
+                            and closing_size_ok:
+                        
+                        transaction_in_profit = bid_price_future < (selected_transaction_price - selected_transaction_price * tp_threshold)
 
-                        else:
-                            transaction_in_profit = bid_price_perpetual > selected_transaction_price + (selected_transaction_price * tp_threshold)
-
-                        log.error (f"closing_size_ok {closing_size_ok} basic_size {basic_size} net_size {net_size} size {size} transaction_in_profit {transaction_in_profit}")
-
+                        log.error (f"transaction_in_profit {transaction_in_profit} len_orders_instrument {len_orders_instrument_transaction_closed} bid_price_future {bid_price_future} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
+                        
                         if transaction_in_profit:
 
-                            if len_orders_instrument_perpetual_closed == 0:
+                            if len_orders_instrument_transaction_closed == 0:
                                 
                                 order_allowed = True      
 
                                 params.update({"instrument_name": instrument_name_transaction})
                             
-                                label_integer = get_label_integer (selected_transaction["label"])
-                                
                                 label = f"{strategy_label}-closed-{label_integer}"
                             
                                 params.update({"label": label})
-                                params.update({"entry_price": ask_price_perpetual})
+                                params.update({"entry_price": bid_price_future})
                 
+                        # using perpetual to balancing delta    
                         else:
-
-                            pass
-                            
-            if instrument_side =="sell":
-                
-                counter_side = "buy"
-                
-                params.update({"side": counter_side})
-                
-                instrument_current_size = sum([ o["amount"] for o in (self.my_trades_currency_strategy)\
-                    if instrument_name_transaction in o["instrument_name"]])
-                
-                log.error (f"instrument_current_size {instrument_current_size} orders_instrument_transaction_net {orders_instrument_transaction_net} selected_transaction_size {selected_transaction_size}")
-
-                instrument_proforma_size  = proforma_size(
-                    instrument_current_size, 
-                    orders_instrument_transaction_net,
-                    selected_transaction_size
-                    )
-                
-                sum_order_under_closed_label = sum_order_under_closed_label_int (
-                    orders_instrument_transaction_closed,
-                    label_integer
-                    )
-                
-                net_size = (basic_size + sum_order_under_closed_label)
-                
-                size_abs = abs(basic_size)
-                
-                size = size_abs * ensure_sign_consistency(counter_side)   
-                
-                closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
-                    basic_size,
-                    net_size,
-                    size
-                    )
-                
-                #log.error (f"closing_size_ok {closing_size_ok} instrument_proforma_size <=0 {instrument_proforma_size <=0}")
-                #log.error (f"basic_size {basic_size} net_size {net_size} size {size} sum_order_under_closed_label {sum_order_under_closed_label}")
             
-                if "PERPETUAL" not in instrument_name_transaction\
-                    and instrument_proforma_size <=0\
-                        and closing_size_ok:
+                            sum_orders_instrument_perpetual_open = 0 if orders_instrument_perpetual_open == []\
+                                else sum([o["amount"] for o in orders_instrument_perpetual_open])
+                                
+                            log.debug (f"sum_orders_instrument_perpetual_open {sum_orders_instrument_perpetual_open} ")
+                            log.error (f"selected_transaction_price <= bid_price_perpetual {selected_transaction_price <= bid_price_perpetual} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}")
+                                
+                            if sum_orders_instrument_perpetual_open < abs(delta)  and delta <=0 :
                     
-                    transaction_in_profit = bid_price_future < (selected_transaction_price - selected_transaction_price * tp_threshold)
-
-                    log.error (f"transaction_in_profit {transaction_in_profit} len_orders_instrument {len_orders_instrument_transaction_closed} bid_price_future {bid_price_future} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
-                    
-                    if transaction_in_profit:
-
-                        if len_orders_instrument_transaction_closed == 0:
+                                # opening new perpetual
+                                if selected_transaction_price <= bid_price_perpetual:
+                                    params.update({"label": label_open})
                             
-                            order_allowed = True      
-
-                            params.update({"instrument_name": instrument_name_transaction})
-                        
-                            label = f"{strategy_label}-closed-{label_integer}"
-                        
-                            params.update({"label": label})
-                            params.update({"entry_price": bid_price_future})
-            
-                    # using perpetual to balancing delta    
-                    else:
-        
-                        sum_orders_instrument_perpetual_open = 0 if orders_instrument_perpetual_open == []\
-                            else sum([o["amount"] for o in orders_instrument_perpetual_open])
-                            
-                        log.debug (f"sum_orders_instrument_perpetual_open {sum_orders_instrument_perpetual_open} ")
-                        log.error (f"selected_transaction_price <= bid_price_perpetual {selected_transaction_price <= bid_price_perpetual} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}")
-                            
-                        if sum_orders_instrument_perpetual_open < abs(delta)  and delta <=0 :
-                        
-                            label_open: str = get_label(
-                                "open", 
-                                strategy_label
-                                )
-                
-                            # opening new perpetual
-                            if selected_transaction_price <= bid_price_perpetual:
-                                params.update({"label": label_open})
-                        
-                                order_allowed = True
-            
-                            # pairing with perpetuak    
-                            if selected_transaction_price > bid_price_perpetual:
-                                params.update({"label": selected_transaction["label"]})
-                            
-                                if waiting_time_for_perpetual_order:
                                     order_allowed = True
-                                    
-                            params.update({"instrument_name": instrument_name_perpetual})
+                
+                                # pairing with perpetuak    
+                                if selected_transaction_price > bid_price_perpetual:
+                                    params.update({"label": selected_transaction["label"]})
+                                
+                                    if waiting_time_for_perpetual_order:
+                                        order_allowed = True
+                                        
+                                params.update({"instrument_name": instrument_name_perpetual})
+                                
+                                params.update({"entry_price": bid_price_perpetual})
+                                                    
+                                orders_instrument: list=  [o for o in orders_instrument_perpetual_open 
+                                                            if instrument_name_perpetual in o["instrument_name"]]
+                                
+                                len_orders_instrument: list=  0 if not  orders_instrument \
+                                    else len(orders_instrument)
                             
-                            params.update({"entry_price": bid_price_perpetual})
-                                                
-                            orders_instrument: list=  [o for o in orders_instrument_perpetual_open 
-                                                        if instrument_name_perpetual in o["instrument_name"]]
-                            
-                            len_orders_instrument: list=  0 if not  orders_instrument \
-                                else len(orders_instrument)
-                        
         
         return dict(
             order_allowed=order_allowed,
