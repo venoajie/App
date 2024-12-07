@@ -624,7 +624,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     # get labels from active trades
                                                     labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
                         
-                                                    max_order_currency = 3
+                                                    max_order_currency = 2
                                                     
                                                     random_instruments_name = random.sample(([o for o in instruments_name\
                                                                                                 if "-FS-" not in o and currency_upper in o]),
