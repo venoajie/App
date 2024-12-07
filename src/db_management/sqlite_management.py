@@ -236,6 +236,7 @@ async def deleting_row(
     if "LIKE" in operator:
         filter_val = (f"""' %{filter_value}%' """,)
 
+    log.critical (f"deleting_row {query_table} {error}")
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
             if filter == None:
@@ -244,7 +245,7 @@ async def deleting_row(
                 await db.execute(query_table, filter_val)
 
     except Exception as error:
-        log.error (f"deleting_row {query_table} {error}")
+        log.critical (f"deleting_row {query_table} {error}")
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 

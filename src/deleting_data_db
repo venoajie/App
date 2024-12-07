@@ -44,12 +44,17 @@ async def updating_db_with_new_data(
         my_trades_instrument_name = [o["instrument_name"] for o in my_trades_currency\
             if "PERPE" not in o["instrument_name"]]
         
+        log.error (f"my_trades_instrument_name {my_trades_instrument_name}")
+        
         for instrument_name in my_trades_instrument_name:
+            
             
             datas = [o for o in my_trades_currency\
                 if instrument_name in o["instrument_name"]]
-            
+                        
             for data in datas:
+                
+                log.debug (f"datas {data}")
                 
                 label = data ["label"]
                 
