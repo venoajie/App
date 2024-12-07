@@ -716,7 +716,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         and size_perpetuals_reconciled\
                                                                             and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
                                                             
-                                                                        log.critical (f"selected_transaction {selected_transaction}")
+                                                                        log.debug (f"selected_transaction {selected_transaction}")
                                                                           
                                                                         for transaction in selected_transaction:
                                                                             instrument_name = transaction["instrument_name"]
