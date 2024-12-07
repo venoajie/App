@@ -573,7 +573,7 @@ async def clean_up_closed_transactions(
                     open_label =  ([o for o in transaction_closed_under_the_same_label_int\
                         if "open" in o["label"]])
                     
-                    transaction = []
+                    transactions = []
                     for open_transaction in open_label:
                         
                         open_transaction_size = open_transaction["amount"]
@@ -590,14 +590,15 @@ async def clean_up_closed_transactions(
                             closed_transaction_size = closed_transaction["amount"]
                             
                             if closed_transaction_size + open_transaction_size == 0:
-                                transaction.append (open_transaction)
-                                transaction.append (open_transaction)
+                                transactions.append (open_transaction)
+                                transactions.append (open_transaction)
                             
                                 await closing_one_to_one(
-                                    instrument_transactions,
+                                    transactions,
                                     where_filter,
                                     trade_table
                                     )
+                                
                                 break
                     
                                         
