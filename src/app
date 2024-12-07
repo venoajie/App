@@ -725,19 +725,18 @@ class RunningStrategy(ModifyOrderDb):
                                                                                 instrument_name
                                                                                 )
                                                                             
-                                                                            log.info(f" instrument_name {instrument_name} ticker_future {ticker_future}")
-                                                                            
-                                                                                                                                                            
-                                                                            send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                            ticker_future[0],
-                                                                            instrument_attributes_futures_all,
-                                                                            TP_THRESHOLD,
-                                                                            transaction,
-                                                                            server_time,
-                                                                            THRESHOLD_MARKET_CONDITIONS_COMBO
-                                                                            )
-                                                                            
-                                                                            break
+                                                                            if ticker_future:
+                                                                                
+                                                                                send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                                                    ticker_future[0],
+                                                                                    instrument_attributes_futures_all,
+                                                                                    TP_THRESHOLD,
+                                                                                    transaction,
+                                                                                    server_time,
+                                                                                    THRESHOLD_MARKET_CONDITIONS_COMBO
+                                                                                    )
+                                                                                
+                                                                                break
                                                                                                                         
                                                             if send_order:
                                                                 await self.processing_orders(
