@@ -16,6 +16,9 @@ from db_management.sqlite_management import (
 from utilities.system_tools import (
     async_raise_error_message,)
 
+from utilities.string_modification import (
+    remove_redundant_elements)
+
 from strategies.basic_strategy import (
     get_label_integer,)
 
@@ -41,8 +44,8 @@ async def updating_db_with_new_data(
                                                     column_trade)
 
 
-        my_trades_instrument_name = [o["instrument_name"] for o in my_trades_currency\
-            if "PERPE" not in o["instrument_name"]]
+        my_trades_instrument_name =  remove_redundant_elements([o["instrument_name"] for o in my_trades_currency\
+            if "PERPE" not in o["instrument_name"]])
         
         log.error (f"my_trades_instrument_name {my_trades_instrument_name}")
         

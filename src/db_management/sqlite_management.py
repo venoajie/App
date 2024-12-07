@@ -236,7 +236,7 @@ async def deleting_row(
     if "LIKE" in operator:
         filter_val = (f"""' %{filter_value}%' """,)
 
-    log.critical (f"deleting_row {query_table} {error}")
+    log.critical (f"deleting_row {query_table}")
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
             if filter == None:
