@@ -741,7 +741,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     timestamp,
                                                                                     server_time,
                                                                                 )
-                                                                            
+                                                                            log.warning (f"waiting_time_for_selected_transaction {waiting_time_for_selected_transaction} waiting_minute_before_ordering {waiting_minute_before_ordering}")
                                                                             instrument_name = transaction["instrument_name"]
                                                                             
                                                                             ticker_transaction= reading_from_pkl_data(
