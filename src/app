@@ -706,6 +706,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                             #! closing unpaired transactions                                                            
                                                             else:
+                                                                
                                                                 log.debug (f"selected_transaction {selected_transaction}" )
                                                                 if len_selected_transaction == 1 \
                                                                     and "closed" not in label:
@@ -716,8 +717,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                         and size_perpetuals_reconciled\
                                                                             and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
                                                             
-                                                                        log.debug (f"selected_transaction {selected_transaction}")
-                                                                          
                                                                         for transaction in selected_transaction:
                                                                             instrument_name = transaction["instrument_name"]
                                                                             
@@ -726,7 +725,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                 instrument_name
                                                                                 )
                                                                             
-                                                                            log.inf(f" instrument_name {instrument_name} ticker_future {ticker_future}")
+                                                                            log.info(f" instrument_name {instrument_name} ticker_future {ticker_future}")
                                                                             
                                                                                                                                                             
                                                                             send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
