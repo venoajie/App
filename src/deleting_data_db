@@ -9,16 +9,19 @@ from loguru import logger as log
 
 # user defined formula
 from db_management.sqlite_management import (
+    deleting_row,
+    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
+    insert_tables,
     update_status_data,)
 from utilities.system_tools import (
     async_raise_error_message,)
 
+from strategies.basic_strategy import (
+    get_label_integer,)
+
+
 async def updating_db_with_new_data(
     trade_db_table: str,
-    archive_db_table: str,
-    trade_id: str,
-    filter: str,
-    new_label: str 
     ) -> None:
     """
     
@@ -26,26 +29,47 @@ async def updating_db_with_new_data(
     """
                 
     try:
+
+        currency = "BTC"
     
-        await update_status_data(
-        trade_db_table,
-        "label",
-        filter,
-        trade_id,
-        new_label,
-        "="
-        )
-    
-    
-        where_filter = f"order_id"
+        column_trade: str= "instrument_name","label", "amount", "price","side","timestamp","trade_id"
         
-        await deleting_row (
-            "orders_all_json",
-            "databases/trading.sqlite3",
-            where_filter,
-            "=",
-            open_order_id,
-        )
+        my_trades_currency: list= await get_query(trade_db_table, 
+                                                    currency, 
+                                                    "all", 
+                                                    "all", 
+                                                    column_trade)
+
+
+        my_trades_instrument_name = [o["instrument_name"] for o in my_trades_currency\
+            if "PERPE" not in o["instrument_name"]]
+        
+        for instrument_name in my_trades_instrument_name:
+            
+            datas = [o for o in my_trades_currency\
+                if instrument_name in o["instrument_name"]]
+            
+            for data in datas:
+                
+                label = data ["label"]
+                
+                label_integer: int = get_label_integer (label) 
+                    
+                where_filter = f"label"
+                
+                await insert_tables(
+                    "my_trades_closed_json", 
+                    data
+                    )
+
+                await deleting_row (
+                    "my_trades_all_json",
+                    "databases/trading.sqlite3",
+                    where_filter,
+                    "LIKE",
+                    label_integer,
+                )
+                
     except Exception as error:
         await async_raise_error_message(error)
         
@@ -54,23 +78,7 @@ async def updating_db_with_new_data(
 if __name__ == '__main__':
 
     trade_db_table= "my_trades_all_json"
-    
-    order_db_table= "orders_all_json"
-    
-    currency_lower = "btc"
-    
-    archive_db_table = f"my_trades_all_{currency_lower}_json"      
-    
-    filter = "trade_id"
-    
-    trade_id = "330882029"
-    
-    new_label = "futureSpread-open-1733120308427"
-                  
+           
     asyncio.run(updating_db_with_new_data(
     trade_db_table,
-    archive_db_table,
-    trade_id,
-    filter,
-    new_label 
     ))

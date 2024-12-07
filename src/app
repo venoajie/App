@@ -640,7 +640,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         selected_transaction_amount = ([o["amount"] for o in selected_transaction])
                                                         sum_selected_transaction = sum(selected_transaction_amount)
                                                         len_selected_transaction = len(selected_transaction_amount)
-                                                         
+                                                        
                                                         #! closing combo auto trading
                                                         if "Auto" in label:
                                                             
