@@ -731,7 +731,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                                                                   
                                                                             waiting_minute_before_ordering = strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE 
                                                                             
-                                                                            timestamp: int = selected_transaction["timestamp"]
+                                                                            timestamp: int = transaction["timestamp"]
                                                                         
                                                                             waiting_time_for_selected_transaction: bool = check_if_minimum_waiting_time_has_passed(
                                                                                     waiting_minute_before_ordering,
