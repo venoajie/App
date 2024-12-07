@@ -567,8 +567,10 @@ async def clean_up_closed_transactions(
                                 where_filter,
                                 trade_table
                                 )
-                    
+                log.error (f"size_to_close {size_to_close}")    
                 if size_to_close != 0:
+                    
+                    log.error (f"transaction_closed_under_the_same_label_int {transaction_closed_under_the_same_label_int}")  
                     
                     open_label =  ([o for o in transaction_closed_under_the_same_label_int\
                         if "open" in o["label"]])
@@ -583,8 +585,6 @@ async def clean_up_closed_transactions(
                         o for o in transaction_closed_under_the_same_label_int\
                             if "closed" in o["label"] \
                                 and abs(o["amount"]) == open_transaction_size]
-                        
-                        
                         
                         for closed_transaction in closed_transaction_with_same_size_as_open_label:
                             
