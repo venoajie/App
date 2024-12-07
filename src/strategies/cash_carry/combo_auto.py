@@ -700,7 +700,8 @@ class ComboAuto (BasicStrategy):
                             
         orders_instrument_future_open_all: list=  [o for o in orders_currency 
                                             if "PERPETUAL" not in o["instrument_name"]\
-                                                and "open" in o["label"]]
+                                                and "-FS-" not in o["instrument_name"]\
+                                                    and "open" in o["label"]]
                             
         len_orders_instrument_future_open_all = 0 if orders_instrument_future_open_all == []\
             else len(orders_instrument_future_open_all)
