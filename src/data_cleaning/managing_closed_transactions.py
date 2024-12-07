@@ -567,7 +567,7 @@ async def clean_up_closed_transactions(
                                 where_filter,
                                 trade_table
                                 )
-                log.error (f"size_to_close {size_to_close}")    
+
                 if size_to_close != 0:
                     
                     open_label =  ([o for o in transaction_closed_under_the_same_label_int\
@@ -575,7 +575,6 @@ async def clean_up_closed_transactions(
                     
                     transactions = []
                     for open_transaction in open_label:
-                        log.error (f"open_transaction {open_transaction}")  
                         
                         open_transaction_size = open_transaction["amount"]
                         open_transaction_instrument_name = open_transaction["instrument_name"]
@@ -583,19 +582,12 @@ async def clean_up_closed_transactions(
                         closed_transaction_with_same_size_as_open_label = [
                         o for o in transaction_closed_under_the_same_label_int\
                             if "closed" in o["label"] \
-                                and abs(o["amount"]) == open_transaction_size]
+                                and abs(o["amount"]) == abs(open_transaction_size)]
                         
-                        log.critical (f"closed_transaction_with_same_size_as_open_label {closed_transaction_with_same_size_as_open_label}")
                         for closed_transaction in closed_transaction_with_same_size_as_open_label:
-                            
-                            log.debug (f"closed_transaction {closed_transaction}")  
-                            
+                                                        
                             closed_transaction_size = closed_transaction["amount"]
                             closed_transaction_instrument_name = closed_transaction["instrument_name"]
-                            log.debug (f"closed_transaction_instrument_name == open_transaction_instrument_name {closed_transaction_instrument_name == open_transaction_instrument_name}")  
-                            log.debug (f"closed_transaction_instrument_name {closed_transaction_instrument_name} open_transaction_instrument_name {open_transaction_instrument_name}")  
-                            log.debug (f"closed_transaction_size + open_transaction_size == 0 {closed_transaction_size + open_transaction_size == 0}")  
-                            log.debug (f"closed_transaction_size {closed_transaction_size} open_transaction_size {open_transaction_size}")  
                             
                             if closed_transaction_instrument_name == open_transaction_instrument_name\
                                 and closed_transaction_size + open_transaction_size == 0:
