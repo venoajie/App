@@ -588,6 +588,10 @@ async def clean_up_closed_transactions(
                             
                             if closed_transaction_size + open_transaction_size == 0:
                                 
+                                log.debug (open_transaction)
+                                log.debug (closed_transaction)
+                                
                                 log.critical ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                                break
                     
                                         
