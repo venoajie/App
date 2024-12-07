@@ -590,10 +590,14 @@ async def clean_up_closed_transactions(
                             
                             if closed_transaction_size + open_transaction_size == 0:
                                 
-                                log.debug (open_transaction)
-                                log.debug (closed_transaction)
-                                
-                                log.critical ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                                instrument_transactions = open_transaction + closed_transaction
+                                log.info(F" instrument_transactions {instrument_transactions}")
+                            
+                                #await closing_one_to_one(
+                                #    instrument_transactions,
+                                #    where_filter,
+                                #    trade_table
+                                #    )
                                 break
                     
                                         
