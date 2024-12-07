@@ -716,11 +716,7 @@ class ComboAuto (BasicStrategy):
             else len(orders_instrument_open)
         
         if selected_transaction:    
-            log.error (f"selected_transaction {selected_transaction}")
-            log.error (f"len_orders_instrument == 0 {len_orders_instrument == 0}")
-            log.error (f"len_orders_instrument_future_open_all <= max_order_currency {len_orders_instrument_future_open_all <= max_order_currency}")
-            log.error (f"len_orders_instrument_future_open_all {len_orders_instrument_future_open_all} max_order_currency {max_order_currency}")
-
+            
             if len_orders_instrument == 0 \
                 and len_orders_instrument_future_open_all <= max_order_currency:
     
@@ -790,7 +786,6 @@ class ComboAuto (BasicStrategy):
                                 
                         # default type: limit
                         params.update({"type": "limit"})
-        log.error (f"order_parameters {params}")
         
         return dict(
             order_allowed=order_allowed,
