@@ -763,6 +763,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     break            
                                                                                                                                                     
                                                                                 else:
+                                                                                
                                                                                     if waiting_time_for_selected_transaction :
                                                                                         
                                                                                         for instrument_attributes_combo in instrument_attributes_combo_all:
@@ -788,7 +789,6 @@ class RunningStrategy(ModifyOrderDb):
 
                                                                                                 ticker_future= ticker_future[0]
                                                                                         
-                                                                                                
                                                                                                 send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
                                                                                                     ticker_future,
                                                                                                     instrument_attributes_futures_all,
