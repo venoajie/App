@@ -718,6 +718,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                             and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
                                                             
                                                                         for transaction in selected_transaction:
+                                                                            
                                                                             instrument_name = transaction["instrument_name"]
                                                                             
                                                                             ticker_future= reading_from_pkl_data(
@@ -735,6 +736,17 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     server_time,
                                                                                     THRESHOLD_MARKET_CONDITIONS_COMBO
                                                                                     )
+                                                                                
+                                                                                if not send_order:
+                                                                                    
+                                                                                    send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
+                                                                                        ticker_future,
+                                                                                        instrument_attributes_futures_all,
+                                                                                        notional,
+                                                                                        target_transaction_per_hour,
+                                                                                        max_order_currency
+                                                                                        )
+                                                                        
                                                                                 
                                                                                 break
                                                                                                                         
