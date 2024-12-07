@@ -697,7 +697,7 @@ class ComboAuto (BasicStrategy):
                 ask_price_future,
                 bid_price_perpetual,
                 )
-            
+            log.debug (f"contango {contango}")
             if contango: 
                 
                     instrument_name_future = ticker_future["instrument_name"]       
