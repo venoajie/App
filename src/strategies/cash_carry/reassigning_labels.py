@@ -71,7 +71,8 @@ def get_single_transaction(
     
     my_trades_currency_strategy = [o for o in my_trades_currency_active_with_no_blanks \
         if strategy in o["label"]\
-                and "closed" not in o["label"]]
+                and "closed" not in o["label"]\
+                    and  "Auto" not in o["label"]]
     
     if my_trades_currency_strategy:
         
@@ -91,8 +92,7 @@ def get_single_transaction(
             
             transaction_under_label_integer_len = len(transaction_under_label_integer)
             log.info (f" sum_transaction_under_label_integer {sum_transaction_under_label_integer} transaction_under_label_integer_len {transaction_under_label_integer_len}")
-            if sum_transaction_under_label_integer == 0\
-                and transaction_under_label_integer_len == 1:
+            if transaction_under_label_integer_len == 1:
                 
                 result.append (transaction_under_label_integer[0])
                 
