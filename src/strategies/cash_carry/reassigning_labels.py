@@ -90,7 +90,7 @@ def get_single_transaction(
             sum_transaction_under_label_integer = sum([o["amount"] for o in transaction_under_label_integer])
             
             transaction_under_label_integer_len = len(transaction_under_label_integer)
-            
+            log.info (f" sum_transaction_under_label_integer {sum_transaction_under_label_integer} transaction_under_label_integer_len {transaction_under_label_integer_len}")
             if sum_transaction_under_label_integer == 0\
                 and transaction_under_label_integer_len == 1:
                 
