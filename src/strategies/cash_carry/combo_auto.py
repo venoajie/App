@@ -756,7 +756,7 @@ class ComboAuto (BasicStrategy):
                 ask_price_future,
                 bid_price_perpetual,
                 )
-            log.debug (f"contango {contango}")
+            log.debug (f"contango {contango} len_orders_instrument_future_open_all {len_orders_instrument_future_open_all}")
             
             if contango: 
                         
