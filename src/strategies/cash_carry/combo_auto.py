@@ -761,7 +761,7 @@ class ComboAuto (BasicStrategy):
             if contango: 
                         
                 if len_orders_instrument == 0 \
-                    and len_orders_instrument_future_open_all <= max_order_currency:
+                    and len_orders_instrument_future_open_all < max_order_currency:
         
                     basic_size = determine_opening_size(
                         instrument_name_future, 
