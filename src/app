@@ -557,7 +557,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                             notional: float = compute_notional_value(index_price, equity)
                                             
-                                            log.warning (f"notional {notional} total_equity_usd {portfolio["total_equity_usd"]} notional {notional}")
+                                            log.warning (f"notional {notional} total_equity_usd {portfolio["total_equity_usd"]} equity {equity} index_price {index_price}")
                                             log.debug (f"portfolio {portfolio}")
                                             
                                             await  asyncio.sleep(150)
