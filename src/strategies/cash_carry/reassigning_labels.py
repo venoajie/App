@@ -316,14 +316,14 @@ async def pairing_single_label(
 
                     perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]  
 
-                    paired_success = waiting_time_has_expired(
+                    waiting_time_expired = waiting_time_has_expired(
                         strategy_params,
                         future_trade,
                         perpetual_trade,
                         server_time
                         )
                                                                             
-                    if paired_success:
+                    if waiting_time_expired:
 
                         side_perpetual = perpetual_trade["side"]
                         side_future = future_trade["side"]
