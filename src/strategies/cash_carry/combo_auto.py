@@ -1000,7 +1000,7 @@ class ComboAuto (BasicStrategy):
                     counter_side
                     )
 
-                log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta}")
+                log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta} instrument_proforma_size {instrument_proforma_size}")
                     
                 if new_transaction_will_reduce_delta:
                     
