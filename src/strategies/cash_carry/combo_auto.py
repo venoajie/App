@@ -1027,6 +1027,26 @@ class ComboAuto (BasicStrategy):
                         )
                     
                     #log.error (f"basic_size {basic_size} net_size {net_size} size {size} sum_order_under_closed_label {sum_order_under_closed_label}")
+                    
+                    if "PERPETUAL" in instrument_name_transaction\
+                        and closing_size_ok:
+                        
+                        transaction_in_profit = ask_price_perpetual < (selected_transaction_price - (selected_transaction_price * tp_threshold))
+
+                        log.error (f"transaction_in_profit {transaction_in_profit} bid_price_perpetual {bid_price_perpetual} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
+                    
+                        if transaction_in_profit:
+
+                            if len_orders_instrument_perpetual_closed == 0:
+                                
+                                order_allowed = True      
+
+                                params.update({"instrument_name": instrument_name_transaction})
+                            
+                                label = f"{strategy_label}-closed-{label_integer}"
+                            
+                                params.update({"label": label})
+                                params.update({"entry_price": bid_price_perpetual})
                 
                     if "PERPETUAL" not in instrument_name_transaction\
                         and closing_size_ok:
@@ -1084,26 +1104,6 @@ class ComboAuto (BasicStrategy):
                                 
                                 len_orders_instrument: list=  0 if not  orders_instrument \
                                     else len(orders_instrument)
-                    
-                    if "PERPETUAL" in instrument_name_transaction\
-                        and closing_size_ok:
-                        
-                        transaction_in_profit = ask_price_perpetual < (selected_transaction_price - (selected_transaction_price * tp_threshold))
-
-                        log.error (f"transaction_in_profit {transaction_in_profit} bid_price_perpetual {bid_price_perpetual} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
-                    
-                        if transaction_in_profit:
-
-                            if len_orders_instrument_perpetual_closed == 0:
-                                
-                                order_allowed = True      
-
-                                params.update({"instrument_name": instrument_name_transaction})
-                            
-                                label = f"{strategy_label}-closed-{label_integer}"
-                            
-                                params.update({"label": label})
-                                params.update({"entry_price": bid_price_perpetual})
                 
         return dict(
             order_allowed=order_allowed,
