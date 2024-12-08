@@ -97,8 +97,8 @@ def get_redundant_ids(
         
         result = []        
         for label in my_trades_label:
-            len_label = [o["label"] for o in my_trades_currency_strategy\
-                                                if label in o["label"]]
+            len_label = len([o["label"] for o in my_trades_currency_strategy\
+                                                if label in o["label"]])
             if len_label >1:
                 result.append (label)
                 
