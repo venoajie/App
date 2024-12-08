@@ -216,16 +216,15 @@ async def relabelling_double_ids(
                 
                 my_trade_instrument_name = ([o for o in my_trades_currency_strategy\
                     if instrument_name in o["instrument_name"]])
-                
-                            
+                        
                 redundant_ids = get_redundant_ids(
                     my_trade_instrument_name,
                     strategy,)
                 
-                log.error (f"redundant_ids {redundant_ids}")
-    
                 if redundant_ids:
                     
+                    log.error (f"redundant_ids {redundant_ids}")
+        
                     for label in redundant_ids:
                         log.error (f"label {label}")
                         
