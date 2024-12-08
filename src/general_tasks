@@ -606,7 +606,6 @@ async def reconciling_size(
                         my_trades_currency_active_free_blanks,
                         )
                     
-                
                     if  relabelling:
                         
                         log.error (f"relabelling {relabelling}")
