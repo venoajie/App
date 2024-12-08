@@ -478,6 +478,8 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     equity: float = portfolio[0]["equity"]    
                                     
+                                    log.debug (f"portfolio {portfolio}")
+                                    
                                     ticker_perpetual_instrument_name = [o for o in ticker_perpetual \
                                         if instrument_name_perpetual == o["instrument_name"]][0]                                   
                                                                                         
