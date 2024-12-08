@@ -865,8 +865,8 @@ class ComboAuto (BasicStrategy):
             len_orders_instrument_transaction_closed: list=  0 if not  orders_instrument_transaction_closed \
                 else len(orders_instrument_transaction_closed)
         
-            len_orders_instrument_perpetual_closed: list=  0 if not  orders_instrument_perpetual_closed \
-                else len(orders_instrument_perpetual_closed)
+            len_orders_instrument_perpetual_open: list=  0 if not  orders_instrument_transaction_open \
+                else len(orders_instrument_transaction_open)
         
             tp_threshold = modified_tp_threshold(
                 instrument_attributes_futures,
@@ -904,6 +904,8 @@ class ComboAuto (BasicStrategy):
             label_integer = get_label_integer (selected_transaction["label"])
             
             basic_size = selected_transaction["amount"]
+            
+            log.warning (f"len_orders_instrument {len_orders_instrument_transaction_closed} len_orders_instrument_perpetual_open {len_orders_instrument_perpetual_open}")
             
             if instrument_side =="buy":
                 
@@ -954,7 +956,7 @@ class ComboAuto (BasicStrategy):
 
                             if transaction_in_profit:
 
-                                if len_orders_instrument_perpetual_closed == 0:
+                                if orders_instrument_transaction_closed == 0:
                                     
                                     params.update({"instrument_name": instrument_name_transaction})
                                 
@@ -967,20 +969,22 @@ class ComboAuto (BasicStrategy):
                     
                             else:
                                 
-                                instrument_name = random_instruments_name[0]
+                                if len_orders_instrument_perpetual_open == 0:
+                                    
+                                    instrument_name = random_instruments_name[0]
 
-                                log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name}")
-                                
-                                ticker_instrument = reading_from_pkl_data(
-                                    "ticker",
-                                    instrument_name
-                                    )[0]
-                                
-                                params.update({"label": label_open})
-                                
-                                params.update({"entry_price": ticker_instrument["best_ask_price"]})
-                                
-                                params.update({"instrument_name": instrument_name})
+                                    log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name}")
+                                    
+                                    ticker_instrument = reading_from_pkl_data(
+                                        "ticker",
+                                        instrument_name
+                                        )[0]
+                                    
+                                    params.update({"label": label_open})
+                                    
+                                    params.update({"entry_price": ticker_instrument["best_ask_price"]})
+                                    
+                                    params.update({"instrument_name": instrument_name})
                             
             if instrument_side =="sell":
                 
@@ -1035,7 +1039,7 @@ class ComboAuto (BasicStrategy):
                         
                         transaction_in_profit = bid_price_future < (selected_transaction_price - selected_transaction_price * tp_threshold)
 
-                        log.error (f"transaction_in_profit {transaction_in_profit} len_orders_instrument {len_orders_instrument_transaction_closed} bid_price_future {bid_price_future} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
+                        log.error (f"transaction_in_profit {transaction_in_profit} bid_price_future {bid_price_future} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
                         
                         if transaction_in_profit:
 
@@ -1060,7 +1064,9 @@ class ComboAuto (BasicStrategy):
                             log.error (f"selected_transaction_price <= bid_price_perpetual {selected_transaction_price <= bid_price_perpetual} ")
                             log.warning (f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}")
                                 
-                            if sum_orders_instrument_perpetual_open < abs(delta)  and delta <=0 :
+                            if len_orders_instrument_perpetual_open == 0\
+                                and sum_orders_instrument_perpetual_open < abs(delta)  \
+                                    and delta <=0 :
                     
                                 # opening new perpetual
                                 if selected_transaction_price <= bid_price_perpetual:
