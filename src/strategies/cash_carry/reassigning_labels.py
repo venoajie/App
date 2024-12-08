@@ -91,7 +91,7 @@ def get_single_transaction(
             sum_transaction_under_label_integer = sum([o["amount"] for o in transaction_under_label_integer])
             
             transaction_under_label_integer_len = len(transaction_under_label_integer)
-            log.info (f" sum_transaction_under_label_integer {sum_transaction_under_label_integer} transaction_under_label_integer_len {transaction_under_label_integer_len}")
+            log.info (f" {transaction_under_label_integer} sum_transaction_under_label_integer {sum_transaction_under_label_integer} transaction_under_label_integer_len {transaction_under_label_integer_len}")
             if transaction_under_label_integer_len == 1:
                 
                 result.append (transaction_under_label_integer[0])
@@ -195,7 +195,7 @@ async def pairing_single_label(
                         server_time
                         )
                     
-                    log.warning (f"waiting_time_has_expired {waiting_time_has_expired}")
+                    log.warning (f"waiting_time_has_expired {paired_success}")
                                                                             
                     if paired_success:
 
