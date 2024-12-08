@@ -1094,7 +1094,12 @@ class ComboAuto (BasicStrategy):
                                 
                                 len_orders_instrument: list=  0 if not  orders_instrument \
                                     else len(orders_instrument)
-            
+                    
+                    
+                    log.error ({instrument_name_transaction})
+                    log.error (f" instrument_proforma_size <=0 {instrument_proforma_size <=0} closing_size_ok {closing_size_ok}")
+                    log.error ("PERPETUAL" in instrument_name_transaction)
+                    
                     if "PERPETUAL" in instrument_name_transaction\
                         and instrument_proforma_size <=0\
                             and closing_size_ok:
