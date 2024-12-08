@@ -338,7 +338,9 @@ class RunningStrategy(ModifyOrderDb):
                 # get tradable currencies
                 currencies= [o["spot"] for o in tradable_config_app] [0]
                 
-                mode_full = [o["mode_full"] for o in tradable_config_app] [0][0]
+                #mode_full = [o["mode_full"] for o in tradable_config_app] [0][0]
+
+                #mode_full = [o["mode_full"] for o in tradable_config_app] [0][0]
                 
                 strategy_attributes = config_app["strategies"]
                                             
@@ -624,6 +626,8 @@ class RunningStrategy(ModifyOrderDb):
                                                         if o["strategy_label"] == strategy][0]   
                                                                                                  
                                                     target_transaction_per_hour = 1/10
+                                                    
+                                                    reduce_only = strategy_params["reduce_only"]
                                                             
                                                     combo_auto = ComboAuto(
                                                         strategy,
@@ -824,7 +828,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                 instrument_name_future
                                                                 )
                                                                 
-                                                            if ticker_future and ticker_combo:
+                                                            if not reduce_only \
+                                                                and ticker_future and ticker_combo:
                                                                 
                                                                 ticker_combo= ticker_combo[0]
 

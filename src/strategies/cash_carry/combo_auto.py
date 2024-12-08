@@ -807,6 +807,8 @@ class ComboAuto (BasicStrategy):
         ) -> dict:
         """ """
         
+        reduce_only = self.strategy_parameters["reduce_only"]
+        
         order_allowed = False
 
         strategy_label = self.strategy_label
@@ -977,7 +979,8 @@ class ComboAuto (BasicStrategy):
                     
                             else:
                                 
-                                if len_orders_instrument_perpetual == 0:
+                                if not reduce_only\
+                                    and len_orders_instrument_perpetual == 0:
                                     
                                     instrument_name = random_instruments_name[0]
 
@@ -1084,9 +1087,10 @@ class ComboAuto (BasicStrategy):
                             log.error (f"selected_transaction_price <= bid_price_perpetual {selected_transaction_price <= bid_price_perpetual} ")
                             log.warning (f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}")
                                 
-                            if len_orders_instrument_perpetual == 0\
-                                and sum_orders_instrument_perpetual_open < abs(delta)  \
-                                    and delta <=0 :
+                            if not reduce_only\
+                                and len_orders_instrument_perpetual == 0\
+                                    and sum_orders_instrument_perpetual_open < abs(delta)  \
+                                        and delta <=0 :
                     
                                 # opening new perpetual
                                 if selected_transaction_price <= bid_price_perpetual:

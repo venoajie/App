@@ -16,7 +16,8 @@ strategy_labels= [#represert strategy
     #"marketMakerShort",
     #"marketMakerLong",
        ]
-mode_full=[true]
+mode_full=[false]
+reduce_only=[true]
        
 [[strategies]]
 strategy_label = "hedgingSpot"
@@ -33,6 +34,8 @@ halt_minute_before_reorder= 240
 max_leverage= 1
 delta_price_pct= 0.005
 sub_account_max_open_orders = {per_instrument = 50, total = 200}
+mode_full= true
+reduce_only= false
 
 
 [[strategies]]
@@ -50,7 +53,9 @@ halt_minute_before_reorder= 240
 max_leverage= 10
 delta_price_pct= 0.1
 sub_account_max_open_orders = {per_instrument = 50, total = 200}
-
+mode_full= false
+reduce_only= true
+       
 
 [[strategies]]
 strategy_label = "futureSpreadAuto"
@@ -67,6 +72,8 @@ halt_minute_before_reorder= 240
 max_leverage= 10
 delta_price_pct= 0.1
 sub_account_max_open_orders = {per_instrument = 50, total = 200}
+mode_full= false
+reduce_only= true
 
 [[strategies]]
 strategy_label = "comboAuto"
