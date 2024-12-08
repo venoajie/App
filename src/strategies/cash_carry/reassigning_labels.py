@@ -231,28 +231,30 @@ async def relabelling_double_ids(
                         
                         trade_ids =  (([o["trade_id"] for o in my_trade_instrument_name  if label in o["label"]]))
                         
-                        for trade_id in trade_ids:
+                        if trade_ids:
                             
-                            log.warning (f"trade_id {trade_id}")
+                            for trade_id in trade_ids:
+                                
+                                log.warning (f"trade_id {trade_id}")
 
-                            filter = "trade_id"
-                            
-                            new_label: str = get_label(
-                                "open", 
-                                strategy
+                                filter = "trade_id"
+                                
+                                new_label: str = get_label(
+                                    "open", 
+                                    strategy
+                                    )
+
+                                await updating_db_with_new_label(
+                                trade_db_table,
+                                archive_db_table,
+                                trade_id,
+                                filter,
+                                new_label
                                 )
+                                
+                                relabelling = True
 
-                            await updating_db_with_new_label(
-                            trade_db_table,
-                            archive_db_table,
-                            trade_id,
-                            filter,
-                            new_label
-                            )
-                            
-                            relabelling = True
-
-                            break
+                                break
         
     return relabelling
     
