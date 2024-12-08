@@ -226,6 +226,8 @@ async def relabelling_double_ids(
                     
                     for label in redundant_ids:
                         log.error (f"label {label}")
+                        log.warning (([o for o in my_trade_instrument_name\
+                    if label in o["label"]]))
 
                         filter = "label"
                         
