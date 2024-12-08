@@ -55,8 +55,9 @@ def waiting_time_has_expired(
     
     return waiting_time_for_perpetual_order and waiting_time_for_future_order
     
+    
                         
-def get_single_transaction(
+def my_trades_currency_strategy_with_no_blanks(
     my_trades_currency: list,    
     strategy: str,
     ) -> list:
@@ -73,6 +74,49 @@ def get_single_transaction(
         if strategy in o["label"]\
                 and "closed" not in o["label"]\
                     and  "Auto" not in o["label"]]
+    return my_trades_currency_strategy
+       
+                        
+def get_redundant_ids(
+    my_trades_currency: list,    
+    strategy: str,
+    ) -> list:
+    """
+    
+    
+    """
+    
+    my_trades_currency_strategy = my_trades_currency_strategy_with_no_blanks(
+        my_trades_currency,    
+        strategy)
+    
+    if my_trades_currency_strategy:
+        
+        my_trades_label = remove_redundant_elements(
+                [(o["label"]) for o in my_trades_currency_strategy])
+        
+        result = []        
+        for label in my_trades_label:
+            len_label = [o["label"] for o in my_trades_currency_strategy\
+                                                if label in o["label"]]
+            if len_label >1:
+                result.append (label)
+                
+        return result
+
+                        
+def get_single_transaction(
+    my_trades_currency: list,    
+    strategy: str,
+    ) -> list:
+    """
+    
+    
+    """
+    
+    my_trades_currency_strategy = my_trades_currency_strategy_with_no_blanks(
+        my_trades_currency,    
+        strategy)
     
     if my_trades_currency_strategy:
         
@@ -129,6 +173,52 @@ async def updating_db_with_new_label(
         )
     
 
+
+async def relabelling_double_ids(
+    trade_db_table: str,
+    archive_db_table: str,
+    my_trades_currency_active: dict,
+    ) -> None:
+    """
+    
+    
+    """
+        
+    from strategies.basic_strategy import (
+        get_label,)
+    
+    relabelled = False
+    
+    strategy = "futureSpread"     
+
+    redundant_ids = get_redundant_ids(
+        my_trades_currency_active,
+        strategy,)
+    
+    log.error (f"redundant_ids {redundant_ids}")
+    
+    if redundant_ids:
+        
+        for label in redundant_ids:
+            log.error (f"label {label}")
+
+            filter = "label"
+            
+            new_label: str = get_label(
+                "open", 
+                strategy
+                )
+
+            await updating_db_with_new_label(
+            trade_db_table,
+            archive_db_table,
+            label,
+            filter,
+            new_label
+            )
+
+            break
+      
 async def pairing_single_label(
     strategy_attributes: list,
     trade_db_table: str,

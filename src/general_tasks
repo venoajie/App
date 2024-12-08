@@ -30,7 +30,9 @@ from db_management.sqlite_management import (
     querying_arithmetic_operator,)
 from market_understanding.technical_analysis import (
     insert_market_condition_result)
-from strategies.cash_carry.reassigning_labels import pairing_single_label
+from strategies.cash_carry.reassigning_labels import (
+    pairing_single_label,
+    relabelling_double_ids)
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
@@ -597,6 +599,12 @@ async def reconciling_size(
 
                     my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
                     if o["label"] is not None]
+                    
+                    await relabelling_double_ids(
+                        trade_db_table,
+                        archive_db_table,
+                        my_trades_currency_active_free_blanks,
+                        )
                     
                     await clean_up_closed_transactions(
                         currency, 
