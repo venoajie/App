@@ -35,7 +35,7 @@ def waiting_time_has_expired(
             
     waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
     
-    log.debug (f"waiting_minute_before_cancel {waiting_minute_before_cancel}")
+    #log.debug (f"waiting_minute_before_cancel {waiting_minute_before_cancel}")
     
     timestamp_perpetual: int = perpetual_trade["timestamp"]
 
