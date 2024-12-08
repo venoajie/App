@@ -599,7 +599,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 #get_unpaired_transaction = get_unpaired_transaction(
                                                 #my_trades_currency_strategy)
                                                 
-                                                if   False and "futureSpread" in strategy :
+                                                if   "futureSpread" in strategy :
                                                 
                                                     log.warning (f"strategy {strategy}-START")    
                                                     
