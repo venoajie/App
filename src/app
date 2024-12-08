@@ -559,6 +559,8 @@ class RunningStrategy(ModifyOrderDb):
                                             
                                             log.warning (f"notional {notional} total_equity_usd {portfolio["total_equity_usd"]} notional {notional}")
                                             log.debug (f"portfolio {portfolio}")
+                                            
+                                            await  asyncio.sleep(150)
                                     
 
                                             TA_result_data_all = await querying_table("market_analytics_json")
