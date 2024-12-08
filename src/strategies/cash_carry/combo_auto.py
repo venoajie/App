@@ -1000,7 +1000,7 @@ class ComboAuto (BasicStrategy):
                     counter_side
                     )
 
-                log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta} instrument_proforma_size {instrument_proforma_size}")
+                log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta} ")
                     
                 if new_transaction_will_reduce_delta:
                     
@@ -1016,6 +1016,7 @@ class ComboAuto (BasicStrategy):
                         orders_instrument_transaction_net,
                         selected_transaction_size
                         )
+                    log.info (f"instrument_proforma_size {instrument_proforma_size} ")
                     
                     sum_order_under_closed_label = sum_order_under_closed_label_int (
                         orders_instrument_transaction_closed,
