@@ -469,7 +469,7 @@ async def reconciling_size(
                                             instrument_name,
                                             10 #random number
                                             )
-                                
+                                                      
                                 my_trades_instrument_name_archive = ([o for o in my_trades_currency_archive\
                                 if instrument_name in o["instrument_name"]]
                                     )
@@ -479,7 +479,7 @@ async def reconciling_size(
                                     my_trades_currency_active,
                                     my_trades_currency_archive,
                                     )
-                                                                
+                                          
                                     
                                 if not my_trades_active_archived_reconciled_each_other:
                                     

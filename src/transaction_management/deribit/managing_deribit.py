@@ -307,6 +307,8 @@ class ModifyOrderDb(SendApiRequest):
                         currency, 
                         first_tick_fr_sqlite, 
                         count)
+        
+        await asyncio.sleep(.1)
                 
         if transaction_log:
             
@@ -701,11 +703,6 @@ class ModifyOrderDb(SendApiRequest):
 
         await self.resupply_sub_accountdb(currency)       
         
-        await self.resupply_transaction_log(
-            currency,
-            transaction_log_trading,
-            archive_db_table)
-
         await update_db_pkl(
             "positions", 
             data_orders,
