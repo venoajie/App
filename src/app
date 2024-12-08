@@ -505,6 +505,18 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         orders_currency = result_from_db_queries["orders_currency"]     
                                         
+                                        outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency])
+                                        
+                                        for label in outstanding_order_id:
+                                            len_label = [o["label"] for o in orders_currency\
+                                                if label in o["label"]]
+                                            
+                                            if len_label >1:
+                                                await self.modify_order_and_db.cancel_the_cancellables(
+                                                    currency,
+                                                    cancellable_strategies
+                                                    )
+                                        
                                         position = [o for o in sub_account["positions"]]
                                         #log.debug (f"position {position}")
                                         position_without_combo = [ o for o in position \
