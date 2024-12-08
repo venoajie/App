@@ -861,13 +861,19 @@ class ComboAuto (BasicStrategy):
             orders_instrument_perpetual_closed: list=  [o for o in orders_instrument_perpetual 
                                                     if "closed" in o["label"]]
             
-            len_orders_instrument_transaction_closed: list=  0 if not  orders_instrument_transaction_closed \
+            len_orders_instrument_transaction_closed: int=  0 if not  orders_instrument_transaction_closed \
                 else len(orders_instrument_transaction_closed)
+                
+            len_orders_instrument_transaction: int=  0 if not  orders_instrument_transaction \
+                else len(orders_instrument_transaction)
         
-            len_orders_instrument_perpetual_open: list=  0 if not  orders_instrument_perpetual_open \
+            len_orders_instrument_perpetual_open: int=  0 if not  orders_instrument_perpetual_open \
+                else len(orders_instrument_perpetual_open)
+                
+            len_orders_instrument_perpetual: int=  0 if not  orders_instrument_perpetual \
                 else len(orders_instrument_perpetual_open)
         
-            len_orders_instrument_perpetual_closed: list=  0 if not  orders_instrument_perpetual_closed \
+            len_orders_instrument_perpetual_closed: int=  0 if not  orders_instrument_perpetual_closed \
                 else len(orders_instrument_perpetual_closed)
         
             tp_threshold = modified_tp_threshold(
@@ -907,7 +913,7 @@ class ComboAuto (BasicStrategy):
             
             basic_size = selected_transaction["amount"]
             
-            log.warning (f"len_orders_instrument {len_orders_instrument_transaction_closed} len_orders_instrument_perpetual_open {len_orders_instrument_perpetual_open}")
+            log.warning (f"len_orders_instrument {len_orders_instrument_transaction} len_orders_instrument_transaction {len_orders_instrument_transaction}")
             
             if instrument_side =="buy":
                 
@@ -971,7 +977,7 @@ class ComboAuto (BasicStrategy):
                     
                             else:
                                 
-                                if len_orders_instrument_perpetual_open == 0:
+                                if len_orders_instrument_perpetual == 0:
                                     
                                     instrument_name = random_instruments_name[0]
 
@@ -1037,7 +1043,7 @@ class ComboAuto (BasicStrategy):
                     
                         if transaction_in_profit:
 
-                            if len_orders_instrument_perpetual_closed == 0:
+                            if len_orders_instrument_perpetual == 0:
                                 
                                 order_allowed = True      
 
@@ -1057,7 +1063,7 @@ class ComboAuto (BasicStrategy):
                         
                         if transaction_in_profit:
 
-                            if len_orders_instrument_transaction_closed == 0:
+                            if len_orders_instrument_transaction == 0:
                                 
                                 order_allowed = True      
 
@@ -1078,7 +1084,7 @@ class ComboAuto (BasicStrategy):
                             log.error (f"selected_transaction_price <= bid_price_perpetual {selected_transaction_price <= bid_price_perpetual} ")
                             log.warning (f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}")
                                 
-                            if len_orders_instrument_perpetual_open == 0\
+                            if len_orders_instrument_perpetual == 0\
                                 and sum_orders_instrument_perpetual_open < abs(delta)  \
                                     and delta <=0 :
                     
