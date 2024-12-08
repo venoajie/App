@@ -865,8 +865,8 @@ class ComboAuto (BasicStrategy):
             len_orders_instrument_transaction_closed: list=  0 if not  orders_instrument_transaction_closed \
                 else len(orders_instrument_transaction_closed)
         
-            len_orders_instrument_perpetual_open: list=  0 if not  orders_instrument_transaction_open \
-                else len(orders_instrument_transaction_open)
+            len_orders_instrument_perpetual_open: list=  0 if not  orders_instrument_perpetual_open \
+                else len(orders_instrument_perpetual_open)
         
             tp_threshold = modified_tp_threshold(
                 instrument_attributes_futures,

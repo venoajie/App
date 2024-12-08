@@ -507,10 +507,13 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency])
                                         
+                                        log.info (f" outstanding_order_id {outstanding_order_id}")
+                                        
                                         for label in outstanding_order_id:
                                             
                                             len_label = len([o["label"] for o in orders_currency\
                                                 if label in o["label"]])
+                                            log.info (f" label {label} {len_label}")
                                             
                                             if len_label >1:
                                                 log.critical (f"double ids {label}")
