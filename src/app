@@ -684,8 +684,8 @@ class RunningStrategy(ModifyOrderDb):
                                                         #! renaming combo auto trading
                                                         else:
                                                         
-                                                            log.debug (f"selected_transaction {selected_transaction}")
-                                                            log.critical (f"sum_selected_transaction {sum_selected_transaction}")
+                                                            #log.debug (f"selected_transaction {selected_transaction}")
+                                                            #log.critical (f"sum_selected_transaction {sum_selected_transaction}")
                                                                         
                                                             if sum_selected_transaction == 0:
                                                                 if "open" in label:
