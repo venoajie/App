@@ -35,6 +35,8 @@ def waiting_time_has_expired(
             
     waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
     
+    log.debug (f"waiting_minute_before_cancel {waiting_minute_before_cancel}")
+    
     timestamp_perpetual: int = perpetual_trade["timestamp"]
 
     waiting_time_for_perpetual_order: bool = check_if_minimum_waiting_time_has_passed(
@@ -147,6 +149,8 @@ async def pairing_single_label(
         my_trades_currency_active,
         strategy)
     
+    log.warning (f"single_label_transaction {single_label_transaction}")
+    
     if single_label_transaction:
         my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in single_label_transaction])
 
@@ -190,6 +194,8 @@ async def pairing_single_label(
                         perpetual_trade,
                         server_time
                         )
+                    
+                    log.warning (f"waiting_time_has_expired {waiting_time_has_expired}")
                                                                             
                     if paired_success:
 
