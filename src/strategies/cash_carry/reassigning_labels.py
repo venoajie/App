@@ -199,6 +199,8 @@ async def relabelling_double_ids(
         get_label,)
     
     strategy = "futureSpread"     
+    
+    relabelling = False
 
     my_trades_currency_strategy = my_trades_currency_strategy_with_no_blanks(
         my_trades_currency_active,    
@@ -227,24 +229,32 @@ async def relabelling_double_ids(
                     for label in redundant_ids:
                         log.error (f"label {label}")
                         
-                        log.warning (([o for o in my_trade_instrument_name  if label in o["label"]]))
-
-                        filter = "label"
+                        trade_ids =  (([o["trade_id"] for o in my_trade_instrument_name  if label in o["label"]]))
                         
-                        new_label: str = get_label(
-                            "open", 
-                            strategy
+                        for trade_id in trade_ids:
+                            
+                            log.warning (f"trade_id {trade_id}")
+
+                            filter = "trade_id"
+                            
+                            new_label: str = get_label(
+                                "open", 
+                                strategy
+                                )
+
+                            await updating_db_with_new_label(
+                            trade_db_table,
+                            archive_db_table,
+                            trade_id,
+                            filter,
+                            new_label
                             )
+                            
+                            relabelling = True
 
-                        await updating_db_with_new_label(
-                        trade_db_table,
-                        archive_db_table,
-                        label,
-                        filter,
-                        new_label
-                        )
-
-                        break
+                            break
+        
+    return relabelling
     
 async def pairing_single_label(
     strategy_attributes: list,

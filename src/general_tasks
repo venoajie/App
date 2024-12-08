@@ -600,11 +600,24 @@ async def reconciling_size(
                     my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
                     if o["label"] is not None]
                     
-                    await relabelling_double_ids(
+                    relabelling = await relabelling_double_ids(
                         trade_db_table,
                         archive_db_table,
                         my_trades_currency_active_free_blanks,
                         )
+                    
+                
+                    if  relabelling:
+                        
+                        log.error (f"relabelling {relabelling}")
+                        
+                        cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                            if o["cancellable"]==True]
+                        
+                        await modify_order_and_db.cancel_the_cancellables(
+                                                    currency,
+                                                    cancellable_strategies)
+                                    
                     
                     await clean_up_closed_transactions(
                         currency, 
