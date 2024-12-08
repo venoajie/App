@@ -966,6 +966,7 @@ class ComboAuto (BasicStrategy):
                                     params.update({"entry_price": ask_price_perpetual})
                     
                             else:
+                                
                                 instrument_name = random_instruments_name[0]
 
                                 log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name}")

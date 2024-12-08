@@ -429,9 +429,10 @@ async def reconciling_size(
                         my_trades_currency_active,
                         server_time 
                         )
-                        log.error (f"pairing_label {pairing_label}")
                         
                         if  pairing_label:
+                            
+                            log.error (f"pairing_label {pairing_label}")
                             
                             cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
                                 if o["cancellable"]==True]

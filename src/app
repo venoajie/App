@@ -886,7 +886,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     strong_bearish = market_condition["strong_falling_price"]
                                                 
                                                     bearish = market_condition["falling_price"]
-                                                    log.error (f"market_condition {market_condition}")
+                                                    #log.error (f"market_condition {market_condition}")
                                                                                                         
                                                     instrument_ticker =   modify_hedging_instrument (
                                                         strong_bearish,

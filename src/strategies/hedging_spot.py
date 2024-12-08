@@ -155,15 +155,15 @@ def get_timing_factor(
     )
     
     log.debug (f"get_timing_factor {threshold} {(
-        ONE_MINUTE * bearish_interval_threshold
+        threshold * bearish_interval_threshold
         if (strong_bearish or bearish)\
-            else ONE_MINUTE *  threshold
+            else  threshold
     )}")
 
     return (
-        ONE_MINUTE * bearish_interval_threshold
+        threshold * bearish_interval_threshold
         if (strong_bearish or bearish)\
-            else ONE_MINUTE *  threshold
+            else   threshold
     )
 
 
@@ -626,7 +626,7 @@ class HedgingSpot(BasicStrategy):
         weighted_factor= hedging_attributes["weighted_factor"]
 
         log.warning (f"bearish {bearish}  strong_bearish {strong_bearish} neutral {neutral}" )
-        log.debug (f"len_orders  {len_open_orders} len_orders == 0 {len_open_orders == 0} sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} not over_hedged {not self.over_hedged_opening}" )
+        #log.debug (f"len_orders  {len_open_orders} len_orders == 0 {len_open_orders == 0} sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} not over_hedged {not self.over_hedged_opening}" )
         
         SIZE_FACTOR = get_waiting_time_factor(
             weighted_factor, 
