@@ -308,7 +308,7 @@ class ModifyOrderDb(SendApiRequest):
                         first_tick_fr_sqlite, 
                         count)
         
-        await asyncio.sleep(.3)
+        await asyncio.sleep(.5)
                 
         if transaction_log:
             
