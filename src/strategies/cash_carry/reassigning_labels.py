@@ -146,7 +146,7 @@ def get_single_transaction(
             sum_transaction_under_label_integer = sum([o["amount"] for o in transaction_under_label_integer])
             
             transaction_under_label_integer_len = len(transaction_under_label_integer)
-            log.info (f" {transaction_under_label_integer} sum_transaction_under_label_integer {sum_transaction_under_label_integer} transaction_under_label_integer_len {transaction_under_label_integer_len}")
+            #log.info (f" {transaction_under_label_integer} sum_transaction_under_label_integer {sum_transaction_under_label_integer} transaction_under_label_integer_len {transaction_under_label_integer_len}")
             if transaction_under_label_integer_len == 1:
                 
                 result.append (transaction_under_label_integer[0])
@@ -226,8 +226,8 @@ async def relabelling_double_ids(
                     
                     for label in redundant_ids:
                         log.error (f"label {label}")
-                        log.warning (([o for o in my_trade_instrument_name\
-                    if label in o["label"]]))
+                        
+                        log.warning (([o for o in my_trade_instrument_name  if label in o["label"]]))
 
                         filter = "label"
                         
@@ -245,7 +245,7 @@ async def relabelling_double_ids(
                         )
 
                         break
-        
+    
 async def pairing_single_label(
     strategy_attributes: list,
     trade_db_table: str,
@@ -266,7 +266,7 @@ async def pairing_single_label(
         my_trades_currency_active,
         strategy)
     
-    log.warning (f"single_label_transaction {single_label_transaction}")
+    #log.warning (f"single_label_transaction {single_label_transaction}")
     
     if single_label_transaction:
         my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in single_label_transaction])
