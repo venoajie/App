@@ -474,11 +474,9 @@ class RunningStrategy(ModifyOrderDb):
                                     portfolio = reading_from_pkl_data (
                                         "portfolio",
                                         currency
-                                        )
+                                        )[0]
                                     
-                                    equity: float = portfolio[0]["equity"]    
-                                    
-                                    log.debug (f"portfolio {portfolio}")
+                                    equity: float = portfolio["equity"]    
                                     
                                     ticker_perpetual_instrument_name = [o for o in ticker_perpetual \
                                         if instrument_name_perpetual == o["instrument_name"]][0]                                   
@@ -511,13 +509,10 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency])
                                         
-                                        log.info (f" outstanding_order_id {outstanding_order_id}")
-                                        
                                         for label in outstanding_order_id:
                                             
                                             len_label = len([o["label"] for o in orders_currency\
                                                 if label in o["label"]])
-                                            log.info (f" label {label} {len_label}")
                                             
                                             if len_label >1:
                                                 log.critical (f"double ids {label}")
@@ -561,6 +556,10 @@ class RunningStrategy(ModifyOrderDb):
                                                 log.debug (f"amount {amount}")
                                                 
                                             notional: float = compute_notional_value(index_price, equity)
+                                            
+                                            log.warning (f"notional {notional} total_equity_usd {portfolio["total_equity_usd"]} notional {notional}")
+                                            log.debug (f"portfolio {portfolio}")
+                                    
 
                                             TA_result_data_all = await querying_table("market_analytics_json")
                                             
