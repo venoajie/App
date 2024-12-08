@@ -761,7 +761,8 @@ class ComboAuto (BasicStrategy):
             if contango: 
                         
                 if len_orders_instrument == 0 \
-                    and len_orders_instrument_future_open_all < max_order_currency:
+                    and len_orders_instrument_future_open_all < max_order_currency\
+                    and "PERPETUAL" not in instrument_name_future:
         
                     basic_size = determine_opening_size(
                         instrument_name_future, 
@@ -868,6 +869,9 @@ class ComboAuto (BasicStrategy):
             len_orders_instrument_perpetual_open: list=  0 if not  orders_instrument_perpetual_open \
                 else len(orders_instrument_perpetual_open)
         
+            len_orders_instrument_perpetual_closed: list=  0 if not  orders_instrument_perpetual_closed \
+                else len(orders_instrument_perpetual_closed)
+        
             tp_threshold = modified_tp_threshold(
                 instrument_attributes_futures,
                 take_profit_threshold_original,
@@ -962,9 +966,9 @@ class ComboAuto (BasicStrategy):
                                 
                                     label_integer = get_label_integer (selected_transaction["label"])
                                     
-                                    label = f"{strategy_label}-closed-{label_integer}"
+                                    closed_label = f"{strategy_label}-closed-{label_integer}"
                                 
-                                    params.update({"label": label})
+                                    params.update({"label": closed_label})
                                     params.update({"entry_price": ask_price_perpetual})
                     
                             else:
@@ -1037,7 +1041,7 @@ class ComboAuto (BasicStrategy):
                         and instrument_proforma_size <=0\
                             and closing_size_ok:
                         
-                        transaction_in_profit = bid_price_future < (selected_transaction_price - selected_transaction_price * tp_threshold)
+                        transaction_in_profit = bid_price_future < (selected_transaction_price - (selected_transaction_price * tp_threshold))
 
                         log.error (f"transaction_in_profit {transaction_in_profit} bid_price_future {bid_price_future} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
                         
@@ -1090,8 +1094,28 @@ class ComboAuto (BasicStrategy):
                                 
                                 len_orders_instrument: list=  0 if not  orders_instrument \
                                     else len(orders_instrument)
+            
+                    if "PERPETUAL" in instrument_name_transaction\
+                        and instrument_proforma_size <=0\
+                            and closing_size_ok:
+                        
+                        transaction_in_profit = ask_price_perpetual < (selected_transaction_price - (selected_transaction_price * tp_threshold))
+
+                        log.error (f"transaction_in_profit {transaction_in_profit} bid_price_perpetual {bid_price_perpetual} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
+                    
+                        if transaction_in_profit:
+
+                            if len_orders_instrument_perpetual_closed == 0:
+                                
+                                order_allowed = True      
+
+                                params.update({"instrument_name": instrument_name_transaction})
                             
-        
+                                label = f"{strategy_label}-closed-{label_integer}"
+                            
+                                params.update({"label": label})
+                                params.update({"entry_price": bid_price_perpetual})
+                
         return dict(
             order_allowed=order_allowed,
             order_parameters=[] if order_allowed == False else params,
