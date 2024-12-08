@@ -508,10 +508,12 @@ class RunningStrategy(ModifyOrderDb):
                                         outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency])
                                         
                                         for label in outstanding_order_id:
+                                            
                                             len_label = len([o["label"] for o in orders_currency\
                                                 if label in o["label"]])
                                             
                                             if len_label >1:
+                                                log.debug (f"souble ids {label}")
                                                 await self.modify_order_and_db.cancel_the_cancellables(
                                                     currency,
                                                     cancellable_strategies
