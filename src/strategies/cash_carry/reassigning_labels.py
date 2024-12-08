@@ -92,17 +92,28 @@ def get_redundant_ids(
     
     if my_trades_currency_strategy:
         
-        my_trades_label = remove_redundant_elements(
-                [(o["label"]) for o in my_trades_currency_strategy])
+        instrument_names = remove_redundant_elements([o["instrument_name"] for o in my_trades_currency_strategy])
         
-        result = []        
-        for label in my_trades_label:
-            len_label = len([o["label"] for o in my_trades_currency_strategy\
-                                                if label in o["label"]])
-            if len_label >1:
-                result.append (label)
+        if instrument_names:
+            
+            for instrument_name in instrument_names:
                 
-        return result
+                my_trade_instrument_name = ([o for o in my_trades_currency_strategy\
+                    if instrument_name in o["instrument_name"]])
+                
+                if my_trade_instrument_name:
+                    
+                    my_trades_label = remove_redundant_elements(
+                            [(o["label"]) for o in my_trade_instrument_name])
+                    
+                    result = []        
+                    for label in my_trades_label:
+                        len_label = len([o["label"] for o in my_trades_currency_strategy\
+                                                            if label in o["label"]])
+                        if len_label >1:
+                            result.append (label)
+                            
+                    return result
 
                         
 def get_single_transaction(
@@ -177,7 +188,7 @@ async def updating_db_with_new_label(
 async def relabelling_double_ids(
     trade_db_table: str,
     archive_db_table: str,
-    my_trades_currency_active: dict,
+    my_trades_currency_active: list,
     ) -> None:
     """
     
@@ -187,38 +198,52 @@ async def relabelling_double_ids(
     from strategies.basic_strategy import (
         get_label,)
     
-    relabelled = False
-    
     strategy = "futureSpread"     
 
-    redundant_ids = get_redundant_ids(
-        my_trades_currency_active,
-        strategy,)
+    my_trades_currency_strategy = my_trades_currency_strategy_with_no_blanks(
+        my_trades_currency_active,    
+        strategy)
     
-    log.error (f"redundant_ids {redundant_ids}")
-    
-    if redundant_ids:
+    if my_trades_currency_strategy:
         
-        for label in redundant_ids:
-            log.error (f"label {label}")
-
-            filter = "label"
+        instrument_names = remove_redundant_elements([o["instrument_name"] for o in my_trades_currency_strategy])
+        
+        if instrument_names:
             
-            new_label: str = get_label(
-                "open", 
-                strategy
-                )
+            for instrument_name in instrument_names:
+                
+                my_trade_instrument_name = ([o for o in my_trades_currency_strategy\
+                    if instrument_name in o["instrument_name"]])
+                
+                            
+                redundant_ids = get_redundant_ids(
+                    my_trade_instrument_name,
+                    strategy,)
+                
+                log.error (f"redundant_ids {redundant_ids}")
+    
+                if redundant_ids:
+                    
+                    for label in redundant_ids:
+                        log.error (f"label {label}")
 
-            await updating_db_with_new_label(
-            trade_db_table,
-            archive_db_table,
-            label,
-            filter,
-            new_label
-            )
+                        filter = "label"
+                        
+                        new_label: str = get_label(
+                            "open", 
+                            strategy
+                            )
 
-            break
-      
+                        await updating_db_with_new_label(
+                        trade_db_table,
+                        archive_db_table,
+                        label,
+                        filter,
+                        new_label
+                        )
+
+                        break
+        
 async def pairing_single_label(
     strategy_attributes: list,
     trade_db_table: str,
