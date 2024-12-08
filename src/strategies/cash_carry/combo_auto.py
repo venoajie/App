@@ -17,8 +17,6 @@ from strategies.basic_strategy import (
     get_label,
     get_label_integer,
     is_minimum_waiting_time_has_passed,
-    proforma_size,
-    provide_side_to_close_transaction,
     size_rounding,
     sum_order_under_closed_label_int)
 from utilities.pickling import (
@@ -1011,13 +1009,6 @@ class ComboAuto (BasicStrategy):
                     
                     log.error (f"instrument_current_size {instrument_current_size} orders_instrument_transaction_net {orders_instrument_transaction_net} selected_transaction_size {selected_transaction_size}")
 
-                    instrument_proforma_size  = proforma_size(
-                        instrument_current_size, 
-                        orders_instrument_transaction_net,
-                        selected_transaction_size
-                        )
-                    log.info (f"instrument_proforma_size {instrument_proforma_size} ")
-                    
                     sum_order_under_closed_label = sum_order_under_closed_label_int (
                         orders_instrument_transaction_closed,
                         label_integer
@@ -1035,12 +1026,10 @@ class ComboAuto (BasicStrategy):
                         size
                         )
                     
-                    #log.error (f"closing_size_ok {closing_size_ok} instrument_proforma_size <=0 {instrument_proforma_size <=0}")
                     #log.error (f"basic_size {basic_size} net_size {net_size} size {size} sum_order_under_closed_label {sum_order_under_closed_label}")
                 
                     if "PERPETUAL" not in instrument_name_transaction\
-                        and instrument_proforma_size <=0\
-                            and closing_size_ok:
+                        and closing_size_ok:
                         
                         transaction_in_profit = bid_price_future < (selected_transaction_price - (selected_transaction_price * tp_threshold))
 
@@ -1096,14 +1085,8 @@ class ComboAuto (BasicStrategy):
                                 len_orders_instrument: list=  0 if not  orders_instrument \
                                     else len(orders_instrument)
                     
-                    
-                    log.error ({instrument_name_transaction})
-                    log.error (f" instrument_proforma_size <=0 {instrument_proforma_size <=0} closing_size_ok {closing_size_ok}")
-                    log.error ("PERPETUAL" in instrument_name_transaction)
-                    
                     if "PERPETUAL" in instrument_name_transaction\
-                        and instrument_proforma_size <=0\
-                            and closing_size_ok:
+                        and closing_size_ok:
                         
                         transaction_in_profit = ask_price_perpetual < (selected_transaction_price - (selected_transaction_price * tp_threshold))
 
