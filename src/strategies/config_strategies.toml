@@ -22,6 +22,7 @@ reduce_only = [true]
 [[relevant_tables]]
 my_trades_table = "my_trades_all_json"
 orders_table = "orders_all_json"
+closed_table = "my_trades_closed_json"
 
 [[strategies]]
 strategy_label = "hedgingSpot"

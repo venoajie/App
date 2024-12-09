@@ -169,10 +169,12 @@ class StreamAccountData(ModifyOrderDb):
                 non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
                     if o["non_checked_for_size_label_consistency"]==True]
                 
-                trade_db_table= "my_trades_all_json"
+                relevant_tables = config_app["relevant_tables"][0]
                 
-                order_db_table= "orders_all_json"         
-                                
+                trade_db_table= relevant_tables["my_trades_table"]
+                
+                order_db_table= relevant_tables["orders_table"]        
+                   
                 settlement_periods = get_settlement_period (strategy_attributes)
                                 
                 futures_instruments =  get_futures_instruments (

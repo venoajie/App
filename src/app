@@ -352,8 +352,6 @@ class RunningStrategy(ModifyOrderDb):
                 
                 relevant_tables = config_app["relevant_tables"][0]
                 
-                log.error (f"relevant_tables {relevant_tables}")
-                                
                 trade_db_table= relevant_tables["my_trades_table"]
                 
                 order_db_table= relevant_tables["orders_table"]        
@@ -759,11 +757,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                                                 if send_order["order_allowed"]:
                                                                                 
-                                                                                    await self.processing_orders(
-                                                                                            send_order,
-                                                                                            currency,
-                                                                                            non_checked_strategies
-                                                                                            )
+                                                                                    await self.processing_orders(send_order)
                                                         
                                                                                     break            
                                                                         
@@ -817,10 +811,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     target_transaction_per_hour
                                                                     )
                                                         
-                                                                await self.processing_orders(
-                                                                    send_order,
-                                                                    currency,
-                                                                    non_checked_strategies)
+                                                                await self.processing_orders(send_order)
                                     
                                                                 send_order = []                           
                                                                                         
@@ -838,10 +829,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         )
                                                         
                                                                 if send_order:
-                                                                    await self.processing_orders(
-                                                                    send_order,
-                                                                    currency,
-                                                                    non_checked_strategies)
+                                                                    await self.processing_orders(send_order)
                                                     
                                                     if orders_currency_strategy:
                                                         for order in orders_currency_strategy:
@@ -923,11 +911,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                                 )
                                                             
-                                                            await self.processing_orders(
-                                                                send_order,
-                                                                currency,
-                                                                non_checked_strategies
-                                                                )
+                                                            await self.processing_orders(send_order)
                                                                 
                                                             if my_trades_currency_strategy_open !=[]:
                                                                                                                                             
@@ -955,11 +939,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         nearest_transaction_to_index,
                                                                         )
 
-                                                                    await self.processing_orders(
-                                                                        send_closing_order,
-                                                                        currency,
-                                                                        non_checked_strategies)
-                            
+                                                                    await self.processing_orders(send_closing_order)
                             
                                                     if orders_currency_strategy:
                                                         
@@ -1001,30 +981,22 @@ class RunningStrategy(ModifyOrderDb):
     async def processing_orders(
         self,
         order_analysis_result: dict,
-        currency: str,
-        non_checked_strategies: list,
         ) -> None:
         """
         """
         
         try:
-            transaction_log_trading_table= f"transaction_log_{currency.lower()}_json"
-            
-            archive_db_table= f"my_trades_all_{currency.lower()}_json"
-            
-            # parsing config file
-            config_app = self.config_app
-            
-            relevant_tables = config_app["relevant_tables"][0]
-                                        
-            trade_db_table= relevant_tables["my_trades_table"]
-            
-            order_db_table= relevant_tables["orders_table"]           
             
             if order_analysis_result["order_allowed"]:
-                
+                    
                 log.error (f"send_order {order_analysis_result}")
-                                                                    
+
+                strategy_attributes = config_app["strategies"]
+                
+                # get strategies that have not short/long attributes in the label 
+                non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                    if o["non_checked_for_size_label_consistency"]==True]
+                                                                                    
                 result_order = await self.modify_order_and_db.if_order_is_true(
                     non_checked_strategies,
                     order_analysis_result, 
@@ -1035,11 +1007,31 @@ class RunningStrategy(ModifyOrderDb):
                     
                     try:
                         data_orders = result_order["result"]
+                        
+                        try:
+                            instrument_name = data_orders["order"]["instrument_name"]
 
+                        except:
+                            instrument_name = data_orders["trades"]["instrument_name"]
+
+                        currency = extract_currency_from_text (instrument_name)
+                        
+                        transaction_log_trading_table= f"transaction_log_{currency.lower()}_json"
+                        
+                        archive_db_table= f"my_trades_all_{currency.lower()}_json"
+                        
+                        # parsing config file
+                        config_app = self.config_app
+                        
+                        relevant_tables = config_app["relevant_tables"][0]
+                                                    
+                        trade_db_table= relevant_tables["my_trades_table"]
+                        
+                        order_db_table= relevant_tables["orders_table"]           
+                
                         await self.modify_order_and_db.update_user_changes_non_ws(
                             non_checked_strategies,
                             data_orders, 
-                            currency, 
                             order_db_table,
                             trade_db_table, 
                             archive_db_table,

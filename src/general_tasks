@@ -390,10 +390,14 @@ async def reconciling_size(
                 
                 if sub_account:
 
-                    trade_db_table= "my_trades_all_json"
+                    relevant_tables = config_app["relevant_tables"][0]
                     
-                    order_db_table= "orders_all_json"
+                    trade_db_table= relevant_tables["my_trades_table"]
                     
+                    order_db_table= relevant_tables["orders_table"]        
+                        
+                    closed_table= relevant_tables["my_trades_closed_json"]        
+
                     currency_lower = currency.lower ()
                     
                     archive_db_table = f"my_trades_all_{currency_lower}_json"                    
@@ -489,7 +493,8 @@ async def reconciling_size(
                                     await my_trades_active_archived_not_reconciled_each_other(
                                         instrument_name,
                                         trade_db_table,
-                                        archive_db_table
+                                        archive_db_table,
+                                        closed_table
                                         )
                                                                 
                                 if my_trades_active_archived_reconciled_each_other:
@@ -554,7 +559,7 @@ async def reconciling_size(
                             for closed_transaction in my_trades_instruments:
                                 
                                 await insert_tables(
-                                "my_trades_closed_json", 
+                                closed_table, 
                                 closed_transaction
                                 )
                                 

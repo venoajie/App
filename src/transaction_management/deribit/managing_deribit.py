@@ -715,7 +715,6 @@ class ModifyOrderDb(SendApiRequest):
         self,
         non_checked_strategies,
         data_orders, 
-        currency, 
         order_db_table,
         trade_db_table, 
         archive_db_table,
@@ -727,6 +726,8 @@ class ModifyOrderDb(SendApiRequest):
         order = data_orders["order"]
 
         instrument_name = order["instrument_name"]
+        
+        currency = extract_currency_from_text (instrument_name)
         
         await self.resupply_sub_accountdb(currency)   
         

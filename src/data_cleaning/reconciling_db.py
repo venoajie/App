@@ -180,7 +180,8 @@ def is_my_trades_and_sub_account_size_reconciled_each_other(
 async def my_trades_active_archived_not_reconciled_each_other(
     instrument_name: str,
     trade_db_table: str,
-    archive_db_table: str
+    archive_db_table: str,
+    closed_db_table: str
     ) -> None:
     
     column_trade: str= "instrument_name","data","trade_id","timestamp"
@@ -191,7 +192,7 @@ async def my_trades_active_archived_not_reconciled_each_other(
                 "all", 
                 column_trade)
     
-    my_trades_instrument_name_closed = await get_query("my_trades_closed_json", 
+    my_trades_instrument_name_closed = await get_query(closed_db_table, 
                 instrument_name, 
                 "all", 
                 "all", 
