@@ -336,12 +336,15 @@ def is_new_transaction_will_reduce_delta(
         selected_transaction_size,
         side
         )
-    log.warning (f"proforma {proforma} delta {delta} side {side} selected_transaction_size {selected_transaction_size}")
     
     if delta > 0:
+        
+        log.warning (f"new_transaction_will_reduce_delta {proforma < delta } proforma {proforma} delta {delta} side {side} selected_transaction_size {selected_transaction_size}")
+    
         return proforma < delta 
     
     if delta < 0:
+        log.warning (f"new_transaction_will_reduce_delta {delta < proforma } proforma {proforma} delta {delta} side {side} selected_transaction_size {selected_transaction_size}")
         return delta < proforma
 
 async def get_market_condition_future_spread(
@@ -819,13 +822,13 @@ class ComboAuto (BasicStrategy):
                 
         log.info (selected_transaction)
 
-        ask_price_future = ticker_future ["best_ask_price"]
+        #ask_price_future = ticker_future ["best_ask_price"]
         bid_price_perpetual, ask_price_perpetual = ticker_perpetual ["best_bid_price"], ticker_perpetual ["best_ask_price"]               
 
-        contango = is_contango(
-            ask_price_future,
-            bid_price_perpetual,
-            )
+        #contango = is_contango(
+        #    ask_price_future,
+        #    bid_price_perpetual,
+        #    )
                 
         delta = self.delta
                 
@@ -854,29 +857,17 @@ class ComboAuto (BasicStrategy):
             orders_instrument_transaction_closed: list=  [o for o in orders_instrument_transaction 
                                                     if "closed" in o["label"]]
             
-            orders_instrument_transaction_open: list=  [o for o in orders_instrument_transaction 
-                                                    if "open" in o["label"]]
-            
             orders_instrument_perpetual_open: list=  [o for o in orders_instrument_perpetual 
                                                     if "open" in o["label"]]
             
             orders_instrument_perpetual_closed: list=  [o for o in orders_instrument_perpetual 
                                                     if "closed" in o["label"]]
-            
-            len_orders_instrument_transaction_closed: int=  0 if not  orders_instrument_transaction_closed \
-                else len(orders_instrument_transaction_closed)
                 
             len_orders_instrument_transaction: int=  0 if not  orders_instrument_transaction \
                 else len(orders_instrument_transaction)
-        
-            len_orders_instrument_perpetual_open: int=  0 if not  orders_instrument_perpetual_open \
-                else len(orders_instrument_perpetual_open)
-                
+           
             len_orders_instrument_perpetual: int=  0 if not  orders_instrument_perpetual \
                 else len(orders_instrument_perpetual_open)
-        
-            len_orders_instrument_perpetual_closed: int=  0 if not  orders_instrument_perpetual_closed \
-                else len(orders_instrument_perpetual_closed)
         
             tp_threshold = modified_tp_threshold(
                 instrument_attributes_futures,
@@ -894,7 +885,7 @@ class ComboAuto (BasicStrategy):
             
             params.update({"size": selected_transaction_size})
             
-            index_price: float = ticker_perpetual["index_price"]
+            #index_price: float = ticker_perpetual["index_price"]
                     
             label_open: str = get_label(
                 "open", 
@@ -914,9 +905,7 @@ class ComboAuto (BasicStrategy):
             label_integer = get_label_integer (selected_transaction["label"])
             
             basic_size = selected_transaction["amount"]
-            
-            log.warning (f"len_orders_instrument {len_orders_instrument_transaction} len_orders_instrument_transaction {len_orders_instrument_transaction}")
-            
+                        
             if instrument_side =="buy":
                 
                 counter_side = "sell"
@@ -1015,8 +1004,6 @@ class ComboAuto (BasicStrategy):
                     selected_transaction_size,
                     counter_side
                     )
-
-                log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta} ")
                     
                 if new_transaction_will_reduce_delta:
                     
