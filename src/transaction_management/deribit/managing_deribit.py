@@ -781,9 +781,12 @@ class ModifyOrderDb(SendApiRequest):
         order_id= order["order_id"]    
         order_state= order["order_state"]    
         
+        log.debug (f"order {order}")
+        
         # no label
         if label == '':
-            if"open" in order_state\
+            
+            if "open" in order_state\
                 or "untriggered" in order_state:
                 
                 order_attributes = labelling_unlabelled_order (order)                   
