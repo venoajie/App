@@ -636,7 +636,8 @@ class ModifyOrderDb(SendApiRequest):
                     
                     len_oto_order_ids = len(orders[0]["oto_order_ids"])
                     
-                    transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
+                    transaction_main = [o for o in orders \
+                        if "OTO" not in o["order_id"]][0]
                     log.debug (f"transaction_main {transaction_main}")
                     
                     if len_oto_order_ids==1:
@@ -690,7 +691,7 @@ class ModifyOrderDb(SendApiRequest):
                                     
                     for order in orders:
                         
-                        if  'OTO' not in order["label"]:
+                        if  'OTO' not in order["order_id"]:
                             
                             log.warning (f"order {order}")
                                                     
