@@ -735,7 +735,6 @@ class RunningStrategy(ModifyOrderDb):
                                                             #! closing unpaired transactions                                                            
                                                             else:
                                                                 
-                                                                log.debug (f"selected_transaction {selected_transaction}" )
                                                                 if len_selected_transaction == 1 \
                                                                     and "closed" not in label:
                                                                     
