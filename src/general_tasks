@@ -391,7 +391,7 @@ async def downloading_sub_account(
                 
                 if sub_account:
                     
-                    positions = [o["positions"] for o in sub_account]#[0]
+                    positions = [o["positions"] for o in sub_account][0][0]
                     if positions:
                     
                         log.error (f"positions {positions}")
