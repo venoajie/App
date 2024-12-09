@@ -396,7 +396,7 @@ async def reconciling_size(
                     
                     order_db_table= relevant_tables["orders_table"]        
                         
-                    closed_table= relevant_tables["my_trades_closed_json"]        
+                    closed_table= relevant_tables["closed_table"]        
 
                     currency_lower = currency.lower ()
                     
