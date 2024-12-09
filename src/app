@@ -350,7 +350,7 @@ class RunningStrategy(ModifyOrderDb):
                 cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
                     if o["cancellable"]==True]
                 
-                relevant_tables = config_app["relevant_tables"]
+                relevant_tables = config_app["relevant_tables"][0]
                 
                 log.error (f"relevant_tables {relevant_tables}")
                                 
@@ -1011,14 +1011,16 @@ class RunningStrategy(ModifyOrderDb):
             transaction_log_trading_table= f"transaction_log_{currency.lower()}_json"
             
             archive_db_table= f"my_trades_all_{currency.lower()}_json"
-                
+            
             # parsing config file
             config_app = self.config_app
             
-            trade_db_table= config_app["my_trades_table"]
+            relevant_tables = config_app["relevant_tables"][0]
+                                        
+            trade_db_table= relevant_tables["my_trades_table"]
             
-            order_db_table= config_app["orders_table"]        
-                                                    
+            order_db_table= relevant_tables["orders_table"]           
+            
             if order_analysis_result["order_allowed"]:
                 
                 log.error (f"send_order {order_analysis_result}")
