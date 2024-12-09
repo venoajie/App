@@ -315,7 +315,7 @@ class RunningStrategy(ModifyOrderDb):
         self.client_secret: str = parse_dotenv(self.sub_account_id)["client_secret"]
         # parsing config file
         self.config_app = get_config("config_strategies.toml")
-        self.relevant_tables = [{"trade": "trade_db_table",
+        self.relevant_tables = [{"trades": "trade_db_table",
                                 "orders": "orders_all_json"}]
 
         # Start Primary Coroutine
