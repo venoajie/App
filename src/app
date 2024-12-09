@@ -780,8 +780,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     )
                                                             
                                                                                 if send_order["order_allowed"]:
-                                                                                    
-                                                                                    log.debug(f"send_order {send_order}")
                                                                                 
                                                                                     await self.processing_orders(
                                                                                             send_order,
@@ -843,8 +841,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                     instrument_attributes_combo,
                                                                     target_transaction_per_hour
                                                                     )
-                                                                
-                                                                log.debug(f"send_order {send_order}")
                                                         
                                                                 await self.processing_orders(
                                                                     send_order,
@@ -869,8 +865,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                         target_transaction_per_hour,
                                                                         min(1,max_order_currency)
                                                                         )
-                                                                    
-                                                                log.debug(f"send_order {send_order}")
                                                         
                                                                 if send_order:
                                                                     await self.processing_orders(
@@ -994,7 +988,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                         instrument_ticker[0]["best_bid_price"],
                                                                         nearest_transaction_to_index,
                                                                         )
-                                                                    log.debug(f"send_order {send_order}")
 
                                                                     await self.processing_orders(
                                                                         send_closing_order,
