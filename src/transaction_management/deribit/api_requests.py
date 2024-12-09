@@ -324,7 +324,7 @@ class SendApiRequest:
                                                        endpoint=endpoint, 
                                                        params=params,)
         
-        return result_sub_account["result"]
+        return result_sub_account#["result"]
 
     async def get_user_trades_by_currency(
         self,
