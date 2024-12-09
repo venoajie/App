@@ -391,7 +391,7 @@ async def downloading_sub_account(
                 
                 if sub_account:
                     
-                    positions = sub_account ["positions"][0]
+                    positions = sub_account [0]["positions"]
                     
                     positions = remove_dict_elements(
                         positions,
