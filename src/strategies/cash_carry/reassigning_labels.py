@@ -324,8 +324,6 @@ async def pairing_single_label(
 
                     perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]  
                     
-                    log.error (f"perpetual_trade {perpetual_trade}")
-
                     waiting_time_expired = waiting_time_has_expired(
                         strategy_params,
                         future_trade,
@@ -349,8 +347,6 @@ async def pairing_single_label(
                             if  side_future == "sell"\
                                 and side_perpetual == "buy":
                                     
-                                log.warning (f"my_trades_perpetual_with_lower_price_sorted {my_trades_perpetual_with_lower_price_sorted}")
-                                
                                 await updating_db_with_new_label(
                                     trade_db_table,
                                     archive_db_table,
