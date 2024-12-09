@@ -332,8 +332,6 @@ class RunningStrategy(ModifyOrderDb):
                 # parsing config file
                 config_app = self.config_app
                 
-                log.info (f"config_app {config_app}")
-
                 # get tradable strategies
                 tradable_config_app = config_app["tradable"]
                 
@@ -351,12 +349,10 @@ class RunningStrategy(ModifyOrderDb):
                 
                 cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
                     if o["cancellable"]==True]
+                                
+                trade_db_table= config_app["my_trades_table"]
                 
-                relevant_tables = self.relevant_tables[0]
-                
-                trade_db_table= relevant_tables["trades"]
-                
-                order_db_table= relevant_tables["orders"]        
+                order_db_table= config_app["orders_table"]        
                                 
                 settlement_periods = get_settlement_period (strategy_attributes)
                                 
@@ -1011,13 +1007,14 @@ class RunningStrategy(ModifyOrderDb):
             transaction_log_trading_table= f"transaction_log_{currency.lower()}_json"
             
             archive_db_table= f"my_trades_all_{currency.lower()}_json"
-    
-            relevant_tables = self.relevant_tables[0]
+                
+            # parsing config file
+            config_app = self.config_app
             
-            trade_db_table= relevant_tables["trades"]
+            trade_db_table= config_app["my_trades_table"]
             
-            order_db_table= relevant_tables["orders"] 
-                                        
+            order_db_table= config_app["orders_table"]        
+                                                    
             if order_analysis_result["order_allowed"]:
                 
                 log.error (f"send_order {order_analysis_result}")
