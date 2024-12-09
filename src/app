@@ -307,17 +307,14 @@ class RunningStrategy(ModifyOrderDb):
     refresh_token: str = None
     refresh_token_expiry_time: int = None
     config_app: list = fields
-    relevant_tables: dict = fields
             
     def __post_init__(self):
         self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
         self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
         self.client_secret: str = parse_dotenv(self.sub_account_id)["client_secret"]
         # parsing config file
+        
         self.config_app = get_config("config_strategies.toml")
-        self.relevant_tables = [{"trades": "trade_db_table",
-                                "orders": "orders_all_json"}]
-
         # Start Primary Coroutine
         self.loop.run_until_complete(self.ws_manager())
     
@@ -334,6 +331,8 @@ class RunningStrategy(ModifyOrderDb):
                     
                 # parsing config file
                 config_app = self.config_app
+                
+                log.info (f"config_app {config_app}")
 
                 # get tradable strategies
                 tradable_config_app = config_app["tradable"]
@@ -1012,11 +1011,13 @@ class RunningStrategy(ModifyOrderDb):
             transaction_log_trading_table= f"transaction_log_{currency.lower()}_json"
             
             archive_db_table= f"my_trades_all_{currency.lower()}_json"
-        
-            trade_db_table= self.relevant_tables("my_trades_all_json")
+    
+            relevant_tables = self.relevant_tables[0]
             
-            order_db_table= self.relevant_tables("orders_all_json")         
-                                    
+            trade_db_table= relevant_tables["trades"]
+            
+            order_db_table= relevant_tables["orders"] 
+                                        
             if order_analysis_result["order_allowed"]:
                 
                 log.error (f"send_order {order_analysis_result}")

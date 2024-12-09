@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 [[tradable]]
-spot= [
+spot = [
     "BTC",
     "ETH",
     #"XRP",
     #"SOL",     
        ]
-strategy_labels= [#represert strategy
+strategy_labels = [#represert strategy
     "hedgingSpot",
     "futureSpread",
     "comboAuto",
@@ -16,9 +16,11 @@ strategy_labels= [#represert strategy
     #"marketMakerShort",
     #"marketMakerLong",
        ]
-mode_full=[false]
-reduce_only=[true]
-       
+mode_full = [false]
+reduce_only = [true]
+my_trades_table = "my_trades_all_json"
+orders_table = "orders_all_json"
+
 [[strategies]]
 strategy_label = "hedgingSpot"
 is_active = true
