@@ -480,7 +480,6 @@ async def reconciling_size(
                                     my_trades_currency_archive,
                                     )
                                           
-                                    
                                 if not my_trades_active_archived_reconciled_each_other:
                                     
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
@@ -525,7 +524,7 @@ async def reconciling_size(
                                         timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
                                         archive_db_table,
                                         trade_db_table,
-                                        20
+                                        50
                                         )
                                     
                     my_trades_instruments = ([ o for o in my_trades_currency_active ]
