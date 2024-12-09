@@ -23,6 +23,8 @@ reduce_only = [true]
 my_trades_table = "my_trades_all_json"
 orders_table = "orders_all_json"
 closed_table = "my_trades_closed_json"
+transaction_log = "transaction_log"
+archive = "my_trades_all"
 
 [[strategies]]
 strategy_label = "hedgingSpot"
