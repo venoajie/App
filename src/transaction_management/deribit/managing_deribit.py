@@ -636,8 +636,7 @@ class ModifyOrderDb(SendApiRequest):
                     
                     len_oto_order_ids = len(orders[0]["oto_order_ids"])
                     
-                    transaction_main = [o for o in orders \
-                        if "OTO" not in o["order_id"]][0]
+                    transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
                     log.debug (f"transaction_main {transaction_main}")
                     
                     if len_oto_order_ids==1:
@@ -782,14 +781,9 @@ class ModifyOrderDb(SendApiRequest):
         order_id= order["order_id"]    
         order_state= order["order_state"]    
         
-        log.debug (f"order {order}")
-        
         # no label
         if label == '':
-            
-            log.error (f"order {order}")
-            
-            if "open" in order_state\
+            if"open" in order_state\
                 or "untriggered" in order_state:
                 
                 order_attributes = labelling_unlabelled_order (order)                   
@@ -801,8 +795,6 @@ class ModifyOrderDb(SendApiRequest):
                 
                 if "OTO" not in order ["order_id"]:
                     await self. cancel_by_order_id (order_id)  
-                    
-                log.warning (f"order_attributes {order_attributes}")
                 
                 await self.if_order_is_true(
                     non_checked_strategies,
