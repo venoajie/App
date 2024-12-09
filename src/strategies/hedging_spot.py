@@ -661,8 +661,6 @@ class HedgingSpot(BasicStrategy):
                     if "closed" in o["label"]\
                         and "open" not in (o["label"])]
                 
-                log.error (f"my_trades_orphan {my_trades_orphan}")
-
                 if  my_trades_orphan :
                     
                     max_timestamp = max([o["timestamp"] for o in my_trades_orphan])
