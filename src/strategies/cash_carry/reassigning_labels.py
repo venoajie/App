@@ -228,7 +228,8 @@ async def relabelling_double_ids(
                     for label in redundant_ids:
                         log.error (f"label {label}")
                         
-                        trade_ids =  (([o["trade_id"] for o in my_trade_instrument_name  if label in o["label"]]))
+                        trade_ids =  (([o["trade_id"] for o in my_trade_instrument_name  \
+                            if label in o["label"]]))
                         
                         if trade_ids:
                             
@@ -253,9 +254,10 @@ async def relabelling_double_ids(
                                 
                                 relabelling = True
 
-                                break
-        
+                                break    
     return relabelling
+    
+    
     
 async def pairing_single_label(
     strategy_attributes: list,
@@ -280,6 +282,7 @@ async def pairing_single_label(
     #log.warning (f"single_label_transaction {single_label_transaction}")
     
     if single_label_transaction:
+        
         my_trades_amount = remove_redundant_elements([abs(o["amount"]) for o in single_label_transaction])
 
         strategy_params =  strategy_params= [o for o in strategy_attributes \
@@ -311,6 +314,8 @@ async def pairing_single_label(
                 my_trades_perpetual_with_lower_price_sorted = sorting_list(
                     my_trades_perpetual_with_lower_price,"price",
                     False)       
+                
+                log.error (f"my_trades_future_sorted {}")
                 
                 if my_trades_perpetual_with_lower_price_sorted:
 
