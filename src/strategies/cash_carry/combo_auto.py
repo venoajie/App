@@ -995,6 +995,8 @@ class ComboAuto (BasicStrategy):
                                         instrument_name
                                         )[0]
                                     
+                                    log.error (f"label_open {label_open}")
+                                    
                                     params.update({"label": label_open})
                                     
                                     params.update({"entry_price": ticker_instrument["best_ask_price"]})
