@@ -353,9 +353,9 @@ class RunningStrategy(ModifyOrderDb):
                 cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
                     if o["cancellable"]==True]
                 
-                trade_db_table= self.relevant_tables("my_trades_all_json")
+                trade_db_table= self.relevant_tables["my_trades_all_json"]
                 
-                order_db_table= self.relevant_tables("orders_all_json")         
+                order_db_table= self.relevant_tables["orders_all_json"]        
                                 
                 settlement_periods = get_settlement_period (strategy_attributes)
                                 
