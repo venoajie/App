@@ -287,8 +287,12 @@ async def pairing_single_label(
 
         strategy_params =  strategy_params= [o for o in strategy_attributes \
                                                     if o["strategy_label"] == strategy][0]  
+        
+        log.error (f"my_trades_amount {my_trades_amount}")
             
         for amount in my_trades_amount:
+            
+            log.error (f"amount {amount}")
             
             my_trades_with_the_same_amount = [o for o in single_label_transaction\
                 if amount == abs(o["amount"])]
