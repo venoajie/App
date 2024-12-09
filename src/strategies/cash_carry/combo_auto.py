@@ -949,7 +949,7 @@ class ComboAuto (BasicStrategy):
                             else:
                                 transaction_in_profit = bid_price_perpetual > selected_transaction_price + (selected_transaction_price * tp_threshold)
 
-                            log.error (f"closing_size_ok {closing_size_ok} basic_size {basic_size} net_size {net_size} size {size} transaction_in_profit {transaction_in_profit}")
+                            log.error (f"transaction_in_profit {transaction_in_profit}")
                             
                             if transaction_in_profit:
 
