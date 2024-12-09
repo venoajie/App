@@ -8,6 +8,9 @@ from dataclassy import dataclass, fields
 from loguru import logger as log
 
 # user defined formula
+
+from db_management.sqlite_management import (
+    update_status_data)
 from strategies.basic_strategy import (
     BasicStrategy,
     are_size_and_order_appropriate,
@@ -595,7 +598,10 @@ class HedgingSpot(BasicStrategy):
         futures_instruments,
         orders_currency_strategy: list,
         ask_price: float,
-    ) -> dict:
+        archive_db_table: str,
+        trade_db_table: str
+        ) -> dict:
+        
         """ """
         
         order_allowed = False
@@ -644,7 +650,7 @@ class HedgingSpot(BasicStrategy):
             SIZE_FACTOR,
             len_open_orders
             )
-        
+
         # additional test for possibilities of orphaned closed orders was existed
         if not order_allowed:        
             
@@ -657,43 +663,34 @@ class HedgingSpot(BasicStrategy):
                 
                 log.error (f"my_trades_orphan {my_trades_orphan}")
 
-                if False and my_trades_orphan !=[]:
+                if  my_trades_orphan :
                     
-                    max_timestamp = max([o["timestamp"] for o in my_trades_orphan])
                     transaction = [o for o in my_trades_orphan if max_timestamp == o["timestamp"]][0]
                     
-                    instrument_name = transaction["instrument_name"]
-                            
-                    instrument_ticker: list = reading_from_pkl_data(
-                        "ticker",
-                        instrument_name)
-
-                    if instrument_ticker:
-                        
-                        instrument_ticker = instrument_ticker[0]
-
-                        best_ask_price = instrument_ticker["best_ask_price"]
-                        
-                        transaction_price = transaction["price"]
-                        
-                        if transaction_price < best_ask_price:
-                                                    
-                            params = {}
-
-                            # determine side        
-                            params.update({"side": "sell"})
-                            params.update({"type": "limit"})
-                            params.update({"size": abs(transaction["amount"])})
+                    label_integer = get_label_integer(transaction ["label"])
                     
-                            label_integer = get_label_integer(transaction ["label"])
-                            
-                            params.update({"label": f"{self.strategy_label}-open-{label_integer}"})
-                            
-                            params.update({"instrument_name": instrument_name})
-                            
-                            params.update({"entry_price": best_ask_price})
-
-                            order_allowed = True
+                    new_label = f"futureSpread-open-{label_integer}"
+                    
+                    filter = "label"
+                    
+                    await update_status_data(
+                        archive_db_table,
+                        "label",
+                        filter,
+                        transaction ["label"],
+                        new_label,
+                        "="
+                        )
+                
+                    await update_status_data(
+                            trade_db_table,
+                            "label",
+                            filter,
+                            transaction ["label"],
+                            new_label,
+                            "="
+                            )
+                    
             
         return dict(
             order_allowed=order_allowed and len_open_orders == 0,
