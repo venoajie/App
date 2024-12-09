@@ -371,7 +371,8 @@ class ModifyOrderDb(SendApiRequest):
              
     async def if_cancel_is_true(
         self,
-        order)-> None:
+        order_db_table: str,
+        order: dict)-> None:
         """ """
 
         if order["cancel_allowed"]:
@@ -454,8 +455,9 @@ class ModifyOrderDb(SendApiRequest):
         self,
         instrument_name: str,
         start_timestamp: int,
-        archive_db_table,
-        trade_db_table,
+        archive_db_table: str,
+        trade_db_table: str,
+        order_db_table: str,
         count: int =  500
         )-> None:
         """

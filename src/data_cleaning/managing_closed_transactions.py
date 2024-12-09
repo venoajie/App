@@ -258,7 +258,8 @@ def get_closed_open_transactions_under_same_label_int(
 
 
 async def distribute_closed_transactions(
-    trade_table,
+    trade_table: str,
+    closed_table: str,
     closed_transaction: dict, 
     where_filter: str,
     ) -> None:
@@ -269,7 +270,7 @@ async def distribute_closed_transactions(
     #insert closed transaction to db for closed transaction
     
     await deleting_row(
-        "my_trades_closed_json",
+        closed_table,
         "databases/trading.sqlite3",
         where_filter,
         "=",
@@ -277,7 +278,7 @@ async def distribute_closed_transactions(
     )
     
     await insert_tables(
-        "my_trades_closed_json", 
+        closed_table, 
         closed_transaction
         )
 
@@ -345,7 +346,8 @@ async def closing_orphan_order(
 async def closing_one_to_one(
     transaction_closed_under_the_same_label_int: dict, 
     where_filter: str,
-    trade_table: str
+    trade_table: str,
+    closed_table: str
     ) -> None:
     """
     """
@@ -354,6 +356,7 @@ async def closing_one_to_one(
     
         await distribute_closed_transactions(
             trade_table,
+            closed_table,
             transaction, 
             where_filter,
             )
@@ -437,6 +440,7 @@ async def closing_one_to_many(
 async def clean_up_closed_transactions(
     currency: str, 
     trade_table: str,
+    closed_table: str,
     transaction_all: list = None
     ) -> None:
     """
@@ -461,9 +465,10 @@ async def clean_up_closed_transactions(
             "all",
             "all",
             column_list,
-            )   
+            )
+           
         transaction_all = [o for o in transaction_all\
-                                        if o["label"] is not None]        
+            if o["label"] is not None]        
 
     else:      
         
@@ -520,7 +525,8 @@ async def clean_up_closed_transactions(
                             await closing_one_to_one(
                                 instrument_transactions,
                                 where_filter,
-                                trade_table
+                                trade_table,
+                                closed_table
                                 )
 
                 if size_to_close != 0:

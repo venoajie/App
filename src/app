@@ -970,6 +970,7 @@ class RunningStrategy(ModifyOrderDb):
                                             #await clean_up_closed_transactions(
                                             #    currency, 
                                             #    trade_db_table,
+                                            # closed_table,
                                             #    my_trades_currency_active_free_blanks
                                             #    )
                                                         

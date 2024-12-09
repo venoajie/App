@@ -24,7 +24,7 @@ def telegram_bot_sendtext(
     
 async def saving_traded_orders(
     trade: str,
-    table: str,
+    trade_table: str,
     order_db_table: str 
     ) -> None:
     
@@ -41,7 +41,7 @@ async def saving_traded_orders(
     # record trading transaction
     if "-FS-" not in instrument_name:
         await insert_tables(
-                table, 
+                trade_table, 
                 trade
                 )
         
@@ -64,13 +64,14 @@ async def saving_traded_orders(
         label= trade["label"]
         
         # check if the transaction was a closing transaction and need to cleaned up
-        if "my_trades_all_json" in table:
+        if "my_trades_all_json" in trade_table:
             
             if   "closed" in label:
                                         
                     await clean_up_closed_transactions(
                         instrument_name,
-                        table
+                        trade_table,
+                        order_db_table,
                         )
             
     except:
