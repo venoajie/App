@@ -306,15 +306,20 @@ class RunningStrategy(ModifyOrderDb):
     websocket_client: websockets.WebSocketClientProtocol = None
     refresh_token: str = None
     refresh_token_expiry_time: int = None
+    config_app: list = fields
+    relevant_tables: dict = fields
             
     def __post_init__(self):
         self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
         self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
         self.client_secret: str = parse_dotenv(self.sub_account_id)["client_secret"]
+        # parsing config file
+        self.config_app = get_config("config_strategies.toml")
+        self.relevant_tables = {"trade_db_table",
+                                "orders_all_json"}
 
         # Start Primary Coroutine
         self.loop.run_until_complete(self.ws_manager())
-    
     
     async def ws_manager(self) -> None:
         async with websockets.connect(
@@ -324,23 +329,17 @@ class RunningStrategy(ModifyOrderDb):
             close_timeout=60,
         ) as self.websocket_client:
                 
-            # registering strategy config file    
-            file_toml = "config_strategies.toml"
                 
             try:
                     
                 # parsing config file
-                config_app = get_config(file_toml)
+                config_app = self.config_app
 
                 # get tradable strategies
                 tradable_config_app = config_app["tradable"]
                 
                 # get tradable currencies
                 currencies= [o["spot"] for o in tradable_config_app] [0]
-                
-                #mode_full = [o["mode_full"] for o in tradable_config_app] [0][0]
-
-                #mode_full = [o["mode_full"] for o in tradable_config_app] [0][0]
                 
                 strategy_attributes = config_app["strategies"]
                                             
@@ -354,9 +353,9 @@ class RunningStrategy(ModifyOrderDb):
                 cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
                     if o["cancellable"]==True]
                 
-                trade_db_table= "my_trades_all_json"
+                trade_db_table= self.relevant_tables("my_trades_all_json")
                 
-                order_db_table= "orders_all_json"         
+                order_db_table= self.relevant_tables("orders_all_json")         
                                 
                 settlement_periods = get_settlement_period (strategy_attributes)
                                 
@@ -581,23 +580,16 @@ class RunningStrategy(ModifyOrderDb):
                                                     currency,
                                                     cancellable_strategies
                                                     )
-                                            
-                                            await reconciling_orders(
-                                                self.modify_order_and_db,
-                                                sub_account,
-                                                orders_currency,
-                                                "from_sub_account_to_order_db",
-                                                order_db_table
+                                                
+                                            reconciliation_direction = ["from_sub_account_to_order_db","from_order_db_to_sub_account"]
+                                            for  direction in reconciliation_direction:
+                                                await reconciling_orders(
+                                                    self.modify_order_and_db,
+                                                    sub_account,
+                                                    orders_currency,
+                                                    direction,
+                                                    order_db_table
                                                 )
-                                            
-
-                                            await reconciling_orders(
-                                                self.modify_order_and_db,
-                                                sub_account,
-                                                orders_currency,
-                                                "from_order_db_to_sub_account",
-                                                order_db_table
-                                                )                   
 
                                             for strategy in active_strategies:
                                                 
@@ -648,6 +640,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                                                 if "-FS-" not in o and currency_upper in o]),
                                                                                             max_order_currency)
                                                                 
+                                                    tables = [archive_db_table, trade_db_table]
+                                                    
                                                     #! closing active trades
                                                     for label in labels:
                                                         
@@ -674,24 +668,16 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                                 filter = "label"
                                                                 
-                                                                await update_status_data(
-                                                                    archive_db_table,
-                                                                    "label",
-                                                                    filter,
-                                                                    label,
-                                                                    new_label,
-                                                                    "="
-                                                                    )
-                                                                
-                                                                await update_status_data(
-                                                                        trade_db_table,
+                                                                for table in tables:
+                                                                    await update_status_data(
+                                                                        table,
                                                                         "label",
                                                                         filter,
                                                                         label,
                                                                         new_label,
                                                                         "="
                                                                         )
-                                                                
+                                                                  
                                                                 log.debug ("renaming combo Auto done")
                                                                 
                                                                 await self.modify_order_and_db.cancel_the_cancellables(
@@ -714,24 +700,16 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                                 filter = "label"
                                                                 
-                                                                await update_status_data(
-                                                                    archive_db_table,
-                                                                    "label",
-                                                                    filter,
-                                                                    label,
-                                                                    new_label,
-                                                                    "="
-                                                                    )
-                                                            
-                                                                await update_status_data(
-                                                                        trade_db_table,
+                                                                for table in tables:
+                                                                    await update_status_data(
+                                                                        table,
                                                                         "label",
                                                                         filter,
                                                                         label,
                                                                         new_label,
                                                                         "="
                                                                         )
-                                                                
+                                                            
                                                             #! closing unpaired transactions                                                            
                                                             else:
                                                                 
@@ -783,11 +761,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     await self.processing_orders(
                                                                                             send_order,
                                                                                             currency,
-                                                                                            non_checked_strategies,
-                                                                                            order_db_table,
-                                                                                            trade_db_table,
-                                                                                            archive_db_table,
-                                                                                            transaction_log_trading_table)
+                                                                                            non_checked_strategies
+                                                                                            )
                                                         
                                                                                     break            
                                                                         
@@ -844,11 +819,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 await self.processing_orders(
                                                                     send_order,
                                                                     currency,
-                                                                    non_checked_strategies,
-                                                                    order_db_table,
-                                                                    trade_db_table,
-                                                                    archive_db_table,
-                                                                    transaction_log_trading_table)
+                                                                    non_checked_strategies)
                                     
                                                                 send_order = []                           
                                                                                         
@@ -869,11 +840,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     await self.processing_orders(
                                                                     send_order,
                                                                     currency,
-                                                                    non_checked_strategies,
-                                                                    order_db_table,
-                                                                    trade_db_table,
-                                                                    archive_db_table,
-                                                                    transaction_log_trading_table)
+                                                                    non_checked_strategies)
                                                     
                                                     if orders_currency_strategy:
                                                         for order in orders_currency_strategy:
@@ -958,11 +925,8 @@ class RunningStrategy(ModifyOrderDb):
                                                             await self.processing_orders(
                                                                 send_order,
                                                                 currency,
-                                                                non_checked_strategies,
-                                                                order_db_table,
-                                                                trade_db_table,
-                                                                archive_db_table,
-                                                                transaction_log_trading_table)
+                                                                non_checked_strategies
+                                                                )
                                                                 
                                                             if my_trades_currency_strategy_open !=[]:
                                                                                                                                             
@@ -993,11 +957,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     await self.processing_orders(
                                                                         send_closing_order,
                                                                         currency,
-                                                                        non_checked_strategies,
-                                                                        order_db_table,
-                                                                        trade_db_table,
-                                                                        archive_db_table,
-                                                                        transaction_log_trading_table)
+                                                                        non_checked_strategies)
                             
                             
                                                     if orders_currency_strategy:
@@ -1035,24 +995,26 @@ class RunningStrategy(ModifyOrderDb):
                 await telegram_bot_sendtext (
                     error,
                     "general_error")
-                            
+              
               
     async def processing_orders(
         self,
         order_analysis_result: dict,
         currency: str,
         non_checked_strategies: list,
-        order_db_table: str,
-        trade_db_table: str, 
-        archive_db_table: str,
-        transaction_log_trading_table: str
-        ,
         ) -> None:
         """
         """
         
         try:
+            transaction_log_trading_table= f"transaction_log_{currency.lower()}_json"
             
+            archive_db_table= f"my_trades_all_{currency.lower()}_json"
+        
+            trade_db_table= self.relevant_tables("my_trades_all_json")
+            
+            order_db_table= self.relevant_tables("orders_all_json")         
+                                    
             if order_analysis_result["order_allowed"]:
                 
                 log.error (f"send_order {order_analysis_result}")
