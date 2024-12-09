@@ -362,6 +362,39 @@ async def update_instruments(idle_time):
     except Exception as error:
         await async_raise_error_message(error)
 
+
+
+async def downloading_sub_account(
+    sub_account_id: str,
+    config_app: list,
+    idle_time: int
+    ) -> None:
+
+                
+    try:
+        # get tradable strategies
+        tradable_config_app = config_app["tradable"]
+        
+        # get tradable currencies
+        currencies= [o["spot"] for o in tradable_config_app] [0]
+
+        modify_order_and_db = ModifyOrderDb(sub_account_id)
+            
+        while True:
+            
+            for currency in currencies:
+                                
+                sub_account = await modify_order_and_db.get_sub_account(currency)
+                
+                log.debug (f"sub_account {sub_account}")
+
+
+            await asyncio.sleep(idle_time)
+
+    except Exception as error:
+        await async_raise_error_message(error)
+
+
 async def reconciling_size(
     sub_account_id: str,
     config_app: list,
@@ -663,6 +696,12 @@ async def main():
             2
             ),
         
+        downloading_sub_account(
+            sub_account_id,
+            config_app,
+            5
+            ),
+    
         update_ohlc_and_market_condition(
             tradable_config_app, 
             15), 
