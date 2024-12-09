@@ -323,6 +323,8 @@ async def pairing_single_label(
                     #log.debug (f"my_trades_perpetual_with_lower_price_sorted {my_trades_perpetual_with_lower_price_sorted}")
 
                     perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]  
+                    
+                    log.error (f"perpetual_trade {perpetual_trade}")
 
                     waiting_time_expired = waiting_time_has_expired(
                         strategy_params,
