@@ -339,12 +339,12 @@ def is_new_transaction_will_reduce_delta(
     
     if delta > 0:
         
-        log.warning (f"new_transaction_will_reduce_delta {proforma < delta } proforma {proforma} delta {delta} side {side} selected_transaction_size {selected_transaction_size}")
+        log.warning (f"will_reduce_delta {proforma < delta} proforma {proforma} delta {delta}")
     
         return proforma < delta 
     
     if delta < 0:
-        log.warning (f"new_transaction_will_reduce_delta {delta < proforma } proforma {proforma} delta {delta} side {side} selected_transaction_size {selected_transaction_size}")
+        log.warning (f"will_reduce_delta {delta < proforma} proforma {proforma} delta {delta}")
         return delta < proforma
 
 async def get_market_condition_future_spread(
