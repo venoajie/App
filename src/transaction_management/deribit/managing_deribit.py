@@ -124,13 +124,14 @@ class ModifyOrderDb(SendApiRequest):
         
     async def cancel_by_order_id(
         self,
-        open_order_id
+        order_db_table: str,
+        open_order_id: str
         )-> None:
 
         where_filter = f"order_id"
         
         await deleting_row (
-            "orders_all_json",
+            order_db_table,
             "databases/trading.sqlite3",
             where_filter,
             "=",
@@ -152,6 +153,7 @@ class ModifyOrderDb(SendApiRequest):
 
     async def cancel_the_cancellables(
         self,
+        order_db_table: str,
         currency: str,
         cancellable_strategies: list,
         open_orders_sqlite: list = None
@@ -184,7 +186,9 @@ class ModifyOrderDb(SendApiRequest):
                     
                     for order_id in open_orders_cancellables_id:
 
-                        await self.cancel_by_order_id(order_id)
+                        await self.cancel_by_order_id(
+                            order_db_table,
+                            order_id)
 
         await self.resupply_sub_accountdb(currency.upper())      
         
@@ -373,7 +377,10 @@ class ModifyOrderDb(SendApiRequest):
         if order["cancel_allowed"]:
 
             # get parameter orders
-            await self.cancel_by_order_id(order["cancel_id"])
+            await self.cancel_by_order_id(
+                order_db_table,
+                order["cancel_id"]
+                )
 
   
     async def cancel_all_orders(self)-> None:
@@ -412,11 +419,12 @@ class ModifyOrderDb(SendApiRequest):
                 
                 return []
                 #await asyncio.sleep(10)
-    
+
     async def update_trades_from_exchange(
         self,
         currency: str,
         archive_db_table,
+        order_db_table,
         count: int =  5
         )-> None:
         """
@@ -437,7 +445,8 @@ class ModifyOrderDb(SendApiRequest):
 
                     await saving_traded_orders(
                         trade,
-                        archive_db_table
+                        archive_db_table,
+                        order_db_table
                         )
 
     
@@ -497,12 +506,14 @@ class ModifyOrderDb(SendApiRequest):
 
                     await saving_traded_orders(
                         trade,
-                        archive_db_table
+                        archive_db_table,
+                        order_db_table
                         )
 
                     await saving_traded_orders(
                         trade,
-                        trade_db_table
+                        trade_db_table,
+                        order_db_table
                         )
                 else:
                             
@@ -514,12 +525,14 @@ class ModifyOrderDb(SendApiRequest):
                     if not trade_trd_id_not_in_archive:
                         await saving_traded_orders(
                             trade,
-                            archive_db_table
+                            archive_db_table,
+                            order_db_table
                             )
 
                         await saving_traded_orders(
                             trade,
-                            trade_db_table
+                            trade_db_table,
+                            order_db_table
                             )
                         
     async def send_triple_orders(
@@ -673,7 +686,10 @@ class ModifyOrderDb(SendApiRequest):
                                 transaction_main
                                 )
                             
-                            await self. cancel_by_order_id (transaction_main["order_id"])  
+                            await self. cancel_by_order_id (
+                                order_db_table,
+                                transaction_main["order_id"]
+                                )  
                             
                             await self.if_order_is_true(
                                 non_checked_strategies,
@@ -795,7 +811,9 @@ class ModifyOrderDb(SendApiRequest):
                     )
                 
                 if "OTO" not in order ["order_id"]:
-                    await self. cancel_by_order_id (order_id)  
+                    await self. cancel_by_order_id (
+                        order_db_table,
+                        order_id)  
                 
                 await self.if_order_is_true(
                     non_checked_strategies,
@@ -827,4 +845,7 @@ class ModifyOrderDb(SendApiRequest):
                         order
                         )
 
-                    await self. cancel_by_order_id (order_id)                    
+                    await self. cancel_by_order_id (
+                        order_db_table,
+                        order_id
+                        )                    

@@ -25,7 +25,7 @@ def telegram_bot_sendtext(
 async def saving_traded_orders(
     trade: str,
     table: str,
-    order_db_table: str = "orders_all_json"
+    order_db_table: str 
     ) -> None:
     
     """_summary_

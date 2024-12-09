@@ -444,9 +444,10 @@ async def reconciling_size(
                                 if o["cancellable"]==True]
                             
                             await modify_order_and_db.cancel_the_cancellables(
-                                                        currency,
-                                                        cancellable_strategies
-                                                        )
+                                order_db_table,
+                                currency,
+                                cancellable_strategies
+                                )
 
                     
                     # FROM sub account to other db's
@@ -618,9 +619,10 @@ async def reconciling_size(
                             if o["cancellable"]==True]
                         
                         await modify_order_and_db.cancel_the_cancellables(
-                                                    currency,
-                                                    cancellable_strategies)
-                                    
+                            order_db_table,
+                            currency,
+                            cancellable_strategies)
+            
                     
                     await clean_up_closed_transactions(
                         currency, 

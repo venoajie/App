@@ -515,6 +515,7 @@ class RunningStrategy(ModifyOrderDb):
                                             if len_label >1:
                                                 log.critical (f"double ids {label}")
                                                 await self.modify_order_and_db.cancel_the_cancellables(
+                                                    order_db_table,
                                                     currency,
                                                     cancellable_strategies
                                                     )
@@ -576,6 +577,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA}")
                                                 
                                                 await self.modify_order_and_db.cancel_the_cancellables(
+                                                    order_db_table,
                                                     currency,
                                                     cancellable_strategies
                                                     )
@@ -680,6 +682,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 log.debug ("renaming combo Auto done")
                                                                 
                                                                 await self.modify_order_and_db.cancel_the_cancellables(
+                                                                    order_db_table,
                                                                     currency,
                                                                     cancellable_strategies
                                                                     )
@@ -838,7 +841,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                 server_time,
                                                                 )
                                                             if cancel_allowed["cancel_allowed"]:
-                                                                await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
+                                                                await self.modify_order_and_db.if_cancel_is_true(
+                                                                    order_db_table,
+                                                                    cancel_allowed)
                                                                     
                                                     log.warning (f"strategy {strategy}-DONE")
                                                 
@@ -951,7 +956,10 @@ class RunningStrategy(ModifyOrderDb):
                                                                 )
                                                             
                                                             if cancel_allowed["cancel_allowed"]:
-                                                                await self.modify_order_and_db.if_cancel_is_true(cancel_allowed)
+                                                                await self.modify_order_and_db.if_cancel_is_true(
+                                                                    order_db_table,
+                                                                    cancel_allowed
+                                                                    )
                                                         
                                                     log.warning (f"strategy {strategy}-DONE")
                                             
