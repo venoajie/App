@@ -490,10 +490,7 @@ class RunningStrategy(ModifyOrderDb):
                                         )
                                     
                                     sub_account = sub_account[0]
-                                    
-                                    log.error (f" portfolio {portfolio}")
-                                    log.debug (f" sub_account {sub_account}")
-                                                
+                                              
                                     transaction_log_trading_table = f"transaction_log_{currency_lower}_json"
                                     
                                     if sub_account :
