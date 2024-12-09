@@ -665,6 +665,8 @@ class HedgingSpot(BasicStrategy):
 
                 if  my_trades_orphan :
                     
+                    max_timestamp = max([o["timestamp"] for o in my_trades_orphan])
+                    
                     transaction = [o for o in my_trades_orphan if max_timestamp == o["timestamp"]][0]
                     
                     label_integer = get_label_integer(transaction ["label"])
@@ -698,6 +700,8 @@ class HedgingSpot(BasicStrategy):
                 if not order_allowed \
                     else params,
         )
+
+
 
 
     async def is_send_exit_order_allowed(
