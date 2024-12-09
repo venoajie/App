@@ -954,7 +954,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                 trade_db_table
                                                                 
                                                                 )
-                                                            log.error (f"send_order {send_order}")
                                                             
                                                             await self.processing_orders(
                                                                 send_order,

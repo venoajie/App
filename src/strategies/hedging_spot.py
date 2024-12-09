@@ -149,20 +149,12 @@ def get_timing_factor(
 
     ONE_PCT = 1 / 100
 
-    ONE_MINUTE: int = 60000
-
     bearish_interval_threshold = (
         (threshold * ONE_PCT * 30) \
             if strong_bearish \
                 else (threshold * ONE_PCT * 60)
     )
     
-    log.debug (f"get_timing_factor {threshold} {(
-        threshold * bearish_interval_threshold
-        if (strong_bearish or bearish)\
-            else  threshold
-    )}")
-
     return (
         threshold * bearish_interval_threshold
         if (strong_bearish or bearish)\
