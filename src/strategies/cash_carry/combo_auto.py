@@ -962,8 +962,6 @@ class ComboAuto (BasicStrategy):
 
                             log.error (f"closing_size_ok {closing_size_ok} basic_size {basic_size} net_size {net_size} size {size} transaction_in_profit {transaction_in_profit}")
                             
-                            order_allowed = True      
-
                             if transaction_in_profit:
 
                                 if orders_instrument_transaction_closed == 0:
@@ -980,6 +978,8 @@ class ComboAuto (BasicStrategy):
                                 
                                     params.update({"label": closed_label})
                                     params.update({"entry_price": ask_price_perpetual})
+                                    
+                                    order_allowed = True      
                     
                             else:
                                 
@@ -1002,6 +1002,9 @@ class ComboAuto (BasicStrategy):
                                     params.update({"entry_price": ticker_instrument["best_ask_price"]})
                                     
                                     params.update({"instrument_name": instrument_name})
+                                    
+                                    order_allowed = True      
+                            
                             
             if instrument_side =="sell":
                 
