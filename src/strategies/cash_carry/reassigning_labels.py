@@ -302,6 +302,8 @@ async def pairing_single_label(
             my_trades_with_the_same_amount_label_non_perpetual_instrument_name = remove_redundant_elements(
                 [o["instrument_name"] for o in my_trades_with_the_same_amount_label_non_perpetual])
             
+            log.error (f"my_trades_with_the_same_amount_label_non_perpetual_instrument_name {my_trades_with_the_same_amount_label_non_perpetual_instrument_name}")
+            
             for instrument_name_future in my_trades_with_the_same_amount_label_non_perpetual_instrument_name:
                 
                 my_trades_with_the_same_amount_label_future = [o for o in my_trades_with_the_same_amount_label_non_perpetual\
