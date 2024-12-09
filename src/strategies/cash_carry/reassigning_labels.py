@@ -309,17 +309,18 @@ async def pairing_single_label(
                 price_future = future_trade["price"]
                 
                 my_trades_perpetual_with_lower_price = [o for o in my_trades_with_the_same_amount_label_perpetual \
-                    if o["price"] < price_future ]
+                    if o["price"] < price_future \
+                        and  o["price"] > 0]
                 
                 my_trades_perpetual_with_lower_price_sorted = sorting_list(
                     my_trades_perpetual_with_lower_price,"price",
                     False)       
                 
-                log.error (f"my_trades_future_sorted {my_trades_future_sorted}")
+                #log.error (f"my_trades_future_sorted {my_trades_future_sorted}")
                 
                 if my_trades_perpetual_with_lower_price_sorted:
                     
-                    log.debug (f"my_trades_perpetual_with_lower_price_sorted {my_trades_perpetual_with_lower_price_sorted}")
+                    #log.debug (f"my_trades_perpetual_with_lower_price_sorted {my_trades_perpetual_with_lower_price_sorted}")
 
                     perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]  
 
