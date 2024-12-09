@@ -35,7 +35,8 @@ from strategies.cash_carry.reassigning_labels import (
     relabelling_double_ids)
 from transaction_management.deribit.api_requests import (
     get_currencies,
-    get_instruments,)
+    get_instruments,
+    SendApiRequest)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -378,13 +379,17 @@ async def downloading_sub_account(
         # get tradable currencies
         currencies= [o["spot"] for o in tradable_config_app] [0]
 
-        modify_order_and_db = ModifyOrderDb(sub_account_id)
+        modify_order_and_db = SendApiRequest (sub_account_id)
             
         while True:
             
             for currency in currencies:
                                 
-                sub_account = await modify_order_and_db.get_sub_account(currency)
+                sub_account = await modify_order_and_db.get_subaccounts_details(currency)
+                
+                log.debug (f"sub_account {sub_account}")
+
+                sub_account = await modify_order_and_db.get_subaccounts()
                 
                 log.debug (f"sub_account {sub_account}")
 
