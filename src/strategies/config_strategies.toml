@@ -18,6 +18,8 @@ strategy_labels = [#represert strategy
        ]
 mode_full = [false]
 reduce_only = [true]
+
+[[relevant_tables]]
 my_trades_table = "my_trades_all_json"
 orders_table = "orders_all_json"
 
