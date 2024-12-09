@@ -26,6 +26,7 @@ from db_management.sqlite_management import (
     back_up_db_sqlite,
     deleting_row,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
+    executing_query_with_return,
     insert_tables, 
     querying_arithmetic_operator,)
 from market_understanding.technical_analysis import (
@@ -48,7 +49,8 @@ from utilities.string_modification import (
     extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
-    transform_nested_dict_to_list,)
+    transform_nested_dict_to_list,
+    remove_dict_elements)
 from utilities.system_tools import (
     async_raise_error_message,
     provide_path_for_file,
@@ -387,13 +389,39 @@ async def downloading_sub_account(
                                 
                 sub_account = await modify_order_and_db.get_subaccounts_details(currency)
                 
-                log.debug (f"sub_account {sub_account}")
-
-                sub_account = await modify_order_and_db.get_subaccounts()
-                
-                log.debug (f"sub_account {sub_account}")
-
-
+                if sub_account:
+                    
+                    positions = sub_account ["positions"][0]
+                    
+                    positions = remove_dict_elements(
+                        positions,
+                        "leverage")
+                    
+                    positions = remove_dict_elements(
+                        positions,
+                        "estimated_liquidation_price")
+                    
+                    positions = remove_dict_elements(
+                        positions,
+                        "kind")
+                    
+                    server_time = get_now_unix_time()  
+                    positions.update({"timestamp": server_time})
+                    
+                    log.debug (f"positions {positions}")
+                    await insert_tables(
+                        "account_summary_json", 
+                        positions
+                        )
+                    
+                    account_summary_json: list= await executing_query_with_return (
+                        "account_summary_json", 
+                        "currency", 
+                        currency
+                        )
+                    
+                    log.debug (f"account_summary_json {account_summary_json}")
+                    
             await asyncio.sleep(idle_time)
 
     except Exception as error:
