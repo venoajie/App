@@ -315,8 +315,8 @@ class RunningStrategy(ModifyOrderDb):
         self.client_secret: str = parse_dotenv(self.sub_account_id)["client_secret"]
         # parsing config file
         self.config_app = get_config("config_strategies.toml")
-        self.relevant_tables = {"trade_db_table",
-                                "orders_all_json"}
+        self.relevant_tables = [{"trade": "trade_db_table",
+                                "orders": "orders_all_json"}]
 
         # Start Primary Coroutine
         self.loop.run_until_complete(self.ws_manager())
@@ -353,9 +353,11 @@ class RunningStrategy(ModifyOrderDb):
                 cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
                     if o["cancellable"]==True]
                 
-                trade_db_table= self.relevant_tables["my_trades_all_json"]
+                relevant_tables = self.relevant_tables[0]
                 
-                order_db_table= self.relevant_tables["orders_all_json"]        
+                trade_db_table= relevant_tables["trades"]
+                
+                order_db_table= relevant_tables["orders"]        
                                 
                 settlement_periods = get_settlement_period (strategy_attributes)
                                 
