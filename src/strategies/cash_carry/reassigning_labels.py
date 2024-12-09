@@ -315,7 +315,7 @@ async def pairing_single_label(
                     my_trades_perpetual_with_lower_price,"price",
                     False)       
                 
-                log.error (f"my_trades_future_sorted {}")
+                log.error (f"my_trades_future_sorted {my_trades_future_sorted}")
                 
                 if my_trades_perpetual_with_lower_price_sorted:
 
