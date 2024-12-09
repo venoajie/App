@@ -786,6 +786,8 @@ class ModifyOrderDb(SendApiRequest):
         # no label
         if label == '':
             
+            log.error (f"order {order}")
+            
             if "open" in order_state\
                 or "untriggered" in order_state:
                 
@@ -798,6 +800,8 @@ class ModifyOrderDb(SendApiRequest):
                 
                 if "OTO" not in order ["order_id"]:
                     await self. cancel_by_order_id (order_id)  
+                    
+                log.warning (f"order_attributes {order_attributes}")
                 
                 await self.if_order_is_true(
                     non_checked_strategies,
