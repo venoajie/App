@@ -351,6 +351,8 @@ class RunningStrategy(ModifyOrderDb):
                     if o["cancellable"]==True]
                 
                 relevant_tables = config_app["relevant_tables"]
+                
+                log.error (f"relevant_tables {relevant_tables}")
                                 
                 trade_db_table= relevant_tables["my_trades_table"]
                 
