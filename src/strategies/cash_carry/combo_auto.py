@@ -1051,8 +1051,11 @@ class ComboAuto (BasicStrategy):
                                 order_allowed = True      
 
                                 params.update({"instrument_name": instrument_name_transaction})
+                                log.error (f"label_integer {label_integer}")
+                                log.error (f"strategy_label {strategy_label}")
                             
                                 label = f"{strategy_label}-closed-{label_integer}"
+                                log.error (f"label {label}")
                             
                                 params.update({"label": label})
                                 params.update({"entry_price": bid_price_perpetual})
