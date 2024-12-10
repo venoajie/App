@@ -521,8 +521,6 @@ async def clean_up_closed_transactions(
                         
                         if sum_instrument_transactions == 0:
                             log.info(F" instrument_transactions {instrument_transactions}")
-                            log.info(F" trade_table {trade_table}")
-                            log.info(F" closed_table {closed_table}")
                             
                             await closing_one_to_one(
                                 instrument_transactions,
