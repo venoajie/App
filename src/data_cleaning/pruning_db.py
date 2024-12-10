@@ -8,8 +8,6 @@ from db_management.sqlite_management import(
     deleting_row,
     executing_query_with_return,
     querying_arithmetic_operator,)
-from strategies.config_strategies import(
-    max_rows)
 from transaction_management.deribit.telegram_bot import(
     telegram_bot_sendtext,)
 
@@ -60,3 +58,20 @@ async def count_and_delete_ohlc_rows(
     except Exception as error:
         await telegram_bot_sendtext(f"error {error}")
             
+
+
+def max_rows(table) -> int:
+    """ """
+    if "market_analytics_json" in table:
+        threshold= 10
+    if "ohlc" in table:
+        threshold= 10000
+    if "supporting_items_json" in table:
+        threshold= 200
+    if "account_summary_json" in table:
+        downloading_times = 2 # every 30 seconds
+        currencies = 2 
+        instruments = 8
+        threshold= (downloading_times * currencies * instruments) * 120 # roughly = 2 hours
+        
+    return threshold

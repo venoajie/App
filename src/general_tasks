@@ -215,6 +215,7 @@ async def clean_up_databases(idle_time) -> None:
                     
         log.critical("count_and_delete_ohlc_rows-START")
         tables = ["market_analytics_json", 
+                "account_summary_json", 
                 "ohlc1_eth_perp_json", 
                 "ohlc1_btc_perp_json", 
                 "ohlc15_eth_perp_json", 
@@ -393,8 +394,6 @@ async def downloading_sub_account(
                     
                     positions = [o["positions"] for o in sub_account][0]
                     
-                    log.warning(positions)
-                    
                     if positions:
                         
                         server_time = get_now_unix_time()  
@@ -421,12 +420,12 @@ async def downloading_sub_account(
                             entry3
                             )
                             
-                            table = "account_summary_json"
+                            #table = "account_summary_json"
                         
-                            account_summary_json: list= await executing_query_with_return (
-                             f"SELECT * FROM  {table} ")
+                            #account_summary_json: list= await executing_query_with_return (
+                            # f"SELECT * FROM  {table} ")
                         
-                            log.debug (f"account_summary_json {account_summary_json}")
+                            #log.debug (f"account_summary_json {account_summary_json}")
                     
             await asyncio.sleep(idle_time)
 
@@ -738,7 +737,7 @@ async def main():
         downloading_sub_account(
             sub_account_id,
             config_app,
-            5
+            30
             ),
     
         update_ohlc_and_market_condition(
