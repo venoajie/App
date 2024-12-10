@@ -545,6 +545,7 @@ class ComboAuto (BasicStrategy):
             waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
             
             timestamp: int = transaction["timestamp"]
+            
 
             if "open" in transaction["label"]:
                 
@@ -561,6 +562,8 @@ class ComboAuto (BasicStrategy):
                         timestamp,
                         server_time,
                         )
+        
+        log.error (f"cancel_allowed {cancel_allowed} transaction {transaction} waiting_minute_before_cancel {waiting_minute_before_cancel}")
         
         return cancel_allowed
     
