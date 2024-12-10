@@ -817,8 +817,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 )
                                                                 
                                                             if len_sub_account_orders_all < 50\
-                                                                and not reduce_only \
-                                                                    and ticker_future and ticker_combo:
+                                                                and ticker_future and ticker_combo:
                                                                 
                                                                 ticker_combo= ticker_combo[0]
 
