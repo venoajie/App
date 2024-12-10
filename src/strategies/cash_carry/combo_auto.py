@@ -544,9 +544,10 @@ class ComboAuto (BasicStrategy):
             
             waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
             
+            #log.warning(f"waiting_minute_before_cancel {waiting_minute_before_cancel} {waiting_minute_before_cancel {waiting_minute_before_cancel}}")
+            
             timestamp: int = transaction["timestamp"]
             
-
             if "open" in transaction["label"]:
                 
                 cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
@@ -563,7 +564,7 @@ class ComboAuto (BasicStrategy):
                         server_time,
                         )
         
-        log.error (f"cancel_allowed {cancel_allowed} transaction {transaction} waiting_minute_before_cancel {waiting_minute_before_cancel}")
+        log.error (f"cancel_allowed {cancel_allowed} transaction {transaction} ")
         
         return cancel_allowed
     
