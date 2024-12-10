@@ -596,21 +596,6 @@ async def reconciling_size(
                                         archive_db_table,
                                         closed_table
                                         )
-                                                                
-                                if my_trades_active_archived_reconciled_each_other:
-                                    
-                                    my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
-                                        if o["label"] is not None]
-                                    
-                                    if  my_trades_currency_active_free_blanks:
-
-                                        await clean_up_closed_transactions(
-                                        currency, 
-                                        trade_db_table,
-                                        closed_table,
-                                        my_trades_currency_active_free_blanks
-                                        )
-                                                                            
                                     
                                     result_from_db_queries = await get_result_from_db_queries (
                                         currency,
@@ -636,7 +621,21 @@ async def reconciling_size(
                                         await executing_query_with_return (query_closed)
                                         await executing_query_with_return (query_active)
 
-  
+                                                                
+                                if my_trades_active_archived_reconciled_each_other:
+                                    
+                                    my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
+                                        if o["label"] is not None]
+                                    
+                                    if  my_trades_currency_active_free_blanks:
+
+                                        await clean_up_closed_transactions(
+                                        currency, 
+                                        trade_db_table,
+                                        closed_table,
+                                        my_trades_currency_active_free_blanks
+                                        )
+                                    
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
                                             instrument_name,
                                             my_trades_currency_archive,
