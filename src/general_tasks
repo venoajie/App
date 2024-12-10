@@ -543,21 +543,21 @@ async def reconciling_size(
                             #eliminating combo transactions as they're not recorded in the book
                             if "-FS-" not in instrument_name:
                                 
-                                transaction_log_and_sub_account_size_reconciled = is_transaction_log_and_sub_account_size_reconciled_each_other(
-                                    instrument_name,
-                                    from_transaction_log,
-                                    sub_account
-                                    )
+                                #transaction_log_and_sub_account_size_reconciled = is_transaction_log_and_sub_account_size_reconciled_each_other(
+                                #    instrument_name,
+                                #    from_transaction_log,
+                                #    sub_account
+                                #    )
 
                                 # transaction log amount is diff vs sub account. update both with data from exchange directly
-                                if not transaction_log_and_sub_account_size_reconciled:
-                                    await modify_order_and_db. resupply_sub_accountdb(currency)
-                                    await modify_order_and_db.resupply_transaction_log(
-                                            currency,
-                                            transaction_log_trading_table,
-                                            instrument_name,
-                                            1000 #random number
-                                            )
+                                #if not transaction_log_and_sub_account_size_reconciled:
+                                #    await modify_order_and_db. resupply_sub_accountdb(currency)
+                                #    await modify_order_and_db.resupply_transaction_log(
+                                #            currency,
+                                #            transaction_log_trading_table,
+                                #            instrument_name,
+                                #            1000 #random number
+                                #            )
                                                       
                                 my_trades_instrument_name_archive = ([o for o in my_trades_currency_archive\
                                 if instrument_name in o["instrument_name"]]
@@ -570,9 +570,7 @@ async def reconciling_size(
                                     )
                                           
                                 if not my_trades_active_archived_reconciled_each_other:
-                                    
-                                    await modify_order_and_db. resupply_sub_accountdb(currency)
-                                               
+                                                                                   
                                     await modify_order_and_db. resupply_sub_accountdb(currency)
                                     
                                     await my_trades_active_archived_not_reconciled_each_other(
@@ -603,8 +601,7 @@ async def reconciling_size(
                                     )    
 
 
-                                if  transaction_log_and_sub_account_size_reconciled \
-                                    and not my_trades_and_sub_account_size_reconciled_archive:
+                                if  not my_trades_and_sub_account_size_reconciled_archive:
                                     
                                     timestamp_log = min(
                                         [o["timestamp"] for o in my_trades_instrument_name_archive]
