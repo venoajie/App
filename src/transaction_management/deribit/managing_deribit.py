@@ -507,8 +507,8 @@ class ModifyOrderDb(SendApiRequest):
                         )
                 else:
                             
-                    #log.debug (f"{trade}")
                     trade_trd_id = trade["trade_id"]
+                    log.debug (f"{trade_trd_id}")
                     
                     trade_trd_id_not_in_archive = [o for o in my_trades_instrument_name_archive if trade_trd_id in o["trade_id"]]
 
