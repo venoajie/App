@@ -386,16 +386,17 @@ async def downloading_sub_account(
             
         while True:
             
+            sub_account_with_pf = await modify_order_and_db.get_subaccounts()
+            portfolio = sub_account_with_pf[0]["portfolio"]
+            
+            log.warning (f"portfolio {portfolio}")
+            
             for currency in currencies:
                                 
                 sub_account = await modify_order_and_db.get_subaccounts_details(currency)
-                
-                log.info (f"sub_account {sub_account}")
+                portfolio_currency = portfolio[f"{currency.lower()}"]
+                log.info (f"portfolio_currency {portfolio_currency}")
                                 
-                sub_account_with_pf = await modify_order_and_db.get_subaccounts()
-                
-                log.warning (f"sub_account_with_pf {sub_account_with_pf}")
-                
                 if sub_account:
                     
                     positions = [o["positions"] for o in sub_account][0]
@@ -422,7 +423,7 @@ async def downloading_sub_account(
                             
                             entry3.update({"value_usd": entry3["size"] * entry3["mark_price"]})
                             entry3.update({"timestamp": server_time})
-                            log.info(entry3)
+                            #log.info(entry3)
                         
                             await insert_tables(
                             "account_summary_json", 
