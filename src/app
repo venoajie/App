@@ -520,7 +520,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 len_aub_accoun_orders_all = len(sub_account_alt__orders)
                                                 
                                             else:
-                                                sub_account_orders_all = sub_account_orders | sub_account_alt__orders
+                                                sub_account_orders_all = sub_account_orders[0] | sub_account_alt__orders[0]
                                                 
                                                 len_aub_accoun_orders_all = len(sub_account_orders_all)
                                             
