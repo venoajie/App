@@ -617,6 +617,8 @@ class ComboAuto (BasicStrategy):
             transactions_sum = sum([ o["amount"] for o in transactions])
         
             transactions_len = len(transactions) # sum product function applied only for 2 items.
+            
+            log.error (label)
                         
             if transactions_sum== 0 \
                 and transactions_len==2:
@@ -665,7 +667,9 @@ class ComboAuto (BasicStrategy):
                             instrument_attributes_combo_all,
                             take_profit_threshold_original,
                             instrument_name_combo
-                            )                
+                            )    
+                                   
+                        log.debug  (f" {premium_pct > tp_threshold } basic_ordering_is_ok {basic_ordering_is_ok } current_premium > 0 {current_premium} {current_premium > 0} current_premium < transactions_premium {current_premium < transactions_premium}")
                                         
                         if premium_pct > tp_threshold \
                             and basic_ordering_is_ok\

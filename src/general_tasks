@@ -215,7 +215,7 @@ async def clean_up_databases(idle_time) -> None:
                     
         log.critical("count_and_delete_ohlc_rows-START")
         tables = ["market_analytics_json", 
-                "account_summary_json", 
+                #"account_summary_json", 
                 "ohlc1_eth_perp_json", 
                 "ohlc1_btc_perp_json", 
                 "ohlc15_eth_perp_json", 
@@ -747,11 +747,11 @@ async def main():
             2
             ),
         
-        downloading_sub_account(
-            sub_account_id,
-            config_app,
-            30
-            ),
+        #downloading_sub_account(
+        #    sub_account_id,
+        ##   config_app,
+        #    30
+        #    ),
     
         update_ohlc_and_market_condition(
             tradable_config_app, 
