@@ -642,6 +642,8 @@ async def reconciling_size(
                                             my_trades_currency_archive,
                                             sub_account
                                             )  
+                                
+                                log.critical(f"my_trades_and_sub_account_size_reconciled_archive {my_trades_and_sub_account_size_reconciled_archive} {not my_trades_and_sub_account_size_reconciled_archive}")
                                   
                                 if  not my_trades_and_sub_account_size_reconciled_archive:
                                     
