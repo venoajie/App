@@ -400,7 +400,6 @@ async def downloading_sub_account(
                         server_time = get_now_unix_time()  
                         
                         for position in positions:
-                            log.info(position)
                         
                             entry1 = remove_dict_elements(
                             position,
@@ -415,6 +414,7 @@ async def downloading_sub_account(
                             "kind")
                             
                             entry3.update({"timestamp": server_time})
+                            log.info(entry3)
                         
                             await insert_tables(
                             "account_summary_json", 
