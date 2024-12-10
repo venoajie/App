@@ -648,7 +648,7 @@ async def reconciling_size(
                                 if  not my_trades_and_sub_account_size_reconciled_archive:
                                     
                                     timestamp_log = min(
-                                        [o["timestamp"] for o in my_trades_instrument_name_archive]
+                                        [o["timestamp"] for o in my_trades_currency_archive]
                                         )
                                     
                                     log.critical(f"timestamp_log {timestamp_log}")
