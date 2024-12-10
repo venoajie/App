@@ -706,6 +706,8 @@ class ComboAuto (BasicStrategy):
                                                     
                                 order_allowed = True
          
+        log.debug  (f"order_allowed {order_allowed}")
+        log.debug  (f"order_parameters {exit_params}")
         return dict(
             order_allowed= order_allowed,
             order_parameters=(
