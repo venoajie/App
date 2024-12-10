@@ -493,12 +493,13 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     open_orders_all =[]
                                     for currency in currency:
-                                        sub_account = reading_from_pkl_data(
+                                        sub_account_ = reading_from_pkl_data(
                                         "sub_accounts",
                                         currency
                                         )
+                                        log.info (f"sub_account {sub_account_}")
                                         
-                                        sub_account = sub_account[0]
+                                        sub_account = sub_account_[0]
                                         
                                         sub_account_orders = sub_account["open_orders"]
                                         open_orders_all.append (sub_account_orders)
