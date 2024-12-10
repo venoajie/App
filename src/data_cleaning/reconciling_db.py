@@ -187,7 +187,7 @@ async def my_trades_active_archived_not_reconciled_each_other(
     closed_db_table: str
     ) -> None:
     
-    column_trade: str= "instrument_name","data","trade_id","timestamp","price"
+    column_trade: str= "instrument_name","data","trade_id","timestamp","price","amount"
     
     my_trades_instrument_name_active = await get_query(trade_db_table, 
                 instrument_name, 
@@ -215,7 +215,8 @@ async def my_trades_active_archived_not_reconciled_each_other(
     
     
     my_trades_currency_active_with_blanks = [o["id"] for o in my_trades_instrument_name_active\
-                    if o["price"] is  None]
+                    if o["price"] is  None\
+                        or o["amount"]is None]
     
     log.error (f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}")
     
