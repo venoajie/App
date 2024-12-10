@@ -421,9 +421,7 @@ async def downloading_sub_account(
                             table = "account_summary_json"
                         
                             account_summary_json: list= await executing_query_with_return (
-                             f"SELECT {table} * FROM {table} " , 
-                            currency
-                            )
+                             f"SELECT * FROM  {table} ")
                         
                             log.debug (f"account_summary_json {account_summary_json}")
                     
