@@ -492,15 +492,7 @@ class RunningStrategy(ModifyOrderDb):
                                         )
                                     
                                     sub_account = sub_account[0]
-                                    
-                                    currency_alternative = [o for o in currencies if currency_upper not in o][0]
                                 
-
-                                    sub_account_alt = reading_from_pkl_data(
-                                    "sub_accounts",
-                                    currency_alternative.lower()
-                                    )
-                                    
                                     sub_account_orders = sub_account["open_orders"]
                                     
                                     len_sub_account_orders_all = len(sub_account_orders)
@@ -530,17 +522,21 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         for label in outstanding_order_id:
                                             
-                                            len_label = len([o["label"] for o in orders_currency\
+                                            orders = ([o for o in orders_currency\
                                                 if label in o["label"]])
                                             
+                                            len_label = len(orders)
+                                            
                                             if len_label >1:
-                                                log.critical (f"double ids {label}")
-                                                log.critical ([o for o in orders_currency if label in o["label"]])
-                                                await self.modify_order_and_db.cancel_the_cancellables(
-                                                    order_db_table,
-                                                    currency,
-                                                    cancellable_strategies
-                                                    )
+                                                
+                                                for order in orders:
+                                                    log.critical (f"double ids {label}")
+                                                    log.critical ([o for o in orders_currency if label in o["label"]])
+                                                    await self. cancel_by_order_id (
+                                                        order_db_table,
+                                                        order["order_id"]
+                                                        )
+                                                    break
                                         
                                         position = [o for o in sub_account["positions"]]
                                         #log.debug (f"position {position}")
