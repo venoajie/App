@@ -508,11 +508,16 @@ class ModifyOrderDb(SendApiRequest):
                 else:
                             
                     trade_trd_id = trade["trade_id"]
-                    log.debug (f"{trade_trd_id}")
+                    
                     
                     trade_trd_id_not_in_archive = [o for o in my_trades_instrument_name_archive if trade_trd_id in o["trade_id"]]
+                    
+                    log.info (f"{trade_trd_id_not_in_archive}")
 
                     if not trade_trd_id_not_in_archive:
+                        
+                        log.debug (f"{trade_trd_id}")
+                        
                         await saving_traded_orders(
                             trade,
                             archive_db_table,
