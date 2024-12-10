@@ -663,6 +663,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                 instrument_attributes_combo_all,
                                                                 TP_THRESHOLD)
                                                                 
+                                                                await self.processing_orders(send_order)
+                                                                
                                                             else:                                                               
                                                                 
                                                                 new_label = f"futureSpread-open-{label_integer}"
