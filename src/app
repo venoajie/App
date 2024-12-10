@@ -945,6 +945,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         orders_currency_strategy_label_closed,
                                                                         instrument_ticker[0]["best_bid_price"],
                                                                         nearest_transaction_to_index,
+                                                                        orders_currency_strategy
                                                                         )
 
                                                                     await self.processing_orders(send_closing_order)

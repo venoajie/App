@@ -690,14 +690,12 @@ class HedgingSpot(BasicStrategy):
                     else params,
         )
 
-
-
-
     async def is_send_exit_order_allowed(
         self,
         closed_orders_label,
         bid_price: float,
         selected_transaction: list,
+        orders_currency_strategy: list
     ) -> dict:
         """
         
@@ -727,8 +725,12 @@ class HedgingSpot(BasicStrategy):
             self.my_trades_currency_strategy,
             transaction
             )
+    
+        len_label = len([o["label"] for o in orders_currency_strategy\
+            if transaction["label"] in o["label"]])
         
-        if exit_size_not_over_bought:
+        if len_label == 0\
+            and  exit_size_not_over_bought:
                 
             hedging_attributes = self.strategy_parameters
 

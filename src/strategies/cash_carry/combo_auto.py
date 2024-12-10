@@ -620,8 +620,6 @@ class ComboAuto (BasicStrategy):
             transactions_sum = sum([ o["amount"] for o in transactions])
         
             transactions_len = len(transactions) # sum product function applied only for 2 items.
-            
-            log.error (label)
                         
             if transactions_sum== 0 \
                 and transactions_len==2:
@@ -674,10 +672,14 @@ class ComboAuto (BasicStrategy):
                                    
                         log.debug  (f" {premium_pct > tp_threshold } basic_ordering_is_ok {basic_ordering_is_ok } current_premium > 0 {current_premium} {current_premium > 0} current_premium < transactions_premium {current_premium < transactions_premium}")
                                         
-                        if premium_pct > tp_threshold \
-                            and basic_ordering_is_ok\
-                                and current_premium > 0\
-                                    and current_premium < transactions_premium:   
+                        len_label = len([o["label"] for o in orders_currency\
+                            if label in o["label"]])
+                        
+                        if len_label == 0\
+                            and premium_pct > tp_threshold \
+                                and basic_ordering_is_ok\
+                                    and current_premium > 0\
+                                        and current_premium < transactions_premium:   
                                     
                             traded_perpetual: list = [o for o in transactions \
                                 if instrument_name_perpetual in o["instrument_name"]][0]
