@@ -393,11 +393,14 @@ async def downloading_sub_account(
                     
                     positions = [o["positions"] for o in sub_account][0]
                     
+                    log.warning(positions)
+                    
                     if positions:
                         
                         server_time = get_now_unix_time()  
                         
                         for position in positions:
+                            log.info(position)
                         
                             entry1 = remove_dict_elements(
                             position,
