@@ -484,6 +484,8 @@ class HedgingSpot(BasicStrategy):
         #neutral = market_condition["neutral_price"]
         
         timestamp: int = transaction["timestamp"]
+        
+        log.info (f"transaction {transaction}")
 
         if "open" in transaction["label"]:
 
