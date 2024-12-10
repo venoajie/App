@@ -610,14 +610,36 @@ async def reconciling_size(
                                         closed_table,
                                         my_trades_currency_active_free_blanks
                                         )
-                                    
+                                                                            
+                                        
+                                        result_from_db_queries = await get_result_from_db_queries (
+                                            currency,
+                                            order_db_table, 
+                                            trade_db_table,
+                                            archive_db_table,
+                                            transaction_log_trading_table,)
+                                        
+                                        my_trades_currency_active: list= result_from_db_queries["my_trades_currency_active"]
+                                        
+                                        my_trades_currency_archive: list= result_from_db_queries["my_trades_currency_archive"]
+                                        
+                                        my_trades_active_archived_reconciled_each_other = is_my_trades_active_archived_reconciled_each_other(
+                                            instrument_name,
+                                            my_trades_currency_active,
+                                            my_trades_currency_archive,
+                                            )
+                                        
+                                        if not my_trades_active_archived_reconciled_each_other:
+                                            await deleting_row(trade_db_table)
+                                            await deleting_row(closed_table)
+
+  
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
-                                    instrument_name,
-                                    my_trades_currency_archive,
-                                    sub_account
-                                    )    
-
-
+                                            instrument_name,
+                                            my_trades_currency_archive,
+                                            sub_account
+                                            )  
+                                  
                                 if  not my_trades_and_sub_account_size_reconciled_archive:
                                     
                                     timestamp_log = min(
