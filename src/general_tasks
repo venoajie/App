@@ -629,9 +629,12 @@ async def reconciling_size(
                                             my_trades_currency_archive,
                                             )
                                         
+                                        query_closed = f"DELETE  FROM {closed_table} WHERE instrument_name LIKE '%{instrument_name}%' "
+                                        query_active = f"DELETE  FROM {trade_db_table} WHERE instrument_name LIKE '%{instrument_name}%' "
+                                        
                                         if not my_trades_active_archived_reconciled_each_other:
-                                            await deleting_row(trade_db_table)
-                                            await deleting_row(closed_table)
+                                            await executing_query_with_return (query_closed)
+                                            await executing_query_with_return (query_active)
 
   
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
