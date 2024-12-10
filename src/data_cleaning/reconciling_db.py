@@ -187,7 +187,7 @@ async def my_trades_active_archived_not_reconciled_each_other(
     closed_db_table: str
     ) -> None:
     
-    column_trade: str= "instrument_name","data","trade_id","timestamp"
+    column_trade: str= "instrument_name","data","trade_id","timestamp","price"
     
     my_trades_instrument_name_active = await get_query(trade_db_table, 
                 instrument_name, 
