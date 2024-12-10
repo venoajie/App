@@ -504,7 +504,9 @@ class RunningStrategy(ModifyOrderDb):
                                     sub_account_orders = sub_account["open_orders"]
                                     
                                     len_aub_accoun_orders_all = len(sub_account_orders)
-                                                            
+                                    
+                                    log.error (f" len_aub_accoun_orders_all {len_aub_accoun_orders_all}")
+                                                                    
                                     if sub_account_alt:
                                         
                                         sub_account_alt = sub_account_alt[0]
@@ -520,6 +522,8 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                                 len_aub_accoun_orders_all = len(sub_account_orders_all)
                                             
+                                        log.error (f" len_aub_accoun_orders_all {len_aub_accoun_orders_all}")
+                                    
                                     transaction_log_trading_table = f"transaction_log_{currency_lower}_json"
                                     
                                     if sub_account :
