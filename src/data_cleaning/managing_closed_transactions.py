@@ -526,7 +526,7 @@ async def clean_up_closed_transactions(
                                 instrument_transactions,
                                 where_filter,
                                 trade_table,
-                                closed_table
+                                closed_table,
                                 )
 
                 if size_to_close != 0:
@@ -563,7 +563,8 @@ async def clean_up_closed_transactions(
                                     await closing_one_to_one(
                                         transactions,
                                         where_filter,
-                                        trade_table
+                                        trade_table,
+                                        closed_table
                                         )
                                     
                                     if closed_transaction_instrument_name == open_transaction_instrument_name:
