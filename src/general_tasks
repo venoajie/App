@@ -520,6 +520,10 @@ async def reconciling_size(
                         server_time 
                         )
                         
+                        my_trades_currency_active_with_blanks = [o for o in my_trades_currency_active\
+                                        if o["price"] is  None]
+                        
+                        log.error (f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}")
                         if  pairing_label:
                             
                             log.error (f"pairing_label {pairing_label}")
