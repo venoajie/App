@@ -468,13 +468,8 @@ class ModifyOrderDb(SendApiRequest):
                                 start_timestamp,
                                 count
                                 )
-                
+            
         if trades_from_exchange:
-            
-            trades_from_exchange_without_futures_combo = [o for o in trades_from_exchange \
-                if f"-FS-" not in o["instrument_name"]]
-            
-            from_exchange_timestamp = max([o["timestamp"] for o in trades_from_exchange_without_futures_combo])
             
             column_trade: str= "instrument_name","timestamp","trade_id"                    
 
@@ -483,13 +478,6 @@ class ModifyOrderDb(SendApiRequest):
                                                         "all", 
                                                         "all",
                                                         column_trade)
-            
-            
-            #log.critical (f"unrecorded_trade_id exchaneg vs archive {unrecorded_trade_id}")
-            #log.critical (f"trades_from_exchange  {trades_from_exchange}")
-            #log.critical (f"trades_from_exchange_without_futures_combo  {trades_from_exchange_without_futures_combo}")
-            
-        if trades_from_exchange:
             
             trades_from_exchange_without_futures_combo = [o for o in trades_from_exchange \
                 if f"-FS-" not in o["instrument_name"]]

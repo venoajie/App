@@ -580,17 +580,17 @@ async def reconciling_size(
                                 my_trades_instrument_name_archive = ([o for o in my_trades_currency_archive\
                                 if instrument_name in o["instrument_name"]]
                                     )
-
+                                
                                 my_trades_active_archived_reconciled_each_other = is_my_trades_active_archived_reconciled_each_other(
                                     instrument_name,
                                     my_trades_currency_active,
                                     my_trades_currency_archive,
                                     )
-                                          
+                                
+                                log.debug (f"my_trades_active_archived_reconciled_each_other {my_trades_active_archived_reconciled_each_other}")
+          
                                 if not my_trades_active_archived_reconciled_each_other:
-                                                                                   
-                                    await modify_order_and_db. resupply_sub_accountdb(currency)
-                                    
+                                                            
                                     await my_trades_active_archived_not_reconciled_each_other(
                                         instrument_name,
                                         trade_db_table,
@@ -648,6 +648,8 @@ async def reconciling_size(
                                     timestamp_log = min(
                                         [o["timestamp"] for o in my_trades_instrument_name_archive]
                                         )
+                                    
+                                    log.critical(f"timestamp_log {timestamp_log}")
                                                                         
                                     await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
                                         instrument_name,
