@@ -213,6 +213,23 @@ async def my_trades_active_archived_not_reconciled_each_other(
         False
         )
     
+    
+    my_trades_currency_active_with_blanks = [o["id"] for o in my_trades_instrument_name_active\
+                    if o["price"] is  None]
+    
+    log.error (f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}")
+    
+    if my_trades_currency_active_with_blanks:
+        for id in my_trades_currency_active_with_blanks:
+            await deleting_row(
+                "my_trades_all_json",
+                "databases/trading.sqlite3",
+                "id",
+                "=",
+                id,
+                )
+        await sleep_and_restart()
+
     my_trades_archive_instrument_data = [ o["data"] for o in my_trades_archive_instrument_sorted ]
 
     if not my_trades_instrument_name_active \
