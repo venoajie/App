@@ -168,7 +168,7 @@ def check_if_minimum_waiting_time_has_passed(
     threshold: float,
     timestamp: int,
     server_time: int,
-) -> bool:
+    ) -> bool:
     """ """
 
     cancel_allowed: bool = False
@@ -496,7 +496,6 @@ class HedgingSpot(BasicStrategy):
                
             if not open_size_not_over_bought:            
                 
-        
                 #Only one open order a time
                 if len_open_orders > 1:
                     

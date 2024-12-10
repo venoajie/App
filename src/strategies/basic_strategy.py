@@ -199,7 +199,9 @@ def delta_time(
     """
     get difference between now and transaction time
     """
-    #log.debug (f"delta_time {server_time - time_stamp}")
+    log.debug (f"time_stamp {time_stamp}")
+    log.debug (f"server_time {server_time}")
+    log.debug (f"delta_time {server_time - time_stamp}")
     return server_time - time_stamp
 
 
