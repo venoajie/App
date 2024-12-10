@@ -392,13 +392,17 @@ async def downloading_sub_account(
             for currency in currencies:
                                 
                 portfolio_currency = portfolio[f"{currency.lower()}"]
-                log.info (f"portfolio_currency {portfolio_currency}")
+                
 
                 sub_account = await modify_order_and_db.get_subaccounts_details(currency)
                                 
                 if sub_account:
                     
                     positions = [o["positions"] for o in sub_account][0]
+                    log.info (f"portfolio_currency {portfolio_currency}")
+                    log.warning (f"positions {positions}")
+                    
+                    value_spot= portfolio_currency["equity"]
                     
                     total_value = sum([o["size"] * o["mark_price"] for o in positions])
                     
