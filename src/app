@@ -520,8 +520,8 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                             else:
                                                 log.info (f"AAAAAAAAAAAAAAAAA")
-                                                sub_account_main = sub_account_orders[0]
-                                                sub_account_alt = sub_account_alt_orders[0]
+                                                sub_account_main = sub_account_orders
+                                                sub_account_alt = sub_account_alt_orders
                                                 log.debug (f"sub_account_main {sub_account_main}")
                                                 log.debug (f"sub_account_alt {sub_account_alt}")
                                                 sub_account_orders_all = sub_account_main | sub_account_alt
