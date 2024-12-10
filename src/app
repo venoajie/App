@@ -490,7 +490,21 @@ class RunningStrategy(ModifyOrderDb):
                                         )
                                     
                                     sub_account = sub_account[0]
-                                              
+                                    
+                                    open_orders_all =[]
+                                    for currency in currency:
+                                        sub_account = reading_from_pkl_data(
+                                        "sub_accounts",
+                                        currency
+                                        )
+                                        
+                                        sub_account = sub_account[0]
+                                        
+                                        sub_account_orders = sub_account["open_orders"]
+                                        open_orders_all.append (sub_account_orders)
+                                            
+                                    
+                                    log.error (f"open_orders_all {open_orders_all}")
                                     transaction_log_trading_table = f"transaction_log_{currency_lower}_json"
                                     
                                     if sub_account :
@@ -506,6 +520,11 @@ class RunningStrategy(ModifyOrderDb):
                                         orders_currency = result_from_db_queries["orders_currency"]     
                                         
                                         outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency])
+                                        
+                                        #len_outstanding_order_id = 0 if outstanding_order_id =[] \
+                                        #    else len (outstanding_order_id)
+                                            
+                                        #log.critical (f"len_outstanding_order_id {len_outstanding_order_id}")    
                                         
                                         for label in outstanding_order_id:
                                             
