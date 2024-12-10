@@ -675,6 +675,8 @@ class ComboAuto (BasicStrategy):
                         len_label = len([o["label"] for o in orders_currency\
                             if label in o["label"]])
                         
+                        log.critical (f"len_label {len_label}")
+                        
                         if len_label == 0\
                             and premium_pct > tp_threshold \
                                 and basic_ordering_is_ok\
