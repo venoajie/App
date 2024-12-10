@@ -534,9 +534,9 @@ async def reconciling_size(
                                     "=",
                                     id,
                                     )
+                            await sleep_and_restart()
 
                             
-                            pass
                         if  pairing_label:
                             
                             log.error (f"pairing_label {pairing_label}")
