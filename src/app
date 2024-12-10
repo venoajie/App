@@ -532,7 +532,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 for order in orders:
                                                     log.critical (f"double ids {label}")
                                                     log.critical ([o for o in orders_currency if label in o["label"]])
-                                                    await self. cancel_by_order_id (
+                                                    await self. modify_order_and_db. cancel_by_order_id (
                                                         order_db_table,
                                                         order["order_id"]
                                                         )
