@@ -1032,9 +1032,9 @@ class RunningStrategy(ModifyOrderDb):
                         archive_db_table= f"my_trades_all_{currency.lower()}_json"
                         
                         # parsing config file
-                        config_app = self.config_app
+                        config = self.config_app
                         
-                        relevant_tables = config_app["relevant_tables"][0]
+                        relevant_tables = config["relevant_tables"][0]
                                                     
                         trade_db_table= relevant_tables["my_trades_table"]
                         
