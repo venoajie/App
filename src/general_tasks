@@ -387,7 +387,7 @@ async def downloading_sub_account(
         while True:
             
             sub_account_with_pf = await modify_order_and_db.get_subaccounts()
-            portfolio = [o for o in sub_account_with_pf if  str(o["id"]) in sub_account_id ]
+            portfolio = [o for o in sub_account_with_pf if  str(o["id"]) in sub_account_id ][0]["portfolio"]
             
             log.warning (f"portfolio {portfolio}")
             
