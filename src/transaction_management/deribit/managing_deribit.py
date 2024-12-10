@@ -512,7 +512,7 @@ class ModifyOrderDb(SendApiRequest):
                     
                     trade_trd_id_not_in_archive = [o for o in my_trades_instrument_name_archive if trade_trd_id in o["trade_id"]]
                     
-                    log.info (f"{trade_trd_id_not_in_archive}")
+                    log.info (f"{trade_trd_id_not_in_archive} {not trade_trd_id_not_in_archive}")
 
                     if not trade_trd_id_not_in_archive:
                         
