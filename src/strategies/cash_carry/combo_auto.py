@@ -692,6 +692,8 @@ class ComboAuto (BasicStrategy):
                                 traded_price_perpetual,
                                 traded_side_future,
                                 traded_side_perpetual,)
+                            
+                            log.debug (f"exit_side {exit_side}")
             
                             if exit_side:
                                 exit_params = {}
