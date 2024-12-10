@@ -725,9 +725,11 @@ class HedgingSpot(BasicStrategy):
             self.my_trades_currency_strategy,
             transaction
             )
+        
+        label_integer = get_label_integer (transaction["label"])
     
         len_label = len([o["label"] for o in orders_currency_strategy\
-            if transaction["label"] in o["label"]])
+            if label_integer in o["label"]])
         
         if len_label == 0\
             and  exit_size_not_over_bought:

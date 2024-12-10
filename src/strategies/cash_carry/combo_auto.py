@@ -673,7 +673,7 @@ class ComboAuto (BasicStrategy):
                         log.debug  (f" {premium_pct > tp_threshold } basic_ordering_is_ok {basic_ordering_is_ok } current_premium > 0 {current_premium} {current_premium > 0} current_premium < transactions_premium {current_premium < transactions_premium}")
                                         
                         len_label = len([o["label"] for o in orders_currency\
-                            if label in o["label"]])
+                            if label_integer in o["label"]])
                         
                         log.critical (f"len_label {len_label} label {label}")
                         log.info (f"orders_currency {orders_currency}")
