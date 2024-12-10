@@ -675,9 +675,9 @@ class ComboAuto (BasicStrategy):
                         log.warning (f"transactions {transactions}")
                         #log.warning (f"orders_currency {orders_currency}")
                         len_label = len([o["label"] for o in orders_currency\
-                            if label_integer in o["label"]])
+                            if str(label_integer) in o["label"]])
                         
-                        log.debug (f"len_label {len_label}")
+                        log.debug (f"len_label {len_label} label_integer {label_integer}")
                         
                         if len_label == 0\
                             and premium_pct > tp_threshold \
