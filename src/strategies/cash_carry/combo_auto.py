@@ -680,7 +680,7 @@ class ComboAuto (BasicStrategy):
                                 and basic_ordering_is_ok\
                                     and current_premium > 0\
                                         and current_premium < transactions_premium:   
-                                    
+                            log.error (f"transactions {transactions}")        
                             traded_perpetual: list = [o for o in transactions \
                                 if instrument_name_perpetual in o["instrument_name"]][0]
                                                                 
