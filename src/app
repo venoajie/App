@@ -512,8 +512,6 @@ class RunningStrategy(ModifyOrderDb):
                                         sub_account_alt = sub_account_alt[0]
                                         
                                         sub_account_alt__orders = sub_account_alt["open_orders"]  
-                                        log.error (f" sub_account_alt_orders {sub_account_alt__orders}")
-                                        log.warning (f" sub_account_orders {sub_account_orders}")
                                         
                                         if sub_account_alt__orders:
                                             if not sub_account_orders:
