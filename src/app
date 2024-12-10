@@ -488,6 +488,7 @@ class RunningStrategy(ModifyOrderDb):
                                         "sub_accounts",
                                         currency
                                         )
+                                    log.info (f"sub_account {sub_account}")
                                     
                                     sub_account = sub_account[0]
                                     
