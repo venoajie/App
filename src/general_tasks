@@ -643,8 +643,6 @@ async def reconciling_size(
                                             sub_account
                                             )  
                                 
-                                log.critical(f"my_trades_and_sub_account_size_reconciled_archive {my_trades_and_sub_account_size_reconciled_archive} {not my_trades_and_sub_account_size_reconciled_archive}")
-                                  
                                 if  not my_trades_and_sub_account_size_reconciled_archive:
                                     
                                     timestamp_log = min(
