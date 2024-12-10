@@ -503,33 +503,10 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     sub_account_orders = sub_account["open_orders"]
                                     
-                                    len_aub_accoun_orders_all = len(sub_account_orders)
+                                    len_sub_account_orders_all = len(sub_account_orders)
                                     
-                                    log.error (f" len_aub_accoun_orders_all {len_aub_accoun_orders_all}")
-                                                                    
-                                    if sub_account_alt:
-                                        
-                                        sub_account_alt = sub_account_alt[0]
-                                        
-                                        sub_account_alt_orders = sub_account_alt["open_orders"]  
-                                        
-                                        if sub_account_alt_orders:
-                                            if not sub_account_orders:
-
-                                                len_aub_accoun_orders_all = len(sub_account_alt_orders)
-                                                
-                                            else:
-                                                log.info (f"AAAAAAAAAAAAAAAAA")
-                                                sub_account_main = sub_account_orders
-                                                sub_account_alt = sub_account_alt_orders
-                                                log.debug (f"sub_account_main {sub_account_main}")
-                                                log.debug (f"sub_account_alt {sub_account_alt}")
-                                                sub_account_orders_all = sub_account_main | sub_account_alt
-                                                
-                                                len_aub_accoun_orders_all = len(sub_account_orders_all)
-                                            
-                                        log.error (f" len_aub_accoun_orders_all {len_aub_accoun_orders_all}")
-                                    
+                                    log.error (f" len_sub_account_orders_all {len_sub_account_orders_all}")
+                                                       
                                     transaction_log_trading_table = f"transaction_log_{currency_lower}_json"
                                     
                                     if sub_account :
@@ -700,7 +677,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         len_selected_transaction = len(selected_transaction_amount)
                                                         
                                                         #! closing combo auto trading
-                                                        if "Auto" in label and len_aub_accoun_orders_all < 51:
+                                                        if "Auto" in label and len_sub_account_orders_all < 51:
                                                             
                                                             if sum_selected_transaction == 0:                                                               
                                                                 send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
@@ -793,7 +770,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                 instrument_name
                                                                                 )
                                                                             
-                                                                            if ticker_transaction and len_aub_accoun_orders_all < 51:
+                                                                            if ticker_transaction and len_sub_account_orders_all < 51:
                                                                                 
                                                                                 send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                                                     ticker_transaction[0],
@@ -844,7 +821,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 instrument_name_future
                                                                 )
                                                                 
-                                                            if len_aub_accoun_orders_all < 51\
+                                                            if len_sub_account_orders_all < 51\
                                                                 and not reduce_only \
                                                                     and ticker_future and ticker_combo:
                                                                 
@@ -866,7 +843,7 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                                                 send_order = []                           
                                                                                         
-                                                                if  len_aub_accoun_orders_all < 51\
+                                                                if  len_sub_account_orders_all < 51\
                                                                     and instrument_name_future in  random_instruments_name \
                                                                         and size_perpetuals_reconciled\
                                                                             and size_future_reconciled\
@@ -944,7 +921,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     if size_future_reconciled:      
                                                         
                                                         #something was wrong because perpetuals were actively traded. cancell  orders
-                                                        if len_aub_accoun_orders_all < 51\
+                                                        if len_sub_account_orders_all < 51\
                                                             and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
                                                             
                                                             my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy \
@@ -986,7 +963,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     "ticker",
                                                                     nearest_transaction_to_index[0]["instrument_name"])
                                                                 
-                                                                if len_aub_accoun_orders_all < 51\
+                                                                if len_sub_account_orders_all < 51\
                                                                     and instrument_ticker:
 
                                                                     send_closing_order: dict = await hedging.is_send_exit_order_allowed(
