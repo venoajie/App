@@ -405,7 +405,7 @@ async def downloading_sub_account(
                             "leverage")
                         
                             entry2 = remove_dict_elements(
-                            entry2,
+                            entry1,
                             "estimated_liquidation_price")
                         
                             entry3 = remove_dict_elements(
