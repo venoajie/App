@@ -515,11 +515,16 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         if sub_account_alt_orders:
                                             if not sub_account_orders:
+
                                                 len_aub_accoun_orders_all = len(sub_account_alt_orders)
                                                 
                                             else:
                                                 log.info (f"AAAAAAAAAAAAAAAAA")
-                                                sub_account_orders_all = {**sub_account_orders[0], **sub_account_alt_orders[0]}
+                                                sub_account_main = sub_account_orders[0]
+                                                sub_account_alt = sub_account_alt_orders[0]
+                                                log.debug (f"sub_account_main {sub_account_main}")
+                                                log.debug (f"sub_account_alt {sub_account_alt}")
+                                                sub_account_orders_all = sub_account_main | sub_account_alt
                                                 
                                                 len_aub_accoun_orders_all = len(sub_account_orders_all)
                                             
