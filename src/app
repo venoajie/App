@@ -336,7 +336,9 @@ class RunningStrategy(ModifyOrderDb):
                 tradable_config_app = config_app["tradable"]
                 
                 # get tradable currencies
-                currencies= [o["spot"] for o in tradable_config_app] [0]
+                currencies= random.sample([o["spot"] for o in tradable_config_app]) [0]
+                
+                log.debug (f"currencies {currencies}")
                 
                 strategy_attributes = config_app["strategies"]
                                             
