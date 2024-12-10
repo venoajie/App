@@ -722,7 +722,6 @@ async def reconciling_size(
                             order_db_table,
                             currency,
                             cancellable_strategies)
-            
                     
                     await clean_up_closed_transactions(
                         currency, 
