@@ -413,7 +413,7 @@ async def downloading_sub_account(
                             "kind")
                             log.debug (f"server_time {server_time}")
                             
-                            positions.update({"timestamp": server_time})
+                            entry3.update({"timestamp": server_time})
                         
                             log.debug (f"positions {entry3}")
                             await insert_tables(
