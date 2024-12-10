@@ -492,6 +492,7 @@ class RunningStrategy(ModifyOrderDb):
                                     sub_account = sub_account[0]
                                     
                                     open_orders_all ={}
+                                    currency_alternative = [o for o in currencies if currency not in o]
                                     for currency in currencies:
 
                                         sub_account_ = reading_from_pkl_data(
@@ -505,6 +506,9 @@ class RunningStrategy(ModifyOrderDb):
                                         open_orders_all.update (sub_account_orders)
                                             
                                     
+                                    log.error (f"currency {currency}")
+                                    log.error (f"currencies {currencies}")
+                                    log.error (f"currency_alternative {currency_alternative}")
                                     log.error (f"open_orders_all {open_orders_all}")
                                     transaction_log_trading_table = f"transaction_log_{currency_lower}_json"
                                     
