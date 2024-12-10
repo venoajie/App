@@ -49,7 +49,7 @@ def get_my_trades_size_per_instrument(
         if instrument_name in o["instrument_name"] ]  
         
     log.error ([o for o in my_trades_instrument if o["amount"] is None])    
-    log.error ([o for o in my_trades_instrument if o["amount"] is not None])    
+#    log.error ([o for o in my_trades_instrument if o["amount"] is not None])    
         
     sum_my_trades_instrument = 0 if not my_trades_instrument \
         else sum([o["amount"] for o in my_trades_instrument])
