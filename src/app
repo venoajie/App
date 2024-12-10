@@ -498,6 +498,11 @@ class RunningStrategy(ModifyOrderDb):
                                     "sub_accounts",
                                     currency_alternative.lower()
                                     )
+                                    sub_account_orders = sub_account["open_orders"]
+                                    
+                                    len_aub_accoun_orders_all = len(sub_account_orders)
+                                    
+                                    log.error (f" len_aub_accoun_orders_all {len_aub_accoun_orders_all}")
                                                                     
                                     if sub_account_alt:
                                         
@@ -506,11 +511,13 @@ class RunningStrategy(ModifyOrderDb):
                                         sub_account_alt__orders = sub_account_alt["open_orders"]  
                                         
                                         if sub_account_alt__orders:
-                                            sub_account_orders = sub_account["open_orders"]
+                                            
                                             sub_account_orders_all = sub_account_orders | sub_account_alt__orders
                                             
+                                            len_aub_accoun_orders_all = len(sub_account_orders_all)
                                             
-                                            log.error (f"sub_account_orders_all {sub_account_orders_all} len {len(sub_account_orders_all)}")
+                                            
+                                        log.error (f" len_aub_accoun_orders_all {len_aub_accoun_orders_all}")
                                     
                                     
                                     transaction_log_trading_table = f"transaction_log_{currency_lower}_json"
