@@ -498,6 +498,7 @@ class RunningStrategy(ModifyOrderDb):
                                     "sub_accounts",
                                     currency_alternative.lower()
                                     )
+                                    
                                     sub_account_orders = sub_account["open_orders"]
                                     
                                     len_aub_accoun_orders_all = len(sub_account_orders)
@@ -509,14 +510,17 @@ class RunningStrategy(ModifyOrderDb):
                                         sub_account_alt = sub_account_alt[0]
                                         
                                         sub_account_alt__orders = sub_account_alt["open_orders"]  
-                                        log.error (f" sub_account_alt__orders {sub_account_alt__orders}")
+                                        log.error (f" sub_account_alt_orders {sub_account_alt__orders}")
                                         log.warning (f" sub_account_orders {sub_account_orders}")
                                         
                                         if sub_account_alt__orders:
-                                            
-                                            sub_account_orders_all = sub_account_orders | sub_account_alt__orders
-                                            
-                                            len_aub_accoun_orders_all = len(sub_account_orders_all)
+                                            if not sub_account_orders:
+                                                len_aub_accoun_orders_all = len(sub_account_alt__orders)
+                                                
+                                            else:
+                                                sub_account_orders_all = sub_account_orders | sub_account_alt__orders
+                                                
+                                                len_aub_accoun_orders_all = len(sub_account_orders_all)
                                             
                                         log.error (f" len_aub_accoun_orders_all {len_aub_accoun_orders_all}")
                                     
