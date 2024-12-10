@@ -492,7 +492,7 @@ class RunningStrategy(ModifyOrderDb):
                                     sub_account = sub_account[0]
                                     
                                     open_orders_all ={}
-                                    currency_alternative = [o for o in currencies if currency not in o]
+                                    currency_alternative = [o for o in currencies if currency_upper not in o]
                                     
                                     
                                     log.error (f"currency {currency}")
