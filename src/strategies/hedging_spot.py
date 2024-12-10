@@ -486,72 +486,74 @@ class HedgingSpot(BasicStrategy):
         timestamp: int = transaction["timestamp"]
         
         log.info (f"transaction {transaction}")
-
-        if "open" in transaction["label"]:
-
-            open_size_not_over_bought  =  self.over_hedged_opening
-            
-            open_orders_label: list=  [o for o in orders_currency_strategy \
-                if "open" in o["label"]]
-                    
-            len_open_orders: int = get_transactions_len(open_orders_label) 
-               
-            if not open_size_not_over_bought:            
-                
-                #Only one open order a time
-                if len_open_orders > 1:
-                    
-                    cancel_allowed = True
-
-                else:
-                                
-                    cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
-                        strong_bearish,
-                        bearish,
-                        waiting_minute_before_cancel,
-                        timestamp,
-                        server_time,
-                    )
-
-            # cancel any orders when overhedged
-            else:
-                
-                if len_open_orders > 0:
-                    
-                    cancel_allowed = True
         
-        if "closed" in transaction["label"]:
+        if timestamp:
 
-            exit_size_not_over_bought = net_size_not_over_bought (
-                self.my_trades_currency_strategy,
-                transaction
-                )
-            
-            if exit_size_not_over_bought:
-                            
-                closed_orders_label: list = [o for o in orders_currency_strategy\
-                    if "closed" in (o["label"]) ]
-                        
-                len_closed_orders: int = get_transactions_len(closed_orders_label)
-                    
-                if len_closed_orders> 1:   
-                    
-                    cancel_allowed = True       
-                    
-                else:          
-                    
-                    cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
-                        strong_bullish,
-                        bullish,
-                        waiting_minute_before_cancel,
-                        timestamp,
-                        server_time,
-                        )
-                    
-            # cancel any orders when overhedged
-            else:
+            if "open" in transaction["label"]:
+
+                open_size_not_over_bought  =  self.over_hedged_opening
                 
-                cancel_allowed = True
+                open_orders_label: list=  [o for o in orders_currency_strategy \
+                    if "open" in o["label"]]
+                        
+                len_open_orders: int = get_transactions_len(open_orders_label) 
+                
+                if not open_size_not_over_bought:            
+                    
+                    #Only one open order a time
+                    if len_open_orders > 1:
+                        
+                        cancel_allowed = True
+
+                    else:
+                                    
+                        cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
+                            strong_bearish,
+                            bearish,
+                            waiting_minute_before_cancel,
+                            timestamp,
+                            server_time,
+                        )
+
+                # cancel any orders when overhedged
+                else:
+                    
+                    if len_open_orders > 0:
+                        
+                        cancel_allowed = True
+            
+            if "closed" in transaction["label"]:
+
+                exit_size_not_over_bought = net_size_not_over_bought (
+                    self.my_trades_currency_strategy,
+                    transaction
+                    )
+                
+                if exit_size_not_over_bought:
+                                
+                    closed_orders_label: list = [o for o in orders_currency_strategy\
+                        if "closed" in (o["label"]) ]
+                            
+                    len_closed_orders: int = get_transactions_len(closed_orders_label)
+                        
+                    if len_closed_orders> 1:   
+                        
+                        cancel_allowed = True       
+                        
+                    else:          
+                        
+                        cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
+                            strong_bullish,
+                            bullish,
+                            waiting_minute_before_cancel,
+                            timestamp,
+                            server_time,
+                            )
+                        
+                # cancel any orders when overhedged
+                else:
+                    
+                    cancel_allowed = True
         
         return cancel_allowed
     
