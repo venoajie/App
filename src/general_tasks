@@ -417,7 +417,7 @@ async def downloading_sub_account(
                             log.debug (f"positions {entry3}")
                             await insert_tables(
                             "account_summary_json", 
-                            entry
+                            entry3
                             )
                         
                             account_summary_json: list= await executing_query_with_return (
