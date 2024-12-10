@@ -499,15 +499,18 @@ class RunningStrategy(ModifyOrderDb):
                                     currency_alternative.lower()
                                     )
                                                                     
-                                    log.error (f"currency {currency_alternative.lower()}")
-                                    log.error (f"currencies {currencies}")
-                                    log.error (f"sub_account_alt {sub_account_alt}")
                                     if sub_account_alt:
                                         
                                         sub_account_alt = sub_account_alt[0]
                                         
                                         sub_account_alt__orders = sub_account_alt["open_orders"]  
-                                        log.error (f"sub_account_alt__orders {sub_account_alt__orders}")
+                                        
+                                        if sub_account_alt__orders:
+                                            sub_account_orders = sub_account["open_orders"]
+                                            sub_account_orders_all = sub_account_orders | sub_account_alt__orders
+                                            
+                                            
+                                            log.error (f"sub_account_orders_all {sub_account_orders_all} len {len(sub_account_orders_all)}")
                                     
                                     
                                     transaction_log_trading_table = f"transaction_log_{currency_lower}_json"
