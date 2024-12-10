@@ -1002,6 +1002,9 @@ class RunningStrategy(ModifyOrderDb):
                     
                 log.error (f"send_order {order_analysis_result}")
 
+                # parsing config file
+                config_app = self.config_app
+                
                 strategy_attributes = config_app["strategies"]
                 
                 # get strategies that have not short/long attributes in the label 
@@ -1031,10 +1034,8 @@ class RunningStrategy(ModifyOrderDb):
                         
                         archive_db_table= f"my_trades_all_{currency.lower()}_json"
                         
-                        # parsing config file
-                        config = self.config_app
                         
-                        relevant_tables = config["relevant_tables"][0]
+                        relevant_tables = config_app["relevant_tables"][0]
                                                     
                         trade_db_table= relevant_tables["my_trades_table"]
                         
