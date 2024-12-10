@@ -740,9 +740,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                     
                                                                     send_order = []
                                                                                                                                     
-                                                                    if size_future_reconciled\
-                                                                        and size_perpetuals_reconciled\
-                                                                            and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
+                                                                    if size_perpetuals_reconciled\
+                                                                        and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
                                                             
                                                                         for transaction in selected_transaction:
                                                                                                                    
