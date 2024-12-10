@@ -586,9 +586,7 @@ async def reconciling_size(
                                     my_trades_currency_active,
                                     my_trades_currency_archive,
                                     )
-                                
-                                log.debug (f"my_trades_active_archived_reconciled_each_other {my_trades_active_archived_reconciled_each_other}")
-          
+                                          
                                 if not my_trades_active_archived_reconciled_each_other:
                                                             
                                     await my_trades_active_archived_not_reconciled_each_other(
