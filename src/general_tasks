@@ -389,13 +389,12 @@ async def downloading_sub_account(
             sub_account_with_pf = await modify_order_and_db.get_subaccounts()
             portfolio = [o for o in sub_account_with_pf if  str(o["id"]) in sub_account_id ][0]["portfolio"]
             
-            log.warning (f"portfolio {portfolio}")
-            
             for currency in currencies:
                                 
-                sub_account = await modify_order_and_db.get_subaccounts_details(currency)
                 portfolio_currency = portfolio[f"{currency.lower()}"]
                 log.info (f"portfolio_currency {portfolio_currency}")
+
+                sub_account = await modify_order_and_db.get_subaccounts_details(currency)
                                 
                 if sub_account:
                     
