@@ -257,25 +257,29 @@ def is_size_sub_account_and_my_trades_reconciled(
     """
     
     try:
-
-        sub_account_size_instrument = ([(o["size"]) for o in position_without_combo \
-            if instrument_name in o["instrument_name"]])
-                
-        sub_account_size_instrument = 0 \
-            if sub_account_size_instrument == []\
-                else sub_account_size_instrument [0]
         
-        my_trades_size_instrument = [o["amount"] for o in sum_my_trades_currency_all\
-            if instrument_name in o["instrument_name"]]
+        if position_without_combo:
 
-        sum_my_trades_size_instrument = 0 \
-            if my_trades_size_instrument == []\
-                else sum(my_trades_size_instrument)
+            sub_account_size_instrument = ([(o["size"]) for o in position_without_combo \
+                if instrument_name in o["instrument_name"]])
+                    
+            if sub_account_size_instrument:
+                sub_account_size_instrument = 0 \
+                if sub_account_size_instrument == []\
+                    else sub_account_size_instrument [0]
                 
-        if sub_account_size_instrument != sum_my_trades_size_instrument:
-            log.critical (f"sum_my_trades_size_instrument {sum_my_trades_size_instrument}  sub_account_size_instrument {sub_account_size_instrument}")
-                
-        return sub_account_size_instrument == sum_my_trades_size_instrument
+                my_trades_size_instrument = [o["amount"] for o in sum_my_trades_currency_all\
+                    if instrument_name in o["instrument_name"]]
+
+                if my_trades_size_instrument:
+                    sum_my_trades_size_instrument = 0 \
+                    if my_trades_size_instrument == []\
+                        else sum(my_trades_size_instrument)
+                        
+                if sub_account_size_instrument != sum_my_trades_size_instrument:
+                    log.critical (f"sum_my_trades_size_instrument {sum_my_trades_size_instrument}  sub_account_size_instrument {sub_account_size_instrument}")
+                        
+                return sub_account_size_instrument == sum_my_trades_size_instrument
                         
     except Exception as error:
         log.warning(error)
