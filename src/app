@@ -490,9 +490,11 @@ class RunningStrategy(ModifyOrderDb):
                                         )
                                     
                                     sub_account = sub_account[0]
+                                    log.warning (f"currency {currency}")
                                     
                                     open_orders_all =[]
                                     for currency in currency:
+                                        log.info (f"currency {currency}")
                                         sub_account_ = reading_from_pkl_data(
                                         "sub_accounts",
                                         currency.lower()
