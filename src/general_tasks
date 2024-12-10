@@ -398,7 +398,6 @@ async def downloading_sub_account(
                         server_time = get_now_unix_time()  
                         
                         for position in positions:
-                            log.error (f"position {position}")
                         
                             entry1 = remove_dict_elements(
                             position,
@@ -411,19 +410,18 @@ async def downloading_sub_account(
                             entry3 = remove_dict_elements(
                             entry2,
                             "kind")
-                            log.debug (f"server_time {server_time}")
                             
                             entry3.update({"timestamp": server_time})
                         
-                            log.debug (f"positions {entry3}")
                             await insert_tables(
                             "account_summary_json", 
                             entry3
                             )
+                            
+                            table = "account_summary_json"
                         
                             account_summary_json: list= await executing_query_with_return (
-                            "account_summary_json", 
-                            "currency", 
+                             f"SELECT {table} * FROM {table} " , 
                             currency
                             )
                         
