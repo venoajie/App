@@ -411,6 +411,7 @@ async def downloading_sub_account(
                             entry3 = remove_dict_elements(
                             entry2,
                             "kind")
+                            log.debug (f"server_time {server_time}")
                             
                             positions.update({"timestamp": server_time})
                         
