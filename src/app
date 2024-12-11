@@ -1073,7 +1073,7 @@ class RunningStrategy(ModifyOrderDb):
                     except Exception as error :
                         pass 
                     
-                    await sleep_and_restart ()
+                    #await sleep_and_restart ()
                     
         except Exception as error:
             log.warning(error)
