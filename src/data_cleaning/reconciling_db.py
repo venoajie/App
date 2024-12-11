@@ -147,6 +147,8 @@ def is_my_trades_active_archived_reconciled_each_other(
     
     reconciled = my_trades_archived_size_instrument == my_trades_active_size_instrument
         
+    log.warning(f"{instrument_name} reconciled {reconciled} my_trades_active_size_instrument {my_trades_active_size_instrument} my_trades_archived_size_instrument {my_trades_archived_size_instrument}")
+       
     if not reconciled:
         log.critical(f"{instrument_name} reconciled {reconciled} my_trades_active_size_instrument {my_trades_active_size_instrument} my_trades_archived_size_instrument {my_trades_archived_size_instrument}")
        
