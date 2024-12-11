@@ -557,8 +557,6 @@ async def reconciling_size(
                                     "=",
                                     id,
                                     )
-                            await sleep_and_restart()
-
                             
                         if  pairing_label:
                             
