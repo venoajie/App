@@ -58,7 +58,7 @@ async def db_ops(db_name: str = "databases/trading.sqlite3"):
 
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(str(e), "failed_order")
-        print(e)
+        log.critical(e)
         await conn.rollback()
         raise e
 
@@ -97,7 +97,7 @@ async def insert_tables(
                     await db.execute(insert_table_json)
 
     except Exception as error:
-        log.warning (f"insert_tables {table_name} {error}")
+        log.critical (f"insert_tables {table_name} {error}")
         await telegram_bot_sendtext(f"sqlite operation insert_tables, failed_order  {table_name} {error} ")
 
 
@@ -149,8 +149,7 @@ async def querying_table(
                                            i)))
 
     except Exception as error:
-        log.error (f"querying_table  {table} {error}") 
-        await telegram_bot_sendtext("sqlite operation", "failed_order")
+        log.critical (f"querying_table  {table} {error}") 
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
     return dict(
@@ -182,7 +181,7 @@ async def deleting_row(
             await db.execute(query_table, filter_val)
 
     except Exception as error:
-        log.error (f"deleting_row {error}")
+        log.critical (f"deleting_row {error}")
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
@@ -195,7 +194,7 @@ async def querying_duplicated_transactions(
     """ """
 
     #query_table = f"""SELECT CAST(SUBSTR((label),-13)as integer) AS label_int, count (*)  FROM {label} GROUP BY label_int HAVING COUNT (*) >1"""
-    query_table = f"""SELECT id, data, {group_by},  FROM {label} GROUP BY {group_by} HAVING count(*) >1"""
+    query_table = f"""SELECT id, data, {group_by}  FROM {label} GROUP BY {group_by} HAVING count(*) >1"""
     combine_result = []
 
     try:
@@ -212,7 +211,7 @@ async def querying_duplicated_transactions(
             combine_result.append(dict(zip(headers, i)))
 
     except Exception as error:
-        log.error (f"querying_table {query_table} {error}")
+        log.critical (f"querying_table {query_table} {error}")
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
@@ -331,7 +330,7 @@ async def update_status_data(
             await db.execute(query)
 
     except Exception as error:
-        log.error (f" ERROR {error}")
+        log.critical (f" ERROR {error}")
         log.info (f"query update status data {query}")
 
         await telegram_bot_sendtext("sqlite operation insert_tables", "failed_order")
@@ -575,7 +574,7 @@ async def executing_query_with_return(
 
     except Exception as error:
         #import traceback
-        log.error (f"querying_table {query_table} {error}")
+        log.critical (f"querying_table {query_table} {error}")
         #traceback.format_exc()
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
