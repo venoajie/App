@@ -541,9 +541,9 @@ async def reconciling_size(
                             await sleep_and_restart()
                         
                         my_trades_currency_active_with_blanks = [o["id"] for o in my_trades_currency_active\
-                                        if o["price"] is  None\
-                                            or o["amount"] is None\
-                                            or o["label"] is None]
+                                        if o["price"] is  None]\
+                                           # or o["amount"] is None\
+                                            #or o["label"] is None]
                         
                         log.error (f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}")
                         
