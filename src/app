@@ -635,8 +635,14 @@ class RunningStrategy(ModifyOrderDb):
                                                                                                  
                                                     target_transaction_per_hour = 1/10
                                                     
-                                                    reduce_only = strategy_params["reduce_only"]
-                                                            
+                                                    max_order_currency = 2
+                                                    
+                                                    random_instruments_name = random.sample(([o for o in instruments_name\
+                                                                                                if "-FS-" not in o and currency_upper in o]),
+                                                                                            max_order_currency)
+                                                                
+                                                    tables = [archive_db_table, trade_db_table]
+                                                                                        
                                                     combo_auto = ComboAuto(
                                                         strategy,
                                                         strategy_params,
@@ -723,14 +729,6 @@ class RunningStrategy(ModifyOrderDb):
                                                     # get labels from active trades
                                                     labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
                         
-                                                    max_order_currency = 2
-                                                    
-                                                    random_instruments_name = random.sample(([o for o in instruments_name\
-                                                                                                if "-FS-" not in o and currency_upper in o]),
-                                                                                            max_order_currency)
-                                                                
-                                                    tables = [archive_db_table, trade_db_table]
-                                                    
                                                     #! closing active trades
                                                     for label in labels:
                                                         
