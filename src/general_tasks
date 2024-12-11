@@ -619,7 +619,35 @@ async def reconciling_size(
                                         archive_db_table,
                                         closed_table
                                         )
+
+                                    result_from_db_queries = await get_result_from_db_queries (
+                                        currency,
+                                        order_db_table, 
+                                        trade_db_table,
+                                        archive_db_table,
+                                        transaction_log_trading_table,)
                                     
+                                    my_trades_currency_active: list= result_from_db_queries["my_trades_currency_active"]                                    
+                                    
+                                    my_trades_currency_active_with_blanks = [o["id"] for o in my_trades_currency_active\
+                                                    if o["price"] is  None\
+                                                        or o["side"] is None\
+                                                        or o["amount"] is None\
+                                                        or o["label"] is None]
+                                    
+                                    log.error (f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}")
+                                    
+                                    if my_trades_currency_active_with_blanks:
+                                        for id in my_trades_currency_active_with_blanks:
+                                            await deleting_row(
+                                                "my_trades_all_json",
+                                                "databases/trading.sqlite3",
+                                                "id",
+                                                "=",
+                                                id,
+                                                )
+                                        await sleep_and_restart()
+
                                     result_from_db_queries = await get_result_from_db_queries (
                                         currency,
                                         order_db_table, 
