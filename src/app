@@ -1180,7 +1180,7 @@ class RunningStrategy(ModifyOrderDb):
         Requests `public/subscribe` or `public/unsubscribe`
         to DBT's API for the specific WebSocket Channel.
         """
-        sleep_time: int = 5
+        sleep_time: int = 1
         
         await asyncio.sleep(sleep_time)
 
