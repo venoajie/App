@@ -557,6 +557,8 @@ async def reconciling_size(
                                     "=",
                                     id,
                                     )
+                            await sleep_and_restart()
+
                             
                         if  pairing_label:
                             
@@ -644,7 +646,6 @@ async def reconciling_size(
                                                 "=",
                                                 id,
                                                 )
-                                        await sleep_and_restart()
 
                                     result_from_db_queries = await get_result_from_db_queries (
                                         currency,
