@@ -838,8 +838,7 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                                                 send_order = []                           
                                                                                         
-                                                                if  len_sub_account_orders_all < 50\
-                                                                    and instrument_name_future in  random_instruments_name \
+                                                                if   instrument_name_future in  random_instruments_name \
                                                                         and size_perpetuals_reconciled\
                                                                             and size_future_reconciled\
                                                                                 and size_future_reconciled:
