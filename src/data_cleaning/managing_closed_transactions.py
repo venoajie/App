@@ -132,6 +132,8 @@ async def refill_db (
                 log.debug (transaction)
                 
                 where_filter ="trade_id"
+                
+                log.error (f"archive_db_table {archive_db_table} trade_db_table {trade_db_table}")
                     
                 await deleting_row (
                     archive_db_table,
