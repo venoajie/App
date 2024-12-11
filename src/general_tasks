@@ -523,7 +523,20 @@ async def reconciling_size(
                         )
                         
                         if duplicated_trade_id_transactions:
+                            
                             log.critical (f"duplicated_trade_id_transactions {duplicated_trade_id_transactions}")
+
+                            ids = [o["id"] for o in duplicated_trade_id_transactions]
+                            
+                            for id in ids:
+                                await deleting_row(
+                                archive_db_table,
+                                "databases/trading.sqlite3",
+                                "id",
+                                "=",
+                                id,)
+                                
+                                break
                         
                         my_trades_currency_active_with_blanks = [o["id"] for o in my_trades_currency_active\
                                         if o["price"] is  None\
