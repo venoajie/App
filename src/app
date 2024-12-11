@@ -649,6 +649,76 @@ class RunningStrategy(ModifyOrderDb):
                                                     TP_THRESHOLD = .1/100
                                                     
                                                     my_trades_currency_strategy_labels: list = [o["label"] for o in my_trades_currency_strategy  ]
+                                                                
+                                                    # send combo orders
+                                                    for instrument_attributes_combo in instrument_attributes_combo_all:
+                                                        
+                                                        try:
+                                                            instrument_name_combo = instrument_attributes_combo["instrument_name"]
+                                                        
+                                                            size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
+                                                                position_without_combo,
+                                                                my_trades_currency_all,
+                                                                instrument_name_combo)
+                                                        
+                                                        except:
+                                                            instrument_name_combo = None
+                                                            
+                                                        if  instrument_name_combo is not None and currency_upper in instrument_name_combo:
+                                                            
+                                                            instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
+                                                        
+                                                            size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
+                                                                position_without_combo,
+                                                                my_trades_currency_all,
+                                                                instrument_name_future)
+                                                                                                                
+                                                            ticker_combo= reading_from_pkl_data(
+                                                                "ticker",
+                                                                instrument_name_combo
+                                                                )
+                                                            
+                                                            ticker_future= reading_from_pkl_data(
+                                                                "ticker",
+                                                                instrument_name_future
+                                                                )
+                                                                
+                                                            if len_sub_account_orders_all < 50\
+                                                                    and ticker_future and ticker_combo:
+                                                                #and not reduce_only \
+                                                                
+                                                                ticker_combo= ticker_combo[0]
+
+                                                                ticker_future= ticker_future[0]
+                                                    
+                                                                send_order: dict = await combo_auto.is_send_open_order_allowed_auto_combo(
+                                                                    ticker_future,
+                                                                    ticker_combo,
+                                                                    notional,
+                                                                    instrument_name_combo,
+                                                                    instrument_attributes_futures_all,
+                                                                    instrument_attributes_combo,
+                                                                    target_transaction_per_hour
+                                                                    )
+                                                        
+                                                                if send_order:
+                                                                    await self.processing_orders(send_order)
+                                                    
+                                                                if   instrument_name_future in  random_instruments_name \
+                                                                        and size_perpetuals_reconciled\
+                                                                            and size_future_reconciled\
+                                                                                and size_future_reconciled:
+                                                                            
+                                                                    send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
+                                                                        ticker_future,
+                                                                        instrument_attributes_futures_all,
+                                                                        notional,
+                                                                        target_transaction_per_hour,
+                                                                        min(1,max_order_currency)
+                                                                        )
+                                                            
+                                                                    if send_order:
+                                                                        await self.processing_orders(send_order)
                                                     
                                                     # get labels from active trades
                                                     labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
@@ -782,77 +852,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     await self.processing_orders(send_order)
                                                         
                                                                                     break            
-                                                                        
-                                                    # send combo orders
-                                                    for instrument_attributes_combo in instrument_attributes_combo_all:
-                                                        
-                                                        try:
-                                                            instrument_name_combo = instrument_attributes_combo["instrument_name"]
-                                                        
-                                                            size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
-                                                                position_without_combo,
-                                                                my_trades_currency_all,
-                                                                instrument_name_combo)
-                                                        
-                                                        except:
-                                                            instrument_name_combo = None
                                                             
-                                                        if  instrument_name_combo is not None and currency_upper in instrument_name_combo:
-                                                            
-                                                            instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
-                                                        
-                                                            size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
-                                                                position_without_combo,
-                                                                my_trades_currency_all,
-                                                                instrument_name_future)
-                                                                                                                
-                                                            ticker_combo= reading_from_pkl_data(
-                                                                "ticker",
-                                                                instrument_name_combo
-                                                                )
-                                                            
-                                                            ticker_future= reading_from_pkl_data(
-                                                                "ticker",
-                                                                instrument_name_future
-                                                                )
-                                                                
-                                                            if len_sub_account_orders_all < 50\
-                                                                    and ticker_future and ticker_combo:
-                                                                #and not reduce_only \
-                                                                
-                                                                ticker_combo= ticker_combo[0]
-
-                                                                ticker_future= ticker_future[0]
-                                                    
-                                                                send_order: dict = await combo_auto.is_send_open_order_allowed_auto_combo(
-                                                                    ticker_future,
-                                                                    ticker_combo,
-                                                                    notional,
-                                                                    instrument_name_combo,
-                                                                    instrument_attributes_futures_all,
-                                                                    instrument_attributes_combo,
-                                                                    target_transaction_per_hour
-                                                                    )
-                                                        
-                                                                if send_order:
-                                                                    await self.processing_orders(send_order)
-                                                    
-                                                                if   instrument_name_future in  random_instruments_name \
-                                                                        and size_perpetuals_reconciled\
-                                                                            and size_future_reconciled\
-                                                                                and size_future_reconciled:
-                                                                            
-                                                                    send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
-                                                                        ticker_future,
-                                                                        instrument_attributes_futures_all,
-                                                                        notional,
-                                                                        target_transaction_per_hour,
-                                                                        min(1,max_order_currency)
-                                                                        )
-                                                            
-                                                                    if send_order:
-                                                                        await self.processing_orders(send_order)
-                                                    
                                                     if orders_currency_strategy:
                                                         for order in orders_currency_strategy:
                                                             cancel_allowed: dict = await combo_auto.is_cancelling_orders_allowed(
