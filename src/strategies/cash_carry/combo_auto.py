@@ -790,7 +790,7 @@ class ComboAuto (BasicStrategy):
                         "open", 
                         self.strategy_label
                         )
-                    
+                    log.error (f"self.strategy_label {self.strategy_label}")
                     order_allowed = True
                     
                     # provide placeholder for params

@@ -66,7 +66,7 @@ reduce_only= true
 
 [[strategies]]
 strategy_label = "futureSpreadAuto"
-is_active = true
+is_active = false
 contribute_to_hedging = true
 cancellable = false
 non_checked_for_size_label_consistency = true
