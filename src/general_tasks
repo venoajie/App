@@ -18,9 +18,7 @@ from data_cleaning.managing_delivered_transactions import (
 from data_cleaning.reconciling_db import(
     is_my_trades_and_sub_account_size_reconciled_each_other,
     is_my_trades_active_archived_reconciled_each_other,
-    is_transaction_log_and_sub_account_size_reconciled_each_other,
-    my_trades_active_archived_not_reconciled_each_other,
-    reconciling_orders,)
+    my_trades_active_archived_not_reconciled_each_other,)
 from data_cleaning.pruning_db import count_and_delete_ohlc_rows
 from db_management.sqlite_management import (
     back_up_db_sqlite,
@@ -28,7 +26,8 @@ from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     executing_query_with_return,
     insert_tables, 
-    querying_arithmetic_operator,)
+    querying_arithmetic_operator,
+    querying_duplicated_transactions)
 from market_understanding.technical_analysis import (
     insert_market_condition_result)
 from strategies.cash_carry.reassigning_labels import (
@@ -46,7 +45,6 @@ from utilities.pickling import (
     read_data,
     replace_data,)
 from utilities.string_modification import (
-    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
     transform_nested_dict_to_list,
@@ -519,6 +517,13 @@ async def reconciling_size(
                         my_trades_currency_active,
                         server_time 
                         )
+                        
+                        duplicated_trade_id_transactions = await querying_duplicated_transactions(
+                            archive_db_table,"trade_id"
+                        )
+                        
+                        if duplicated_trade_id_transactions:
+                            log.critical (f"duplicated_trade_id_transactions {duplicated_trade_id_transactions}")
                         
                         my_trades_currency_active_with_blanks = [o["id"] for o in my_trades_currency_active\
                                         if o["price"] is  None\

@@ -191,11 +191,11 @@ async def querying_duplicated_transactions(
     label: str = "my_trades_all_json",
     group_by: str = "trade_id",
     database: str = "databases/trading.sqlite3",
-) -> list:
+    ) -> list:
     """ """
 
     #query_table = f"""SELECT CAST(SUBSTR((label),-13)as integer) AS label_int, count (*)  FROM {label} GROUP BY label_int HAVING COUNT (*) >1"""
-    query_table = f"""SELECT {group_by} FROM {label} GROUP BY {group_by} HAVING count(*) >1"""
+    query_table = f"""SELECT id, data, {group_by},  FROM {label} GROUP BY {group_by} HAVING count(*) >1"""
     combine_result = []
 
     try:
