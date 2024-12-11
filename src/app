@@ -756,7 +756,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     waiting_minute_before_ordering,
                                                                                     timestamp,
                                                                                     server_time,
-                                                                                )
+                                                                                ) * 2
 
                                                                             instrument_name = transaction["instrument_name"]
                                                                             

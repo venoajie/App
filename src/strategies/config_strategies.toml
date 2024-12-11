@@ -16,8 +16,8 @@ strategy_labels = [#represert strategy
     #"marketMakerShort",
     #"marketMakerLong",
        ]
-mode_full = [false]
-reduce_only = [true]
+mode_full = [true]
+reduce_only = [false]
 
 [[relevant_tables]]
 my_trades_table = "my_trades_all_json"
