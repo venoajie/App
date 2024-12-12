@@ -10,8 +10,9 @@ from loguru import logger as log
 # user defined formula
 from db_management.sqlite_management import(
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
+    deleting_row,
     insert_tables,
-    deleting_row,)
+    update_status_data)
 from strategies.basic_strategy import(
     get_label_integer,)
 from utilities.string_modification import(
@@ -259,39 +260,25 @@ def get_closed_open_transactions_under_same_label_int(
     return [o for o in transactions_all if str(label_integer) in o["label"]]
 
 
-async def distribute_closed_transactions(
-    trade_table: str,
-    closed_table: str,
+async def updating_status_closed_transactions(
     closed_transaction: dict, 
     where_filter: str,
+    trade_table: str
+    
     ) -> None:
     """
     """
     trade_id = closed_transaction [where_filter]
+    #trade_tabel = f"my_trades_all_{currency.lower()}.json"
 
-    #insert closed transaction to db for closed transaction
-    
-    await deleting_row(
-        closed_table,
-        "databases/trading.sqlite3",
-        where_filter,
-        "=",
-        trade_id,
-    )
-    
-    await insert_tables(
-        closed_table, 
-        closed_transaction
-        )
-
-    #delete respective transaction from active db
-    await deleting_row(
+    await update_status_data(
         trade_table,
-        "databases/trading.sqlite3",
-        where_filter,
-        "=",
+        "is_open",
+        filter,
         trade_id,
-    )
+        0,
+        "="
+        )
     
     
 async def closing_orphan_order(
@@ -349,21 +336,20 @@ async def closing_one_to_one(
     transaction_closed_under_the_same_label_int: dict, 
     where_filter: str,
     trade_table: str,
-    closed_table: str
     ) -> None:
     """
     """
     
     for transaction in transaction_closed_under_the_same_label_int:
     
-        await distribute_closed_transactions(
-            trade_table,
-            closed_table,
+        await updating_status_closed_transactions(
             transaction, 
             where_filter,
+            trade_table
             )
         
 async def closing_one_to_many_single_open_order(
+    currency: str,
     open_label: dict, 
     transaction_closed_under_the_same_label_int,
     where_filter: str,
@@ -392,22 +378,16 @@ async def closing_one_to_many_single_open_order(
         
         log.debug (F"closed_label_ready_to_close{closed_label_ready_to_close}")
         
-        #closed open order
-        await distribute_closed_transactions(
-            trade_table,
-            open_label, 
-            where_filter,
-            )
-        
         #closed one of closing order
-        await distribute_closed_transactions(
-            trade_table,
+        await updating_status_closed_transactions(
             closed_label_ready_to_close, 
             where_filter,
+            trade_table
             )
         
 async def closing_one_to_many(
-    open_label,
+    currency: str,
+    open_label: str,
     transaction_closed_under_the_same_label_int: dict, 
     where_filter: str,
     trade_table: str
@@ -421,6 +401,7 @@ async def closing_one_to_many(
         log.info(F"len_open_label_size 1 {len_open_label_size}")
         
         await closing_one_to_many_single_open_order(
+            currency,
             open_label[0],
             transaction_closed_under_the_same_label_int,
             where_filter,
@@ -432,6 +413,7 @@ async def closing_one_to_many(
             log.warning(F"len_open_label_size > 1 {len_open_label_size}")
                 
             await closing_one_to_many_single_open_order(
+                currency,
                 transaction,
                 transaction_closed_under_the_same_label_int,
                 where_filter,
@@ -442,7 +424,6 @@ async def closing_one_to_many(
 async def clean_up_closed_transactions(
     currency: str, 
     trade_table: str,
-    closed_table: str,
     transaction_all: list = None
     ) -> None:
     """
@@ -458,7 +439,7 @@ async def clean_up_closed_transactions(
     where_filter = f"trade_id"
 
     if transaction_all is None:
-        column_list: str= "instrument_name","label", "amount", where_filter
+        column_list: str= "instrument_name","label", "amount", where_filter, "is_open"
         
         #querying tables
         transaction_all: list = await get_query(
@@ -528,7 +509,6 @@ async def clean_up_closed_transactions(
                                 instrument_transactions,
                                 where_filter,
                                 trade_table,
-                                closed_table,
                                 )
 
                 if size_to_close != 0:
@@ -566,7 +546,6 @@ async def clean_up_closed_transactions(
                                         transactions,
                                         where_filter,
                                         trade_table,
-                                        closed_table
                                         )
                                     
                                     if closed_transaction_instrument_name == open_transaction_instrument_name:

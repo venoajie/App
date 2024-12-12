@@ -310,6 +310,9 @@ async def update_status_data(
     where_clause= f"WHERE {filter}  LIKE '%{filter_value}%'"
     
     query = f"""UPDATE {table} SET data = JSON_REPLACE (data, '$.{data_column}', '{new_value}') {where_clause};"""
+    
+    if "is_open" in data_column:
+        query = f"""UPDATE {table} SET {data_column} = {new_value} {where_clause};"""
 
     if "ohlc" in table:
 
