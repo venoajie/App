@@ -542,7 +542,9 @@ async def clean_up_closed_transactions(
                                         transactions.append (open_transaction)
                                         transactions.append (closed_transaction)
                                         
-                                        #log.critical (f"transactions {transactions}")
+                                        log.critical (f"transactions {transactions}")
+                                        log.warning (f"closed_transaction_instrument_name {closed_transaction_instrument_name}")
+                                        log.error (f"open_transaction_instrument_name {open_transaction_instrument_name}")
                                     
                                         await closing_one_to_one(
                                             transactions,
