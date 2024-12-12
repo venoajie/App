@@ -319,6 +319,8 @@ async def update_status_data(
         query = f"""UPDATE {table} SET {data_column} = JSON_REPLACE ('{json.dumps(new_value)}')   {where_clause};"""
 
         if data_column == "open_interest":
+            
+            log.critical (f" table {table} data_column {data_column} new_value {new_value} where_clause {where_clause}")
 
             query = f"""UPDATE {table} SET {data_column} = ({new_value})  {where_clause};"""
 
