@@ -313,7 +313,6 @@ async def update_status_data(
     
     if "is_open" in data_column:
         query = f"""UPDATE {table} SET {data_column} = ({new_value}) {where_clause};"""
-        log.critical (f" table {table} data_column {data_column} new_value {new_value} where_clause {where_clause}")
 
     if "ohlc" in table:
 
