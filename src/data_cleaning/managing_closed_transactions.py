@@ -522,7 +522,7 @@ async def clean_up_closed_transactions(
                         sum_instrument_transactions = sum([o["amount"] for o in instrument_transactions])
                         
                         if sum_instrument_transactions == 0:
-                            log.info(F" instrument_transactions {instrument_transactions}")
+                            #log.info(F" instrument_transactions {instrument_transactions}")
                             
                             await closing_one_to_one(
                                 instrument_transactions,
@@ -560,7 +560,7 @@ async def clean_up_closed_transactions(
                                     transactions.append (open_transaction)
                                     transactions.append (closed_transaction)
                                     
-                                    log.critical (f"transactions {transactions}")
+                                    #log.critical (f"transactions {transactions}")
                                 
                                     await closing_one_to_one(
                                         transactions,
