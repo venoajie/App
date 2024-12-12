@@ -23,7 +23,8 @@ from utilities.string_modification import(
     parsing_sqlite_json_output,
     remove_redundant_elements,
     )
-
+from utilities.system_tools import (
+    raise_error_message,)
 
 def get_label_main(
     result: list, 
@@ -558,5 +559,6 @@ async def clean_up_closed_transactions(
                             
                                                 
     except Exception as error:
-        log.critical (f"error {error}")
+        
+        await raise_error_message (error)
 
