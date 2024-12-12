@@ -465,14 +465,12 @@ async def clean_up_closed_transactions(
 
         # filtered transactions with closing labels
         if transaction_all:
-            log.info (transaction_all)
+
             transaction_with_closed_labels = get_transactions_with_closed_label(transaction_all)
             
-            #log.debug(f"transaction_with_closed_labels {transaction_with_closed_labels}")
-                                
-            labels_only = remove_redundant_elements([o["label"] for o in transaction_with_closed_labels])
-
             if transaction_with_closed_labels:
+                
+                labels_only = remove_redundant_elements([o["label"] for o in transaction_with_closed_labels])
 
                 for label in labels_only:
                     
