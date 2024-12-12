@@ -505,33 +505,7 @@ async def reconciling_size(
                 
                     my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
                     if o["label"] is not None]
-                    
-
-                    log.debug (sum([o["amount"] for o in my_trades_currency_all_transactions]))
-                    my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency_all_transactions ])
-                    for instrument in my_trades: 
-                        log.debug (f"instrument {instrument}")
-                        amount = sum([o["amount"] for o in my_trades_currency_all_transactions if instrument in o["instrument_name"]])
-                                                                                                            
-                        log.debug (f"amount {amount}")
-                    
-                    await clean_up_closed_transactions(
-                        currency, 
-                        archive_db_table,
-                        my_trades_currency_active
-                        )
-                    
-                    log.warning (sum([o["amount"] for o in my_trades_currency_active]))
-                    my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency_active ])
-                    for instrument in my_trades: 
-                        log.debug (f"instrument {instrument}")
-                        amount = sum([o["amount"] for o in my_trades_currency_active if instrument in o["instrument_name"]])
-                                                                                                            
-                        log.debug (f"amount {amount}")
-                                                
-                    log.debug (f"sleep")
-                    await asyncio .sleep(150)
-                    
+                                        
                     if my_trades_currency_active:
                         pairing_label = await pairing_single_label(
                         strategy_attributes,
@@ -540,9 +514,6 @@ async def reconciling_size(
                         my_trades_currency_active,
                         server_time 
                         )
-                    
-                        
-                        
                             
                         duplicated_trade_id_transactions = await querying_duplicated_transactions(
                             archive_db_table,"trade_id"
@@ -565,7 +536,6 @@ async def reconciling_size(
                                 break
                             
                             await sleep_and_restart()
-                        
                             
                         if  pairing_label:
                             
@@ -630,22 +600,6 @@ async def reconciling_size(
                             )
                         
                         if instrument_name_has_delivered:
-                                                        
-                            #delete respective transaction from active db
-                            await deleting_row(
-                                trade_db_table,
-                                "databases/trading.sqlite3",
-                                "instrument_name",
-                                "=",
-                                my_trade_instrument,
-                            )
-                            
-                            for closed_transaction in my_trades_instruments:
-                                
-                                await insert_tables(
-                                closed_table, 
-                                closed_transaction
-                                )
                                 
                             log.debug (f" inactive instrument_name {my_trade_instrument}")
                             
@@ -676,6 +630,12 @@ async def reconciling_size(
                                             5
                                             )                
                             break
+                    
+                    await clean_up_closed_transactions(
+                        currency, 
+                        archive_db_table,
+                        my_trades_currency_active
+                        )
                     
                     relabelling = await relabelling_double_ids(
                         trade_db_table,
