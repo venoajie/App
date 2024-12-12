@@ -470,8 +470,6 @@ async def reconciling_size(
                     
                     order_db_table= relevant_tables["orders_table"]        
                         
-                    closed_table= relevant_tables["closed_table"]        
-
                     currency_lower = currency.lower ()
                     
                     archive_db_table = f"my_trades_all_{currency_lower}_json"                    
