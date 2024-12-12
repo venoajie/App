@@ -494,9 +494,6 @@ def is_label_and_side_consistent(
         
     if bool([o for o in non_checked_strategies if(o in label)]):
         is_consistent = True
-        log.warning(f"non_checked_strategies {non_checked_strategies}")
-        log.warning(f"label {label}")
-        log.warning(f"is_consistent {is_consistent}")
 
     else:
         
