@@ -521,7 +521,7 @@ async def reconciling_size(
                         my_trades_currency_active
                         )
                     
-                    log.warning (([o["amount"] for o in my_trades_currency_active]))
+                    log.warning (sum([o["amount"] for o in my_trades_currency_active]))
                     my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency_active ])
                     for instrument in my_trades: 
                         log.debug (f"instrument {instrument}")
