@@ -292,16 +292,12 @@ def is_size_sub_account_and_my_trades_reconciled(
                     else sub_account_size_instrument [0]
                 
                 my_trades_size_instrument = [o["amount"] for o in sum_my_trades_currency_all\
-                    if instrument_name in o["instrument_name"]]
-
-                if my_trades_size_instrument:
-                    
-                    sum_my_trades_size_instrument = sum(my_trades_size_instrument)
-                    
-                    sum_my_trades_size_instrument = 0 \
-                    if my_trades_size_instrument == []\
+                    if instrument_name in o["instrument_name"]]    
+                
+                sum_my_trades_size_instrument = 0 \
+                    if not my_trades_size_instrument \
                         else sum(my_trades_size_instrument)
-                        
+                    
                 if sub_account_size_instrument != sum_my_trades_size_instrument:
                     log.critical (f"{instrument_name} sum_my_trades_size_instrument {sum_my_trades_size_instrument}  sub_account_size_instrument {sub_account_size_instrument}")
                         
