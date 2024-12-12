@@ -259,27 +259,6 @@ def get_closed_open_transactions_under_same_label_int(
 
     return [o for o in transactions_all if str(label_integer) in o["label"]]
 
-
-async def updating_status_closed_transactions(
-    closed_transaction: dict, 
-    where_filter: str,
-    trade_table: str
-    
-    ) -> None:
-    """
-    """
-    trade_id = closed_transaction [where_filter]
-    #trade_tabel = f"my_trades_all_{currency.lower()}.json"
-
-    await update_status_data(
-        trade_table,
-        "is_open",
-        filter,
-        trade_id,
-        0,
-        "="
-        )
-    
     
 async def closing_orphan_order(
     label: str, 
@@ -332,6 +311,27 @@ async def closing_orphan_order(
             )
         
 
+
+async def updating_status_closed_transactions(
+    closed_transaction: dict, 
+    where_filter: str,
+    trade_table: str
+    
+    ) -> None:
+    """
+    """
+    trade_id = closed_transaction [where_filter]
+    #trade_tabel = f"my_trades_all_{currency.lower()}.json"
+
+    await update_status_data(
+        trade_table,
+        "is_open",
+        where_filter,
+        trade_id,
+        0,
+        "="
+        )
+    
 async def closing_one_to_one(
     transaction_closed_under_the_same_label_int: dict, 
     where_filter: str,
@@ -458,7 +458,7 @@ async def clean_up_closed_transactions(
         if transaction_all:
                         
             transaction_all: list = [o for o in transaction_all \
-            if currency in o["instrument_name"]]
+                if currency in o["instrument_name"]]
 
     # filtered transactions with closing labels
     if transaction_all:
