@@ -489,7 +489,7 @@ async def reconciling_size(
                     my_trades_currency_all_transactions: list= result_from_db_queries["my_trades_currency_all_transactions"]
                                                                     
                     my_trades_currency_active: list= [o for o in my_trades_currency_all_transactions\
-                        if ["is_open"] == 1]
+                        if o["is_open"] == 1]
 
                     from_transaction_log = result_from_db_queries["from_transaction_log"]                          
 
