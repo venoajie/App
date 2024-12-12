@@ -103,7 +103,6 @@ async def refill_db (
     instrument_name: str,
     my_trades_currency_active: list,
     archive_db_table: str,
-    trade_db_table: str
     ) -> list:
     
     my_trades_currency_active_with_blanks = [o for o in my_trades_currency_active\
@@ -135,18 +134,8 @@ async def refill_db (
                 
                 where_filter ="trade_id"
                 
-                log.error (f"archive_db_table {archive_db_table} trade_db_table {trade_db_table}")
-                    
                 await deleting_row (
                     archive_db_table,
-                    "databases/trading.sqlite3",
-                    where_filter,
-                    "=",
-                    id,
-                )
-                
-                await deleting_row (
-                    trade_db_table,
                     "databases/trading.sqlite3",
                     where_filter,
                     "=",
@@ -158,12 +147,7 @@ async def refill_db (
                         transaction
                     )
         
-                await insert_tables(
-                        trade_db_table, 
-                        transaction
-                    )
-        
-
+              
 def get_unrecorded_trade_transactions(
     direction: str,
     my_trades_instrument_name: list,
@@ -454,8 +438,8 @@ async def clean_up_closed_transactions(
                 column_list,
                 )
             
-            transaction_all = [o for o in transaction_all\
-                if o["label"] is not None]        
+            transaction_all: list= [o for o in transaction_all\
+                        if o["is_open"] == 1]     
 
         else:      
             
