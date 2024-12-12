@@ -192,7 +192,7 @@ async def get_result_from_db_queries (
     ) -> list:
     
 
-    column_trade: str= "instrument_name","label", "amount", "price","side","timestamp","trade_id","is_open"
+    column_trade: str= "instrument_name,label, amount, price,side,timestamp,trade_id,is_open"
     query = f"SELECT {column_trade} FROM  {trade_db_table} WHERE is_open = 1 AND instrument_name LIKE '%{currency}%'"
     my_trades_currency: list= await executing_query_with_return (query)
                                                     
