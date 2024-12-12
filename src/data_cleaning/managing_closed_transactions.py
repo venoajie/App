@@ -237,8 +237,9 @@ def get_unrecorded_trade_transactions(
 def get_transactions_with_closed_label(transactions_all: list) -> list:
     """ """
 
-    #log.error(f"transactions_all {transactions_all}")
-    return [] if(transactions_all is None or transactions_all == []) \
+    log.error(my_trades_currency_active_free_blanks = [o for o in transactions_all\
+                    if o["label"] is  None])
+    return [] if(not transactions_all) \
         else [o for o in transactions_all if "closed" in o["label"]]
 
 def transactions_under_label_int(
