@@ -484,7 +484,7 @@ async def reconciling_size(
                         archive_db_table,
                         transaction_log_trading_table,)
                     
-                    my_trades_currency_active: list= result_from_db_queries["my_trades_currency_active"]
+                    #my_trades_currency_active: list= result_from_db_queries["my_trades_currency_active"]
 
                     my_trades_currency_all_transactions: list= result_from_db_queries["my_trades_currency_all_transactions"]
                                                                     
