@@ -529,6 +529,7 @@ async def reconciling_size(
                                                                                                             
                         log.debug (f"amount {amount}")
                                                 
+                    log.debug (f"sleep")
                     await asyncio .sleep(150)
                     
                     if my_trades_currency_active:
