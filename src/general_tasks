@@ -502,6 +502,25 @@ async def reconciling_size(
                     server_time = get_now_unix_time()  
                     
                     strategy_attributes = config_app["strategies"]
+                
+                    my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
+                    if o["label"] is not None]
+                    
+                    await clean_up_closed_transactions(
+                        currency, 
+                        archive_db_table,
+                        my_trades_currency_all_transactions
+                        )
+
+                    log.debug (sum([o["amount"] for o in my_trades_currency_all_transactions]))
+                    my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency_all_transactions ])
+                    for instrument in my_trades: 
+                        log.debug (f"instrument {instrument}")
+                        amount = sum([o["amount"] for o in my_trades_currency_all_transactions if instrument in o["instrument_name"]])
+                                                                                                            
+                        log.debug (f"amount {amount}")
+                                                
+                    await asyncio .sleep(150)
                     
                     if my_trades_currency_active:
                         pairing_label = await pairing_single_label(
@@ -512,16 +531,8 @@ async def reconciling_size(
                         server_time 
                         )
                     
-                        my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
-                        if o["label"] is not None]
                         
-                        await clean_up_closed_transactions(
-                            currency, 
-                            archive_db_table,
-                            my_trades_currency_active_free_blanks
-                            )
                         
-                        await asyncio .sleep(150)
                             
                         duplicated_trade_id_transactions = await querying_duplicated_transactions(
                             archive_db_table,"trade_id"
