@@ -429,7 +429,7 @@ class ComboAuto (BasicStrategy):
         target_transaction_per_hour
         ) -> dict:
         """ """
-        log.warning (f"auto_combo")
+        log.warning (f"auto_combo {instrument_name_combo}")
         
         order_allowed = False
         
