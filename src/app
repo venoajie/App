@@ -21,6 +21,7 @@ from data_cleaning.reconciling_db import (
     is_size_sub_account_and_my_trades_reconciled)
 from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
+    executing_query_with_return,
     querying_table,
     update_status_data)
 from strategies.basic_strategy import (
@@ -192,11 +193,8 @@ async def get_result_from_db_queries (
     
 
     column_trade: str= "instrument_name","label", "amount", "price","side","timestamp","trade_id","is_open"
-    my_trades_currency: list= await get_query(trade_db_table, 
-                                                currency, 
-                                                "all", 
-                                                "all", 
-                                                column_trade)
+    query = f"SELECT {column_trade} FROM  {trade_db_table} WHERE is_open = 1 AND instrument_name LIKE '%{currency}%'"
+    my_trades_currency: list= await executing_query_with_return (query)
                                                     
     column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
     from_transaction_log = await get_query (transaction_log_trading, 
@@ -509,10 +507,10 @@ class RunningStrategy(ModifyOrderDb):
                                             archive_db_table,
                                             transaction_log_trading_table,)
                                         
-                                        my_trades_currency_all_transactions: list= result_from_db_queries["my_trades_currency"]
+                                        my_trades_currency_all: list= result_from_db_queries["my_trades_currency"]
                                         
-                                        my_trades_currency_all: list= [o for o in my_trades_currency_all_transactions\
-                                            if o["is_open"] == 1]
+                                        #my_trades_currency_all: list= [o for o in my_trades_currency_all_transactions\
+                                        #    if o["is_open"] == 1]
                                         
                                         orders_currency = result_from_db_queries["orders_currency"]     
                                         
