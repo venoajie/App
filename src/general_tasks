@@ -356,86 +356,6 @@ async def update_instruments(idle_time):
     except Exception as error:
         await async_raise_error_message(error)
 
-
-
-async def downloading_sub_account(
-    sub_account_id: str,
-    config_app: list,
-    idle_time: int
-    ) -> None:
-
-                
-    try:
-        # get tradable strategies
-        tradable_config_app = config_app["tradable"]
-        
-        # get tradable currencies
-        currencies= [o["spot"] for o in tradable_config_app] [0]
-
-        modify_order_and_db = SendApiRequest (sub_account_id)
-            
-        while True:
-            
-            sub_account_with_pf = await modify_order_and_db.get_subaccounts()
-            portfolio = [o for o in sub_account_with_pf if  str(o["id"]) in sub_account_id ][0]["portfolio"]
-            
-            for currency in currencies:
-                                
-                portfolio_currency = portfolio[f"{currency.lower()}"]
-                
-
-                sub_account = await modify_order_and_db.get_subaccounts_details(currency)
-                                
-                if sub_account:
-                    
-                    positions = [o["positions"] for o in sub_account][0]
-                    log.info (f"portfolio_currency {portfolio_currency}")
-                    log.warning (f"positions {positions}")
-                    
-                    value_spot= portfolio_currency["equity"]
-                    
-                    total_value = sum([o["size"] * o["mark_price"] for o in positions])
-                    
-                    if positions:
-                        
-                        server_time = get_now_unix_time()  
-                        
-                        for position in positions:
-                        
-                            entry1 = remove_dict_elements(
-                            position,
-                            "leverage")
-                        
-                            entry2 = remove_dict_elements(
-                            entry1,
-                            "estimated_liquidation_price")
-                        
-                            entry3 = remove_dict_elements(
-                            entry2,
-                            "kind")
-                            
-                            entry3.update({"value_usd": entry3["size"] * entry3["mark_price"]})
-                            entry3.update({"timestamp": server_time})
-                            #log.info(entry3)
-                        
-                            await insert_tables(
-                            "account_summary_json", 
-                            entry3
-                            )
-                            
-                            #table = "account_summary_json"
-                        
-                            #account_summary_json: list= await executing_query_with_return (
-                            # f"SELECT * FROM  {table} ")
-                        
-                            #log.debug (f"account_summary_json {account_summary_json}")
-                    
-            await asyncio.sleep(idle_time)
-
-    except Exception as error:
-        await async_raise_error_message(error)
-
-
 async def reconciling_size(
     sub_account_id: str,
     config_app: list,
@@ -560,7 +480,7 @@ async def reconciling_size(
                                     
                                 my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
                                             instrument_name,
-                                            my_trades_currency_all_transactions,
+                                            my_trades_currency_active,
                                             sub_account
                                             )  
                                 
