@@ -506,10 +506,13 @@ class RunningStrategy(ModifyOrderDb):
                                         result_from_db_queries = await get_result_from_db_queries (
                                             currency,
                                             order_db_table, 
-                                            trade_db_table,
+                                            archive_db_table,
                                             transaction_log_trading_table,)
                                         
-                                        my_trades_currency_all: list= result_from_db_queries["my_trades_currency"]
+                                        my_trades_currency_all_transactions: list= result_from_db_queries["my_trades_currency"]
+                                        
+                                        my_trades_currency_all: list= [o for o in my_trades_currency_all_transactions\
+                                            if o["is_open"] == 1]
                                         
                                         orders_currency = result_from_db_queries["orders_currency"]     
                                         
