@@ -191,37 +191,25 @@ def get_label(
 
     return label
 
-
-def delta_time(
-    server_time,
-    time_stamp
-    ) -> int:
+def compute_profit_usd(
+    transaction_price: float,
+    currrent_price: float,
+    size: int,
+    side: str,
+    ) -> float:
     """
     get difference between now and transaction time
     """
+    if side == "buy":
+        delta = currrent_price - transaction_price
     
-    return server_time - time_stamp
-
-
-def is_minimum_waiting_time_has_passed(
-    server_time,
-    time_stamp, 
-    time_threshold
-    ) -> bool:
-    """
-    check whether delta time has exceed time threhold
-    """
-
-    return (
-        True
-        if time_stamp == []
-        
-        else delta_time(
-            server_time,
-            time_stamp
-            ) > time_threshold
-    )
+    if side == "sell":
+        delta = transaction_price - currrent_price
     
+    profit = delta/transaction_price * abs(size)
+    
+    return  profit
+
 def pct_price_in_usd(
     price: float, 
     pct_threshold: float
@@ -276,6 +264,59 @@ def is_transaction_price_plus_above_threshold(
         ) < current_price
 
 
+
+def profit_usd_has_exceed_target(
+    target_profit: float,
+    transaction_price: float,
+    currrent_price: float,
+    size: int,
+    side: str,
+    ) -> bool:
+    """
+    get difference between now and transaction time
+    """
+    current_profit = compute_profit_usd(
+        transaction_price,
+        currrent_price,
+        size,
+        side,
+        )
+    
+    target = abs(pct_price_in_usd(target_profit,
+                              size))
+    
+    return  current_profit > 0 and current_profit > target 
+
+def delta_time(
+    server_time,
+    time_stamp
+    ) -> int:
+    """
+    get difference between now and transaction time
+    """
+    
+    return server_time - time_stamp
+
+
+def is_minimum_waiting_time_has_passed(
+    server_time,
+    time_stamp, 
+    time_threshold
+    ) -> bool:
+    """
+    check whether delta time has exceed time threhold
+    """
+
+    return (
+        True
+        if time_stamp == []
+        
+        else delta_time(
+            server_time,
+            time_stamp
+            ) > time_threshold
+    )
+    
 def get_max_time_stamp(result_strategy_label) -> int:
     """ """
     return (
@@ -453,6 +494,9 @@ def is_label_and_side_consistent(
         
     if bool([o for o in non_checked_strategies if(o in label)]):
         is_consistent = True
+        log.warning(f"non_checked_strategies {non_checked_strategies}")
+        log.warning(f"label {label}")
+        log.warning(f"is_consistent {is_consistent}")
 
     else:
         
@@ -466,6 +510,8 @@ def is_label_and_side_consistent(
                                         or "hedging" in label\
                                             or "custom" in label) \
                                             else False
+                
+                log.warning(f"is_consistent {is_consistent}")
 
             if side == "buy":
                 is_consistent = True \

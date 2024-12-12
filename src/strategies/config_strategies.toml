@@ -11,8 +11,9 @@ strategy_labels = [#represert strategy
     "hedgingSpot",
     "futureSpread",
     "comboAuto",
-    "customLong",
-    "customShort",
+    "custom",
+    #"customLong",
+    #"customShort",
     #"marketMakerShort",
     #"marketMakerLong",
        ]

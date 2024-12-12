@@ -12,11 +12,13 @@ from loguru import logger as log
 from strategies.basic_strategy import (
     BasicStrategy,
     check_if_next_closing_size_will_not_exceed_the_original,
+    compute_profit_usd,
     delta_pct,
     ensure_sign_consistency,
     get_label,
     get_label_integer,
     is_minimum_waiting_time_has_passed,
+    profit_usd_has_exceed_target,
     size_rounding,
     sum_order_under_closed_label_int)
 from utilities.pickling import (
@@ -961,7 +963,11 @@ class ComboAuto (BasicStrategy):
                                 transaction_in_profit = bid_price_perpetual >= (selected_transaction_price)
 
                             else:
-                                transaction_in_profit = bid_price_perpetual > selected_transaction_price + (selected_transaction_price * tp_threshold)
+                                transaction_in_profit = profit_usd_has_exceed_target(tp_threshold,
+                                                                                     selected_transaction_price,
+                                                                                     bid_price_perpetual,
+                                                                                     basic_size,
+                                                                                     instrument_side)
 
                             log.error (f"transaction_in_profit {transaction_in_profit}")
                             
@@ -1049,8 +1055,12 @@ class ComboAuto (BasicStrategy):
                     
                     if "PERPETUAL" in instrument_name_transaction\
                         and closing_size_ok:
-                        
-                        transaction_in_profit = ask_price_perpetual < (selected_transaction_price - (selected_transaction_price * tp_threshold))
+                                                
+                        transaction_in_profit = profit_usd_has_exceed_target(tp_threshold,
+                                                                            selected_transaction_price,
+                                                                            ask_price_perpetual,
+                                                                            basic_size,
+                                                                            instrument_side)
 
                         log.error (f"transaction_in_profit {transaction_in_profit} bid_price_perpetual {bid_price_perpetual} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
                     

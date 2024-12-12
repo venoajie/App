@@ -1,17 +1,47 @@
 # -*- coding: utf-8 -*-
 import pytest
-
+import os
+# installed
+import tomli
+from utilities.system_tools import (
+    provide_path_for_file)
 
 from strategies.basic_strategy import (
     are_size_and_order_appropriate,
     check_if_next_closing_size_will_not_exceed_the_original,
+    compute_profit_usd,
     is_label_and_side_consistent,
     positions_and_orders,
+    profit_usd_has_exceed_target,
     proforma_size,
     sum_order_under_closed_label_int)
 
+
+def get_config(file_name: str) -> list:
+    """ """
+    config_path = provide_path_for_file (file_name)
+    
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, "rb") as handle:
+                read= tomli.load(handle)
+                return read
+    except:
+        return []
+
+
+# parsing config file
+#config_app = get_config("config_strategies.toml")
+
+#strategy_attributes = config_app["strategies"]
+
+# get strategies that have not short/long attributes in the label 
+#non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
+#    if o["non_checked_for_size_label_consistency"]==True]
+                                                    
 non_checked_strategies = ["futureSpread",
-                          "comboAuto",]
+                          "comboAuto",
+                          "custom"]
       
 params1 = {"label": "hedgingSpot-open-100",
            "side": "sell"}
@@ -39,7 +69,7 @@ params9 = {"label": "hedgingSpot-open-100",
     ( non_checked_strategies, params5, True),
     ( non_checked_strategies, params6, True),
     ( non_checked_strategies, params7, True),
-    ( non_checked_strategies, params8, False),
+    ( non_checked_strategies, params8, True),
     ( non_checked_strategies, params9, False),
     ])
 def test_is_label_and_side_consistent (non_checked_strategies, 
@@ -140,3 +170,46 @@ def test_are_size_and_order_appropriate(purpose,
 
     assert result == expected
 
+
+@pytest.mark.parametrize("transaction_price, currrent_price, size, side, expected", [
+    (100_000, 99_950, -50, "sell", .025),
+    (100_000, 99_899, -50, "sell", .0505),
+    (100_000, 100_050, -50, "sell", -.025),
+    (100_000, 99_950, 50, "buy", -.025),
+    (100_000, 100_050, 50, "buy", .025),])
+def test_compute_profit(transaction_price, 
+                        currrent_price,
+                        size,
+                        side,
+                        expected):
+    
+    result = compute_profit_usd(transaction_price, 
+                            currrent_price,
+                            size,
+                            side
+                            )
+
+    assert result == expected
+
+@pytest.mark.parametrize("target_profit, transaction_price, currrent_price, size, side, expected", [
+    (.1/100, 100_000, 99_950, -50, "sell", False),
+    (.1/100, 100_000, 99_899, -50, "sell", True),
+    (.1/100,100_000, 100_050, -50, "sell", False),
+    (.1/100,100_000, 99_950, 50, "buy", False),
+    (.1/100, 99_950,100_051, 50, "buy", True),
+    (.1/100,100_000, 100_050, 50, "buy", False),])
+def test_profit_usd_has_exceed_target(target_profit,
+                        transaction_price, 
+                        currrent_price,
+                        size,
+                        side,
+                        expected):
+    
+    result = profit_usd_has_exceed_target(target_profit,
+                                transaction_price, 
+                                currrent_price,
+                                size,
+                                side
+                                )
+
+    assert result == expected
