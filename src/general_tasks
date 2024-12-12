@@ -667,8 +667,8 @@ async def reconciling_size(
                                     query_closed = f"DELETE  FROM {closed_table} WHERE instrument_name LIKE '%{instrument_name}%' "
                                     query_active = f"DELETE  FROM {trade_db_table} WHERE instrument_name LIKE '%{instrument_name}%' "
                                     log.warning (f"my_trades_active_archived_reconciled_each_other {my_trades_active_archived_reconciled_each_other} {not my_trades_active_archived_reconciled_each_other}")
-                                    
-                                    if not my_trades_active_archived_reconciled_each_other:
+                                    if not my_trades_currency_active\
+                                        and  my_trades_active_archived_reconciled_each_other:
                                         await executing_query_with_return (query_closed)
                                         await executing_query_with_return (query_active)
 

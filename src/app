@@ -743,6 +743,8 @@ class RunningStrategy(ModifyOrderDb):
                                                         #! closing combo auto trading
                                                         if "Auto" in label and len_sub_account_orders_all < 50:
                                                             
+                                                            TP_THRESHOLD = TP_THRESHOLD * 10
+                                                            
                                                             if sum_selected_transaction == 0:                                                               
                                                                 send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
                                                                 label,
@@ -834,6 +836,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                                 )
                                                                             
                                                                             if ticker_transaction and len_sub_account_orders_all < 50:
+                                                                                
+                                                                                TP_THRESHOLD = TP_THRESHOLD * 5
                                                                                 
                                                                                 send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                                                     ticker_transaction[0],

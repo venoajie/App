@@ -12,7 +12,6 @@ from loguru import logger as log
 from strategies.basic_strategy import (
     BasicStrategy,
     check_if_next_closing_size_will_not_exceed_the_original,
-    compute_profit_usd,
     delta_pct,
     ensure_sign_consistency,
     get_label,
