@@ -191,7 +191,7 @@ async def get_result_from_db_queries (
     ) -> list:
     
 
-    column_trade: str= "instrument_name","label", "amount", "price","side","timestamp","trade_id"
+    column_trade: str= "instrument_name","label", "amount", "price","side","timestamp","trade_id","is_open"
     my_trades_currency: list= await get_query(trade_db_table, 
                                                 currency, 
                                                 "all", 
