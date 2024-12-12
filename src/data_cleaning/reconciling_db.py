@@ -295,6 +295,9 @@ def is_size_sub_account_and_my_trades_reconciled(
                     if instrument_name in o["instrument_name"]]
 
                 if my_trades_size_instrument:
+                    
+                    sum_my_trades_size_instrument = sum(my_trades_size_instrument)
+                    
                     sum_my_trades_size_instrument = 0 \
                     if my_trades_size_instrument == []\
                         else sum(my_trades_size_instrument)
