@@ -498,6 +498,8 @@ class HedgingSpot(BasicStrategy):
                         
                 len_open_orders: int = get_transactions_len(open_orders_label) 
                 
+                log.info (f"open_size_not_over_bought {open_size_not_over_bought} len_open_orders {len_open_orders}")
+                
                 if not open_size_not_over_bought:            
                     
                     #Only one open order a time
@@ -514,6 +516,7 @@ class HedgingSpot(BasicStrategy):
                             timestamp,
                             server_time,
                         )
+                        log.info (f"cancel_allowed {cancel_allowed}")
 
                 # cancel any orders when overhedged
                 else:
