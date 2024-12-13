@@ -592,7 +592,9 @@ class RunningStrategy(ModifyOrderDb):
                                             
                                             delta_time_expiration = min_expiration_timestamp - server_time  
                                             
-                                            log.info (f"delta_time_expiration {delta_time_expiration}")
+                                            delta_time_expiration_in_minute = delta_time_expiration/60000
+                                            
+                                            log.info (f"delta_time_expiration {delta_time_expiration} delta_time_expiration_in_minute {delta_time_expiration_in_minute}")
                                             
                                             delta_time_seconds = delta_time/1000   
                                             
