@@ -566,7 +566,7 @@ class ComboAuto (BasicStrategy):
                         server_time,
                         )
         
-        log.error (f"cancel_allowed {cancel_allowed} transaction {transaction} ")
+        #log.error (f"cancel_allowed {cancel_allowed} transaction {transaction} ")
         
         return cancel_allowed
     
@@ -969,7 +969,7 @@ class ComboAuto (BasicStrategy):
                                                                                      basic_size,
                                                                                      instrument_side)
 
-                            log.error (f"transaction_in_profit {transaction_in_profit}")
+                            log.error (f"transaction_in_profit {transaction_in_profit} orders_instrument_transaction_closed == 0 {orders_instrument_transaction_closed == 0}")
                             
                             if transaction_in_profit:
 
