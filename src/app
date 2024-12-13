@@ -1150,8 +1150,8 @@ class RunningStrategy(ModifyOrderDb):
 
         except Exception as error:
             if "frame" in error:
-                await sleep_and_restart ()
                 log.debug (error)
+                await sleep_and_restart ()
             
     async def ws_refresh_auth(self) -> None:
         """
