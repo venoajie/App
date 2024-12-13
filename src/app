@@ -599,6 +599,12 @@ class RunningStrategy(ModifyOrderDb):
                                             
                                             delta_time_seconds = delta_time/ONE_SECOND   
                                             
+                                            delta_time_expiration = min_expiration_timestamp - server_time  
+                                            
+                                            if delta_time_expiration < 0:
+                                                
+                                                await sleep_and_restart ()
+                            
                                             if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
                                                 
                                                 log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA}")
