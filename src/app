@@ -1149,7 +1149,9 @@ class RunningStrategy(ModifyOrderDb):
             await self.websocket_client.send(json.dumps(msg))
 
         except Exception as error:
-            log.debug (error)
+            if "frame" in error:
+                await sleep_and_restart ()
+                log.debug (error)
             
     async def ws_refresh_auth(self) -> None:
         """
@@ -1189,8 +1191,8 @@ class RunningStrategy(ModifyOrderDb):
         sleep_time: int = 1
         
         await asyncio.sleep(sleep_time)
-
         id = id_numbering.id(operation, ws_channel)
+
 
         msg: dict = {
             "jsonrpc": "2.0",
