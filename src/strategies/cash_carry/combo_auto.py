@@ -938,6 +938,48 @@ class ComboAuto (BasicStrategy):
                 
                 if new_transaction_will_reduce_delta:
                     
+                    if "PERPETUAL" not in instrument_name_transaction:
+                        
+                        sum_order_under_closed_label = sum_order_under_closed_label_int (
+                        orders_instrument_transaction_closed,
+                        label_integer
+                        )
+                        
+                        net_size = (basic_size + sum_order_under_closed_label)
+                        
+                        size_abs = abs(basic_size)
+                        
+                        size = size_abs * ensure_sign_consistency(counter_side)   
+                        
+                        closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
+                            basic_size,
+                            net_size,
+                            size
+                            )
+                        
+                        if closing_size_ok:
+                            
+                    
+                            ticker_selected_transaction = reading_from_pkl_data(
+                                "ticker",
+                                instrument_name
+                                )[0]
+                            
+                            bid_price_selected_transaction = ticker_selected_transaction ["best_bid_price"]
+                                                    
+                            if delta > 0:
+                                transaction_in_profit = bid_price_selected_transaction >= (selected_transaction_price)
+
+                            else:
+                                transaction_in_profit = profit_usd_has_exceed_target(tp_threshold,
+                                                                                     selected_transaction_price,
+                                                                                     bid_price_selected_transaction,
+                                                                                     basic_size,
+                                                                                     instrument_side)
+
+                            log.error (f"transaction_in_profit {transaction_in_profit} orders_instrument_transaction_closed == 0 {orders_instrument_transaction_closed == 0}")
+                            log.debug (f"orders_instrument_transaction {orders_instrument_transaction}")
+            
                     if "PERPETUAL" in instrument_name_transaction:
                         
                         sum_order_under_closed_label = sum_order_under_closed_label_int (
