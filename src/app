@@ -451,7 +451,7 @@ class RunningStrategy(ModifyOrderDb):
 
                                     data_orders: list = message["params"]["data"] 
 
-                                    instrument_name_perpetual =data_orders["instrument_name"]
+                                    instrument_name_perpetual = data_orders["instrument_name"]
                                     
                                     currency: str = extract_currency_from_text(instrument_name_perpetual)
                                     
@@ -507,10 +507,13 @@ class RunningStrategy(ModifyOrderDb):
                                             archive_db_table,
                                             transaction_log_trading_table,)
                                         
-                                        my_trades_currency_all: list= result_from_db_queries["my_trades_currency"]
+                                        my_trades_currency_all_transactions: list= result_from_db_queries["my_trades_currency"]
                                         
-                                        #my_trades_currency_all: list= [o for o in my_trades_currency_all_transactions\
-                                        #    if o["is_open"] == 1]
+                                        log.error (remove_redundant_elements([o["instrument_name"] for o in my_trades_currency_all_transactions]))
+                                        
+                                        my_trades_currency_all: list= [o for o in my_trades_currency_all_transactions\
+                                            if o["instrument_name"] in instrument_attributes_futures_all]
+                                        log.warning (remove_redundant_elements([o["instrument_name"] for o in my_trades_currency_all]))
                                         
                                         orders_currency = result_from_db_queries["orders_currency"]     
                                         
@@ -682,7 +685,7 @@ class RunningStrategy(ModifyOrderDb):
                                                         if  instrument_name_combo is not None and currency_upper in instrument_name_combo:
                                                             
                                                             instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
-                                                        
+
                                                             size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
                                                                 position_without_combo,
                                                                 my_trades_currency_all,

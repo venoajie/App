@@ -506,60 +506,46 @@ async def reconciling_size(
                     my_trades_instruments_name = remove_redundant_elements(
                                         [o["instrument_name"] for o in my_trades_instruments ]
                                         )
-
-                    ONE_SECOND = 1000
-                    
-                    ONE_MINUTE = ONE_SECOND * 60   
-                    
-                    INSTRUMENT_EXPIRATION_THRESHOLD = 60 * 8 # 8 hours
                     
                     for my_trade_instrument in my_trades_instruments_name:
-
-                        instrument_time_left = (max([o["expiration_timestamp"] for o in my_trade_instrument\
-                            if o["instrument_name"] == instrument_name])- server_time)/ONE_MINUTE  
+                        instrument_name_has_delivered = is_instrument_name_has_delivered(
+                            currencies, 
+                            my_trade_instrument,
+                            strategy_attributes
+                            )
                         
-                        instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
-                        
-                        if not instrument_time_left_exceed_threshold:
-                                                                    
-                            instrument_name_has_delivered = is_instrument_name_has_delivered(
-                                currencies, 
-                                my_trade_instrument,
-                                strategy_attributes
-                                )
+                        if instrument_name_has_delivered:
+                                
+                            log.debug (f" inactive instrument_name {my_trade_instrument}")
                             
-                            if instrument_name_has_delivered:
-                                    
-                                log.debug (f" inactive instrument_name {my_trade_instrument}")
-                                
-                                column_list= "instrument_name", "position", "timestamp","trade_id","user_seq","type"    
-                                from_transaction_log = await get_query (transaction_log_trading_table, 
-                                                                            currency, 
-                                                                            "all", 
-                                                                            "all", 
-                                                                            column_list)                    
+                            column_list= "instrument_name", "position", "timestamp","trade_id","user_seq","type"    
+                            from_transaction_log = await get_query (transaction_log_trading_table, 
+                                                                        currency, 
+                                                                        "all", 
+                                                                        "all", 
+                                                                        column_list)                    
 
-                                from_transaction_log_instrument_name = (
-                                            [o for o in from_transaction_log if o["instrument_name"] == my_trade_instrument]
-                                            )  
-                                            
-                                unrecorded_timestamp_from_transaction_log = get_unrecorded_trade_transactions(
-                                                "delivered",
-                                                my_trades_currency_all_transactions,
-                                                from_transaction_log_instrument_name
-                                                )
+                            from_transaction_log_instrument_name = (
+                                        [o for o in from_transaction_log if o["instrument_name"] == my_trade_instrument]
+                                        )  
+                                        
+                            unrecorded_timestamp_from_transaction_log = get_unrecorded_trade_transactions(
+                                            "delivered",
+                                            my_trades_currency_all_transactions,
+                                            from_transaction_log_instrument_name
+                                            )
+                            
+                            if unrecorded_timestamp_from_transaction_log:
                                 
-                                if unrecorded_timestamp_from_transaction_log:
-                                    
-                                    await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
-                                                my_trade_instrument,
-                                                unrecorded_timestamp_from_transaction_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
-                                                archive_db_table,
-                                                trade_db_table,
-                                                5
-                                                )                
-                            break
-    
+                                await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
+                                            my_trade_instrument,
+                                            unrecorded_timestamp_from_transaction_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                                            archive_db_table,
+                                            trade_db_table,
+                                            5
+                                            )                
+                        break
+
                     # handling transactions with no label                    
                     await refill_db(
                         currency,
