@@ -962,7 +962,7 @@ class ComboAuto (BasicStrategy):
                     
                             ticker_selected_transaction = reading_from_pkl_data(
                                 "ticker",
-                                instrument_name
+                                instrument_name_transaction
                                 )[0]
                             
                             bid_price_selected_transaction = ticker_selected_transaction ["best_bid_price"]
