@@ -578,6 +578,17 @@ class RunningStrategy(ModifyOrderDb):
                                                                                                                                     
                                                 log.debug (f"amount {amount}")
                                                 
+                                            
+                                            THRESHOLD_DELTA_TIME_SECONDS = 120
+                                            
+                                            THRESHOLD_MARKET_CONDITIONS_COMBO = .01/100
+                                            
+                                            INSTRUMENT_EXPIRATION_THRESHOLD = 60 * 8
+                                            
+                                            ONE_SECOND = 1000
+                                            
+                                            ONE_MINUTE = ONE_SECOND * 60   
+                                            
                                             notional: float = compute_notional_value(index_price, equity)
                                             
                                             TA_result_data_all = await querying_table("market_analytics_json")
@@ -592,16 +603,12 @@ class RunningStrategy(ModifyOrderDb):
                                             
                                             delta_time_expiration = min_expiration_timestamp - server_time  
                                             
-                                            delta_time_expiration_in_minute = delta_time_expiration/60000
+                                            delta_time_expiration_in_minute = delta_time_expiration/ONE_MINUTE
                                             
                                             log.info (f"delta_time_expiration {delta_time_expiration} delta_time_expiration_in_minute {delta_time_expiration_in_minute}")
                                             
-                                            delta_time_seconds = delta_time/1000   
+                                            delta_time_seconds = delta_time/ONE_SECOND   
                                             
-                                            THRESHOLD_DELTA_TIME_SECONDS = 120
-                                            
-                                            THRESHOLD_MARKET_CONDITIONS_COMBO = .01/100
-                                                
                                             if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
                                                 
                                                 log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA}")
@@ -722,9 +729,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                 if send_order:
                                                                     await self.processing_orders(send_order)
                                                     
-                                                                INSTRUMENT_EXPIRATION_THRESHOLD = 60 * 8
                                                                 instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
-                                                                    if o["instrument_name"] == instrument_name_future])- server_time)/60000  
+                                                                    if o["instrument_name"] == instrument_name_future])- server_time)/ONE_MINUTE  
                                                                 
                                                                 instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
                                                                 
@@ -835,9 +841,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                         and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
                                                             
                                                                         for transaction in selected_transaction:
-                                                                                                                   
-                                                                            ONE_SECOND = 1000
-                                                                            ONE_MINUTE = ONE_SECOND * 60    
                                                                                                                                   
                                                                             waiting_minute_before_ordering = strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE 
                                                                             
@@ -935,6 +938,13 @@ class RunningStrategy(ModifyOrderDb):
                                                         )
                                                                                                             
                                                     if size_future_reconciled:      
+                                                
+                                                        instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
+                                                            if o["instrument_name"] == instrument_name])- server_time)/ONE_MINUTE  
+                                                        
+                                                        instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
+                                                        
+                                                        log.critical (f" instrument_name {instrument_name} instrument_time_left {instrument_time_left} instrument_time_left_exceed_threshold {instrument_time_left_exceed_threshold}")
                                                         
                                                         #something was wrong because perpetuals were actively traded. cancell  orders
                                                         if len_sub_account_orders_all < 50\
