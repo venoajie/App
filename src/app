@@ -374,7 +374,7 @@ class RunningStrategy(ModifyOrderDb):
                 min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]   
                 
                 future_instrument_with_min_exp_time_stamp = [o for o in instrument_attributes_futures_all\
-                    if o["min_expiration_timestamp"] = min_expiration_timestamp] 
+                    if o["min_expiration_timestamp"] == min_expiration_timestamp] 
                 
                 log.info (f"future_instrument_with_min_exp_time_stamp {future_instrument_with_min_exp_time_stamp} min_expiration_timestamp {min_expiration_timestamp}")
                 
