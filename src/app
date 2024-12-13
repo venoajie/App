@@ -371,7 +371,12 @@ class RunningStrategy(ModifyOrderDb):
 
                 instruments_name = futures_instruments["instruments_name"]   
                 
-                min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]    
+                min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]   
+                
+                future_instrument_with_min_exp_time_stamp = [o for o in instrument_attributes_futures_all\
+                    if o["min_expiration_timestamp"] = min_expiration_timestamp] 
+                
+                log.info (f"future_instrument_with_min_exp_time_stamp {future_instrument_with_min_exp_time_stamp} min_expiration_timestamp {min_expiration_timestamp}")
                 
                 resolution = 1                
                     
@@ -584,6 +589,10 @@ class RunningStrategy(ModifyOrderDb):
                                             tick_TA=  max([o["tick"] for o in TA_result_data])
                                                         
                                             delta_time = server_time-tick_TA
+                                            
+                                            delta_time_expiration = min_expiration_timestamp - server_time  
+                                            
+                                            log.info (f"delta_time_expiration {delta_time_expiration}")
                                             
                                             delta_time_seconds = delta_time/1000   
                                             
