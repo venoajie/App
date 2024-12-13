@@ -974,7 +974,7 @@ class ComboAuto (BasicStrategy):
             
                             if transaction_in_profit:
 
-                                if orders_instrument_transaction_closed == 0:
+                                if not orders_instrument_transaction_closed:
                                     
                                     params.update({"instrument_name": instrument_name_transaction})
                                 
