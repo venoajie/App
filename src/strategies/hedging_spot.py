@@ -532,12 +532,15 @@ class HedgingSpot(BasicStrategy):
                     transaction
                     )
                 
+                log.info (f"exit_size_not_over_bought {exit_size_not_over_bought}")
                 if exit_size_not_over_bought:
                                 
                     closed_orders_label: list = [o for o in orders_currency_strategy\
                         if "closed" in (o["label"]) ]
                             
                     len_closed_orders: int = get_transactions_len(closed_orders_label)
+                    
+                    log.info (f" len_open_orders {len_open_orders}")
                         
                     if len_closed_orders> 1:   
                         
@@ -552,6 +555,7 @@ class HedgingSpot(BasicStrategy):
                             timestamp,
                             server_time,
                             )
+                        log.info (f" cancel_allowed {cancel_allowed}")
                         
                 # cancel any orders when overhedged
                 else:
