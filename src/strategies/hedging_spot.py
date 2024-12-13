@@ -540,7 +540,7 @@ class HedgingSpot(BasicStrategy):
                             
                     len_closed_orders: int = get_transactions_len(closed_orders_label)
                     
-                    log.info (f" len_open_orders {len_open_orders}")
+                    log.info (f" len_closed_orders {len_closed_orders}")
                         
                     if len_closed_orders> 1:   
                         
