@@ -722,7 +722,16 @@ class RunningStrategy(ModifyOrderDb):
                                                                 if send_order:
                                                                     await self.processing_orders(send_order)
                                                     
-                                                                if   instrument_name_future in  random_instruments_name \
+                                                                INSTRUMENT_EXPIRATION_THRESHOLD = 60 * 8
+                                                                instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
+                                                                    if o["instrument_name"] == instrument_name_future])- server_time)/60000  
+                                                                
+                                                                instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
+                                                                
+                                                                log.critical (f" instrument_name_future {instrument_name_future} instrument_time_left {instrument_time_left} instrument_time_left_exceed_threshold {instrument_time_left_exceed_threshold}")
+                                                                 
+                                                                if instrument_time_left_exceed_threshold\
+                                                                    and instrument_name_future in  random_instruments_name \
                                                                         and size_perpetuals_reconciled\
                                                                             and size_future_reconciled\
                                                                                 and size_future_reconciled:
