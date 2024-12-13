@@ -373,11 +373,6 @@ class RunningStrategy(ModifyOrderDb):
                 
                 min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]   
                 
-                future_instrument_with_min_exp_time_stamp = [o for o in instrument_attributes_futures_all\
-                    if o["expiration_timestamp"] == min_expiration_timestamp] 
-                
-                log.info (f"future_instrument_with_min_exp_time_stamp {future_instrument_with_min_exp_time_stamp} min_expiration_timestamp {min_expiration_timestamp}")
-                
                 resolution = 1                
                     
                 # filling currencies attributes
@@ -578,12 +573,13 @@ class RunningStrategy(ModifyOrderDb):
                                                                                                                                     
                                                 log.debug (f"amount {amount}")
                                                 
+                                            ONE_PCT = 1 / 100
                                             
                                             THRESHOLD_DELTA_TIME_SECONDS = 120
                                             
-                                            THRESHOLD_MARKET_CONDITIONS_COMBO = .01/100
+                                            THRESHOLD_MARKET_CONDITIONS_COMBO = .01 * ONE_PCT
                                             
-                                            INSTRUMENT_EXPIRATION_THRESHOLD = 60 * 8
+                                            INSTRUMENT_EXPIRATION_THRESHOLD = 60 * 8 # 8 hours
                                             
                                             ONE_SECOND = 1000
                                             
@@ -600,12 +596,6 @@ class RunningStrategy(ModifyOrderDb):
                                             tick_TA=  max([o["tick"] for o in TA_result_data])
                                                         
                                             delta_time = server_time-tick_TA
-                                            
-                                            delta_time_expiration = min_expiration_timestamp - server_time  
-                                            
-                                            delta_time_expiration_in_minute = delta_time_expiration/ONE_MINUTE
-                                            
-                                            log.info (f"delta_time_expiration {delta_time_expiration} delta_time_expiration_in_minute {delta_time_expiration_in_minute}")
                                             
                                             delta_time_seconds = delta_time/ONE_SECOND   
                                             
@@ -733,9 +723,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     if o["instrument_name"] == instrument_name_future])- server_time)/ONE_MINUTE  
                                                                 
                                                                 instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
-                                                                
-                                                                log.critical (f" instrument_name_future {instrument_name_future} instrument_time_left {instrument_time_left} instrument_time_left_exceed_threshold {instrument_time_left_exceed_threshold}")
-                                                                 
+                                                                                                                                 
                                                                 if instrument_time_left_exceed_threshold\
                                                                     and instrument_name_future in  random_instruments_name \
                                                                         and size_perpetuals_reconciled\
@@ -943,12 +931,11 @@ class RunningStrategy(ModifyOrderDb):
                                                             if o["instrument_name"] == instrument_name])- server_time)/ONE_MINUTE  
                                                         
                                                         instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
-                                                        
-                                                        log.critical (f" instrument_name {instrument_name} instrument_time_left {instrument_time_left} instrument_time_left_exceed_threshold {instrument_time_left_exceed_threshold}")
-                                                        
+                                                                                                                
                                                         #something was wrong because perpetuals were actively traded. cancell  orders
-                                                        if len_sub_account_orders_all < 50\
-                                                            and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
+                                                        if instrument_time_left_exceed_threshold\
+                                                            and len_sub_account_orders_all < 50\
+                                                                and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
                                                             
                                                             my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy \
                                                                 if "open" in (o["label"])]
