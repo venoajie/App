@@ -839,8 +839,8 @@ class ComboAuto (BasicStrategy):
         log.info (selected_transaction)
 
         #ask_price_future = ticker_future ["best_ask_price"]
-        bid_price_perpetual, ask_price_perpetual = ticker_perpetual ["best_bid_price"], ticker_perpetual ["best_ask_price"]               
-
+        bid_price_perpetual, ask_price_perpetual = ticker_perpetual ["best_bid_price"], ticker_perpetual ["best_ask_price"] 
+        
         #contango = is_contango(
         #    ask_price_future,
         #    bid_price_perpetual,
@@ -855,7 +855,17 @@ class ComboAuto (BasicStrategy):
             instrument_name_perpetual = ticker_perpetual["instrument_name"]
                         
             instrument_name_transaction = selected_transaction ["instrument_name"]
-            #if delta < 0:
+            
+            if "PERPETUAL" not in instrument_name_transaction:
+            
+                ticker_selected_transaction = reading_from_pkl_data(
+                    "ticker",
+                    instrument_name_transaction
+                    )[0]
+                
+                bid_price_selected_transaction = ticker_selected_transaction ["best_bid_price"]
+                ask_price_selected_transaction = ticker_selected_transaction ["best_ask_price"]
+                                                        #if delta < 0:
         
             bid_price_future = ticker_future ["best_bid_price"]
 
@@ -936,7 +946,7 @@ class ComboAuto (BasicStrategy):
                 
                 log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta}")
                 
-                if new_transaction_will_reduce_delta:
+                if new_transaction_will_reduce_delta and not reduce_only:
                     
                     if "PERPETUAL" not in instrument_name_transaction:
                         
@@ -958,14 +968,6 @@ class ComboAuto (BasicStrategy):
                             )
                         
                         if closing_size_ok:
-                            
-                    
-                            ticker_selected_transaction = reading_from_pkl_data(
-                                "ticker",
-                                instrument_name_transaction
-                                )[0]
-                            
-                            bid_price_selected_transaction = ticker_selected_transaction ["best_bid_price"]
                                                     
                             if delta > 0:
                                 transaction_in_profit = bid_price_selected_transaction >= (selected_transaction_price)
@@ -974,40 +976,6 @@ class ComboAuto (BasicStrategy):
                                 transaction_in_profit = profit_usd_has_exceed_target(tp_threshold,
                                                                                      selected_transaction_price,
                                                                                      bid_price_selected_transaction,
-                                                                                     basic_size,
-                                                                                     instrument_side)
-
-                            log.error (f"transaction_in_profit {transaction_in_profit} orders_instrument_transaction_closed == 0 {orders_instrument_transaction_closed == 0}")
-                            log.debug (f"orders_instrument_transaction {orders_instrument_transaction}")
-            
-                    if "PERPETUAL" in instrument_name_transaction:
-                        
-                        sum_order_under_closed_label = sum_order_under_closed_label_int (
-                        orders_instrument_perpetual_closed,
-                        label_integer
-                        )
-                        
-                        net_size = (basic_size + sum_order_under_closed_label)
-                        
-                        size_abs = abs(basic_size)
-                        
-                        size = size_abs * ensure_sign_consistency(counter_side)   
-                        
-                        closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
-                            basic_size,
-                            net_size,
-                            size
-                            )
-                        
-                        if closing_size_ok:
-                                                    
-                            if delta > 0:
-                                transaction_in_profit = bid_price_perpetual >= (selected_transaction_price)
-
-                            else:
-                                transaction_in_profit = profit_usd_has_exceed_target(tp_threshold,
-                                                                                     selected_transaction_price,
-                                                                                     bid_price_perpetual,
                                                                                      basic_size,
                                                                                      instrument_side)
 
@@ -1029,22 +997,30 @@ class ComboAuto (BasicStrategy):
                                     log.error (f"closed_label {closed_label}")
                                 
                                     params.update({"label": closed_label})
-                                    params.update({"entry_price": ask_price_perpetual})
+                                    params.update({"entry_price": ask_price_selected_transaction})
                                     
-                                    order_allowed = True      
+                                    #order_allowed = True      
                     
                             else:
                                 
-                                if not reduce_only\
-                                    and len_orders_instrument_perpetual == 0:
-                                    
-                                    instrument_name = random_instruments_name[0]
+                                instrument_name_future = random_instruments_name[0]
 
-                                    log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name}")
+                                log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name_future}")
+                                    
+                                orders_instrument_transaction: list=  [o for o in orders_currency 
+                                                if instrument_name_future in o["instrument_name"]]
+                                
+                                orders_instrument_transaction_net: int= 0 if orders_instrument_transaction == []\
+                                    else sum([o["amount"] for o in orders_instrument_transaction])
+                                
+                                len_orders_instrument_transaction: int=  0 if not  orders_instrument_transaction \
+                                    else len(orders_instrument_transaction)
+                                
+                                if  len_orders_instrument_transaction == 0:
                                     
                                     ticker_instrument = reading_from_pkl_data(
                                         "ticker",
-                                        instrument_name
+                                        instrument_name_future
                                         )[0]
                                     
                                     log.error (f"label_open {label_open}")
@@ -1053,10 +1029,95 @@ class ComboAuto (BasicStrategy):
                                     
                                     params.update({"entry_price": ticker_instrument["best_ask_price"]})
                                     
-                                    params.update({"instrument_name": instrument_name})
+                                    params.update({"instrument_name": instrument_name_future})
                                     
-                                    order_allowed = True      
+                                    #order_allowed = True      
                             
+                    if "PERPETUAL" in instrument_name_transaction:
+                                        
+                        if delta > 0:
+                            transaction_in_profit = bid_price_perpetual >= (selected_transaction_price)
+
+                        else:
+                            transaction_in_profit = profit_usd_has_exceed_target(tp_threshold,
+                                                                                    selected_transaction_price,
+                                                                                    bid_price_perpetual,
+                                                                                    basic_size,
+                                                                                    instrument_side)
+
+                        log.error (f"transaction_in_profit {transaction_in_profit} orders_instrument_transaction_closed == 0 {orders_instrument_transaction_closed == 0}")
+                        log.debug (f"orders_instrument_transaction {orders_instrument_transaction}")
+        
+                        if transaction_in_profit:
+
+                            sum_order_under_closed_label = sum_order_under_closed_label_int (
+                            orders_instrument_perpetual_closed,
+                            label_integer
+                            )
+                            
+                            net_size = (basic_size + sum_order_under_closed_label)
+                            
+                            size_abs = abs(basic_size)
+                            
+                            size = size_abs * ensure_sign_consistency(counter_side)   
+                            
+                            closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
+                                basic_size,
+                                net_size,
+                                size
+                                )
+                                                        
+                            if not orders_instrument_transaction_closed \
+                                and closing_size_ok:
+                                
+                                params.update({"instrument_name": instrument_name_perpetual})
+                            
+                                label_integer = get_label_integer (selected_transaction["label"])
+                                
+                                log.error (f"label_integer {label_integer}")
+                                log.error (f"strategy_label {strategy_label}")
+                                
+                                closed_label = f"{strategy_label}-closed-{label_integer}"
+                                log.error (f"closed_label {closed_label}")
+                            
+                                params.update({"label": closed_label})
+                                params.update({"entry_price": ask_price_perpetual})
+                                
+                                order_allowed = True      
+                
+                        else:
+                                
+                            instrument_name_transaction = random_instruments_name[0]
+
+                            log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name_transaction}")
+                            
+                            ticker_instrument = reading_from_pkl_data(
+                                "ticker",
+                                instrument_name_transaction
+                                )[0]
+                            
+                            orders_instrument_transaction: list=  [o for o in orders_currency 
+                                            if instrument_name_transaction in o["instrument_name"]]
+                            
+                            orders_instrument_transaction_net: int= 0 if orders_instrument_transaction == []\
+                                else sum([o["amount"] for o in orders_instrument_transaction])
+                            
+                            len_orders_instrument_transaction: int=  0 if not  orders_instrument_transaction \
+                                else len(orders_instrument_transaction)
+                            
+                            if not reduce_only\
+                                and len_orders_instrument_transaction == 0:
+                                
+                                log.error (f"label_open {label_open}")
+                                
+                                params.update({"label": label_open})
+                                
+                                params.update({"entry_price": ticker_instrument["best_ask_price"]})
+                                
+                                params.update({"instrument_name": instrument_name_transaction})
+                                
+                                order_allowed = True      
+                        
                             
             if instrument_side =="sell":
                 
@@ -1113,7 +1174,7 @@ class ComboAuto (BasicStrategy):
                                 
                                 order_allowed = True      
 
-                                params.update({"instrument_name": instrument_name_transaction})
+                                params.update({"instrument_name": instrument_name_perpetual})
                                 
                                 label = f"{strategy_label}-closed-{label_integer}"
                                 log.error (f"label {label}")
@@ -1124,6 +1185,12 @@ class ComboAuto (BasicStrategy):
                     if "PERPETUAL" not in instrument_name_transaction\
                         and closing_size_ok:
                         
+                        transaction_in_profit = profit_usd_has_exceed_target(tp_threshold,
+                                                                            selected_transaction_price,
+                                                                            ask_price_selected_transaction,
+                                                                            basic_size,
+                                                                            instrument_side)
+
                         transaction_in_profit = bid_price_future < (selected_transaction_price - (selected_transaction_price * tp_threshold))
 
                         log.error (f"transaction_in_profit {transaction_in_profit} bid_price_future {bid_price_future} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}")
@@ -1139,7 +1206,7 @@ class ComboAuto (BasicStrategy):
                                 label = f"{strategy_label}-closed-{label_integer}"
                             
                                 params.update({"label": label})
-                                params.update({"entry_price": bid_price_future})
+                                params.update({"entry_price": bid_price_selected_transaction})
                 
                         # using perpetual to balancing delta    
                         else:
