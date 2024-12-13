@@ -979,7 +979,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                 orders_currency_strategy,
                                                                 server_time,
                                                                 )
-                                                            
+                                                            log.critical (cancel_allowed {"cancel_allowed"})
                                                             if cancel_allowed["cancel_allowed"]:
                                                                 await self.modify_order_and_db.if_cancel_is_true(
                                                                     order_db_table,
