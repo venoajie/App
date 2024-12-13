@@ -1145,8 +1145,16 @@ class RunningStrategy(ModifyOrderDb):
         }
         
         
-        await self.websocket_client.send(json.dumps(msg))
+        try:
+            await self.websocket_client.send(json.dumps(msg))
 
+        except Exception as error:
+            raise_error_message (
+                error, 
+                5,
+                "app"
+                )
+            
     async def ws_refresh_auth(self) -> None:
         """
         Requests DBT's `public/auth` to refresh
