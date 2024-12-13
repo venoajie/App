@@ -436,10 +436,10 @@ class StreamAccountData(ModifyOrderDb):
             await self.websocket_client.send(json.dumps(msg))
 
         except Exception as error:
-            if "frame" in error:
-                raise_error_message (
+            
+            raise_error_message (
             error, 
-            3,
+            1,
             "app"
             )
                 

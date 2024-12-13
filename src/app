@@ -1149,10 +1149,10 @@ class RunningStrategy(ModifyOrderDb):
             await self.websocket_client.send(json.dumps(msg))
 
         except Exception as error:
-            if "frame" in error:
-                log.debug (error)
-                await sleep_and_restart ()
-            
+        
+            log.debug (error)
+            await sleep_and_restart ()
+        
     async def ws_refresh_auth(self) -> None:
         """
         Requests DBT's `public/auth` to refresh
