@@ -513,10 +513,9 @@ class RunningStrategy(ModifyOrderDb):
                                         log.error (instrument_attributes_futures_all)
                                         
                                         my_trades_currency_all: list= [o for o in my_trades_currency_all_transactions\
-                                            if o["instrument_name"] in instrument_attributes_futures_all]
+                                            if o["instrument_name"] in [o["instrument_name"] for o in my_trades_currency_all]]
                                         log.warning (remove_redundant_elements([o["instrument_name"] for o in my_trades_currency_all]))
                                         
-                                        log.error (my_trades_currency_all)
                                         orders_currency = result_from_db_queries["orders_currency"]     
                                         
                                         outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency])
