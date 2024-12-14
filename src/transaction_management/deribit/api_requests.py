@@ -219,6 +219,7 @@ class SendApiRequest:
         """ """
 
         # basic params
+        log.info (f"params {params}")
         side = params["side"]
         instrument = params["instrument_name"]
         label_numbered = params["label"]
