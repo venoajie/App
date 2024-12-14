@@ -675,19 +675,19 @@ class ComboAuto (BasicStrategy):
                                    
                         #log.debug  (f" {premium_pct > tp_threshold } basic_ordering_is_ok {basic_ordering_is_ok } current_premium > 0 {current_premium} {current_premium > 0} current_premium < transactions_premium {current_premium < transactions_premium}")
                                         
-                        log.warning (f"transactions {transactions}")
+                        #log.warning (f"transactions {transactions}")
                         #log.warning (f"orders_currency {orders_currency}")
                         len_label = len([o["label"] for o in orders_currency\
                             if str(label_integer) in o["label"]])
                         
-                        log.debug (f"len_label {len_label} label_integer {label_integer}")
+                        l#og.debug (f"len_label {len_label} label_integer {label_integer}")
                         
                         if len_label == 0\
                             and premium_pct > tp_threshold \
                                 and basic_ordering_is_ok\
                                     and current_premium > 0\
                                         and current_premium < transactions_premium:   
-                            log.error (f"transactions {transactions}")        
+                            #log.error (f"transactions {transactions}")        
                             traded_perpetual: list = [o for o in transactions \
                                 if instrument_name_perpetual in o["instrument_name"]][0]
                                                                 
@@ -773,7 +773,7 @@ class ComboAuto (BasicStrategy):
                 ask_price_future,
                 bid_price_perpetual,
                 )
-            log.debug (f"contango {contango} len_orders_instrument_future_open_all {len_orders_instrument_future_open_all}")
+            #log.debug (f"contango {contango} len_orders_instrument_future_open_all {len_orders_instrument_future_open_all}")
             
             if contango: 
                         
@@ -792,7 +792,7 @@ class ComboAuto (BasicStrategy):
                         "open", 
                         self.strategy_label
                         )
-                    log.error (f"self.strategy_label {self.strategy_label}")
+
                     order_allowed = True
                     
                     # provide placeholder for params
@@ -841,13 +841,11 @@ class ComboAuto (BasicStrategy):
                         
             instrument_name_transaction = selected_transaction ["instrument_name"]
                     
-            ticker_selected_transaction = reading_from_pkl_data(
+            ticker_selected_transaction: list = reading_from_pkl_data(
                 "ticker",
                 instrument_name_transaction
                 )
             
-            log.error (f"ticker_selected_transaction {ticker_selected_transaction}")
-                
             orders_currency = self.orders_currency_strategy
             
             tp_threshold = modified_tp_threshold(
@@ -862,6 +860,7 @@ class ComboAuto (BasicStrategy):
                 )
             
             if ticker_selected_transaction:
+                
                 ticker_selected_transaction = ticker_selected_transaction[0]
                 
                 if instrument_side =="buy":         
@@ -1089,7 +1088,6 @@ class ComboAuto (BasicStrategy):
                         orders_instrument: list=  [o for o in orders_instrument_perpetual_open 
                                                     if instrument_name_perpetual in o["instrument_name"]]
          
-        log.error (f"params {params} order_allowed {order_allowed}")
         return dict(
             order_allowed=order_allowed,
             order_parameters=[] if order_allowed == False else params,
@@ -1335,7 +1333,6 @@ class ComboAuto (BasicStrategy):
                             
                             order_allowed = True      
     
-        log.error (f"params {params} order_allowed {order_allowed}")
         return dict(
             order_allowed=order_allowed,
             order_parameters=[] if order_allowed == False else params,
