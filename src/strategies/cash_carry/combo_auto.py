@@ -1123,8 +1123,13 @@ class ComboAuto (BasicStrategy):
             bid_price_selected_transaction = ticker_selected_transaction ["best_bid_price"]
             ask_price_selected_transaction = ticker_selected_transaction ["best_ask_price"]
                                                             #if delta < 0:
+            size_abs = abs(basic_size)
+            
+            size = size_abs * ensure_sign_consistency(counter_side)   
             
             params.update({"side": counter_side})
+
+            params.update({"size": size_abs})
             
             orders_instrument_transaction: list=  [o for o in orders_currency 
                             if instrument_name_transaction in o["instrument_name"]]
@@ -1163,10 +1168,6 @@ class ComboAuto (BasicStrategy):
                 )
                 
                 net_size = (basic_size + sum_order_under_closed_label)
-                
-                size_abs = abs(basic_size)
-                
-                size = size_abs * ensure_sign_consistency(counter_side)   
                 
                 closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
                     basic_size,
@@ -1253,10 +1254,6 @@ class ComboAuto (BasicStrategy):
                     )
                     
                     net_size = (basic_size + sum_order_under_closed_label)
-                    
-                    size_abs = abs(basic_size)
-                    
-                    size = size_abs * ensure_sign_consistency(counter_side)   
                     
                     closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
                         basic_size,
