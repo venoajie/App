@@ -1087,9 +1087,6 @@ class ComboAuto (BasicStrategy):
                             
                                 label_integer = get_label_integer (selected_transaction["label"])
                                 
-                                log.error (f"label_integer {label_integer}")
-                                log.error (f"strategy_label {strategy_label}")
-                                
                                 closed_label = f"{strategy_label}-closed-{label_integer}"
                                 log.error (f"closed_label {closed_label}")
                             
@@ -1097,7 +1094,7 @@ class ComboAuto (BasicStrategy):
                                 params.update({"entry_price": ask_price_perpetual})
                                 
                                 order_allowed = True      
-                
+                                
                         else:
                                 
                             instrument_name_transaction = random_instruments_name[0]
@@ -1263,8 +1260,9 @@ class ComboAuto (BasicStrategy):
                                 len_orders_instrument: list=  0 if not  orders_instrument \
                                     else len(orders_instrument)
                 
-        return dict(
-            order_allowed=order_allowed,
-            order_parameters=[] if order_allowed == False else params,
-        )
+            log.error (f"params {params}")
+            return dict(
+                order_allowed=order_allowed,
+                order_parameters=[] if order_allowed == False else params,
+            )
         
