@@ -989,7 +989,7 @@ class ComboAuto (BasicStrategy):
             
             size_abs = abs(basic_size)
             
-            params.update({"side": size_abs})
+            params.update({"size": size_abs})
             
             size = size_abs * ensure_sign_consistency(counter_side)   
             
