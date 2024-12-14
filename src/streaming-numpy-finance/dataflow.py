@@ -165,7 +165,8 @@ align_to = align_to - timedelta(
     seconds=align_to.second, microseconds=align_to.microsecond
 )
 window_config = TumblingWindower(length=timedelta(seconds=60), align_to=align_to)
-window = win.fold_window("1_min", inp, clock_config, window_config, build_array, acc_values)
+window = win.fold_window("1_min", inp, clock_config, window_config, build_array, acc_values,
+    build_array.__add__,)
 op.inspect("inspect", window)
 
 def calculate_features(ticker__data):
