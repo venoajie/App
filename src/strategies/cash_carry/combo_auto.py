@@ -1107,30 +1107,34 @@ class ComboAuto (BasicStrategy):
                             ticker_instrument = reading_from_pkl_data(
                                 "ticker",
                                 instrument_name_transaction
-                                )[0]
+                                )
                             
-                            orders_instrument_transaction: list=  [o for o in orders_currency 
-                                            if instrument_name_transaction in o["instrument_name"]]
+                            if ticker_instrument:
+                                
+                                ticker_instrument = ticker_instrument[0]
+                                
+                                orders_instrument_transaction: list=  [o for o in orders_currency 
+                                                if instrument_name_transaction in o["instrument_name"]]
+                                
+                                orders_instrument_transaction_net: int= 0 if orders_instrument_transaction == []\
+                                    else sum([o["amount"] for o in orders_instrument_transaction])
+                                
+                                len_orders_instrument_transaction: int=  0 if not  orders_instrument_transaction \
+                                    else len(orders_instrument_transaction)
+                                
+                                if reduce_only\
+                                    and len_orders_instrument_transaction == 0:
+                                    
+                                    log.error (f"label_open {label_open}")
+                                    
+                                    params.update({"label": label_open})
+                                    
+                                    params.update({"entry_price": ticker_instrument["best_ask_price"]})
+                                    
+                                    params.update({"instrument_name": instrument_name_transaction})
+                                    
+                                    order_allowed = True      
                             
-                            orders_instrument_transaction_net: int= 0 if orders_instrument_transaction == []\
-                                else sum([o["amount"] for o in orders_instrument_transaction])
-                            
-                            len_orders_instrument_transaction: int=  0 if not  orders_instrument_transaction \
-                                else len(orders_instrument_transaction)
-                            
-                            if reduce_only\
-                                and len_orders_instrument_transaction == 0:
-                                
-                                log.error (f"label_open {label_open}")
-                                
-                                params.update({"label": label_open})
-                                
-                                params.update({"entry_price": ticker_instrument["best_ask_price"]})
-                                
-                                params.update({"instrument_name": instrument_name_transaction})
-                                
-                                order_allowed = True      
-                        
                             
             if instrument_side =="sell":
                 
