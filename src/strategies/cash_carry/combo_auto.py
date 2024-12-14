@@ -863,12 +863,15 @@ class ComboAuto (BasicStrategy):
                 
                 ticker_selected_transaction = ticker_selected_transaction[0]
                 
+                order_params_opening = get_basic_opening_parameters(strategy_label)
+                
                 if instrument_side =="buy":         
 
                     result = await self.contra_order_for_unpaired_transaction_buy_side(
                         strategy_label,
                         tp_threshold,
                         delta,
+                        order_params_opening,
                         orders_currency,
                         selected_transaction,
                         ticker_selected_transaction,
@@ -882,6 +885,7 @@ class ComboAuto (BasicStrategy):
                         strategy_label,
                         tp_threshold,
                         delta,
+                        order_params_opening,
                         orders_currency,
                         selected_transaction,
                         ticker_selected_transaction,
@@ -898,6 +902,7 @@ class ComboAuto (BasicStrategy):
         strategy_label,
         tp_threshold: dict,
         delta: float,
+        params,
         orders_currency,
         selected_transaction: dict,
         ticker_selected_transaction: bool,
@@ -931,8 +936,6 @@ class ComboAuto (BasicStrategy):
         orders_instrument_perpetual: list=  [o for o in orders_currency 
                                             if instrument_name_perpetual in o["instrument_name"]]
         
-        # provide placeholder for params
-        params = {} 
         new_transaction_will_reduce_delta = is_new_transaction_will_reduce_delta(
             delta,
             selected_transaction_size,
@@ -940,11 +943,6 @@ class ComboAuto (BasicStrategy):
             )
             
         if new_transaction_will_reduce_delta:
-        
-            label_open: str = get_label(
-                "open", 
-                strategy_label
-                )
             
             bid_price_future = ticker_future ["best_bid_price"]
     
@@ -1072,7 +1070,6 @@ class ComboAuto (BasicStrategy):
             
                         # opening new perpetual
                         if selected_transaction_price <= bid_price_perpetual:
-                            params.update({"label": label_open})
                     
                             order_allowed = True
         
@@ -1101,6 +1098,7 @@ class ComboAuto (BasicStrategy):
         strategy_label,
         tp_threshold: dict,
         delta: float,
+        params,
         orders_currency,
         selected_transaction: dict,
         ticker_selected_transaction: dict,
@@ -1117,9 +1115,6 @@ class ComboAuto (BasicStrategy):
         reduce_only = self.strategy_parameters["reduce_only"]#[0]
         
         order_allowed = False
-
-        # provide placeholder for params
-        params = {}
 
         selected_transaction_price = selected_transaction ["price"]
         
@@ -1164,11 +1159,6 @@ class ComboAuto (BasicStrategy):
         
         if new_transaction_will_reduce_delta and  reduce_only:
                     
-            label_open: str = get_label(
-                "open", 
-                strategy_label
-                )
-            
             #ask_price_future = ticker_future ["best_ask_price"]
             bid_price_perpetual, ask_price_perpetual = ticker_perpetual ["best_bid_price"], ticker_perpetual ["best_ask_price"] 
 
@@ -1227,11 +1217,7 @@ class ComboAuto (BasicStrategy):
                         
                             label_integer = get_label_integer (selected_transaction["label"])
                             
-                            log.error (f"label_integer {label_integer}")
-                            log.error (f"strategy_label {strategy_label}")
-                            
                             closed_label = f"{strategy_label}-closed-{label_integer}"
-                            log.error (f"closed_label {closed_label}")
                         
                             params.update({"label": closed_label})
                             params.update({"entry_price": ask_price_selected_transaction})
@@ -1254,8 +1240,6 @@ class ComboAuto (BasicStrategy):
                             
                             if ticker_instrument:
                                 ticker_instrument = ticker_instrument[0]
-                                
-                                params.update({"label": label_open})
                                 
                                 params.update({"entry_price": ticker_instrument["best_ask_price"]})
                                 
@@ -1326,8 +1310,6 @@ class ComboAuto (BasicStrategy):
                         
                         if reduce_only\
                             and len_orders_instrument_future == 0:
-                            
-                            params.update({"label": label_open})
                             
                             params.update({"entry_price": ticker_instrument["best_ask_price"]})
                             
