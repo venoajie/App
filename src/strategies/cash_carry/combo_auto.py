@@ -856,6 +856,11 @@ class ComboAuto (BasicStrategy):
                 instrument_name_transaction
                 )
             
+            result = dict(
+                order_allowed=False,
+                order_parameters=[] 
+                )
+            
             if ticker_selected_transaction:
                 ticker_selected_transaction = ticker_selected_transaction[0]
                 
@@ -885,9 +890,9 @@ class ComboAuto (BasicStrategy):
                         ticker_perpetual,
                         waiting_time_for_perpetual_order,
                         )
-                
-        log.error (f"result {result} ")
-        return result
+                        
+                log.error (f"result {result} ")
+                return result
             
     async def contra_order_for_unpaired_transaction_sell_side(
         self,
