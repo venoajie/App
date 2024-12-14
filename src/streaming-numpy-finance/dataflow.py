@@ -54,13 +54,14 @@ async def _ws_agen(worker_tickers):
     async with websockets.connect(url) as websocket:
         # Subscribe to tickers
         msg = json.dumps({"subscribe": worker_tickers})
-        print(msg)
+        
         await websocket.send(msg)
         await websocket.recv()
 
         while True:
             # Receive updates
             msg = await websocket.recv()
+            print(msg)
             # Deserialize
             msg_ok = deserialize(msg)
             yield msg_ok
