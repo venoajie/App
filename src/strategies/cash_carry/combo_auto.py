@@ -947,7 +947,7 @@ class ComboAuto (BasicStrategy):
                     counter_side
                     )
                 
-                log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta}")
+                log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta} {not reduce_only}")
                 
                 if new_transaction_will_reduce_delta and not reduce_only:
                     
@@ -969,6 +969,9 @@ class ComboAuto (BasicStrategy):
                             net_size,
                             size
                             )
+                        
+                        log.warning (f"closing_size_ok {closing_size_ok} { sum_order_under_closed_label}")
+                        log.info (f"orders_instrument_transaction_closed  { orders_instrument_transaction_closed}")
                         
                         if closing_size_ok:
                                                     
