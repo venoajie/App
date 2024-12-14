@@ -1141,8 +1141,6 @@ class ComboAuto (BasicStrategy):
 
         instrument_name_transaction = selected_transaction ["instrument_name"]
             
-        log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name_future}")
-        
         orders_instrument_transaction: list=  [o for o in orders_currency 
                         if instrument_name_transaction in o["instrument_name"]]
         
@@ -1244,7 +1242,9 @@ class ComboAuto (BasicStrategy):
 
                         len_orders_instrument_future: int=  0 if not  orders_instrument_future \
                             else len(orders_instrument_future)
-                        
+            
+                        log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name_future}")
+                    
                         if  len_orders_instrument_future == 0:
                             
                             if ticker_instrument:
