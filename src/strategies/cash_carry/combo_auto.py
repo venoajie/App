@@ -1009,7 +1009,7 @@ class ComboAuto (BasicStrategy):
                                     params.update({"label": closed_label})
                                     params.update({"entry_price": ask_price_selected_transaction})
                                     
-                                    #order_allowed = True      
+                                    order_allowed = True      
                     
                             else:
                                 
@@ -1044,7 +1044,7 @@ class ComboAuto (BasicStrategy):
                                         
                                         params.update({"instrument_name": instrument_name_future})
                                         
-                                        #order_allowed = True      
+                                        order_allowed = True      
                             
                     if "PERPETUAL" in instrument_name_transaction:
                                         
