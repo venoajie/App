@@ -172,6 +172,8 @@ def calculate_features(ticker__data):
     '''
     ticker, data = ticker__data
     win_data = data[1]
+    print (ticker)
+    print (data)
     return (
         ticker,
         data[0], # metadata
