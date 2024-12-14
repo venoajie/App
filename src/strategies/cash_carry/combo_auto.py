@@ -680,7 +680,7 @@ class ComboAuto (BasicStrategy):
                         len_label = len([o["label"] for o in orders_currency\
                             if str(label_integer) in o["label"]])
                         
-                        l#og.debug (f"len_label {len_label} label_integer {label_integer}")
+                        #log.debug (f"len_label {len_label} label_integer {label_integer}")
                         
                         if len_label == 0\
                             and premium_pct > tp_threshold \
