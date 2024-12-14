@@ -826,7 +826,7 @@ class ComboAuto (BasicStrategy):
         ) -> dict:
         """ """
         
-        reduce_only = self.strategy_parameters["reduce_only"]
+        reduce_only = self.strategy_parameters["reduce_only"][0]
         
         order_allowed = False
 
@@ -835,6 +835,7 @@ class ComboAuto (BasicStrategy):
         ticker_perpetual = self.ticker_perpetual
         
         log.warning (f"contra order")
+        log.warning (f"reduce_only {reduce_only}")
                 
         log.info (selected_transaction)
 
@@ -948,7 +949,7 @@ class ComboAuto (BasicStrategy):
                     )
                 
                 log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta} {not reduce_only}")
-                log.info (f"delta {delta} selected_transaction_size {selected_transaction_size} counter_side")
+                log.info (f"delta {delta} selected_transaction_size {selected_transaction_size} counter_side {counter_side}")
                 
                 if new_transaction_will_reduce_delta and not reduce_only:
                     
