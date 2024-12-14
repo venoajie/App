@@ -1022,13 +1022,9 @@ class ComboAuto (BasicStrategy):
         
             if "PERPETUAL" not in instrument_name_transaction\
                 and closing_size_ok:
-                
-                if ticker_selected_transaction:
-                
-                    ticker_selected_transaction = ticker_selected_transaction [0]
-                    bid_price_selected_transaction = ticker_selected_transaction ["best_bid_price"]
-                    ask_price_selected_transaction = ticker_selected_transaction ["best_ask_price"]
-                                                        #if delta < 0:
+            
+                bid_price_selected_transaction = ticker_selected_transaction ["best_bid_price"]
+                ask_price_selected_transaction = ticker_selected_transaction ["best_ask_price"]
         
                 transaction_in_profit = profit_usd_has_exceed_target(tp_threshold,
                                                                     selected_transaction_price,
