@@ -974,6 +974,8 @@ class ComboAuto (BasicStrategy):
         
             params.update({"side": counter_side})
             
+            label_integer = get_label_integer (selected_transaction["label"])
+            
             instrument_current_size = sum([ o["amount"] for o in (self.my_trades_currency_strategy)\
                 if instrument_name_transaction in o["instrument_name"]])
             
@@ -997,9 +999,7 @@ class ComboAuto (BasicStrategy):
                 )
             
             #log.error (f"basic_size {basic_size} net_size {net_size} size {size} sum_order_under_closed_label {sum_order_under_closed_label}")
-        
-            label_integer = get_label_integer (selected_transaction["label"])
-                
+            
             if "PERPETUAL" in instrument_name_transaction\
                 and closing_size_ok:
                                         
