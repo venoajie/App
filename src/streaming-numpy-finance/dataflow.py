@@ -156,6 +156,13 @@ def get_event_time(ticker):
     '''
     return datetime.utcfromtimestamp(ticker.time/1000).replace(tzinfo=timezone.utc)
 
+# Process windowed data and generate profile report
+def fold_and_profile():
+    """Fold the windowed data and output a profile report."""
+    acc = build_array
+    if len(build_array) > 0:  # Perform profiling if there are accumulated readings
+        (build_array)
+    return build_array
 # Configure the `fold_window` operator to use the event time
 clock_config = EventClock(get_event_time, wait_for_system_duration=timedelta(seconds=10))
 
@@ -165,8 +172,14 @@ align_to = align_to - timedelta(
     seconds=align_to.second, microseconds=align_to.microsecond
 )
 window_config = TumblingWindower(length=timedelta(seconds=60), align_to=align_to)
-window = win.fold_window("1_min", inp, clock_config, window_config, build_array, acc_values,
-    build_array.__add__,)
+window = win.fold_window(
+    "1_min", 
+    inp,
+    clock_config,
+    window_config, 
+    build_array,
+    acc_values,
+    fold_and_profile,)
 op.inspect("inspect", window)
 
 def calculate_features(ticker__data):
