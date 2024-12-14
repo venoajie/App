@@ -1,198 +1,144 @@
-'''
-Input: ticker list
-For example: ['AMZN', 'MSFT']
-
-Output: data stream (tuple) with 1-minute time window containing ticker, metadata,
-time, min, max, first price, last price and volume for each window
-
-For example:
-('AMZN', WindowMetadata(open_time: 2024-04-16 14:20:00 UTC, close_time: 2024-04-16 14:21:00 UTC), 
-{'time': 1713277219000.0, 'min': 184.3800048828125, 'max': 184.6199951171875, 
-'first_price': 184.61000061035156, 'last_price': 184.389892578125, 'volume': 56134.0})
-('MSFT', WindowMetadata(open_time: 2024-04-16 14:20:00 UTC, close_time: 2024-04-16 14:21:00 UTC), 
-{'time': 1713277219000.0, 'min': 416.8399963378906, 'max': 417.2900085449219, 
-'first_price': 417.2900085449219, 'last_price': 416.8399963378906, 'volume': 18399.0})
-'''
-import base64
 import json
-from datetime import datetime, timedelta, timezone
+from dataclasses import dataclass, field
+from datetime import timedelta
+from typing import Dict, List, Optional
 
-import numpy as np
-
+import websockets
 from bytewax import operators as op
-import bytewax.operators.window as win
-
 from bytewax.connectors.stdio import StdOutSink
 from bytewax.dataflow import Dataflow
 from bytewax.inputs import FixedPartitionedSource, StatefulSourcePartition, batch_async
-from bytewax.operators.window import EventClockConfig, TumblingWindow
 
-import websockets
-from ticker_pb2 import Ticker
 
-## input
-ticker_list = ['AMZN', 'MSFT']
-# we can also use BTC-USD outside of stock exchange opening hours
-#ticker_list = ['BTC-USD']
-
-# Function deserializing Protobuf messages
-def deserialize(message):
-    '''Use the imported Ticker class to deserialize 
-    the protobuf message
-
-    returns: ticker id and ticker object
-    '''
-    ticker_ = Ticker()
-    message_bytes = base64.b64decode(message)
-    ticker_.ParseFromString(message_bytes)
-    return ticker_.id, ticker_
-
-# Function yielding deserialized data from YahooFinance
-async def _ws_agen(worker_tickers):
-    url = "wss://streamer.finance.yahoo.com/"
-    # Establish connection to Yahoo Finance with WebSockets
+async def _ws_agen(product_id):
+    url = "wss://ws-feed.exchange.coinbase.com"
     async with websockets.connect(url) as websocket:
-        # Subscribe to tickers
-        msg = json.dumps({"subscribe": worker_tickers})
-        
+        msg = json.dumps(
+            {
+                "type": "subscribe",
+                "product_ids": [product_id],
+                "channels": ["level2_batch"],
+            }
+        )
         await websocket.send(msg)
+        # The first msg is just a confirmation that we have subscribed.
         await websocket.recv()
 
         while True:
-            # Receive updates
             msg = await websocket.recv()
-            print(msg)
-            # Deserialize
-            msg_ok = deserialize(msg)
-            print(msg_ok)
-            yield msg_ok
+            yield (product_id, json.loads(msg))
 
-# Yahoo partition class inherited from Bytewax input StatefulSourcePartition class
-class YahooPartition(StatefulSourcePartition):
-    '''
-    Input partition that maintains state of its position.
-    '''
-    def __init__(self, worker_tickers):
-        '''
-        Get deserialized messages from Yahoo Finance and batch them
-        up to 0,5 seconds or 100 messages.
-        '''
-        agen = _ws_agen(worker_tickers)
+
+class CoinbasePartition(StatefulSourcePartition):
+    def __init__(self, product_id):
+        agen = _ws_agen(product_id)
         self._batcher = batch_async(agen, timedelta(seconds=0.5), 100)
 
     def next_batch(self):
-        '''
-        Attempt to get the next batch of items.
-        '''
         return next(self._batcher)
 
     def snapshot(self):
-        '''
-        Snapshot the position of the next read of this partition.
-        Returned via the resume_state parameter of the input builder.
-        '''
         return None
 
-# Yahoo source class inherited from Bytewax input FixedPartitionedSource class
-class YahooSource(FixedPartitionedSource):
-    '''
-    Input source with a fixed number of independent partitions.
-    '''
-    def __init__(self, worker_tickers):
-        '''
-        Initialize the class with the ticker list
-        '''
-        self.worker_tickers = worker_tickers
+
+@dataclass
+class CoinbaseSource(FixedPartitionedSource):
+    product_ids: List[str]
 
     def list_parts(self):
-        '''
-        List all partitions the worker has access to.
-        '''
-        return ["single-part"]
+        return self.product_ids
 
     def build_part(self, step_id, for_key, _resume_state):
-        '''
-        Build anew or resume an input partition.
-        Returns the built partition
-        '''
-        return YahooPartition(self.worker_tickers)
+        return CoinbasePartition(for_key)
 
 
-# Creating dataflow and input
-flow = Dataflow("yahoofinance")
+@dataclass(frozen=True)
+class OrderBookSummary:
+    bid_price: float
+    bid_size: float
+    ask_price: float
+    ask_size: float
+    spread: float
+
+
+@dataclass
+class OrderBookState:
+    bids: Dict[float, float] = field(default_factory=dict)
+    asks: Dict[float, float] = field(default_factory=dict)
+    bid_price: Optional[float] = None
+    ask_price: Optional[float] = None
+
+    def update(self, data):
+        # Initialize bids and asks if they're empty
+        if not self.bids:
+            self.bids = {float(price): float(size) for price, size in data["bids"]}
+            self.bid_price = max(self.bids.keys(), default=None)
+        if not self.asks:
+            self.asks = {float(price): float(size) for price, size in data["asks"]}
+            self.ask_price = min(self.asks.keys(), default=None)
+
+        # Process updates from the "changes" field in the data
+        for change in data.get("changes", []):
+            side, price_str, size_str = change
+            price, size = float(price_str), float(size_str)
+
+            target_dict = self.asks if side == "sell" else self.bids
+
+            # If size is zero, remove the price level; otherwise,
+            # update/add the price level
+            if size == 0.0:
+                target_dict.pop(price, None)
+            else:
+                target_dict[price] = size
+
+            # After update, recalculate the best bid and ask prices
+            if side == "sell":
+                self.ask_price = min(self.asks.keys(), default=None)
+            else:
+                self.bid_price = max(self.bids.keys(), default=None)
+
+    def spread(self) -> float:
+        return self.ask_price - self.bid_price  # type: ignore
+
+    def summarize(self):
+        return OrderBookSummary(
+            bid_price=self.bid_price,
+            bid_size=self.bids[self.bid_price],
+            ask_price=self.ask_price,
+            ask_size=self.asks[self.ask_price],
+            spread=self.spread(),
+        )
+
+
+flow = Dataflow("orderbook")
 inp = op.input(
-    "input", flow, YahooSource(ticker_list)
+    "input", flow, CoinbaseSource(["BTC-USD", "ETH-USD", "BTC-EUR", "ETH-EUR"])
 )
-# ('AMZN', id: "AMZN"
-# price: 184.585
-# time: 1713276945000
-# exchange: "NMS"
-# quoteType: EQUITY
-# marketHours: REGULAR_MARKET
-# changePercent: 0.52554822
-# dayVolume: 7182358
-# dayHigh: 184.59
-# dayLow: 182.26
-# change: 0.965011597
-# lastSize: 100
-# priceHint: 2
-# )
+# ('BTC-USD', {
+#     'type': 'l2update',
+#     'product_id': 'BTC-USD',
+#     'changes': [['buy', '36905.39', '0.00334873']],
+#     'time': '2022-05-05T17:25:09.072519Z',
+# })
 
-def build_array():
-    '''
-    Build an empty array
-    '''
-    return np.empty((0,3))
 
-def acc_values(np_array, ticker):
-    '''
-    Accumulator function; inserts time, price and volume values into the array
-    '''
-    return np.insert(np_array, 0, np.array((ticker.time, ticker.price, ticker.dayVolume)), 0)
+def mapper(state, value):
+    if state is None:
+        state = OrderBookState()
 
-def get_event_time(ticker):
-    '''
-    Retrieve event's datetime from the input (Must be UTC)
-    '''
-    return datetime.utcfromtimestamp(ticker.time/1000).replace(tzinfo=timezone.utc)
+    state.update(value)
+    return (state, state.summarize())
 
-# Configure the `fold_window` operator to use the event time
-clock_config = EventClockConfig(get_event_time, wait_for_system_duration=timedelta(seconds=10))
 
-# Add a 5 seconds tumbling window, that starts at the beginning of the minute
-align_to = datetime.now(timezone.utc)
-align_to = align_to - timedelta(
-    seconds=align_to.second, microseconds=align_to.microsecond
-)
-window_config = TumblingWindow(length=timedelta(seconds=60), align_to=align_to)
-window = win.fold_window("1_min", inp, clock_config, window_config, build_array, acc_values)
-op.inspect("inspect", window)
+stats = op.stateful_map("orderbook", inp, mapper)
+# ('BTC-USD', (36905.39, 0.00334873, 36905.4, 1.6e-05, 0.010000000002037268))
 
-def calculate_features(ticker__data):
-    '''
-    Data analysis function; 
-    Returns metadata, time, min, max, first price, last price and volume for each window
-    '''
-    ticker, data = ticker__data
-    win_data = data[1]
-    print (win_data)
-    return (
-        ticker,
-        data[0], # metadata
-        {
-            "time":win_data[-1][0],
-            "min":np.amin(win_data[:,1]), 
-            "max":np.amax(win_data[:,1]),
-            "first_price":win_data[:,1][-1], 
-            "last_price":win_data[:,1][0],
-            "volume":win_data[:,2][0] - win_data[:,2][-1]
-        }
-    )
 
-features = op.map("features", window, calculate_features)
+# # filter on 0.1% spread as a per
+def just_large_spread(prod_summary):
+    product, summary = prod_summary
+    return summary.spread / summary.ask_price > 0.0001
 
-# Output
-op.output("out", features, StdOutSink())
-# ('MSFT', WindowMetadata(open_time: 2024-04-16 14:20:00 UTC, close_time: 2024-04-16 14:21:00 UTC),
-# {'time': 1713277219000.0, 'min': 416.8399963378906, 'max': 417.2900085449219,
-# 'first_price': 417.2900085449219, 'last_price': 416.8399963378906, 'volume': 18399.0})
+
+state = op.filter("big_spread", stats, just_large_spread)
+op.output("out", stats, StdOutSink())
