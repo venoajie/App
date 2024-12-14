@@ -1,144 +1,87 @@
 import json
-from dataclasses import dataclass, field
-from datetime import timedelta
-from typing import Dict, List, Optional
+from datetime import datetime, timedelta, timezone
+from typing import List, Optional, Tuple
 
-import websockets
-from bytewax import operators as op
+import bytewax.operators as op
+import bytewax.operators.windowing as win
+
+# pip install aiohttp-sse-client
+from aiohttp_sse_client.client import EventSource
 from bytewax.connectors.stdio import StdOutSink
 from bytewax.dataflow import Dataflow
 from bytewax.inputs import FixedPartitionedSource, StatefulSourcePartition, batch_async
+from bytewax.operators.windowing import SystemClock, TumblingWindower
 
 
-async def _ws_agen(product_id):
-    url = "wss://ws-feed.exchange.coinbase.com"
-    async with websockets.connect(url) as websocket:
-        msg = json.dumps(
-            {
-                "type": "subscribe",
-                "product_ids": [product_id],
-                "channels": ["level2_batch"],
-            }
-        )
-        await websocket.send(msg)
-        # The first msg is just a confirmation that we have subscribed.
-        await websocket.recv()
-
-        while True:
-            msg = await websocket.recv()
-            yield (product_id, json.loads(msg))
+async def _sse_agen(url):
+    async with EventSource(url) as source:
+        async for event in source:
+            yield event.data
 
 
-class CoinbasePartition(StatefulSourcePartition):
-    def __init__(self, product_id):
-        agen = _ws_agen(product_id)
-        self._batcher = batch_async(agen, timedelta(seconds=0.5), 100)
+class WikiPartition(StatefulSourcePartition[str, None]):
+    def __init__(self):
+        agen = _sse_agen("https://stream.wikimedia.org/v2/stream/recentchange")
+        # Gather up to 0.25 sec of or 1000 items.
+        self._batcher = batch_async(agen, timedelta(seconds=0.25), 1000)
 
-    def next_batch(self):
+    def next_batch(self) -> List[str]:
         return next(self._batcher)
 
-    def snapshot(self):
+    def snapshot(self) -> None:
         return None
 
 
-@dataclass
-class CoinbaseSource(FixedPartitionedSource):
-    product_ids: List[str]
-
+class WikiSource(FixedPartitionedSource[str, None]):
     def list_parts(self):
-        return self.product_ids
+        return ["single-part"]
 
     def build_part(self, step_id, for_key, _resume_state):
-        return CoinbasePartition(for_key)
+        return WikiPartition()
 
 
-@dataclass(frozen=True)
-class OrderBookSummary:
-    bid_price: float
-    bid_size: float
-    ask_price: float
-    ask_size: float
-    spread: float
+flow = Dataflow("wikistream")
+inp = op.input("inp", flow, WikiSource())
+inp = op.map("load_json", inp, json.loads)
+# { "server_name": ..., ... }
 
 
-@dataclass
-class OrderBookState:
-    bids: Dict[float, float] = field(default_factory=dict)
-    asks: Dict[float, float] = field(default_factory=dict)
-    bid_price: Optional[float] = None
-    ask_price: Optional[float] = None
-
-    def update(self, data):
-        # Initialize bids and asks if they're empty
-        if not self.bids:
-            self.bids = {float(price): float(size) for price, size in data["bids"]}
-            self.bid_price = max(self.bids.keys(), default=None)
-        if not self.asks:
-            self.asks = {float(price): float(size) for price, size in data["asks"]}
-            self.ask_price = min(self.asks.keys(), default=None)
-
-        # Process updates from the "changes" field in the data
-        for change in data.get("changes", []):
-            side, price_str, size_str = change
-            price, size = float(price_str), float(size_str)
-
-            target_dict = self.asks if side == "sell" else self.bids
-
-            # If size is zero, remove the price level; otherwise,
-            # update/add the price level
-            if size == 0.0:
-                target_dict.pop(price, None)
-            else:
-                target_dict[price] = size
-
-            # After update, recalculate the best bid and ask prices
-            if side == "sell":
-                self.ask_price = min(self.asks.keys(), default=None)
-            else:
-                self.bid_price = max(self.bids.keys(), default=None)
-
-    def spread(self) -> float:
-        return self.ask_price - self.bid_price  # type: ignore
-
-    def summarize(self):
-        return OrderBookSummary(
-            bid_price=self.bid_price,
-            bid_size=self.bids[self.bid_price],
-            ask_price=self.ask_price,
-            ask_size=self.asks[self.ask_price],
-            spread=self.spread(),
-        )
+def get_server_name(data_dict):
+    return data_dict["server_name"]
 
 
-flow = Dataflow("orderbook")
-inp = op.input(
-    "input", flow, CoinbaseSource(["BTC-USD", "ETH-USD", "BTC-EUR", "ETH-EUR"])
+server_counts = win.count_window(
+    "count",
+    inp,
+    SystemClock(),
+    TumblingWindower(
+        length=timedelta(seconds=2), align_to=datetime(2023, 1, 1, tzinfo=timezone.utc)
+    ),
+    get_server_name,
 )
-# ('BTC-USD', {
-#     'type': 'l2update',
-#     'product_id': 'BTC-USD',
-#     'changes': [['buy', '36905.39', '0.00334873']],
-#     'time': '2022-05-05T17:25:09.072519Z',
-# })
+# ("server.name", (window_id, count_per_window))
 
 
-def mapper(state, value):
-    if state is None:
-        state = OrderBookState()
-
-    state.update(value)
-    return (state, state.summarize())
-
-
-stats = op.stateful_map("orderbook", inp, mapper)
-# ('BTC-USD', (36905.39, 0.00334873, 36905.4, 1.6e-05, 0.010000000002037268))
-
-
-# # filter on 0.1% spread as a per
-def just_large_spread(prod_summary):
-    product, summary = prod_summary
-    return summary.spread / summary.ask_price > 0.0001
+def keep_max(
+    max_count: Optional[int], id_count: Tuple[int, int]
+) -> Tuple[Optional[int], int]:
+    _win_id, new_count = id_count
+    if max_count is None:
+        new_max = new_count
+    else:
+        new_max = max(max_count, new_count)
+    # print(f"Just got {new_count}, old max was {max_count}, new max is {new_max}")
+    return (new_max, new_max)
 
 
-state = op.filter("big_spread", stats, just_large_spread)
-op.output("out", stats, StdOutSink())
+max_count_per_window = op.stateful_map("keep_max", server_counts.down, keep_max)
+# ("server.name", max_per_window)
+
+
+def format_nice(name_max):
+    server_name, max_per_window = name_max
+    return f"{server_name}, {max_per_window}"
+
+
+out = op.map("format", max_count_per_window, format_nice)
+op.output("out", out, StdOutSink())
