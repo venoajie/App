@@ -826,7 +826,7 @@ class ComboAuto (BasicStrategy):
         ) -> dict:
         """ """
         
-        reduce_only = self.strategy_parameters["reduce_only"][0]
+        reduce_only = self.strategy_parameters["reduce_only"]#[0]
         
         order_allowed = False
 
