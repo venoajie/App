@@ -510,7 +510,7 @@ class RunningStrategy(ModifyOrderDb):
                                         my_trades_currency_all_transactions: list= result_from_db_queries["my_trades_currency"]
                                                                                 
                                         my_trades_currency_all: list= [o for o in my_trades_currency_all_transactions\
-                                            if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
+                                            if currency_upper in [o["instrument_name"] for o in instrument_attributes_futures_all]]
                                         
                                         orders_currency = result_from_db_queries["orders_currency"]     
                                         
