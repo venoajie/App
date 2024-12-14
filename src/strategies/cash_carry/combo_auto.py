@@ -835,7 +835,6 @@ class ComboAuto (BasicStrategy):
         ticker_perpetual = self.ticker_perpetual
         
         log.warning (f"contra order")
-        log.warning (f"reduce_only {reduce_only}")
                 
         log.info (selected_transaction)
 
@@ -948,10 +947,10 @@ class ComboAuto (BasicStrategy):
                     counter_side
                     )
                 
-                log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta} {not reduce_only}")
+                log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta} {reduce_only}")
                 log.info (f"delta {delta} selected_transaction_size {selected_transaction_size} counter_side {counter_side}")
                 
-                if new_transaction_will_reduce_delta and not reduce_only:
+                if new_transaction_will_reduce_delta and  reduce_only:
                     
                     if "PERPETUAL" not in instrument_name_transaction:
                         
@@ -1116,7 +1115,7 @@ class ComboAuto (BasicStrategy):
                             len_orders_instrument_transaction: int=  0 if not  orders_instrument_transaction \
                                 else len(orders_instrument_transaction)
                             
-                            if not reduce_only\
+                            if reduce_only\
                                 and len_orders_instrument_transaction == 0:
                                 
                                 log.error (f"label_open {label_open}")
@@ -1229,7 +1228,7 @@ class ComboAuto (BasicStrategy):
                             log.error (f"selected_transaction_price <= bid_price_perpetual {selected_transaction_price <= bid_price_perpetual} ")
                             log.warning (f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}")
                                 
-                            if not reduce_only\
+                            if reduce_only\
                                 and len_orders_instrument_perpetual == 0\
                                     and sum_orders_instrument_perpetual_open < abs(delta)  \
                                         and delta <=0 :
