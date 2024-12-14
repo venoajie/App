@@ -311,6 +311,7 @@ class StreamAccountData(ModifyOrderDb):
                                             currency
                                             )
                         
+                                        log.critical ("F")
                                         await self.modify_order_and_db.resupply_sub_accountdb(currency)    
                                         
                                     if "user.changes.any" in message_channel:

@@ -190,6 +190,7 @@ class ModifyOrderDb(SendApiRequest):
                             order_db_table,
                             order_id)
 
+        log.critical ("D")
         await self.resupply_sub_accountdb(currency.upper())      
         
     async def get_sub_account(
