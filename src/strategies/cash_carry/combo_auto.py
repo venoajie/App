@@ -863,6 +863,8 @@ class ComboAuto (BasicStrategy):
                     instrument_name_transaction
                     )
                 
+                log.error (f"ticker_selected_transaction {ticker_selected_transaction}")
+                
                 if ticker_selected_transaction:
                 
                     ticker_selected_transaction = ticker_selected_transaction [0]
@@ -952,7 +954,8 @@ class ComboAuto (BasicStrategy):
                 
                 if new_transaction_will_reduce_delta and  reduce_only:
                     
-                    if "PERPETUAL" not in instrument_name_transaction:
+                    if "PERPETUAL" not in instrument_name_transaction\
+                        and ticker_selected_transaction:
                         
                         sum_order_under_closed_label = sum_order_under_closed_label_int (
                         orders_instrument_transaction_closed,
