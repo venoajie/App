@@ -855,44 +855,37 @@ class ComboAuto (BasicStrategy):
                 take_profit_threshold_original,
                 instrument_name_transaction
                 )
-            #market_condition = await get_market_condition_future_spread(
-            #    TA_result_data, 
-            #    index_price, 
-            #    threshold_market_condition
-            #    )
             
-            #bullish, strong_bullish = market_condition["rising_price"], market_condition["strong_rising_price"]
+            if ticker_selected_transaction:
+                ticker_selected_transaction = ticker_selected_transaction[0]
+                
+                if instrument_side =="buy":         
 
-            #bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
-            #neutral = market_condition["neutral_price"]
-            
-            if instrument_side =="buy":         
-
-                result = await self.contra_order_for_unpaired_transaction_buy_side(
-                    strategy_label,
-                    tp_threshold,
-                    delta,
-                    orders_currency,
-                    selected_transaction,
-                    ticker_selected_transaction,
-                    ticker_perpetual,
-                    random_instruments_name
-                    )
-                                           
-            if instrument_side =="sell":
-               
-                result = await self. contra_order_for_unpaired_transaction_sell_side(
-                    strategy_label,
-                    tp_threshold,
-                    delta,
-                    orders_currency,
-                    selected_transaction,
-                    ticker_selected_transaction,
-                    ticker_future,
-                    ticker_perpetual,
-                    waiting_time_for_perpetual_order,
-                    )
-            
+                    result = await self.contra_order_for_unpaired_transaction_buy_side(
+                        strategy_label,
+                        tp_threshold,
+                        delta,
+                        orders_currency,
+                        selected_transaction,
+                        ticker_selected_transaction,
+                        ticker_perpetual,
+                        random_instruments_name
+                        )
+                                            
+                if instrument_side =="sell":
+                
+                    result = await self. contra_order_for_unpaired_transaction_sell_side(
+                        strategy_label,
+                        tp_threshold,
+                        delta,
+                        orders_currency,
+                        selected_transaction,
+                        ticker_selected_transaction,
+                        ticker_future,
+                        ticker_perpetual,
+                        waiting_time_for_perpetual_order,
+                        )
+                
         log.error (f"result {result} ")
         return result
             
