@@ -1,122 +1,194 @@
-"""Setup a dataflow for profiling time series data.
+'''
+Input: ticker list
+For example: ['AMZN', 'MSFT']
 
-This script sets up a dataflow that reads in a CSV file containing time series data
-and profiles the data in hourly windows. The data is read in from a CSV file and
-parsed to extract the timestamp. The data is then windowed into hourly windows and
-accumulated. The accumulated data is then profiled using the ydata_profiling library
-and the profile report is output to a file.
-"""
+Output: data stream (tuple) with 1-minute time window containing ticker, metadata,
+time, min, max, first price, last price and volume for each window
 
-# start-imports
+For example:
+('AMZN', WindowMetadata(open_time: 2024-04-16 14:20:00 UTC, close_time: 2024-04-16 14:21:00 UTC), 
+{'time': 1713277219000.0, 'min': 184.3800048828125, 'max': 184.6199951171875, 
+'first_price': 184.61000061035156, 'last_price': 184.389892578125, 'volume': 56134.0})
+('MSFT', WindowMetadata(open_time: 2024-04-16 14:20:00 UTC, close_time: 2024-04-16 14:21:00 UTC), 
+{'time': 1713277219000.0, 'min': 416.8399963378906, 'max': 417.2900085449219, 
+'first_price': 417.2900085449219, 'last_price': 416.8399963378906, 'volume': 18399.0})
+'''
+import base64
+import json
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 
-import bytewax.operators as op
-import pandas as pd
-from bytewax.connectors.files import CSVSource
+import numpy as np
+
+from bytewax import operators as op
+import bytewax.operators.window as win
+
 from bytewax.connectors.stdio import StdOutSink
 from bytewax.dataflow import Dataflow
-from bytewax.operators import windowing as wop
-from bytewax.operators.windowing import EventClock, TumblingWindower
-from ydata_profiling import ProfileReport  # type: ignore
+from bytewax.inputs import FixedPartitionedSource, StatefulSourcePartition, batch_async
+from bytewax.operators.window import EventClockConfig, TumblingWindow
 
-# end-imports
+import websockets
+from ticker_pb2 import Ticker
 
-# start-dataflow
-# Initialize dataflow
-flow = Dataflow("timeseries")
-csv_path = Path("iot_telemetry_data_1000.csv")
-input_data = op.input("simulated_stream", flow, CSVSource(csv_path))
-# end-dataflow
+## input
+ticker_list = ['AMZN', 'MSFT']
+# we can also use BTC-USD outside of stock exchange opening hours
+#ticker_list = ['BTC-USD']
+
+# Function deserializing Protobuf messages
+def deserialize(message):
+    '''Use the imported Ticker class to deserialize 
+    the protobuf message
+
+    returns: ticker id and ticker object
+    '''
+    ticker_ = Ticker()
+    message_bytes = base64.b64decode(message)
+    ticker_.ParseFromString(message_bytes)
+    return ticker_.id, ticker_
+
+# Function yielding deserialized data from YahooFinance
+async def _ws_agen(worker_tickers):
+    url = "wss://streamer.finance.yahoo.com/"
+    # Establish connection to Yahoo Finance with WebSockets
+    async with websockets.connect(url) as websocket:
+        # Subscribe to tickers
+        msg = json.dumps({"subscribe": worker_tickers})
+        await websocket.send(msg)
+        await websocket.recv()
+
+        while True:
+            # Receive updates
+            msg = await websocket.recv()
+            # Deserialize
+            msg_ok = deserialize(msg)
+            yield msg_ok
+
+# Yahoo partition class inherited from Bytewax input StatefulSourcePartition class
+class YahooPartition(StatefulSourcePartition):
+    '''
+    Input partition that maintains state of its position.
+    '''
+    def __init__(self, worker_tickers):
+        '''
+        Get deserialized messages from Yahoo Finance and batch them
+        up to 0,5 seconds or 100 messages.
+        '''
+        agen = _ws_agen(worker_tickers)
+        self._batcher = batch_async(agen, timedelta(seconds=0.5), 100)
+
+    def next_batch(self):
+        '''
+        Attempt to get the next batch of items.
+        '''
+        return next(self._batcher)
+
+    def snapshot(self):
+        '''
+        Snapshot the position of the next read of this partition.
+        Returned via the resume_state parameter of the input builder.
+        '''
+        return None
+
+# Yahoo source class inherited from Bytewax input FixedPartitionedSource class
+class YahooSource(FixedPartitionedSource):
+    '''
+    Input source with a fixed number of independent partitions.
+    '''
+    def __init__(self, worker_tickers):
+        '''
+        Initialize the class with the ticker list
+        '''
+        self.worker_tickers = worker_tickers
+
+    def list_parts(self):
+        '''
+        List all partitions the worker has access to.
+        '''
+        return ["single-part"]
+
+    def build_part(self, step_id, for_key, _resume_state):
+        '''
+        Build anew or resume an input partition.
+        Returns the built partition
+        '''
+        return YahooPartition(self.worker_tickers)
 
 
-# start-parse-time-stamp
-# Parse timestamps in data
-def parse_time(reading_data):
-    """Parse the timestamp in the reading data."""
-    reading_data["ts"] = datetime.fromtimestamp(float(reading_data["ts"]), timezone.utc)
-    return reading_data
-
-
-parse_time_step = op.map("parse_time", input_data, parse_time)
-map_tuple = op.map(
-    "tuple_map",
-    parse_time_step,
-    lambda reading_data: (reading_data["device"], reading_data),
+# Creating dataflow and input
+flow = Dataflow("yahoofinance")
+inp = op.input(
+    "input", flow, YahooSource(ticker_list)
 )
-# end-parse-time-stamp
+# ('AMZN', id: "AMZN"
+# price: 184.585
+# time: 1713276945000
+# exchange: "NMS"
+# quoteType: EQUITY
+# marketHours: REGULAR_MARKET
+# changePercent: 0.52554822
+# dayVolume: 7182358
+# dayHigh: 184.59
+# dayLow: 182.26
+# change: 0.965011597
+# lastSize: 100
+# priceHint: 2
+# )
 
+def build_array():
+    '''
+    Build an empty array
+    '''
+    return np.empty((0,3))
 
-# start-accumulator-helpers
-# Accumulator function
-def acc_values():
-    """Initialize the accumulator for the windowed data."""
-    return []
+def acc_values(np_array, ticker):
+    '''
+    Accumulator function; inserts time, price and volume values into the array
+    '''
+    return np.insert(np_array, 0, np.array((ticker.time, ticker.price, ticker.dayVolume)), 0)
 
+def get_event_time(ticker):
+    '''
+    Retrieve event's datetime from the input (Must be UTC)
+    '''
+    return datetime.utcfromtimestamp(ticker.time/1000).replace(tzinfo=timezone.utc)
 
-def accumulate(acc, reading):
-    """Accumulate the readings in the window."""
-    acc.append(reading)
-    return acc
+# Configure the `fold_window` operator to use the event time
+clock_config = EventClockConfig(get_event_time, wait_for_system_duration=timedelta(seconds=10))
 
-
-def merge_acc(acc1, acc2):
-    """Merge two accumulators together."""
-    return acc1 + acc2
-
-
-# Get timestamp from reading
-def get_time(reading):
-    """Get the timestamp from the reading."""
-    return reading["ts"]
-
-
-# end-accumulator-helpers
-
-# start-windowing
-# Configure windowing
-event_time_config = EventClock(get_time, wait_for_system_duration=timedelta(seconds=30))
-align_to = datetime(2020, 1, 1, tzinfo=timezone.utc)
-clock_config = TumblingWindower(align_to=align_to, length=timedelta(hours=1))
-# end-windowing
-
-# start-windowed-data
-# Collect windowed data
-windowed_data = wop.fold_window(
-    "windowed_data",
-    map_tuple,
-    clock=event_time_config,
-    windower=clock_config,
-    builder=acc_values,
-    folder=accumulate,
-    merger=merge_acc,
+# Add a 5 seconds tumbling window, that starts at the beginning of the minute
+align_to = datetime.now(timezone.utc)
+align_to = align_to - timedelta(
+    seconds=align_to.second, microseconds=align_to.microsecond
 )
-# end-windowed-data
+window_config = TumblingWindow(length=timedelta(seconds=60), align_to=align_to)
+window = win.fold_window("1_min", inp, clock_config, window_config, build_array, acc_values)
+op.inspect("inspect", window)
 
+def calculate_features(ticker__data):
+    '''
+    Data analysis function; 
+    Returns metadata, time, min, max, first price, last price and volume for each window
+    '''
+    ticker, data = ticker__data
+    win_data = data[1]
+    return (
+        ticker,
+        data[0], # metadata
+        {
+            "time":win_data[-1][0],
+            "min":np.amin(win_data[:,1]), 
+            "max":np.amax(win_data[:,1]),
+            "first_price":win_data[:,1][-1], 
+            "last_price":win_data[:,1][0],
+            "volume":win_data[:,2][0] - win_data[:,2][-1]
+        }
+    )
 
-# start-profile-report
-def output_profile(acc):
-    """Output a profile report for the accumulated data."""
-    df = pd.DataFrame(acc)
-    profile = ProfileReport(df, title="Profiling Report")
-    profile.to_file(f"profile_{datetime.now(tz=timezone.utc).isoformat()}.html")
-    return acc
+features = op.map("features", window, calculate_features)
 
-
-# Process windowed data and generate profile report
-def fold_and_profile(acc, reading):
-    """Fold the windowed data and output a profile report."""
-    acc = accumulate(acc, reading)
-    if len(acc) > 0:  # Perform profiling if there are accumulated readings
-        output_profile(acc)
-    return acc
-
-
-folded = op.fold_final("acc_values", windowed_data.down, acc_values, fold_and_profile)
-
-# end-profile-report
-
-# start-output
-# Output results
-op.output("output", folded, StdOutSink())
-# end-output
+# Output
+op.output("out", features, StdOutSink())
+# ('MSFT', WindowMetadata(open_time: 2024-04-16 14:20:00 UTC, close_time: 2024-04-16 14:21:00 UTC),
+# {'time': 1713277219000.0, 'min': 416.8399963378906, 'max': 417.2900085449219,
+# 'first_price': 417.2900085449219, 'last_price': 416.8399963378906, 'volume': 18399.0})
