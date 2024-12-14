@@ -413,6 +413,7 @@ class ModifyOrderDb(SendApiRequest):
             if  label_and_side_consistent:
                 send_limit_result = await self.private_data.send_limit_order(params)                
                 currency = extract_currency_from_text (params["instrument_name"])
+                log.critical ('A')
                 await self.resupply_sub_accountdb(currency)
                 return send_limit_result
                 #await asyncio.sleep(10)
@@ -710,6 +711,7 @@ class ModifyOrderDb(SendApiRequest):
                                 order_db_table
                             )
 
+        log.critical ('B')
         await self.resupply_sub_accountdb(currency)       
         
         await update_db_pkl(
@@ -737,7 +739,7 @@ class ModifyOrderDb(SendApiRequest):
         instrument_name = order["instrument_name"]
         
         currency = extract_currency_from_text (instrument_name)
-        
+        log.critical ('C')
         await self.resupply_sub_accountdb(currency)   
         
         if trades:
