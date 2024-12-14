@@ -861,10 +861,13 @@ class ComboAuto (BasicStrategy):
                 ticker_selected_transaction = reading_from_pkl_data(
                     "ticker",
                     instrument_name_transaction
-                    )[0]
+                    )
                 
-                bid_price_selected_transaction = ticker_selected_transaction ["best_bid_price"]
-                ask_price_selected_transaction = ticker_selected_transaction ["best_ask_price"]
+                if ticker_selected_transaction:
+                
+                    ticker_selected_transaction = ticker_selected_transaction [0]
+                    bid_price_selected_transaction = ticker_selected_transaction ["best_bid_price"]
+                    ask_price_selected_transaction = ticker_selected_transaction ["best_ask_price"]
                                                         #if delta < 0:
         
             bid_price_future = ticker_future ["best_bid_price"]
@@ -1021,17 +1024,20 @@ class ComboAuto (BasicStrategy):
                                     ticker_instrument = reading_from_pkl_data(
                                         "ticker",
                                         instrument_name_future
-                                        )[0]
+                                        ) 
                                     
-                                    log.error (f"label_open {label_open}")
-                                    
-                                    params.update({"label": label_open})
-                                    
-                                    params.update({"entry_price": ticker_instrument["best_ask_price"]})
-                                    
-                                    params.update({"instrument_name": instrument_name_future})
-                                    
-                                    #order_allowed = True      
+                                    if ticker_instrument:
+                                        ticker_instrument = ticker_instrument[0]
+                                        
+                                        log.error (f"label_open {label_open}")
+                                        
+                                        params.update({"label": label_open})
+                                        
+                                        params.update({"entry_price": ticker_instrument["best_ask_price"]})
+                                        
+                                        params.update({"instrument_name": instrument_name_future})
+                                        
+                                        #order_allowed = True      
                             
                     if "PERPETUAL" in instrument_name_transaction:
                                         
