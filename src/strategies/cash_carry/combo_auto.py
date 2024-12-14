@@ -868,7 +868,7 @@ class ComboAuto (BasicStrategy):
             
             if instrument_side =="buy":         
 
-                await self.contra_order_for_unpaired_transaction_buy_side(
+                result = await self.contra_order_for_unpaired_transaction_buy_side(
                     strategy_label,
                     tp_threshold,
                     delta,
@@ -881,7 +881,7 @@ class ComboAuto (BasicStrategy):
                                            
             if instrument_side =="sell":
                
-                await self. contra_order_for_unpaired_transaction_sell_side(
+                result = await self. contra_order_for_unpaired_transaction_sell_side(
                     strategy_label,
                     tp_threshold,
                     delta,
@@ -893,6 +893,8 @@ class ComboAuto (BasicStrategy):
                     waiting_time_for_perpetual_order,
                     )
             
+        log.error (f"result {result} ")
+        return result
             
     async def contra_order_for_unpaired_transaction_sell_side(
         self,
