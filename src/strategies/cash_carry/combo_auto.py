@@ -840,21 +840,19 @@ class ComboAuto (BasicStrategy):
             order_parameters=[] 
             )    
     
-        instrument_side = selected_transaction ["side"]
-                    
-        instrument_name_transaction = selected_transaction ["instrument_name"]
-        
-        orders_currency = self.orders_currency_strategy
-        
-        tp_threshold = modified_tp_threshold(
-            instrument_attributes_futures,
-            take_profit_threshold_original,
-            instrument_name_transaction
-            )
-        
-        if ticker_selected_transaction:
+        if selected_transaction:
             
-            ticker_selected_transaction = ticker_selected_transaction[0]
+            instrument_side = selected_transaction ["side"]
+                        
+            instrument_name_transaction = selected_transaction ["instrument_name"]
+            
+            orders_currency = self.orders_currency_strategy
+            
+            tp_threshold = modified_tp_threshold(
+                instrument_attributes_futures,
+                take_profit_threshold_original,
+                instrument_name_transaction
+                )
             
             order_params_opening = get_basic_opening_parameters(strategy_label)
             
