@@ -188,6 +188,7 @@ def calculate_features(ticker__data):
     )
 
 features = op.map("features", window, calculate_features)
+print (features)
 
 # Output
 op.output("out", features, StdOutSink())
