@@ -948,6 +948,7 @@ class ComboAuto (BasicStrategy):
                     )
                 
                 log.info (f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta} {not reduce_only}")
+                log.info (f"delta {delta} selected_transaction_size {selected_transaction_size} counter_side")
                 
                 if new_transaction_will_reduce_delta and not reduce_only:
                     
