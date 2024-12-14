@@ -64,6 +64,7 @@ async def _ws_agen(worker_tickers):
             print(msg)
             # Deserialize
             msg_ok = deserialize(msg)
+            print(msg_ok)
             yield msg_ok
 
 # Yahoo partition class inherited from Bytewax input StatefulSourcePartition class
@@ -174,6 +175,7 @@ def calculate_features(ticker__data):
     '''
     ticker, data = ticker__data
     win_data = data[1]
+    print (win_data)
     return (
         ticker,
         data[0], # metadata
