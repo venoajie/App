@@ -834,7 +834,12 @@ class ComboAuto (BasicStrategy):
         delta = self.delta
 
         strategy_label = self.strategy_label
-                
+        
+        result = dict(
+            order_allowed=False,
+            order_parameters=[] 
+            )    
+    
         if selected_transaction:
             
             instrument_side = selected_transaction ["side"]
@@ -852,11 +857,6 @@ class ComboAuto (BasicStrategy):
                 instrument_attributes_futures,
                 take_profit_threshold_original,
                 instrument_name_transaction
-                )
-            
-            result = dict(
-                order_allowed=False,
-                order_parameters=[] 
                 )
             
             if ticker_selected_transaction:
@@ -890,9 +890,9 @@ class ComboAuto (BasicStrategy):
                         waiting_time_for_perpetual_order,
                         )
                         
-                log.error (f"result {result} ")
-                return result
-            
+        log.error (f"result {result} ")
+        return result
+    
     async def contra_order_for_unpaired_transaction_sell_side(
         self,
         strategy_label,
