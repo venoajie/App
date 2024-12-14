@@ -1138,7 +1138,10 @@ class ComboAuto (BasicStrategy):
             selected_transaction_size,
             counter_side
             )
-            
+
+        orders_instrument_transaction: list=  [o for o in orders_currency 
+                        if instrument_name_future in o["instrument_name"]]
+        
         orders_instrument_perpetual: list=  [o for o in orders_currency 
                                             if instrument_name_perpetual in o["instrument_name"]]
         
@@ -1226,9 +1229,6 @@ class ComboAuto (BasicStrategy):
 
                         log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name_future}")
                             
-                        orders_instrument_transaction: list=  [o for o in orders_currency 
-                                        if instrument_name_future in o["instrument_name"]]
-                        
                         len_orders_instrument_transaction: int=  0 if not  orders_instrument_transaction \
                             else len(orders_instrument_transaction)
                         
