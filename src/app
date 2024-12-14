@@ -1102,7 +1102,7 @@ class RunningStrategy(ModifyOrderDb):
                     await sleep_and_restart ()
                     
         except Exception as error:
-            log.warning(error)
+            await raise_error_message (error)
                     
   
     async def establish_heartbeat(self) -> None:
