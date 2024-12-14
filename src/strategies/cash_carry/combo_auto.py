@@ -832,21 +832,21 @@ class ComboAuto (BasicStrategy):
         log.info (selected_transaction)
 
         delta = self.delta
-        
+
+        strategy_label = self.strategy_label
+                
         if selected_transaction:
             
             instrument_side = selected_transaction ["side"]
                         
             instrument_name_transaction = selected_transaction ["instrument_name"]
+                    
+            ticker_selected_transaction = reading_from_pkl_data(
+                "ticker",
+                instrument_name_transaction
+                )
             
-            if "PERPETUAL" not in instrument_name_transaction:
-            
-                ticker_selected_transaction = reading_from_pkl_data(
-                    "ticker",
-                    instrument_name_transaction
-                    )
-                
-                log.error (f"ticker_selected_transaction {ticker_selected_transaction}")
+            log.error (f"ticker_selected_transaction {ticker_selected_transaction}")
                 
             orders_currency = self.orders_currency_strategy
             
@@ -869,35 +869,41 @@ class ComboAuto (BasicStrategy):
             if instrument_side =="buy":         
 
                 await self.contra_order_for_unpaired_transaction_buy_side(
+                    strategy_label,
                     tp_threshold,
                     delta,
                     orders_currency,
                     selected_transaction,
                     ticker_selected_transaction,
+                    ticker_perpetual,
                     random_instruments_name
                     )
                                            
             if instrument_side =="sell":
                
                 await self. contra_order_for_unpaired_transaction_sell_side(
+                    strategy_label,
                     tp_threshold,
                     delta,
                     orders_currency,
                     selected_transaction,
                     ticker_selected_transaction,
                     ticker_future,
+                    ticker_perpetual,
                     waiting_time_for_perpetual_order,
                     )
             
             
     async def contra_order_for_unpaired_transaction_sell_side(
         self,
+        strategy_label,
         tp_threshold: dict,
         delta: float,
         orders_currency,
         selected_transaction: dict,
         ticker_selected_transaction: bool,
         ticker_future: dict,
+        ticker_perpetual,
         waiting_time_for_perpetual_order,
         ) -> dict:
         
@@ -913,10 +919,6 @@ class ComboAuto (BasicStrategy):
         
         order_allowed = False
 
-        strategy_label = self.strategy_label
-        
-        ticker_perpetual = self.ticker_perpetual
-        
         selected_transaction_price = selected_transaction ["price"]
         
         selected_transaction_size = abs(selected_transaction["amount"])
@@ -1096,15 +1098,17 @@ class ComboAuto (BasicStrategy):
             order_allowed=order_allowed,
             order_parameters=[] if order_allowed == False else params,
         )
-    
+            
     
     async def contra_order_for_unpaired_transaction_buy_side(
         self,
+        strategy_label,
         tp_threshold: dict,
         delta: float,
         orders_currency,
         selected_transaction: dict,
-        ticker_selected_transaction: bool,
+        ticker_selected_transaction: dict,
+        ticker_perpetual: dict,
         random_instruments_name: list,
         ) -> dict:
         
@@ -1118,10 +1122,6 @@ class ComboAuto (BasicStrategy):
         
         order_allowed = False
 
-        strategy_label = self.strategy_label
-        
-        ticker_perpetual = self.ticker_perpetual
-        
         # provide placeholder for params
         params = {}
 
