@@ -1139,8 +1139,12 @@ class ComboAuto (BasicStrategy):
             counter_side
             )
 
+        instrument_name_transaction = selected_transaction ["instrument_name"]
+            
+        log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name_future}")
+        
         orders_instrument_transaction: list=  [o for o in orders_currency 
-                        if instrument_name_future in o["instrument_name"]]
+                        if instrument_name_transaction in o["instrument_name"]]
         
         orders_instrument_perpetual: list=  [o for o in orders_currency 
                                             if instrument_name_perpetual in o["instrument_name"]]
@@ -1165,6 +1169,13 @@ class ComboAuto (BasicStrategy):
             #ask_price_future = ticker_future ["best_ask_price"]
             bid_price_perpetual, ask_price_perpetual = ticker_perpetual ["best_bid_price"], ticker_perpetual ["best_ask_price"] 
 
+            instrument_name_future = random_instruments_name[0]
+
+            ticker_instrument = reading_from_pkl_data(
+                "ticker",
+                instrument_name_future
+                ) 
+                            
             if "PERPETUAL" not in instrument_name_transaction\
                 and ticker_selected_transaction:
                 
@@ -1204,6 +1215,7 @@ class ComboAuto (BasicStrategy):
                     log.error (f"transaction_in_profit {transaction_in_profit} orders_instrument_transaction_closed == 0 {orders_instrument_transaction_closed == 0}")
                     log.debug (f"orders_instrument_transaction {orders_instrument_transaction}")
     
+                    # using the same instrument as transaction instrument
                     if transaction_in_profit:
 
                         if not orders_instrument_transaction_closed:
@@ -1221,28 +1233,22 @@ class ComboAuto (BasicStrategy):
                             params.update({"label": closed_label})
                             params.update({"entry_price": ask_price_selected_transaction})
                             
-                            order_allowed = True      
-            
+                            order_allowed = True     
+                                                         
+                    #using other future isntrument (should with higher price)
                     else:
                         
-                        instrument_name_future = random_instruments_name[0]
+                        orders_instrument_future: list=  [o for o in orders_currency 
+                        if instrument_name_future in o["instrument_name"]]
+        
 
-                        log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name_future}")
-                            
-                        len_orders_instrument_transaction: int=  0 if not  orders_instrument_transaction \
-                            else len(orders_instrument_transaction)
+                        len_orders_instrument_future: int=  0 if not  orders_instrument_future \
+                            else len(orders_instrument_future)
                         
-                        if  len_orders_instrument_transaction == 0:
-                            
-                            ticker_instrument = reading_from_pkl_data(
-                                "ticker",
-                                instrument_name_future
-                                ) 
+                        if  len_orders_instrument_future == 0:
                             
                             if ticker_instrument:
                                 ticker_instrument = ticker_instrument[0]
-                                
-                                log.error (f"label_open {label_open}")
                                 
                                 params.update({"label": label_open})
                                 
@@ -1302,36 +1308,25 @@ class ComboAuto (BasicStrategy):
                         order_allowed = True      
                         
                 else:
-                        
-                    instrument_name_transaction = random_instruments_name[0]
-
-                    log.debug (f"random_instruments_name {random_instruments_name} instrument_name {instrument_name_transaction}")
-                    
-                    ticker_instrument = reading_from_pkl_data(
-                        "ticker",
-                        instrument_name_transaction
-                        )
                     
                     if ticker_instrument:
                         
                         ticker_instrument = ticker_instrument[0]
                         
-                        orders_instrument_transaction: list=  [o for o in orders_currency 
-                                        if instrument_name_transaction in o["instrument_name"]]
+                        orders_instrument_future: list=  [o for o in orders_currency 
+                                        if instrument_name_future in o["instrument_name"]]
                         
-                        len_orders_instrument_transaction: int=  0 if not  orders_instrument_transaction \
-                            else len(orders_instrument_transaction)
+                        len_orders_instrument_future: int=  0 if not  orders_instrument_future \
+                            else len(orders_instrument_future)
                         
                         if reduce_only\
-                            and len_orders_instrument_transaction == 0:
-                            
-                            log.error (f"label_open {label_open}")
+                            and len_orders_instrument_future == 0:
                             
                             params.update({"label": label_open})
                             
                             params.update({"entry_price": ticker_instrument["best_ask_price"]})
                             
-                            params.update({"instrument_name": instrument_name_transaction})
+                            params.update({"instrument_name": instrument_name_future})
                             
                             order_allowed = True      
     
