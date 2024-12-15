@@ -99,11 +99,12 @@ def ema_list(x, ratio):
      log.warning (y)
      for k in range(1, len(y)):
           y.append(y[-1]*ratio + x[k]*(1-ratio))
+     log.error (y)
      return y
  
 table_1 = f"ohlc1_btc_perp_json" 
 ohlc_1_high_9 = asyncio. run(cleaned_up_ohlc("high", table_1, 10))
-print (ohlc_1_high_9)
+
 ohlc = ohlc_1_high_9["ohlc"] 
 
 log.info (ohlc)
