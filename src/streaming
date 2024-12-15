@@ -478,10 +478,11 @@ class StreamAccountData(ModifyOrderDb):
                                     if "chart.trades" in message_channel:
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                         
-                                        if "btc" in currency:
-                                            
-                                            log.error (f"ema {ema}")
-                                            log.warning(f"data_orders {currency} {data_orders}")
+                                        ema_currency = [o for o in ema if currency in o["currency"]]
+                                        
+                                        log.error (f"ema {ema_currency}")
+                                        
+                                        log.warning(f"data_orders {currency} {data_orders}")
                                                                                                     
                                         await ohlc_result_per_time_frame(
                                             instrument_ticker,
