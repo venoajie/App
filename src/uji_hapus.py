@@ -106,8 +106,8 @@ print (ohlc_1_high_9)
 ohlc = ohlc_1_high_9["ohlc"] 
 log.warning (ohlc_1_high_9["last_price"] )
 log.info (ohlc_1_high_9["ohlc_price"] )
-print (ohlc_1_high_9["ohlc_price"] )
-print (ohlc)
+log.debug (ohlc_1_high_9["ohlc_price"] )
+log.info (ohlc)
 ema= ema_list(ohlc,ratio)
 
 print (ema)
