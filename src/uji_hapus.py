@@ -77,25 +77,26 @@ async def cleaned_up_ohlc(
 import numpy as np
 from timeit import timeit
 
-n=100
+n=10
 x_np = np.random.randn(n) # your data
 x_list = list(x_np)
-a = 0.9
+ratio: float = 0.9 
 print(x_np)
-def ema_list(x, a):
+def ema_list(x, ratio):
      y = [x[0]]
+     log.warning (y)
      for k in range(1, n):
-          y.append(y[-1]*a + x[k]*(1-a))
+          y.append(y[-1]*ratio + x[k]*(1-ratio))
      return y
 
 
 
 
 print(timeit(lambda: ema_list(x_list, a), number=1))
-ratio: float = 0.9 
 
 def ema_list(x, ratio):
      y = []
+     log.warning (y)
      for k in range(1, len(y)):
           y.append(y[-1]*ratio + x[k]*(1-ratio))
      return y
@@ -104,10 +105,8 @@ table_1 = f"ohlc1_btc_perp_json"
 ohlc_1_high_9 = asyncio. run(cleaned_up_ohlc("high", table_1, 10))
 print (ohlc_1_high_9)
 ohlc = ohlc_1_high_9["ohlc"] 
-log.warning (ohlc_1_high_9["last_price"] )
-log.info (ohlc_1_high_9["ohlc_price"] )
-log.debug (ohlc_1_high_9["ohlc_price"] )
+
 log.info (ohlc)
 ema= ema_list(ohlc,ratio)
 
-print (ema)
+log.debug (ema)
