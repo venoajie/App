@@ -81,9 +81,7 @@ def ema_list(ohlc_all, ratio: float = 0.9):
     
     import numpy as np
     
-    log.info (f"ohlc_all {ohlc_all}")
-    
-    ohlc =[o["close"] for o in ohlc_all]
+    ohlc = ohlc_all["close"] 
     
     ohlc = np.array (ohlc,dtype= "f16")
     
@@ -335,7 +333,7 @@ class StreamAccountData(ModifyOrderDb):
                     for ohlc in ohlc_all:
 
                         ohlc.update({"ema": ema_list(ohlc)})
-                        ema.append (ohlc_request_cleaned)
+                        ema.append (ohlc)
                         
                     for currency in currencies:
                         
