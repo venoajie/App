@@ -108,7 +108,10 @@ def cached_ohlc_data(currencies):
     from websocket_management.allocating_ohlc import (
         ohlc_end_point, 
         ohlc_result_per_time_frame,
-        last_tick_fr_sqlite,)
+        last_tick_fr_sqlite,)   
+    from utilities.string_modification import (
+    remove_redundant_elements,
+    sorting_list)
             
     resolution = 5
     
@@ -134,10 +137,11 @@ def cached_ohlc_data(currencies):
             follow_redirects=True
             ).json()["result"]
     
+        ohlc_request_sorted =  sorting_list(ohlc_request,"ticks",True)
     
     
 
-    return ohlc_request
+    return ohlc_request_sorted
 
 
 async def update_db_pkl(
