@@ -276,7 +276,7 @@ class StreamAccountData(ModifyOrderDb):
                 currencies = [o["spot"] for o in tradable_config_app] [0]
                 
                 ohlc = cached_ohlc_data(currencies)
-                
+                #data_orders {'close': 377.6, 'high': 377.6, 'low': 377.6, 'open': 377.6, 'tick': 1734259860000, 'cost': 0.0, 'volume': 0.0}
                 ema = ema_list(ohlc, .9)
                 
                 strategy_attributes = config_app["strategies"]
