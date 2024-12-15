@@ -167,7 +167,9 @@ def cached_ohlc_data(currencies):
                 follow_redirects=True
                 ).json()["result"]
         
-        result.update({f"{currency}": ohlc_request["close"]})
+        ohlc_closed = ohlc_request["close"]
+        log.debug (f"ohlc_closed {ohlc_closed}")
+        result.update({f"{currency}": ohlc_closed}[0])
         
         log.error (f"result {result}")
             
