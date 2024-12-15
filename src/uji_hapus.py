@@ -100,7 +100,7 @@ def ema_list(x, ratio):
      y = [x[0]]
      log.warning (y)
      for k in range(1, len(x)):
-         log.debug (len(y))
+         log.debug (len(x))
          y.append(y[-1]*ratio + x[k]*(1-ratio))
      log.error (y)
      return y
