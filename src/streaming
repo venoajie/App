@@ -174,9 +174,7 @@ def cached_ohlc_data(currencies):
         ohlc_request_cleaned=[]
         for item in items_to_be_removed:
             log.debug (f"ohlc_request {ohlc_request}")
-            ohlc_request_dict = ohlc_request[0]
-            log.debug (f"ohlc_request_dict {ohlc_request_dict}")
-            cleaned = remove_dict_elements(ohlc_request_dict, item)
+            cleaned = remove_dict_elements(ohlc_request, item)
             log.debug (f"cleaned {cleaned}")
             ohlc_request_cleaned.append (cleaned)
 
