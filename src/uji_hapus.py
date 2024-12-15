@@ -75,15 +75,17 @@ async def cleaned_up_ohlc(
     )
 
 
+ratio: float = 0.9 
 
-def ema_list(x, a):
+def ema_list(x, ratio):
      y = [x[0]]
-     for k in range(1, n):
-          y.append(y[-1]*a + x[k]*(1-a))
+     for k in range(1, len(x)):
+          y.append(y[-1]*ratio + x[k]*(1-ratio))
      return y
  
 table_1 = f"ohlc1_btc_perp_json" 
-ratio: float = 0.9 
-ohlc_1_high_9 = asyncio. cleaned_up_ohlc("high", table_1, 10)
-
+ohlc_1_high_9 = asyncio. run(cleaned_up_ohlc("high", table_1, 10))
 print (ohlc_1_high_9)
+ema= ema_list(ohlc_1_high_9)
+
+print (ema)
