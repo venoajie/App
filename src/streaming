@@ -138,7 +138,7 @@ def cached_ohlc_data(currencies):
             follow_redirects=True
             ).json()["result"]
     
-        ohlc_close = np.array (ohlc_request["close"],dtype= "i4")
+        ohlc_close = np.array (ohlc_request["close"],dtype= "float16")
         
     
     
