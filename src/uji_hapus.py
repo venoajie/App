@@ -95,7 +95,7 @@ def ema_list(x, ratio):
 print(timeit(lambda: ema_list(x_list, ratio), number=1))
 
 def ema_list(x, ratio):
-     y = []
+     y = [x[0]]
      log.warning (y)
      for k in range(1, len(y)):
           y.append(y[-1]*ratio + x[k]*(1-ratio))
