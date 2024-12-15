@@ -87,10 +87,12 @@ def ema_list(ohlc_all, ratio: float = 0.9):
     
     y = [ohlc[0]]
     for k in range(1, len(ohlc)):
+        
+        result = y[-1]*ratio + ohlc[k]*(1-ratio)
 
-         y.append(y[-1]*ratio + ohlc[k]*(1-ratio))
+        y.append(round(result,2))
 
-    return round(y,2)
+    return y
  
 def update_cached_ticker_data(
     instrument_name,
