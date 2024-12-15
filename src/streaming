@@ -81,6 +81,8 @@ def ema_list(ohlc_all, ratio: float = 0.9):
     
     import numpy as np
     
+    log.info (f"ohlc_all {ohlc_all}")
+    
     ohlc =[o["close"] for o in ohlc_all]
     
     ohlc = np.array (ohlc,dtype= "f16")
