@@ -104,6 +104,7 @@ table_1 = f"ohlc1_btc_perp_json"
 ohlc_1_high_9 = asyncio. run(cleaned_up_ohlc("high", table_1, 10))
 print (ohlc_1_high_9)
 ohlc = ohlc_1_high_9["ohlc"] 
+print (ohlc_1_high_9["last_price"] )
 print (ohlc)
 ema= ema_list(ohlc,ratio)
 
