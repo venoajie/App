@@ -95,7 +95,7 @@ print(timeit(lambda: ema_list(x_list, a), number=1))
 ratio: float = 0.9 
 
 def ema_list(x, ratio):
-     y = [x["ohlc"]]
+     y = []
      for k in range(1, len(y)):
           y.append(y[-1]*ratio + x[k]*(1-ratio))
      return y
