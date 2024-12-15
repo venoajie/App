@@ -169,30 +169,23 @@ def cached_ohlc_data(currencies):
                 follow_redirects=True
                 ).json()["result"]
 
-        items_to_be_removed = ["volume", "open", "high", "low", "ticks"]
+        items_to_be_removed = ["volume", "open", "high", "low", "ticks", "status", "cost"]
         
         ohlc_request.update({"currency": currency})
-        log.debug (f"ohlc_request {ohlc_request}")
-        
+
+        # remove_dict_elements
         ohlc_request_cleaned= {i:ohlc_request [i] for i in ohlc_request if i not in items_to_be_removed}
 
         log.warning (f"ohlc_request_cleaned {ohlc_request_cleaned}")
-        
-        log.debug (f"ohlc_request {ohlc_request_cleaned}")
-        ohlc_closed = ohlc_request["close"]
-        log.debug (f"ohlc_closed {ohlc_closed}")
-        ohlc_closed.update({f"{currency}": ohlc_closed}[0])
-        
-        log.debug (f"ohlc_closed {ohlc_closed}")
-            
-        result.append (ohlc_closed)
+
+        result.append (ohlc_request_cleaned)
         log.error (f"result {result}")
         
-        ohlc_close = np.array (result,dtype= "f16")
+        #ohlc_close = np.array (result,dtype= "f16")
         
-    log.error (f"ohlc_close {ohlc_close}")
+    log.error (f"result {result}")
     
-    return ohlc_close
+    return result
 
 
 async def update_db_pkl(
