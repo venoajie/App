@@ -86,19 +86,22 @@ def ema_list(x, ratio):
      y = [x[0]]
      log.warning (y)
      for k in range(1, n):
-          y.append(y[-1]*ratio + x[k]*(1-ratio))
+         log.debug (n)
+         y.append(y[-1]*ratio + x[k]*(1-ratio))
+     log.error (y)
      return y
 
 
 
 
-print(timeit(lambda: ema_list(x_list, ratio), number=1))
+log.info(timeit(lambda: ema_list(x_list, ratio), number=1))
 
 def ema_list(x, ratio):
      y = [x[0]]
      log.warning (y)
      for k in range(1, len(y)):
-          y.append(y[-1]*ratio + x[k]*(1-ratio))
+         log.debug (len(y))
+         y.append(y[-1]*ratio + x[k]*(1-ratio))
      log.error (y)
      return y
  
