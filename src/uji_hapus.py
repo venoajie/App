@@ -107,11 +107,11 @@ def ema_list(ohlc, ratio):
      return y
  
 table_1 = f"ohlc1_btc_perp_json" 
-ohlc_1_high_9 = asyncio. run(cleaned_up_ohlc("high", table_1, 10))
+ohlc_1_high_9 = asyncio. run(cleaned_up_ohlc("close", table_1, 10))
 
 ohlc = ohlc_1_high_9["ohlc"] 
 
-log.info (ohlc)
 ema= ema_list(ohlc,ratio)
 
-log.debug (ema)
+log.warning (f"ohlc {ohlc}")
+log.debug (f"ema {ema}")
