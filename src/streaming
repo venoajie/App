@@ -449,7 +449,7 @@ class StreamAccountData(ModifyOrderDb):
                                     if "chart.trades" in message_channel:
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                         
-                                        if "BTC" in currency:
+                                        if "btc" in currency:
                                             
                                             log.error (f"ohlc {ohlc}")
                                             log.error (f"ema {ema}")
