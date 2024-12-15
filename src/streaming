@@ -134,6 +134,8 @@ def cached_ohlc_data(currencies):
     import numpy as np
     
     from utilities.time_modification import convert_time_to_unix
+    from utilities.string_modification import remove_dict_elements
+    
     from websocket_management.allocating_ohlc import (
         ohlc_end_point, 
         ohlc_result_per_time_frame,
@@ -166,8 +168,18 @@ def cached_ohlc_data(currencies):
                 end_point, 
                 follow_redirects=True
                 ).json()["result"]
+
+        items_to_be_removed = ["volume", "open", "high", "low"]
         
-        log.debug (f"ohlc_request {ohlc_request}")
+        cleaned_item=[]
+        for item in items_to_be_removed:
+            ohlc_request_cleaned = remove_dict_elements(ohlc_request, item)
+            cleaned_item.append (ohlc_request_cleaned)
+
+        log.debug (f"ohlc_request {ohlc_request_cleaned}")
+        ohlc_request_cleaned.update({"currency": {currency}})
+        
+        log.debug (f"ohlc_request {ohlc_request_cleaned}")
         ohlc_closed = ohlc_request["close"]
         log.debug (f"ohlc_closed {ohlc_closed}")
         ohlc_closed.update({f"{currency}": ohlc_closed}[0])
