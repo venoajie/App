@@ -94,35 +94,6 @@ def ema_list(ohlc_all, ratio: float = 0.9):
 
     return y
  
-def update_cached_ticker_data(
-    instrument_name,
-    ticker,
-    data_orders):
-    """_summary_
-    https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
-
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    #result = (orjson.loads(data))
-        
-    instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
-    
-    if instrument_ticker:
-        
-        for item in data_orders:
-            if "stats" not in item and "instrument_name" not in item and "type" not in item:
-                [o for o in ticker if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
-            #[o for o in ticker if instr
-            if "stats"  in item:
-                data_orders_stat = data_orders[item]
-                for item in data_orders_stat:
-                    [o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
-    
-# Using the LRUCache decorator function with a maximum cache size of 3
 def cached_ohlc_data(currencies):
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
@@ -151,6 +122,7 @@ def cached_ohlc_data(currencies):
     remove_redundant_elements,
     sorting_list)
             
+    resolutions = [1, 5 , 60]
     resolution = 5
     
     qty_candles = 20
@@ -163,31 +135,33 @@ def cached_ohlc_data(currencies):
     result=[]
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
-        
-        end_point = ohlc_end_point(instrument_name,
-                        resolution,
-                        start_timestamp,
-                        now_unix,
-                        )
-        
-        with httpx.Client() as client:
-            ohlc_request = client.get(
-                end_point, 
-                follow_redirects=True
-                ).json()["result"]
+        for resolution in resolutions:
+                
+            end_point = ohlc_end_point(instrument_name,
+                            resolution,
+                            start_timestamp,
+                            now_unix,
+                            )
+            
+            with httpx.Client() as client:
+                ohlc_request = client.get(
+                    end_point, 
+                    follow_redirects=True
+                    ).json()["result"]
 
-        items_to_be_removed = ["volume", "open", "high", "low", "ticks", "status", "cost"]
-        
-        tick_max = max([o for o in ohlc_request["ticks"]])
+            items_to_be_removed = ["volume", "open", "high", "low", "ticks", "status", "cost"]
+            
+            tick_max = max([o for o in ohlc_request["ticks"]])
 
-        ohlc_request_cleaned= {i:ohlc_request [i] for i in ohlc_request if i not in items_to_be_removed}
-        
-        ohlc_request_cleaned.update({"currency": currency})
-        ohlc_request_cleaned.update({"ticks": tick_max})
+            ohlc_request_cleaned= {i:ohlc_request [i] for i in ohlc_request if i not in items_to_be_removed}
+            
+            ohlc_request_cleaned.update({"currency": currency})
+            ohlc_request_cleaned.update({"ticks": tick_max})
+            ohlc_request_cleaned.update({"resolution": resolution})
 
-        # remove_dict_elements
+            # remove_dict_elements
 
-        result.append (ohlc_request_cleaned)
+            result.append (ohlc_request_cleaned)
         
         #ohlc_close = np.array (result,dtype= "f16")
         
