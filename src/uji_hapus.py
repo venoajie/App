@@ -96,13 +96,14 @@ def ema_list(x, ratio):
 
 log.info(timeit(lambda: ema_list(x_list, ratio), number=1))
 
-def ema_list(x, ratio):
-     y = [x[0]]
-     log.warning (y)
-     for k in range(1, len(x)):
-         log.debug (len(x))
-         y.append(y[-1]*ratio + x[k]*(1-ratio))
-     log.error (y)
+def ema_list(ohlc, ratio):
+
+     y = [ohlc[0]]
+
+     for k in range(1, len(ohlc)):
+
+         y.append(y[-1]*ratio + ohlc[k]*(1-ratio))
+
      return y
  
 table_1 = f"ohlc1_btc_perp_json" 
