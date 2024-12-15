@@ -90,7 +90,7 @@ def ema_list(ohlc_all, ratio: float = 0.9):
 
          y.append(y[-1]*ratio + ohlc[k]*(1-ratio))
 
-    return y
+    return round(y,2)
  
 def update_cached_ticker_data(
     instrument_name,
