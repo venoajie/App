@@ -151,20 +151,23 @@ def cached_ohlc_data(currencies):
 
     start_timestamp = now_unix - (60000 * resolution) * qty_candles
     
-    #instrument_name= f"{currency}-PERPETUAL"
-    instrument_name= f"BTC-PERPETUAL"
-    
-    end_point = ohlc_end_point(instrument_name,
-                    resolution,
-                    start_timestamp,
-                    now_unix,
-                    )
-    
-    with httpx.Client() as client:
-        ohlc_request = client.get(
-            end_point, 
-            follow_redirects=True
-            ).json()["result"]
+    result=[]
+    for currency in currencies:
+        instrument_name = f"{currency}-PERPETUAL"
+        
+        end_point = ohlc_end_point(instrument_name,
+                        resolution,
+                        start_timestamp,
+                        now_unix,
+                        )
+        
+        with httpx.Client() as client:
+            ohlc_request = client.get(
+                end_point, 
+                follow_redirects=True
+                ).json()["result"]
+            
+        result.append (ohlc_request)
     
         ohlc_close = np.array (ohlc_request["close"],dtype= "f16")
         
