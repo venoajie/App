@@ -116,7 +116,7 @@ def cached_ohlc_data(currencies):
             
     resolution = 5
     
-    qty_candles = 6000
+    qty_candles = 10
     
     now_utc = datetime.now()
     now_unix = convert_time_to_unix(now_utc)
