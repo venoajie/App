@@ -43,6 +43,9 @@ from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
 
+from transaction_management.deribit.api_requests import get_tickers
+
+
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
 
@@ -57,6 +60,84 @@ def get_config(file_name: str) -> list:
                 return read
     except:
         return []
+
+
+def reading_from_pkl_data(
+    end_point, 
+    currency,
+    status: str = None
+    ) -> dict:
+    """ """
+
+    path: str = provide_path_for_file (end_point,
+                                      currency,
+                                      status)
+    data = read_data(path)
+
+    return data
+
+
+def ema_list(ohlc, ratio):
+
+     y = [ohlc[0]]
+
+     for k in range(1, len(ohlc)):
+
+         y.append(y[-1]*ratio + ohlc[k]*(1-ratio))
+
+     return y
+ 
+# Using the LRUCache decorator function with a maximum cache size of 3
+def cached_ohlc_data(currencies):
+    """_summary_
+    https://blog.apify.com/python-cache-complete-guide/]
+    data caching
+    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
+
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    #result = (orjson.loads(data))
+
+    import httpx
+    
+    from utilities.time_modification import convert_time_to_unix
+    from websocket_management.allocating_ohlc import (
+        ohlc_end_point, 
+        ohlc_result_per_time_frame,
+        last_tick_fr_sqlite,)
+            
+    resolution = 5
+    
+    qty_candles = 6000
+    
+    now_utc = datetime.now()
+    now_unix = convert_time_to_unix(now_utc)
+
+    start_timestamp = now_unix - (60000 * resolution) * qty_candles
+    
+    #instrument_name= f"{currency}-PERPETUAL"
+    instrument_name= f"BTC-PERPETUAL"
+    
+    end_point = ohlc_end_point(instrument_name,
+                    resolution,
+                    start_timestamp,
+                    now_unix,
+                    )
+    
+    with httpx.Client() as client:
+        ohlc_request = client.get(
+            end_point, 
+            follow_redirects=True
+            ).json()["result"]
+    
+    
+    
+
+    return ohlc_request
 
 
 async def update_db_pkl(
@@ -162,6 +243,10 @@ class StreamAccountData(ModifyOrderDb):
                 
                 # get TRADABLE currencies
                 currencies = [o["spot"] for o in tradable_config_app] [0]
+                
+                ohlc = cached_ohlc_data(currencies)
+                
+                log.error (f"ohlc {ohlc}")
                 
                 strategy_attributes = config_app["strategies"]
                 
