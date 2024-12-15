@@ -137,11 +137,11 @@ def cached_ohlc_data(currencies):
             follow_redirects=True
             ).json()["result"]
     
-        ohlc_request_sorted =  sorting_list(ohlc_request,"ticks",True)
+        ohlc_close = ohlc_request["close"]
     
     
 
-    return ohlc_request_sorted
+    return ohlc_close
 
 
 async def update_db_pkl(
