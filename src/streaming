@@ -166,13 +166,17 @@ def cached_ohlc_data(currencies):
                 end_point, 
                 follow_redirects=True
                 ).json()["result"]
-            
-        result.append (ohlc_request["close"])
+        
+        result.update({f"{currency}": ohlc_request["close"]})
         
         log.error (f"result {result}")
-    
+            
+        result.append (ohlc_request)
+        
         ohlc_close = np.array (result,dtype= "f16")
         
+    log.error (f"ohlc_close {ohlc_close}")
+    
     return ohlc_close
 
 
