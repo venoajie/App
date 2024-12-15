@@ -155,14 +155,14 @@ def cached_ohlc_data(currencies):
 
             ohlc_request_cleaned= {i:ohlc_request [i] for i in ohlc_request if i not in items_to_be_removed}
             
-            ohlc_request_cleaned.update({"currency": currency})
-            ohlc_request_cleaned.update({"ticks": tick_max})
             ohlc_request_cleaned.update({"resolution": resolution})
 
             # remove_dict_elements
 
             result.append (ohlc_request_cleaned)
         
+        ohlc_request_cleaned.update({"currency": currency})
+        ohlc_request_cleaned.update({"ticks": tick_max})
         #ohlc_close = np.array (result,dtype= "f16")
         
     log.error (f"result {result}")
