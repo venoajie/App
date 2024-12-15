@@ -74,12 +74,29 @@ async def cleaned_up_ohlc(
         tick=max(tick), ohlc=ohlc_window, ohlc_price=ohlc_price, last_price=ohlc[-1:][0]
     )
 
+import numpy as np
+from timeit import timeit
 
+n=100
+x_np = np.random.randn(n) # your data
+x_list = list(x_np)
+a = 0.9
+print(x_np)
+def ema_list(x, a):
+     y = [x[0]]
+     for k in range(1, n):
+          y.append(y[-1]*a + x[k]*(1-a))
+     return y
+
+
+
+
+print(timeit(lambda: ema_list(x_list, a), number=1))
 ratio: float = 0.9 
 
 def ema_list(x, ratio):
-     y = [x[0]]
-     for k in range(1, len(x)):
+     y = [x["ohlc"]]
+     for k in range(1, len(y)):
           y.append(y[-1]*ratio + x[k]*(1-ratio))
      return y
  
