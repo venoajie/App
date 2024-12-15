@@ -144,7 +144,7 @@ def cached_ohlc_data(currencies):
             
     resolution = 5
     
-    qty_candles = 100
+    qty_candles = 20
     
     now_utc = datetime.now()
     now_unix = convert_time_to_unix(now_utc)
@@ -168,6 +168,8 @@ def cached_ohlc_data(currencies):
                 ).json()["result"]
             
         result.append (ohlc_request)
+        
+        log.error (f"result {result}")
     
         ohlc_close = np.array (result["close"],dtype= "f16")
         
