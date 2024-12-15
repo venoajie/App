@@ -77,15 +77,20 @@ def reading_from_pkl_data(
     return data
 
 
-def ema_list(ohlc, ratio):
-
-     y = [ohlc[0]]
-     
-     for k in range(1, len(ohlc)):
+def ema_list(ohlc_all, ratio: float = 0.9):
+    
+    import numpy as np
+    
+    ohlc =[o["close"] for o in ohlc_all]
+    
+    ohlc = np.array (ohlc,dtype= "f16")
+    
+    y = [ohlc[0]]
+    for k in range(1, len(ohlc)):
 
          y.append(y[-1]*ratio + ohlc[k]*(1-ratio))
 
-     return y
+    return y
  
 def update_cached_ticker_data(
     instrument_name,
@@ -131,7 +136,7 @@ def cached_ohlc_data(currencies):
     #result = (orjson.loads(data))
 
     import httpx
-    import numpy as np
+    
     
     from utilities.time_modification import convert_time_to_unix
     from utilities.string_modification import remove_dict_elements
@@ -176,10 +181,7 @@ def cached_ohlc_data(currencies):
         # remove_dict_elements
         ohlc_request_cleaned= {i:ohlc_request [i] for i in ohlc_request if i not in items_to_be_removed}
 
-        log.warning (f"ohlc_request_cleaned {ohlc_request_cleaned}")
-
         result.append (ohlc_request_cleaned)
-        log.error (f"result {result}")
         
         #ohlc_close = np.array (result,dtype= "f16")
         
@@ -291,11 +293,7 @@ class StreamAccountData(ModifyOrderDb):
                 
                 # get TRADABLE currencies
                 currencies = [o["spot"] for o in tradable_config_app] [0]
-                
-                ohlc = cached_ohlc_data(currencies)
-                #data_orders {'close': 377.6, 'high': 377.6, 'low': 377.6, 'open': 377.6, 'tick': 1734259860000, 'cost': 0.0, 'volume': 0.0}
-                ema = ema_list(ohlc, .9)
-                
+
                 strategy_attributes = config_app["strategies"]
                 
                 # get strategies that have not short/long attributes in the label 
@@ -328,9 +326,22 @@ class StreamAccountData(ModifyOrderDb):
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
+                
+                    ohlc_all = cached_ohlc_data(currencies)
                     
+                    ema=[]
+                    for ohlc in ohlc_all:
+                        ohlc_request_cleaned= {i:ohlc [i] for i in ohlc if "close" not in ohlc}
+                        ohlc.update({"ema": ema_list(ohlc)})
+                        ema.append (ohlc_request_cleaned)
+                        
                     for currency in currencies:
                         
+                        ohlc_currency = [o["close"] for o in ohlc_all if currency in o["currency"]]
+
+                        ema = ema_list(ohlc_currency, .9)
+                
+                            
                         # some pre-trading checks
                         currency_lower = currency.lower ()
                         archive_db_table= f"my_trades_all_{currency_lower}_json"                    
