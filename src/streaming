@@ -331,7 +331,7 @@ class StreamAccountData(ModifyOrderDb):
                     
                     ema=[]
                     for ohlc in ohlc_all:
-                        ohlc_request_cleaned= {i:ohlc [i] for i in ohlc if "close" not in ohlc}
+
                         ohlc.update({"ema": ema_list(ohlc)})
                         ema.append (ohlc_request_cleaned)
                         
