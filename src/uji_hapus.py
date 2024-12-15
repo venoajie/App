@@ -1,7 +1,7 @@
 
 # built ins
 import asyncio
-
+from loguru import logger as log
 # user defined formula
 from db_management.sqlite_management import (
     executing_query_with_return,
@@ -104,7 +104,9 @@ table_1 = f"ohlc1_btc_perp_json"
 ohlc_1_high_9 = asyncio. run(cleaned_up_ohlc("high", table_1, 10))
 print (ohlc_1_high_9)
 ohlc = ohlc_1_high_9["ohlc"] 
-print (ohlc_1_high_9["last_price"] )
+log.warning (ohlc_1_high_9["last_price"] )
+log.info (ohlc_1_high_9["ohlc_price"] )
+print (ohlc_1_high_9["ohlc_price"] )
 print (ohlc)
 ema= ema_list(ohlc,ratio)
 
