@@ -454,7 +454,7 @@ class StreamAccountData(ModifyOrderDb):
                                             log.error (f"ohlc {ohlc}")
                                             log.error (f"ema {ema}")
                                         
-                                        log.warning(f"data_orders {data_orders}")
+                                        log.warning(f"data_orders {currency} {data_orders}")
                                                                                                     
                                         await ohlc_result_per_time_frame(
                                             instrument_ticker,
