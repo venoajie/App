@@ -169,11 +169,12 @@ def cached_ohlc_data(currencies):
         
         ohlc_closed = ohlc_request["close"]
         log.debug (f"ohlc_closed {ohlc_closed}")
-        result.update({f"{currency}": ohlc_closed}[0])
+        ohlc_closed.update({f"{currency}": ohlc_closed}[0])
         
-        log.error (f"result {result}")
+        log.debug (f"ohlc_closed {ohlc_closed}")
             
-        result.append (ohlc_request)
+        result.append (ohlc_closed)
+        log.error (f"result {result}")
         
         ohlc_close = np.array (result,dtype= "f16")
         
