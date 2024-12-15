@@ -478,7 +478,7 @@ class StreamAccountData(ModifyOrderDb):
                                     if "chart.trades" in message_channel:
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                         
-                                        ema_currency = [o for o in ema if currency in o["currency"]]
+                                        ema_currency = [o for o in ema if currency.upper() in o["currency"]]
                                         
                                         log.error (f"ema {ema_currency}")
                                         
