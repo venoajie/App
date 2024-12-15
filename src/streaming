@@ -336,11 +336,6 @@ class StreamAccountData(ModifyOrderDb):
                         ema.append (ohlc)
                         
                     for currency in currencies:
-                        
-                        ohlc_currency = [o["close"] for o in ohlc_all if currency in o["currency"]]
-
-                        ema = ema_list(ohlc_currency, .9)
-                
                             
                         # some pre-trading checks
                         currency_lower = currency.lower ()
