@@ -103,6 +103,7 @@ def cached_ohlc_data(currencies):
     #result = (orjson.loads(data))
 
     import httpx
+    import numpy as np
     
     from utilities.time_modification import convert_time_to_unix
     from websocket_management.allocating_ohlc import (
@@ -137,7 +138,8 @@ def cached_ohlc_data(currencies):
             follow_redirects=True
             ).json()["result"]
     
-        ohlc_close = ohlc_request["close"]
+        ohlc_close = np.array (ohlc_request["close"],dtype= "i4")
+        
     
     
 
