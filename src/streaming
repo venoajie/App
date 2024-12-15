@@ -252,7 +252,10 @@ class StreamAccountData(ModifyOrderDb):
                 
                 ohlc = cached_ohlc_data(currencies)
                 
+                ema = ema_list(ohlc, .9)
+                
                 log.error (f"ohlc {ohlc}")
+                log.error (f"ema {ema}")
                 
                 strategy_attributes = config_app["strategies"]
                 
