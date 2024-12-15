@@ -170,10 +170,9 @@ def cached_ohlc_data(currencies):
                 ).json()["result"]
 
         items_to_be_removed = ["volume", "open", "high", "low", "ticks"]
-        log.debug (f"ohlc_request {ohlc_request}")
         
-        ohlc_request_cleaned.update({"currency": currency})
-        log.debug (f"ohlc_request_cleaned {ohlc_request_cleaned}")
+        ohlc_request.update({"currency": currency})
+        log.debug (f"ohlc_request {ohlc_request}")
         
         ohlc_request_cleaned=[]
         for item in items_to_be_removed:
