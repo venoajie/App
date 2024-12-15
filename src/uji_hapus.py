@@ -92,7 +92,7 @@ def ema_list(x, ratio):
 
 
 
-print(timeit(lambda: ema_list(x_list, a), number=1))
+print(timeit(lambda: ema_list(x_list, ratio), number=1))
 
 def ema_list(x, ratio):
      y = []
