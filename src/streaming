@@ -176,10 +176,14 @@ def cached_ohlc_data(currencies):
 
         items_to_be_removed = ["volume", "open", "high", "low", "ticks", "status", "cost"]
         
+        tick_max = max([o for o in ohlc_request["ticks"]])
+
+        ohlc_request_cleaned= {i:ohlc_request [i] for i in ohlc_request if i not in items_to_be_removed}
+        
         ohlc_request.update({"currency": currency})
+        ohlc_request.update({"ticks": tick_max})
 
         # remove_dict_elements
-        ohlc_request_cleaned= {i:ohlc_request [i] for i in ohlc_request if i not in items_to_be_removed}
 
         result.append (ohlc_request_cleaned)
         
