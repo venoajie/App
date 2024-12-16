@@ -97,6 +97,7 @@ def ema_list(
     y = [ohlc[0]]
     for k in range(1, len(ohlc)):
         alpha = 2 / (candle_lengths + 1)
+        log.critical (f"alpha {alpha}")
         
         #EMA = alpha * x + (1 - alpha) * EMA[1], 
         
