@@ -154,12 +154,6 @@ def cached_ohlc_data(
             ohlc_request_cleaned.update({"tick": tick_max})
 
             result.append (ohlc_request_cleaned)
-        
-        
-        
-        #ohlc_close = np.array (result,dtype= "f16")
-        
-    log.error (f"result {result}")
     
     return result
 
@@ -449,8 +443,8 @@ class StreamAccountData(ModifyOrderDb):
                                     if "chart.trades" in message_channel:
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                         
+                                        log.warning(f"data_orders {currency} {ema}")
                                         ema_currency =[o for o in ema if currency.upper() in o["instrument_name"]]
-                                        
                                         
                                         for ema in ema_currency:
                                             ema_tick = ema["tick"]
