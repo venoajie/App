@@ -84,7 +84,7 @@ def ema_list(
     
     import numpy as np
     
-    ohlc = ohlc_all["close"] [-candle_lengths:]
+    ohlc = ohlc_all["close"] [-(candle_lengths+1):]
     
     ohlc = np.array (ohlc,dtype= "f16")
     
