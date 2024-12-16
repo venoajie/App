@@ -153,7 +153,7 @@ def cached_ohlc_data(
 
             result.append (ohlc_request_cleaned)
         
-        ohlc_request_cleaned.update({"currency": currency})
+        result.update({"currency": currency})
         
         #ohlc_close = np.array (result,dtype= "f16")
         
