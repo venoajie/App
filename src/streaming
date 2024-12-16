@@ -88,6 +88,8 @@ def ema_list(
     
     ohlc = np.array (ohlc,dtype= "f16")
     
+    log.debug (f"candle_lengths {candle_lengths} ohlc {ohlc}")
+    
     y = [ohlc[0]]
     for k in range(1, len(ohlc)):
         
@@ -450,7 +452,7 @@ class StreamAccountData(ModifyOrderDb):
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                                                                 
                                         for ema_currency in ema:
-                                            log.error (f"ema {ema_currency}")
+                                            #log.error (f"ema {ema_currency}")
                                             ema_tick = ema_currency["tick"]
                                             data_order_tick = data_orders["tick"]
                                             
