@@ -147,7 +147,7 @@ def cached_ohlc_data(
             
             ohlc_request_cleaned.update({"resolution": resolution})
 
-            ohlc_request_cleaned.update({"currency": currency})
+            ohlc_request_cleaned.update({"instrument_name": instrument_name})
 
             # remove_dict_elements
             
@@ -450,7 +450,7 @@ class StreamAccountData(ModifyOrderDb):
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                         
                                         log.error (f"ema {ema}")
-                                        ema_currency =[o for o in ema if currency.upper() in o["currency"]]
+                                        ema_currency =[o for o in ema if currency.upper() in o["instrument_name"]]
                                         
                                         log.error (f"ema {ema_currency}")
                                         
