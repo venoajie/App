@@ -94,7 +94,9 @@ def ema_list(ohlc_all, ratio: float = 0.9):
 
     return y
  
-def cached_ohlc_data(currencies):
+def cached_ohlc_data(
+    currencies: list,
+    resolutions: list):
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
     data caching
@@ -111,10 +113,7 @@ def cached_ohlc_data(currencies):
     from utilities.time_modification import convert_time_to_unix
     
     from websocket_management.allocating_ohlc import (
-        ohlc_end_point, 
-        last_tick_fr_sqlite,)   
-            
-    resolutions = [1, 5 , 60]
+        ohlc_end_point, )   
     
     qty_candles = 20
     
@@ -149,11 +148,13 @@ def cached_ohlc_data(currencies):
             ohlc_request_cleaned.update({"resolution": resolution})
 
             # remove_dict_elements
+            
+            ohlc_request_cleaned.update({"ticks": tick_max})
 
             result.append (ohlc_request_cleaned)
         
         ohlc_request_cleaned.update({"currency": currency})
-        ohlc_request_cleaned.update({"ticks": tick_max})
+        
         #ohlc_close = np.array (result,dtype= "f16")
         
     log.error (f"result {result}")
@@ -297,8 +298,11 @@ class StreamAccountData(ModifyOrderDb):
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
+                    
+                    resolutions = [1, 5 , 60]
                 
-                    ohlc_all = cached_ohlc_data(currencies)
+                    ohlc_all = cached_ohlc_data(currencies,
+                                                resolutions)
                     
                     ema=[]
                     for ohlc in ohlc_all:
@@ -443,6 +447,7 @@ class StreamAccountData(ModifyOrderDb):
                                     if "chart.trades" in message_channel:
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                         
+                                        log.error (f"ema {ema}")
                                         ema_currency = [o for o in ema if currency.upper() in o["currency"]]
                                         
                                         log.error (f"ema {ema_currency}")
