@@ -62,124 +62,6 @@ def get_config(file_name: str) -> list:
         return []
 
 
-def reading_from_pkl_data(
-    end_point, 
-    currency,
-    status: str = None
-    ) -> dict:
-    """ """
-
-    path: str = provide_path_for_file (end_point,
-                                      currency,
-                                      status)
-    data = read_data(path)
-
-    return data
-
-
-def ema_list(
-    ohlc_all, 
-    candle_lengths,
-    ratio: float = 0.9):
-    """
-    https://plainenglish.io/blog/how-to-calculate-the-ema-of-a-stock-with-python
-    https://www.reddit.com/r/algotrading/comments/naa633/my_hard_way_to_learn_emas_formula_and_deep_dive/
-    look back period = 3.45 * (n + 1) 
-    """
-    
-    import numpy as np
-    
-    ohlc = ohlc_all["close"] [-(candle_lengths+1):]
-    
-    ohlc = np.array (ohlc,dtype= "f16")
-    
-    log.debug (f"candle_lengths {candle_lengths} ohlc {ohlc}")
-    
-    y = [ohlc[0]]
-    for k in range(1, len(ohlc)):
-        alpha = 2 / (candle_lengths + 1)
-        
-        ema = sum(ohlc[:candle_lengths]) / candle_lengths
-        initial_value = ema if k == 1 else ohlc[k-1]
-        log.critical (f"k {k}")
-        log.critical (f"k {ohlc[k-1]}")
-        log.critical (f"ema {ema}")
-        log.critical (f"initial_value {initial_value}")
-        
-        #EMA = alpha * x + (1 - alpha) * EMA[1], 
-        
-        #result = y[-1]*alpha + ohlc[k]*(1-alpha)
-        result = y[-1]*alpha + initial_value*(1-alpha)
-
-        y.append(round(result,2))
-
-    log.warning (f"ema {y}")
-    return y
- 
-def cached_ohlc_data(
-    currencies: list,
-    resolutions: list):
-    """_summary_
-    https://blog.apify.com/python-cache-complete-guide/]
-    data caching
-    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
-
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
-    import httpx
-    from utilities.time_modification import convert_time_to_unix
-    
-    from websocket_management.allocating_ohlc import (
-        ohlc_end_point, )   
-    
-    qty_candles = 50
-    
-    now_utc = datetime.now()
-    now_unix = convert_time_to_unix(now_utc)
-
-    result=[]
-    for currency in currencies:
-        instrument_name = f"{currency}-PERPETUAL"
-        for resolution in resolutions:
-            
-            start_timestamp = now_unix - (60000 * resolution) * qty_candles
-                
-            end_point = ohlc_end_point(instrument_name,
-                            resolution,
-                            start_timestamp,
-                            now_unix,
-                            )
-            
-            with httpx.Client() as client:
-                ohlc_request = client.get(
-                    end_point, 
-                    follow_redirects=True
-                    ).json()["result"]
-
-            items_to_be_removed = ["volume", "open", "high", "low", "ticks", "status", "cost"]
-            
-            tick_max = max([o for o in ohlc_request["ticks"]])
-
-            ohlc_request_cleaned= {i:ohlc_request [i] for i in ohlc_request if i not in items_to_be_removed}
-            
-            ohlc_request_cleaned.update({"resolution": resolution})
-
-            ohlc_request_cleaned.update({"instrument_name": instrument_name})
-
-            # remove_dict_elements
-            
-            ohlc_request_cleaned.update({"tick": tick_max})
-
-            result.append (ohlc_request_cleaned)
-    
-    return result
-
-
 async def update_db_pkl(
     path, 
     data_orders,
@@ -316,21 +198,6 @@ class StreamAccountData(ModifyOrderDb):
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
-                    
-                    resolutions = [1, 5 , 60]
-                
-                    ohlc_all = cached_ohlc_data(currencies,
-                                                resolutions)
-                    lengths = [9,26]
-                    ema=[]
-                    for ohlc in ohlc_all:
-                        
-                        for candle_lengths in lengths:
-                            #candle_lengths = int(1.5 * (candle_lengths + 1) )
-                            
-                            ohlc.update({f"ema-{candle_lengths}": ema_list(ohlc,
-                                                                        candle_lengths)})
-                            ema.append (ohlc)
                         
                     for currency in currencies:
                             
@@ -469,19 +336,6 @@ class StreamAccountData(ModifyOrderDb):
                                     if "chart.trades" in message_channel:
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                                                                 
-                                        for ema_currency in ema:
-                                            log.error (f"ema {ema_currency}")
-                                            ema_tick = ema_currency["tick"]
-                                            data_order_tick = data_orders["tick"]
-                                            
-                                            #log.error (f"ema_tick {ema_tick} data_order_tick {data_order_tick}")
-                                            
-                                            if data_order_tick > ema_tick:
-                                                pass
-                                            
-                                        
-                                        log.warning(f"data_orders {currency} {data_orders}")
-                                                                                                    
                                         await ohlc_result_per_time_frame(
                                             instrument_ticker,
                                             resolution,
