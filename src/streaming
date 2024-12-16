@@ -106,36 +106,27 @@ def cached_ohlc_data(currencies):
     Returns:
         _type_: _description_
     """
-    #result = (orjson.loads(data))
 
     import httpx
-    
-    
     from utilities.time_modification import convert_time_to_unix
-    from utilities.string_modification import remove_dict_elements
     
     from websocket_management.allocating_ohlc import (
         ohlc_end_point, 
-        ohlc_result_per_time_frame,
         last_tick_fr_sqlite,)   
-    from utilities.string_modification import (
-    remove_redundant_elements,
-    sorting_list)
             
     resolutions = [1, 5 , 60]
-    resolution = 5
     
     qty_candles = 20
     
     now_utc = datetime.now()
     now_unix = convert_time_to_unix(now_utc)
 
-    start_timestamp = now_unix - (60000 * resolution) * qty_candles
-    
     result=[]
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
         for resolution in resolutions:
+            
+            start_timestamp = now_unix - (60000 * resolution) * qty_candles
                 
             end_point = ohlc_end_point(instrument_name,
                             resolution,
