@@ -98,7 +98,7 @@ def ema_list(
     for k in range(1, len(ohlc)):
         alpha = 2 / (candle_lengths + 1)
         
-        ema = [sum(ohlc[:candle_lengths]) / candle_lengths]
+        ema = sum(ohlc[:candle_lengths]) / candle_lengths
         initial_value = ema if k == 1 else ohlc[k]
         log.critical (f"k {k}")
         log.critical (f"k {ohlc[k]}")
