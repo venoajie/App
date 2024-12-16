@@ -82,6 +82,7 @@ def ema_list(
     candle_lengths,
     ratio: float = 0.9):
     """
+    https://plainenglish.io/blog/how-to-calculate-the-ema-of-a-stock-with-python
     https://www.reddit.com/r/algotrading/comments/naa633/my_hard_way_to_learn_emas_formula_and_deep_dive/
     look back period = 3.45 * (n + 1) 
     """
@@ -98,7 +99,7 @@ def ema_list(
     for k in range(1, len(ohlc)):
         alpha = 2 / (candle_lengths + 1)
         
-        ema = sum(ohlc[:candle_lengths+1]) / candle_lengths
+        ema = sum(ohlc[:candle_lengths]) / candle_lengths
         initial_value = ema if k == 1 else ohlc[k-1]
         log.critical (f"k {k}")
         log.critical (f"k {ohlc[k-1]}")
