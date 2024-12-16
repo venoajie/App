@@ -151,7 +151,7 @@ def cached_ohlc_data(
 
             # remove_dict_elements
             
-            ohlc_request_cleaned.update({"ticks": tick_max})
+            ohlc_request_cleaned.update({"tick": tick_max})
 
             result.append (ohlc_request_cleaned)
         
@@ -449,10 +449,19 @@ class StreamAccountData(ModifyOrderDb):
                                     if "chart.trades" in message_channel:
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                         
-                                        log.error (f"ema {ema}")
                                         ema_currency =[o for o in ema if currency.upper() in o["instrument_name"]]
                                         
-                                        log.error (f"ema {ema_currency}")
+                                        
+                                        for ema in ema_currency:
+                                            ema_tick = ema["tick"]
+                                            data_order_tick = data_orders["tick"]
+                                            
+                                            log.error (f"ema {ema}")
+                                            log.error (f"ema_tick {ema_tick} data_order_tick {data_order_tick}")
+                                            
+                                            if data_order_tick > ema_tick:
+                                                pass
+                                            
                                         
                                         log.warning(f"data_orders {currency} {data_orders}")
                                                                                                     
