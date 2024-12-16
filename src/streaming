@@ -97,6 +97,7 @@ def ema_list(
 
         y.append(round(result,2))
 
+    log.debug (f"ema {y}")
     return y
  
 def cached_ohlc_data(
