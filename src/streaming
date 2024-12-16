@@ -81,6 +81,10 @@ def ema_list(
     ohlc_all, 
     candle_lengths,
     ratio: float = 0.9):
+    """
+    https://www.reddit.com/r/algotrading/comments/naa633/my_hard_way_to_learn_emas_formula_and_deep_dive/
+    look back period = 3.45 * (n + 1) 
+    """
     
     import numpy as np
     
@@ -313,6 +317,7 @@ class StreamAccountData(ModifyOrderDb):
                     for ohlc in ohlc_all:
                         
                         for candle_lengths in lengths:
+                            candle_lengths = 3.45 * (candle_lengths + 1) 
                             
                             ohlc.update({f"ema-{candle_lengths}": ema_list(ohlc,
                                                                         candle_lengths)})
