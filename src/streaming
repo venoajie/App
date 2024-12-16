@@ -299,12 +299,16 @@ class StreamAccountData(ModifyOrderDb):
                 
                     ohlc_all = cached_ohlc_data(currencies,
                                                 resolutions)
-                    
+                    lengths = [9,26]
                     ema=[]
                     for ohlc in ohlc_all:
+                        
+                        for candle_lengths in lengths:
+                            
+                            ohlc_length = ohlc[-candle_lengths:]
 
-                        ohlc.update({"ema": ema_list(ohlc)})
-                        ema.append (ohlc)
+                            ohlc.update({f"ema-{ohlc_length}": ema_list(ohlc_length)})
+                            ema.append (ohlc)
                         
                     for currency in currencies:
                             
