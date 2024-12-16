@@ -448,7 +448,7 @@ class StreamAccountData(ModifyOrderDb):
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                         
                                         log.error (f"ema {ema}")
-                                        ema_currency = [o for o in ema if currency.upper() in o["currency"]]
+                                        ema_currency = ema["currency"]
                                         
                                         log.error (f"ema {ema_currency}")
                                         
