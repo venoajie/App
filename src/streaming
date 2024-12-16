@@ -92,7 +92,7 @@ def ema_list(
     
     ohlc = np.array (ohlc,dtype= "f16")
     
-    log.debug (f"candle_lengths {candle_lengths} ohlc {ohlc}")
+    log.debug (f"candle_lengths {candle_lengths}")
     
     y = [ohlc[0]]
     for k in range(1, len(ohlc)):
@@ -317,7 +317,7 @@ class StreamAccountData(ModifyOrderDb):
                     for ohlc in ohlc_all:
                         
                         for candle_lengths in lengths:
-                            candle_lengths = int(3.45 * (candle_lengths + 1) )
+                            candle_lengths = (candle_lengths * 4) + candle_lengths
                             
                             ohlc.update({f"ema-{candle_lengths}": ema_list(ohlc,
                                                                         candle_lengths)})
