@@ -99,14 +99,15 @@ def ema_list(
         alpha = 2 / (candle_lengths + 1)
         
         ema = [sum(ohlc[:candle_lengths]) / candle_lengths]
-        log.critical (f"k {k}")
-        log.critical (f"k {ohlc[k]}")
-        log.critical (f"ema {ema}")
+        initial_value = ema if k == 1 else ohlc[k]
+        #log.critical (f"k {k}")
+        #log.critical (f"k {ohlc[k]}")
+        #log.critical (f"ema {ema}")
         
         #EMA = alpha * x + (1 - alpha) * EMA[1], 
         
         #result = y[-1]*alpha + ohlc[k]*(1-alpha)
-        result = y[-1]*alpha + ema[-1]*(1-alpha)
+        result = y[-1]*alpha + initial_value*(1-alpha)
 
         y.append(round(result,2))
 
