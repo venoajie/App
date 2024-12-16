@@ -317,7 +317,7 @@ class StreamAccountData(ModifyOrderDb):
                     for ohlc in ohlc_all:
                         
                         for candle_lengths in lengths:
-                            candle_lengths = int(3.45 * (candle_lengths + 1) )
+                            candle_lengths = int(2 * (candle_lengths + 1) )
                             
                             ohlc.update({f"ema-{candle_lengths}": ema_list(ohlc,
                                                                         candle_lengths)})
