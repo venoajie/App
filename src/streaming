@@ -444,13 +444,12 @@ class StreamAccountData(ModifyOrderDb):
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
                                         
                                         log.warning(f"data_orders {currency} {ema}")
-                                        ema_currency =[o for o in ema if currency.upper() in o["instrument_name"]]
                                         
-                                        for ema in ema_currency:
-                                            ema_tick = ema["tick"]
+                                        for ema_currency in ema:
+                                            log.error (f"ema {ema_currency}")
+                                            ema_tick = ema_currency["tick"]
                                             data_order_tick = data_orders["tick"]
                                             
-                                            log.error (f"ema {ema}")
                                             log.error (f"ema_tick {ema_tick} data_order_tick {data_order_tick}")
                                             
                                             if data_order_tick > ema_tick:
