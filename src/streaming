@@ -103,7 +103,8 @@ def ema_list(
         
         #EMA = alpha * x + (1 - alpha) * EMA[1], 
         
-        result = y[-1]*alpha + ema[k]*(1-alpha)
+        #result = y[-1]*alpha + ohlc[k]*(1-alpha)
+        result = y[-1]*alpha + ema[-1]*(1-alpha)
 
         y.append(round(result,2))
 
