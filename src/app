@@ -188,20 +188,22 @@ async def get_result_from_db_queries (
     currency,
     order_db_table,
     trade_db_table,
-    transaction_log_trading,
+    #transaction_log_trading,
     ) -> list:
     
 
-    column_trade: str= "instrument_name,label, amount_dir as amount, price,side,timestamp,trade_id,is_open"
-    query = f"SELECT {column_trade} FROM  {trade_db_table} WHERE is_open = 1 AND instrument_name LIKE '%{currency}%'"
+    #column_trade: str= "instrument_name,label, amount_dir as amount, price,side,timestamp,trade_id,is_open"
+    query = f"SELECT * FROM  v_{currency}_active"
     my_trades_currency: list= await executing_query_with_return (query)
+    
+    log.debug (my_trades_currency)
                                                     
-    column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
-    from_transaction_log = await get_query (transaction_log_trading, 
-                                                currency, 
-                                                "all", 
-                                                "all", 
-                                                column_list)                                       
+    #column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
+    #from_transaction_log = await get_query (transaction_log_trading, 
+    #                                            currency, 
+    #                                            "all", 
+    #                                            "all", 
+    #                                            column_list)                                       
 
     column_order= "instrument_name","label","amount","order_id","timestamp"
     orders_currency = await get_query(order_db_table, 
@@ -211,7 +213,7 @@ async def get_result_from_db_queries (
                                             column_order)     
     
     return dict(my_trades_currency=my_trades_currency,
-                from_transaction_log=from_transaction_log,
+                #from_transaction_log=from_transaction_log,
                 orders_currency=orders_currency)
     
     
