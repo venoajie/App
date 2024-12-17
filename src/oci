@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-
 import oci
 import base64
  
 # Specify the OCID of the secret to retrieve
-keyOCID = "ocid1.vaultsecret.oc1.eu-frankfurt-1.amaaaaaaaenu5lyalgpevezkod2vxl5vr5hsgopr5zx5fxoxxqvcnif7rdtq"
+keyOCID = "ocid1.vaultsecret.oc1.eu-frankfurt-1.amaaaaaaaenu5lyakmdxctv7twvwovaa2jakvkp7svkhnokhnzd5vp2xog6a"
  
 # Create vaultsclient using the default config file (\.oci\config) for auth to the API
 config = oci.config.from_file()
