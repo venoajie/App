@@ -15,7 +15,7 @@ import tomli
 import websockets
 
 # user defined formula
-from configuration import id_numbering, config
+from configuration import id_numbering, config, config_oci
 from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query)
 from transaction_management.deribit.api_requests import (
@@ -116,6 +116,8 @@ class StreamAccountData(ModifyOrderDb):
         self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
         self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
         self.client_secret: str = parse_dotenv(self.sub_account_id)["client_secret"]
+        log.error (config_oci())
+        log.warning (parse_dotenv(self.sub_account_id)["client_secret"])
 
         # Start Primary Coroutine
         self.loop.run_until_complete(self.ws_manager())
