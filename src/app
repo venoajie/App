@@ -508,7 +508,8 @@ class RunningStrategy(ModifyOrderDb):
                                             currency,
                                             order_db_table, 
                                             archive_db_table,
-                                            transaction_log_trading_table,)
+                                            #transaction_log_trading_table,
+                                            )
                                         
                                         my_trades_currency_all_transactions: list= result_from_db_queries["my_trades_currency"]
                                                                                 
