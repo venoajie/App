@@ -21,7 +21,6 @@ from data_cleaning.pruning_db import count_and_delete_ohlc_rows
 from db_management.sqlite_management import (
     back_up_db_sqlite,
     deleting_row,
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     executing_query_with_return,
     insert_tables, 
     querying_arithmetic_operator,
@@ -33,8 +32,7 @@ from strategies.cash_carry.reassigning_labels import (
     relabelling_double_ids)
 from transaction_management.deribit.api_requests import (
     get_currencies,
-    get_instruments,
-    SendApiRequest)
+    get_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -45,8 +43,7 @@ from utilities.pickling import (
 from utilities.string_modification import (
     remove_double_brackets_in_list,
     remove_redundant_elements,
-    transform_nested_dict_to_list,
-    remove_dict_elements)
+    transform_nested_dict_to_list,)
 from utilities.system_tools import (
     async_raise_error_message,
     provide_path_for_file,
@@ -77,38 +74,13 @@ def check_cpu_usage(threshold):
     cpu_usage = psutil.cpu_percent()
     if cpu_usage > threshold:
         send_alert(f"CPU usage is too high: {cpu_usage}%")
-        
-def get_index (
-    data_orders: dict, 
-    ticker: dict
-    ) -> float:
-
-    try:
-        index_price= data_orders["index_price"]
-        
-    except:
-        
-        index_price= ticker["index_price"]
-        
-        if index_price==[]:
-            index_price = ticker ["estimated_delivery_price"]
-        
-    return index_price
-
-
+    
 def get_settlement_period (strategy_attributes) -> list:
     
     return (remove_redundant_elements(
         remove_double_brackets_in_list(
             [o["settlement_period"]for o in strategy_attributes]))
             )
-
-def compute_notional_value(
-    index_price: float,
-    equity: float
-    ) -> float:
-    """ """
-    return index_price * equity
 
 def reading_from_pkl_data(
     end_point, 
@@ -159,17 +131,6 @@ async def get_instruments_from_deribit(currency) -> float:
 
     return result
 
-
-async def get_result_from_db_queries (currency) -> dict:
-                                                    
-    query_trades = f"SELECT * FROM  v_{currency}_trading_active_id"
-    query_orders = f"SELECT * FROM  v_{currency}_orders"
-    query_log = f"SELECT * FROM  v_{currency}_transaction_log"
-        
-    return dict(my_trades_currency_all_transactions=await executing_query_with_return (query_trades),
-                from_transaction_log=await executing_query_with_return (query_log),
-                orders_currency=await executing_query_with_return (query_orders)  )
-    
 
 async def clean_up_databases(idle_time) -> None:
     """ """
@@ -366,17 +327,17 @@ async def reconciling_size(
                     currency_lower = currency.lower ()
                     
                     archive_db_table = f"my_trades_all_{currency_lower}_json"                    
-                                                        
-                    result_from_db_queries = await get_result_from_db_queries (currency_lower)
-                    
-                    #my_trades_currency_active: list= result_from_db_queries["my_trades_currency_active"]
-
-                    my_trades_currency_all_transactions: list= result_from_db_queries["my_trades_currency_all_transactions"]
+                                            
+                    query_trades = f"SELECT * FROM  v_{currency}_trading_active_id"
+                    query_orders = f"SELECT * FROM  v_{currency}_orders"
+                    query_log = f"SELECT * FROM  v_{currency}_transaction_log"
+        
+                    my_trades_currency_all_transactions: list= await executing_query_with_return (query_trades)
                                                                     
                     my_trades_currency_active: list= [o for o in my_trades_currency_all_transactions\
                         if o["is_open"] == 1]
 
-                    from_transaction_log = result_from_db_queries["from_transaction_log"]                          
+                    from_transaction_log = await executing_query_with_return (query_log)                  
 
                     sub_account_positions = sub_account["positions"]
                     
