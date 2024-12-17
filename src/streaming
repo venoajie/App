@@ -115,7 +115,6 @@ class StreamAccountData(ModifyOrderDb):
     def __post_init__(self):
         self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
         self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
-        log.error (parse_dotenv(self.sub_account_id))
         self.client_secret: str = config_oci.get_oci_key(parse_dotenv(self.sub_account_id)["key_ocid"])
 
         # Start Primary Coroutine
