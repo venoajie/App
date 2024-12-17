@@ -14,7 +14,7 @@ from loguru import logger as log
 import tomli
 import websockets
 
-from configuration import id_numbering, config
+from configuration import id_numbering, config, config_oci
 from configuration.label_numbering import get_now_unix_time
 from data_cleaning.reconciling_db import (
     reconciling_orders,
@@ -309,7 +309,7 @@ class RunningStrategy(ModifyOrderDb):
     def __post_init__(self):
         self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
         self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
-        self.client_secret: str = parse_dotenv(self.sub_account_id)["client_secret"]
+        self.client_secret: str = config_oci.get_oci_key()
         # parsing config file
         
         self.config_app = get_config("config_strategies.toml")

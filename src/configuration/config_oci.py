@@ -22,7 +22,5 @@ def get_oci_key () -> list:
     keybase64bytes = keybase64.encode("ascii")
     keybytes = base64.b64decode(keybase64bytes)
     key = keybytes.decode("ascii")
-    print(key)
-    
     
     return key

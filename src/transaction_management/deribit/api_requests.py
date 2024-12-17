@@ -11,7 +11,7 @@ from aiohttp.helpers import BasicAuth
 from loguru import logger as log
 
 # user defined formula
-from configuration import id_numbering, config
+from configuration import id_numbering, config, config_oci
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from utilities import time_modification
@@ -44,8 +44,8 @@ async def private_connection (
         "params": params,
     }
 
-    client_id =  parse_dotenv(sub_account)["client_id"]
-    client_secret =  parse_dotenv(sub_account)["client_secret"]
+    client_id: str =  parse_dotenv(sub_account)["client_id"]
+    client_secret: str =  config_oci.get_oci_key()
     
     async with aiohttp.ClientSession() as session:
         async with session.post(
