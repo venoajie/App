@@ -48,9 +48,6 @@ def get_my_trades_size_per_instrument(
         else [o for o in my_trades_currency \
         if instrument_name in o["instrument_name"] ]  
         
-    log.error ([o for o in my_trades_instrument if o["amount"] is None])    
-#    log.error ([o for o in my_trades_instrument if o["amount"] is not None])    
-        
     sum_my_trades_instrument = 0 if not my_trades_instrument \
         else sum([o["amount"] for o in my_trades_instrument])
         
@@ -164,8 +161,6 @@ def is_my_trades_and_sub_account_size_reconciled_each_other(
     
     if sub_account :
         
-        log.debug (my_trades_currency)
- 
         my_trades_size_instrument = get_my_trades_size_per_instrument(
             instrument_name,
             my_trades_currency,
