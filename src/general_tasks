@@ -305,9 +305,19 @@ async def reconciling_size(
         currencies= [o["spot"] for o in tradable_config_app] [0]
 
         modify_order_and_db = ModifyOrderDb(sub_account_id)
+        
+        strategy_attributes = config_app["strategies"]
+
+        relevant_tables = config_app["relevant_tables"][0]
+        
+        trade_db_table= relevant_tables["my_trades_table"]
+        
+        order_db_table= relevant_tables["orders_table"]        
             
         while True:
             
+            server_time = get_now_unix_time()  
+                    
             for currency in currencies:
                 
                 sub_account = reading_from_pkl_data(
@@ -317,20 +327,13 @@ async def reconciling_size(
                 sub_account = [] if not sub_account else sub_account[0]
                 
                 if sub_account:
-
-                    relevant_tables = config_app["relevant_tables"][0]
-                    
-                    trade_db_table= relevant_tables["my_trades_table"]
-                    
-                    order_db_table= relevant_tables["orders_table"]        
-                        
+                
                     currency_lower = currency.lower ()
                     
                     archive_db_table = f"my_trades_all_{currency_lower}_json"                    
                                             
-                    query_trades = f"SELECT * FROM  v_{currency}_trading_active_id"
-                    query_orders = f"SELECT * FROM  v_{currency}_orders"
-                    query_log = f"SELECT * FROM  v_{currency}_transaction_log"
+                    query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active_id"
+                    query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log"
         
                     my_trades_currency_all_transactions: list= await executing_query_with_return (query_trades)
                                                                     
@@ -345,14 +348,11 @@ async def reconciling_size(
                         [o["instrument_name"] for o in sub_account_positions ]
                         )
                     
-                    server_time = get_now_unix_time()  
-                    
-                    strategy_attributes = config_app["strategies"]
-                
                     my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
-                    if o["label"] is not None]
+                        if o["label"] is not None]
                                         
                     if my_trades_currency_active:
+                        
                         pairing_label = await pairing_single_label(
                         strategy_attributes,
                         trade_db_table,
@@ -451,9 +451,8 @@ async def reconciling_size(
                             query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log_type"
                             from_transaction_log = await executing_query_with_return (query_log)                 
 
-                            from_transaction_log_instrument_name = (
-                                        [o for o in from_transaction_log if o["instrument_name"] == my_trade_instrument]
-                                        )  
+                            from_transaction_log_instrument_name = ([o for o in from_transaction_log\
+                                if o["instrument_name"] == my_trade_instrument])  
                                         
                             unrecorded_timestamp_from_transaction_log = get_unrecorded_trade_transactions(
                                             "delivered",
