@@ -163,6 +163,8 @@ def is_my_trades_and_sub_account_size_reconciled_each_other(
     """ """
     
     if sub_account :
+        
+        log.debug (my_trades_currency)
  
         my_trades_size_instrument = get_my_trades_size_per_instrument(
             instrument_name,
