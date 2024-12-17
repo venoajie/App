@@ -332,7 +332,7 @@ async def reconciling_size(
                     
                     archive_db_table = f"my_trades_all_{currency_lower}_json"                    
                                             
-                    query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active_id"
+                    query_trades = f"SELECT * FROM  v_{currency_lower}_trading"
                     query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log"
         
                     my_trades_currency_all_transactions: list= await executing_query_with_return (query_trades)
