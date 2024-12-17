@@ -160,40 +160,15 @@ async def get_instruments_from_deribit(currency) -> float:
     return result
 
 
-async def get_result_from_db_queries (
-    currency,
-    order_db_table,
-    archive_db_table,
-    transaction_log_trading,
-    ) -> list:
-    
-
-    column_trade: str= "id","instrument_name","label", "amount", "price","side","trade_id","timestamp","is_open"
-                                    
-    my_trades_currency_all_transactions: list= await get_query(archive_db_table, 
-                                                currency, 
-                                                "all", 
-                                                "all", 
-                                                column_trade)
+async def get_result_from_db_queries (currency) -> dict:
                                                     
-    column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"    
-    from_transaction_log = await get_query (transaction_log_trading, 
-                                                currency, 
-                                                "all", 
-                                                "all", 
-                                                column_list)                                       
-
-    column_order= "instrument_name","label","amount","order_id","timestamp"
-    orders_currency = await get_query(order_db_table, 
-                                            currency, 
-                                            "all", 
-                                            "all", 
-                                            column_order)     
-    
-    return dict(#my_trades_currency_active=my_trades_currency_active,
-                my_trades_currency_all_transactions=my_trades_currency_all_transactions,
-                from_transaction_log=from_transaction_log,
-                orders_currency=orders_currency)
+    query_trades = f"SELECT * FROM  v_{currency}_trading_active_id"
+    query_orders = f"SELECT * FROM  v_{currency}_orders"
+    query_log = f"SELECT * FROM  v_{currency}_transaction_log"
+        
+    return dict(my_trades_currency_all_transactions=await executing_query_with_return (query_trades),
+                from_transaction_log=await executing_query_with_return (query_log),
+                orders_currency=await executing_query_with_return (query_orders)  )
     
 
 async def clean_up_databases(idle_time) -> None:
@@ -391,14 +366,8 @@ async def reconciling_size(
                     currency_lower = currency.lower ()
                     
                     archive_db_table = f"my_trades_all_{currency_lower}_json"                    
-                    
-                    transaction_log_trading_table = f"transaction_log_{currency_lower}_json"                                        
-                                    
-                    result_from_db_queries = await get_result_from_db_queries (
-                        currency,
-                        order_db_table, 
-                        archive_db_table,
-                        transaction_log_trading_table,)
+                                                        
+                    result_from_db_queries = await get_result_from_db_queries (currency_lower)
                     
                     #my_trades_currency_active: list= result_from_db_queries["my_trades_currency_active"]
 
@@ -518,12 +487,8 @@ async def reconciling_size(
                                 
                             log.debug (f" inactive instrument_name {my_trade_instrument}")
                             
-                            column_list= "instrument_name", "position", "timestamp","trade_id","user_seq","type"    
-                            from_transaction_log = await get_query (transaction_log_trading_table, 
-                                                                        currency, 
-                                                                        "all", 
-                                                                        "all", 
-                                                                        column_list)                    
+                            query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log_type"
+                            from_transaction_log = await executing_query_with_return (query_log)                 
 
                             from_transaction_log_instrument_name = (
                                         [o for o in from_transaction_log if o["instrument_name"] == my_trade_instrument]

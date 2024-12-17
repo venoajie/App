@@ -20,7 +20,6 @@ from data_cleaning.reconciling_db import (
     reconciling_orders,
     is_size_sub_account_and_my_trades_reconciled)
 from db_management.sqlite_management import (
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     executing_query_with_return,
     querying_table,
     update_status_data)
@@ -183,39 +182,6 @@ def get_settlement_period (strategy_attributes) -> list:
         remove_double_brackets_in_list(
             [o["settlement_period"]for o in strategy_attributes]))
             )
-    
-async def get_result_from_db_queries (
-    currency,
-    order_db_table,
-    trade_db_table,
-    #transaction_log_trading,
-    ) -> list:
-    
-
-    #column_trade: str= "instrument_name,label, amount_dir as amount, price,side,timestamp,trade_id,is_open"
-    query = f"SELECT * FROM  v_{currency}_active"
-    my_trades_currency: list= await executing_query_with_return (query)
-    
-    log.debug (my_trades_currency)
-                                                    
-    #column_list= "instrument_name", "position", "timestamp","trade_id","user_seq"        
-    #from_transaction_log = await get_query (transaction_log_trading, 
-    #                                            currency, 
-    #                                            "all", 
-    #                                            "all", 
-    #                                            column_list)                                       
-
-    column_order= "instrument_name","label","amount","order_id","timestamp"
-    orders_currency = await get_query(order_db_table, 
-                                            currency, 
-                                            "all", 
-                                            "all", 
-                                            column_order)     
-    
-    return dict(my_trades_currency=my_trades_currency,
-                #from_transaction_log=from_transaction_log,
-                orders_currency=orders_currency)
-    
     
 def modify_hedging_instrument (
     strong_bearish:  bool,
@@ -463,8 +429,6 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     archive_db_table= f"my_trades_all_{currency_lower}_json"
                                     
-                                    transaction_log_trading_table= f"transaction_log_{currency_lower}_json"
-
                                     update_cached_ticker_data(
                                         instrument_name_perpetual,
                                         ticker_perpetual,
@@ -500,23 +464,18 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     log.error (f" len_sub_account_orders_all {len_sub_account_orders_all}")
                                                        
-                                    transaction_log_trading_table = f"transaction_log_{currency_lower}_json"
-                                    
                                     if sub_account :
-
-                                        result_from_db_queries = await get_result_from_db_queries (
-                                            currency,
-                                            order_db_table, 
-                                            archive_db_table,
-                                            #transaction_log_trading_table,
-                                            )
                                         
-                                        my_trades_currency_all_transactions: list= result_from_db_queries["my_trades_currency"]
+                                        query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
+                                                                                
+                                        query_orders = f"SELECT * FROM  v_{currency_lower}_orders"
+
+                                        my_trades_currency_all_transactions: list= await executing_query_with_return (query_trades)
                                                                                 
                                         my_trades_currency_all: list= [o for o in my_trades_currency_all_transactions\
                                             if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
                                         
-                                        orders_currency = result_from_db_queries["orders_currency"]     
+                                        orders_currency = await executing_query_with_return (query_orders)  
                                         
                                         outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency])
                                         
