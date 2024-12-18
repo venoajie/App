@@ -3,8 +3,9 @@ import pytest
 
 
 from strategies.cash_carry.combo_auto import (
-    get_transactions_premium,
     delta_premium_pct,
+    get_basic_opening_size,
+    get_transactions_premium,
     is_new_transaction_will_reduce_delta,
     proforma_delta,
     )
@@ -73,4 +74,25 @@ def test_is_new_transaction_will_reduce_delta (delta,
 
     assert result == expected
     
+    
+@pytest.mark.parametrize("notional, target_profit, average_movement, basic_ticks_for_average_meovement, expected", [
+    ( 400,50/100, .15/100, 15,  46.29629629629629 ),
+    ( 400,50/100, .05/100, 5,   46.2962962962963 ),
+    ])
+def test_get_basic_opening_size (
+    notional, 
+    target_profit,
+    average_movement,
+    basic_ticks_for_average_meovement,
+    expected
+    ):
+    
+    result = get_basic_opening_size (
+        notional, 
+        basic_ticks_for_average_meovement,
+        average_movement,
+        target_profit)
+    
+
+    assert result == expected
     

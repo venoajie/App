@@ -606,6 +606,12 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                                 if    "futureSpread" in strategy :
                                                 
+                                                    tp_threshold_hourly = (strategy_params["monthly_profit_pct"]/30)/24
+                                                    
+                                                    AVERAGE_MOVEMENT: float = .15/100
+                                                    BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = 15
+                                                    TP_THRESHOLD = strategy_params["monthly_profit_pct"]
+                                                    
                                                     log.warning (f"strategy {strategy}-START")    
                                                     
                                                     strategy_params= [o for o in strategy_attributes \
@@ -629,8 +635,6 @@ class RunningStrategy(ModifyOrderDb):
                                                         my_trades_currency_strategy,
                                                         ticker_perpetual_instrument_name,
                                                         )
-                                                    
-                                                    TP_THRESHOLD = .1/100
                                                     
                                                     my_trades_currency_strategy_labels: list = [o["label"] for o in my_trades_currency_strategy  ]
                                                                 

@@ -69,15 +69,42 @@ def convert_list_to_dict (transaction: list) -> dict:
 
     return transaction
 
+def get_basic_opening_size(
+    notional: float, 
+    monthly_target_profit: float,
+    average_movement: float,
+    basic_ticks_for_average_meovement: int,
+    ) -> int:
+    """ """
+    
+    hour_in_minutes = 60
+    
+    target_profit_hourly = monthly_target_profit/30/24
+    
+    usd_per_hour = notional * target_profit_hourly
+    
+    size_per_hour = usd_per_hour / average_movement
+    
+    return size_per_hour/(
+        hour_in_minutes/basic_ticks_for_average_meovement
+        )
+
 def determine_opening_size(
     instrument_name: str,
     instrument_attributes_futures,
     notional: float, 
-    factor: float
+    monthly_target_profit: float,
+    average_movement: float,
+    basic_ticks_for_average_meovement: int
     ) -> int:
     """ """
     
-    proposed_size = notional * factor
+    proposed_size = get_basic_opening_size(
+        notional,
+        monthly_target_profit,
+        average_movement,
+        basic_ticks_for_average_meovement,
+        )
     
     return size_rounding(
         instrument_name,
@@ -434,7 +461,8 @@ class ComboAuto (BasicStrategy):
         
         orders_currency = self.orders_currency_strategy
 
-        orders_instrument: list=  [o for o in orders_currency if instrument_name_combo in o["instrument_name"]]
+        orders_instrument: list=  [o for o in orders_currency \
+            if instrument_name_combo in o["instrument_name"]]
         
         open_orders_instrument: list=  [o for o in orders_instrument if "open" in o["label"]]
         
@@ -453,7 +481,8 @@ class ComboAuto (BasicStrategy):
             max_stacked_orders = 1
                    
         #log.error (f"open_orders_instrument {open_orders_instrument} ")
-        if not open_orders_instrument or (delta_time_seconds > threshold and len_open_orders_instrument < max_stacked_orders):
+        if not open_orders_instrument or (delta_time_seconds > threshold \
+            and len_open_orders_instrument < max_stacked_orders):
         
             ask_price_combo = ticker_combo ["best_ask_price"]
             ask_price_future = ticker_future ["best_ask_price"]
