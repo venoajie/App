@@ -372,7 +372,6 @@ class RunningStrategy(ModifyOrderDb):
                                 ws_channel= f"incremental_ticker.{currency}-PERPETUAL",
                             ))
                         
-                
                     ticker_perpetual = cached_ticker_data(currencies)    
                     
                     while self.websocket_client.open:
@@ -607,19 +606,15 @@ class RunningStrategy(ModifyOrderDb):
                                                 #my_trades_currency_strategy)
                                                 
                                                 if    "futureSpread" in strategy :
-                                                
-                                                    tp_threshold_hourly = (strategy_params["monthly_profit_pct"]/30)/24
-                                                    
+                                                                                                    
                                                     AVERAGE_MOVEMENT: float = .15/100
                                                     BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = 15
-                                                    TP_THRESHOLD = strategy_params["monthly_profit_pct"]
-                                                    
+                                                    monthly_target_profit = strategy_params["monthly_profit_pct"]
+                                                                        
                                                     log.warning (f"strategy {strategy}-START")    
                                                     
                                                     strategy_params= [o for o in strategy_attributes \
                                                         if o["strategy_label"] == strategy][0]   
-                                                                                                 
-                                                    target_transaction_per_hour = 1/10
                                                     
                                                     max_order_currency = 2
                                                     
@@ -688,7 +683,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                     instrument_name_combo,
                                                                     instrument_attributes_futures_all,
                                                                     instrument_attributes_combo,
-                                                                    target_transaction_per_hour
+                                                                    monthly_target_profit,
+                                                                    AVERAGE_MOVEMENT,
+                                                                    BASIC_TICKS_FOR_AVERAGE_MOVEMENT
                                                                     )
                                                         
                                                                 if send_order:
@@ -709,7 +706,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                         ticker_future,
                                                                         instrument_attributes_futures_all,
                                                                         notional,
-                                                                        target_transaction_per_hour,
+                                                                        monthly_target_profit,
+                                                                        AVERAGE_MOVEMENT,
+                                                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
                                                                         min(1,max_order_currency)
                                                                         )
                                                             

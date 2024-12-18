@@ -452,7 +452,9 @@ class ComboAuto (BasicStrategy):
         instrument_name_combo,
         instrument_attributes_futures,
         instrument_attributes_combo,
-        target_transaction_per_hour
+        monthly_target_profit: float,
+        average_movement: float,
+        basic_ticks_for_average_meovement: int
         ) -> dict:
         """ """
         log.warning (f"auto_combo {instrument_name_combo}")
@@ -508,11 +510,14 @@ class ComboAuto (BasicStrategy):
         if order_allowed:
             
             size: int = determine_opening_size(
-                instrument_name_future, 
-                instrument_attributes_futures, 
-                notional,
-                target_transaction_per_hour
-                )
+                        instrument_name_future, 
+                        instrument_attributes_futures, 
+                        notional,
+                        monthly_target_profit,
+                        average_movement,
+                        basic_ticks_for_average_meovement
+
+                        )
            
             label_open_minus_auto: str = get_label(
                 "open", 
@@ -757,7 +762,9 @@ class ComboAuto (BasicStrategy):
         ticker_future: dict,
         instrument_attributes_futures: list,
         notional: float,
-        target_transaction_per_hour: int,
+        monthly_target_profit: float,
+        average_movement: float,
+        basic_ticks_for_average_meovement: int,
         max_order_currency: int,
         ) -> dict:
         """ """
@@ -814,7 +821,9 @@ class ComboAuto (BasicStrategy):
                         instrument_name_future, 
                         instrument_attributes_futures, 
                         notional,
-                        target_transaction_per_hour
+                        monthly_target_profit,
+                        average_movement,
+                        basic_ticks_for_average_meovement
                         )
                     
                     label_open: str = get_label(
