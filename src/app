@@ -334,8 +334,6 @@ class RunningStrategy(ModifyOrderDb):
                 
                 instrument_attributes_futures_all = futures_instruments["active_futures"]   
                 
-                log.warning (f"instrument_attributes_futures_all {instrument_attributes_futures_all}")
-
                 instrument_attributes_combo_all = futures_instruments["active_combo"]  
                 
                 #log.info (instrument_attributes_combo)
@@ -606,12 +604,14 @@ class RunningStrategy(ModifyOrderDb):
                                                 #my_trades_currency_strategy)
                                                 
                                                 if    "futureSpread" in strategy :
-                                                                                                    
-                                                    AVERAGE_MOVEMENT: float = .15/100
-                                                    BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = 15
-                                                    monthly_target_profit = strategy_params["monthly_profit_pct"]
                                                                         
                                                     log.warning (f"strategy {strategy}-START")    
+                                                                                 
+                                                    BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = strategy_params["waiting_minute_before_relabelling"]
+                                                                       
+                                                    AVERAGE_MOVEMENT: float = .15/100
+                                                    
+                                                    monthly_target_profit = strategy_params["monthly_profit_pct"]
                                                     
                                                     strategy_params= [o for o in strategy_attributes \
                                                         if o["strategy_label"] == strategy][0]   

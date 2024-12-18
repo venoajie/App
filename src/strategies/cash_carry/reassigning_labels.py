@@ -33,7 +33,7 @@ def waiting_time_has_expired(
     
     ONE_MINUTE = ONE_SECOND * 60
             
-    waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
+    waiting_minute_before_cancel= strategy_params["waiting_minute_before_relabelling"] * ONE_MINUTE
     
     #log.debug (f"waiting_minute_before_cancel {waiting_minute_before_cancel}")
     
