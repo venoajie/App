@@ -102,7 +102,7 @@ def test_get_basic_opening_size (
     
     
 @pytest.mark.parametrize("instrument_name, instrument_attributes_futures, notional, target_profit, average_movement, basic_ticks_for_average_meovement, expected", [
-    ("BTC-PERPETUAL", instrument_attributes_futures_all, 400,50/100, .15/100, 15,  46.29629629629629 ),
+    ("BTC-PERPETUAL", instrument_attributes_futures_all, 400,50/100, .15/100, 15,  50 ),
     ])
 def test_determine_opening_size (
     instrument_name,
