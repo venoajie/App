@@ -4,6 +4,7 @@ import pytest
 
 from strategies.cash_carry.combo_auto import (
     delta_premium_pct,
+    determine_opening_size,
     get_basic_opening_size,
     get_transactions_premium,
     is_new_transaction_will_reduce_delta,
@@ -88,6 +89,31 @@ def test_get_basic_opening_size (
     ):
     
     result = get_basic_opening_size (
+        notional, 
+        basic_ticks_for_average_meovement,
+        average_movement,
+        target_profit)
+    
+
+    assert result == expected
+    
+    
+@pytest.mark.parametrize("instrument_name, instrument_attributes_futures, notional, target_profit, average_movement, basic_ticks_for_average_meovement, expected", [
+    ("BTC-PERPETUAL", 400,50/100, .15/100, 15,  46.29629629629629 ),
+    ])
+def test_determine_opening_size (
+    instrument_name,
+    instrument_attributes_futures,
+    notional, 
+    target_profit,
+    average_movement,
+    basic_ticks_for_average_meovement,
+    expected
+    ):
+    
+    result = determine_opening_size (
+        instrument_name,
+        instrument_attributes_futures,
         notional, 
         basic_ticks_for_average_meovement,
         average_movement,

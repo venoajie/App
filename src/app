@@ -333,6 +333,8 @@ class RunningStrategy(ModifyOrderDb):
                     )  
                 
                 instrument_attributes_futures_all = futures_instruments["active_futures"]   
+                
+                log.warning (f"instrument_attributes_futures_all {instrument_attributes_futures_all}")
 
                 instrument_attributes_combo_all = futures_instruments["active_combo"]  
                 

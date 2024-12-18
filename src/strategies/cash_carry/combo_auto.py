@@ -91,7 +91,7 @@ def get_basic_opening_size(
 
 def determine_opening_size(
     instrument_name: str,
-    instrument_attributes_futures,
+    instrument_attributes_futures: list,
     notional: float, 
     monthly_target_profit: float,
     average_movement: float,
