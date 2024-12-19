@@ -124,7 +124,7 @@ class StreamAccountData(ModifyOrderDb):
                      
                     # Authenticate WebSocket Connection
                     
-                    method = "v2/account.balance"
+                    method = "account.balance"
                     await self.ws_auth_non_stream(method)
                     #await self.ws_auth(method)
 
