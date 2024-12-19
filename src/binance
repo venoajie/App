@@ -193,14 +193,14 @@ class StreamAccountData(ModifyOrderDb):
         }
         
         
-        msg: dict = {
-            "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
-            "method": method,
-            "params": params  if not is_authenticated else   {
-                "apiKey": self.client_id,
-                "timestamp": timestamp,
-                "signature": signature
-            }     }
+        #msg: dict = {
+        #    "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
+        #    "method": method,
+        #    "params": params  if not is_authenticated else   {
+        #        "apiKey": self.client_id,
+        #        "timestamp": timestamp,
+        #        "signature": signature
+        #    }     }
         
         
         basic_msg: dict = {
@@ -213,6 +213,7 @@ class StreamAccountData(ModifyOrderDb):
                 #"timestamp": timestamp,
                 #"signature": signature
             }     
+            
             msg = basic_msg.update({"params": msg_authenticated})
         
         
