@@ -69,7 +69,7 @@ class StreamAccountData(ModifyOrderDb):
         self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
         self.client_secret: str = (parse_dotenv(self.sub_account_id)["key_ocid"])
         
-        log.debug ({self.client_id} {self.client_secret})
+        log.debug (f"{self.client_id} {self.client_secret}")
 
         # Start Primary Coroutine
         self.loop.run_until_complete(self.ws_manager())
