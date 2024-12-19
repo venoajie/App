@@ -235,9 +235,10 @@ class StreamAccountData(ModifyOrderDb):
                         self.client_secret
                         )
         
+        log.debug (f" msg {msg}")
         log.debug (f" method {method}")
         log.debug (f" signature {signature}")
-        log.error (f" json.dumps(msg) {json.dumps(msg)}")
+        log.error (f" json.dumps(msg) {json.dumps(signature)}")
 
         try:
             await self.websocket_client.send(json.dumps(msg))
