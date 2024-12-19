@@ -17,6 +17,35 @@ import asyncio
 import websockets
 import json
 
+from transaction_management.deribit.managing_deribit import (
+    ModifyOrderDb,
+    currency_inline_with_database_address,)
+
+# user defined formula
+from configuration import id_numbering, config, config_oci
+
+from utilities.system_tools import (
+    provide_path_for_file,
+    async_raise_error_message,
+    raise_error_message,)
+
+
+def parse_dotenv (sub_account) -> dict:
+    return config.main_dotenv(sub_account)
+
+def get_config(file_name: str) -> list:
+    """ """
+    config_path = provide_path_for_file (file_name)
+    
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, "rb") as handle:
+                read= tomli.load(handle)
+                return read
+    except:
+        return []
+
+
 msg = {"method": "SUBSCRIBE", "params":
         [
         "btcusdt@depth"
@@ -24,13 +53,80 @@ msg = {"method": "SUBSCRIBE", "params":
         "id": 1
         }
 
-async def call_api():
-    async with websockets.connect('wss://stream.binance.com:9443/ws/btcusdt@depth') as ws:
-        while True:
-            await ws.send(json.dumps(msg))
-            response = await asyncio.wait_for(ws.recv(), timeout=2)
-            response = json.loads(response)
-            print(response)
-            await asyncio.sleep(0.5)
 
-asyncio.get_event_loop().run_until_complete(call_api())
+@dataclass(unsafe_hash=True, slots=True)
+class StreamAccountData(ModifyOrderDb):
+
+    sub_account_id: str
+    client_id: str = fields 
+    client_secret: str = fields 
+    modify_order_and_db: object = fields 
+    # Async Event Loop
+    loop = asyncio.get_event_loop()
+    ws_connection_url: str = "wss://www.deribit.com/ws/api/v2"
+    # Instance Variables
+    connection_url: str = "'wss://stream.binance.com:9443/ws/btcusdt@depth'"
+    websocket_client: websockets.WebSocketClientProtocol = None
+    refresh_token: str = None
+    refresh_token_expiry_time: int = None
+            
+    def __post_init__(self):
+        self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
+        self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
+        self.client_secret: str = config_oci.get_oci_key(parse_dotenv(self.sub_account_id)["key_ocid"])
+
+        # Start Primary Coroutine
+        self.loop.run_until_complete(self.ws_manager())
+    
+    async def ws_manager(self) -> None:
+        async with websockets.connect(
+            self.ws_connection_url,
+            ping_interval=None,
+            compression=None,
+            close_timeout=60,
+            ) as ws:
+            while True:
+                await ws.send(json.dumps(msg))
+                response = await asyncio.wait_for(ws.recv(), timeout=2)
+                response = json.loads(response)
+                print(response)
+                await asyncio.sleep(0.5)
+
+
+def main():
+    # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
+    sub_account_id = "deribit-148510"
+    
+    try:
+        StreamAccountData(sub_account_id)
+
+    except Exception as error:
+        log.critical (error)
+        raise_error_message (
+            error, 
+            3,
+            "app"
+            )
+                
+if __name__ == "__main__":
+    
+    try:
+        main()
+        
+    except(
+        KeyboardInterrupt, 
+        SystemExit
+        ):
+        asyncio.get_event_loop().run_until_complete(main().stop_ws())
+        
+    except Exception as error:
+        log.critical (error)
+        asyncio. telegram_bot_sendtext (
+            error,
+            "general_error"
+            )
+        raise_error_message(
+        error, 
+        3, 
+        "app"
+        )
