@@ -46,6 +46,14 @@ def get_config(file_name: str) -> list:
         return []
 
 
+msg = {"method": "SUBSCRIBE", "params":
+        [
+        "btcusdt@depth"
+        ],
+        "id": 1
+        }
+
+
 @dataclass(unsafe_hash=True, slots=True)
 class StreamAccountData(ModifyOrderDb):
 
@@ -65,7 +73,7 @@ class StreamAccountData(ModifyOrderDb):
     def __post_init__(self):
         self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
         self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
-        self.client_secret: str = (parse_dotenv(self.sub_account_id)["key_ocid"])
+        self.client_secret: str = config_oci.get_oci_key(parse_dotenv(self.sub_account_id)["key_ocid"])
 
         # Start Primary Coroutine
         self.loop.run_until_complete(self.ws_manager())
@@ -78,20 +86,16 @@ class StreamAccountData(ModifyOrderDb):
             close_timeout=60,
             ) as self.websocket_client:
             while True:
-                
-                self.loop.create_task(
-                    self.ws_operation(
-                        method = "SUBSCRIBE")
-                    )
+                log.debug (f"msg {msg}")
                 
                 while self.websocket_client.open:
-                    
-                    # Receive WebSocket messages
-                    message: bytes = await self.websocket_client.recv()
-                    message: dict = orjson.loads(message)
-                    message_channel: str = None
-                    log.warning (message)
-                    #log
+                        
+                    await self.websocket_client.send(json.dumps(msg))
+                    response = await asyncio.wait_for(ws.recv(), timeout=2)
+                    response = json.loads(response)
+                    print(response)
+                    await asyncio.sleep(0.5)
+
 
     async def ws_operation(
         method,
@@ -116,10 +120,9 @@ class StreamAccountData(ModifyOrderDb):
         #log.info(ws_channel)
         await self.websocket_client.send(json.dumps(msg))
 
-
 def main():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
-    sub_account_id = "binance_main_1"
+    sub_account_id = "deribit-148510"
     
     try:
         StreamAccountData(sub_account_id)
