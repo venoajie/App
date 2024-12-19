@@ -46,13 +46,6 @@ def get_config(file_name: str) -> list:
         return []
 
 
-msg = {"method": "SUBSCRIBE", "params":
-        [
-        "btcusdt@depth"
-        ],
-        "id": 1
-        }
-
 
 @dataclass(unsafe_hash=True, slots=True)
 class StreamAccountData(ModifyOrderDb):
@@ -86,7 +79,6 @@ class StreamAccountData(ModifyOrderDb):
             close_timeout=60,
             ) as self.websocket_client:
             while True:
-                log.debug (f"msg {msg}")
                 
                 while self.websocket_client.open:
                     
