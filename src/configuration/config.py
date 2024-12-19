@@ -4,7 +4,10 @@ from configparser import ConfigParser
 from utilities import system_tools
 
 
-def catch_error(error, idle: int = None) -> list:
+def catch_error(
+    error, 
+    idle: int = None
+    ) -> list:
     """ """
     from utilities import system_tools
 
@@ -20,7 +23,11 @@ class Read_Configuration:
         self.params = None
         self.conn = None
 
-    def config(self, filename: str, section: str) -> dict:
+    def config(
+        self, 
+        filename: str, 
+        section: str
+        ) -> dict:
         # create parser
         parser = ConfigParser()
 
@@ -46,7 +53,10 @@ class Read_Configuration:
         return parameters
 
 
-def main_dotenv(header: str = "None", filename: str = ".env") -> dict:
+def main_dotenv(
+    header: str = "None", 
+    filename: str = ".env"
+    ) -> dict:
     """
     https://www.python-engineer.com/posts/run-python-github-actions/
     """
@@ -63,6 +73,9 @@ def main_dotenv(header: str = "None", filename: str = ".env") -> dict:
         Connection = Read_Configuration()
 
         credentials = Connection.config(config_path, header)
+        print(f"config_path {config_path}")
+        print(f"header {header}")
+        print(f"credentials {credentials}")
 
     # to accomodate transition phase. Will be deleted
     except:
