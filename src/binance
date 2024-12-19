@@ -91,7 +91,7 @@ class StreamAccountData(ModifyOrderDb):
                 while self.websocket_client.open:
                     
                     params = [
-                "btcusdt@depth"
+                "/stream?streams=btcusdt@trade&timeUnit=millisecond"
                 ]
                         
                     await self.ws_operation(
