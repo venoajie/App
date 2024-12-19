@@ -90,7 +90,7 @@ class StreamAccountData(ModifyOrderDb):
                 
                 while self.websocket_client.open:
                         
-                    self.ws_operation()
+                    self.ws_operation("SUBSCRIBE")
                     
                     # Receive WebSocket messages
                     message: bytes = await self.websocket_client.recv()
@@ -102,7 +102,8 @@ class StreamAccountData(ModifyOrderDb):
 
 
     async def ws_operation(
-        self
+        self,
+        method
         ) -> None:
         """
         Requests `public/subscribe` or `public/unsubscribe`
@@ -112,7 +113,7 @@ class StreamAccountData(ModifyOrderDb):
         
         await asyncio.sleep(sleep_time)
 
-        msg = {"method": "SUBSCRIBE", "params":
+        msg = {"method": method, "params":
                 [
                 "btcusdt@depth"
                 ],
