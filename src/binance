@@ -74,6 +74,7 @@ def hashing(
     payload = '&'.join([f'{param}={value}' for param, value in sorted(params.items())])
     apiSecret = load_pem_private_key(apiSecret,
                                        password=None)
+    log.debug (f" payload {payload}")
     log.debug (f" apiSecret {apiSecret}")
 
     signature = base64.b64encode(apiSecret.sign(payload.encode('ASCII')))
