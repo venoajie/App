@@ -91,10 +91,13 @@ class StreamAccountData(ModifyOrderDb):
                 while self.websocket_client.open:
                         
                     await self.websocket_client.send(json.dumps(msg))
-                    response = await asyncio.wait_for(ws.recv(), timeout=2)
-                    response = json.loads(response)
-                    print(response)
-                    await asyncio.sleep(0.5)
+                    
+                    # Receive WebSocket messages
+                    message: bytes = await self.websocket_client.recv()
+                    message: dict = orjson.loads(message)
+                    message_channel: str = None
+                    log.warning (message)
+
 
 
     async def ws_operation(
