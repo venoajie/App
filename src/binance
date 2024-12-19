@@ -50,7 +50,7 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
-def hashing_(
+def hashing(
     query_string,
     apiSecret
     )-> str:
@@ -62,7 +62,7 @@ def hashing_(
         hashlib.sha256
         ).hexdigest()
 
-def hashing(
+def hashing_(
     params,
     apiSecret
     )-> str:
@@ -197,15 +197,6 @@ class StreamAccountData(ModifyOrderDb):
         }
         
         
-        #msg: dict = {
-        #    "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
-        #    "method": method,
-        #    "params": params  if not is_authenticated else   {
-        #        "apiKey": self.client_id,
-        #        "timestamp": timestamp,
-        #        "signature": signature
-        #    }     }
-        
         
         basic_msg: dict = {
             "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
@@ -237,13 +228,18 @@ class StreamAccountData(ModifyOrderDb):
         log.debug (f" msg {msg}")
         log.debug (f" method {method}")
         
-        signature = hashing(
-                        msg,
-                        self.client_secret
-                        )
-        log.debug (f" signature {signature}")
-        log.error (f" json.dumps(msg) {json.dumps(signature)}")
-
+        
+        signature = hashing(urlencode(payload), self.client_secret)
+        
+        msg: dict = {
+            "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
+            "method": method,
+            "params": params  if not is_authenticated else   {
+                "apiKey": self.client_id,
+                "timestamp": timestamp,
+                "signature": signature
+            }     }
+        
         try:
             await self.websocket_client.send(json.dumps(msg))
 
