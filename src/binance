@@ -46,14 +46,6 @@ def get_config(file_name: str) -> list:
         return []
 
 
-msg = {"method": "SUBSCRIBE", "params":
-        [
-        "btcusdt@depth"
-        ],
-        "id": 1
-        }
-
-
 @dataclass(unsafe_hash=True, slots=True)
 class StreamAccountData(ModifyOrderDb):
 
@@ -73,7 +65,7 @@ class StreamAccountData(ModifyOrderDb):
     def __post_init__(self):
         self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
         self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
-        self.client_secret: str = config_oci.get_oci_key(parse_dotenv(self.sub_account_id)["key_ocid"])
+        self.client_secret: str = (parse_dotenv(self.sub_account_id)["key_ocid"])
 
         # Start Primary Coroutine
         self.loop.run_until_complete(self.ws_manager())
@@ -86,7 +78,11 @@ class StreamAccountData(ModifyOrderDb):
             close_timeout=60,
             ) as self.websocket_client:
             while True:
-                log.debug (f"msg {msg}")
+                
+                self.loop.create_task(
+                    self.ws_operation(
+                        method = "SUBSCRIBE")
+                    )
                 
                 while self.websocket_client.open:
                     
@@ -97,9 +93,33 @@ class StreamAccountData(ModifyOrderDb):
                     log.warning (message)
                     #log
 
+    async def ws_operation(
+        method,
+        self
+        ) -> None:
+        """
+        Requests `public/subscribe` or `public/unsubscribe`
+        to DBT's API for the specific WebSocket Channel.
+        """
+        sleep_time: int = 5
+        
+        await asyncio.sleep(sleep_time)
+
+        msg: dict = {"method": method, "params":
+                [
+                "btcusdt@depth"
+                ],
+                "id": 1
+                }
+
+
+        #log.info(ws_channel)
+        await self.websocket_client.send(json.dumps(msg))
+
+
 def main():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
-    sub_account_id = "deribit-148510"
+    sub_account_id = "binance_main_1"
     
     try:
         StreamAccountData(sub_account_id)
