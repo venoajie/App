@@ -324,7 +324,7 @@ class StreamAccountData(ModifyOrderDb):
                 ]
         }
 
-        #log.info(ws_channel)
+        log.info(msg)
         await self.websocket_client.send(json.dumps(msg))
 
     
