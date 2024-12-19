@@ -136,8 +136,7 @@ class StreamAccountData(ModifyOrderDb):
                     method = "account.status"
                     await self.ws_auth_m_futures(method)
                     #await self.ws_auth(method)
-                    pm = f"https://papi.binance.com/papi/v1/{signature}"
-                    log.debug(f"pm {pm}")
+                    pm = f"wss://fstream.binance.com/pm/ws/{signature}"
                     await self.websocket_client.send(json.dumps(pm))
                     log.debug(f"pm {pm}")
 
