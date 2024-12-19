@@ -89,6 +89,10 @@ class StreamAccountData(ModifyOrderDb):
                 log.debug (f"msg {msg}")
                 
                 while self.websocket_client.open:
+                    
+                    params = [
+                "btcusdt@depth"
+                ]
                         
                     await self.ws_operation("SUBSCRIBE")
                     
@@ -103,7 +107,8 @@ class StreamAccountData(ModifyOrderDb):
 
     async def ws_operation(
         self,
-        method
+        method,
+        params
         ) -> None:
         """
         Requests `public/subscribe` or `public/unsubscribe`
@@ -113,10 +118,8 @@ class StreamAccountData(ModifyOrderDb):
         
         await asyncio.sleep(sleep_time)
 
-        msg = {"method": method, "params":
-                [
-                "btcusdt@depth"
-                ],
+        msg = {"method": method, "params":params
+                ,
                 "id": 1
                 }
 
