@@ -194,11 +194,6 @@ class StreamAccountData(ModifyOrderDb):
             "timestamp": timestamp
         }
         
-        #signature = hashing(urlencode(payload), self.client_secret)
-        signature = hashing(
-                        params,
-                        self.client_secret
-                        )
         
         msg: dict = {
             "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
@@ -217,8 +212,8 @@ class StreamAccountData(ModifyOrderDb):
         if is_authenticated:
             msg_authenticated =    {
                 "apiKey": self.client_id,
-                "timestamp": timestamp,
-                "signature": signature
+                #"timestamp": timestamp,
+                #"signature": signature
             }     
             msg = basic_msg.update({"params": msg_authenticated})
         
@@ -233,6 +228,13 @@ class StreamAccountData(ModifyOrderDb):
         #    "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
         #    "method": method,
         #    "params": {"symbol": "BTCUSDT" }     }
+        
+        #signature = hashing(urlencode(payload), self.client_secret)
+        signature = hashing(
+                        msg,
+                        self.client_secret
+                        )
+        
         log.debug (f" method {method}")
         log.debug (f" signature {signature}")
         log.error (f" json.dumps(msg) {json.dumps(msg)}")
