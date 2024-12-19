@@ -113,6 +113,8 @@ class StreamAccountData(ModifyOrderDb):
         
         url = config_app_url["future"]
         method = config_app_url["method"]
+        log.info (url)
+        log.info (method)
 
         async with websockets.connect(
             url,
@@ -145,8 +147,9 @@ class StreamAccountData(ModifyOrderDb):
                     
                     signature = hashing(urlencode(payload), self.client_secret)
                     
-                    method = "account.status"
-                    await self.ws_auth(method)
+                    account_status = method["account.status"]
+                    log.info (account_status)
+                    await self.ws_auth(account_status)
                     #await self.ws_auth(method)
                     pm = f"wss://fstream.binance.com/pm/ws/{signature}"
                     await self.websocket_client.send(json.dumps(pm))
