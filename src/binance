@@ -113,7 +113,7 @@ class StreamAccountData(ModifyOrderDb):
         
         connection_kind = config_app_url["future"]
         method = config_app_url["method"]
-        url =  (connection_kind["url"]["url"])
+        url =  (connection_kind["url"])
         log.info (url)
         log.info (method)
 
