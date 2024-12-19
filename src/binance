@@ -83,7 +83,8 @@ class StreamAccountData(ModifyOrderDb):
     # Async Event Loop
     loop = asyncio.get_event_loop()
 #    ws_connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
-    ws_connection_url_non_stream: str ="wss://ws-fapi.binance.com/ws-fapi/v1" # "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
+    ws_connection_url_non_stream: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
+    ws_connection_url_m_futures: str = "wss://ws-fapi.binance.com/ws-fapi/v1"
     ws_connection_url: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
     # Instance Variables
     #connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
@@ -103,7 +104,7 @@ class StreamAccountData(ModifyOrderDb):
     
     async def ws_manager(self) -> None:
         async with websockets.connect(
-            self.ws_connection_url_non_stream,
+            self.ws_connection_url_m_futures,
             ping_interval=None,
             compression=None,
             close_timeout=60,
@@ -123,7 +124,7 @@ class StreamAccountData(ModifyOrderDb):
                      
                     # Authenticate WebSocket Connection
                     
-                    method = "account.status"
+                    method = "v2/account.balance"
                     await self.ws_auth_non_stream(method)
                     #await self.ws_auth(method)
 
@@ -134,6 +135,48 @@ class StreamAccountData(ModifyOrderDb):
                     log.warning (message)
                     #await asyncio.sleep(0.5)
 
+
+    async def ws_auth_m_futures(
+        self,
+        method) -> None:
+        """
+        Requests DBT's `public/auth` to
+        authenticate the WebSocket Connection.
+        """
+        sleep_time: int = .5
+        
+        await asyncio.sleep(sleep_time)
+
+        timestamp = get_timestamp()
+        payload = {
+            "apiKey": self.client_id,
+            "timestamp": timestamp
+        }
+        
+        msg: dict = {
+            "id": "2",
+            "method": method,
+            #"method": "account.status",
+            "params": {
+                "apiKey": self.client_id,
+                "signature": hashing(urlencode(payload), self.client_secret),
+                "timestamp": timestamp
+            }
+	}
+
+        #log.debug (f" msg {msg}")
+        #log.error (f" json.dumps(msg) {json.dumps(msg)}")
+
+        try:
+            await self.websocket_client.send(json.dumps(msg))
+
+        except Exception as error:
+            
+            raise_error_message (
+            error, 
+            1,
+            "app"
+            )
 
     async def ws_auth_non_stream(
         self,
