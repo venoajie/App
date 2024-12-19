@@ -111,7 +111,7 @@ class StreamAccountData(ModifyOrderDb):
         """
         sleep_time: int = .5
         
-        #await asyncio.sleep(sleep_time)
+        await asyncio.sleep(sleep_time)
 
         msg = {"method": method, "params":
                 [
