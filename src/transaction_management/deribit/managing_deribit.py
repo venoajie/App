@@ -232,7 +232,9 @@ class ModifyOrderDb(SendApiRequest):
         ]
 
         """
+        res = await self.private_data.get_subaccounts_details (currency)
         
+        log.debug (res)
         # fetch data from exchange
         return await self.private_data.get_subaccounts_details (currency)
 
