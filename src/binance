@@ -83,7 +83,8 @@ class StreamAccountData(ModifyOrderDb):
     loop = asyncio.get_event_loop()
 #    ws_connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
     ws_connection_url_non_stream: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
-    ws_connection_url_m_futures: str = "wss://ws-fapi.binance.com/ws-fapi/v1"
+    ws_connection_url_usd_futures: str = "wss://ws-fapi.binance.com/ws-fapi/v1"
+    ws_connection_url_coin_futures: str = "wss://dstream.binance.com"
     ws_connection_url: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
     # Instance Variables
     #connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
@@ -101,7 +102,7 @@ class StreamAccountData(ModifyOrderDb):
     
     async def ws_manager(self) -> None:
         async with websockets.connect(
-            self.ws_connection_url_m_futures,
+            self.ws_connection_url_usd_futures,
             ping_interval=None,
             compression=None,
             close_timeout=60,
@@ -154,18 +155,18 @@ class StreamAccountData(ModifyOrderDb):
         signature = hashing(urlencode(payload), self.client_secret)
         
         msg: dict = {
-    "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
-    "method": method,
-    "params": {
-        "apiKey": self.client_id,
-        "timestamp": timestamp,
-        "signature": hashing(urlencode(payload), self.client_secret)
-    }
-}
+            "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
+            "method": method,
+            "params": {
+                "apiKey": self.client_id,
+                "timestamp": timestamp,
+                "signature": hashing(urlencode(payload), self.client_secret)
+            }
+        }
 
         log.debug (f" method {method}")
         log.debug (f" signature {signature}")
-        #log.error (f" json.dumps(msg) {json.dumps(msg)}")
+        log.error (f" json.dumps(msg) {json.dumps(msg)}")
 
         try:
             await self.websocket_client.send(json.dumps(msg))
