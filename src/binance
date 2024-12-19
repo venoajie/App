@@ -134,7 +134,7 @@ class StreamAccountData(ModifyOrderDb):
                     account_status = method["account_status"]
                     ticker_price = method["ticker_price"]
                         
-                    await self.ws_operation("SUBSCRIBE", ticker_price)
+                    #await self.ws_operation("SUBSCRIBE", ticker_price)
                      
                     # Authenticate WebSocket Connection
                     
@@ -150,7 +150,7 @@ class StreamAccountData(ModifyOrderDb):
                     
                     #log.info (account_status)
 #                    await self.ws_auth(account_status)
-                    #await self.ws_auth(ticker_price)
+                    await self.ws_auth(ticker_price)
                     #pm = f"wss://fstream.binance.com/pm/ws/{signature}"
                     #await self.websocket_client.send(json.dumps(pm))
                     #log.debug(f"pm {pm}")
@@ -166,7 +166,10 @@ class StreamAccountData(ModifyOrderDb):
 
     async def ws_auth(
         self,
-        method) -> None:
+        is_uthenticated: bool,
+        method: str,
+        params) -> None:
+        
         """
         Requests DBT's `public/auth` to
         authenticate the WebSocket Connection.
@@ -187,13 +190,16 @@ class StreamAccountData(ModifyOrderDb):
         msg: dict = {
             "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
             "method": method,
-            "params": {
+            "params": params            }
+        
+
+        if is_uthenticated:
+            msg.update{"params": {
                 "apiKey": self.client_id,
                 "timestamp": timestamp,
                 "signature": signature
-            }
-        }
-
+            }}
+        
         log.debug (f" method {method}")
         log.debug (f" signature {signature}")
         log.error (f" json.dumps(msg) {json.dumps(msg)}")
