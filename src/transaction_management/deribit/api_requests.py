@@ -326,6 +326,12 @@ class SendApiRequest:
         result_sub_account = await private_connection (self.sub_account_id,
                                                        endpoint=endpoint, 
                                                        params=params,)
+                
+        log.debug (endpoint)
+        log.debug (self.sub_account_id)
+        log.debug (params)
+        log.debug (result_sub_account)
+
         
         return result_sub_account["result"]
 
