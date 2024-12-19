@@ -73,9 +73,6 @@ def main_dotenv(
         Connection = Read_Configuration()
 
         credentials = Connection.config(config_path, header)
-        print(f"config_path {config_path}")
-        print(f"header {header}")
-        print(f"credentials {credentials}")
 
     # to accomodate transition phase. Will be deleted
     except:
@@ -89,9 +86,6 @@ def main_dotenv(
         # github env
         credentials = os.environ
         # log.info (credentials)
-        print(f"dotenv_path {dotenv_path}")
-        print(f"credentials {credentials}")
-
 
     return credentials
 
