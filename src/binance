@@ -111,13 +111,14 @@ class StreamAccountData(ModifyOrderDb):
         
         log.info (config_app_url)
         
-        url = config_app_url["future"]
+        connection_kind = config_app_url["future"]
         method = config_app_url["method"]
+        url =  (connection_kind["url"]["url"])
         log.info (url)
         log.info (method)
 
         async with websockets.connect(
-            url["url"],
+            url,
             ping_interval=None,
             compression=None,
             close_timeout=60,
@@ -147,7 +148,7 @@ class StreamAccountData(ModifyOrderDb):
                     
                     signature = hashing(urlencode(payload), self.client_secret)
                     
-                    account_status = method["account.status"]
+                    account_status = method["account_status"]
                     log.info (account_status)
                     await self.ws_auth(account_status)
                     #await self.ws_auth(method)
