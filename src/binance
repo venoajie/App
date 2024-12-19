@@ -122,7 +122,7 @@ class StreamAccountData(ModifyOrderDb):
                      
                     # Authenticate WebSocket Connection
                     
-                    method = "v2/account.status"
+                    method = "account.status"
                     await self.ws_auth_m_futures(method)
                     #await self.ws_auth(method)
 
