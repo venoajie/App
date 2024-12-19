@@ -155,10 +155,6 @@ class StreamAccountData(ModifyOrderDb):
                         "timestamp": timestamp
                     }
                     
-                    signature = hashing(
-                        params,
-                        self.client_secret
-                        )       
                     #log.info (account_status)
 #                    await self.ws_auth(account_status)
                     await self.ws_auth(True,account_balance)
