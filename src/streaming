@@ -125,8 +125,8 @@ class StreamAccountData(ModifyOrderDb):
     async def ws_manager(self) -> None:
         async with websockets.connect(
             self.ws_connection_url,
-            timeout=10,
-            trace=True,
+            self.timeout,
+            self.trace,
         ) as self.websocket_client:
             
             # registering strategy config file    
