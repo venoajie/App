@@ -90,7 +90,7 @@ class StreamAccountData(ModifyOrderDb):
                 
                 while self.websocket_client.open:
                         
-                    self.ws_operation("SUBSCRIBE")
+                    await self.ws_operation("SUBSCRIBE")
                     
                     # Receive WebSocket messages
                     message: bytes = await self.websocket_client.recv()
