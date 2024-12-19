@@ -81,9 +81,9 @@ class StreamAccountData(ModifyOrderDb):
     async def ws_manager(self) -> None:
         async with websockets.connect(
             self.ws_connection_url,
-            ping_interval=None,
-            compression=None,
-            close_timeout=60,
+            #ping_interval=None,
+            #compression=None,
+            #close_timeout=60,
             ) as ws:
             while True:
                 await ws.send(json.dumps(msg))
