@@ -59,7 +59,7 @@ class StreamAccountData(ModifyOrderDb):
 #    ws_connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
     ws_connection_url: str = "wss://stream.binance.com:9443/ws"
     # Instance Variables
-    connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
+    #connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
     websocket_client: websockets.WebSocketClientProtocol = None
     refresh_token: str = None
     refresh_token_expiry_time: int = None
@@ -110,6 +110,10 @@ class StreamAccountData(ModifyOrderDb):
         Requests DBT's `public/auth` to
         authenticate the WebSocket Connection.
         """
+        sleep_time: int = .5
+        
+        await asyncio.sleep(sleep_time)
+
         msg: dict = {
         "method": "SUBSCRIBE",
         "params":
