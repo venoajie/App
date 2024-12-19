@@ -83,7 +83,7 @@ class StreamAccountData(ModifyOrderDb):
     loop = asyncio.get_event_loop()
 #    ws_connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
     ws_connection_url_non_stream: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
-    ws_connection_url_m_futures: str = "wss://ws-fapi.binance.com/ws-fapi/v1/ws"
+    ws_connection_url_m_futures: str = "wss://ws-fapi.binance.com/ws-fapi/v1"
     ws_connection_url: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
     # Instance Variables
     #connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
@@ -145,13 +145,16 @@ class StreamAccountData(ModifyOrderDb):
         await asyncio.sleep(sleep_time)
 
         timestamp = get_timestamp()
+        
         payload = {
             "apiKey": self.client_id,
             "timestamp": timestamp
         }
         
+        signature = hashing(urlencode(payload), self.client_secret)
+        
         msg: dict = {
-    "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
+    "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
     "method": "v2/account.balance",
     "params": {
         "apiKey": self.client_id,
@@ -160,7 +163,7 @@ class StreamAccountData(ModifyOrderDb):
     }
 }
 
-        #log.debug (f" msg {msg}")
+        log.debug (f" signature {signature}")
         #log.error (f" json.dumps(msg) {json.dumps(msg)}")
 
         try:
