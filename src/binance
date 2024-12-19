@@ -109,7 +109,7 @@ class StreamAccountData(ModifyOrderDb):
         
         config_app_url = get_config(file_toml)
         
-        connection_kind = config_app_url["future"]
+        connection_kind = config_app_url["ws-api-future"]
         
         url =  (connection_kind["url"])
         
