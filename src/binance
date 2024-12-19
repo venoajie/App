@@ -63,9 +63,9 @@ class StreamAccountData(ModifyOrderDb):
     modify_order_and_db: object = fields 
     # Async Event Loop
     loop = asyncio.get_event_loop()
-    ws_connection_url: str = "wss://www.deribit.com/ws/api/v2"
+    ws_connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
     # Instance Variables
-    connection_url: str = "'wss://stream.binance.com:9443/ws/btcusdt@depth'"
+    connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
     websocket_client: websockets.WebSocketClientProtocol = None
     refresh_token: str = None
     refresh_token_expiry_time: int = None
