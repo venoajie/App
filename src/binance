@@ -210,6 +210,9 @@ class StreamAccountData(ModifyOrderDb):
         
         if not params:
             msg = basic_msg
+        
+        else:
+            msg.update({"symbol": params})
             
         log.debug (f" method {method}")
         log.debug (f" signature {signature}")
