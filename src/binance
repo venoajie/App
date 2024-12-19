@@ -84,7 +84,7 @@ class StreamAccountData(ModifyOrderDb):
             ping_interval=None,
             compression=None,
             close_timeout=60,
-            ) as self.websocket_clientws:
+            ) as self.websocket_client:
             while True:
                 log.debug (f"msg {msg}")
                 
