@@ -154,15 +154,14 @@ class StreamAccountData(ModifyOrderDb):
         }
         
         msg: dict = {
-            "id": "2",
-            "method": method,
-            #"method": "account.status",
-            "params": {
-                "apiKey": self.client_id,
-                "signature": hashing(urlencode(payload), self.client_secret),
-                "timestamp": timestamp
-            }
-	}
+    "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
+    "method": "v2/account.balance",
+    "params": {
+        "apiKey": self.client_id,
+        "timestamp": timestamp,
+        "signature": hashing(urlencode(payload), self.client_secret)
+    }
+}
 
         #log.debug (f" msg {msg}")
         #log.error (f" json.dumps(msg) {json.dumps(msg)}")
