@@ -122,7 +122,7 @@ class StreamAccountData(ModifyOrderDb):
                     # Authenticate WebSocket Connection
                     
                     method = "account.balance"
-                    await self.ws_auth_non_stream(method)
+                    await self.ws_auth_m_futures(method)
                     #await self.ws_auth(method)
 
                     # Receive WebSocket messages
@@ -155,7 +155,7 @@ class StreamAccountData(ModifyOrderDb):
         
         msg: dict = {
     "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
-    "method": "v2/account.balance",
+    "method": method,
     "params": {
         "apiKey": self.client_id,
         "timestamp": timestamp,
