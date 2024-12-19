@@ -94,7 +94,9 @@ class StreamAccountData(ModifyOrderDb):
                 "btcusdt@depth"
                 ]
                         
-                    await self.ws_operation("SUBSCRIBE")
+                    await self.ws_operation(
+                        "SUBSCRIBE",
+                        params)
                     
                     # Receive WebSocket messages
                     message: bytes = await self.websocket_client.recv()
