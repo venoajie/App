@@ -168,7 +168,7 @@ class StreamAccountData(ModifyOrderDb):
         self,
         is_authenticated: bool,
         method: str,
-        params) -> None:
+        params: str = None) -> None:
         
         """
         Requests DBT's `public/auth` to
