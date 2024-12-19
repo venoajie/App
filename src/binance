@@ -86,6 +86,7 @@ class StreamAccountData(ModifyOrderDb):
             #close_timeout=60,
             ) as ws:
             while True:
+                log.debug (f"msg {msg}")
                 await ws.send(json.dumps(msg))
                 response = await asyncio.wait_for(ws.recv(), timeout=2)
                 response = json.loads(response)
