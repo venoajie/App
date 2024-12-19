@@ -150,7 +150,7 @@ class StreamAccountData(ModifyOrderDb):
 	  "method": "account.status",
 	  "params": {
 	    "apiKey": self.client_id,
-	    "signature": hashing(urlencode(payload, self.client_secret)),
+	    "signature": hashing(urlencode(payload), self.client_secret),
 	    "timestamp": timestamp
 	  }
 	}
