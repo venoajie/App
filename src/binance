@@ -129,10 +129,11 @@ class StreamAccountData(ModifyOrderDb):
                 "btcusdt@depth"
                 ]
                     params = ["/stream?streams=btcusdt@trade&timeUnit=millisecond"]
+                    account_status = method["account_status"]
                         
-                    #await self.ws_operation(
-                    #    "SUBSCRIBE",
-                    #    params)
+                    await self.ws_operation(
+                        "SUBSCRIBE",
+                        params)
                      
                     # Authenticate WebSocket Connection
                     
@@ -146,9 +147,8 @@ class StreamAccountData(ModifyOrderDb):
                     
                     signature = hashing(urlencode(payload), self.client_secret)
                     
-                    account_status = method["account_status"]
                     log.info (account_status)
-                    await self.ws_auth(account_status)
+#                    await self.ws_auth(account_status)
                     #await self.ws_auth(method)
                     pm = f"wss://fstream.binance.com/pm/ws/{signature}"
                     #await self.websocket_client.send(json.dumps(pm))
