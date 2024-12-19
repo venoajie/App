@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+[[url_list]]
 
 [spot]
 url = "wss://stream.binance.com:9443/ws"
