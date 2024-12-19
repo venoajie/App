@@ -66,11 +66,15 @@ def hashing(
     params,
     apiSecret
     )-> str:
+    from cryptography.hazmat.primitives.serialization import load_pem_private_key
     
     log.debug (f" apiSecret {apiSecret}")
     log.debug (f" params {params}")
     # Sign the request
     payload = '&'.join([f'{param}={value}' for param, value in sorted(params.items())])
+    apiSecret = load_pem_private_key(apiSecret,
+                                       password=None)
+    log.debug (f" apiSecret {apiSecret}")
 
     signature = base64.b64encode(apiSecret.sign(payload.encode('ASCII')))
     params['signature'] = signature.decode('ASCII')
