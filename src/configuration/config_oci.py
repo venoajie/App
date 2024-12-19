@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-
-import oci
 import base64
 
 
 def get_oci_key (keyOCID) -> list:
+    import oci
      
     # Create vaultsclient using the default config file (\.oci\config) for auth to the API
     config = oci.config.from_file()

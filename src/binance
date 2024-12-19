@@ -23,11 +23,10 @@ import hmac
 from urllib.parse import urlencode
 
 from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,
-    currency_inline_with_database_address,)
+    ModifyOrderDb)
 
 # user defined formula
-from configuration import id_numbering, config, config_oci
+from configuration import id_numbering, config#, config_oci
 
 from utilities.system_tools import (
     provide_path_for_file,
