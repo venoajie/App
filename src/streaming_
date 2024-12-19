@@ -146,9 +146,12 @@ class StreamAccountData(ModifyOrderDb):
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
-                      
+                    feed =   "ticker"
+                    product_ids =   "PI_XBTUSD"
                     self.loop.create_task(
-                            self.ws_operation())
+                            self.ws_operation(
+                                feed,
+                                product_ids))
                     
                     while self.websocket_client.open:
                         
@@ -302,7 +305,10 @@ class StreamAccountData(ModifyOrderDb):
             await asyncio.sleep(150)
 
     async def ws_operation(
-        self,    ) -> None:
+        self,
+        feed,
+        product_ids
+        ) -> None:
         """
         Requests `public/subscribe` or `public/unsubscribe`
         to DBT's API for the specific WebSocket Channel.
@@ -312,10 +318,8 @@ class StreamAccountData(ModifyOrderDb):
         await asyncio.sleep(sleep_time)
 
         msg: dict = {"event": "subscribe",
-                    "feed": "ticker",
-                    "product_ids": [
-                        "PI_XBTUSD"
-  ] }
+                    "feed": feed,
+                    "product_ids": [product_ids]}
 
         #log.info(ws_channel)
         await self.websocket_client.send(json.dumps(msg))
