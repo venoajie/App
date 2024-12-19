@@ -212,8 +212,12 @@ class StreamAccountData(ModifyOrderDb):
             msg = basic_msg
         
         else:
-            msg.update({"symbol": params})
+            msg.update({"params": params})
             
+        msg: dict = {
+            "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
+            "method": method,
+            "params": {"symbol": "BTCUSDT" }     }
         log.debug (f" method {method}")
         log.debug (f" signature {signature}")
         log.error (f" json.dumps(msg) {json.dumps(msg)}")
