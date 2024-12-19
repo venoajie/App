@@ -194,11 +194,11 @@ class StreamAccountData(ModifyOrderDb):
         
 
         if is_uthenticated:
-            msg.update{"params": {
+            msg.update("params": {
                 "apiKey": self.client_id,
                 "timestamp": timestamp,
                 "signature": signature
-            }}
+            })
         
         log.debug (f" method {method}")
         log.debug (f" signature {signature}")
