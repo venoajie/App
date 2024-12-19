@@ -122,9 +122,9 @@ class StreamAccountData(ModifyOrderDb):
                     #    params)
                      
                     # Authenticate WebSocket Connection
-                    await self.ws_auth_non_stream()
                     
                     method = "account.status"
+                    await self.ws_auth_non_stream(method)
                     #await self.ws_auth(method)
 
                     # Receive WebSocket messages
