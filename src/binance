@@ -16,6 +16,7 @@ import websockets
 import asyncio
 import websockets
 import json
+import base64
 
 import time
 import hashlib
@@ -49,28 +50,36 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
-def hashing(query_string,
-            apiSecret):
+def hashing_(
+    query_string,
+    apiSecret
+    )-> str:
+    
+    
     return hmac.new(
-        apiSecret.encode("utf-8"), query_string.encode("utf-8"), hashlib.sha256
-    ).hexdigest()
+        apiSecret.encode("utf-8"), 
+        query_string.encode("utf-8"), 
+        hashlib.sha256
+        ).hexdigest()
 
+def hashing(
+    params,
+    apiSecret
+    )-> str:
+    # Sign the request
+    payload = '&'.join([f'{param}={value}' for param, value in sorted(params.items())])
+
+    signature = base64.b64encode(apiSecret.sign(payload.encode('ASCII')))
+    params['signature'] = signature.decode('ASCII')
+    
+    return params
 
 
 def get_timestamp():
     return int(time.time() * 1000)
 
 """ === end of util functions === """
-
-def server_time_message():
-	"""
-		The message to get server time
-	"""
-
-	return {
-	  "id": "187d3cb2-942d-484c-8271-4e2141bbadb1",
-	  "method": "time"
-	}
+ 
  
 @dataclass(unsafe_hash=True, slots=True)
 class StreamAccountData(ModifyOrderDb):
@@ -144,8 +153,10 @@ class StreamAccountData(ModifyOrderDb):
                         "timestamp": timestamp
                     }
                     
-                    signature = hashing(urlencode(payload), self.client_secret)
-                    
+                    signature = hashing(
+                        params,
+                        self.client_secret
+                        )       
                     #log.info (account_status)
 #                    await self.ws_auth(account_status)
                     await self.ws_auth(True,account_balance)
@@ -183,7 +194,11 @@ class StreamAccountData(ModifyOrderDb):
             "timestamp": timestamp
         }
         
-        signature = hashing(urlencode(payload), self.client_secret)
+        #signature = hashing(urlencode(payload), self.client_secret)
+        signature = hashing(
+                        params,
+                        self.client_secret
+                        )
         
         msg: dict = {
             "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
