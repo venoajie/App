@@ -83,7 +83,7 @@ class StreamAccountData(ModifyOrderDb):
     loop = asyncio.get_event_loop()
 #    ws_connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
     ws_connection_url_non_stream: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
-    ws_connection_url_m_futures: str = "wss://ws-fapi.binance.com/ws-fapi/v1"
+    ws_connection_url_m_futures: str = "wss://ws-fapi.binance.com/ws-fapi/v1/ws"
     ws_connection_url: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
     # Instance Variables
     #connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
@@ -96,8 +96,6 @@ class StreamAccountData(ModifyOrderDb):
         self.client_id: str = parse_dotenv(self.sub_account_id)["my_id"]
         self.client_secret: str = (parse_dotenv(self.sub_account_id)["my_secret"])
         
-        log.debug (f"{self.sub_account_id} {self.client_id} {self.client_secret}")
-
         # Start Primary Coroutine
         self.loop.run_until_complete(self.ws_manager())
     
