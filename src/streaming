@@ -316,8 +316,6 @@ class StreamAccountData(ModifyOrderDb):
         
         await asyncio.sleep(sleep_time)
 
-        id = id_numbering.id(operation, ws_channel)
-
         msg: dict = {
             "event": "subscribe",
             "feed": "ticker",
