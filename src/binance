@@ -117,7 +117,7 @@ class StreamAccountData(ModifyOrderDb):
         log.info (method)
 
         async with websockets.connect(
-            url,
+            url["url"],
             ping_interval=None,
             compression=None,
             close_timeout=60,
