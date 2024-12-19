@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
 
 
-[[spot]]
+[spot]
 url = "wss://stream.binance.com:9443/ws"
 
-[[margin]]
+[margin]
 url = "wss://stream.binance.com:9443/ws"
 
-[[future]]
+[future]
 url = "wss://fstream.binance.com/ws"
 
-[[delivery]]
+[delivery]
 url = "wss://dstream.binance.com/ws"
 
-[[ws-api-spot]]
+[ws-api-spot]
 url = "wss://ws-api.binance.com:443/ws-api/v3"
 
-[[ws-api-future]]
+[ws-api-future]
 url = "wss://ws-fapi.binance.com/ws-fapi/v1"
 
-[[papi]]
+[papi]
 url = "wss://fstream.binance.com/pm/ws"
 
 
