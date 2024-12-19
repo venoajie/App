@@ -123,9 +123,8 @@ class StreamAccountData(ModifyOrderDb):
     async def ws_manager(self) -> None:
         async with websockets.connect(
             self.ws_connection_url,
-            ping_interval=None,
-            compression=None,
-            close_timeout=60,
+            timeout=10,
+            trace=True,
         ) as self.websocket_client:
             
             # registering strategy config file    
@@ -133,60 +132,6 @@ class StreamAccountData(ModifyOrderDb):
 
             try:                    
                 
-                # get ALL traded currencies in deribit
-                get_currencies_all = await get_currencies()
-
-                currencies = [o["currency"] for o in get_currencies_all["result"]]
-
-                for currency in currencies:
-
-                    instruments = await get_instruments(currency)
-
-                    my_path_instruments = provide_path_for_file("instruments", 
-                                                                currency)
-
-                    replace_data(
-                        my_path_instruments,
-                        instruments
-                        )
-
-                my_path_cur = provide_path_for_file("currencies")
-
-                replace_data(
-                    my_path_cur,
-                    currencies
-                    )
-                
-                # parsing config file
-                config_app = get_config(file_toml)
-
-                # get tradable strategies
-                tradable_config_app = config_app["tradable"]
-                
-                # get TRADABLE currencies
-                currencies = [o["spot"] for o in tradable_config_app] [0]
-
-                strategy_attributes = config_app["strategies"]
-                
-                # get strategies that have not short/long attributes in the label 
-                non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                    if o["non_checked_for_size_label_consistency"]==True]
-                
-                relevant_tables = config_app["relevant_tables"][0]
-                
-                trade_db_table= relevant_tables["my_trades_table"]
-                
-                order_db_table= relevant_tables["orders_table"]        
-                   
-                settlement_periods = get_settlement_period (strategy_attributes)
-                                
-                futures_instruments =  get_futures_instruments (
-                    currencies,
-                    settlement_periods)  
-                
-                instruments_name = futures_instruments["instruments_name"]   
-                                
-                resolution = 1                
                 
                 while True:
                     
@@ -198,57 +143,9 @@ class StreamAccountData(ModifyOrderDb):
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
-                        
-                    for currency in currencies:
-                            
-                        # some pre-trading checks
-                        currency_lower = currency.lower ()
-                        archive_db_table= f"my_trades_all_{currency_lower}_json"                    
-                        transaction_log_trading= f"transaction_log_{currency_lower}_json"
-                        
-                        await self.modify_order_and_db.resupply_sub_accountdb (currency)
-
-                        await self.modify_order_and_db.resupply_portfolio (currency)
-                  
-                        column_trade: str= "instrument_name","label"
-                        my_trades_currency: list= await get_query(
-                            trade_db_table, 
-                            currency, 
-                            "all", 
-                            "all", 
-                            column_trade
-                            )
-                        
-                        my_trades_instrument_name_only = remove_redundant_elements(
-                            [o["instrument_name"] for o in my_trades_currency]
-                            )
-                            
-                        ws_channel_currency = [
-                            f"user.portfolio.{currency}",
-                            f"user.changes.any.{currency.upper()}.raw",
-                            ]
-                    
-                        for ws in ws_channel_currency:
-
-                            self.loop.create_task(
-                                self.ws_operation(
-                                    operation = "subscribe", 
-                                    ws_channel = ws)
-                                )
                       
-                    for instrument in instruments_name:
-                                            
-                        ws_channel_instrument = [
-                            f"incremental_ticker.{instrument}",
-                            f"chart.trades.{instrument}.{resolution}"
-                            ]
-                        
-                        for ws in ws_channel_instrument:
-                            self.loop.create_task(
-                            self.ws_operation(
-                                operation = "subscribe",
-                                ws_channel = ws,
-                            ))
+                    self.loop.create_task(
+                            self.ws_operation())
                     
                     while self.websocket_client.open:
                         
@@ -258,7 +155,7 @@ class StreamAccountData(ModifyOrderDb):
                             message: bytes = await self.websocket_client.recv()
                             message: dict = orjson.loads(message)
                             message_channel: str = None
-                            #log.warning (message)
+                            log.warning (message)
                             if "id" in list(message):
                                 if message["id"] == 9929:
                                     
@@ -297,75 +194,7 @@ class StreamAccountData(ModifyOrderDb):
                                     message_channel = message["params"]["channel"]
 
                                     data_orders: list = message["params"]["data"]    
-                                    
-                                    currency: str = extract_currency_from_text(message_channel)
-                                    
-                                    currency_lower = currency
-                                                                        
-                                    archive_db_table= f"my_trades_all_{currency_lower}_json"
-                                    
-                                    transaction_log_trading= f"transaction_log_{currency_lower}_json"
-
-                                    if message_channel == f"user.portfolio.{currency.lower()}":
-                                        # also always performed at restart                                
-                                        await update_db_pkl(
-                                            "portfolio", 
-                                            data_orders, 
-                                            currency
-                                            )
-                        
-                                        log.critical ("F")
-                                        await self.modify_order_and_db.resupply_sub_accountdb(currency)    
-                                        
-                                    if "user.changes.any" in message_channel:
-                                                                                
-                                        await self.modify_order_and_db. update_user_changes(
-                                            non_checked_strategies,
-                                            data_orders, 
-                                            currency, 
-                                            order_db_table,
-                                            trade_db_table, 
-                                            archive_db_table,
-                                            transaction_log_trading
-                                            )                                                             
-                                    
-                                    TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
-                                    WHERE_FILTER_TICK: str = "tick"
-                                    DATABASE: str = "databases/trading.sqlite3"
-                                    
-                                    if "chart.trades" in message_channel:
-                                        instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-                                                                                
-                                        await ohlc_result_per_time_frame(
-                                            instrument_ticker,
-                                            resolution,
-                                            data_orders,
-                                            TABLE_OHLC1,
-                                            WHERE_FILTER_TICK,
-                                            )
-                                        
-                                    instrument_ticker = (message_channel)[19:]  
-                                    
-                                    if (
-                                        message_channel
-                                        == f"incremental_ticker.{instrument_ticker}"):
-                                        
-                                        my_path_ticker = provide_path_for_file(
-                                            "ticker", instrument_ticker)
-                                        
-                                        await distribute_ticker_result_as_per_data_type(
-                                            my_path_ticker, data_orders, instrument_ticker)
-                                                
-                                    
-                                        if "PERPETUAL" in data_orders["instrument_name"]:
-                                            
-                                            await inserting_open_interest(
-                                                currency, 
-                                                WHERE_FILTER_TICK, 
-                                                TABLE_OHLC1, 
-                                                data_orders
-                                                )                                                
-                                                                                        
+                                                       
                         except Exception as error:
                             log.critical (error)
                             await telegram_bot_sendtext (
@@ -470,11 +299,7 @@ class StreamAccountData(ModifyOrderDb):
             await asyncio.sleep(150)
 
     async def ws_operation(
-        self, 
-        operation: str, 
-        ws_channel: str, 
-        id: int = 100
-    ) -> None:
+        self,    ) -> None:
         """
         Requests `public/subscribe` or `public/unsubscribe`
         to DBT's API for the specific WebSocket Channel.
@@ -483,14 +308,11 @@ class StreamAccountData(ModifyOrderDb):
         
         await asyncio.sleep(sleep_time)
 
-        id = id_numbering.id(operation, ws_channel)
-
-        msg: dict = {
-            "jsonrpc": "2.0",
-            "method": f"private/{operation}",
-            "id": id,
-            "params": {"channels": [ws_channel]},
-        }
+        msg: dict = {"event": "subscribe",
+                    "feed": "ticker",
+                    "product_ids": [
+                        "PI_XBTUSD"
+  ] }
 
         #log.info(ws_channel)
         await self.websocket_client.send(json.dumps(msg))
