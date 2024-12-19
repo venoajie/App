@@ -81,18 +81,21 @@ class StreamAccountData(ModifyOrderDb):
     async def ws_manager(self) -> None:
         async with websockets.connect(
             self.ws_connection_url,
-            #ping_interval=None,
-            #compression=None,
-            #close_timeout=60,
-            ) as ws:
+            ping_interval=None,
+            compression=None,
+            close_timeout=60,
+            ) as self.websocket_clientws:
             while True:
                 log.debug (f"msg {msg}")
-                await ws.send(json.dumps(msg))
-                response = await asyncio.wait_for(ws.recv(), timeout=2)
-                response = json.loads(response)
-                print(response)
-                await asyncio.sleep(0.5)
-
+                
+                while self.websocket_client.open:
+                    
+                    # Receive WebSocket messages
+                    message: bytes = await self.websocket_client.recv()
+                    message: dict = orjson.loads(message)
+                    message_channel: str = None
+                    log.warning (message)
+                    #log
 
 def main():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
