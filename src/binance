@@ -67,6 +67,7 @@ def hashing(
     apiSecret
     )-> str:
     
+    log.debug (f" apiSecret {apiSecret}")
     log.debug (f" params {params}")
     # Sign the request
     payload = '&'.join([f'{param}={value}' for param, value in sorted(params.items())])
