@@ -121,7 +121,7 @@ class StreamAccountData(ModifyOrderDb):
                      
                     # Authenticate WebSocket Connection
                     
-                    method = "account.balance"
+                    method = "v2/account.status"
                     await self.ws_auth_m_futures(method)
                     #await self.ws_auth(method)
 
@@ -163,6 +163,7 @@ class StreamAccountData(ModifyOrderDb):
     }
 }
 
+        log.debug (f" method {method}")
         log.debug (f" signature {signature}")
         #log.error (f" json.dumps(msg) {json.dumps(msg)}")
 
