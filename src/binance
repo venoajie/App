@@ -131,7 +131,7 @@ class StreamAccountData(ModifyOrderDb):
         
                     method = config_app_url["method"]
         
-                    account_status = method["account_status"]
+                    account_balance = method["account_balance"]
                     ticker_price = connection_kind["ticker_price"]
                         
                     #await self.ws_operation("SUBSCRIBE", ticker_price)
@@ -150,7 +150,7 @@ class StreamAccountData(ModifyOrderDb):
                     
                     #log.info (account_status)
 #                    await self.ws_auth(account_status)
-                    await self.ws_auth(True,account_status)
+                    await self.ws_auth(True,account_balance)
                     #pm = f"wss://fstream.binance.com/pm/ws/{signature}"
                     #await self.websocket_client.send(json.dumps(pm))
                     #log.debug(f"pm {pm}")
