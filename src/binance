@@ -112,6 +112,7 @@ class StreamAccountData(ModifyOrderDb):
         log.info (config_app_url)
         
         url = config_app_url["future"]
+        method = config_app_url["method"]
 
         async with websockets.connect(
             url,
@@ -227,7 +228,7 @@ class StreamAccountData(ModifyOrderDb):
         await self.websocket_client.send(json.dumps(msg))
 
 def main():
-    # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
+
     sub_account_id = "binance-sub-1"
     
     try:
