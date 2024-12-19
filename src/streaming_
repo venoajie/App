@@ -105,7 +105,7 @@ class StreamAccountData(ModifyOrderDb):
     modify_order_and_db: object = fields 
     # Async Event Loop
     loop = asyncio.get_event_loop()
-    ws_connection_url: str = "wss://www.deribit.com/ws/api/v2"
+    ws_connection_url: str = "wss://www.cryptofacilities.com/ws/v1"
     # Instance Variables
     connection_url: str = "https://www.deribit.com/api/v2/"
     websocket_client: websockets.WebSocketClientProtocol = None
@@ -117,7 +117,7 @@ class StreamAccountData(ModifyOrderDb):
     def __post_init__(self):
         self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
         self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
-        self.client_secret: str = config_oci.get_oci_key(parse_dotenv(self.sub_account_id)["key_ocid"])
+        self.client_secret: str = (parse_dotenv(self.sub_account_id)["key_ocid"])
 
         # Start Primary Coroutine
         self.loop.run_until_complete(self.ws_manager())
@@ -367,7 +367,7 @@ async def distribute_ticker_result_as_per_data_type(
 
 def main():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
-    sub_account_id = "deribit-148510"
+    sub_account_id = "kraken"
     
     try:
         StreamAccountData(sub_account_id)
