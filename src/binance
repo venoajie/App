@@ -230,13 +230,14 @@ class StreamAccountData(ModifyOrderDb):
         #    "params": {"symbol": "BTCUSDT" }     }
         
         #signature = hashing(urlencode(payload), self.client_secret)
+        
+        log.debug (f" msg {msg}")
+        log.debug (f" method {method}")
+        
         signature = hashing(
                         msg,
                         self.client_secret
                         )
-        
-        log.debug (f" msg {msg}")
-        log.debug (f" method {method}")
         log.debug (f" signature {signature}")
         log.error (f" json.dumps(msg) {json.dumps(signature)}")
 
