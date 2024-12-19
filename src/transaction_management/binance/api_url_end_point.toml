@@ -19,6 +19,7 @@ url = "wss://ws-api.binance.com:443/ws-api/v3"
 
 [ws-api-future]
 url = "wss://ws-fapi.binance.com/ws-fapi/v1"
+account_status = "account.status"
 
 [papi]
 url = "wss://fstream.binance.com/pm/ws"
