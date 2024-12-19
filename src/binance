@@ -17,6 +17,11 @@ import asyncio
 import websockets
 import json
 
+import time
+import hashlib
+import hmac
+from urllib.parse import urlencode
+
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
@@ -45,8 +50,29 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
+def hashing(query_string,
+            apiSecret):
+    return hmac.new(
+        apiSecret.encode("utf-8"), query_string.encode("utf-8"), hashlib.sha256
+    ).hexdigest()
 
 
+
+def get_timestamp():
+    return int(time.time() * 1000)
+
+""" === end of util functions === """
+
+def server_time_message():
+	"""
+		The message to get server time
+	"""
+
+	return {
+	  "id": "187d3cb2-942d-484c-8271-4e2141bbadb1",
+	  "method": "time"
+	}
+ 
 @dataclass(unsafe_hash=True, slots=True)
 class StreamAccountData(ModifyOrderDb):
 
@@ -114,15 +140,21 @@ class StreamAccountData(ModifyOrderDb):
         
         await asyncio.sleep(sleep_time)
 
+        timestamp = get_timestamp()
+        payload = {
+            "apiKey": self.client_id,
+            "timestamp": timestamp
+        }
         msg: dict = {
-        "method": "SUBSCRIBE",
-        "params":
-        [
-         "btcusdt@trade",
-         "btcusdt@depth"
-         ],
-         "id": 1
-         }
+	  "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
+	  "method": "account.status",
+	  "params": {
+	    "apiKey": self.client_id,
+	    "signature": hashing(urlencode(payload, self.client_secret)),
+	    "timestamp": timestamp
+	  }
+	}
+
         #log.debug (f" msg {msg}")
         #log.error (f" json.dumps(msg) {json.dumps(msg)}")
 
