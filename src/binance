@@ -97,6 +97,7 @@ class StreamAccountData(ModifyOrderDb):
                     message: dict = orjson.loads(message)
                     message_channel: str = None
                     log.warning (message)
+                    await asyncio.sleep(0.5)
 
 
 
