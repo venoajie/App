@@ -57,7 +57,7 @@ class StreamAccountData(ModifyOrderDb):
     # Async Event Loop
     loop = asyncio.get_event_loop()
 #    ws_connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
-    ws_connection_url: str = "wss://stream.binance.com:9443"
+    ws_connection_url: str = "wss://stream.binance.com:9443/ws"
     # Instance Variables
     connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
     websocket_client: websockets.WebSocketClientProtocol = None
@@ -82,10 +82,7 @@ class StreamAccountData(ModifyOrderDb):
             close_timeout=60,
             ) as self.websocket_client:
             while True:
-                      
-                # Authenticate WebSocket Connection
-                await self.ws_auth()
-
+                     
                 while self.websocket_client.open:
                     
                     params = [
@@ -96,7 +93,10 @@ class StreamAccountData(ModifyOrderDb):
                     #await self.ws_operation(
                     #    "SUBSCRIBE",
                     #    params)
-                    
+                     
+                    # Authenticate WebSocket Connection
+                    await self.ws_auth()
+
                     # Receive WebSocket messages
                     message: bytes = await self.websocket_client.recv()
                     message: dict = orjson.loads(message)
