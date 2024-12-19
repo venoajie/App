@@ -89,6 +89,9 @@ def main_dotenv(
         # github env
         credentials = os.environ
         # log.info (credentials)
+        print(f"dotenv_path {dotenv_path}")
+        print(f"credentials {credentials}")
+
 
     return credentials
 
