@@ -83,7 +83,7 @@ class StreamAccountData(ModifyOrderDb):
     # Async Event Loop
     loop = asyncio.get_event_loop()
 #    ws_connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
-    ws_connection_url: str = "wss://stream.binance.com:9443/ws"
+    ws_connection_url: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
     # Instance Variables
     #connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
     websocket_client: websockets.WebSocketClientProtocol = None
