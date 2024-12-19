@@ -72,8 +72,6 @@ def hashing(
     log.debug (f" params {params}")
     # Sign the request
     payload = '&'.join([f'{param}={value}' for param, value in sorted(params.items())])
-    apiSecret = load_pem_private_key(apiSecret,
-                                       password=None)
     log.debug (f" payload {payload}")
     log.debug (f" apiSecret {apiSecret}")
 
