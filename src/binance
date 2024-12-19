@@ -283,7 +283,7 @@ class StreamAccountData(ModifyOrderDb):
 
 def main():
     # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
-    sub_account_id = "binance-main-1"
+    sub_account_id = "binance-sub-1"
     
     try:
         StreamAccountData(sub_account_id)
