@@ -169,6 +169,9 @@ def provide_path_for_file(
     if "config_strategies.toml" in end_point:
         sub_folder = "strategies"
 
+    if "api_url_end_point.toml" in end_point:
+        sub_folder = "transaction_management/binance"
+
     # to accomodate pytest env
     if "test.env" in end_point:
         sub_folder = "src/configuration"

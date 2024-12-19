@@ -81,12 +81,13 @@ class StreamAccountData(ModifyOrderDb):
     modify_order_and_db: object = fields 
     # Async Event Loop
     loop = asyncio.get_event_loop()
+    
 #    ws_connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
-    ws_connection_url_non_stream: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
-    ws_connection_url_usd_futures: str = "wss://ws-fapi.binance.com/ws-fapi/v1"
-    ws_connection_url_usd_pm: str = "wss://fstream.binance.com/pm"
-    ws_connection_url_coin_futures: str = "wss://dstream.binance.com"
-    ws_connection_url: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
+    #ws_connection_url_non_stream: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
+    #ws_connection_url_usd_futures: str = "wss://ws-fapi.binance.com/ws-fapi/v1"
+    #ws_connection_url_usd_pm: str = "wss://fstream.binance.com/pm"
+    #ws_connection_url_coin_futures: str = "wss://dstream.binance.com"
+    #ws_connection_url: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
     # Instance Variables
     #connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
     websocket_client: websockets.WebSocketClientProtocol = None
@@ -102,8 +103,16 @@ class StreamAccountData(ModifyOrderDb):
         self.loop.run_until_complete(self.ws_manager())
     
     async def ws_manager(self) -> None:
+        
+                # parsing config file
+        file_toml = "api_url_end_point.toml"
+        
+        config_app_url = get_config(file_toml)
+        
+        url = config_app_url["future"]
+
         async with websockets.connect(
-            self.ws_connection_url_usd_pm,
+            url,
             ping_interval=None,
             compression=None,
             close_timeout=60,
@@ -134,7 +143,7 @@ class StreamAccountData(ModifyOrderDb):
                     signature = hashing(urlencode(payload), self.client_secret)
                     
                     method = "account.status"
-                    await self.ws_auth_m_futures(method)
+                    await self.ws_auth(method)
                     #await self.ws_auth(method)
                     pm = f"wss://fstream.binance.com/pm/ws/{signature}"
                     await self.websocket_client.send(json.dumps(pm))
@@ -147,52 +156,8 @@ class StreamAccountData(ModifyOrderDb):
                     log.warning (message)
                     #await asyncio.sleep(0.5)
 
-    async def ws_auth_pm(
-        self,
-        method) -> None:
-        """
-        Requests DBT's `public/auth` to
-        authenticate the WebSocket Connection.
-        """
-        sleep_time: int = .5
-        
-        await asyncio.sleep(sleep_time)
 
-        timestamp = get_timestamp()
-        
-        payload = {
-            "apiKey": self.client_id,
-            "timestamp": timestamp
-        }
-        
-        signature = hashing(urlencode(payload), self.client_secret)
-        
-        msg: dict = {
-            "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
-            "method": method,
-            "params": {
-                "apiKey": self.client_id,
-                "timestamp": timestamp,
-                "signature": signature
-            }
-        }
-
-        log.debug (f" method {method}")
-        log.debug (f" signature {signature}")
-        log.error (f" json.dumps(msg) {json.dumps(signature)}")
-
-        try:
-            await self.websocket_client.send(json.dumps(msg))
-
-        except Exception as error:
-            
-            raise_error_message (
-            error, 
-            1,
-            "app"
-            )
-
-    async def ws_auth_m_futures(
+    async def ws_auth(
         self,
         method) -> None:
         """
@@ -225,86 +190,6 @@ class StreamAccountData(ModifyOrderDb):
         log.debug (f" method {method}")
         log.debug (f" signature {signature}")
         log.error (f" json.dumps(msg) {json.dumps(msg)}")
-
-        try:
-            await self.websocket_client.send(json.dumps(msg))
-
-        except Exception as error:
-            
-            raise_error_message (
-            error, 
-            1,
-            "app"
-            )
-
-    async def ws_auth_non_stream(
-        self,
-        method) -> None:
-        """
-        Requests DBT's `public/auth` to
-        authenticate the WebSocket Connection.
-        """
-        sleep_time: int = .5
-        
-        await asyncio.sleep(sleep_time)
-
-        timestamp = get_timestamp()
-        payload = {
-            "apiKey": self.client_id,
-            "timestamp": timestamp
-        }
-        
-        msg: dict = {
-            "id": "2",
-            "method": method,
-            #"method": "account.status",
-            "params": {
-                "apiKey": self.client_id,
-                "signature": hashing(urlencode(payload), self.client_secret),
-                "timestamp": timestamp
-            }
-	}
-
-        #log.debug (f" msg {msg}")
-        #log.error (f" json.dumps(msg) {json.dumps(msg)}")
-
-        try:
-            await self.websocket_client.send(json.dumps(msg))
-
-        except Exception as error:
-            
-            raise_error_message (
-            error, 
-            1,
-            "app"
-            )
-
-    async def ws_auth(self) -> None:
-        """
-        Requests DBT's `public/auth` to
-        authenticate the WebSocket Connection.
-        """
-        sleep_time: int = .5
-        
-        await asyncio.sleep(sleep_time)
-
-        timestamp = get_timestamp()
-        payload = {
-            "apiKey": self.client_id,
-            "timestamp": timestamp
-        }
-        msg: dict = {
-	  "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
-	  "method": "account.status",
-	  "params": {
-	    "apiKey": self.client_id,
-	    "signature": hashing(urlencode(payload), self.client_secret),
-	    "timestamp": timestamp
-	  }
-	}
-
-        #log.debug (f" msg {msg}")
-        #log.error (f" json.dumps(msg) {json.dumps(msg)}")
 
         try:
             await self.websocket_client.send(json.dumps(msg))
