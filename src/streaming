@@ -111,6 +111,8 @@ class StreamAccountData(ModifyOrderDb):
     websocket_client: websockets.WebSocketClientProtocol = None
     refresh_token: str = None
     refresh_token_expiry_time: int = None
+    trace: int = True
+    timeout: int = 10
             
     def __post_init__(self):
         self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
