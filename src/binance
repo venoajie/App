@@ -109,6 +109,8 @@ class StreamAccountData(ModifyOrderDb):
         
         config_app_url = get_config(file_toml)
         
+        log.info (config_app_url)
+        
         url = config_app_url["future"]
 
         async with websockets.connect(
