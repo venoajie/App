@@ -207,7 +207,7 @@ class StreamAccountData(ModifyOrderDb):
                 "timestamp": timestamp,
                 "signature": signature
             }     
-            msg = basic_msg.update("params": msg_authenticated)
+            msg = basic_msg.update({"params": msg_authenticated})
         
         
         if not params:
