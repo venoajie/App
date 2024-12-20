@@ -181,6 +181,7 @@ class StreamAccountData(ModifyOrderDb):
                 msg.update({"params": params})
             
         try:
+            log.error (f"msg {msg}")
             await self.websocket_client.send(json.dumps(msg))
 
         except Exception as error:
