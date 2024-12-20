@@ -121,6 +121,7 @@ def cached_ohlc_data(
 
             result.append (result)
     
+    log.warning (f"result {result}")
     return result
 
 
