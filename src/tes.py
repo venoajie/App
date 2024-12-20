@@ -114,10 +114,8 @@ def cached_ohlc_data(
                     end_point, 
                     follow_redirects=True
                     ).json()["result"]
-                log.info (f"initial {ohlc_request}")
+
                 result = transform_nested_dict_to_list_ohlc(ohlc_request)
-                
-                log.warning (f"list {result}")
 
             items_to_be_removed = ["status", "cost"]
             
@@ -212,6 +210,6 @@ my_data = cached_ohlc_data(
 log.warning (my_data)
 
 for data in my_data:
-    ohlc = data[""]
-    three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3))
+
+    three_dim_sequence = np.asarray(my_generator(data.values[1:],3))
     log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
