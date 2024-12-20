@@ -127,12 +127,12 @@ class StreamAccountData(ModifyOrderDb):
                      
                 while self.websocket_client.open:
                     
-                    #account_balance = connection_kind["account_status"]
-                    ticker_price = connection_kind["ticker_price"]
+                    account_balance = connection_kind["account_status"]
+                    #ticker_price = connection_kind["ticker_price"]
                     
                     await self.ws_auth(
-                        False,
-                        ticker_price,
+                        True,
+                        account_balance,
                         encoding_result,
                         timestamp
                         )
