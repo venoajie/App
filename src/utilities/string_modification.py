@@ -567,3 +567,17 @@ def sorting_list(
         listing, 
         key=operator.itemgetter(item_reference), 
         reverse = is_reversed)
+
+def hashing(
+    query_string,
+    apiSecret
+    )-> str:
+    
+    import hashlib
+    import hmac
+    
+    return hmac.new(
+        apiSecret.encode("utf-8"), 
+        query_string.encode("utf-8"), 
+        hashlib.sha256
+        ).hexdigest()

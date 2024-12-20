@@ -16,7 +16,6 @@ import websockets
 import asyncio
 import websockets
 import json
-import base64
 
 import time
 import hashlib
@@ -33,6 +32,10 @@ from utilities.system_tools import (
     provide_path_for_file,
     async_raise_error_message,
     raise_error_message,)
+
+
+from utilities.string_modification import (
+    hashing,)
 
 
 def parse_dotenv (sub_account) -> dict:
@@ -62,24 +65,6 @@ def hashing(
         hashlib.sha256
         ).hexdigest()
 
-def hashing_(
-    params,
-    apiSecret
-    )-> str:
-    from cryptography.hazmat.primitives.serialization import load_pem_private_key
-    
-    log.debug (f" apiSecret {apiSecret}")
-    log.debug (f" params {params}")
-    # Sign the request
-    payload = '&'.join([f'{param}={value}' for param, value in sorted(params.items())])
-    log.debug (f" payload {payload}")
-    log.debug (f" apiSecret {apiSecret}")
-
-    signature = base64.b64encode(apiSecret.sign(payload.encode('ASCII')))
-    params['signature'] = signature.decode('ASCII')
-    
-    return params
-
 
 def get_timestamp():
     return int(time.time() * 1000)
@@ -97,14 +82,6 @@ class StreamAccountData(ModifyOrderDb):
     # Async Event Loop
     loop = asyncio.get_event_loop()
     
-#    ws_connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
-    #ws_connection_url_non_stream: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
-    #ws_connection_url_usd_futures: str = "wss://ws-fapi.binance.com/ws-fapi/v1"
-    #ws_connection_url_usd_pm: str = "wss://fstream.binance.com/pm"
-    #ws_connection_url_coin_futures: str = "wss://dstream.binance.com"
-    #ws_connection_url: str = "wss://ws-api.binance.com/ws-api/v3" #"wss://stream.binance.com:9443/ws"
-    # Instance Variables
-    #connection_url: str = "wss://stream.binance.com:9443/ws/btcusdt@depth"
     websocket_client: websockets.WebSocketClientProtocol = None
     refresh_token: str = None
     refresh_token_expiry_time: int = None
@@ -119,7 +96,7 @@ class StreamAccountData(ModifyOrderDb):
     
     async def ws_manager(self) -> None:
         
-                # parsing config file
+        # parsing config file
         file_toml = "api_url_end_point.toml"
         
         config_app_url = get_config(file_toml)
@@ -127,6 +104,18 @@ class StreamAccountData(ModifyOrderDb):
         connection_kind = config_app_url["ws-api-future"]
         
         url =  (connection_kind["url"])
+        
+        timestamp = get_timestamp()
+        
+        payload = {
+            "apiKey": self.client_id,
+            "timestamp": timestamp
+        }
+        
+        encoding_result = hashing(
+            urlencode(payload),
+            self.client_secret
+            )
         
         async with websockets.connect(
             url,
@@ -138,50 +127,29 @@ class StreamAccountData(ModifyOrderDb):
                      
                 while self.websocket_client.open:
                     
-                    params = [
-                "btcusdt@depth"
-                ]
-                    params = ["/stream?streams=btcusdt@trade&timeUnit=millisecond"]
-        
-        
                     #account_balance = connection_kind["account_status"]
                     ticker_price = connection_kind["ticker_price"]
-                        
-                    #await self.ws_operation("SUBSCRIBE", ticker_price)
-                     
-                    # Authenticate WebSocket Connection
                     
-
-                    timestamp = get_timestamp()
-                    
-                    payload = {
-                        "apiKey": self.client_id,
-                        "timestamp": timestamp
-                    }
-                    
-                    #log.info (account_status)
-#                    await self.ws_auth(account_status)
                     await self.ws_auth(
                         False,
-                        ticker_price
+                        ticker_price,
+                        encoding_result,
+                        timestamp
                         )
-                    #pm = f"wss://fstream.binance.com/pm/ws/{signature}"
-                    #await self.websocket_client.send(json.dumps(pm))
-                    #log.debug(f"pm {pm}")
-                    #await self.websocket_client.send(json.dumps(pm))
-
+                    
                     # Receive WebSocket messages
                     message: bytes = await self.websocket_client.recv()
                     message: dict = orjson.loads(message)
-                    message_channel: str = None
+
                     log.warning (message)
-                    #await asyncio.sleep(0.5)
 
 
     async def ws_auth(
         self,
         is_authenticated: bool,
         method: str,
+        signature: str,
+        timestamp: int,
         params: str = None) -> None:
         
         """
@@ -192,17 +160,6 @@ class StreamAccountData(ModifyOrderDb):
         
         await asyncio.sleep(sleep_time)
 
-        timestamp = get_timestamp()
-        
-        payload = {
-            "apiKey": self.client_id,
-            "timestamp": timestamp
-        }
-        
-        
-        signature = hashing(urlencode(payload), self.client_secret)
-        
-        
         basic_msg: dict = {
             "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
             "method": method}
@@ -223,10 +180,6 @@ class StreamAccountData(ModifyOrderDb):
             else:
                 msg.update({"params": params})
             
-        log.debug (f" msg {msg}")
-        log.debug (f" method {method}")
-        
-        
         try:
             await self.websocket_client.send(json.dumps(msg))
 
@@ -238,27 +191,6 @@ class StreamAccountData(ModifyOrderDb):
             "app"
             )
 
-    async def ws_operation(
-        self,
-        method,
-        params
-        ) -> None:
-        """
-        Requests `public/subscribe` or `public/unsubscribe`
-        to DBT's API for the specific WebSocket Channel.
-        """
-        sleep_time: int = .5
-        
-        await asyncio.sleep(sleep_time)
-
-        msg = {"method": method, "params":params
-                ,
-                "id": 1
-                }
-
-
-        #log.info(ws_channel)
-        await self.websocket_client.send(json.dumps(msg))
 
 def main():
 
@@ -274,6 +206,7 @@ def main():
             3,
             "app"
             )
+
                 
 if __name__ == "__main__":
     
