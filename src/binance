@@ -53,19 +53,6 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
-def hashing(
-    query_string,
-    apiSecret
-    )-> str:
-    
-    
-    return hmac.new(
-        apiSecret.encode("utf-8"), 
-        query_string.encode("utf-8"), 
-        hashlib.sha256
-        ).hexdigest()
-
-
 def get_timestamp():
     return int(time.time() * 1000)
 
