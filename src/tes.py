@@ -115,7 +115,9 @@ def cached_ohlc_data(
                     follow_redirects=True
                     ).json()["result"]
 
+                log.warning (f"ohlc_request {ohlc_request}")
                 result = transform_nested_dict_to_list_ohlc(ohlc_request)
+                log.warning (f"result {result}")
 
             result.append (result)
     
