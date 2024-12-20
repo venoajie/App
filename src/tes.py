@@ -191,7 +191,7 @@ log.warning (f"three_dim_sequence        {three_dim_sequence}")
 currencies = ["BTC", "ETH"]
 resolutions = [60, 15]
 
-my_data = np.array(cached_ohlc_data(
+my_data = (cached_ohlc_data(
     currencies,
     resolutions))
 log.warning (my_data)
@@ -206,10 +206,11 @@ dtype = [
     ]
 
 # Converting list of dictionaries to a structured NumPy array
+log.warning (my_data)
+
+three_dim_sequence = np.asarray(my_generator_candle(my_data.values[1:],3))
+log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
 np_users_data = np.array([tuple(user.values()) for user in my_data], dtype=dtype)
 log.warning (np_users_data)
-
-for data in my_data:
-
-    three_dim_sequence = np.asarray(my_generator_candle(np_users_data.values[1:],3))
-    log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
+three_dim_sequence = np.asarray(my_generator_candle(np_users_data.values[1:],3))
+log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
