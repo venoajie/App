@@ -162,8 +162,8 @@ class StreamAccountData(ModifyOrderDb):
                     #log.info (account_status)
 #                    await self.ws_auth(account_status)
                     await self.ws_auth(
-                        True,
-                        account_balance
+                        False,
+                        ticker_price
                         )
                     #pm = f"wss://fstream.binance.com/pm/ws/{signature}"
                     #await self.websocket_client.send(json.dumps(pm))
@@ -202,15 +202,6 @@ class StreamAccountData(ModifyOrderDb):
         
         signature = hashing(urlencode(payload), self.client_secret)
         
-        #msg: dict = {
-        #    "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
-        #    "method": method,
-        #    "params": params  if not is_authenticated else   {
-        #        "apiKey": self.client_id,
-        #        "timestamp": timestamp,
-        #        "signature": signature
-        #    }     }
-        
         
         basic_msg: dict = {
             "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
@@ -225,20 +216,13 @@ class StreamAccountData(ModifyOrderDb):
             
             msg = basic_msg.update({"params": msg_authenticated})
         
-        
-        if not params:
-            msg = basic_msg
-        
         else:
-            msg.update({"params": params})
+            if not params:
+                msg = basic_msg
             
-        #msg: dict = {
-        #    "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
-        #    "method": method,
-        #    "params": {"symbol": "BTCUSDT" }     }
-        
-        #signature = hashing(urlencode(payload), self.client_secret)
-        
+            else:
+                msg.update({"params": params})
+            
         log.debug (f" msg {msg}")
         log.debug (f" method {method}")
         
