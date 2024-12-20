@@ -161,7 +161,10 @@ class StreamAccountData(ModifyOrderDb):
                     
                     #log.info (account_status)
 #                    await self.ws_auth(account_status)
-                    await self.ws_auth(False,ticker_price)
+                    await self.ws_auth(
+                        False,
+                        ticker_price
+                        )
                     #pm = f"wss://fstream.binance.com/pm/ws/{signature}"
                     #await self.websocket_client.send(json.dumps(pm))
                     #log.debug(f"pm {pm}")
@@ -230,15 +233,6 @@ class StreamAccountData(ModifyOrderDb):
         
         
         signature = hashing(urlencode(payload), self.client_secret)
-        
-        msg: dict = {
-            "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
-            "method": method,
-            "params": params  if not is_authenticated else   {
-                "apiKey": self.client_id,
-                "timestamp": timestamp,
-                "signature": signature
-            }     }
         
         try:
             await self.websocket_client.send(json.dumps(msg))
