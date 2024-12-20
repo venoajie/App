@@ -1,6 +1,6 @@
 from db_management import sql_executing_queries
 import asyncio
-
+from loguru import logger as log
 
 async def get_dataframe_from_ohlc_tables(tables: str = "ohlc60_eth_perp_json"):
     """_summary_
@@ -36,6 +36,7 @@ def my_generator(
     data,
     lookback
     ):
+    
     final_output = []
     counter = 0
     first_row = 0
@@ -55,6 +56,8 @@ def my_generator(
 def ohlc_to_candlestick(conversion_array):
     
     candlestick_data = [0,0,0,0]
+    
+    log.warning (f"conversion_array {conversion_array}")
 
     if conversion_array[3]>conversion_array[0]:
         candle_type=1
@@ -108,6 +111,8 @@ def my_generator_candle(
         )
     
     for a in range(len(data)-lookback):
+        
+        log.debug (f"data my_generator_candle {data} lookback {lookback}")
         
         temp_list = []
         for candle in data[first_row:first_row+lookback]:
