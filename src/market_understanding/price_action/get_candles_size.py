@@ -40,6 +40,7 @@ def my_generator(
     counter = 0
     first_row = 0
     arr = np.empty((1,lookback,4), int)
+    
     for a in range(len(data)-lookback):
         temp_list = []
         for candle in data[first_row:first_row+lookback]:
@@ -68,12 +69,16 @@ def ohlc_to_candlestick(conversion_array):
         body_size=conversion_array[1]-conversion_array[3]
 
 
-    if wicks_up < 0:wicks_up=wicks_up*(-1)
-    if wicks_down < 0:wicks_down=wicks_down*(-1)
-    if body_size < 0:body_size=body_size*(-1)
+    if wicks_up < 0: wicks_up=wicks_up*(-1)
+    if wicks_down < 0: wicks_down=wicks_down*(-1)
+    if body_size < 0: body_size=body_size*(-1)
+    
     candlestick_data[0]=candle_type
+    
     candlestick_data[1]=round(round(wicks_up,5),2)
+    
     candlestick_data[2]=round(round(wicks_down,5),2)
+    
     candlestick_data[3]=round(round(body_size,5),2)
 
     return candlestick_data
@@ -95,18 +100,27 @@ def my_generator_candle(
         _type_: _description_
     """
     first_row = 0
-    arr = np.empty((1,lookback,4), int)
+    arr = np.empty(
+        (1,
+         lookback,
+         4
+         ), int
+        )
+    
     for a in range(len(data)-lookback):
+        
         temp_list = []
         for candle in data[first_row:first_row+lookback]:
 
             converted_data = ohlc_to_candlestick(candle)
             temp_list.append(converted_data)
+        
         temp_list2 = np.asarray(temp_list)
         templist3 = [temp_list2]
         templist4 = np.asarray(templist3)
         arr = np.append(arr, templist4, axis=0)
         first_row=first_row+1
+    
     return arr
 
 

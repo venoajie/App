@@ -126,8 +126,8 @@ my_dataset = pd.read_csv('dataset.csv')
 del my_dataset['Local time']
 del my_dataset['Volume']
 
-three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,my_dataset.values[1:],3))
-log.warning (f"three_dim_sequence        {three_dim_sequence}")
+#three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,my_dataset.values[1:],3))
+#log.warning (f"three_dim_sequence        {three_dim_sequence}")
 
 currencies = ["BTC", "ETH"]
 resolutions = [60, 15]
@@ -146,11 +146,6 @@ dtype = [
     
     ]
 
-# Converting list of dictionaries to a structured NumPy array
-#log.warning (my_data)
-
-#three_dim_sequence = np.asarray(my_generator_candle(my_data.values[1:],3))
-#log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
 for data in my_data:
     log.warning (data)
     np_users_data = np.array(data)
