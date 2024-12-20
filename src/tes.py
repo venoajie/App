@@ -206,7 +206,7 @@ dtype = [
     ]
 
 # Converting list of dictionaries to a structured NumPy array
-np_users_data = np.array([tuple(user.values()) for user in data], dtype=dtype)
+np_users_data = np.array([tuple(user.values()) for user in my_data], dtype=dtype)
 log.warning (np_users_data)
 
 for data in my_data:
