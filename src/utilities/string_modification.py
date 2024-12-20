@@ -546,8 +546,8 @@ def transform_nested_dict_to_list_ohlc(list_example) -> dict:
             open=list_example["open"][k],
             low=list_example["low"][k],
             high=list_example["high"][k],
-            cost=list_example["cost"][k],
-            #close=list_example["close"][k],
+            #cost=list_example["cost"][k],
+            close=list_example["close"][k],
         )
 
         my_list.append(dict_result)

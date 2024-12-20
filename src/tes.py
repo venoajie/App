@@ -117,21 +117,7 @@ def cached_ohlc_data(
 
                 result = transform_nested_dict_to_list_ohlc(ohlc_request)
 
-            items_to_be_removed = ["status", "cost"]
-            
-            tick_max = max([o for o in ohlc_request["ticks"]])
-
-            ohlc_request_cleaned= {i:ohlc_request [i] for i in ohlc_request if i not in items_to_be_removed}
-            
-            ohlc_request_cleaned.update({"resolution": resolution})
-
-            ohlc_request_cleaned.update({"instrument_name": instrument_name})
-
-            # remove_dict_elements
-            
-            ohlc_request_cleaned.update({"tick": tick_max})
-
-            result.append (ohlc_request_cleaned)
+            result.append (result)
     
     return result
 
