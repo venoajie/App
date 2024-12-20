@@ -145,7 +145,7 @@ class StreamAccountData(ModifyOrderDb):
         
         
                     account_balance = connection_kind["account_balance"]
-                    ticker_price = connection_kind["ticker_price"]
+                    #ticker_price = connection_kind["ticker_price"]
                         
                     #await self.ws_operation("SUBSCRIBE", ticker_price)
                      
