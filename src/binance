@@ -124,7 +124,7 @@ class StreamAccountData(ModifyOrderDb):
         
         config_app_url = get_config(file_toml)
         
-        connection_kind = config_app_url["ws-api-future"]
+        connection_kind = config_app_url["ws-api-spot"]
         
         url =  (connection_kind["url"])
         
@@ -144,7 +144,7 @@ class StreamAccountData(ModifyOrderDb):
                     params = ["/stream?streams=btcusdt@trade&timeUnit=millisecond"]
         
         
-                    #account_balance = connection_kind["account_status"]
+                    account_balance = connection_kind["account_status"]
                     ticker_price = connection_kind["ticker_price"]
                         
                     #await self.ws_operation("SUBSCRIBE", ticker_price)
@@ -162,8 +162,8 @@ class StreamAccountData(ModifyOrderDb):
                     #log.info (account_status)
 #                    await self.ws_auth(account_status)
                     await self.ws_auth(
-                        False,
-                        ticker_price
+                        True,
+                        account_balance
                         )
                     #pm = f"wss://fstream.binance.com/pm/ws/{signature}"
                     #await self.websocket_client.send(json.dumps(pm))
@@ -200,6 +200,17 @@ class StreamAccountData(ModifyOrderDb):
         }
         
         
+        signature = hashing(urlencode(payload), self.client_secret)
+        
+        #msg: dict = {
+        #    "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
+        #    "method": method,
+        #    "params": params  if not is_authenticated else   {
+        #        "apiKey": self.client_id,
+        #        "timestamp": timestamp,
+        #        "signature": signature
+        #    }     }
+        
         
         basic_msg: dict = {
             "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
@@ -208,8 +219,8 @@ class StreamAccountData(ModifyOrderDb):
         if is_authenticated:
             msg_authenticated =    {
                 "apiKey": self.client_id,
-                #"timestamp": timestamp,
-                #"signature": signature
+                "timestamp": timestamp,
+                "signature": signature
             }     
             
             msg = basic_msg.update({"params": msg_authenticated})
@@ -231,8 +242,6 @@ class StreamAccountData(ModifyOrderDb):
         log.debug (f" msg {msg}")
         log.debug (f" method {method}")
         
-        
-        signature = hashing(urlencode(payload), self.client_secret)
         
         try:
             await self.websocket_client.send(json.dumps(msg))
