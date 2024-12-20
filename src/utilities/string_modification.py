@@ -569,15 +569,21 @@ def sorting_list(
         reverse = is_reversed)
 
 def hashing(
-    query_string,
-    apiSecret
+    timestamp: int,
+    client_id: str,
+    apiSecret: str,
     )-> str:
     
     import hashlib
     import hmac
     
+    payload = {
+            "apiKey": client_id,
+            "timestamp": timestamp
+        }
+    
     return hmac.new(
         apiSecret.encode("utf-8"), 
-        query_string.encode("utf-8"), 
+        payload.encode("utf-8"), 
         hashlib.sha256
         ).hexdigest()

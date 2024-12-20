@@ -107,13 +107,9 @@ class StreamAccountData(ModifyOrderDb):
         
         timestamp = get_timestamp()
         
-        payload = {
-            "apiKey": self.client_id,
-            "timestamp": timestamp
-        }
-        
         encoding_result = hashing(
-            urlencode(payload),
+            timestamp,
+            self.client_id,
             self.client_secret
             )
         
@@ -160,13 +156,12 @@ class StreamAccountData(ModifyOrderDb):
         
         await asyncio.sleep(sleep_time)
         
-        log.debug (method.replace(".", "-", 1))
-
         msg: dict = {
             "id": f"{method.replace(".", "-", 1)}-605a6d20-",
             "method": method}
         
         if is_authenticated:
+            
             msg_authenticated =    {
                 "apiKey": self.client_id,
                 "timestamp": timestamp,
