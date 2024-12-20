@@ -53,19 +53,6 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
-def hashing_(
-    query_string,
-    apiSecret
-    )-> str:
-    
-    
-    return hmac.new(
-        apiSecret.encode("utf-8"), 
-        query_string.encode("utf-8"), 
-        hashlib.sha256
-        ).hexdigest()
-
-
 def get_timestamp():
     return int(time.time() * 1000)
 
@@ -105,25 +92,21 @@ class StreamAccountData(ModifyOrderDb):
         
         url =  (connection_kind["url"])
         
-        timestamp = get_timestamp()
-        
-        payload = {
-            "apiKey": self.client_id,
-            "timestamp": timestamp
-        }
-        
-        encoding_result = hashing(
-            timestamp,
-            self.client_id,
-            self.client_secret
-            )
-        
         async with websockets.connect(
             url,
             ping_interval=None,
             compression=None,
             close_timeout=60,
             ) as self.websocket_client:
+
+            timestamp = get_timestamp()
+            
+            encoding_result = hashing(
+                timestamp,
+                self.client_id,
+                self.client_secret
+                )
+            
             while True:
                      
                 while self.websocket_client.open:
