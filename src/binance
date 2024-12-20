@@ -165,6 +165,8 @@ class StreamAccountData(ModifyOrderDb):
             "method": method}
         
         log.error (f"is_authenticated {is_authenticated}")
+        log.error (f"basic_msg {basic_msg}")
+        log.error (f"method {method}")
         
         if is_authenticated:
             msg_authenticated =    {
