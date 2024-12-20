@@ -20,8 +20,6 @@ account_status = "account.status"
 
 [ws-api-future]
 url = "wss://ws-fapi.binance.com/ws-fapi/v1"
-account_balance = "account.balance"
-account_balance_v2 = "v2/account.balance"
 ticker_price = "ticker.price"
 
 [papi]
