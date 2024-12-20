@@ -91,7 +91,7 @@ def cached_ohlc_data(
     from websocket_management.allocating_ohlc import (
         ohlc_end_point, )   
     
-    qty_candles = 5
+    qty_candles = 3
     
     now_utc = datetime.now()
     now_unix = convert_time_to_unix(now_utc)
