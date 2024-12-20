@@ -476,30 +476,32 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         orders_currency = await executing_query_with_return (query_orders)  
                                         
-                                        outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency])
-                                        
-                                        #len_outstanding_order_id = 0 if outstanding_order_id =[] \
-                                        #    else len (outstanding_order_id)
+                                        if orders_currency:
                                             
-                                        #log.critical (f"len_outstanding_order_id {len_outstanding_order_id}")    
-                                        
-                                        for label in outstanding_order_id:
+                                            outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency])
                                             
-                                            orders = ([o for o in orders_currency\
-                                                if label in o["label"]])
-                                            
-                                            len_label = len(orders)
-                                            
-                                            if len_label >1:
+                                            #len_outstanding_order_id = 0 if outstanding_order_id =[] \
+                                            #    else len (outstanding_order_id)
                                                 
-                                                for order in orders:
-                                                    log.critical (f"double ids {label}")
-                                                    log.critical ([o for o in orders_currency if label in o["label"]])
-                                                    await self. modify_order_and_db. cancel_by_order_id (
-                                                        order_db_table,
-                                                        order["order_id"]
-                                                        )
-                                                    break
+                                            #log.critical (f"len_outstanding_order_id {len_outstanding_order_id}")    
+                                            
+                                            for label in outstanding_order_id:
+                                                
+                                                orders = ([o for o in orders_currency\
+                                                    if label in o["label"]])
+                                                
+                                                len_label = len(orders)
+                                                
+                                                if len_label >1:
+                                                    
+                                                    for order in orders:
+                                                        log.critical (f"double ids {label}")
+                                                        log.critical ([o for o in orders_currency if label in o["label"]])
+                                                        await self. modify_order_and_db. cancel_by_order_id (
+                                                            order_db_table,
+                                                            order["order_id"]
+                                                            )
+                                                        break
                                         
                                         position = [o for o in sub_account["positions"]]
                                         #log.debug (f"position {position}")
