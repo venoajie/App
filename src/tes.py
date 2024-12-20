@@ -2,7 +2,7 @@ import numpy as np
 from datetime import datetime, timedelta, timezone
 from loguru import logger as log
 import pandas as pd
-
+from market_understanding.price_action import get_candles_size
 from utilities.string_modification import (transform_nested_dict_to_list_ohlc)
 
 nump= [
@@ -122,71 +122,11 @@ def cached_ohlc_data(
     return result
 
 
-def my_generator(data,lookback):
-    final_output = []
-    counter = 0
-    first_row = 0
-    arr = np.empty((1,lookback,4), int)
-    for a in range(len(data)-lookback):
-        temp_list = []
-        for candle in data[first_row:first_row+lookback]:
-            temp_list.append(candle)
-        temp_list2 = np.asarray(temp_list)
-        templist3 = [temp_list2]
-        templist4 = np.asarray(templist3)
-        arr = np.append(arr, templist4, axis=0)
-        first_row=first_row+1
-    return arr
-
-def ohlc_to_candlestick(conversion_array):
-    candlestick_data = [0,0,0,0]
-
-    if conversion_array[3]>conversion_array[0]:
-        candle_type=1
-        wicks_up=conversion_array[1]-conversion_array[3]
-        wicks_down=conversion_array[2]-conversion_array[0]
-        body_size=conversion_array[3]-conversion_array[0]
-
-    else:
-        candle_type=0
-        wicks_up=conversion_array[1]-conversion_array[0]
-        wicks_down=conversion_array[2]-conversion_array[3]
-        body_size=conversion_array[1]-conversion_array[3]
-
-
-    if wicks_up < 0:wicks_up=wicks_up*(-1)
-    if wicks_down < 0:wicks_down=wicks_down*(-1)
-    if body_size < 0:body_size=body_size*(-1)
-    candlestick_data[0]=candle_type
-    candlestick_data[1]=round(round(wicks_up,5),2)
-    candlestick_data[2]=round(round(wicks_down,5),2)
-    candlestick_data[3]=round(round(body_size,5),2)
-
-    return candlestick_data
-
-def my_generator_candle(data,lookback):
-    first_row = 0
-    arr = np.empty((1,lookback,4), int)
-    for a in range(len(data)-lookback):
-        temp_list = []
-        for candle in data[first_row:first_row+lookback]:
-            log.debug (f"candle {candle}")
-
-            converted_data = ohlc_to_candlestick(candle)
-            log.debug (f"converted_data {converted_data}")
-            temp_list.append(converted_data)
-        temp_list2 = np.asarray(temp_list)
-        templist3 = [temp_list2]
-        templist4 = np.asarray(templist3)
-        arr = np.append(arr, templist4, axis=0)
-        first_row=first_row+1
-    return arr
-
 my_dataset = pd.read_csv('dataset.csv')
 del my_dataset['Local time']
 del my_dataset['Volume']
 
-three_dim_sequence = np.asarray(my_generator_candle(my_dataset.values[1:],3))
+three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,my_dataset.values[1:],3))
 log.warning (f"three_dim_sequence        {three_dim_sequence}")
 
 currencies = ["BTC", "ETH"]
@@ -219,5 +159,5 @@ for data in my_data:
 
     df = pd.DataFrame((np_data))
 
-    three_dim_sequence = np.asarray(my_generator_candle(df.values[1:],3))
+    three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(df.values[1:],3))
     log.error (f"three_dim_sequence {three_dim_sequence}")
