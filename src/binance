@@ -161,7 +161,7 @@ class StreamAccountData(ModifyOrderDb):
         await asyncio.sleep(sleep_time)
 
         msg: dict = {
-            "id": f"{method}-605a6d20-",
+            "id": f"{method.replace("..", "-", 1)}-605a6d20-",
             "method": method}
         
         if is_authenticated:
