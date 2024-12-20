@@ -147,7 +147,7 @@ def my_generator(data,lookback):
         first_row=first_row+1
     return arr
 
-my_dataset = pd.read_csv('src/dataset.csv')
+my_dataset = pd.read_csv('dataset.csv')
 del my_dataset['Local time']
 del my_dataset['Volume']
 
