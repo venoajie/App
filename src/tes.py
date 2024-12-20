@@ -116,10 +116,10 @@ def cached_ohlc_data(
                     ).json()["result"]
 
                 log.warning (f"ohlc_request {ohlc_request}")
-                result = transform_nested_dict_to_list_ohlc(ohlc_request)
-                log.warning (f"result {result}")
+                ohlc = transform_nested_dict_to_list_ohlc(ohlc_request)
+                log.warning (f"result {ohlc}")
 
-            result.append (result)
+            result.append (ohlc)
     
     log.warning (f"result {result}")
     return result
