@@ -609,6 +609,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 if    "futureSpread" in strategy :
                                                                         
                                                     log.warning (f"strategy {strategy}-START")    
+                                                    log.warning (f"strategy {strategy_params}-START")    
                                                                                  
                                                     BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = strategy_params["waiting_minute_before_relabelling"]
                                                                        
