@@ -2,6 +2,9 @@ import numpy as np
 from datetime import datetime, timedelta, timezone
 from loguru import logger as log
 import pandas as pd
+
+from utilities.string_modification import (transform_nested_dict_to_list)
+
 nump= [
     {"liquidity": "M", "risk_reducing": False, "order_type": "limit", "trade_id": "329163428", "fee_currency": "BTC", "contracts": 1.0, "self_trade": False, "reduce_only": False, "post_only": True, "mmp": False, "fee": 0.0, "tick_direction": 1, "matching_id": None, "mark_price": 98292.08, "api": True, "trade_seq": 224809036, "instrument_name": "BTC-PERPETUAL", "profit_loss": -4.1e-07, "index_price": 98229.85, "direction": "sell", "amount": 10.0, "order_id": "81484353138", "price": 98277.0, "state": "filled", "timestamp": 1732429227364, "label": "futureSpread-closed-1732285058841"},
     {"liquidity": "M", "risk_reducing": False, "order_type": "limit", "trade_id": "329163380", "fee_currency": "BTC", "contracts": 1.0, "self_trade": False, "reduce_only": False, "post_only": True, "mmp": False, "fee": 0.0, "tick_direction": 1, "matching_id": None, "mark_price": 98240.81, "api": True, "trade_seq": 224809002, "instrument_name": "BTC-PERPETUAL", "profit_loss": -4.5e-07, "index_price": 98181.77, "direction": "sell", "amount": 10.0, "order_id": "81484332065", "price": 98238.0, "state": "filled", "timestamp": 1732429113025, "label": "futureSpread-closed-1732285058841"},
@@ -88,7 +91,7 @@ def cached_ohlc_data(
     from websocket_management.allocating_ohlc import (
         ohlc_end_point, )   
     
-    qty_candles = 50
+    qty_candles = 5
     
     now_utc = datetime.now()
     now_unix = convert_time_to_unix(now_utc)
@@ -111,6 +114,9 @@ def cached_ohlc_data(
                     end_point, 
                     follow_redirects=True
                     ).json()["result"]
+                log.info (f"initial {ohlc_request}")
+                result = transform_nested_dict_to_list(ohlc_request)
+                log.warning (f"list {result}")
 
             items_to_be_removed = ["status", "cost"]
             
