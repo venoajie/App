@@ -126,6 +126,7 @@ def my_generator_candle(
         templist4 = np.asarray(templist3)
         log.info (f"templist4  {templist4}")
         arr = np.append(arr, templist4, axis=0)
+        log.warning (f"arr  {arr}")
         first_row=first_row+1
     
     return arr
