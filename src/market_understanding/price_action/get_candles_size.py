@@ -109,7 +109,7 @@ def my_generator_candle(
          4
          ), int
         )
-    log.critical (f"arr  0 {arr}")
+    log.critical (f"arr  0 {arr} lookback {lookback}")
     
     for a in range(len(data)-lookback):
         
