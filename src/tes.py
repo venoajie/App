@@ -171,7 +171,9 @@ def my_generator_candle(data,lookback):
         temp_list = []
         for candle in data[first_row:first_row+lookback]:
             log.debug (f"candle {candle}")
+
             converted_data = ohlc_to_candlestick(candle)
+            log.debug (f"converted_data {converted_data}")
             temp_list.append(converted_data)
         temp_list2 = np.asarray(temp_list)
         templist3 = [temp_list2]
@@ -184,7 +186,6 @@ my_dataset = pd.read_csv('dataset.csv')
 del my_dataset['Local time']
 del my_dataset['Volume']
 
-log.error (f"my_dataset {my_dataset}")
 three_dim_sequence = np.asarray(my_generator_candle(my_dataset.values[1:],3))
 log.warning (f"three_dim_sequence        {three_dim_sequence}")
 
@@ -213,11 +214,10 @@ dtype = [
 for data in my_data:
     log.warning (data)
     np_users_data = np.array(data)
-    log.warning (np_users_data)
+
     np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
-    log.warning (np_data)
+
     df = pd.DataFrame((np_data))
-    log.warning (df)
 
     three_dim_sequence = np.asarray(my_generator_candle(df.values[1:],3))
     log.error (f"three_dim_sequence {three_dim_sequence}")
