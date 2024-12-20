@@ -158,9 +158,9 @@ def ohlc_to_candlestick(conversion_array):
     if wicks_down < 0:wicks_down=wicks_down*(-1)
     if body_size < 0:body_size=body_size*(-1)
     candlestick_data[0]=candle_type
-    candlestick_data[1]=round(round(wicks_up,5)*10000,2)
-    candlestick_data[2]=round(round(wicks_down,5)*10000,2)
-    candlestick_data[3]=round(round(body_size,5)*10000,2)
+    candlestick_data[1]=round(round(wicks_up,5),2)
+    candlestick_data[2]=round(round(wicks_down,5),2)
+    candlestick_data[3]=round(round(body_size,5),2)
 
     return candlestick_data
 
