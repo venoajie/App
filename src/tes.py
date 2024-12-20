@@ -214,6 +214,9 @@ for data in my_data:
     log.warning (data)
     np_users_data = np.array(data)
     log.warning (np_users_data)
+
+    three_dim_sequence = np.asarray(my_generator_candle(np_users_data.values[1:],3))
+    log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
     np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
     log.debug (np_data)
     three_dim_sequence = np.asarray(my_generator_candle(np_data.values[1:],3))
