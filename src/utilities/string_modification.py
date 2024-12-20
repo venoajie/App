@@ -577,6 +577,9 @@ def hashing(
     import hashlib
     import hmac
     
+    from urllib.parse import urlencode
+
+    
     payload = {
             "apiKey": client_id,
             "timestamp": timestamp
@@ -584,6 +587,6 @@ def hashing(
     
     return hmac.new(
         apiSecret.encode("utf-8"), 
-        payload.encode("utf-8"), 
+        urlencode(payload).encode("utf-8"), 
         hashlib.sha256
         ).hexdigest()
