@@ -116,6 +116,10 @@ def cached_ohlc_data(
                     ).json()["result"]
                 log.info (f"initial {ohlc_request}")
                 result = transform_nested_dict_to_list(ohlc_request)
+                                
+                del result["cost"]
+                del result["tick"]
+                del result['volume']
                 log.warning (f"list {result}")
 
             items_to_be_removed = ["status", "cost"]
