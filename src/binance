@@ -164,6 +164,8 @@ class StreamAccountData(ModifyOrderDb):
             "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
             "method": method}
         
+        log.error (f"is_authenticated {is_authenticated}")
+        
         if is_authenticated:
             msg_authenticated =    {
                 "apiKey": self.client_id,
@@ -179,6 +181,8 @@ class StreamAccountData(ModifyOrderDb):
             
             else:
                 msg.update({"params": params})
+        log.error (f"params {params}")
+        log.error (f"params {msg_authenticated}")
             
         try:
             log.error (f"msg {msg}")
