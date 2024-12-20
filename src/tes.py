@@ -111,7 +111,7 @@ def cached_ohlc_data(
                     follow_redirects=True
                     ).json()["result"]
 
-            items_to_be_removed = ["volume", "open", "high", "low", "ticks", "status", "cost"]
+            items_to_be_removed = ["status", "cost"]
             
             tick_max = max([o for o in ohlc_request["ticks"]])
 
