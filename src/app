@@ -599,7 +599,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 my_trades_currency_strategy = [o for o in my_trades_currency \
                                                     if strategy in (o["label"]) ]
                                                 
-                                                orders_currency_strategy = ([] if orders_currency == [] 
+                                                orders_currency_strategy = ([] if not orders_currency  
                                                                             else [o for o in orders_currency 
                                                                                   if strategy in (o["label"]) ])
                                                                             
