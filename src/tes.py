@@ -115,13 +115,10 @@ def cached_ohlc_data(
                     follow_redirects=True
                     ).json()["result"]
 
-                log.warning (f"ohlc_request {ohlc_request}")
                 ohlc = transform_nested_dict_to_list_ohlc(ohlc_request)
-                log.warning (f"result {ohlc}")
 
             result.append (ohlc)
     
-    log.warning (f"result {result}")
     return result
 
 
@@ -197,7 +194,7 @@ resolutions = [60, 15]
 my_data = (cached_ohlc_data(
     currencies,
     resolutions))
-log.warning (my_data)
+log.warning (f"my_data {my_data}")
 
 
 dtype = [
