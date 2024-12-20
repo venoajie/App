@@ -196,7 +196,20 @@ my_data = cached_ohlc_data(
     resolutions)
 log.warning (my_data)
 
+
+dtype = [
+    ("open", "f4"),
+    ("high", "f4"),
+    ("low", "f4"),
+    ("close", "f4"),
+    
+    ]
+
+# Converting list of dictionaries to a structured NumPy array
+np_users_data = np.array([tuple(user.values()) for user in data], dtype=dtype)
+log.warning (np_users_data)
+
 for data in my_data:
 
-    three_dim_sequence = np.asarray(my_generator_candle(data.values[1:],3))
+    three_dim_sequence = np.asarray(my_generator_candle(np_users_data.values[1:],3))
     log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
