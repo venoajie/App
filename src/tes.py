@@ -159,5 +159,5 @@ for data in my_data:
 
     df = pd.DataFrame((np_data))
 
-    three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(df.values[1:],3))
+    three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,df.values[1:],3))
     log.error (f"three_dim_sequence {three_dim_sequence}")
