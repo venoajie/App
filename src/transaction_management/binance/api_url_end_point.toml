@@ -26,9 +26,6 @@ ticker_price = "ticker.price"
 [papi]
 url = "wss://fstream.binance.com/pm/ws"
 
-[method]
-account_status = "account.status"
-ticker_price = "ticker.price"
 
 
 
