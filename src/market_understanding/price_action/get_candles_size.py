@@ -109,6 +109,7 @@ def my_generator_candle(
          4
          ), int
         )
+    log.critical (f"arr  0 {arr}")
     
     for a in range(len(data)-lookback):
         
@@ -125,8 +126,9 @@ def my_generator_candle(
         templist3 = [temp_list2]
         templist4 = np.asarray(templist3)
         log.info (f"templist4  {templist4}")
+        log.warning (f"arr  1 {arr}")
         arr = np.append(arr, templist4, axis=0)
-        log.warning (f"arr  {arr}")
+        log.warning (f"arr  2 {arr}")
         first_row=first_row+1
     
     return arr
