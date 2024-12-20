@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from loguru import logger as log
 import pandas as pd
 
-from utilities.string_modification import (transform_nested_dict_to_list)
+from utilities.string_modification import (transform_nested_dict_to_list_ohlc)
 
 nump= [
     {"liquidity": "M", "risk_reducing": False, "order_type": "limit", "trade_id": "329163428", "fee_currency": "BTC", "contracts": 1.0, "self_trade": False, "reduce_only": False, "post_only": True, "mmp": False, "fee": 0.0, "tick_direction": 1, "matching_id": None, "mark_price": 98292.08, "api": True, "trade_seq": 224809036, "instrument_name": "BTC-PERPETUAL", "profit_loss": -4.1e-07, "index_price": 98229.85, "direction": "sell", "amount": 10.0, "order_id": "81484353138", "price": 98277.0, "state": "filled", "timestamp": 1732429227364, "label": "futureSpread-closed-1732285058841"},
@@ -115,7 +115,7 @@ def cached_ohlc_data(
                     follow_redirects=True
                     ).json()["result"]
                 log.info (f"initial {ohlc_request}")
-                result = transform_nested_dict_to_list(ohlc_request)
+                result = transform_nested_dict_to_list_ohlc(ohlc_request)
                                 
                 del result["cost"]
                 del result["tick"]
