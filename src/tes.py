@@ -1,6 +1,7 @@
 import numpy as np
 from datetime import datetime, timedelta, timezone
 from loguru import logger as log
+import pandas as pd
 nump= [
     {"liquidity": "M", "risk_reducing": False, "order_type": "limit", "trade_id": "329163428", "fee_currency": "BTC", "contracts": 1.0, "self_trade": False, "reduce_only": False, "post_only": True, "mmp": False, "fee": 0.0, "tick_direction": 1, "matching_id": None, "mark_price": 98292.08, "api": True, "trade_seq": 224809036, "instrument_name": "BTC-PERPETUAL", "profit_loss": -4.1e-07, "index_price": 98229.85, "direction": "sell", "amount": 10.0, "order_id": "81484353138", "price": 98277.0, "state": "filled", "timestamp": 1732429227364, "label": "futureSpread-closed-1732285058841"},
     {"liquidity": "M", "risk_reducing": False, "order_type": "limit", "trade_id": "329163380", "fee_currency": "BTC", "contracts": 1.0, "self_trade": False, "reduce_only": False, "post_only": True, "mmp": False, "fee": 0.0, "tick_direction": 1, "matching_id": None, "mark_price": 98240.81, "api": True, "trade_seq": 224809002, "instrument_name": "BTC-PERPETUAL", "profit_loss": -4.5e-07, "index_price": 98181.77, "direction": "sell", "amount": 10.0, "order_id": "81484332065", "price": 98238.0, "state": "filled", "timestamp": 1732429113025, "label": "futureSpread-closed-1732285058841"},
@@ -146,12 +147,23 @@ def my_generator(data,lookback):
         first_row=first_row+1
     return arr
 
+my_dataset = pd.read_csv('src/dataset.csv')
+del my_dataset['Local time']
+del my_dataset['Volume']
+
+log.error (f"my_dataset {my_dataset}")
+three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3))
+log.warning (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
+
 currencies = ["BTC", "ETH"]
 resolutions = [60, 15]
 
-my_dataset = cached_ohlc_data(
+my_data = cached_ohlc_data(
     currencies,
     resolutions)
-log.warning (my_dataset)
-three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3))
-log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
+log.warning (my_data)
+
+for data in my_data:
+    ohlc = data[""]
+    three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3))
+    log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
