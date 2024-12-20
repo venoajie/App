@@ -91,7 +91,7 @@ def cached_ohlc_data(
     from websocket_management.allocating_ohlc import (
         ohlc_end_point, )   
     
-    qty_candles = 3
+    qty_candles = 10
     
     now_utc = datetime.now()
     now_unix = convert_time_to_unix(now_utc)
@@ -217,8 +217,4 @@ for data in my_data:
     df = pd.DataFrame((np_users_data))
 
     three_dim_sequence = np.asarray(my_generator_candle(df.values[1:],3))
-    log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
-    np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
-    log.debug (np_data)
-    three_dim_sequence = np.asarray(my_generator_candle(np_data.values[1:],3))
-    log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
+    log.error (f"three_dim_sequence {three_dim_sequence}")
