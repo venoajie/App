@@ -191,9 +191,9 @@ log.warning (f"three_dim_sequence        {three_dim_sequence}")
 currencies = ["BTC", "ETH"]
 resolutions = [60, 15]
 
-my_data = cached_ohlc_data(
+my_data = np.array(cached_ohlc_data(
     currencies,
-    resolutions)
+    resolutions))
 log.warning (my_data)
 
 
