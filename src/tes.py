@@ -1,5 +1,6 @@
 import numpy as np
-
+from datetime import datetime, timedelta, timezone
+from loguru import logger as log
 nump= [
     {"liquidity": "M", "risk_reducing": False, "order_type": "limit", "trade_id": "329163428", "fee_currency": "BTC", "contracts": 1.0, "self_trade": False, "reduce_only": False, "post_only": True, "mmp": False, "fee": 0.0, "tick_direction": 1, "matching_id": None, "mark_price": 98292.08, "api": True, "trade_seq": 224809036, "instrument_name": "BTC-PERPETUAL", "profit_loss": -4.1e-07, "index_price": 98229.85, "direction": "sell", "amount": 10.0, "order_id": "81484353138", "price": 98277.0, "state": "filled", "timestamp": 1732429227364, "label": "futureSpread-closed-1732285058841"},
     {"liquidity": "M", "risk_reducing": False, "order_type": "limit", "trade_id": "329163380", "fee_currency": "BTC", "contracts": 1.0, "self_trade": False, "reduce_only": False, "post_only": True, "mmp": False, "fee": 0.0, "tick_direction": 1, "matching_id": None, "mark_price": 98240.81, "api": True, "trade_seq": 224809002, "instrument_name": "BTC-PERPETUAL", "profit_loss": -4.5e-07, "index_price": 98181.77, "direction": "sell", "amount": 10.0, "order_id": "81484332065", "price": 98238.0, "state": "filled", "timestamp": 1732429113025, "label": "futureSpread-closed-1732285058841"},
@@ -61,3 +62,96 @@ data = [1, 2, 3, 4, 5]
 product = reduce(lambda x, y: x * y, data)  # Calculates
 
 print (product)
+
+
+
+
+def cached_ohlc_data(
+    currencies: list,
+    resolutions: list):
+    """_summary_
+    https://blog.apify.com/python-cache-complete-guide/]
+    data caching
+    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
+
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    import httpx
+    from utilities.time_modification import convert_time_to_unix
+    
+    from websocket_management.allocating_ohlc import (
+        ohlc_end_point, )   
+    
+    qty_candles = 50
+    
+    now_utc = datetime.now()
+    now_unix = convert_time_to_unix(now_utc)
+
+    result=[]
+    for currency in currencies:
+        instrument_name = f"{currency}-PERPETUAL"
+        for resolution in resolutions:
+            
+            start_timestamp = now_unix - (60000 * resolution) * qty_candles
+                
+            end_point = ohlc_end_point(instrument_name,
+                            resolution,
+                            start_timestamp,
+                            now_unix,
+                            )
+            
+            with httpx.Client() as client:
+                ohlc_request = client.get(
+                    end_point, 
+                    follow_redirects=True
+                    ).json()["result"]
+
+            items_to_be_removed = ["volume", "open", "high", "low", "ticks", "status", "cost"]
+            
+            tick_max = max([o for o in ohlc_request["ticks"]])
+
+            ohlc_request_cleaned= {i:ohlc_request [i] for i in ohlc_request if i not in items_to_be_removed}
+            
+            ohlc_request_cleaned.update({"resolution": resolution})
+
+            ohlc_request_cleaned.update({"instrument_name": instrument_name})
+
+            # remove_dict_elements
+            
+            ohlc_request_cleaned.update({"tick": tick_max})
+
+            result.append (ohlc_request_cleaned)
+    
+    return result
+
+
+def my_generator(data,lookback):
+    final_output = []
+    counter = 0
+    first_row = 0
+    arr = np.empty((1,lookback,4), int)
+    for a in range(len(data)-lookback):
+        temp_list = []
+        for candle in data[first_row:first_row+lookback]:
+            temp_list.append(candle)
+        temp_list2 = np.asarray(temp_list)
+        templist3 = [temp_list2]
+        templist4 = np.asarray(templist3)
+        arr = np.append(arr, templist4, axis=0)
+        first_row=first_row+1
+    return arr
+
+currencies = ["BTC", "ETH"]
+resolutions = [60, 15]
+
+my_dataset = cached_ohlc_data(
+    currencies,
+    resolutions)
+log.warning (my_dataset)
+three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3))
+log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
