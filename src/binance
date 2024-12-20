@@ -161,12 +161,8 @@ class StreamAccountData(ModifyOrderDb):
         await asyncio.sleep(sleep_time)
 
         msg: dict = {
-            "id": "605a6d20-6588-4cb9-afa0-b0ab7507ba",
+            "id": "605a6d20-",
             "method": method}
-        
-        log.error (f"is_authenticated {is_authenticated}")
-        log.error (f"basic_msg {msg}")
-        log.error (f"method {method}")
         
         if is_authenticated:
             msg_authenticated =    {
@@ -180,12 +176,8 @@ class StreamAccountData(ModifyOrderDb):
         else:
             if  params:
                 msg.update({"params": params})
-        
-        log.error (f"params {params}")
-        log.error (f"params {msg_authenticated}")
             
         try:
-            log.error (f"msg {msg}")
             await self.websocket_client.send(json.dumps(msg))
 
         except Exception as error:
