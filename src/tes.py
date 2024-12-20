@@ -214,7 +214,7 @@ for data in my_data:
     log.warning (data)
     np_users_data = np.array(data)
     log.warning (np_users_data)
-    df = pd.DataFrame(df = pd.DataFrame(ohlc))
+    df = pd.DataFrame(df = pd.DataFrame(np_users_data))
 
     three_dim_sequence = np.asarray(my_generator_candle(df.values[1:],3))
     log.error (f"three_dim_sequence = np.asarray(my_generator(my_dataset.values[1:],3)) {three_dim_sequence}")
