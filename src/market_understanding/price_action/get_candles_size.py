@@ -32,7 +32,7 @@ async def get_dataframe_from_ohlc_tables(tables: str = "ohlc60_eth_perp_json"):
 
 def ohlc_to_candlestick(conversion_array):
     
-    candlestick_data = [0,0,0,0]
+    candlestick_data = [0,0,0,0,0]
     
     log.warning (f"open  {conversion_array[0]} high  {conversion_array[1]} low  {conversion_array[2]} close  {conversion_array[3]}")
     
@@ -42,6 +42,7 @@ def ohlc_to_candlestick(conversion_array):
     close = conversion_array[3]
     
     body_size=abs(close-open)
+    height=abs(high-low)
 
     if close>open:
         candle_type=1
@@ -60,6 +61,8 @@ def ohlc_to_candlestick(conversion_array):
     candlestick_data[2]=round(round(wicks_down,5),2)
     
     candlestick_data[3]=round(round(body_size,5),2)
+
+    candlestick_data[4]=round(round(height,5),2)
     
     log.warning (f" candlestick_data {candlestick_data} open  {conversion_array[0]} high  {conversion_array[1]} low  {conversion_array[2]} close  {conversion_array[3]}")
 
@@ -83,12 +86,12 @@ def my_generator_candle(
         _type_: _description_
     """
     first_row = 0
-    arr = np.empty(
-        (1,
-         lookback,
-         4
-         ), int
-        )
+    
+    parameters = len(["candle_type", "wicks_up", "wicks_down", "body_size", "height"])
+
+    
+    arr = np.empty((1,lookback,parameters),
+                   int)
     
     for a in range(len(data)-lookback):
         
@@ -101,12 +104,19 @@ def my_generator_candle(
             log.info (f"converted_data  {converted_data} candle {candle}")
             temp_list.append(converted_data)
         
-        temp_list2 = np.asarray(temp_list,dtype = "f4")
+        temp_list2 = np.asarray(temp_list)
         templist3 = [temp_list2]
-        templist4 = np.asarray(templist3)
+        templist4 = np.asarray(
+            templist3,
+            dtype = "f4"
+            )
 #        log.info (f"templist4  {templist4}")
 #        log.warning (f"arr  1 {arr}")
-        arr = np.append(arr, templist4, axis=0)
+        arr = np.append(
+            arr, 
+            templist4, 
+            axis=0
+            )
 #        log.warning (f"arr  2 {arr}")
         first_row=first_row+1
     
