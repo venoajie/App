@@ -492,7 +492,7 @@ class RunningStrategy(ModifyOrderDb):
                                         tick= data_orders["tick"]
                                         #log.warning (candles_data)
                                         log.warning (tick)
-                                        tick_from_cache = [o['tick']  for o in candles_data if currency_upper in o["instrument_name"] ]
+                                        tick_from_cache = [o['ohlc']  for o in candles_data if currency_upper in o["instrument_name"] ]
                                         log.warning (tick_from_cache)
                                     
                                     else:
