@@ -117,8 +117,6 @@ def cached_candles_data(
         result_resolution ={}
         for resolution in resolutions:
 
-            #result_resolution.append (resolution)
-            
             ohlc = get_ohlc_data (
                 instrument_name, 
                 qty_candles, 
@@ -133,18 +131,15 @@ def cached_candles_data(
                 np,
                 np_data[1:],
                 3)
-                                            )
+                                  )
             
             result_resolution.update (({"instrument_name": instrument_name}))
             result_resolution.update (({"resolution": resolution}))
             result_resolution.update (({"ohlc": ohlc}))
-            result_resolution.update (({"three_dim_sequence": three_dim_sequence}))
-            #result_resolution.append (three_dim_sequence)
+            result_resolution.update (({"candles_summary": three_dim_sequence}))
             
         result_instrument.append (result_resolution)
 
-
-    log.error (result_instrument)
     return result_instrument
 
 def update_cached_ticker_data(
