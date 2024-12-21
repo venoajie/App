@@ -35,19 +35,24 @@ def ohlc_to_candlestick(conversion_array):
     candlestick_data = [0,0,0,0]
     
     log.warning (f"open  {conversion_array[0]} high  {conversion_array[1]} low  {conversion_array[2]} close  {conversion_array[3]}")
+    
+    open = conversion_array[0]
+    high = conversion_array[1]
+    low = conversion_array[2]
+    close = conversion_array[3]
 
 
-    if conversion_array[3]>conversion_array[0]:
+    if close>open:
         candle_type=1
-        wicks_up=conversion_array[1]-conversion_array[3]
-        wicks_down=conversion_array[2]-conversion_array[0]
-        body_size=conversion_array[3]-conversion_array[0]
+        wicks_up=high-close
+        wicks_down=low-open
+        body_size=close-open
 
     else:
         candle_type=0
-        wicks_up=conversion_array[1]-conversion_array[0]
-        wicks_down=conversion_array[2]-conversion_array[3]
-        body_size=conversion_array[1]-conversion_array[3]
+        wicks_up=high-open
+        wicks_down=low-close
+        body_size=high-close
 
 
     if wicks_up < 0: wicks_up=wicks_up*(-1)
@@ -61,6 +66,8 @@ def ohlc_to_candlestick(conversion_array):
     candlestick_data[2]=round(round(wicks_down,5),2)
     
     candlestick_data[3]=round(round(body_size,5),2)
+    
+    log.warning (f" candlestick_data {candlestick_data} open  {conversion_array[0]} high  {conversion_array[1]} low  {conversion_array[2]} close  {conversion_array[3]}")
 
     return candlestick_data
 
