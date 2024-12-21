@@ -117,8 +117,6 @@ def cached_candles_data(
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
         
-        result.append (instrument_name)
-        
         for resolution in resolutions:
 
             ohlc = get_ohlc_data (
@@ -145,6 +143,8 @@ def cached_candles_data(
             
             result.append (result_resolution)
             #log.debug (result)
+        
+        #result.append (instrument_name)
         
         
         #log.debug (result)
