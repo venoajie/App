@@ -144,7 +144,8 @@ def cached_candles_data(
             result.append (resolution)
             #log.debug (result)
         
-        result.append (instrument_name)
+        result_resolution.update (({"instrument_name": instrument_name}))
+        result.append (result_resolution)
         
         
         #log.debug (result)
