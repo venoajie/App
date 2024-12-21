@@ -174,10 +174,8 @@ def get_ohlc_data(
             end_point, 
             follow_redirects=True
             ).json()["result"]
-        
-        ohlc_request.update({"instrument_name": instrument_name})
     
-    return ohlc_request# transform_nested_dict_to_list_ohlc(ohlc_request)
+    return  transform_nested_dict_to_list_ohlc(ohlc_request)
 
 
 @dataclass(unsafe_hash=True, slots=True)
