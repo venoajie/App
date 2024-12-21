@@ -30,34 +30,11 @@ async def get_dataframe_from_ohlc_tables(tables: str = "ohlc60_eth_perp_json"):
     return df
 
 
-
-def my_generator(
-    np,
-    data,
-    lookback
-    ):
-    
-    final_output = []
-    counter = 0
-    first_row = 0
-    arr = np.empty((1,lookback,4), int)
-    
-    for a in range(len(data)-lookback):
-        temp_list = []
-        for candle in data[first_row:first_row+lookback]:
-            temp_list.append(candle)
-        temp_list2 = np.asarray(temp_list)
-        templist3 = [temp_list2]
-        templist4 = np.asarray(templist3)
-        arr = np.append(arr, templist4, axis=0)
-        first_row=first_row+1
-    return arr
-
 def ohlc_to_candlestick(conversion_array):
     
     candlestick_data = [0,0,0,0]
     
-    log.warning (f"conversion_array {conversion_array}")
+#    log.warning (f"conversion_array {conversion_array}")
 
     if conversion_array[3]>conversion_array[0]:
         candle_type=1
@@ -109,26 +86,25 @@ def my_generator_candle(
          4
          ), int
         )
-    log.critical (f"arr  0 {arr} lookback {lookback}")
     
     for a in range(len(data)-lookback):
         
-        log.debug (f"data my_generator_candle {data} lookback {lookback}")
+#        log.debug (f"data my_generator_candle {data} lookback {lookback}")
         
         temp_list = []
         for candle in data[first_row:first_row+lookback]:
 
             converted_data = ohlc_to_candlestick(candle)
-            log.info (f"converted_data  {converted_data} candle {candle}")
+#            log.info (f"converted_data  {converted_data} candle {candle}")
             temp_list.append(converted_data)
         
         temp_list2 = np.asarray(temp_list)
         templist3 = [temp_list2]
         templist4 = np.asarray(templist3)
-        log.info (f"templist4  {templist4}")
-        log.warning (f"arr  1 {arr}")
+#        log.info (f"templist4  {templist4}")
+#        log.warning (f"arr  1 {arr}")
         arr = np.append(arr, templist4, axis=0)
-        log.warning (f"arr  2 {arr}")
+#        log.warning (f"arr  2 {arr}")
         first_row=first_row+1
     
     return arr
