@@ -34,8 +34,6 @@ def ohlc_to_candlestick(conversion_array):
     
     candlestick_data = [0,0,0,0,0]
     
-    log.warning (f"open  {conversion_array[0]} high  {conversion_array[1]} low  {conversion_array[2]} close  {conversion_array[3]}")
-    
     open = conversion_array[0]
     high = conversion_array[1]
     low = conversion_array[2]
@@ -64,8 +62,6 @@ def ohlc_to_candlestick(conversion_array):
 
     candlestick_data[4]=round(round(height,5),2)
     
-    log.warning (f" candlestick_data {candlestick_data} open  {conversion_array[0]} high  {conversion_array[1]} low  {conversion_array[2]} close  {conversion_array[3]}")
-
     return candlestick_data
 
 def my_generator_candle(

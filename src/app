@@ -13,6 +13,8 @@ import json, orjson
 from loguru import logger as log
 import tomli
 import websockets
+import numpy as np
+import pandas as pd
 
 from configuration import id_numbering, config, config_oci
 from configuration.label_numbering import get_now_unix_time
@@ -23,6 +25,7 @@ from db_management.sqlite_management import (
     executing_query_with_return,
     querying_table,
     update_status_data)
+from market_understanding.price_action import get_candles_size
 from strategies.basic_strategy import (
     get_label_integer,)
 from strategies.hedging_spot import (
@@ -31,7 +34,7 @@ from strategies.hedging_spot import (
 from strategies.cash_carry.combo_auto import(
     ComboAuto,
     check_if_minimum_waiting_time_has_passed)
-from transaction_management.deribit.api_requests import get_tickers
+from transaction_management.deribit.api_requests import get_tickers,get_ohlc_data
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -89,6 +92,45 @@ def cached_ticker_data(currencies):
 
     return result
 
+
+def cached_candles_data(
+    currencies,
+    qty_candles,
+    resolutions):
+    """_summary_
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    
+    result=[]
+    for currency in currencies:
+        instrument_name = f"{currency}-PERPETUAL"
+        
+        for resolution in resolutions:
+            
+            ohlc = get_ohlc_data (
+                instrument_name, 
+                qty_candles, 
+                resolution
+                )
+        
+            
+            log.warning (ohlc)
+            np_users_data = np.array(ohlc)
+
+            np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
+
+            df = pd.DataFrame((np_data))
+
+            three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,df.values[1:],3))
+            log.error (f"three_dim_sequence {three_dim_sequence}")
+            result.append (ohlc)
+
+
+    return result
 
 def update_cached_ticker_data(
     instrument_name,

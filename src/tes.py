@@ -128,9 +128,8 @@ dtype = [
     ("open", "f4"),
     ("high", "f4"),
     ("low", "f4"),
-    ("close", "f4"),
-    
-    ]
+    ("close", "f4"),]
+
 qty_candles = 10
 for currency in currencies:
     instrument_name = f"{currency.upper()}-PERPETUAL"
@@ -142,6 +141,8 @@ for currency in currencies:
 
         np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
 
+        three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,np_data.values[1:],3))
+        log.error (f"three_dim_sequence {three_dim_sequence}")
         df = pd.DataFrame((np_data))
 
         three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,df.values[1:],3))
