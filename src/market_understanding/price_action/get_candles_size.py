@@ -103,7 +103,7 @@ def my_generator_candle(
         for candle in data[first_row:first_row+lookback]:
 
             converted_data = ohlc_to_candlestick(candle)
-#            log.info (f"converted_data  {converted_data} candle {candle}")
+            log.info (f"converted_data  {converted_data} candle {candle}")
             temp_list.append(converted_data)
         
         temp_list2 = np.asarray(temp_list)
