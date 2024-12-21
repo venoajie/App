@@ -22,7 +22,7 @@ def analysis_based_on_length(
         candles_summary = [o["candles_summary"] for o in data_per_resolution][0]
         log.error (candles_summary)
         
-        body_length = candles_summary[ :,2]
+        body_length = candles_summary[ :,3]
         
         log.warning (body_length)
     
