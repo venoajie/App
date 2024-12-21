@@ -135,10 +135,12 @@ def cached_candles_data(
             
             result_resolution.append (ohlc)
             result_resolution.append (three_dim_sequence)
+            
+        result_instrument.append (result_resolution)
 
 
-    log.error (result_resolution)
-    return result_resolution
+    log.error (result_instrument)
+    return result_instrument
 
 def update_cached_ticker_data(
     instrument_name,
