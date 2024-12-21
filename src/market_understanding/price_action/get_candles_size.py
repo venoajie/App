@@ -96,7 +96,7 @@ def my_generator_candle(
         for candle in data[first_row:first_row+lookback]:
 
             converted_data = ohlc_to_candlestick(candle)
-            log.info (f"converted_data  {converted_data} candle {candle}")
+            #log.info (f"converted_data  {converted_data} candle {candle}")
             temp_list.append(converted_data)
         
         temp_list2 = np.asarray(temp_list)
@@ -116,14 +116,3 @@ def my_generator_candle(
         first_row=first_row+1
     
     return arr
-
-
-if __name__ == "__main__":
-
-    try:
-        asyncio.get_event_loop().run_until_complete(
-            get_dataframe_from_ohlc_tables("ohlc60_eth_perp_json")
-        )
-
-    except Exception as error:
-        print(error)
