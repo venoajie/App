@@ -496,7 +496,7 @@ class RunningStrategy(ModifyOrderDb):
                                         ohlc = ( [o['ohlc'] for o in candles_data \
                                             if currency_upper in o["instrument_name"] and o["resolution"] == 5])[0]
                                         log.warning (ohlc)
-                                        tick_from_cache = ([o['tick']  for o in ohlc ])
+                                        tick_from_cache = max([o['tick']  for o in ohlc ])
                                         log.warning (tick_from_cache)
                                         if tick_from_exchange > tick_from_cache:
                                             await sleep_and_restart()
