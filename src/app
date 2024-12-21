@@ -148,9 +148,9 @@ def cached_candles_data(
             log.debug (result)
         
         
-        log.debug (result_instrument)
+        log.debug (result)
 
-    return result_instrument
+    return result
 
 def update_cached_ticker_data(
     instrument_name,
