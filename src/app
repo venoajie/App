@@ -144,6 +144,7 @@ def cached_candles_data(
             log.debug (result)
         
         result_instrument.append (result)
+        log.debug (result_instrument)
 
     return result_instrument
 
