@@ -137,6 +137,7 @@ def cached_candles_data(
             result_resolution.append (three_dim_sequence)
 
 
+    log.error (result_resolution)
     return result_resolution
 
 def update_cached_ticker_data(
@@ -428,7 +429,7 @@ class RunningStrategy(ModifyOrderDb):
                         qty_candles,
                         resolutions)  
                     
-                    log.error (candles_data)
+                    
                     log.info (ticker_perpetual)
                     
                     while self.websocket_client.open:
