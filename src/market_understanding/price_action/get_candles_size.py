@@ -40,25 +40,19 @@ def ohlc_to_candlestick(conversion_array):
     high = conversion_array[1]
     low = conversion_array[2]
     close = conversion_array[3]
-
+    
+    body_size=abs(close-open)
 
     if close>open:
         candle_type=1
-        wicks_up=high-close
-        wicks_down=low-open
-        body_size=close-open
+        wicks_up=abs(high-close)
+        wicks_down=abs(low-open)
 
     else:
         candle_type=0
-        wicks_up=high-open
-        wicks_down=low-close
-        body_size=high-close
+        wicks_up=abs(high-open)
+        wicks_down=abs(low-close)
 
-
-    if wicks_up < 0: wicks_up=wicks_up*(-1)
-    if wicks_down < 0: wicks_down=wicks_down*(-1)
-    if body_size < 0: body_size=body_size*(-1)
-    
     candlestick_data[0]=candle_type
     
     candlestick_data[1]=round(round(wicks_up,5),2)
@@ -78,6 +72,7 @@ def my_generator_candle(
     )->list:
     
     """_summary_
+        https://github.com/MikePapinski/DeepLearning/blob/master/PredictCandlestick/CandleSTick%20patterns%20prediction/JupyterResearch_0.1.ipynb
         https://mikepapinski.github.io/deep%20learning/machine%20learning/python/forex/2018/12/15/Predict-Candlestick-patterns-with-Keras-and-Forex-data.md.html
     
     Args:
