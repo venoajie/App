@@ -110,9 +110,6 @@ def cached_candles_data(
         ("low", "f4"),
         ("close", "f4"),]
         
-    result_instrument=[]
-
-    result_resolution ={}
     result =[]
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
@@ -134,26 +131,14 @@ def cached_candles_data(
                 np_data[1:],
                 3))
             
-            #log.error (resolution)
-            #log.error (ohlc)
-            result_resolution.update (({"instrument_name": instrument_name}))
-            result_resolution.update (({"resolution": resolution}))
-            result_resolution.update (({"ohlc": ohlc}))
-            #result_resolution.update (({"candles_summary": three_dim_sequence}))
-            
             result.append (dict(
             instrument_name = instrument_name,
             resolution = (resolution),
             ohlc = (ohlc),
+            candles_summary = (three_dim_sequence),
             )
 )
-            #log.debug (result)
-        
-        #result.append (result_resolution)
-        
-        
-        #log.debug (result)
-
+            
     return result
 
 def update_cached_ticker_data(
