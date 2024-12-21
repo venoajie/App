@@ -69,8 +69,6 @@ product = reduce(lambda x, y: x * y, data)  # Calculates
 print (product)
 
 
-
-
 def cached_ohlc_data(
     currencies: list,
     resolutions: list):
@@ -123,19 +121,8 @@ def cached_ohlc_data(
     return result
 
 
-my_dataset = pd.read_csv('dataset.csv')
-del my_dataset['Local time']
-del my_dataset['Volume']
-
-#three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,my_dataset.values[1:],3))
-#log.warning (f"three_dim_sequence        {three_dim_sequence}")
-
 currencies = ["BTC", "ETH"]
 resolutions = [60, 15]
-
-my_data = (cached_ohlc_data(
-    currencies,
-    resolutions))
 
 dtype = [
     ("open", "f4"),
