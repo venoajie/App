@@ -123,7 +123,7 @@ def cached_candles_data(
                 resolution
                 )
             log.info(ohlc)
-            ohlc_without_ticks = remove_list_elements(ohlc, "ticks")
+            ohlc_without_ticks = remove_list_elements(ohlc, "tick")
             log.info(ohlc_without_ticks)
             
             np_users_data = np.array(ohlc_without_ticks)
