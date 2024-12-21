@@ -542,7 +542,7 @@ def transform_nested_dict_to_list_ohlc(list_example) -> dict:
 
         dict_result = dict(
             #volume=list_example["volume"][k],
-            #tick=list_example["ticks"][k],
+            tick=list_example["ticks"][k],
             open=list_example["open"][k],
             high=list_example["high"][k],
             low=list_example["low"][k],
