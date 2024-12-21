@@ -488,16 +488,11 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     data_orders: list = message["params"]["data"] 
                                     
-                                    candles_data_instrument = [o for o in candles_data \
-                                            if currency_upper in o["instrument_name"]]
-                                    
-                                    log.warning (candles_data_instrument)
-                                    
                                     if "chart.trades" in message_channel:
                                         tick_from_exchange= data_orders["tick"]
                                         #log.warning (candles_data)
 
-                                        ohlc = ( [o['ohlc'] for o in candles_data_instrument \
+                                        ohlc = ( [o['ohlc'] for o in candles_data \
                                             if  o["resolution"] == 5])[0]
 
                                         tick_from_cache = max([o['tick']  for o in ohlc ])
@@ -508,14 +503,18 @@ class RunningStrategy(ModifyOrderDb):
                                             await sleep_and_restart()
                                     
                                     else:
-                                        
-
+                                    
                                         instrument_name_perpetual = data_orders["instrument_name"]
                                         
                                         currency: str = extract_currency_from_text(instrument_name_perpetual)
                                         
                                         currency_upper: str = currency.upper()
                                         currency_lower: str =currency
+                                    
+                                        candles_data_instrument = [o for o in candles_data \
+                                                if currency_upper in o["instrument_name"]]
+                                        
+                                        log.warning (candles_data_instrument)
                                         
                                         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                         
