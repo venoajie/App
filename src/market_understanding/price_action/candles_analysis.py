@@ -24,6 +24,6 @@ def analysis_based_on_length(
         
         body_length = candles_summary[ :,2]
         
-        log.error (body_length)
+        log.warning (body_length)
     
     return 
