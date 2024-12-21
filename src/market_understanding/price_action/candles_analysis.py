@@ -13,10 +13,13 @@ def analysis_based_on_length(
         Returns:
             _type_: _description_
     """
+    
+    
     for resolution in resolutions:
         
         data_per_resolution = [o for o in candles_data_instrument\
             if resolution == o["resolution"]]
-        log.error (data_per_resolution)
+        candles_summary = [o["candles_summary"] for o in data_per_resolution]
+        log.error (candles_summary)
     
     return 
