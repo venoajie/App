@@ -141,7 +141,7 @@ def cached_candles_data(
             result_resolution.update (({"ohlc": ohlc}))
             #result_resolution.update (({"candles_summary": three_dim_sequence}))
             
-            result.append (result_resolution)
+            result.append (resolution)
             #log.debug (result)
         
         #result.append (instrument_name)
