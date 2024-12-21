@@ -101,7 +101,7 @@ def my_generator_candle(
             log.info (f"converted_data  {converted_data} candle {candle}")
             temp_list.append(converted_data)
         
-        temp_list2 = np.asarray(temp_list)
+        temp_list2 = np.asarray(temp_list,dtype = "f4")
         templist3 = [temp_list2]
         templist4 = np.asarray(templist3)
 #        log.info (f"templist4  {templist4}")
