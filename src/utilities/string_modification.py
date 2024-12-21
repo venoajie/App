@@ -534,7 +534,7 @@ def transform_nested_dict_to_list(list_example) -> dict:
 
 def transform_nested_dict_to_list_ohlc(list_example) -> dict:
     """ """
-    len_tick = len(list_example["volume"])
+    len_tick = len(list_example["open"])
 
     my_list = []
 
