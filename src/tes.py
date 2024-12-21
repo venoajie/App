@@ -142,8 +142,3 @@ for currency in currencies:
         np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
 
         three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,np_data[1:],3))
-        log.error (f"three_dim_sequence {three_dim_sequence}")
-        df = pd.DataFrame((np_data))
-
-        three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,df.values[1:],3))
-        log.error (f"three_dim_sequence {three_dim_sequence}")
