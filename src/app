@@ -33,7 +33,9 @@ from strategies.hedging_spot import (
 from strategies.cash_carry.combo_auto import(
     ComboAuto,
     check_if_minimum_waiting_time_has_passed)
-from transaction_management.deribit.api_requests import get_tickers,get_ohlc_data
+from transaction_management.deribit.api_requests import (
+    analysis_based_on_length,
+    get_tickers,get_ohlc_data)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -431,7 +433,7 @@ class RunningStrategy(ModifyOrderDb):
                         
                     ticker_perpetual = cached_ticker_data(currencies)  
                     
-                    resolutions = [60,5]     
+                    resolutions = [60,15, 5]     
                     qty_candles = 5       
                     
                     candles_data = cached_candles_data(
@@ -514,7 +516,11 @@ class RunningStrategy(ModifyOrderDb):
                                         candles_data_instrument = [o for o in candles_data \
                                                 if currency_upper in o["instrument_name"]]
                                         
-                                        log.warning (candles_data_instrument)
+                                        candles_analysis = analysis_based_on_length(
+                                            candles_data_instrument,
+                                            resolutions)
+                                        
+                                        log.warning (candles_analysis)
                                         
                                         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                         
