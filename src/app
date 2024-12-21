@@ -103,6 +103,8 @@ def cached_candles_data(
         _type_: _description_
     """
     
+    from utilities.string_modification import (transform_nested_dict_to_list_ohlc)
+    
     dtype = [
         ("open", "f4"),
         ("high", "f4"),
@@ -129,7 +131,7 @@ def cached_candles_data(
                 resolution
                 )
             
-            np_users_data = np.array(ohlc)
+            np_users_data = np.array(transform_nested_dict_to_list_ohlc(ohlc))
 
             np_data = np.array([tuple(user.values()) for user in (np_users_data)], dtype=dtype)
 
@@ -140,7 +142,7 @@ def cached_candles_data(
             
             log.error (resolution)
             log.error (ohlc)
-            result_resolution.update (({"instrument_name": instrument_name}))
+            ohlc.update (({"instrument_name": instrument_name}))
             result_resolution.update (({"resolution": resolution}))
             result_resolution.update (({"ohlc": ohlc}))
             #result_resolution.update (({"candles_summary": three_dim_sequence}))
