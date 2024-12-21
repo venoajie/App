@@ -147,7 +147,7 @@ def cached_candles_data(
             result_resolution.update (({"ohlc": ohlc}))
             #result_resolution.update (({"candles_summary": three_dim_sequence}))
             
-            result.append (ohlc)
+            result.append (transform_nested_dict_to_list_ohlc(ohlc))
             result.append (three_dim_sequence)
             log.debug (result)
         
