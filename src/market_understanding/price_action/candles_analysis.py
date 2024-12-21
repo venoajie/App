@@ -20,7 +20,7 @@ def analysis_based_on_length(
         data_per_resolution = [o for o in candles_data_instrument\
             if resolution == o["resolution"]]
         candles_summary = [o["candles_summary"] for o in data_per_resolution][0]
-        log.error (candles_summary.dtype)
+        log.error (f"candles_summary.dtype {candles_summary.dtype} candles_summary.dtype {candles_summary.shape} candles_summary.dtype {candles_summary.ndim}")
         
         body_length = [o[3] for o in candles_summary]
         
