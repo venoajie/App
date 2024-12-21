@@ -128,7 +128,7 @@ def cached_candles_data(
 
             np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
 
-            three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(
+            three_dim_sequence = (get_candles_size.my_generator_candle(
                 np,
                 np_data[1:],
                 3)
