@@ -91,6 +91,7 @@ def cached_ticker_data(currencies):
 
     return result
 
+
 def cached_candles_data(
     currencies,
     qty_candles,
@@ -103,8 +104,6 @@ def cached_candles_data(
         _type_: _description_
     """
     
-    from utilities.string_modification import (transform_nested_dict_to_list_ohlc)
-    
     dtype = [
         ("open", "f4"),
         ("high", "f4"),
@@ -112,17 +111,11 @@ def cached_candles_data(
         ("close", "f4"),]
         
     result_instrument=[]
-    result =[]
-    
-    instrument={}
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
         
-        instrument.update (({"instrument_name": instrument_name}))
-        result_instrument.append (instrument)
-        
         result_resolution ={}
-        
+        result =[]
         for resolution in resolutions:
 
             ohlc = get_ohlc_data (
@@ -131,9 +124,9 @@ def cached_candles_data(
                 resolution
                 )
             
-            np_users_data = np.array(transform_nested_dict_to_list_ohlc(ohlc))
+            np_users_data = np.array(ohlc)
 
-            np_data = np.array([tuple(user.values()) for user in (np_users_data)], dtype=dtype)
+            np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
 
             three_dim_sequence = (get_candles_size.my_generator_candle(
                 np,
@@ -142,20 +135,18 @@ def cached_candles_data(
             
             log.error (resolution)
             log.error (ohlc)
-            ohlc.update (({"instrument_name": instrument_name}))
+            result_resolution.update (({"instrument_name": instrument_name}))
             result_resolution.update (({"resolution": resolution}))
             result_resolution.update (({"ohlc": ohlc}))
-            #result_resolution.update (({"candles_summary": three_dim_sequence}))
+            result_resolution.update (({"candles_summary": three_dim_sequence}))
             
-            result.append (transform_nested_dict_to_list_ohlc(ohlc))
-            result.append (three_dim_sequence)
-            result.append (three_dim_sequence)
-            result.append(result_instrument.copy())
+            result.append (result_resolution)
             log.debug (result)
         
-        log.debug (result)
+        result_instrument.append (result)
+        log.debug (result_instrument)
 
-    return result
+    return result_instrument
 
 def update_cached_ticker_data(
     instrument_name,
