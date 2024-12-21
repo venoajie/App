@@ -114,15 +114,48 @@ def cached_candles_data(
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
         
-        res = [ get_ohlc_data (
+        res = [ (get_candles_size.my_generator_candle(
+                np,
+                get_ohlc_data (
                 instrument_name, 
                 qty_candles, 
                 o
-                ) for o in resolutions]
+                )[1:],
+                3)) for o in resolutions]
         
         result_instrument.append (res)
         log.debug (result_instrument)
 
+
+        result_resolution ={}
+        result =[]
+        for resolution in resolutions:
+
+            ohlc = get_ohlc_data (
+                instrument_name, 
+                qty_candles, 
+                resolution
+                )
+            
+            np_users_data = np.array(ohlc)
+
+            np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
+
+            three_dim_sequence = (get_candles_size.my_generator_candle(
+                np,
+                np_data[1:],
+                3))
+            
+            log.error (resolution)
+            log.error (ohlc)
+            result_resolution.update (({"instrument_name": instrument_name}))
+            result_resolution.update (({"resolution": resolution}))
+            result_resolution.update (({"ohlc": ohlc}))
+            #result_resolution.update (({"candles_summary": three_dim_sequence}))
+            
+            result.append (result_resolution)
+            log.debug (result)
+        
     return result_instrument
 
 def update_cached_ticker_data(
