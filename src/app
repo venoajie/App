@@ -48,6 +48,7 @@ from utilities.string_modification import (
     extract_currency_from_text,
     parsing_label,
     remove_double_brackets_in_list,
+    remove_list_elements,
     remove_redundant_elements)
 from utilities.system_tools import (
     async_raise_error_message,
@@ -121,8 +122,9 @@ def cached_candles_data(
                 qty_candles, 
                 resolution
                 )
+            ohlc_without_ticks = remove_list_elements(ohlc, "ticks")
             
-            np_users_data = np.array(ohlc)
+            np_users_data = np.array(ohlc_without_ticks)
 
             np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
 
