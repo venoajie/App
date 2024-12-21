@@ -133,6 +133,7 @@ def cached_candles_data(
                 3)
                                   )
             log.error (resolution)
+            log.error (ohlc)
             result_resolution.update (({"instrument_name": instrument_name}))
             result_resolution.update (({"resolution": resolution}))
             result_resolution.update (({"ohlc": ohlc}))
