@@ -394,8 +394,6 @@ class RunningStrategy(ModifyOrderDb):
                 
                 min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]   
                 
-                resolution = 1                
-                    
                 # filling currencies attributes
                 my_path_cur = provide_path_for_file("currencies")
                 replace_data(
@@ -422,7 +420,17 @@ class RunningStrategy(ModifyOrderDb):
                                 ws_channel= f"incremental_ticker.{currency}-PERPETUAL",
                             ))
                         
-                    ticker_perpetual = cached_ticker_data(currencies)    
+                    ticker_perpetual = cached_ticker_data(currencies)  
+                    
+                    resolutions = [60,5]     
+                    qty_candles = 5       
+                    
+                    candles_data = cached_candles_data(
+                        currencies,
+                        qty_candles,
+                        resolutions)  
+                    
+                    log.error (candles_data)
                     
                     while self.websocket_client.open:
                         
@@ -515,7 +523,7 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     log.error (f" len_sub_account_orders_all {len_sub_account_orders_all}")
                                                        
-                                    if sub_account :
+                                    if False and sub_account :
                                         
                                         query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
                                                                                 
