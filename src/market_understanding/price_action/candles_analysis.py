@@ -23,7 +23,7 @@ def analysis_based_on_length(
         print(candles_summary)
         log.error (f"candles_summary.dtype {candles_summary.dtype} candles_summary.shape {candles_summary.shape} candles_summary.ndim {candles_summary.ndim} candles_summary.size {candles_summary.size}")
         
-        body_length =candles_summary[0:2, 2]
+        body_length =candles_summary[-1, :]
         
         log.warning (body_length)
     
