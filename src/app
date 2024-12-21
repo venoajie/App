@@ -136,19 +136,19 @@ def cached_candles_data(
                 np_data[1:],
                 3))
             
-            log.error (resolution)
-            log.error (ohlc)
+            #log.error (resolution)
+            #log.error (ohlc)
             result_resolution.update (({"instrument_name": instrument_name}))
             result_resolution.update (({"resolution": resolution}))
             result_resolution.update (({"ohlc": ohlc}))
             result_resolution.update (({"candles_summary": three_dim_sequence}))
             
             result.append (result_resolution)
-            result.append(result_instrument.copy())
-            log.debug (result)
+            result.append(result_instrument)
+            #log.debug (result)
         
         
-        log.debug (result)
+        #log.debug (result)
 
     return result
 
