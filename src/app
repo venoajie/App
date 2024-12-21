@@ -130,8 +130,8 @@ def cached_candles_data(
             three_dim_sequence = (get_candles_size.my_generator_candle(
                 np,
                 np_data[1:],
-                3)
-                                  )
+                3))
+            
             log.error (resolution)
             log.error (ohlc)
             result_resolution.update (({"instrument_name": instrument_name}))
@@ -142,7 +142,7 @@ def cached_candles_data(
             result_instrument.append (result_resolution)
             log.debug (result_instrument)
         
-        #result_instrument.append (result_instrument)
+        result_instrument.append (result_resolution)
 
     return result_instrument
 
