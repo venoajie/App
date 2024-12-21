@@ -122,8 +122,6 @@ def cached_candles_data(
                 resolution
                 )
             
-            #log.warning (ohlc)
-    
             np_users_data = np.array(ohlc)
 
             np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
@@ -134,9 +132,7 @@ def cached_candles_data(
                 3)
                                             )
             
-            #log.error (f"three_dim_sequence {three_dim_sequence}")
-            
-            result.append (ohlc[0])
+            result.append (ohlc)
             result.append (three_dim_sequence)
 
 
