@@ -494,7 +494,7 @@ class RunningStrategy(ModifyOrderDb):
                                         log.warning (tick_from_exchange)
                                         log.debug (data_orders)
                                         ohlc = ( [o['ohlc'] for o in candles_data \
-                                            if currency_upper in o["instrument_name"] and o["resolution"] == 5])
+                                            if currency_upper in o["instrument_name"] and o["resolution"] == 5])[0]
                                         log.warning (ohlc)
                                         tick_from_cache = ([o['tick']  for o in ohlc ])
                                         log.warning (tick_from_cache)
