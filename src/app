@@ -489,13 +489,14 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     message_channel = message["params"]["channel"]
                                     
+                                    data_orders: list = message["params"]["data"] 
+                                    
                                     if "chart.trades" in message_channel:
                                         tick= data_orders["tick"]
                                         log.warning (tick)
                                     
                                     else:
                                         
-                                        data_orders: list = message["params"]["data"] 
 
                                         instrument_name_perpetual = data_orders["instrument_name"]
                                         
