@@ -426,7 +426,7 @@ class RunningStrategy(ModifyOrderDb):
                         self.loop.create_task(
                             self.ws_operation(
                                 operation="subscribe",
-                                ws_channel= f"chart.trades.{currency}-PERPETUAL.1",
+                                ws_channel= f"chart.trades.{currency}-PERPETUAL.5",
                             ))
                         
                     ticker_perpetual = cached_ticker_data(currencies)  
@@ -494,6 +494,8 @@ class RunningStrategy(ModifyOrderDb):
                                     if "chart.trades" in message_channel:
                                         tick= data_orders["tick"]
                                         log.warning (tick)
+                                        tick_from_cache = [o["tick"]  for o in cached_candles_data if o["resolution"] == 5]
+                                        log.warning (tick_from_cache)
                                     
                                     else:
                                         
