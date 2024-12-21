@@ -108,7 +108,7 @@ def my_generator_candle(
 #        log.info (f"templist4  {templist4}")
 #        log.warning (f"arr  1 {arr}")
         arr = np.append(
-            round(arr,2)r, 
+            round(arr,2), 
             templist4, 
             axis=0
             )
