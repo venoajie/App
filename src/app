@@ -134,7 +134,7 @@ def cached_candles_data(
                 3)
                                             )
             
-            log.error (f"three_dim_sequence {three_dim_sequence}")
+            #log.error (f"three_dim_sequence {three_dim_sequence}")
             
             result.append (ohlc)
             result.append (three_dim_sequence)
