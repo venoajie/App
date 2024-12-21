@@ -21,5 +21,9 @@ def analysis_based_on_length(
             if resolution == o["resolution"]]
         candles_summary = [o["candles_summary"] for o in data_per_resolution]
         log.error (candles_summary)
+        
+        body_length = [o[4] for o in candles_summary]
+        
+        log.error (body_length)
     
     return 
