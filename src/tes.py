@@ -4,6 +4,7 @@ from loguru import logger as log
 import pandas as pd
 from market_understanding.price_action import get_candles_size
 from utilities.string_modification import (transform_nested_dict_to_list_ohlc)
+from transaction_management.deribit.api_requests import get_ohlc_data
 
 nump= [
     {"liquidity": "M", "risk_reducing": False, "order_type": "limit", "trade_id": "329163428", "fee_currency": "BTC", "contracts": 1.0, "self_trade": False, "reduce_only": False, "post_only": True, "mmp": False, "fee": 0.0, "tick_direction": 1, "matching_id": None, "mark_price": 98292.08, "api": True, "trade_seq": 224809036, "instrument_name": "BTC-PERPETUAL", "profit_loss": -4.1e-07, "index_price": 98229.85, "direction": "sell", "amount": 10.0, "order_id": "81484353138", "price": 98277.0, "state": "filled", "timestamp": 1732429227364, "label": "futureSpread-closed-1732285058841"},
@@ -135,8 +136,6 @@ resolutions = [60, 15]
 my_data = (cached_ohlc_data(
     currencies,
     resolutions))
-#log.warning (f"my_data {my_data}")
-
 
 dtype = [
     ("open", "f4"),
@@ -145,14 +144,18 @@ dtype = [
     ("close", "f4"),
     
     ]
+qty_candles = 10
+for currency in currencies:
+    instrument_name = f"{currency.upper()}-PERPETUAL"
+    for resolution in resolutions:
+        ohlc = get_ohlc_data (instrument_name, qty_candles, resolution)
+            
+        log.warning (ohlc)
+        np_users_data = np.array(ohlc)
 
-for data in my_data:
-    log.warning (data)
-    np_users_data = np.array(data)
+        np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
 
-    np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
+        df = pd.DataFrame((np_data))
 
-    df = pd.DataFrame((np_data))
-
-    three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,df.values[1:],3))
-    log.error (f"three_dim_sequence {three_dim_sequence}")
+        three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,df.values[1:],3))
+        log.error (f"three_dim_sequence {three_dim_sequence}")

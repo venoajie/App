@@ -89,6 +89,7 @@ def cached_ticker_data(currencies):
 
     return result
 
+
 def update_cached_ticker_data(
     instrument_name,
     ticker,

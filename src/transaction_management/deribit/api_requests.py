@@ -9,12 +9,16 @@ from dataclassy import dataclass
 import aiohttp
 from aiohttp.helpers import BasicAuth
 from loguru import logger as log
+import httpx
+        
 
 # user defined formula
 from configuration import id_numbering, config, config_oci
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from utilities import time_modification
+from utilities.time_modification import convert_time_to_unix
+
 
 def parse_dotenv(sub_account)-> dict:
     return config.main_dotenv(sub_account)
@@ -121,6 +125,59 @@ def get_tickers(
     
     return result
     
+    
+def ohlc_end_point(
+    instrument_ticker: str,
+    resolution: int,
+    start_timestamp: int,
+    end_timestamp: int,
+    )-> str:
+    
+
+    url=(f"https://deribit.com/api/v2/public/get_tradingview_chart_data?")
+    
+    return  (f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}")
+
+
+def get_ohlc_data(
+    instrument_name: str,
+    qty_candles: int,
+    resolution: list):
+    """_summary_
+    https://blog.apify.com/python-cache-complete-guide/]
+    data caching
+    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
+
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    from utilities.string_modification import (transform_nested_dict_to_list_ohlc)
+    
+    now_utc = datetime.now()
+    
+    now_unix = convert_time_to_unix(now_utc)
+
+    start_timestamp = now_unix - (60000 * resolution) * qty_candles
+        
+    end_point = ohlc_end_point(instrument_name,
+                    resolution,
+                    start_timestamp,
+                    now_unix,
+                    )
+    
+    with httpx.Client() as client:
+        ohlc_request = client.get(
+            end_point, 
+            follow_redirects=True
+            ).json()["result"]
+    
+    return  transform_nested_dict_to_list_ohlc(ohlc_request)
+
+
 @dataclass(unsafe_hash=True, slots=True)
 class SendApiRequest:
     """ """
