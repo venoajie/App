@@ -116,10 +116,10 @@ def cached_candles_data(
 
         result_instrument.append (instrument_name)
         
-        result_resolution =[]
+        result_resolution ={}
         for resolution in resolutions:
 
-            result_resolution.append (resolution)
+            #result_resolution.append (resolution)
             
             ohlc = get_ohlc_data (
                 instrument_name, 
@@ -137,8 +137,10 @@ def cached_candles_data(
                 3)
                                             )
             
-            result_resolution.append (ohlc)
-            result_resolution.append (three_dim_sequence)
+            result_resolution.update (({"resolution": resolution}))
+            result_resolution.update (({"ohlc": "ohlc"}))
+            result_resolution.update (({"three_dim_sequence": "three_dim_sequence"}))
+            #result_resolution.append (three_dim_sequence)
             
         result_instrument.append (result_resolution)
 
