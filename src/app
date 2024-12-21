@@ -14,7 +14,6 @@ from loguru import logger as log
 import tomli
 import websockets
 import numpy as np
-import pandas as pd
 
 from configuration import id_numbering, config, config_oci
 from configuration.label_numbering import get_now_unix_time
@@ -105,6 +104,12 @@ def cached_candles_data(
         _type_: _description_
     """
     
+    dtype = [
+        ("open", "f4"),
+        ("high", "f4"),
+        ("low", "f4"),
+        ("close", "f4"),]
+        
     result=[]
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
@@ -116,17 +121,21 @@ def cached_candles_data(
                 qty_candles, 
                 resolution
                 )
-        
             
             log.warning (ohlc)
+    
             np_users_data = np.array(ohlc)
 
             np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
 
-            df = pd.DataFrame((np_data))
-
-            three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(np,df.values[1:],3))
+            three_dim_sequence = np.asarray(get_candles_size.my_generator_candle(
+                np,
+                np_data[1:],
+                3)
+                                            )
+            
             log.error (f"three_dim_sequence {three_dim_sequence}")
+            
             result.append (ohlc)
 
 
