@@ -428,6 +428,7 @@ class RunningStrategy(ModifyOrderDb):
                         resolutions)  
                     
                     log.error (candles_data)
+                    log.info (ticker_perpetual)
                     
                     while self.websocket_client.open:
                         
