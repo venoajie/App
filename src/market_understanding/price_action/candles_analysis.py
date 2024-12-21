@@ -2,7 +2,7 @@ from db_management import sql_executing_queries
 import asyncio
 from loguru import logger as log
 
-async def analysis_based_on_length(
+def analysis_based_on_length(
     candles_data_instrument: list,
     resolutions: list):
     """_summary_
