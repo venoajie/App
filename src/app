@@ -104,7 +104,7 @@ def get_market_condition(
                                                 if currency_upper in o["instrument_name"]]
     
     candles_data_60 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 60]
-    candle_type_60 = [o["candle_type"] for o in candles_data_60]
+    candle_type_60 = [o["candle_type"] for o in candles_data_60][0]
     candles_data_5 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 5]
     candles_data_15 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 15]
     log.warning (candles_data_60)
