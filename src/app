@@ -469,7 +469,7 @@ class RunningStrategy(ModifyOrderDb):
                                         tick_from_exchange= data_orders["tick"]
                                         #log.warning (candles_data)
 
-                                        tick_from_cache = max( [o['tick'] for o in candles_data \
+                                        tick_from_cache = max( [o["max_tick"] for o in candles_data \
                                             if  o["resolution"] == 5])
 
                                         log.warning (tick_from_exchange)
