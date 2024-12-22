@@ -18,6 +18,8 @@ def analysis_based_on_length(
     
     for resolution in resolutions:
         
+        log.critical (resolution)
+        
         data_per_resolution = [o for o in candles_data_instrument\
             if resolution == o["resolution"]]
 
@@ -31,7 +33,7 @@ def analysis_based_on_length(
         is_long_body = candles_arrays [-1, :, 5] #(last_column_third_row)
         mean_body_length = np.average(body_length)
         
-        print(candles_arrays)
+        #print(candles_arrays)
         log.warning (f"candle_type {candle_type}")
         log.warning (f"wicks_up {wicks_up}")
         log.warning (f"wicks_down {wicks_down}")
