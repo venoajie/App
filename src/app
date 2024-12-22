@@ -136,11 +136,16 @@ def cached_candles_data(
                 np_data[1:],
                 3))
             
+            candles_analysis_result = candles_analysis.analysis_based_on_length(
+                                            np,
+                                            three_dim_sequence)
+            log.debug (f"candles_analysis_result {candles_analysis_result}")
             result.append (dict(
             instrument_name = instrument_name,
             resolution = (resolution),
             ohlc = (ohlc),
             candles_summary = (three_dim_sequence),
+            candles_analysis = (candles_analysis_result),
             )
 )
             
@@ -280,39 +285,6 @@ def modify_hedging_instrument (
     else:
         return   ticker_perpetual_instrument_name
                 
-def future_spread_attributes (
-    position_without_combo:  list,
-    instrument_attributes_futures: list,
-    currency_upper: str,
-    notional: float,
-    best_ask_prc: float,
-    server_time: int,
-    ) -> dict:
-
-    #log.warning (currency_upper)    
-    #log.info (notional)    
-    #log.error ([o["instrument_name"] for o in instrument_attributes_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
-    #          )       
-    #log.error ([ (reading_from_pkl_data("ticker",  o["instrument_name"])) for o in instrument_attributes_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
-    #          )    
-    #log.debug ([ (reading_from_pkl_data("ticker",  o["instrument_name"]))[0] for o in instrument_attributes_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
-    #          )    
-    #log.warning ([ (reading_from_pkl_data("ticker",  o["instrument_name"]))[0]["mark_price"] for o in instrument_attributes_futures if "PERP" not in o["instrument_name"] and currency_upper  in o["instrument_name"]]
-    #          )    
-    
-    return  [{'instrument_name':o['instrument_name'], 
-              'is_weekly': o["settlement_period"]=="week", 
-              'premium': (reading_from_pkl_data("ticker",  o["instrument_name"])[0]["mark_price"])   - best_ask_prc, 
-              'contango':((reading_from_pkl_data("ticker",  o["instrument_name"])[0]["mark_price"])   - best_ask_prc) > 0, 
-              'leverage_instrument': 0 if ([i["size"]/notional for i in position_without_combo if i["instrument_name"] == o["instrument_name"]]) == []\
-                                else abs([i["size"]/notional for i in position_without_combo if i["instrument_name"] == o["instrument_name"]][0]), 
-                'pct_premium_per_day':((reading_from_pkl_data("ticker", 
-                                                              o["instrument_name"])[0]["mark_price"]) - best_ask_prc
-                                                   )/((o["expiration_timestamp"] - server_time)/1000/60/60/24
-                                                      )/best_ask_prc,
-                                                   } for o in instrument_attributes_futures if "PERP" not in o["instrument_name"]\
-                                                       and currency_upper  in o["instrument_name"]
-                            ]
                 
 @dataclass(unsafe_hash=True, slots=True)
 class RunningStrategy(ModifyOrderDb):
