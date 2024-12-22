@@ -94,6 +94,36 @@ def cached_ticker_data(currencies):
 
     return result
 
+def get_market_condition(
+    candles_data,
+    currency_upper
+    ):
+    """
+    """
+    candles_data_instrument = [o["candles_analysis"] for o in candles_data \
+                                                if currency_upper in o["instrument_name"]]
+    
+    log.warning (candles_data_instrument)
+    
+    bullish = True
+    strong_bullish = True
+    weak_bullish = True
+    neutral = True
+    bearish = True,
+    weak_bearish = True
+    strong_bearish = True
+    
+    return dict(
+                bullish = bullish,
+                strong_bullish = strong_bullish,
+                weak_bullish = weak_bullish,
+                neutral = neutral,
+                bearish = bearish,
+                weak_bearish = weak_bearish,
+                strong_bearish = strong_bearish,
+                )
+
+
 async def chart_trade_in_msg(
     message_channel,
     data_orders,
@@ -502,11 +532,12 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         currency_upper: str = currency.upper()
                                         currency_lower: str =currency
-                                    
-                                        candles_data_instrument = [o["candles_analysis"] for o in candles_data \
-                                                if currency_upper in o["instrument_name"]]
                                         
-                                        log.warning (candles_data_instrument)
+                                        market_condition = get_market_condition(
+                                            candles_data,
+                                            currency_upper
+                                            )
+                                        log.warning (market_condition)
                                         
                                         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                         
