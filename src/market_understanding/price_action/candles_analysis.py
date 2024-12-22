@@ -31,8 +31,8 @@ def analysis_based_on_length(
         body_size = candles_arrays [-1, :, 3] #(last_column_third_row)
         body_length = candles_arrays [-1, :, 4] #(last_column_third_row)
         is_long_body = candles_arrays [-1, :, 5] #(last_column_third_row)
-        mean_body_length = np.average(body_length)
-        
+        avg_body_length = np.average(body_length)
+        body_length_exceed_average = body_length > avg_body_length
         #print(candles_arrays)
         log.warning (f"candle_type {candle_type}")
         log.warning (f"wicks_up {wicks_up}")
@@ -40,6 +40,7 @@ def analysis_based_on_length(
         log.warning (f"body_size {body_size}")
         log.warning (f"body_length {body_length}")
         log.warning (f"is_long_body {is_long_body}")
-        log.warning (mean_body_length)
+        log.warning (f" avg_body_length {avg_body_length}")
+        log.warning (f" body_length_exceed_average {body_length_exceed_average}")
     
     return 
