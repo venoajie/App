@@ -61,6 +61,8 @@ def ohlc_to_candlestick(conversion_array):
     candlestick_data[3]=round(round(body_size,5),2)
 
     candlestick_data[4]=round(round(height,5),2)
+
+    candlestick_data[5]=round(round(body_size/height,5),2)>70/100
     
     return candlestick_data
 
@@ -83,7 +85,7 @@ def my_generator_candle(
     """
     first_row = 0
     
-    parameters = len(["candle_type", "wicks_up", "wicks_down", "body_size", "length"])
+    parameters = len(["candle_type", "wicks_up", "wicks_down", "body_size", "length", "is_long_body"])
 
     arr = np.empty((1,lookback,parameters),
                    int)
