@@ -24,7 +24,9 @@ from db_management.sqlite_management import (
     executing_query_with_return,
     #querying_table,
     update_status_data)
-from market_understanding.price_action.candles_analysis import (cached_candles_data)
+from market_understanding.price_action.candles_analysis import (
+    combining_candles_data,
+    get_market_condition)
 from strategies.basic_strategy import (
     get_label_integer,)
 from strategies.hedging_spot import (
@@ -373,14 +375,12 @@ class RunningStrategy(ModifyOrderDb):
                     resolutions = [60,15, 5]     
                     qty_candles = 5       
                     
-                    market_condition = cached_candles_data(
+                    cached_candles_data = combining_candles_data(
                         np,
                         currencies,
                         qty_candles,
                         resolutions)  
-
-                    log.warning (market_condition)
-                    
+                                        
                     while self.websocket_client.open:
                         
                         try:
@@ -433,7 +433,7 @@ class RunningStrategy(ModifyOrderDb):
                                     chart_trade = await chart_trade_in_msg(
                                         message_channel,
                                         data_orders,
-                                        market_condition,
+                                        cached_candles_data,
                                         )
                                     
                                     if not chart_trade:
@@ -481,7 +481,14 @@ class RunningStrategy(ModifyOrderDb):
                                         len_sub_account_orders_all = len(sub_account_orders)
                                         
                                         log.error (f" len_sub_account_orders_all {len_sub_account_orders_all}")
-                                                        
+                                        
+                                        market_condition = get_market_condition(
+                                            np,
+                                            cached_candles_data,currency
+                                            )
+                                        
+                                        log.warning (market_condition)
+
                                         if False and sub_account :
                                             
                                             query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
