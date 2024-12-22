@@ -143,8 +143,8 @@ def cached_candles_data(
             result.append (dict(
             instrument_name = instrument_name,
             resolution = (resolution),
-            ohlc = (ohlc),
-            candles_summary = (three_dim_sequence),
+            #ohlc = (ohlc),
+            #candles_summary = (three_dim_sequence),
             candles_analysis = (candles_analysis_result),
             )
 )
