@@ -31,7 +31,11 @@ def analysis_based_on_length(
         mean_body_length = np.average(body_length)
         
         print(candles_arrays)
-        log.warning (body_length)
+        log.warning (f"candle_type {candle_type}")
+        log.warning (f"wicks_up {wicks_up}")
+        log.warning (f"wicks_down {wicks_down}")
+        log.warning (f"body_size {body_size}")
+        log.warning (f"body_length {body_length}")
         log.warning (mean_body_length)
     
     return 
