@@ -35,6 +35,7 @@ def analysis_based_on_length(
     log.warning (f" body_length_exceed_average {body_length_exceed_average}")
     
     return  (dict(
+            candle_type = candle_type,
             body_length_exceed_average = body_length_exceed_average,
             is_long_body = (is_long_body),
             )
