@@ -24,7 +24,8 @@ from db_management.sqlite_management import (
     executing_query_with_return,
     querying_table,
     update_status_data)
-from market_understanding.price_action import get_candles_size,candles_analysis
+from market_understanding.price_action import get_candles_size
+from market_understanding.price_action.candles_analysis import get_market_condition
 from strategies.basic_strategy import (
     get_label_integer,)
 from strategies.hedging_spot import (
@@ -93,49 +94,6 @@ def cached_ticker_data(currencies):
 
 
     return result
-
-def get_market_condition(
-    candles_data,
-    currency_upper
-    ):
-    """
-    """
-    candles_data_instrument = [o for o in candles_data \
-                                                if currency_upper in o["instrument_name"]]
-    
-    candles_data_60 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 60]
-    candle_type_60 = np.sum([o["candle_type"] for o in candles_data_60])
-    candle_is_long_60 = np.sum([o["is_long_body"] for o in candles_data_60])
-    candles_data_5 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 5]
-    candle_type_5 = np.sum([o["candle_type"] for o in candles_data_5])
-    candle_is_long_5 = np.sum([o["is_long_body"] for o in candles_data_5])
-    candles_data_15 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 15]
-    candle_type_15 = np.sum([o["candle_type"] for o in candles_data_15])
-    candle_is_long_15 = np.sum([o["is_long_body"] for o in candles_data_15])
-    
-    log.warning (candles_data_60)
-    log.debug (candles_data_5)
-    log.debug (candle_type_60)
-    log.warning (candles_data_15)
-    
-    strong_bullish = candle_type_60 >= 2 and candle_is_long_60 >= 2
-    bullish = candle_type_15 > 2 and candle_is_long_60 >= 2
-    weak_bullish = candle_type_5 > 2
-    neutral = candle_is_long_60 == 0 and candle_is_long_15 == 0 and candle_is_long_5 == 0
-    weak_bearish = True
-    bearish = candle_type_15 <= -2 and candle_is_long_60 >= 2
-    strong_bearish = candle_type_60 <= -2 and candle_is_long_60 >= 2
-    
-    return dict(
-                strong_bullish = strong_bullish,
-                bullish = bullish,
-                weak_bullish = weak_bullish,
-                neutral = neutral,
-                weak_bearish = weak_bearish,
-                bearish = bearish,
-                strong_bearish = strong_bearish,
-                )
-
 
 async def chart_trade_in_msg(
     message_channel,
