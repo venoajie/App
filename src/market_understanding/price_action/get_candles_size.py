@@ -32,7 +32,7 @@ async def get_dataframe_from_ohlc_tables(tables: str = "ohlc60_eth_perp_json"):
 
 def ohlc_to_candlestick(conversion_array):
     
-    candlestick_data = [0,0,0,0,0]
+    candlestick_data = [0,0,0,0,0,0]
     
     open = conversion_array[0]
     high = conversion_array[1]
