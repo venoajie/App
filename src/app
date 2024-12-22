@@ -467,13 +467,10 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     if "chart.trades" in message_channel:
                                         tick_from_exchange= data_orders["tick"]
-                                        #log.warning (candles_data)
+                                        log.warning (tick_from_exchange)
 
                                         tick_from_cache = max( [o["max_tick"] for o in candles_data \
                                             if  o["resolution"] == 5])
-
-                                        log.warning (tick_from_exchange)
-                                        log.warning (tick_from_cache)
 
                                         if tick_from_exchange > tick_from_cache:
                                             await sleep_and_restart()
