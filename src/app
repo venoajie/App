@@ -108,8 +108,11 @@ async def chart_trade_in_msg(
         tick_from_cache = max( [o["max_tick"] for o in candles_data \
             if  o["resolution"] == 5])
 
-        if tick_from_exchange > tick_from_cache:
-            await sleep_and_restart()
+        if tick_from_exchange < tick_from_cache:
+            return True
+        
+        else:
+            await sleep_and_restart()            
 
     else:
         
