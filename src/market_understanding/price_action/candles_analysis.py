@@ -13,8 +13,8 @@ def analysis_based_on_length(
         Returns:
             _type_: _description_
     """
-    
-    candles_arrays = [o["candles_summary"] for o in data_per_resolution][0]
+    log.info (f"data_per_resolution {data_per_resolution}")
+    candles_arrays = data_per_resolution[0]
 
     candle_type = candles_arrays [-1, :, 0] #(last_column_third_row)
     wicks_up = candles_arrays [-1, :, 1] #(last_column_third_row)
