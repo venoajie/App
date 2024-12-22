@@ -43,7 +43,8 @@ def analysis_based_on_length(
 
 
 def get_market_condition(
-    candles_data: object,
+    np: object,
+    candles_data: list,
     currency_upper: str
     ):
     """

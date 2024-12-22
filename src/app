@@ -507,6 +507,7 @@ class RunningStrategy(ModifyOrderDb):
                                         currency_lower: str =currency
                                         
                                         market_condition = get_market_condition(
+                                            np,
                                             candles_data,
                                             currency_upper
                                             )
