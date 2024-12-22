@@ -484,7 +484,8 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         market_condition = get_market_condition(
                                             np,
-                                            cached_candles_data,currency
+                                            cached_candles_data,
+                                            currency_upper
                                             )
                                         
                                         log.warning (market_condition)
