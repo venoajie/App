@@ -110,7 +110,7 @@ async def chart_trade_in_msg(
         
         log.error (f" {tick_from_exchange} tick_from_cache {tick_from_cache} {tick_from_exchange < tick_from_cache}")
 
-        if tick_from_exchange < tick_from_cache:
+        if tick_from_exchange <= tick_from_cache:
             return True
         
         else:
