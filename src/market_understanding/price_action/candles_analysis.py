@@ -39,13 +39,12 @@ def analysis_based_on_length(
             body_length_exceed_average = body_length_exceed_average,
             is_long_body = (is_long_body),
             )
-)
-            
+)            
 
 
 def get_market_condition(
-    candles_data,
-    currency_upper
+    candles_data: object,
+    currency_upper: str
     ):
     """
     """
