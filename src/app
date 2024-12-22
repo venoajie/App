@@ -94,6 +94,26 @@ def cached_ticker_data(currencies):
 
     return result
 
+async def chart_trade_in_msg(
+    message_channel,
+    data_orders,
+    candles_data,
+    ):
+    """
+    """
+
+    if "chart.trades" in message_channel:
+        tick_from_exchange= data_orders["tick"]
+
+        tick_from_cache = max( [o["max_tick"] for o in candles_data \
+            if  o["resolution"] == 5])
+
+        if tick_from_exchange > tick_from_cache:
+            await sleep_and_restart()
+
+    else:
+        
+        return False
 
 def cached_candles_data(
     currencies,
@@ -465,17 +485,13 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     data_orders: list = message["params"]["data"] 
                                     
-                                    if "chart.trades" in message_channel:
-                                        tick_from_exchange= data_orders["tick"]
-                                        log.warning (data_orders)
-
-                                        tick_from_cache = max( [o["max_tick"] for o in candles_data \
-                                            if  o["resolution"] == 5])
-
-                                        if tick_from_exchange > tick_from_cache:
-                                            await sleep_and_restart()
+                                    chart_trade = await chart_trade_in_msg(
+                                        message_channel,
+                                        data_orders,
+                                        candles_data,
+                                        )
                                     
-                                    else:
+                                    if not chart_trade:
                                     
                                         instrument_name_perpetual = data_orders["instrument_name"]
                                         
