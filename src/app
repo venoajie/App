@@ -139,19 +139,18 @@ def cached_candles_data(
             candles_analysis_result = candles_analysis.analysis_based_on_length(
                                             np,
                                             three_dim_sequence)
-            log.debug (f"ohlc {ohlc}")
+
             max_tick = max([o['tick']  for o in ohlc ])
-            log.debug (f"max_tick {max_tick}")
             
             result.append (dict(
-            instrument_name = instrument_name,
-            resolution = (resolution),
-            max_tick = (max_tick),
-            #ohlc = (ohlc),
-            #candles_summary = (three_dim_sequence),
-            candles_analysis = (candles_analysis_result),
-            )
-)
+                instrument_name = instrument_name,
+                resolution = (resolution),
+                max_tick = (max_tick),
+                #ohlc = (ohlc),
+                #candles_summary = (three_dim_sequence),
+                candles_analysis = (candles_analysis_result),
+                )
+                           )
             
     return result
 
