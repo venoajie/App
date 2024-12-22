@@ -121,7 +121,7 @@ def get_market_condition(
     strong_bullish = candle_type_60 >= 2 and candle_is_long_60 >= 2
     bullish = candle_type_15 > 2 and candle_is_long_60 >= 2
     weak_bullish = candle_type_5 > 2
-    neutral = candle_is_long_60 = 0 and candle_is_long_15 = 0 and candle_is_long_5 = 0
+    neutral = candle_is_long_60 == 0 and candle_is_long_15 == 0 and candle_is_long_5 == 0
     weak_bearish = True
     bearish = candle_type_15 <= -2 and candle_is_long_60 >= 2
     strong_bearish = candle_type_60 <= -2 and candle_is_long_60 >= 2
