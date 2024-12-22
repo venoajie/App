@@ -13,7 +13,7 @@ def analysis_based_on_length(
         Returns:
             _type_: _description_
     """
-    log.info (f"data_per_resolution {data_per_resolution}")
+
     candles_arrays = data_per_resolution#[0]
 
     candle_type = candles_arrays [-1, :, 0] #(last_column_third_row)
@@ -34,4 +34,9 @@ def analysis_based_on_length(
     log.warning (f" avg_body_length {avg_body_length}")
     log.warning (f" body_length_exceed_average {body_length_exceed_average}")
     
-    return 
+    return  (dict(
+            body_length_exceed_average = body_length_exceed_average,
+            is_long_body = (is_long_body),
+            )
+)
+            
