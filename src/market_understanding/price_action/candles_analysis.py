@@ -23,7 +23,11 @@ def analysis_based_on_length(
 
         candles_arrays = [o["candles_summary"] for o in data_per_resolution][0]
 
-        body_length = candles_arrays [-1, :, 3] #(last_column_third_row)
+        candle_type = candles_arrays [-1, :, 0] #(last_column_third_row)
+        wicks_up = candles_arrays [-1, :, 1] #(last_column_third_row)
+        wicks_down = candles_arrays [-1, :, 2] #(last_column_third_row)
+        body_size = candles_arrays [-1, :, 3] #(last_column_third_row)
+        body_length = candles_arrays [-1, :, 4] #(last_column_third_row)
         mean_body_length = np.average(body_length)
         
         print(candles_arrays)

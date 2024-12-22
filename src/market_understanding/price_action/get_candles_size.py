@@ -83,7 +83,7 @@ def my_generator_candle(
     """
     first_row = 0
     
-    parameters = len(["candle_type", "wicks_up", "wicks_down", "body_size", "height"])
+    parameters = len(["candle_type", "wicks_up", "wicks_down", "body_size", "length"])
 
     arr = np.empty((1,lookback,parameters),
                    int)
