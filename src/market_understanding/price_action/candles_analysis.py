@@ -1,6 +1,12 @@
-from db_management import sql_executing_queries
-import asyncio
+
 from loguru import logger as log
+
+
+from transaction_management.deribit.api_requests import (
+    get_ohlc_data)
+
+from utilities.string_modification import (
+    remove_list_elements)
 
 def analysis_based_on_length(
     np: object,
@@ -51,6 +57,7 @@ def get_market_condition(
     """
     candles_data_instrument = [o for o in candles_data \
                                                 if currency_upper in o["instrument_name"]]
+    log.warning (candles_data_instrument)
     
     candle_60 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 60]
     candle_60_type = np.sum([o["candle_type"] for o in candle_60])
@@ -73,19 +80,19 @@ def get_market_condition(
     
     candle_60_no_long = candle_60_is_long == 0
     
-    strong_bullish = candle_60_type >= 2 and candle_60_long_body_more_than_2
-    
-    bullish = candle_15_type > 2 and candle_60_is_long >= 2
-    
     weak_bullish = candle_5_type > 2
+
+    weak_bearish = candle_5_type < -2
+        
+    neutral = not weak_bearish and not weak_bullish
     
-    neutral = candle_60_no_long and candle_15_is_long == 0 and candle_5_is_long == 0
+    bullish = weak_bullish and candle_15_type > 1 and candle_60_is_long >= 1
+
+    bearish = weak_bearish and candle_15_type <= -1 and candle_60_is_long >= 1
     
-    weak_bearish = True
+    strong_bullish = bullish and candle_60_long_body_more_than_2
     
-    bearish = candle_15_type <= -2 and candle_60_is_long >= 2
-    
-    strong_bearish = candle_60_type <= -2 and candle_60_long_body_more_than_2
+    strong_bearish = bearish and candle_60_long_body_more_than_2
     
     return dict(
                 strong_bullish = strong_bullish,
@@ -96,4 +103,155 @@ def get_market_condition(
                 bearish = bearish,
                 strong_bearish = strong_bearish,
                 )
+
+
+def ohlc_to_candlestick(conversion_array):
+    
+    candlestick_data = [0,0,0,0,0,0]
+    
+    open = conversion_array[0]
+    high = conversion_array[1]
+    low = conversion_array[2]
+    close = conversion_array[3]
+    
+    body_size=abs(close-open)
+    height=abs(high-low)
+
+    if close>open:
+        candle_type=1
+        wicks_up=abs(high-close)
+        wicks_down=abs(low-open)
+
+    else:
+        candle_type=-1
+        wicks_up=abs(high-open)
+        wicks_down=abs(low-close)
+
+    candlestick_data[0]=candle_type
+    
+    candlestick_data[1]=round(round(wicks_up,5),2)
+    
+    candlestick_data[2]=round(round(wicks_down,5),2)
+    
+    candlestick_data[3]=round(round(body_size,5),2)
+
+    candlestick_data[4]=round(round(height,5),2)
+
+    candlestick_data[5]= (round(round(body_size/height,5),2)>70/100) * 1
+    
+    return candlestick_data
+
+def my_generator_candle(
+    np: object,
+    data: object,
+    lookback: int
+    )->list:
+    
+    """_summary_
+        https://github.com/MikePapinski/DeepLearning/blob/master/PredictCandlestick/CandleSTick%20patterns%20prediction/JupyterResearch_0.1.ipynb
+        https://mikepapinski.github.io/deep%20learning/machine%20learning/python/forex/2018/12/15/Predict-Candlestick-patterns-with-Keras-and-Forex-data.md.html
+    
+    Args:
+        data (_type_): _description_
+        lookback (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    first_row = 0
+    
+    parameters = len(["candle_type", "wicks_up", "wicks_down", "body_size", "length", "is_long_body"])
+
+    arr = np.empty((1,lookback,parameters),
+                   int)
+    
+    for a in range(len(data)-lookback):
+        
+#        log.debug (f"data my_generator_candle {data} lookback {lookback}")
+        
+        temp_list = []
+        for candle in data[first_row:first_row+lookback]:
+
+            converted_data = ohlc_to_candlestick(candle)
+            #log.info (f"converted_data  {converted_data} candle {candle}")
+            temp_list.append(converted_data)
+        
+        temp_list2 = np.asarray(temp_list)
+        templist3 = [temp_list2]
+        templist4 = np.asarray(
+            templist3,
+            dtype = "f4"
+            )
+#        log.info (f"templist4  {templist4}")
+#        log.warning (f"arr  1 {arr}")
+        arr = np.append(
+            arr, 
+            templist4, 
+            axis=0
+            )
+#        log.warning (f"arr  2 {arr}")
+        first_row=first_row+1
+    
+    return arr
+
+
+def cached_candles_data(
+    np: object,
+    currencies: list,
+    qty_candles,
+    resolutions):
+    """_summary_
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    
+    dtype = [
+        ("open", "f4"),
+        ("high", "f4"),
+        ("low", "f4"),
+        ("close", "f4"),]
+        
+    result =[]
+    for currency in currencies:
+        instrument_name = f"{currency}-PERPETUAL"
+        
+        for resolution in resolutions:
+
+            ohlc = get_ohlc_data (
+                instrument_name, 
+                qty_candles, 
+                resolution
+                )
+
+            ohlc_without_ticks = remove_list_elements(ohlc, "tick")
+            
+            np_users_data = np.array(ohlc_without_ticks)
+
+            np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
+
+            three_dim_sequence = (my_generator_candle(
+                np,
+                np_data[1:],
+                3))
+            
+            candles_analysis_result = analysis_based_on_length(
+                                            np,
+                                            three_dim_sequence)
+
+            max_tick = max([o['tick']  for o in ohlc ])
+            
+            result.append (dict(
+                instrument_name = instrument_name,
+                resolution = (resolution),
+                max_tick = (max_tick),
+                #ohlc = (ohlc),
+                #candles_summary = (three_dim_sequence),
+                candles_analysis = (candles_analysis_result),
+                )
+                           )
+            
+    return result
 

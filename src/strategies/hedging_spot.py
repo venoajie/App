@@ -193,54 +193,6 @@ def check_if_minimum_waiting_time_has_passed(
     return cancel_allowed
 
 
-async def get_market_condition_hedging(
-    TA_result_data, 
-    index_price, 
-    threshold
-    ) -> dict:
-    
-    """ """
-    neutral_price, rising_price, falling_price = False, False, False
-    strong_rising_price, strong_falling_price = False, False
-    
-    TA_data=[o for o in TA_result_data \
-        if o["tick"] == max([i["tick"] for i in TA_result_data])][0]
-
-    open_60 = TA_data["60_open"]
-
-    fluctuation_exceed_threshold = TA_data["1m_fluctuation_exceed_threshold"]
-
-    delta_price_pct = delta_pct(
-        index_price,
-        open_60
-        )
-    
-    if fluctuation_exceed_threshold or True:
-
-        if index_price > open_60:
-            rising_price = True
-
-            if delta_price_pct > threshold:
-                strong_rising_price = True
-
-        if index_price < open_60:
-            falling_price = True
-
-            if delta_price_pct > threshold:
-                strong_falling_price = True
-
-    if not rising_price  and not falling_price :
-        neutral_price = True
-
-    return dict(
-        rising_price=rising_price,
-        strong_rising_price=strong_rising_price,
-        neutral_price=neutral_price,
-        falling_price=falling_price,
-        strong_falling_price=strong_falling_price,
-    )
-
-
 def current_hedge_position_exceed_max_position (
     sum_my_trades_currency_str: int, 
     max_position: float) -> bool:
@@ -273,7 +225,7 @@ class HedgingSpot(BasicStrategy):
     
     notional: float
     my_trades_currency_strategy: int
-    TA_result_data: list
+    market_condition: list
     index_price: float
     sum_my_trades_currency_strategy: int= fields 
     over_hedged_opening: bool= fields 
@@ -326,12 +278,12 @@ class HedgingSpot(BasicStrategy):
         if len_orders == 0:
             
             #bullish = market_condition["rising_price"]
-            bearish = market_condition["falling_price"]
+            bearish = market_condition["bearish"]
 
             #strong_bullish = market_condition["strong_rising_price"]
-            strong_bearish = market_condition["strong_falling_price"]     
+            strong_bearish = market_condition["strong_bearish"]     
             
-            neutral = market_condition["neutral_price"]              
+            neutral = market_condition["neutral"]              
         
             max_position = self.max_position
             
@@ -467,20 +419,14 @@ class HedgingSpot(BasicStrategy):
             hedging_attributes: dict = self.strategy_parameters
         else:
             hedging_attributes: dict = strategy_params
-               
-        threshold_market_condition: float = hedging_attributes ["delta_price_pct"]
-        
+                       
         waiting_minute_before_cancel= hedging_attributes["waiting_minute_before_cancel"] * ONE_MINUTE
 
-        market_condition: dict = await get_market_condition_hedging(
-            self.TA_result_data,
-            self.index_price,
-            threshold_market_condition
-            )
+        market_condition: dict = self.market_condition
         
-        bullish, strong_bullish = market_condition["rising_price"], market_condition["strong_rising_price"]
+        bullish, strong_bullish = market_condition["bullish"], market_condition["strong_bullish"]
 
-        bearish, strong_bearish = market_condition["falling_price"], market_condition["strong_falling_price"]
+        bearish, strong_bearish = market_condition["bearish"], market_condition["strong_bearish"]
         #neutral = market_condition["neutral_price"]
         
         timestamp: int = transaction["timestamp"]
@@ -613,21 +559,15 @@ class HedgingSpot(BasicStrategy):
         len_open_orders: int = get_transactions_len(open_orders_label)
         
         hedging_attributes= self.strategy_parameters
-        
-        threshold_market_condition= hedging_attributes ["delta_price_pct"]
-        
-        market_condition = await get_market_condition_hedging(
-            self.TA_result_data, 
-            self.index_price, 
-            threshold_market_condition
-            )
+                
+        market_condition =   self.market_condition
 
         #bullish = market_condition["rising_price"]
-        bearish = market_condition["falling_price"]
+        bearish = market_condition["bearish"]
 
         #strong_bullish = market_condition["strong_rising_price"]
-        strong_bearish = market_condition["strong_falling_price"]
-        neutral = market_condition["neutral_price"]
+        strong_bearish = market_condition["strong_bearish"]
+        neutral = market_condition["neutral"]
         params: dict = self.get_basic_params().get_basic_opening_parameters(ask_price)
         
         weighted_factor= hedging_attributes["weighted_factor"]
@@ -744,17 +684,9 @@ class HedgingSpot(BasicStrategy):
         if len_label == 0\
             and  exit_size_not_over_bought:
                 
-            hedging_attributes = self.strategy_parameters
+            market_condition = self.TA_result_data
 
-            threshold_market_condition = hedging_attributes ["delta_price_pct"]
-                
-            market_condition = await get_market_condition_hedging (
-                self.TA_result_data,
-                self.index_price,
-                threshold_market_condition
-                )
-
-            bullish, strong_bullish = market_condition["rising_price"], market_condition["strong_rising_price"]
+            bullish, strong_bullish = market_condition["bullish"], market_condition["strong_bullish"]
 
             len_orders: int = get_transactions_len(closed_orders_label)
                 

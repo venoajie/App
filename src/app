@@ -25,14 +25,11 @@ from db_management.sqlite_management import (
     querying_table,
     update_status_data)
 from market_understanding.price_action import get_candles_size
-from market_understanding.price_action.candles_analysis import (
-    analysis_based_on_length,
-    get_market_condition)
+from market_understanding.price_action.candles_analysis import (cached_candles_data)
 from strategies.basic_strategy import (
     get_label_integer,)
 from strategies.hedging_spot import (
-    HedgingSpot,
-    get_market_condition_hedging)
+    HedgingSpot)
 from strategies.cash_carry.combo_auto import(
     ComboAuto,
     check_if_minimum_waiting_time_has_passed)
@@ -120,65 +117,6 @@ async def chart_trade_in_msg(
     else:
         
         return False
-
-def cached_candles_data(
-    currencies,
-    qty_candles,
-    resolutions):
-    """_summary_
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    
-    dtype = [
-        ("open", "f4"),
-        ("high", "f4"),
-        ("low", "f4"),
-        ("close", "f4"),]
-        
-    result =[]
-    for currency in currencies:
-        instrument_name = f"{currency}-PERPETUAL"
-        
-        for resolution in resolutions:
-
-            ohlc = get_ohlc_data (
-                instrument_name, 
-                qty_candles, 
-                resolution
-                )
-
-            ohlc_without_ticks = remove_list_elements(ohlc, "tick")
-            
-            np_users_data = np.array(ohlc_without_ticks)
-
-            np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
-
-            three_dim_sequence = (get_candles_size.my_generator_candle(
-                np,
-                np_data[1:],
-                3))
-            
-            candles_analysis_result = analysis_based_on_length(
-                                            np,
-                                            three_dim_sequence)
-
-            max_tick = max([o['tick']  for o in ohlc ])
-            
-            result.append (dict(
-                instrument_name = instrument_name,
-                resolution = (resolution),
-                max_tick = (max_tick),
-                #ohlc = (ohlc),
-                #candles_summary = (three_dim_sequence),
-                candles_analysis = (candles_analysis_result),
-                )
-                           )
-            
-    return result
 
 def update_cached_ticker_data(
     instrument_name,
@@ -437,10 +375,13 @@ class RunningStrategy(ModifyOrderDb):
                     resolutions = [60,15, 5]     
                     qty_candles = 5       
                     
-                    candles_data = cached_candles_data(
+                    market_condition = cached_candles_data(
+                        np,
                         currencies,
                         qty_candles,
                         resolutions)  
+
+                    log.warning (market_condition)
                     
                     while self.websocket_client.open:
                         
@@ -494,7 +435,7 @@ class RunningStrategy(ModifyOrderDb):
                                     chart_trade = await chart_trade_in_msg(
                                         message_channel,
                                         data_orders,
-                                        candles_data,
+                                        market_condition,
                                         )
                                     
                                     if not chart_trade:
@@ -505,13 +446,6 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         currency_upper: str = currency.upper()
                                         currency_lower: str =currency
-                                        
-                                        market_condition = get_market_condition(
-                                            np,
-                                            candles_data,
-                                            currency_upper
-                                            )
-                                        log.warning (market_condition)
                                         
                                         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                         
@@ -637,15 +571,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 ONE_MINUTE = ONE_SECOND * 60   
                                                 
                                                 notional: float = compute_notional_value(index_price, equity)
-                                                
-                                                TA_result_data_all = await querying_table("market_analytics_json")
-                                                
-                                                TA_result_data_only=  TA_result_data_all["list_data_only"]
-
-                                                TA_result_data = [o for o in TA_result_data_only if currency_upper in o["instrument"]]                                                                                                    
-                                                                                                
-                                                tick_TA=  max([o["tick"] for o in TA_result_data])
-                                                            
+                                                  
                                                 delta_time = server_time-tick_TA
                                                 
                                                 delta_time_seconds = delta_time/ONE_SECOND   
@@ -655,17 +581,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 if delta_time_expiration < 0:
                                                     
                                                     await sleep_and_restart ()
-                                
-                                                if delta_time_seconds > THRESHOLD_DELTA_TIME_SECONDS:
-                                                    
-                                                    log.warning (f"delta_time_seconds < 120 {delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS} {delta_time_seconds} tick_TA {tick_TA}")
-                                                    
-                                                    await self.modify_order_and_db.cancel_the_cancellables(
-                                                        order_db_table,
-                                                        currency,
-                                                        cancellable_strategies
-                                                        )
-                                                    
+                                    
                                                 reconciliation_direction = ["from_sub_account_to_order_db","from_order_db_to_sub_account"]
                                                 for  direction in reconciliation_direction:
                                                     await reconciling_orders(
@@ -720,6 +636,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             strategy_params,
                                                             orders_currency_strategy,
                                                             server_time,
+                                                            market_condition,
                                                             my_trades_currency_strategy,
                                                             ticker_perpetual_instrument_name,
                                                             )
@@ -954,15 +871,9 @@ class RunningStrategy(ModifyOrderDb):
                                                             if o["settlement_period"] != "month" and\
                                                                 o["kind"] == "future"] 
                                                                 
-                                                        market_condition: dict = await get_market_condition_hedging(
-                                                            TA_result_data,
-                                                            index_price,
-                                                            threshold_market_condition
-                                                            )
-                                                        
-                                                        strong_bearish = market_condition["strong_falling_price"]
+                                                        strong_bearish = market_condition["strong_bearish"]
                                                     
-                                                        bearish = market_condition["falling_price"]
+                                                        bearish = market_condition["bearish"]
                                                         #log.error (f"market_condition {market_condition}")
                                                                                                             
                                                         instrument_ticker =   modify_hedging_instrument (
@@ -986,7 +897,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             strategy_params,
                                                             max_position,
                                                             my_trades_currency_strategy,
-                                                            TA_result_data,
+                                                            market_condition,
                                                             index_price,
                                                             )
                                                                                                                 
