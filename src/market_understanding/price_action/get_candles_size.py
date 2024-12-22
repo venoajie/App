@@ -48,7 +48,7 @@ def ohlc_to_candlestick(conversion_array):
         wicks_down=abs(low-open)
 
     else:
-        candle_type=0
+        candle_type=-1
         wicks_up=abs(high-open)
         wicks_down=abs(low-close)
 
@@ -62,7 +62,7 @@ def ohlc_to_candlestick(conversion_array):
 
     candlestick_data[4]=round(round(height,5),2)
 
-    candlestick_data[5]=round(round(body_size/height,5),2)>70/100
+    candlestick_data[5]= (round(round(body_size/height,5),2)>70/100) * 1
     
     return candlestick_data
 

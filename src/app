@@ -106,27 +106,30 @@ def get_market_condition(
     candles_data_60 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 60]
     candle_type_60 = np.sum([o["candle_type"] for o in candles_data_60])
     candles_data_5 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 5]
+    candle_type_5 = np.sum([o["candle_type"] for o in candles_data_5])
     candles_data_15 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 15]
+    candle_type_15 = np.sum([o["candle_type"] for o in candles_data_15])
+    
     log.warning (candles_data_60)
     log.debug (candles_data_5)
     log.debug (candle_type_60)
     log.warning (candles_data_15)
     
-    bullish = True
-    strong_bullish = True
-    weak_bullish = True
+    strong_bullish = candle_type_60 >= 2
+    bullish = candle_type_15 > 2
+    weak_bullish = candle_type_5 > 2
     neutral = True
-    bearish = True,
     weak_bearish = True
-    strong_bearish = True
+    bearish = True,
+    strong_bearish = candle_type_60 <= -2
     
     return dict(
-                bullish = bullish,
                 strong_bullish = strong_bullish,
+                bullish = bullish,
                 weak_bullish = weak_bullish,
                 neutral = neutral,
-                bearish = bearish,
                 weak_bearish = weak_bearish,
+                bearish = bearish,
                 strong_bearish = strong_bearish,
                 )
 
