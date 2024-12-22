@@ -467,7 +467,7 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     if "chart.trades" in message_channel:
                                         tick_from_exchange= data_orders["tick"]
-                                        log.warning (tick_from_exchange)
+                                        log.warning (data_orders)
 
                                         tick_from_cache = max( [o["max_tick"] for o in candles_data \
                                             if  o["resolution"] == 5])
