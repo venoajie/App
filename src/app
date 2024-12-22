@@ -108,8 +108,6 @@ async def chart_trade_in_msg(
         tick_from_cache = max( [o["max_tick"] for o in candles_data \
             if  o["resolution"] == 5])
         
-        log.error (f" {tick_from_exchange} tick_from_cache {tick_from_cache} {tick_from_exchange < tick_from_cache}")
-
         if tick_from_exchange <= tick_from_cache:
             return True
         
@@ -505,7 +503,7 @@ class RunningStrategy(ModifyOrderDb):
                                         currency_upper: str = currency.upper()
                                         currency_lower: str =currency
                                     
-                                        candles_data_instrument = [o for o in candles_data \
+                                        candles_data_instrument = [o["candles_analysis"] for o in candles_data \
                                                 if currency_upper in o["instrument_name"]]
                                         
                                         log.warning (candles_data_instrument)
