@@ -1,10 +1,7 @@
 
 from loguru import logger as log
-
-
 from transaction_management.deribit.api_requests import (
     get_ohlc_data)
-
 from utilities.string_modification import (
     remove_list_elements)
 
@@ -141,14 +138,9 @@ def my_generator_candle(
 def combining_candles_data(
     np: object,
     currencies: list,
-    qty_candles,
-    resolutions):
-    """_summary_
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
+    qty_candles: int,
+    resolutions: int):
+    """
     """
     
     dtype = [
@@ -156,6 +148,8 @@ def combining_candles_data(
         ("high", "f4"),
         ("low", "f4"),
         ("close", "f4"),]
+    
+    dim_sequence = 3
         
     result =[]
     for currency in currencies:
@@ -178,7 +172,7 @@ def combining_candles_data(
             three_dim_sequence = (my_generator_candle(
                 np,
                 np_data[1:],
-                3))
+                dim_sequence))
             
             candles_analysis_result = analysis_based_on_length(
                                             np,
@@ -207,8 +201,7 @@ def get_market_condition(
     ):
     """
     """
-    candles_data_instrument = [o for o in candles_data \
-                                                if currency_upper in o["instrument_name"]]
+    candles_data_instrument = [o for o in candles_data if currency_upper in o["instrument_name"]]
     log.warning (candles_data_instrument)
     
     candle_60 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 60]

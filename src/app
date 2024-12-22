@@ -480,7 +480,7 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         len_sub_account_orders_all = len(sub_account_orders)
                                         
-                                        log.error (f" len_sub_account_orders_all {len_sub_account_orders_all}")
+                                        #log.error (f" len_sub_account_orders_all {len_sub_account_orders_all}")
                                         
                                         market_condition = get_market_condition(
                                             np,
