@@ -377,6 +377,7 @@ async def reconciling_orders(
     try:
 
         sub_account_orders = sub_account["open_orders"]
+        log.warning (f"orders_currency {orders_currency}")
                     
         if direction == "from_order_db_to_sub_account":
             orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in orders_currency  ])
@@ -385,6 +386,7 @@ async def reconciling_orders(
 
             orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in sub_account_orders  ])
                     
+        log.warning (f"orders_instrument_name {orders_instrument_name}")
         if orders_instrument_name:
             
             for instrument_name in orders_instrument_name:
