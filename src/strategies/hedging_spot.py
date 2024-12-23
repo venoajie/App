@@ -315,7 +315,7 @@ class HedgingSpot(BasicStrategy):
                     and fluctuation_exceed_threshold
                 )
             
-            log.info (f"order_allowed {order_allowed} fluctuation_exceed_threshold {fluctuation_exceed_threshold}")
+            log.info (f"order_allowed {order_allowed} ")
             log.info (f" size_and_order_appropriate_for_ordering {size_and_order_appropriate_for_ordering} over_hedged_cls {over_hedged_cls}  { (size_and_order_appropriate_for_ordering or over_hedged_cls)}")
 
             if order_allowed :
