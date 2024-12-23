@@ -10,9 +10,8 @@ from loguru import logger as log
 # user defined formula
 from db_management.sqlite_management import(
     insert_tables,
-    deleting_row,)
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,)
+    deleting_row,
+    update_status_data)
 from utilities.string_modification import (
     remove_double_brackets_in_list,
     remove_redundant_elements)
@@ -93,3 +92,20 @@ async def clean_up_closed_futures_because_has_delivered_(
     await insert_tables("my_trades_closed_json", closing_transaction)
 
     
+    
+async def updating_delivered_instruments(
+    archive_db_table: str,
+    instrument_name: str) -> None:
+    """ """
+    
+    where_filter = f"instrument_name"
+    
+    await update_status_data(
+                archive_db_table,
+                "is_open",
+                where_filter,
+                instrument_name,
+                0,
+                "="
+                )
+                
