@@ -25,28 +25,16 @@ def get_settlement_period (strategy_attributes) -> list:
             )
     
 def is_instrument_name_has_delivered(
-    currencies: list, 
     instrument_name: list,
-    strategy_attributes: list,
+    instrument_attributes_futures_all
     )-> bool:
-    
-    settlement_periods = get_settlement_period (strategy_attributes)
-    
-    futures_instruments = get_futures_instruments (
-            currencies,
-            settlement_periods
-            )  
-    
-    instrument_attributes_futures_all = futures_instruments["active_futures"]   
-    
+        
     active_futures_instrument =  [o["instrument_name"] for o in instrument_attributes_futures_all]
     
-    return instrument_name not in active_futures_instrument
-        
-        
-        
+    log.debug (f"active_futures_instrument {active_futures_instrument}")
     
-        
+    return instrument_name not in active_futures_instrument
+            
 
 async def clean_up_closed_futures_because_has_delivered_(
     instrument_name, 

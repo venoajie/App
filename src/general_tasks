@@ -392,29 +392,6 @@ async def reconciling_size(
                     my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
                         if o["label"] is not None]
                     
-                    settlement_periods = get_settlement_period (strategy_attributes)
-                    
-                    futures_instruments = get_futures_instruments (
-                    currencies,
-                    settlement_periods
-                    )  
-                    
-                    min_expiration_timestamp = futures_instruments["min_expiration_timestamp"] 
-                    
-                    instrument_attributes_futures_all = futures_instruments["active_futures"]     
-                                                                                                        
-                    delta_time_expiration = min_expiration_timestamp - server_time  
-                    
-                    if delta_time_expiration < 0:
-                        
-                        await updating_expired_instruments(
-                            currency,
-                            archive_db_table,
-                            instrument_attributes_futures_all,
-                            min_expiration_timestamp,
-                            my_trades_currency_active,
-                            )
-
                     if my_trades_currency_active:
                         
                         pairing_label = await pairing_single_label(
@@ -495,6 +472,29 @@ async def reconciling_size(
                                         1000
                                         )
                                     
+                    settlement_periods = get_settlement_period (strategy_attributes)
+                    
+                    futures_instruments = get_futures_instruments (
+                    currencies,
+                    settlement_periods
+                    )  
+                    
+                    min_expiration_timestamp = futures_instruments["min_expiration_timestamp"] 
+                    
+                    instrument_attributes_futures_all = futures_instruments["active_futures"]     
+                                                                                                        
+                    delta_time_expiration = min_expiration_timestamp - server_time  
+                    
+                    if delta_time_expiration < 0:
+                        
+                        await updating_expired_instruments(
+                            currency,
+                            archive_db_table,
+                            instrument_attributes_futures_all,
+                            min_expiration_timestamp,
+                            my_trades_currency_active,
+                            )
+                                    
                     my_trades_instruments = ([ o for o in my_trades_currency_active ]
                                         )
                     my_trades_instruments_name = remove_redundant_elements(
@@ -504,11 +504,11 @@ async def reconciling_size(
                     log.debug (f"my_trades_instruments_name {my_trades_instruments_name}")
                     
                     for my_trade_instrument in my_trades_instruments_name:
+                        
                         instrument_name_has_delivered = is_instrument_name_has_delivered(
-                            currencies, 
                             my_trade_instrument,
-                            strategy_attributes
-                            )
+                            instrument_attributes_futures_all,)
+                        
                         log.debug (f"instrument_name_has_delivered {instrument_name_has_delivered}")
                         
                         if instrument_name_has_delivered:
