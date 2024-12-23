@@ -914,6 +914,8 @@ class RunningStrategy(ModifyOrderDb):
                                                             market_condition,
                                                             index_price,
                                                             )
+                                                        
+                                                        log.warning (f"vsize_future_reconciled {size_future_reconciled}")
                                                                                                                 
                                                         if size_future_reconciled:      
                                                     
