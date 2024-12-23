@@ -112,6 +112,8 @@ async def chart_trade_in_msg(
             return True
         
         else:
+            
+            log.warning ("upfate ohlc")
             await sleep_and_restart()            
 
     else:
@@ -581,7 +583,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 delta_time_expiration = min_expiration_timestamp - server_time  
                                                 
                                                 if delta_time_expiration < 0:
-                                                    
+                                                    log.critical ("delta_time_expiration < 0")
                                                     await sleep_and_restart ()
                                     
                                                 reconciliation_direction = ["from_sub_account_to_order_db","from_order_db_to_sub_account"]
@@ -1084,6 +1086,7 @@ class RunningStrategy(ModifyOrderDb):
                     except Exception as error :
                         pass 
                     
+                    log.warning ("processing order done")
                     await sleep_and_restart ()
                     
         except Exception as error:
