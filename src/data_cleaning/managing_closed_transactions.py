@@ -215,7 +215,7 @@ def get_unrecorded_trade_transactions(
 
         log.debug(f"unrecorded_time_stamp {unrecorded_time_stamp} {delivered_from_transaction_log_instrument}")
         
-        return max(unrecorded_time_stamp)
+        return [] if not unrecorded_time_stamp else max(unrecorded_time_stamp)
     
     
 def get_transactions_with_closed_label(transactions_all: list) -> list:
