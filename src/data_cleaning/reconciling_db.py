@@ -378,49 +378,51 @@ async def reconciling_orders(
 
         sub_account_orders = sub_account["open_orders"]
         log.warning (f"orders_currency {orders_currency}")
-                    
-        if direction == "from_order_db_to_sub_account":
-            orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in orders_currency  ])
         
-        if direction == "from_sub_account_to_order_db":
-
-            orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in sub_account_orders  ])
-                    
-        log.warning (f"orders_instrument_name {orders_instrument_name}")
-        if orders_instrument_name:
-            
-            for instrument_name in orders_instrument_name:
-                
-                currency = extract_currency_from_text (instrument_name)
-
-                len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
-                    sub_account,
-                    instrument_name,
-                    orders_currency)
-                
-                if not len_order_is_reconciled_each_other:
-                                
-                    sub_account_instrument_name = [o for o in sub_account_orders \
-                        if instrument_name in o["instrument_name"]]
-                            
-                    where_filter = f"instrument_name"
-                    
-                    await deleting_row (
-                        "orders_all_json",
-                        "databases/trading.sqlite3",
-                        where_filter,
-                        "=",
-                        instrument_name,
-                    )
-                    
-                    for order in sub_account_instrument_name:
+        if orders_currency:
                         
-                        await insert_tables(
-                                    order_db_table, 
-                                    order
-                                    )
+            if direction == "from_order_db_to_sub_account":
+                orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in orders_currency  ])
+            
+            if direction == "from_sub_account_to_order_db":
+
+                orders_instrument_name = remove_redundant_elements([o["instrument_name"] for o in sub_account_orders  ])
+                        
+            log.warning (f"orders_instrument_name {orders_instrument_name}")
+            if orders_instrument_name:
+                
+                for instrument_name in orders_instrument_name:
                     
-                    await modify_order_and_db. resupply_sub_accountdb(currency)
+                    currency = extract_currency_from_text (instrument_name)
+
+                    len_order_is_reconciled_each_other =  check_whether_order_db_reconciled_each_other (
+                        sub_account,
+                        instrument_name,
+                        orders_currency)
+                    
+                    if not len_order_is_reconciled_each_other:
+                                    
+                        sub_account_instrument_name = [o for o in sub_account_orders \
+                            if instrument_name in o["instrument_name"]]
+                                
+                        where_filter = f"instrument_name"
+                        
+                        await deleting_row (
+                            "orders_all_json",
+                            "databases/trading.sqlite3",
+                            where_filter,
+                            "=",
+                            instrument_name,
+                        )
+                        
+                        for order in sub_account_instrument_name:
+                            
+                            await insert_tables(
+                                        order_db_table, 
+                                        order
+                                        )
+                        
+                        await modify_order_and_db. resupply_sub_accountdb(currency)
                 
     except Exception as error:
         log.warning(error)
