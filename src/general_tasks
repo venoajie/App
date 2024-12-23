@@ -473,8 +473,6 @@ async def reconciling_size(
                                         [o["instrument_name"] for o in my_trades_instruments ]
                                         )
                     
-                    log.debug (f"my_trades_instruments_name {my_trades_instruments_name}")
-                    
                     for my_trade_instrument in my_trades_instruments_name:
                         
                         instrument_name_has_delivered = is_instrument_name_has_delivered(
@@ -488,14 +486,15 @@ async def reconciling_size(
                             await updating_delivered_instruments(
                                 archive_db_table,
                                 my_trade_instrument)
- 
-                                
+             
                             await update_instruments_per_currency(currency)
                             
                             log.debug (f" inactive instrument_name {my_trade_instrument}")
                             
                             query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log_type"
-                            from_transaction_log = await executing_query_with_return (query_log)                 
+                            from_transaction_log = await executing_query_with_return (query_log)  
+                            
+                            #! need to be completed to compute rl from instrument name               
 
                             from_transaction_log_instrument_name = ([o for o in from_transaction_log\
                                 if o["instrument_name"] == my_trade_instrument])  

@@ -30,8 +30,6 @@ def is_instrument_name_has_delivered(
         
     active_futures_instrument =  [o["instrument_name"] for o in instrument_attributes_futures_all]
     
-    log.debug (f"active_futures_instrument {active_futures_instrument} instrument_name_tested {instrument_name} ")
-    
     return instrument_name not in active_futures_instrument
             
 
