@@ -490,7 +490,7 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         log.warning (market_condition)
 
-                                        if False and sub_account :
+                                        if sub_account :
                                             
                                             query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
                                                                                     
@@ -615,7 +615,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     #get_unpaired_transaction = get_unpaired_transaction(
                                                     #my_trades_currency_strategy)
                                                     
-                                                    if    "futureSpread" in strategy :
+                                                    if  False and   "futureSpread" in strategy :
                                                                             
                                                         log.warning (f"strategy {strategy}-START")    
                                                         log.warning (f"strategy {strategy_params}-START")    
@@ -880,8 +880,25 @@ class RunningStrategy(ModifyOrderDb):
                                                         strong_bearish = market_condition["strong_bearish"]
                                                     
                                                         bearish = market_condition["bearish"]
+                                                        weak_bullish = market_condition["weak_bullish"]
+                                                        weak_bearish = market_condition["weak_bearish"]
+                                                        bullish = market_condition["bullish"]
+                                                        strong_bullish = market_condition["strong_bullish"]
                                                         #log.error (f"market_condition {market_condition}")
-                                                                                                            
+                                                                                                                    
+                                                        if not strong_bullish or bullish:
+                                                            multiply_factor = 1                                                         
+                                                        if weak_bullish:
+                                                            multiply_factor = .8                                                         
+                                                        elif weak_bearish:
+                                                            multiply_factor = 1.1                                                       
+                                                        elif bearish:
+                                                            multiply_factor = 1.3                                                         
+                                                        elif strong_bearish:
+                                                            multiply_factor = 1.5                                                      
+    
+                                                        max_position: int = notional * -1 * multiply_factor
+                                                                   
                                                         instrument_ticker =   modify_hedging_instrument (
                                                             strong_bearish,
                                                             bearish,
@@ -895,9 +912,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             position_without_combo,
                                                             my_trades_currency_all,
                                                             instrument_name)
-    
-                                                        max_position: int = notional * -1
-                                                            
+                                                                                                     
                                                         hedging = HedgingSpot(
                                                             strategy,
                                                             strategy_params,

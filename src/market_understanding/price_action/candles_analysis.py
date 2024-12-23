@@ -222,22 +222,30 @@ def get_market_condition(
     log.warning (candle_15)
     
     candle_60_long_body_more_than_2 = candle_60_is_long >= 2
+    candle_5_long_body_any = candle_5_is_long >0
+    candle_15_long_body_any = candle_15_is_long >0
+    candle_60_long_body_any = candle_60_is_long >0
     
     candle_60_no_long = candle_60_is_long == 0
+        
+    neutral = True
+    weak_bullish,  weak_bearish = False, False
+    bullish,  bearish = False, False
+    strong_bullish,  strong_bearish = False, False
     
-    weak_bullish = candle_5_type > 2
-
-    weak_bearish = candle_5_type < -2
+    if candle_5_long_body_any:
+        weak_bullish = candle_5_type > 0
+        weak_bearish = candle_5_type < 0
+    
+    if candle_60_long_body_any and candle_15_long_body_any:
+        bullish = weak_bullish and candle_15_type > 0 
+        bearish = weak_bearish and candle_15_type < 0 
+    
+    if candle_60_long_body_more_than_2:
+        strong_bullish = bullish and candle_60_long_body_more_than_2
+        strong_bearish = bearish and candle_60_long_body_more_than_2
         
     neutral = not weak_bearish and not weak_bullish
-    
-    bullish = weak_bullish and candle_15_type > 1 and candle_60_is_long >= 1
-
-    bearish = weak_bearish and candle_15_type <= -1 and candle_60_is_long >= 1
-    
-    strong_bullish = bullish and candle_60_long_body_more_than_2
-    
-    strong_bearish = bearish and candle_60_long_body_more_than_2
     
     return dict(
                 strong_bullish = strong_bullish,
