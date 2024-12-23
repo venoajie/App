@@ -914,9 +914,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             market_condition,
                                                             index_price,
                                                             )
-                                                        
-                                                        log.warning (f"vsize_future_reconciled {size_future_reconciled}")
-                                                                                                                
+                                                                                    
                                                         if size_future_reconciled:      
                                                     
                                                             instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
@@ -943,9 +941,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     orders_currency_strategy,
                                                                     best_ask_prc,
                                                                     archive_db_table,
-                                                                    trade_db_table
-                                                                    
-                                                                    )
+                                                                    trade_db_table)
                                                                 
                                                                 await self.processing_orders(send_order)
                                                                     

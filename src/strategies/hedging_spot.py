@@ -684,7 +684,7 @@ class HedgingSpot(BasicStrategy):
         if len_label == 0\
             and  exit_size_not_over_bought:
                 
-            market_condition = self.TA_result_data
+            market_condition = self.market_condition
 
             bullish, strong_bullish = market_condition["bullish"], market_condition["strong_bullish"]
 
