@@ -509,6 +509,7 @@ async def reconciling_size(
                             my_trade_instrument,
                             strategy_attributes
                             )
+                        log.debug (f"instrument_name_has_delivered {instrument_name_has_delivered}")
                         
                         if instrument_name_has_delivered:
                                 
