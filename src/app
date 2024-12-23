@@ -582,7 +582,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                                                                                   
                                                 delta_time_expiration = min_expiration_timestamp - server_time  
                                                 
-                                                log.debug (transactions_expired = [o for o in instrument_attributes_futures_all if o ["expiration_timestamp"] == min_expiration_timestamp])
+                                                log.debug ( [o for o in instrument_attributes_futures_all if o ["expiration_timestamp"] == min_expiration_timestamp])
                                                 
                                                 if delta_time_expiration < 0:
                                                     log.critical ("delta_time_expiration < 0")
