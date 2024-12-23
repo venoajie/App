@@ -577,11 +577,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 ONE_MINUTE = ONE_SECOND * 60   
                                                 
                                                 notional: float = compute_notional_value(index_price, equity)
-                                                  
-                                                delta_time = server_time-tick_TA
-                                                
-                                                delta_time_seconds = delta_time/ONE_SECOND   
-                                                
+                                                                                                                                                  
                                                 delta_time_expiration = min_expiration_timestamp - server_time  
                                                 
                                                 if delta_time_expiration < 0:
@@ -931,8 +927,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                                                     
                                                             #something was wrong because perpetuals were actively traded. cancell  orders
                                                             if instrument_time_left_exceed_threshold\
-                                                                and len_sub_account_orders_all < 50\
-                                                                    and delta_time_seconds < THRESHOLD_DELTA_TIME_SECONDS:
+                                                                and len_sub_account_orders_all < 50:
                                                                 
                                                                 my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy \
                                                                     if "open" in (o["label"])]
