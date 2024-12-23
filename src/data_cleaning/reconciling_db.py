@@ -277,14 +277,10 @@ def is_size_sub_account_and_my_trades_reconciled(
     """
     
     try:
-        log.debug (f"sum_my_trades_currency_all {sum_my_trades_currency_all} {instrument_name}")
-        log.debug (f"position_without_combo {position_without_combo}")
 
         sub_account_size_instrument = [] if not position_without_combo\
             else ([(o["size"]) for o in position_without_combo \
                 if instrument_name in o["instrument_name"]])
-        
-        log.debug (f"sub_account_size_instrument {sub_account_size_instrument}")
         sub_account_size_instrument = 0 \
             if sub_account_size_instrument == []\
                 else sub_account_size_instrument [0]
