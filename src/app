@@ -35,7 +35,7 @@ from strategies.cash_carry.combo_auto import(
     ComboAuto,
     check_if_minimum_waiting_time_has_passed)
 from transaction_management.deribit.api_requests import (
-    get_tickers)
+    get_tickers,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -57,6 +57,8 @@ from utilities.system_tools import (
     provide_path_for_file,
     raise_error_message,
     sleep_and_restart,)
+
+
 
 # Using the LRUCache decorator function with a maximum cache size of 3
 def cached_ticker_data(currencies):
@@ -186,7 +188,6 @@ def compute_notional_value(
     ) -> float:
     """ """
     return index_price * equity
-
 
 
 def get_index (
@@ -579,16 +580,6 @@ class RunningStrategy(ModifyOrderDb):
                                                 ONE_MINUTE = ONE_SECOND * 60   
                                                 
                                                 notional: float = compute_notional_value(index_price, equity)
-                                                                                                                                                  
-                                                delta_time_expiration = min_expiration_timestamp - server_time  
-                                                
-                                                log.debug ( [o["instrument_name"] for o in instrument_attributes_futures_all if o ["expiration_timestamp"] == min_expiration_timestamp])
-                                                
-                                                if delta_time_expiration < 0:
-                                                    log.critical ("delta_time_expiration < 0")
-                                                    transactions_expired = [o for o in instrument_attributes_futures_all if o ["expiration_timestamp"] == min_expiration_timestamp]
-                                                    log.debug (transactions_expired)
-                                                    await sleep_and_restart ()
                                     
                                                 reconciliation_direction = ["from_sub_account_to_order_db","from_order_db_to_sub_account"]
                                                 for  direction in reconciliation_direction:

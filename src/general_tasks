@@ -24,7 +24,8 @@ from db_management.sqlite_management import (
     executing_query_with_return,
     insert_tables, 
     querying_arithmetic_operator,
-    querying_duplicated_transactions)
+    querying_duplicated_transactions,
+    update_status_data)
 from market_understanding.technical_analysis import (
     insert_market_condition_result)
 from strategies.cash_carry.reassigning_labels import (
@@ -33,6 +34,8 @@ from strategies.cash_carry.reassigning_labels import (
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -256,6 +259,18 @@ async def get_instruments_from_deribit(currency) -> float:
 
     return result
 
+async def update_instruments_per_currency(currency):
+
+    instruments = await get_instruments_from_deribit(currency)
+
+    my_path_instruments = provide_path_for_file("instruments", 
+                                                currency)
+
+    replace_data(
+        my_path_instruments,
+        instruments
+        )
+    
 async def update_instruments(idle_time):
 
     try:
@@ -268,15 +283,7 @@ async def update_instruments(idle_time):
 
             for currency in currencies:
 
-                instruments = await get_instruments_from_deribit(currency)
-
-                my_path_instruments = provide_path_for_file("instruments", 
-                                                            currency)
-
-                replace_data(
-                    my_path_instruments,
-                    instruments
-                    )
+                await update_instruments_per_currency(currency)
 
             my_path_cur = provide_path_for_file("currencies")
 
@@ -290,6 +297,40 @@ async def update_instruments(idle_time):
     except Exception as error:
         await async_raise_error_message(error)
 
+async def updating_expired_instruments(
+    currency: str,
+    archive_db_table: str,
+    instrument_attributes_futures_all: list,
+    min_expiration_timestamp: int,
+    my_trades_currency: list,) -> None:
+    """ """
+    
+    expired_instrument_name = [o["instrument_name"]  for o in instrument_attributes_futures_all \
+        if o ["expiration_timestamp"] == min_expiration_timestamp]
+                                                    
+    for instrument_name in expired_instrument_name:
+        
+        expired_trade_id = [o["trade_id"] for o in my_trades_currency \
+            if instrument_name in o["instrument_name"]]
+        
+        if expired_trade_id:
+            
+            for trade_id in expired_trade_id:
+                
+                where_filter = f"trade_id"
+                                                                            
+                await update_status_data(
+                    archive_db_table,
+                    "is_open",
+                    where_filter,
+                    trade_id,
+                    0,
+                    "="
+                    )
+                    
+    await update_instruments_per_currency(currency)
+    
+    
 async def reconciling_size(
     sub_account_id: str,
     config_app: list,
@@ -350,7 +391,30 @@ async def reconciling_size(
                     
                     my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
                         if o["label"] is not None]
-                                        
+                    
+                    settlement_periods = get_settlement_period (strategy_attributes)
+                    
+                    futures_instruments = get_futures_instruments (
+                    currencies,
+                    settlement_periods
+                    )  
+                    
+                    min_expiration_timestamp = futures_instruments["min_expiration_timestamp"] 
+                    
+                    instrument_attributes_futures_all = futures_instruments["active_futures"]     
+                                                                                                        
+                    delta_time_expiration = min_expiration_timestamp - server_time  
+                    
+                    if delta_time_expiration < 0:
+                        
+                        await updating_expired_instruments(
+                            currency,
+                            archive_db_table,
+                            instrument_attributes_futures_all,
+                            min_expiration_timestamp,
+                            my_trades_currency_active,
+                            )
+
                     if my_trades_currency_active:
                         
                         pairing_label = await pairing_single_label(
@@ -436,6 +500,8 @@ async def reconciling_size(
                     my_trades_instruments_name = remove_redundant_elements(
                                         [o["instrument_name"] for o in my_trades_instruments ]
                                         )
+                    
+                    log.debug (f"my_trades_instruments_name {my_trades_instruments_name}")
                     
                     for my_trade_instrument in my_trades_instruments_name:
                         instrument_name_has_delivered = is_instrument_name_has_delivered(
