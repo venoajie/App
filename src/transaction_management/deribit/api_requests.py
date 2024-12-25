@@ -512,9 +512,10 @@ def get_api_end_point(
         params.update({"params": {"with_portfolio": True}})
         
     if endpoint == "get_open_orders":
-        params.update({"params": {"kind": params["kind"], 
-                                  "type": params["type"]
-                                  }})
+        end_point_params = dict(kind=params["kind"], 
+                                type=params["type"]
+        )
+        params.update({"params": end_point_params})
         
         
     return dict(jsonrpc="2.0",
