@@ -527,7 +527,8 @@ class StreamAccountData(ModifyOrderDb):
             
             log.info(msg)
 
-            return await self.websocket_client.send(json.dumps(msg))
+            result = await self.websocket_client.send(json.dumps(msg))
+            return orjson.loads(result)
 
         
         #msg: dict = {
