@@ -504,10 +504,10 @@ def get_api_end_point(
     endpoint,
     parameters: dict = None)-> dict:
     
-    endpoint=f"private/{endpoint}"
+    private_endpoint=f"private/{endpoint}"
     
     params = {}
-    params.update({"endpoint": endpoint})
+    params.update({"endpoint": private_endpoint})
     if endpoint == "get_subaccounts":
         params.update({"params": {"with_portfolio": True}})
 
