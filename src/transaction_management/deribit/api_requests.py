@@ -350,20 +350,6 @@ class SendApiRequest:
                                          )
     
         return order_result
-    
-
-    async def get_subaccounts(self)-> list:
-        # Set endpoint
-        endpoint: str = "private/get_subaccounts"
-
-        params = {"with_portfolio": True}
-    
-        result_sub_account = await private_connection (self.sub_account_id,
-                                                       endpoint=endpoint, 
-                                                       params=params,)
-        
-        return result_sub_account["result"]
-
 
     async def get_subaccounts_details(
         self,
@@ -497,3 +483,54 @@ class SendApiRequest:
                                           endpoint=endpoint,
                                           params=params)
         return result
+
+
+    
+
+    async def get_subaccounts(self)-> list:
+        # Set endpoint
+        endpoint: str = "private/get_subaccounts"
+
+        params = {"with_portfolio": True}
+    
+        result_sub_account = await private_connection (self.sub_account_id,
+                                                       endpoint=endpoint, 
+                                                       params=params,)
+        
+        return result_sub_account["result"]
+
+
+def get_api_end_point(
+    endpoint,
+    params: dict = None)-> dict:
+    
+    method=f"private/{endpoint}"
+    
+    params = {}
+    if endpoint == "get_subaccounts":
+        params.update({"params": {"with_portfolio": True}})
+        
+    if endpoint == "get_open_orders":
+        params.update({"params": {"kind": params[0], 
+                                  "type": params[1]
+                                  }})
+        
+        
+    return dict(jsonrpc="2.0",
+                method=method,
+                id=100,
+                params=params,
+                )
+
+
+async def get_subaccounts(self)-> list:
+    # Set endpoint
+    endpoint: str = "private/get_subaccounts"
+
+    params = {"with_portfolio": True}
+
+    result_sub_account = await private_connection (self.sub_account_id,
+                                                    endpoint=endpoint, 
+                                                    params=params,)
+    
+    return result_sub_account["result"]
