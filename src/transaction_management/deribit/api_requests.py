@@ -508,7 +508,7 @@ def get_api_end_point(
     
     params = {}
     params.update({"jsonrpc": "2.0"})
-    params.update({"endpoint": private_endpoint})
+    params.update({"method": private_endpoint})
     if endpoint == "get_subaccounts":
         params.update({"params": {"with_portfolio": True}})
 
