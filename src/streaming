@@ -194,6 +194,23 @@ class StreamAccountData(ModifyOrderDb):
                     # Authenticate WebSocket Connection
                     await self.ws_auth()
                     
+                    while self.websocket_client.open:
+                        
+                        open_orders = (
+                                self.ws_operation(
+                                    operation = "get_open_orders", 
+                                    ws_channel = {"kind": "future",
+                                                  "type": "trigger_all"})
+                                )
+                            
+                        message: dict = orjson.loads(open_orders)
+
+                        message: bytes = await self.websocket_client.recv()
+                        message: dict = orjson.loads(open_orders)
+
+                        log.info(message)
+
+
                     # Establish Heartbeat
                     await self.establish_heartbeat()
 
@@ -499,6 +516,14 @@ class StreamAccountData(ModifyOrderDb):
             )
             msg.update(extra_params)
 
+        if "rest_api" in source:
+
+            extra_params: dict = await get_end_point_result("get_open_orders",
+                                                 {"kind": "future",
+                                                  "type": "trigger_all"})
+            msg.update(extra_params)
+
+        log.info(msg)
         #msg: dict = {
         #    "jsonrpc": "2.0",
         #    "method": f"private/{operation}",
