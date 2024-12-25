@@ -506,8 +506,7 @@ def get_api_end_point(
     
     method=f"private/{endpoint}"
     log.info(params)
-    
-    params = {}
+
     if endpoint == "get_subaccounts":
         params.update({"params": {"with_portfolio": True}})
         
