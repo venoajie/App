@@ -200,7 +200,7 @@ class StreamAccountData(ModifyOrderDb):
                     msg: dict = {
                         "jsonrpc": "2.0",
                         "method": f"private/{endpoint}",
-                        "id": id,
+                        "id": 100,
                         "params":  params,
                     }
                     log.info(msg)
