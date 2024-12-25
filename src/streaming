@@ -539,10 +539,7 @@ class StreamAccountData(ModifyOrderDb):
             log.info(extra_params)
             log.info(msg)
 
-            result = await self.websocket_client.send(json.dumps(msg))
-            await self.websocket_client.recv()
-            log.info(result)
-            return orjson.loads(result)
+            await self.websocket_client.send(json.dumps(msg))
 
         
         #msg: dict = {
