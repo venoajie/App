@@ -203,6 +203,7 @@ class StreamAccountData(ModifyOrderDb):
                         "id": id,
                         "params":  params,
                     }
+                    log.info(msg)
 
                     self.loop.create_task(await self.websocket_client.send(json.dumps(msg)))
                     message: bytes = await self.websocket_client.recv()
