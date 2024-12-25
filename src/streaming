@@ -194,7 +194,7 @@ class StreamAccountData(ModifyOrderDb):
                     # Authenticate WebSocket Connection
                     await self.ws_auth()
                     
-                    msg: str = get_end_point_result("get_open_orders",
+                    msg: str = await get_end_point_result("get_open_orders",
                                                  {"kind": "future",
                                                   "type": "trigger_all"})
                     
