@@ -204,12 +204,15 @@ class StreamAccountData(ModifyOrderDb):
                         "params":  params,
                     }
                     log.info(msg)
+                    
+                    while self.websocket_client.open:
+                            
 
-                    (await self.websocket_client.send(json.dumps(msg)))
-                    message: bytes = await self.websocket_client.recv()
-                    message: dict = orjson.loads(message)
+                        (await self.websocket_client.send(json.dumps(msg)))
+                        message: bytes = await self.websocket_client.recv()
+                        message: dict = orjson.loads(message)
 
-                    log.info(message)
+                        log.info(message)
 
 
                     # Establish Heartbeat
