@@ -202,6 +202,7 @@ class StreamAccountData(ModifyOrderDb):
                         
                                     
                         open_orders = await self.websocket_client.send(json.dumps(extra_params))
+                        log.info(open_orders)
                         await self.websocket_client.recv()
 
                         message: bytes = await self.websocket_client.recv()
