@@ -201,7 +201,7 @@ class StreamAccountData(ModifyOrderDb):
                                     operation = "get_open_orders", 
                                     ws_channel = {"kind": "future",
                                                   "type": "trigger_all"}),
-                                "rest_api"
+                                source = "rest_api"
                                 )
                         log.info(open_orders)
                             
