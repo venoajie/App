@@ -530,4 +530,4 @@ async def get_end_point_result(
     
     result_endpoint = get_api_end_point(endpoint,parameters
                                )
-    return result_endpoint["result"]
+    return result_endpoint#["result"]
