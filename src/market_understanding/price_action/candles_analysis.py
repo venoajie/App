@@ -139,7 +139,8 @@ def combining_candles_data(
     np: object,
     currencies: list,
     qty_candles: int,
-    resolutions: int):
+    resolutions: int,
+    dim_sequence: int = 3):
     """
     """
     
@@ -148,9 +149,7 @@ def combining_candles_data(
         ("high", "f4"),
         ("low", "f4"),
         ("close", "f4"),]
-    
-    dim_sequence = 3
-        
+            
     result =[]
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"

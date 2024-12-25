@@ -377,13 +377,15 @@ class RunningStrategy(ModifyOrderDb):
                     ticker_perpetual = cached_ticker_data(currencies)  
                     
                     resolutions = [60,15, 5]     
-                    qty_candles = 5       
+                    qty_candles = 5  
+                    dim_sequence = 3     
                     
                     cached_candles_data = combining_candles_data(
                         np,
                         currencies,
                         qty_candles,
-                        resolutions)  
+                        resolutions,
+                        dim_sequence)  
                                         
                     while self.websocket_client.open:
                         

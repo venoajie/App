@@ -343,7 +343,6 @@ class HedgingSpot(BasicStrategy):
         exit_params,
         bullish, 
         strong_bullish,
-        len_orders,
         bid_price,
         ) -> bool:
         """ """
@@ -351,51 +350,27 @@ class HedgingSpot(BasicStrategy):
         order_allowed: bool = False
 
         bid_price_is_lower = bid_price < transaction ["price"]
-        
-        over_hedged_opening  =  self.over_hedged_opening
-        
-        if over_hedged_opening :                       
+        over_hedged  =  self.over_hedged_closing
             
-            # immediate order. No further check to traded price
-            if  len_orders == 0:
+        if over_hedged:
+            
+            order_allowed: bool = False
+    
+        else:
+        
+            size = exit_params["size"]   
+            
+            if size != 0 :
                 
-                exit_params.update({"entry_price": bid_price})
+                if (bullish and  bid_price_is_lower ) \
+                    or strong_bullish :
                 
-                size = exit_params["size"]     
-                
-                log.warning (f"""size {size}""")
-                
-                if size != 0:    
+                    exit_params.update({"entry_price": bid_price})
+                        
                     #convert size to positive sign
-                    exit_params.update({"size": abs (exit_params["size"])})
-                    log.info (f"exit_params {exit_params}")
-                    order_allowed = True
-        else:     
-            
-            over_hedged  =  self.over_hedged_closing
-            
-            if over_hedged:
-               
-                order_allowed: bool = False
-        
-            else:
-            
-                size = exit_params["size"]   
-                
-                if size != 0 :
+                    exit_params.update({"size": abs (size)})
                     
-                    if (bullish and  bid_price_is_lower ) \
-                        or strong_bullish :
-                    
-                        if (False if size == 0 else True) \
-                            and len_orders == 0:# and max_order:
-                            
-                            exit_params.update({"entry_price": bid_price})
-                                
-                            #convert size to positive sign
-                            exit_params.update({"size": abs (size)})
-                            
-                            order_allowed: bool = True
+                    order_allowed: bool = True
             
         return order_allowed
 
@@ -675,31 +650,32 @@ class HedgingSpot(BasicStrategy):
         
         label_integer = get_label_integer (transaction["label"])
     
-        len_label = len([o["label"] for o in orders_currency_strategy\
+        closed_orders_int = ([o for o in closed_orders_label\
             if str(label_integer) in o["label"]])
         
-        if len_label == 0\
+        len_closed_orders_int = get_transactions_len(closed_orders_int)
+        
+        log.warning (f" len_closed_orders_int == 0 {len_closed_orders_int == 0}")
+
+        if len_closed_orders_int == 0\
             and  exit_size_not_over_bought:
                 
             market_condition = self.market_condition
 
             bullish, strong_bullish = market_condition["bullish"], market_condition["strong_bullish"]
 
-            len_orders: int = get_transactions_len(closed_orders_label)
-                
             exit_params: dict = self.get_basic_params(). get_basic_closing_paramaters (
                 selected_transaction,
                 closed_orders_label,
                 )
 
-            log.warning (f"sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} over_hedged_opening {self.over_hedged_opening} len_orders == 0 {len_orders == 0}")
+            log.warning (f"sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} over_hedged_opening {self.over_hedged_opening}")
             
             order_allowed = self. closing_position (
                 transaction,
                 exit_params,
                 bullish, 
                 strong_bullish,
-                len_orders,
                 bid_price,
                 )
                     
