@@ -524,10 +524,12 @@ class StreamAccountData(ModifyOrderDb):
                                                  {"kind": "future",
                                                   "type": "trigger_all"})
             msg.update(extra_params)
+            
+            log.info(msg)
 
             return await self.websocket_client.send(json.dumps(msg))
 
-        log.info(msg)
+        
         #msg: dict = {
         #    "jsonrpc": "2.0",
         #    "method": f"private/{operation}",
