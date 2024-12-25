@@ -202,7 +202,6 @@ class StreamAccountData(ModifyOrderDb):
                         extra_params: dict = await get_end_point_result("get_subaccounts")
                                                             
                         await self.websocket_client.send(json.dumps(extra_params))
-                        log.info(message)
 
                         await self.websocket_client.recv()
 
