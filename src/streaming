@@ -506,13 +506,13 @@ class StreamAccountData(ModifyOrderDb):
         
         msg: dict = {
             "jsonrpc": "2.0",
-            "method": f"private/{operation}",
         }
         
         if "ws" in source:
 
             extra_params: dict = dict(
                 id= id,
+                method= f"private/{operation}",
                 params= {"channels": [ws_channel]}
             )
             msg.update(extra_params)

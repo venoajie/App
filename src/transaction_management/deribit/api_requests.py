@@ -504,7 +504,7 @@ def get_api_end_point(
     endpoint,
     parameters: dict = None)-> dict:
     
-    #method=f"{endpoint}"
+    endpoint=f"private/{endpoint}"
     
     params = {}
     if endpoint == "get_subaccounts":
@@ -518,6 +518,7 @@ def get_api_end_point(
         params.update({"params": end_point_params})
         
         
+    params.update({"endpoint": endpoint})
     return params
 
 
