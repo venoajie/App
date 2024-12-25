@@ -505,7 +505,6 @@ def get_api_end_point(
     parameters: dict = None)-> dict:
     
     method=f"private/{endpoint}"
-    log.info(params)
     
     params = {}
     if endpoint == "get_subaccounts":
