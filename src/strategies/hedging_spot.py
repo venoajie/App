@@ -202,7 +202,7 @@ def current_hedge_position_exceed_max_position (
 
 def net_size_of_label (
     my_trades_currency_strategy: list,
-    transaction: list) -> bool:
+    transaction: dict) -> bool:
     """ """
     
     label_integer = get_label_integer (transaction["label"])

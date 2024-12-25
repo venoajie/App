@@ -192,6 +192,24 @@ class StreamAccountData(ModifyOrderDb):
                     
                     # Authenticate WebSocket Connection
                     await self.ws_auth()
+                    
+                    endpoint: str = "get_subaccounts"
+                    
+                    params = {"with_portfolio": True}
+
+                    msg: dict = {
+                        "jsonrpc": "2.0",
+                        "method": f"private/{endpoint}",
+                        "id": id,
+                        "params": {"channels": params},
+                    }
+
+                    message: bytes = await self.websocket_client.recv()
+                    message: dict = orjson.loads(message)
+
+                    log.info(message)
+                    await self.websocket_client.send(json.dumps(msg))
+
 
                     # Establish Heartbeat
                     await self.establish_heartbeat()

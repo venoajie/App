@@ -64,6 +64,7 @@ from utilities.system_tools import (
 def cached_ticker_data(currencies):
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
+    https://medium.com/@jodielovesmaths/memoization-in-python-using-cache-36b676cb21ef
     data caching
     https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
 
@@ -930,7 +931,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     if "open" in (o["label"])]
                                                                 
                                                                 orders_currency_strategy_label_closed = [o for o in orders_currency_strategy \
-                                                                    if "closed" in (o["label"]) ]
+                                                                    if "closed" in o["label"] ]
                                                                 
                                                                 best_ask_prc: float = instrument_ticker["best_ask_price"] 
         
