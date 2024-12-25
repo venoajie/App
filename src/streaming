@@ -198,8 +198,8 @@ class StreamAccountData(ModifyOrderDb):
                     type = "trigger_all"
                     
                     msg: str = get_api_end_point("get_open_orders",
-                                                 {kind,
-                                                  type})
+                                                 {kind: "future",
+                                                  type: "trigger_all"})
                     
                     log.info(msg)
                     

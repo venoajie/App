@@ -512,8 +512,8 @@ def get_api_end_point(
         params.update({"params": {"with_portfolio": True}})
         
     if endpoint == "get_open_orders":
-        params.update({"params": {"kind": params[1], 
-                                  "type": params[2]
+        params.update({"params": {"kind": params["kind"], 
+                                  "type": params["type"]
                                   }})
         
         
