@@ -19,7 +19,7 @@ from configuration import id_numbering, config, config_oci
 from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query)
 from transaction_management.deribit.api_requests import (
-    get_api_end_point,
+    get_end_point_result,
     get_currencies,
     get_instruments,)
 from transaction_management.deribit.get_instrument_summary import (
@@ -194,7 +194,7 @@ class StreamAccountData(ModifyOrderDb):
                     # Authenticate WebSocket Connection
                     await self.ws_auth()
                     
-                    msg: str = get_api_end_point("get_open_orders",
+                    msg: str = get_end_point_result("get_open_orders",
                                                  {"kind": "future",
                                                   "type": "trigger_all"})
                     

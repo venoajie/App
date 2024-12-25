@@ -513,7 +513,8 @@ def get_api_end_point(
     if endpoint == "get_open_orders":
         end_point_params = dict(kind=parameters["kind"], 
                                 type=parameters["type"]
-        )
+                                )
+        
         params.update({"params": end_point_params})
         
         
@@ -523,14 +524,11 @@ def get_api_end_point(
                 )
 
 
-async def get_subaccounts(self)-> list:
+async def get_end_point_result(
+    endpoint,
+    parameters)-> list:
     # Set endpoint
-    endpoint: str = "private/get_subaccounts"
-
-    params = {"with_portfolio": True}
-
-    result_sub_account = await private_connection (self.sub_account_id,
-                                                    endpoint=endpoint, 
-                                                    params=params,)
     
-    return result_sub_account["result"]
+    result = get_api_end_point(endpoint,parameters
+                               )
+    return result["result"]
