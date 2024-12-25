@@ -204,12 +204,12 @@ class StreamAccountData(ModifyOrderDb):
                         
                         
                                     
-                        open_orders = await self.websocket_client.send(json.dumps(extra_params))
-                        log.info(open_orders)
+                        await self.websocket_client.send(json.dumps(extra_params))
+
                         await self.websocket_client.recv()
 
                         message: bytes = await self.websocket_client.recv()
-                        message: dict = orjson.loads(open_orders)
+                        message: dict = orjson.loads(message)
                         
                         open_orders = await self.ws_operation(
                                     operation = "get_open_orders", 
