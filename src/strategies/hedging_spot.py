@@ -350,9 +350,10 @@ class HedgingSpot(BasicStrategy):
         order_allowed: bool = False
 
         bid_price_is_lower = bid_price < transaction ["price"]
-        over_hedged  =  self.over_hedged_closing
-            
-        if over_hedged:
+        over_hedged_closing  =  self.over_hedged_closing
+        over_hedged_opening  =  self.over_hedged_opening
+                    
+        if over_hedged_closing:
             
             order_allowed: bool = False
     
@@ -371,7 +372,9 @@ class HedgingSpot(BasicStrategy):
                     exit_params.update({"size": abs (size)})
                     
                     order_allowed: bool = True
-            
+                    
+        log.warning (f"order_allowed {order_allowed} over_hedged_closing {over_hedged_closing} over_hedged_opening {over_hedged_opening}")
+    
         return order_allowed
 
 
@@ -669,7 +672,7 @@ class HedgingSpot(BasicStrategy):
                 closed_orders_label,
                 )
 
-            log.warning (f"sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} over_hedged_opening {self.over_hedged_opening}")
+            log.warning (f"sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} ")
             
             order_allowed = self. closing_position (
                 transaction,
