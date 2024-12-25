@@ -196,6 +196,17 @@ class StreamAccountData(ModifyOrderDb):
                     
                     while self.websocket_client.open:
                         
+                        extra_params: dict = await get_end_point_result("get_open_orders",
+                                                 {"kind": "future",
+                                                  "type": "trigger_all"})
+                        
+                                    
+                        await self.websocket_client.send(json.dumps(extra_params))
+                        await self.websocket_client.recv()
+
+                        message: bytes = await self.websocket_client.recv()
+                        message: dict = orjson.loads(open_orders)
+                        
                         open_orders = await self.ws_operation(
                                     operation = "get_open_orders", 
                                     ws_channel = {"kind": "future",
@@ -203,6 +214,7 @@ class StreamAccountData(ModifyOrderDb):
                                 source = "rest_api")
                                 
                         log.info(open_orders)
+                        
                             
                         #message: dict = orjson.loads(open_orders)
 
