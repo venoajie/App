@@ -194,22 +194,6 @@ class StreamAccountData(ModifyOrderDb):
                     # Authenticate WebSocket Connection
                     await self.ws_auth()
                     
-                    msg: str = await get_end_point_result("get_open_orders",
-                                                 {"kind": "future",
-                                                  "type": "trigger_all"})
-                    
-                    log.info(msg)
-                    
-                    while self.websocket_client.open:
-                            
-
-                        (await self.websocket_client.send(json.dumps(msg)))
-                        message: bytes = await self.websocket_client.recv()
-                        message: dict = orjson.loads(message)
-
-                        log.info(message)
-
-
                     # Establish Heartbeat
                     await self.establish_heartbeat()
 
@@ -490,7 +474,7 @@ class StreamAccountData(ModifyOrderDb):
         self, 
         operation: str, 
         ws_channel: str, 
-        id: int = 100
+        source: str = "ws"
     ) -> None:
         """
         Requests `public/subscribe` or `public/unsubscribe`
@@ -501,13 +485,26 @@ class StreamAccountData(ModifyOrderDb):
         await asyncio.sleep(sleep_time)
 
         id = id_numbering.id(operation, ws_channel)
-
+        
         msg: dict = {
             "jsonrpc": "2.0",
             "method": f"private/{operation}",
-            "id": id,
-            "params": {"channels": [ws_channel]},
         }
+        
+        if "ws" in source:
+
+            extra_params: dict = dict(
+                id= id,
+                params= {"channels": [ws_channel]}
+            )
+            msg.update(extra_params)
+
+        #msg: dict = {
+        #    "jsonrpc": "2.0",
+        #    "method": f"private/{operation}",
+        #    "id": id,
+        #    "params": {"channels": [ws_channel]},
+        #}
 
         #log.info(ws_channel)
         await self.websocket_client.send(json.dumps(msg))

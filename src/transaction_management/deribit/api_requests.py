@@ -504,12 +504,12 @@ def get_api_end_point(
     endpoint,
     parameters: dict = None)-> dict:
     
-    method=f"private/{endpoint}"
+    method=f"{endpoint}"
     
     params = {}
     if endpoint == "get_subaccounts":
         params.update({"params": {"with_portfolio": True}})
-        
+
     if endpoint == "get_open_orders":
         end_point_params = dict(kind=parameters["kind"], 
                                 type=parameters["type"]
@@ -518,8 +518,7 @@ def get_api_end_point(
         params.update({"params": end_point_params})
         
         
-    return dict(jsonrpc="2.0",
-                method=method,
+    return dict(method=method,
                 params=params,
                 )
 
@@ -529,6 +528,6 @@ async def get_end_point_result(
     parameters)-> list:
     # Set endpoint
     
-    result = get_api_end_point(endpoint,parameters
+    result_endpoint = get_api_end_point(endpoint,parameters
                                )
-    return result["result"]
+    return result_endpoint["result"]
