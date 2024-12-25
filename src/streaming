@@ -201,7 +201,7 @@ class StreamAccountData(ModifyOrderDb):
                         "jsonrpc": "2.0",
                         "method": f"private/{endpoint}",
                         "id": id,
-                        "params": {"channels": params},
+                        "params":  params,
                     }
 
                     self.loop.create_task(await self.websocket_client.send(json.dumps(msg)))
