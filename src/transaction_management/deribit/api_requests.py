@@ -502,17 +502,18 @@ class SendApiRequest:
 
 def get_api_end_point(
     endpoint,
-    params: dict = None)-> dict:
+    parameters: dict = None)-> dict:
     
     method=f"private/{endpoint}"
     log.info(params)
-
+    
+    params = {}
     if endpoint == "get_subaccounts":
         params.update({"params": {"with_portfolio": True}})
         
     if endpoint == "get_open_orders":
-        end_point_params = dict(kind=params["kind"], 
-                                type=params["type"]
+        end_point_params = dict(kind=parameters["kind"], 
+                                type=parameters["type"]
         )
         params.update({"params": end_point_params})
         
