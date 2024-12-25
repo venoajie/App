@@ -518,9 +518,7 @@ def get_api_end_point(
         params.update({"params": end_point_params})
         
         
-    return dict(#method=method,
-                params=params,
-                )
+    return params
 
 
 async def get_end_point_result(
