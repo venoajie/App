@@ -525,7 +525,7 @@ def get_api_end_point(
 
 async def get_end_point_result(
     endpoint,
-    parameters)-> list:
+    parameters: dict = None)-> list:
     # Set endpoint
     
     result_endpoint = get_api_end_point(endpoint,parameters
