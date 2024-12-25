@@ -201,7 +201,7 @@ class StreamAccountData(ModifyOrderDb):
                                                   "type": "trigger_all"})  
                         extra_params: dict = await get_end_point_result("get_subaccounts")
                                                             
-                        message = await self.websocket_client.send(json.dumps(extra_params))
+                        await self.websocket_client.send(json.dumps(extra_params))
                         log.info(message)
 
                         await self.websocket_client.recv()
@@ -210,21 +210,18 @@ class StreamAccountData(ModifyOrderDb):
                         message: dict = orjson.loads(message)
                         
                         log.info(message)
-                        open_orders = await self.ws_operation(
+                        await self.ws_operation(
                                     operation = "get_open_orders", 
                                     ws_channel = {"kind": "future",
                                                   "type": "trigger_all"},
                                 source = "rest_api")
                                 
-                        log.info(open_orders)
-                        
-                            
                         #message: dict = orjson.loads(open_orders)
 
                         message: bytes = await self.websocket_client.recv()
-                        message: dict = orjson.loads(open_orders)
+                        message: dict = orjson.loads(message)
 
-                        log.info(message)
+                        log.debug(message)
 
 
                     # Establish Heartbeat
