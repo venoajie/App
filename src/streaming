@@ -194,7 +194,12 @@ class StreamAccountData(ModifyOrderDb):
                     # Authenticate WebSocket Connection
                     await self.ws_auth()
                     
-                    msg: str = get_api_end_point("get_subaccounts")
+                    kind= "future"
+                    type = "trigger_all"
+                    
+                    msg: str = get_api_end_point("get_open_orders",
+                                                 {kind,
+                                                  type})
                     
                     log.info(msg)
                     

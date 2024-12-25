@@ -518,7 +518,6 @@ def get_api_end_point(
         
     return dict(jsonrpc="2.0",
                 method=method,
-                id=100,
                 params=params,
                 )
 
