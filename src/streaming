@@ -200,7 +200,8 @@ class StreamAccountData(ModifyOrderDb):
                                 await self.ws_operation(
                                     operation = "get_open_orders", 
                                     ws_channel = {"kind": "future",
-                                                  "type": "trigger_all"})
+                                                  "type": "trigger_all"}),
+                                "rest_api"
                                 )
                         log.info(open_orders)
                             
