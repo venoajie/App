@@ -518,7 +518,7 @@ def get_api_end_point(
         
         params.update({"params": end_point_params})
         
-        
+    log.debug (f"params {params}")    
     return params
 
 
