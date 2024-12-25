@@ -201,7 +201,7 @@ class StreamAccountData(ModifyOrderDb):
                                                   "type": "trigger_all"})
                         
                                     
-                        await self.websocket_client.send(json.dumps(extra_params))
+                        open_orders = await self.websocket_client.send(json.dumps(extra_params))
                         await self.websocket_client.recv()
 
                         message: bytes = await self.websocket_client.recv()
