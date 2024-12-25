@@ -202,6 +202,7 @@ class StreamAccountData(ModifyOrderDb):
                                     ws_channel = {"kind": "future",
                                                   "type": "trigger_all"})
                                 )
+                        log.info(open_orders)
                             
                         message: dict = orjson.loads(open_orders)
 
