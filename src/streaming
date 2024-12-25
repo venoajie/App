@@ -205,7 +205,7 @@ class StreamAccountData(ModifyOrderDb):
                     }
                     log.info(msg)
 
-                    self.loop.create_task(await self.websocket_client.send(json.dumps(msg)))
+                    (await self.websocket_client.send(json.dumps(msg)))
                     message: bytes = await self.websocket_client.recv()
                     message: dict = orjson.loads(message)
 
