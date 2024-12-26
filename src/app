@@ -308,16 +308,21 @@ class RunningStrategy(ModifyOrderDb):
                 #currencies= random.sample(currencies_spot,len(currencies_spot))
                 
                 strategy_attributes = config_app["strategies"]
-                                            
-                active_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                
+                strategy_attributes_active = [o for o in strategy_attributes \
                     if o["is_active"]==True]
-
+                                            
+                active_strategies =   [o["strategy_label"] for o in strategy_attributes_active]
+                
                 # get strategies that have not short/long attributes in the label 
-                non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
                     if o["non_checked_for_size_label_consistency"]==True]
                 
-                cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
                     if o["cancellable"]==True]
+                
+                contribute_to_hedging_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
+                    if o["contribute_to_hedging"]==True]
                 
                 relevant_tables = config_app["relevant_tables"][0]
                 
@@ -554,6 +559,12 @@ class RunningStrategy(ModifyOrderDb):
                                                 my_trades_currency: list= [ o for o in my_trades_currency_all \
                                                     if o["label"] is not None] 
                                                 
+                                                log.debug (f"active_strategies {active_strategies}")
+                                                log.debug (f"cancellable_strategies {cancellable_strategies}")
+                                                log.debug (f"contribute_to_hedging_strategies {contribute_to_hedging_strategies}")
+                                                my_trades_currency_contribute_to_hedging = [o for o in my_trades_currency \
+                                                    if (parsing_label(o["label"])["main"] ) in contribute_to_hedging_strategies ]
+                                                log.debug (f"my_trades_currency_contribute_to_hedging {my_trades_currency_contribute_to_hedging}")
                                                 my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency ])
                                                 my_labels= remove_redundant_elements([parsing_label(o["label"])["main"] for o in my_trades_currency ])
                                                 
@@ -876,24 +887,8 @@ class RunningStrategy(ModifyOrderDb):
                                                         strong_bearish = market_condition["strong_bearish"]
                                                     
                                                         bearish = market_condition["bearish"]
-                                                        weak_bullish = market_condition["weak_bullish"]
-                                                        weak_bearish = market_condition["weak_bearish"]
-                                                        bullish = market_condition["bullish"]
-                                                        strong_bullish = market_condition["strong_bullish"]
-                                                        #log.error (f"market_condition {market_condition}")
-                                                                                                                    
-                                                        if not strong_bullish or bullish:
-                                                            multiply_factor = 1                                                         
-                                                        if weak_bullish:
-                                                            multiply_factor = .8                                                         
-                                                        elif weak_bearish:
-                                                            multiply_factor = 1.1                                                       
-                                                        elif bearish:
-                                                            multiply_factor = 1.3                                                         
-                                                        elif strong_bearish:
-                                                            multiply_factor = 1.5                                                      
-    
-                                                        max_position: int = notional * -1 * multiply_factor
+                                                        
+                                                        max_position: int = notional * -1 
                                                                    
                                                         instrument_ticker =   modify_hedging_instrument (
                                                             strong_bearish,

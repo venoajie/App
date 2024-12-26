@@ -14,7 +14,6 @@ from db_management.sqlite_management import (
 from strategies.basic_strategy import (
     BasicStrategy,
     are_size_and_order_appropriate,
-    delta_pct,
     ensure_sign_consistency,
     is_label_and_side_consistent,
     is_minimum_waiting_time_has_passed,
@@ -140,7 +139,7 @@ def get_timing_factor(
     strong_bearish: bool,
     bearish: bool, 
     threshold: float
-    ) -> bool:
+    ) -> float:
     """
     Determine order outstanding timing for size determination.
     strong bearish : 30% of normal interval
@@ -218,6 +217,48 @@ def net_size_not_over_bought (
     return net_size_of_label (
         my_trades_currency_strategy, 
         transaction) < 0
+    
+    
+def size_multiply_factor (market_condition: dict) -> float:
+    """ """
+                             
+    strong_bearish = market_condition["strong_bearish"]
+
+    bearish = market_condition["bearish"]
+    weak_bullish = market_condition["weak_bullish"]
+    weak_bearish = market_condition["weak_bearish"]
+    bullish = market_condition["bullish"]
+    strong_bullish = market_condition["strong_bullish"]
+    
+    multiply_factor = 1
+                                
+    if  bullish  or  strong_bullish:
+        multiply_factor = 0                                                       
+    else:
+        if weak_bullish:
+            multiply_factor = .8                                                          
+        elif strong_bearish:
+            multiply_factor = 1.5                                                       
+        elif bearish:
+            multiply_factor = 1.3                                                        
+        elif weak_bearish:
+            multiply_factor = 1.1                                                      
+    
+    return multiply_factor
+
+def size_to_be_hedged (notional,
+                       sum_my_trades_currency_strategy,
+                       over_hedged_closing,
+                       market_condition: dict) -> float:
+    """ """
+                             
+    multiply = size_multiply_factor (market_condition)
+    
+    max_position =  (abs(notional) + sum_my_trades_currency_strategy) * -1 \
+            if over_hedged_closing\
+                else notional
+    
+    return multiply * max_position
 
 @dataclass(unsafe_hash=True, slots=True)
 class HedgingSpot(BasicStrategy):
@@ -239,11 +280,11 @@ class HedgingSpot(BasicStrategy):
             self.notional
             )        
         self.over_hedged_closing = self.sum_my_trades_currency_strategy > 0       
-        self.max_position =  (abs(self.notional) \
-            + self.sum_my_trades_currency_strategy) * -1 \
-                if self.over_hedged_closing\
-                    else self.notional
-            
+        self.max_position =  size_to_be_hedged (self.notional,
+                       self.sum_my_trades_currency_strategy,
+                       self.over_hedged_closing,
+                       self.market_condition)
+        
     def get_basic_params(self) -> dict:
         """ """
         return BasicStrategy(
@@ -267,7 +308,6 @@ class HedgingSpot(BasicStrategy):
         instrument_name,
         futures_instruments,
         open_orders_label,
-        market_condition,
         params,
         SIZE_FACTOR,
         len_orders) -> bool:
@@ -277,20 +317,10 @@ class HedgingSpot(BasicStrategy):
         
         if len_orders == 0:
             
-            #bullish = market_condition["rising_price"]
-            bearish = market_condition["bearish"]
-
-            #strong_bullish = market_condition["strong_rising_price"]
-            strong_bearish = market_condition["strong_bearish"]     
-            
-            neutral = market_condition["neutral"]              
-        
             max_position = self.max_position
             
             over_hedged_cls  =  self.over_hedged_closing
             
-            fluctuation_exceed_threshold = True #TA_result_data["1m_fluctuation_exceed_threshold"]
-
             size = determine_opening_size(instrument_name, 
                                         futures_instruments, 
                                         params["side"], 
@@ -310,10 +340,7 @@ class HedgingSpot(BasicStrategy):
             )
             
             order_allowed: bool = (
-                    (size_and_order_appropriate_for_ordering or over_hedged_cls)
-                    and (bearish or strong_bearish or neutral)
-                    and fluctuation_exceed_threshold
-                )
+                    (size_and_order_appropriate_for_ordering or over_hedged_cls))
             
             log.info (f"order_allowed {order_allowed} ")
             log.info (f" size_and_order_appropriate_for_ordering {size_and_order_appropriate_for_ordering} over_hedged_cls {over_hedged_cls}  { (size_and_order_appropriate_for_ordering or over_hedged_cls)}")
@@ -561,7 +588,6 @@ class HedgingSpot(BasicStrategy):
             instrument_name,
             futures_instruments,
             open_orders_label,
-            market_condition,
             params,
             SIZE_FACTOR,
             len_open_orders

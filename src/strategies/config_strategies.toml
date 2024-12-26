@@ -90,7 +90,7 @@ reduce_only= true
 [[strategies]]
 strategy_label = "comboAuto"
 is_active = true
-contribute_to_hedging = false
+contribute_to_hedging = true
 cancellable = true
 non_checked_for_size_label_consistency = true
 side = "sell"
