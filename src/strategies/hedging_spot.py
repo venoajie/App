@@ -366,11 +366,12 @@ class HedgingSpot(BasicStrategy):
 
     def closing_position (
         self,
-        transaction,
-        exit_params,
-        bullish, 
-        strong_bullish,
-        bid_price,
+        transaction: dict,
+        exit_params: dict,
+        bullish: bool, 
+        strong_bullish: bool,
+        weak_bullish: bool,
+        bid_price: float,
         ) -> bool:
         """ """
         
@@ -388,10 +389,11 @@ class HedgingSpot(BasicStrategy):
         
             size = exit_params["size"]   
             
-            if size != 0 :
+            if size != 0 \
+                and over_hedged_opening:
                 
-                if (bullish and  bid_price_is_lower ) \
-                    or strong_bullish :
+                if  (weak_bullish and  bid_price_is_lower ) \
+                    or (bullish or strong_bullish) :
                 
                     exit_params.update({"entry_price": bid_price})
                         
@@ -691,7 +693,7 @@ class HedgingSpot(BasicStrategy):
                 
             market_condition = self.market_condition
 
-            bullish, strong_bullish = market_condition["bullish"], market_condition["strong_bullish"]
+            bullish, strong_bullish, weak_bullish = market_condition["bullish"], market_condition["strong_bullish"], market_condition["weak_bullish"]
 
             exit_params: dict = self.get_basic_params(). get_basic_closing_paramaters (
                 selected_transaction,
@@ -705,6 +707,7 @@ class HedgingSpot(BasicStrategy):
                 exit_params,
                 bullish, 
                 strong_bullish,
+                weak_bullish,
                 bid_price,
                 )
                     
