@@ -395,8 +395,7 @@ class HedgingSpot(BasicStrategy):
             if size != 0 \
                 and over_hedged_opening:
                 
-                if  (weak_bullish and  bid_price_is_lower ) \
-                    or (bullish or strong_bullish) :
+                if  weak_bullish or bullish or strong_bullish :
                 
                     exit_params.update({"entry_price": bid_price})
                         
