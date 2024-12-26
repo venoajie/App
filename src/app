@@ -563,8 +563,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     if (parsing_label(o["label"])["main"] ) in contribute_to_hedging_strategies ]
                                                 my_trades_currency_contribute_to_hedging_sum = 0 if  not my_trades_currency_contribute_to_hedging\
                                                     else sum([o["amount"] for o in my_trades_currency_contribute_to_hedging])
-                                                
-                                                log.error (f"my_trades_currency_contribute_to_hedging_sum {my_trades_currency_contribute_to_hedging_sum} my_trades_currency_contribute_to_hedging {my_trades_currency_contribute_to_hedging}")
+                                                    
                                                 my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency ])
                                                 my_labels= remove_redundant_elements([parsing_label(o["label"])["main"] for o in my_trades_currency ])
                                                 
@@ -961,8 +960,11 @@ class RunningStrategy(ModifyOrderDb):
                                                                         "ticker",
                                                                         nearest_transaction_to_index[0]["instrument_name"])
                                                                     
+                                                                    log.error (f"my_trades_currency_contribute_to_hedging {my_trades_currency_contribute_to_hedging}")
+
                                                                     if len_sub_account_orders_all < 50\
-                                                                        and instrument_ticker:
+                                                                        and instrument_ticker\
+                                                                            and my_trades_currency_contribute_to_hedging_sum <=0:
 
                                                                         send_closing_order: dict = await hedging.is_send_exit_order_allowed(
                                                                             orders_currency_strategy_label_closed,
