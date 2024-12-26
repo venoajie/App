@@ -960,7 +960,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         "ticker",
                                                                         nearest_transaction_to_index[0]["instrument_name"])
                                                                     
-                                                                    log.error (f"my_trades_currency_contribute_to_hedging {my_trades_currency_contribute_to_hedging}")
+                                                                    log.error (f"my_trades_currency_contribute_to_hedging_sum {my_trades_currency_contribute_to_hedging_sum}")
 
                                                                     if len_sub_account_orders_all < 50\
                                                                         and instrument_ticker\
