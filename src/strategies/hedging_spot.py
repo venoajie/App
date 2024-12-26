@@ -389,6 +389,7 @@ class HedgingSpot(BasicStrategy):
         
             size = exit_params["size"]   
             
+            log.debug (f"bid_price {bid_price} transaction {transaction}")
             log.warning (f"size != 0 {size} over_hedged_closing {over_hedged_closing} (weak_bullish and  bid_price_is_lower ) {(weak_bullish and  bid_price_is_lower ) }(bullish or strong_bullish) {(bullish or strong_bullish)}")
             
             if size != 0 \
