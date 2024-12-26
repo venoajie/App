@@ -107,7 +107,7 @@ sub_account_max_open_orders = {per_instrument = 50, total = 200}
 
 [[strategies]]
 strategy_label = "custom"
-is_active = true
+is_active = false
 contribute_to_hedging = false
 cancellable = false
 non_checked_for_size_label_consistency = true
