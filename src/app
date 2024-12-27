@@ -609,8 +609,6 @@ class RunningStrategy(ModifyOrderDb):
                                                     strategy_params= [o for o in strategy_attributes \
                                                     if o["strategy_label"] == strategy][0]   
                                                 
-                                                    threshold_market_condition: float = strategy_params ["delta_price_pct"]
-                                
                                                     my_trades_currency_strategy = [o for o in my_trades_currency \
                                                         if strategy in (o["label"]) ]
                                                     
@@ -621,7 +619,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     #get_unpaired_transaction = get_unpaired_transaction(
                                                     #my_trades_currency_strategy)
                                                     
-                                                    if  False and   "futureSpread" in strategy :
+                                                    if  "futureSpread" in strategy :
                                                                             
                                                         log.warning (f"strategy {strategy}-START")    
                                                         log.warning (f"strategy {strategy_params}-START")    
@@ -945,6 +943,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                 if my_trades_currency_strategy_open !=[]:
                                                                                                                                                 
                                                                     best_bid_prc: float = instrument_ticker["best_bid_price"]
+                                                                    log.warning(best_bid_prc)
+                                                                    log.debug(instrument_ticker[0]["best_bid_price"])
                                                                     
                                                                     get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_open]
                                                                     
@@ -970,7 +970,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                             orders_currency_strategy_label_closed,
                                                                             instrument_ticker[0]["best_bid_price"],
                                                                             nearest_transaction_to_index,
-                                                                            orders_currency_strategy
+                                                                            #orders_currency_strategy
                                                                             )
 
                                                                         await self.processing_orders(send_closing_order)

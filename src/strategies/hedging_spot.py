@@ -377,7 +377,7 @@ class HedgingSpot(BasicStrategy):
         
         order_allowed: bool = False
 
-        bid_price_is_lower = bid_price < transaction ["price"]
+        #bid_price_is_lower = bid_price < transaction ["price"]
         over_hedged_closing  =  self.over_hedged_closing
         over_hedged_opening  =  self.over_hedged_opening
                     
@@ -389,8 +389,8 @@ class HedgingSpot(BasicStrategy):
         
             size = exit_params["size"]   
             
-            log.debug (f"bid_price {bid_price} transaction {transaction}")
-            log.warning (f"size != 0 {size} over_hedged_closing {over_hedged_closing} (weak_bullish and  bid_price_is_lower ) {(weak_bullish and  bid_price_is_lower ) }(bullish or strong_bullish) {(bullish or strong_bullish)}")
+            log.debug (f"transaction {transaction}")
+            log.warning (f"size != 0 {size} over_hedged_closing {over_hedged_closing} (bullish or strong_bullish) {(weak_bullish or bullish or strong_bullish)}")
             
             if size != 0 \
                 and over_hedged_opening:
@@ -648,43 +648,25 @@ class HedgingSpot(BasicStrategy):
 
     async def is_send_exit_order_allowed(
         self,
-        closed_orders_label,
+        orders_currency_strategy_label_closed,
         bid_price: float,
         selected_transaction: list,
-        orders_currency_strategy: list
-    ) -> dict:
+        #orders_currency_strategy: list
+        ) -> dict:
         """
-        
-
-        Args:
-            TA_result_data (_type_): _description_
-            index_price (float): _description_
-            bid_price (float): _description_
-            selected_transaction (list): example [  
-                                                {'instrument_name': 'BTC-PERPETUAL', 
-                                                'label': 'hedgingSpot-open-1726878876878', 
-                                                'amount': -10.0, 
-                                                'price': 63218.0, 
-                                                'side': 'sell', 
-                                                'has_closed_label': 0}
-                                                    ]
-            server_time (int): _description_
-
-        Returns:
-            dict: _description_
         """
-        order_allowed = False
+        order_allowed: bool  = False
         
-        transaction = selected_transaction[0]
+        transaction: dict  = selected_transaction[0]
 
         exit_size_not_over_bought = net_size_not_over_bought (
             self.my_trades_currency_strategy,
             transaction
             )
         
-        label_integer = get_label_integer (transaction["label"])
+        label_integer: int  = get_label_integer (transaction["label"])
     
-        closed_orders_int = ([o for o in closed_orders_label\
+        closed_orders_int = ([o for o in orders_currency_strategy_label_closed\
             if str(label_integer) in o["label"]])
         
         len_closed_orders_int = get_transactions_len(closed_orders_int)
@@ -700,7 +682,7 @@ class HedgingSpot(BasicStrategy):
 
             exit_params: dict = self.get_basic_params(). get_basic_closing_paramaters (
                 selected_transaction,
-                closed_orders_label,
+                orders_currency_strategy_label_closed,
                 )
 
             log.warning (f"sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} ")
@@ -714,6 +696,70 @@ class HedgingSpot(BasicStrategy):
                 bid_price,
                 )
                     
+            # default type: limit
+            exit_params.update({"type": "limit"})
+
+        return dict(
+            order_allowed = order_allowed,
+            order_parameters = (
+                [] \
+                    if not order_allowed \
+                        else exit_params
+            ),
+            )
+
+
+
+    async def send_contra_order_for_orphaned_closed_transctions(
+        self,
+        closed_orders_label,
+        bid_price: float,
+        ask_price: float,
+        selected_transaction: list,
+        ) -> dict:
+        """
+        
+        """
+        order_allowed: bool  = False
+        
+        transaction: dict  = selected_transaction[0]
+
+        exit_size_not_over_bought = net_size_not_over_bought (
+            self.my_trades_currency_strategy,
+            transaction
+            )
+        
+        label_integer: int  = get_label_integer (transaction["label"])
+    
+        closed_orders_int = ([o for o in closed_orders_label\
+            if str(label_integer) in o["label"]])
+        
+        len_closed_orders_int = get_transactions_len(closed_orders_int)
+        
+        log.warning (f" len_closed_orders_int == 0 {len_closed_orders_int == 0}")
+
+        if len_closed_orders_int == 0\
+            and  exit_size_not_over_bought:
+                
+            exit_params: dict = self.get_basic_params(). get_basic_closing_paramaters (
+                selected_transaction,
+                closed_orders_label,
+                "contra"
+                )
+
+            log.warning (f"sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} ")
+            
+            size = exit_params["size"]   
+
+            if size != 0 :
+            
+                exit_params.update({"entry_price": ask_price})
+                    
+                #convert size to positive sign
+                exit_params.update({"size": abs (size)})
+                
+                order_allowed: bool = True
+                
             # default type: limit
             exit_params.update({"type": "limit"})
 

@@ -165,20 +165,23 @@ def delta_pct(
 
 def get_label(
     status: str, 
-    label_main_or_label_transactions: str) -> str:
+    label_main_or_label_transactions: str
+    ) -> str:
     """
     provide transaction label
     """
-    from configuration import label_numbering
 
     if status == "open":
+        
+        from configuration import label_numbering
+        
         # get open label
         label = label_numbering.labelling(
             "open",
             label_main_or_label_transactions
             )
 
-    if status == "closed":
+    else:
 
         # parsing label id
         label_id: int = parsing_label(label_main_or_label_transactions)["int"]
@@ -186,8 +189,18 @@ def get_label(
         # parsing label strategy
         label_main: str = parsing_label(label_main_or_label_transactions)["main"]
 
-        # combine id + label strategy
-        label: str = f"""{label_main}-closed-{label_id}"""
+        if status == "contra":
+
+            if "closed" in  label_main_or_label_transactions:
+                label =  f"""{label_main}-open-{label_id}"""
+
+            if "open" in  label_main_or_label_transactions:
+                label =  f"""{label_main}-closed-{label_id}"""
+
+        if status == "closed":
+
+            # combine id + label strategy
+            label: str = f"""{label_main}-closed-{label_id}"""
 
     return label
 
@@ -594,7 +607,8 @@ def check_db_consistencies (
 
 def get_basic_closing_paramaters(
     selected_transaction: list,
-    closed_orders_label_strategy: list
+    closed_orders_label_strategy: list,
+    closed_label_status: str = None
     ) -> dict:
     
     """ """
@@ -606,10 +620,12 @@ def get_basic_closing_paramaters(
 
     # determine side        
     side = provide_side_to_close_transaction(transaction)
-    params.update({"side": side}
-                  )
+    params.update({"side": side})
+    
     basic_size = get_transaction_size(transaction)
-    label_integer_open = get_label_integer(transaction ["label"])
+    
+    label_transaction = transaction ["label"]
+    label_integer_open = get_label_integer(label_transaction)
     
     sum_order_under_closed_label = sum_order_under_closed_label_int (
         closed_orders_label_strategy,
@@ -629,11 +645,18 @@ def get_basic_closing_paramaters(
         )
 
     log.debug (f"sum_order_under_closed_label {sum_order_under_closed_label} label_integer_open {label_integer_open}")
-    #log.warning (f"basic_size {basic_size} size_abs {size_abs} size {size} closing_size_ok {closing_size_ok}")
+
     # size=exactly amount of transaction size
     params.update({"size": size if closing_size_ok else 0 })
+    
+    if closed_label_status is None:
 
-    label_closed: str = get_label("closed", transaction["label"])
+        label_closed: str = get_label("closed", label_transaction)
+
+    else:
+
+        label_closed: str = get_label(closed_label_status, label_transaction)
+        
     params.update({"label": label_closed})
     
     params.update({"instrument_name": transaction ["instrument_name"]})
