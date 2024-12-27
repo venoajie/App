@@ -767,6 +767,7 @@ class ComboAuto (BasicStrategy):
         average_movement: float,
         basic_ticks_for_average_meovement: int,
         max_order_currency: int,
+        market_condition: dict
         ) -> dict:
         """ """
         
@@ -800,7 +801,9 @@ class ComboAuto (BasicStrategy):
         
         len_orders_instrument: list=  0 if not  orders_instrument_open \
             else len(orders_instrument_open)
-        
+            
+        bullish, strong_bullish, weak_bullish = market_condition["bullish"], market_condition["strong_bullish"], market_condition["weak_bullish"]
+        bearish, strong_bearish, weak_bearish = market_condition["bearish"], market_condition["strong_bearish"], market_condition["weak_bearish"]
         
         if delta == 0:            
 
@@ -812,39 +815,56 @@ class ComboAuto (BasicStrategy):
                 )
             #log.debug (f"contango {contango} len_orders_instrument_future_open_all {len_orders_instrument_future_open_all}")
             
-            if contango: 
-                        
-                if len_orders_instrument == 0 \
-                    and len_orders_instrument_future_open_all < max_order_currency\
-                    and "PERPETUAL" not in instrument_name_future:
-        
-                    basic_size = determine_opening_size(
-                        instrument_name_future, 
-                        instrument_attributes_futures, 
-                        notional,
-                        monthly_target_profit,
-                        average_movement,
-                        basic_ticks_for_average_meovement
-                        )
-                    
-                    label_open: str = get_label(
-                        "open", 
-                        self.strategy_label
-                        )
-
-                    order_allowed = True
-                    
-                    # provide placeholder for params
-                    params = {}
-                    params.update({"side": "sell"})                                                       
-                    params.update({"instrument_name": instrument_name_future})
-                    params.update({"size": basic_size})
-                    params.update({"label": label_open})
-                    params.update({"entry_price": ask_price_future})
-                            
-                    # default type: limit
-                    params.update({"type": "limit"})
+            if len_orders_instrument == 0 \
+                    and contango: 
     
+                basic_size = determine_opening_size(
+                    instrument_name_future, 
+                    instrument_attributes_futures, 
+                    notional,
+                    monthly_target_profit,
+                    average_movement,
+                    basic_ticks_for_average_meovement
+                    )
+        
+                    
+                label_open: str = get_label(
+                    "open", 
+                    self.strategy_label
+                    )
+
+                # provide placeholder for params
+                params = {}
+                                                               
+                params.update({"instrument_name": instrument_name_future})
+                params.update({"size": basic_size})
+                params.update({"label": label_open})
+                        
+                # default type: limit
+                params.update({"type": "limit"})
+                
+                if strong_bullish or bullish or weak_bullish\
+                    and "PERPETUAL" in instrument_name_future\
+                        and len_orders_instrument_future_open_all == 0:
+                        
+                        order_allowed = True
+                        
+                        params.update({"entry_price": bid_price_perpetual})
+                        
+                        params.update({"side": "buy"})        
+                                        
+                if strong_bearish or bearish or weak_bearish\
+                    and "PERPETUAL" not in instrument_name_future\
+                        and len_orders_instrument_future_open_all < max_order_currency:
+                            
+                        order_allowed = True
+                        
+                        params.update({"entry_price": ask_price_future})
+                        
+                        params.update({"side": "sell"})        
+                        
+                
+        
         return dict(
             order_allowed=order_allowed,
             order_parameters=[] if order_allowed == False else params,

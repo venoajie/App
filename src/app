@@ -727,7 +727,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                             monthly_target_profit,
                                                                             AVERAGE_MOVEMENT,
                                                                             BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
-                                                                            min(1,max_order_currency)
+                                                                            min(1,max_order_currency),
+                                                                            market_condition
                                                                             )
                                                                 
                                                                         if send_order:
