@@ -960,7 +960,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     
                                                                                     best_bid_prc: float = instrument_ticker["best_bid_price"]
                                                                                     
-                                                                                    best_ask_prc: float = instrument_ticker["best_ask_prc"]
+                                                                                    best_ask_prc: float = instrument_ticker["best_ask_price"]
                                                                                     
                                                                                     get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_status\
                                                                                         if instrument_name in  o["instrument_name"]]
