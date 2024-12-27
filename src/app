@@ -921,12 +921,6 @@ class RunningStrategy(ModifyOrderDb):
                                                             if instrument_time_left_exceed_threshold\
                                                                 and len_sub_account_orders_all < 50:
                                                                 
-                                                                my_trades_currency_strategy_open = [o for o in my_trades_currency_strategy \
-                                                                    if "open" in (o["label"])]
-                                                                
-                                                                orders_currency_strategy_label_closed = [o for o in orders_currency_strategy \
-                                                                    if "closed" in o["label"] ]
-                                                                
                                                                 best_ask_prc: float = instrument_ticker["best_ask_price"] 
         
                                                                 send_order: dict = await hedging.is_send_open_order_allowed(
@@ -939,42 +933,83 @@ class RunningStrategy(ModifyOrderDb):
                                                                     trade_db_table)
                                                                 
                                                                 await self.processing_orders(send_order)
-                                                                    
-                                                                if my_trades_currency_strategy_open !=[]:
-                                                                                                                                                
-                                                                    best_bid_prc: float = instrument_ticker["best_bid_price"]
-                                                                    log.warning(best_bid_prc)
-                                                                    log.debug(instrument_ticker[0]["best_bid_price"])
-                                                                    
-                                                                    get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_open]
-                                                                    
-                                                                    closest_price = get_closest_value(
-                                                                        get_prices_in_label_transaction_main,
-                                                                        best_bid_prc
-                                                                        )
+                                                                
+                                                                status_transaction =["open",
+                                                                         "closed"]
+                                                                
+                                                                if len_sub_account_orders_all < 50:
+                                                                                                                                                        
+                                                                    for status in status_transaction:
+                                                                        my_trades_currency_strategy_status = [o for o in my_trades_currency_strategy \
+                                                                            if status in (o["label"])]
+                                                                            
+                                                                        if my_trades_currency_strategy_status !=[]:
+                                                                            
+                                                                            transaction_instrument_name = remove_redundant_elements (
+                                                                                [o["instrument_name"] for o in my_trades_currency_strategy_status])
+                                                                            
+                                                                            for instrument_name in transaction_instrument_name:
+                                                                                
+                                                                                instrument_ticker: list = reading_from_pkl_data(
+                                                                                    "ticker",
+                                                                                    instrument_name)
+                                                                                
+                                                                                if instrument_ticker:
+                                                                                    
+                                                                                    instrument_ticker = instrument_ticker[0]
+                                                                                    
+                                                                                    best_bid_prc: float = instrument_ticker["best_bid_price"]
+                                                                                    
+                                                                                    best_ask_prc: float = instrument_ticker["best_ask_prc"]
+                                                                                    
+                                                                                    get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_status\
+                                                                                        if instrument_name in  o["instrument_name"]]
+                                                                                    
+                                                                                    log.error (f"my_trades_currency_contribute_to_hedging_sum {my_trades_currency_contribute_to_hedging_sum}")
 
-                                                                    nearest_transaction_to_index = [o for o in my_trades_currency_strategy_open \
-                                                                        if o["price"] == closest_price]
-                                                                    
-                                                                    instrument_ticker: list = reading_from_pkl_data(
-                                                                        "ticker",
-                                                                        nearest_transaction_to_index[0]["instrument_name"])
-                                                                    
-                                                                    log.error (f"my_trades_currency_contribute_to_hedging_sum {my_trades_currency_contribute_to_hedging_sum}")
+                                                                                    if status == "open" and my_trades_currency_contribute_to_hedging_sum <=0:
+                                                                                    
+                                                                                        closest_price = get_closest_value(
+                                                                                            get_prices_in_label_transaction_main,
+                                                                                            best_bid_prc
+                                                                                            )
 
-                                                                    if len_sub_account_orders_all < 50\
-                                                                        and instrument_ticker\
-                                                                            and my_trades_currency_contribute_to_hedging_sum <=0:
+                                                                                        nearest_transaction_to_index = [o for o in my_trades_currency_strategy_status \
+                                                                                            if o["price"] == closest_price]
+                                                                                        
+                                                                                        orders_currency_strategy_label_closed = [o for o in orders_currency_strategy \
+                                                                                            if "closed" in o["label"] ]
+                                                                
+                                                                                    
+                                                                                        send_closing_order: dict = await hedging.is_send_exit_order_allowed(
+                                                                                        orders_currency_strategy_label_closed,
+                                                                                        best_bid_prc,
+                                                                                        nearest_transaction_to_index,
+                                                                                        #orders_currency_strategy
+                                                                                        )
+                                                                                        await self.processing_orders(send_closing_order)
+                                    
+                                                                                    if status == "closed":
+                                                                                    
+                                                                                        closest_price = get_closest_value(
+                                                                                            get_prices_in_label_transaction_main,
+                                                                                            best_ask_prc
+                                                                                            )
 
-                                                                        send_closing_order: dict = await hedging.is_send_exit_order_allowed(
-                                                                            orders_currency_strategy_label_closed,
-                                                                            instrument_ticker[0]["best_bid_price"],
-                                                                            nearest_transaction_to_index,
-                                                                            #orders_currency_strategy
-                                                                            )
-
-                                                                        await self.processing_orders(send_closing_order)
-                                
+                                                                                        nearest_transaction_to_index = [o for o in my_trades_currency_strategy_status \
+                                                                                            if o["price"] == closest_price]
+                                                                                    
+                                                                                        orders_currency_strategy_label_open = [o for o in orders_currency_strategy \
+                                                                                            if "open" in o["label"] ]
+                                                                
+                                                                                        send_closing_order: dict = await hedging.send_contra_order_for_orphaned_closed_transctions(
+                                                                                        orders_currency_strategy_label_open,
+                                                                                        best_ask_prc,
+                                                                                        nearest_transaction_to_index,
+                                                                                        #orders_currency_strategy
+                                                                                        )
+                                                                                        await self.processing_orders(send_closing_order)
+                                    
                                                         if orders_currency_strategy:
                                                             
                                                             for order in orders_currency_strategy:

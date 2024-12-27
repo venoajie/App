@@ -712,8 +712,7 @@ class HedgingSpot(BasicStrategy):
 
     async def send_contra_order_for_orphaned_closed_transctions(
         self,
-        closed_orders_label,
-        bid_price: float,
+        orders_currency_strategy_label_open,
         ask_price: float,
         selected_transaction: list,
         ) -> dict:
@@ -731,27 +730,29 @@ class HedgingSpot(BasicStrategy):
         
         label_integer: int  = get_label_integer (transaction["label"])
     
-        closed_orders_int = ([o for o in closed_orders_label\
+        open_orders_int = ([o for o in orders_currency_strategy_label_open\
             if str(label_integer) in o["label"]])
         
-        len_closed_orders_int = get_transactions_len(closed_orders_int)
+        len_open_orders_int = get_transactions_len(open_orders_int)
         
-        log.warning (f" len_closed_orders_int == 0 {len_closed_orders_int == 0}")
+        log.warning (f" len_closed_orders_int == 0 {len_open_orders_int == 0}")
 
-        if len_closed_orders_int == 0\
+        if len_open_orders_int == 0\
             and  exit_size_not_over_bought:
                 
             exit_params: dict = self.get_basic_params(). get_basic_closing_paramaters (
                 selected_transaction,
-                closed_orders_label,
+                orders_currency_strategy_label_open,
                 "contra"
                 )
 
             log.warning (f"sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy} ")
             
             size = exit_params["size"]   
+            
+            ask_price_is_higher = ask_price > transaction ["price"]
 
-            if size != 0 :
+            if size != 0 and ask_price_is_higher:
             
                 exit_params.update({"entry_price": ask_price})
                     

@@ -535,13 +535,13 @@ async def reconciling_size(
                         my_trades_currency_active
                         )
                     
-                    relabelling = await relabelling_double_ids(
-                        trade_db_table,
-                        archive_db_table,
-                        my_trades_currency_active_free_blanks,
-                        )
+                    #relabelling = await relabelling_double_ids(
+                    #    trade_db_table,
+                    #    archive_db_table,
+                    #    my_trades_currency_active_free_blanks,
+                    #    )
                     
-                    if  relabelling:
+                    if  False:# and relabelling:
                         
                         log.error (f"relabelling {relabelling}")
                         
