@@ -878,7 +878,6 @@ class ComboAuto (BasicStrategy):
         take_profit_threshold_original: float,
         selected_transaction: dict,
         waiting_time_for_perpetual_order: bool,
-        threshold_market_condition,
         random_instruments_name: list,
         strategy_params: list = None,
         ) -> dict:

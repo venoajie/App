@@ -584,7 +584,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                                 THRESHOLD_DELTA_TIME_SECONDS = 120
                                                 
-                                                THRESHOLD_MARKET_CONDITIONS_COMBO = .01 * ONE_PCT
+                                                THRESHOLD_MARKET_CONDITIONS_COMBO = .1 * ONE_PCT
                                                 
                                                 INSTRUMENT_EXPIRATION_THRESHOLD = 60 * 8 # 8 hours
                                                 
@@ -750,14 +750,12 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                             #! closing combo auto trading
                                                             if "Auto" in label and len_sub_account_orders_all < 50:
-                                                                
-                                                                TP_THRESHOLD = TP_THRESHOLD * 10
-                                                                
+                                                                                                                                
                                                                 if sum_selected_transaction == 0:                                                               
                                                                     send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
                                                                     label,
                                                                     instrument_attributes_combo_all,
-                                                                    TP_THRESHOLD)
+                                                                    THRESHOLD_MARKET_CONDITIONS_COMBO)
                                                                     
                                                                     await self.processing_orders(send_order)
                                                                     
@@ -842,7 +840,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                 
                                                                                 if ticker_transaction and len_sub_account_orders_all < 50:
                                                                                     
-                                                                                    TP_THRESHOLD = TP_THRESHOLD * 5
+                                                                                    TP_THRESHOLD = THRESHOLD_MARKET_CONDITIONS_COMBO * 5
                                                                                     
                                                                                     send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
                                                                                         ticker_transaction[0],
@@ -850,7 +848,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                                         TP_THRESHOLD,
                                                                                         transaction,
                                                                                         waiting_time_for_selected_transaction,
-                                                                                        THRESHOLD_MARKET_CONDITIONS_COMBO,
                                                                                         random_instruments_name
                                                                                         )
                                                                 
@@ -941,10 +938,14 @@ class RunningStrategy(ModifyOrderDb):
                                                                 if len_sub_account_orders_all < 50:
                                                                                                                                                         
                                                                     for status in status_transaction:
+                                                                        
                                                                         my_trades_currency_strategy_status = [o for o in my_trades_currency_strategy \
                                                                             if status in (o["label"])]
                                                                         
-                                                                        log.error (f"{status} my_trades_currency_strategy_status {my_trades_currency_strategy_status}")
+                                                                        orders_currency_strategy_label_status = [o for o in orders_currency_strategy \
+                                                                            if status in o["label"] ]
+                                                                
+                                                                        log.error (f"{status} ")
                                                                             
                                                                         if my_trades_currency_strategy_status:
                                                                             
@@ -961,16 +962,14 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     
                                                                                     instrument_ticker = instrument_ticker[0]
                                                                                     
-                                                                                    best_bid_prc: float = instrument_ticker["best_bid_price"]
-                                                                                    
-                                                                                    best_ask_prc: float = instrument_ticker["best_ask_price"]
-                                                                                    
                                                                                     get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_status\
                                                                                         if instrument_name in  o["instrument_name"]]
                                                                                     
                                                                                     log.error (f"my_trades_currency_contribute_to_hedging_sum {my_trades_currency_contribute_to_hedging_sum}")
 
                                                                                     if status == "open" and my_trades_currency_contribute_to_hedging_sum <=0:
+                                                                                        
+                                                                                        best_bid_prc: float = instrument_ticker["best_bid_price"]
                                                                                     
                                                                                         closest_price = get_closest_value(
                                                                                             get_prices_in_label_transaction_main,
@@ -980,19 +979,18 @@ class RunningStrategy(ModifyOrderDb):
                                                                                         nearest_transaction_to_index = [o for o in my_trades_currency_strategy_status \
                                                                                             if o["price"] == closest_price]
                                                                                         
-                                                                                        orders_currency_strategy_label_closed = [o for o in orders_currency_strategy \
-                                                                                            if "closed" in o["label"] ]
-                                                                
-                                                                                    
                                                                                         send_closing_order: dict = await hedging.is_send_exit_order_allowed(
-                                                                                        orders_currency_strategy_label_closed,
+                                                                                        orders_currency_strategy_label_status,
                                                                                         best_bid_prc,
                                                                                         nearest_transaction_to_index,
                                                                                         #orders_currency_strategy
                                                                                         )
+                                                                                        
                                                                                         await self.processing_orders(send_closing_order)
                                     
                                                                                     if status == "closed":
+                                                                                    
+                                                                                        best_ask_prc: float = instrument_ticker["best_ask_price"]
                                                                                     
                                                                                         closest_price = get_closest_value(
                                                                                             get_prices_in_label_transaction_main,
@@ -1002,11 +1000,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                                         nearest_transaction_to_index = [o for o in my_trades_currency_strategy_status \
                                                                                             if o["price"] == closest_price]
                                                                                     
-                                                                                        orders_currency_strategy_label_open = [o for o in orders_currency_strategy \
-                                                                                            if "open" in o["label"] ]
-                                                                
                                                                                         send_closing_order: dict = await hedging.send_contra_order_for_orphaned_closed_transctions(
-                                                                                        orders_currency_strategy_label_open,
+                                                                                        orders_currency_strategy_label_status,
                                                                                         best_ask_prc,
                                                                                         nearest_transaction_to_index,
                                                                                         #orders_currency_strategy
