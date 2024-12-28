@@ -942,8 +942,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                         my_trades_currency_strategy_status = [o for o in my_trades_currency_strategy \
                                                                             if status in (o["label"])]
                                                                         
-                                                                        orders_currency_strategy_label_status = [o for o in orders_currency_strategy \
-                                                                            if status in o["label"] ]
+                                                                        orders_currency_strategy_label_contra_status = [o for o in orders_currency_strategy \
+                                                                            if status not in o["label"] ]
                                                                 
                                                                         log.error (f"{status} ")
                                                                         log.error (f"{orders_currency_strategy} ")
@@ -981,7 +981,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                             if o["price"] == closest_price]
                                                                                         
                                                                                         send_closing_order: dict = await hedging.is_send_exit_order_allowed(
-                                                                                        orders_currency_strategy_label_status,
+                                                                                        orders_currency_strategy_label_contra_status,
                                                                                         best_bid_prc,
                                                                                         nearest_transaction_to_index,
                                                                                         #orders_currency_strategy
@@ -1002,7 +1002,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                             if o["price"] == closest_price]
                                                                                     
                                                                                         send_closing_order: dict = await hedging.send_contra_order_for_orphaned_closed_transctions(
-                                                                                        orders_currency_strategy_label_status,
+                                                                                        orders_currency_strategy_label_contra_status,
                                                                                         best_ask_prc,
                                                                                         nearest_transaction_to_index,
                                                                                         #orders_currency_strategy
