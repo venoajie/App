@@ -675,6 +675,9 @@ class HedgingSpot(BasicStrategy):
         len_closed_orders_int = get_transactions_len(closed_orders_int)
         
         log.warning (f" len_closed_orders_int == 0 {len_closed_orders_int == 0}")
+        log.error (f" closed_orders_int {closed_orders_int}")
+        log.debug (f" label_integer {label_integer}")
+        log.info (f" orders_currency_strategy_label_closed {orders_currency_strategy_label_closed}")
 
         if len_closed_orders_int == 0\
             and  exit_size_not_over_bought:
