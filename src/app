@@ -946,6 +946,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                             if status in o["label"] ]
                                                                 
                                                                         log.error (f"{status} ")
+                                                                        log.error (f"{orders_currency_strategy} ")
                                                                             
                                                                         if my_trades_currency_strategy_status:
                                                                             
