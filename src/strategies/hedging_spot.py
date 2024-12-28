@@ -285,6 +285,9 @@ class HedgingSpot(BasicStrategy):
                        self.over_hedged_closing,
                        self.market_condition)
         
+        log.info (f" max_position {self.max_position} over_hedged_closing {self.over_hedged_closing}  over_hedged_closing {self.over_hedged_closing} sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy}")
+
+        
     def get_basic_params(self) -> dict:
         """ """
         return BasicStrategy(
@@ -343,7 +346,7 @@ class HedgingSpot(BasicStrategy):
                     (size_and_order_appropriate_for_ordering or over_hedged_cls))
             
             log.info (f"order_allowed {order_allowed} ")
-            log.info (f" size_and_order_appropriate_for_ordering {size_and_order_appropriate_for_ordering} over_hedged_cls {over_hedged_cls}  { (size_and_order_appropriate_for_ordering or over_hedged_cls)}")
+            log.info (f" size_and_order_appropriate_for_ordering {size_and_order_appropriate_for_ordering} { (size_and_order_appropriate_for_ordering or over_hedged_cls)}")
 
             if order_allowed :
                 
@@ -390,7 +393,7 @@ class HedgingSpot(BasicStrategy):
             size = exit_params["size"]   
             
             log.debug (f"transaction {transaction}")
-            log.warning (f"size != 0 {size} over_hedged_closing {over_hedged_closing} (bullish or strong_bullish) {(weak_bullish or bullish or strong_bullish)}")
+            log.warning (f"size != 0 {size} (bullish or strong_bullish) {(weak_bullish or bullish or strong_bullish)}")
             
             if size != 0 \
                 and over_hedged_opening:
@@ -405,7 +408,7 @@ class HedgingSpot(BasicStrategy):
                     order_allowed: bool = True
                     
         
-        log.warning (f"order_allowed {order_allowed} over_hedged_closing {over_hedged_closing} over_hedged_opening {over_hedged_opening}")
+        log.warning (f"order_allowed {order_allowed} ")
     
         return order_allowed
 
