@@ -201,7 +201,7 @@ def get_market_condition(
     """
     """
     candles_data_instrument = [o for o in candles_data if currency_upper in o["instrument_name"]]
-    log.warning (candles_data_instrument)
+    #log.warning (candles_data_instrument)
     
     candle_60 = [o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 60]
     candle_60_type = np.sum([o["candle_type"] for o in candle_60])

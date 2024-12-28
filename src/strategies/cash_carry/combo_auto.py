@@ -1250,7 +1250,9 @@ class ComboAuto (BasicStrategy):
                                                                                 )
 
                     log.error (f"transaction_in_profit {transaction_in_profit} orders_instrument_transaction_closed == 0 {orders_instrument_transaction_closed == 0}")
+                    log.info (f"instrument_name_transaction {instrument_name_transaction}")
                     log.debug (f"orders_instrument_transaction {orders_instrument_transaction}")
+                    log.warning (f"orders_currency {orders_currency}")
     
                     # using the same instrument as transaction instrument
                     if transaction_in_profit:
@@ -1302,6 +1304,7 @@ class ComboAuto (BasicStrategy):
                                                                             selected_transaction_side)
 
                 log.error (f"transaction_in_profit {transaction_in_profit} orders_instrument_transaction_closed == 0 {orders_instrument_transaction_closed == 0}")
+                log.debug (f"orders_instrument_transaction {orders_instrument_transaction}")
                 log.debug (f"orders_instrument_transaction {orders_instrument_transaction}")
 
                 if transaction_in_profit:
