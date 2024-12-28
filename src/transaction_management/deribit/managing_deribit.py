@@ -624,21 +624,17 @@ class ModifyOrderDb(SendApiRequest):
                 
                 log.info (f"BBBBBBBBBBBBBBBB")
                 for trade in trades:
+                    
+                    log.info (f"{trade}")
                 
                     if f"f{currency.upper()}-FS-" not in instrument_name:
                     
-                        await saving_traded_orders(
-                            trade,
-                            trade_db_table,
-                            order_db_table
-                            )                      
-
                         await saving_traded_orders(
                             trade, 
                             archive_db_table, 
                             order_db_table
                             )
-                
+                        
             else:
                 
                 log.info (f"CCCCCCCCCCCCCCCCCCCCC")
@@ -759,11 +755,6 @@ class ModifyOrderDb(SendApiRequest):
                     
                     log.info (f"AAAAAAAAAAAAAAAAAAAAA")
                 
-                    await saving_traded_orders(
-                        trade, 
-                        trade_db_table, 
-                        order_db_table)                      
-
                     await saving_traded_orders(
                         trade,
                         archive_db_table,

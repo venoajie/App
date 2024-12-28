@@ -37,14 +37,7 @@ async def saving_traded_orders(
 
 
     instrument_name = trade["instrument_name"]
-
-    # record trading transaction
-    if "-FS-" not in instrument_name:
-        await insert_tables(
-                trade_table, 
-                trade
-                )
-        
+    
     filter_trade="order_id"
             
     order_id = trade[f"{filter_trade}"]
@@ -56,6 +49,12 @@ async def saving_traded_orders(
         filter_trade,
         "=",
         order_id,
+                )
+    
+    # record trading transaction
+    await insert_tables(
+                trade_table, 
+                trade
                 )
     
     # just in case manual transactions without label
