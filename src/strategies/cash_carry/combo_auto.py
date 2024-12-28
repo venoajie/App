@@ -660,7 +660,7 @@ class ComboAuto (BasicStrategy):
             transactions_len = len(transactions) # sum product function applied only for 2 items.
                         
             if transactions_sum== 0 \
-                and transactions_len==2:
+                and transactions_len==0:
             
                 traded_future = [o for o in transactions \
                     if "PERPETUAL" not  in o["instrument_name"]]
