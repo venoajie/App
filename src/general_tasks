@@ -569,10 +569,10 @@ async def reconciling_size(
                             order_db_table,
                             currency,
                             cancellable_strategies)
-                               
-            await asyncio.sleep(idle_time)
             
             log.debug (f"server_time_fixed {server_time - server_time_fixed}")
+                               
+            await asyncio.sleep(idle_time)
             
             
     except Exception as error:
