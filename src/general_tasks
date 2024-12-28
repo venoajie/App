@@ -571,11 +571,9 @@ async def reconciling_size(
                             currency,
                             cancellable_strategies)
             
-            log.debug (f"server_time_fixed {(server_time - server_time_fixed)/1000}")
-            
             time_elapsed = (server_time - server_time_fixed)/1000
             
-            if time_elapsed > 10:
+            if time_elapsed > 15 * 60 :
                 
                 kill_process("general_tasks")
                                
