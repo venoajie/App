@@ -936,6 +936,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                          "closed"]
                                                                 
                                                                 if len_sub_account_orders_all < 50:
+                                                                    
+                                                                    log.error (f"{orders_currency_strategy} ")
                                                                                                                                                         
                                                                     for status in status_transaction:
                                                                         
@@ -946,8 +948,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                             if status not in o["label"] ]
                                                                 
                                                                         log.error (f"{status} ")
-                                                                        log.error (f"{orders_currency_strategy} ")
-                                                                            
+                                                                                                                                                    
                                                                         if my_trades_currency_strategy_status:
                                                                             
                                                                             transaction_instrument_name = remove_redundant_elements (
