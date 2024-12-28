@@ -52,6 +52,7 @@ from utilities.string_modification import (
     transform_nested_dict_to_list,)
 from utilities.system_tools import (
     async_raise_error_message,
+    kill_process,
     provide_path_for_file,
     raise_error_message,
     sleep_and_restart)
@@ -570,7 +571,13 @@ async def reconciling_size(
                             currency,
                             cancellable_strategies)
             
-            log.debug (f"server_time_fixed {server_time - server_time_fixed}")
+            log.debug (f"server_time_fixed {(server_time - server_time_fixed)/1000}")
+            
+            time_elapsed = (server_time - server_time_fixed)/1000
+            
+            if time_elapsed > 10:
+                
+                kill_process("general_tasks")
                                
             await asyncio.sleep(idle_time)
             
