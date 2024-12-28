@@ -330,8 +330,6 @@ async def reconciling_size(
         while True:
             
             server_time = get_now_unix_time()  
-            
-            log.debug (f"server_time_fixed {server_time - server_time_fixed}")
                                 
             for currency in currencies:
                 
@@ -573,6 +571,9 @@ async def reconciling_size(
                             cancellable_strategies)
                                
             await asyncio.sleep(idle_time)
+            
+            log.debug (f"server_time_fixed {server_time - server_time_fixed}")
+            
             
     except Exception as error:
         await async_raise_error_message(error)

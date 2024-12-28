@@ -354,8 +354,6 @@ class RunningStrategy(ModifyOrderDb):
                     currencies
                     )
                 
-                server_time_fixed = get_now_unix_time()  
-                
                 while True:
                                
                     # Authenticate WebSocket Connection
