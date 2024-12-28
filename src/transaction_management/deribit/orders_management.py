@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# installed
-from loguru import logger as log
-
 # user defined formula
 from db_management.sqlite_management import(
     deleting_row,
     insert_tables)
-from data_cleaning.managing_closed_transactions import(
-    clean_up_closed_transactions,)
 
 def telegram_bot_sendtext(
     bot_message: str,
@@ -37,7 +32,7 @@ async def saving_traded_orders(
 
 
     instrument_name = trade["instrument_name"]
-    
+
     filter_trade="order_id"
             
     order_id = trade[f"{filter_trade}"]
@@ -52,31 +47,12 @@ async def saving_traded_orders(
                 )
     
     # record trading transaction
-    await insert_tables(
+    if "-FS-" not in instrument_name:
+        await insert_tables(
                 trade_table, 
                 trade
                 )
     
-    # just in case manual transactions without label
-    try:
-        
-        label= trade["label"]
-        
-        # check if the transaction was a closing transaction and need to cleaned up
-        if "my_trades_all_json" in trade_table:
-            
-            if   "closed" in label:
-                                        
-                    await clean_up_closed_transactions(
-                        instrument_name,
-                        trade_table,
-                        order_db_table,
-                        )
-            
-    except:
-        pass # no need to do anything
-        
-
 async def saving_order_based_on_state(
     order_table: str,
     order: dict
@@ -148,7 +124,6 @@ def get_custom_label_oto(transaction: list) -> dict:
     
     return dict(open = (f"custom{side_label.title()}-open-{last_update}"),
                 closed= (f"custom{side_label.title()}-closed-{last_update}") )
-
 
         
 def labelling_unlabelled_order(order: dict) -> None:

@@ -509,7 +509,6 @@ class ModifyOrderDb(SendApiRequest):
                             
                     trade_trd_id = trade["trade_id"]
                     
-                    
                     trade_trd_id_not_in_archive = [o for o in my_trades_instrument_name_archive if trade_trd_id in o["trade_id"]]
                     
                     if not trade_trd_id_not_in_archive:
@@ -617,12 +616,9 @@ class ModifyOrderDb(SendApiRequest):
         log.info (f" {data_orders}")
 
         if orders:
-            
-            log.info (f"AAAAAAAAAAAAAAAAAAAAA")
-            
+                        
             if trades:
                 
-                log.info (f"BBBBBBBBBBBBBBBB")
                 for trade in trades:
                     
                     log.info (f"{trade}")
@@ -637,12 +633,8 @@ class ModifyOrderDb(SendApiRequest):
                         
             else:
                 
-                log.info (f"CCCCCCCCCCCCCCCCCCCCC")
-                
                 if "oto_order_ids" in (orders[0]):
-                    
-                    log.info (f"DDDDDDDDDDDDDDDDDDDDDDDDDDDD")
-                    
+                                        
                     len_oto_order_ids = len(orders[0]["oto_order_ids"])
                     
                     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
@@ -699,9 +691,7 @@ class ModifyOrderDb(SendApiRequest):
                                 )
                                 
                 else:
-                    
-                    log.info (f"EEEEEEEEEEEEEEEEE")
-                                    
+                                                        
                     for order in orders:
                         
                         if  'OTO' not in order["order_id"]:
@@ -715,7 +705,6 @@ class ModifyOrderDb(SendApiRequest):
                                 order_db_table
                             )
 
-        log.critical ('B')
         await self.resupply_sub_accountdb(currency)       
         
         await update_db_pkl(

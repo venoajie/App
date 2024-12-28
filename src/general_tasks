@@ -26,8 +26,7 @@ from db_management.sqlite_management import (
     executing_query_with_return,
     insert_tables, 
     querying_arithmetic_operator,
-    querying_duplicated_transactions,
-    update_status_data)
+    querying_duplicated_transactions)
 from market_understanding.technical_analysis import (
     insert_market_condition_result)
 from strategies.cash_carry.reassigning_labels import (
@@ -46,7 +45,6 @@ from utilities.pickling import (
     read_data,
     replace_data,)
 from utilities.string_modification import (
-    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
     transform_nested_dict_to_list,)
