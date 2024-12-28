@@ -18,7 +18,7 @@ import numpy as np
 from configuration import id_numbering, config, config_oci
 from configuration.label_numbering import get_now_unix_time
 from data_cleaning.reconciling_db import (
-    reconciling_orders,
+    #reconciling_orders,
     is_size_sub_account_and_my_trades_reconciled)
 from db_management.sqlite_management import (
     executing_query_with_return,
@@ -594,15 +594,15 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                                 notional: float = compute_notional_value(index_price, equity)
                                     
-                                                reconciliation_direction = ["from_sub_account_to_order_db","from_order_db_to_sub_account"]
-                                                for  direction in reconciliation_direction:
-                                                    await reconciling_orders(
-                                                        self.modify_order_and_db,
-                                                        sub_account,
-                                                        orders_currency,
-                                                        direction,
-                                                        order_db_table
-                                                    )
+                                                #reconciliation_direction = ["from_sub_account_to_order_db","from_order_db_to_sub_account"]
+                                                #for  direction in reconciliation_direction:
+                                                #    await reconciling_orders(
+                                                #        self.modify_order_and_db,
+                                                #        sub_account,
+                                                #        orders_currency,
+                                                #        direction,
+                                                #        order_db_table
+                                                #    )
 
                                                 for strategy in active_strategies:
                                                     
