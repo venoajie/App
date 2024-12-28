@@ -478,7 +478,35 @@ When called this function will set up the system exception hook.
 
     sys.excepthook = info
 
+def kill_process(process_name):
+    """_summary_
 
+    Args:
+        process_ (str): _description_
+
+    Returns:
+        _type_: _description_
+        
+        https://www.geeksforgeeks.org/kill-a-process-by-name-using-python/
+    """
+    
+    import signal
+     
+    try:
+         
+        # iterating through each instance of the process
+        for line in os.popen("ps ax | grep " + process_name + " | grep -v grep"): 
+            fields = line.split()
+             
+            # extracting Process ID from the output
+            pid = fields[0] 
+             
+            # terminating process 
+            os.kill(int(pid), signal.SIGKILL) 
+        print("Process Successfully terminated")
+         
+    except:
+        print("Error Encountered while running script")
 
 def main():
   print("Everything is going swimmingly")
