@@ -236,10 +236,6 @@ class StreamAccountData(ModifyOrderDb):
                             "all", 
                             column_trade
                             )
-                        
-                        my_trades_instrument_name_only = remove_redundant_elements(
-                            [o["instrument_name"] for o in my_trades_currency]
-                            )
                             
                         ws_channel_currency = [
                             f"user.portfolio.{currency}",
@@ -344,7 +340,6 @@ class StreamAccountData(ModifyOrderDb):
                                             order_db_table,
                                             trade_db_table, 
                                             archive_db_table,
-                                            transaction_log_trading
                                             )                                                             
                                     
                                     TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"

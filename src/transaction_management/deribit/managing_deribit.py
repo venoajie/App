@@ -604,7 +604,6 @@ class ModifyOrderDb(SendApiRequest):
         order_db_table,
         trade_db_table,
         archive_db_table,
-        transaction_log_trading
         ) -> None:
         
         trades = data_orders["trades"]
@@ -619,7 +618,11 @@ class ModifyOrderDb(SendApiRequest):
 
         if orders:
             
+            log.info (f"AAAAAAAAAAAAAAAAAAAAA")
+            
             if trades:
+                
+                log.info (f"BBBBBBBBBBBBBBBB")
                 for trade in trades:
                 
                     if f"f{currency.upper()}-FS-" not in instrument_name:
@@ -638,7 +641,11 @@ class ModifyOrderDb(SendApiRequest):
                 
             else:
                 
+                log.info (f"CCCCCCCCCCCCCCCCCCCCC")
+                
                 if "oto_order_ids" in (orders[0]):
+                    
+                    log.info (f"DDDDDDDDDDDDDDDDDDDDDDDDDDDD")
                     
                     len_oto_order_ids = len(orders[0]["oto_order_ids"])
                     
@@ -696,6 +703,8 @@ class ModifyOrderDb(SendApiRequest):
                                 )
                                 
                 else:
+                    
+                    log.info (f"EEEEEEEEEEEEEEEEE")
                                     
                     for order in orders:
                         
@@ -742,10 +751,13 @@ class ModifyOrderDb(SendApiRequest):
         await self.resupply_sub_accountdb(currency)   
         
         if trades:
+            log.info (f"!!!!!!!!!!!!!!!!!!!!!!!!")
             
             for trade in trades:
                 
                 if f"{currency.upper()}-FS-" not in instrument_name:
+                    
+                    log.info (f"AAAAAAAAAAAAAAAAAAAAA")
                 
                     await saving_traded_orders(
                         trade, 
@@ -759,6 +771,8 @@ class ModifyOrderDb(SendApiRequest):
                         )
             
         else:
+            
+            log.info (f"SSSSSSSSSSSSSSSSSSSSS")
                 
             await self.saving_order(
                 non_checked_strategies,
@@ -815,7 +829,7 @@ class ModifyOrderDb(SendApiRequest):
                     )
                     
         else:
-            
+            log.info ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
             label_and_side_consistent= is_label_and_side_consistent(
                 non_checked_strategies,
                 order)
@@ -829,7 +843,7 @@ class ModifyOrderDb(SendApiRequest):
                 
             # check if transaction has label. Provide one if not any
             if  not label_and_side_consistent:
-                
+                log.info ("GGGGGGGGGGGGGGGGGGGGGGGG")
                 if order_state != "cancelled" or order_state != "filled":
                     
                     log.warning (f" not label_and_side_consistent {order} {order_state}")
