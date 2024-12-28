@@ -354,6 +354,8 @@ class RunningStrategy(ModifyOrderDb):
                     currencies
                     )
                 
+                server_time_fixed = get_now_unix_time()  
+                
                 while True:
                                
                     # Authenticate WebSocket Connection
@@ -395,6 +397,8 @@ class RunningStrategy(ModifyOrderDb):
                     while self.websocket_client.open:
                         
                         try:
+                            
+                            log.debug (f"server_time_fixed {server_time_fixed}")
                                 
                             # Receive WebSocket messages
                             message: bytes = await self.websocket_client.recv()
