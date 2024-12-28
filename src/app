@@ -398,7 +398,7 @@ class RunningStrategy(ModifyOrderDb):
                         
                         try:
                             
-                            log.debug (f"server_time_fixed {server_time_fixed}")
+                            
                                 
                             # Receive WebSocket messages
                             message: bytes = await self.websocket_client.recv()

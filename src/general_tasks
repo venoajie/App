@@ -325,10 +325,14 @@ async def reconciling_size(
         
         order_db_table= relevant_tables["orders_table"]        
             
+        server_time_fixed = get_now_unix_time()  
+        
+        log.debug (f"server_time_fixed {server_time_fixed}")
+            
         while True:
             
             server_time = get_now_unix_time()  
-                    
+                                
             for currency in currencies:
                 
                 sub_account = reading_from_pkl_data(
