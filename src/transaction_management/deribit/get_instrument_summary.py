@@ -9,7 +9,9 @@ from utilities.system_tools import (
 from utilities.pickling import read_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,)
-
+from transaction_management.deribit.api_requests import (
+    get_instruments,)
+    
 def get_instruments_kind(
     currency: str,
     settlement_periods,
@@ -53,10 +55,9 @@ def get_instruments_kind(
         if o["settlement_period"] in settlement_periods]
 
 
-def get_futures_for_active_currencies(
+async def get_futures_for_active_currencies(
     active_currencies,
-    settlement_periods,
-    result: list = None) -> list:
+    settlement_periods) -> list:
     """_summary_
 
     Returns:
@@ -65,6 +66,8 @@ def get_futures_for_active_currencies(
     
     instruments_holder_place= []
     for currency in active_currencies:
+        
+        result = await get_instruments(currency)
 
         future_instruments= get_instruments_kind (currency,
                                                   settlement_periods,
@@ -94,16 +97,14 @@ def get_futures_for_active_currencies(
     return remove_double_brackets_in_list(instruments_holder_plc)
     
     
-def get_futures_instruments(
+async def get_futures_instruments(
     active_currencies, 
     settlement_periods,
-    result: list = None
     ) -> list:
     
-    active_futures=   get_futures_for_active_currencies(
+    active_futures=   await get_futures_for_active_currencies(
             active_currencies,
-            settlement_periods,
-            result)
+            settlement_periods)
               
     min_expiration_timestamp = min([o["expiration_timestamp"] for o in active_futures]) 
     
