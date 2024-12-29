@@ -35,6 +35,7 @@ def get_instruments_kind(
         
         
     """ 
+    print (f"result ")
     
     if result :
 
