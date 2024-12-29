@@ -844,6 +844,8 @@ class ComboAuto (BasicStrategy):
                 # default type: limit
                 params.update({"type": "limit"})
                 
+                log.warning (f"PERPETUAL in instrument_name_future {"PERPETUAL" in instrument_name_future} PERPETUAL not in instrument_name_future {"PERPETUAL" not in instrument_name_future}")
+                
                 if strong_bullish or bullish or weak_bullish\
                     and "PERPETUAL" in instrument_name_future\
                         and len_orders_instrument_future_open_all == 0:
