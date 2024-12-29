@@ -220,11 +220,6 @@ class StreamAccountData(ModifyOrderDb):
                     
                     for currency in currencies:
                         
-                        await self.modify_order_and_db.cancel_the_cancellables(
-                            order_db_table,
-                            currency,
-                            cancellable_strategies
-                            )        
                         # some pre-trading checks
                         currency_lower = currency.lower ()
                         archive_db_table= f"my_trades_all_{currency_lower}_json"                    
