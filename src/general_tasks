@@ -621,7 +621,7 @@ async def main():
         
         clean_up_databases(60), 
         
-        update_instruments(60),
+        #update_instruments(60),
         
         return_exceptions=True)
     

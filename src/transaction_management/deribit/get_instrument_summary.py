@@ -37,7 +37,7 @@ def get_instruments_kind(
     """ 
     
     if result :
-        print ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
         result = result["result"]
 
     else:
