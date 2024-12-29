@@ -14,7 +14,7 @@ from transaction_management.deribit.api_requests import (
     
 def get_instruments_kind(
     currency: str,
-    settlement_periods,
+    settlement_periods: list,
     kind: str= "all",
     result: list = None
     ) -> list:
@@ -35,7 +35,6 @@ def get_instruments_kind(
         
         
     """ 
-    print (f"result ")
     
     if result :
 
@@ -61,8 +60,9 @@ def get_instruments_kind(
 
 
 async def get_futures_for_active_currencies(
-    active_currencies,
-    settlement_periods) -> list:
+    active_currencies: list,
+    settlement_periods: list
+    ) -> list:
     """_summary_
 
     Returns:
@@ -71,9 +71,7 @@ async def get_futures_for_active_currencies(
     
     instruments_holder_place= []
     for currency in active_currencies:
-        
-        print (f"currency {currency}")
-        
+                
         result = await get_instruments(currency)
 
         future_instruments= get_instruments_kind (currency,
@@ -105,9 +103,9 @@ async def get_futures_for_active_currencies(
     
     
 async def get_futures_instruments(
-    active_currencies, 
-    settlement_periods,
-    ) -> list:
+    active_currencies: list, 
+    settlement_periods: list,
+    ) -> dict:
     
     active_futures=   await get_futures_for_active_currencies(
             active_currencies,
