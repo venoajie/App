@@ -338,7 +338,6 @@ class RunningStrategy(ModifyOrderDb):
                     settlement_periods,
                     )  
 
-                log.error (futures_instruments)
                 instrument_attributes_futures_all = futures_instruments["active_futures"]   
                 
                 instrument_attributes_combo_all = futures_instruments["active_combo"]  
