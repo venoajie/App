@@ -35,6 +35,7 @@ from strategies.cash_carry.combo_auto import(
     ComboAuto,
     check_if_minimum_waiting_time_has_passed)
 from transaction_management.deribit.api_requests import (
+    get_instruments,
     get_tickers,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
@@ -331,12 +332,15 @@ class RunningStrategy(ModifyOrderDb):
                 order_db_table= relevant_tables["orders_table"]        
                                 
                 settlement_periods = get_settlement_period (strategy_attributes)
+                
+                result_instruments = await get_instruments(currency)
                                 
                 futures_instruments = get_futures_instruments (
                     currencies,
-                    settlement_periods
+                    settlement_periods,
+                    result_instruments
                     )  
-                
+                log.error (futures_instruments)
                 instrument_attributes_futures_all = futures_instruments["active_futures"]   
                 
                 instrument_attributes_combo_all = futures_instruments["active_combo"]  

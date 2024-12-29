@@ -13,7 +13,8 @@ from utilities.string_modification import (
 def get_instruments_kind(
     currency: str,
     settlement_periods,
-    kind: str= "all"
+    kind: str= "all",
+    result: list = None
     ) -> list:
     """_summary_
 
@@ -33,17 +34,20 @@ def get_instruments_kind(
         
     """ 
     
-    my_path_instruments = provide_path_for_file(
-        "instruments", 
-        currency
-    )
+    print (f"result {result}")
+    if result is None:
+        my_path_instruments = provide_path_for_file(
+            "instruments", 
+            currency
+        )
 
-    instruments_raw = read_data(my_path_instruments)
-    instruments = instruments_raw[0]["result"]
+        instruments_raw = read_data(my_path_instruments)
+        result = instruments_raw[0]["result"]
+        
     non_spot_instruments=  [
-        o for o in instruments if o["kind"] != "spot"]
+        o for o in result if o["kind"] != "spot"]
     instruments_kind= non_spot_instruments if kind =="all" else  [
-        o for o in instruments if o["kind"] == kind]
+        o for o in result if o["kind"] == kind]
     
     return  [o for o in instruments_kind \
         if o["settlement_period"] in settlement_periods]
@@ -51,7 +55,8 @@ def get_instruments_kind(
 
 def get_futures_for_active_currencies(
     active_currencies,
-    settlement_periods) -> list:
+    settlement_periods,
+    result: list = None) -> list:
     """_summary_
 
     Returns:
@@ -63,11 +68,13 @@ def get_futures_for_active_currencies(
 
         future_instruments= get_instruments_kind (currency,
                                                   settlement_periods,
-                                                  "future" )
+                                                  "future",
+                                                  result)
 
         future_combo_instruments= get_instruments_kind (currency,
                                                   settlement_periods,
-                                                  "future_combo" )
+                                                  "future_combo",
+                                                  result)
         
         active_combo_perp = [o for o in future_combo_instruments \
             if "_PERP" in o["instrument_name"]]
@@ -89,12 +96,14 @@ def get_futures_for_active_currencies(
     
 def get_futures_instruments(
     active_currencies, 
-    settlement_periods
+    settlement_periods,
+    result: list = None
     ) -> list:
     
     active_futures=   get_futures_for_active_currencies(
             active_currencies,
-            settlement_periods)
+            settlement_periods,
+            result)
               
     min_expiration_timestamp = min([o["expiration_timestamp"] for o in active_futures]) 
     
