@@ -71,6 +71,8 @@ async def get_futures_for_active_currencies(
     instruments_holder_place= []
     for currency in active_currencies:
         
+        print (f"currency {currency}")
+        
         result = await get_instruments(currency)
 
         future_instruments= get_instruments_kind (currency,
