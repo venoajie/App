@@ -230,7 +230,7 @@ class StreamAccountData(ModifyOrderDb):
                         cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
                             if o["cancellable"]==True]
                         
-                        await self.modify_order_and_db.cancel_the_cancellables(
+                        await self.loop.create_task.cancel_the_cancellables(
                                                                         order_db_table,
                                                                         currency,
                                                                         cancellable_strategies
