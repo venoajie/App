@@ -141,7 +141,7 @@ class StreamAccountData(ModifyOrderDb):
                 currencies = [o["currency"] for o in get_currencies_all["result"]]
 
                 for currency in currencies:
-
+                    
                     instruments = await get_instruments(currency)
 
                     my_path_instruments = provide_path_for_file("instruments", 
@@ -218,10 +218,13 @@ class StreamAccountData(ModifyOrderDb):
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
                     
-                    kill_process("app")
-                        
                     for currency in currencies:
-                            
+                        
+                        await self.modify_order_and_db.cancel_the_cancellables(
+                            order_db_table,
+                            currency,
+                            cancellable_strategies
+                            )        
                         # some pre-trading checks
                         currency_lower = currency.lower ()
                         archive_db_table= f"my_trades_all_{currency_lower}_json"                    
@@ -465,6 +468,10 @@ class StreamAccountData(ModifyOrderDb):
             await self.websocket_client.send(json.dumps(msg))
 
         except Exception as error:
+            
+            
+            kill_process("app")
+                        
             
             raise_error_message (
             error, 
