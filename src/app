@@ -57,45 +57,14 @@ from utilities.system_tools import (
     provide_path_for_file,
     raise_error_message,
     sleep_and_restart,)
+from utilities.caching import (
+    cached_ticker,
+    update_cached_ticker)
 
 
-
-# Using the LRUCache decorator function with a maximum cache size of 3
 def cached_ticker_data(currencies):
-    """_summary_
-    https://blog.apify.com/python-cache-complete-guide/]
-    https://medium.com/@jodielovesmaths/memoization-in-python-using-cache-36b676cb21ef
-    data caching
-    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
 
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    #result = (orjson.loads(data))
-    
-    
-    
-    result=[]
-    for currency in currencies:
-        instrument_name = f"{currency}-PERPETUAL"
-                        
-        result_instrument= reading_from_pkl_data(
-                "ticker",
-                instrument_name
-                )
-        
-        if result_instrument:
-            result_instrument = result_instrument[0]
-
-        else:
-            result_instrument = get_tickers (instrument_name)
-        result.append (result_instrument)
-
-
-    return result
+    return cached_ticker (currencies)
 
 async def chart_trade_in_msg(
     message_channel,
@@ -123,34 +92,6 @@ async def chart_trade_in_msg(
         
         return False
 
-def update_cached_ticker_data(
-    instrument_name,
-    ticker,
-    data_orders):
-    """_summary_
-    https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
-
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    #result = (orjson.loads(data))
-        
-    instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
-    
-    if instrument_ticker:
-        
-        for item in data_orders:
-            if "stats" not in item and "instrument_name" not in item and "type" not in item:
-                [o for o in ticker if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
-            #[o for o in ticker if instr
-            if "stats"  in item:
-                data_orders_stat = data_orders[item]
-                for item in data_orders_stat:
-                    [o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
-    
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
@@ -342,8 +283,6 @@ class RunningStrategy(ModifyOrderDb):
                 
                 instrument_attributes_combo_all = futures_instruments["active_combo"]  
                 
-                #log.info (instrument_attributes_combo)
-
                 instruments_name = futures_instruments["instruments_name"]   
                 
                 min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]   
@@ -396,8 +335,6 @@ class RunningStrategy(ModifyOrderDb):
                     while self.websocket_client.open:
                         
                         try:
-                            
-                            
                                 
                             # Receive WebSocket messages
                             message: bytes = await self.websocket_client.recv()
@@ -461,7 +398,7 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                         
-                                        update_cached_ticker_data(
+                                        update_cached_ticker(
                                             instrument_name_perpetual,
                                             ticker_perpetual,
                                             data_orders
@@ -494,8 +431,6 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         len_sub_account_orders_all = len(sub_account_orders)
                                         
-                                        #log.error (f" len_sub_account_orders_all {len_sub_account_orders_all}")
-                                        
                                         market_condition = get_market_condition(
                                             np,
                                             cached_candles_data,
@@ -520,11 +455,6 @@ class RunningStrategy(ModifyOrderDb):
                                             if orders_currency:
                                                 
                                                 outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency])
-                                                
-                                                #len_outstanding_order_id = 0 if outstanding_order_id =[] \
-                                                #    else len (outstanding_order_id)
-                                                    
-                                                #log.critical (f"len_outstanding_order_id {len_outstanding_order_id}")    
                                                 
                                                 for label in outstanding_order_id:
                                                     
@@ -597,16 +527,6 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                                 notional: float = compute_notional_value(index_price, equity)
                                     
-                                                #reconciliation_direction = ["from_sub_account_to_order_db","from_order_db_to_sub_account"]
-                                                #for  direction in reconciliation_direction:
-                                                #    await reconciling_orders(
-                                                #        self.modify_order_and_db,
-                                                #        sub_account,
-                                                #        orders_currency,
-                                                #        direction,
-                                                #        order_db_table
-                                                #    )
-
                                                 for strategy in active_strategies:
                                                     
                                                     strategy_params= [o for o in strategy_attributes \
@@ -618,10 +538,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     orders_currency_strategy = ([] if not orders_currency  
                                                                                 else [o for o in orders_currency 
                                                                                     if strategy in (o["label"]) ])
-                                                                                
-                                                    #get_unpaired_transaction = get_unpaired_transaction(
-                                                    #my_trades_currency_strategy)
-                                                    
+                                                                                                                                    
                                                     if  "futureSpread" in strategy :
                                                                             
                                                         log.warning (f"strategy {strategy}-START")    
@@ -737,6 +654,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                             
                                                         # get labels from active trades
                                                         labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
+                                                        
+                                                        filter = "label"
                             
                                                         #! closing active trades
                                                         for label in labels:
@@ -763,18 +682,15 @@ class RunningStrategy(ModifyOrderDb):
                                                                 else:                                                               
                                                                     
                                                                     new_label = f"futureSpread-open-{label_integer}"
-                                                                
-                                                                    filter = "label"
-                                                                    
-                                                                    for table in tables:
-                                                                        await update_status_data(
-                                                                            table,
-                                                                            "label",
-                                                                            filter,
-                                                                            label,
-                                                                            new_label,
-                                                                            "="
-                                                                            )
+                                                                                                                                    
+                                                                    await update_status_data(
+                                                                        archive_db_table,
+                                                                        "label",
+                                                                        filter,
+                                                                        label,
+                                                                        new_label,
+                                                                        "="
+                                                                        )
                                                                     
                                                                     log.debug ("renaming combo Auto done")
                                                                     
@@ -787,27 +703,21 @@ class RunningStrategy(ModifyOrderDb):
                                                             #! renaming combo auto trading
                                                             else:
                                                             
-                                                                #log.debug (f"selected_transaction {selected_transaction}")
-                                                                #log.critical (f"sum_selected_transaction {sum_selected_transaction}")
-                                                                            
                                                                 if sum_selected_transaction == 0:
                                                                     if "open" in label:
                                                                         new_label = f"futureSpreadAuto-open-{label_integer}"
                                                                 
                                                                     if "closed" in label:
                                                                         new_label = f"futureSpreadAuto-closed-{label_integer}"
-                                                                
-                                                                    filter = "label"
                                                                     
-                                                                    for table in tables:
-                                                                        await update_status_data(
-                                                                            table,
-                                                                            "label",
-                                                                            filter,
-                                                                            label,
-                                                                            new_label,
-                                                                            "="
-                                                                            )
+                                                                    await update_status_data(
+                                                                        tables,
+                                                                        "label",
+                                                                        filter,
+                                                                        label,
+                                                                        new_label,
+                                                                        "="
+                                                                        )
                                                                 
                                                                 #! closing unpaired transactions                                                            
                                                                 else:
