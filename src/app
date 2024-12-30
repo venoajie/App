@@ -855,15 +855,18 @@ class RunningStrategy(ModifyOrderDb):
                                                                                         waiting_time_for_selected_transaction,
                                                                                         random_instruments_name
                                                                                         )
+                                                    
+                                                            try:
+                                                                if send_order["order_allowed"]:
                                                                 
-                                                                                    if send_order["order_allowed"]:
-                                                                                    
-                                                                                        await self.processing_orders(send_order)
-                                                                                        
-                                                                                        log.debug ("AAAAAAAAAAAAAAAAAAAAA")
-                                                            
-                                                                                        break            
-                                                                                        log.error ("AAAAAAAAAAAAAAAAAAAAA")
+                                                                    await self.processing_orders(send_order)
+                                                                    
+                                                                    log.debug ("AAAAAAAAAAAAAAAAAAAAA")
+                                        
+                                                                    break            
+
+                                                            except:
+                                                                continue
                                                                 
                                                         if orders_currency_strategy:
                                                             for order in orders_currency_strategy:
