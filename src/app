@@ -863,6 +863,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                         log.debug ("AAAAAAAAAAAAAAAAAAAAA")
                                                             
                                                                                         break            
+                                                                                        log.error ("AAAAAAAAAAAAAAAAAAAAA")
                                                                 
                                                         if orders_currency_strategy:
                                                             for order in orders_currency_strategy:
