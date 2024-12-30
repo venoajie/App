@@ -17,9 +17,7 @@ def reading_from_pkl_data(
     path: str = provide_path_for_file (end_point,
                                       currency,
                                       status)
-    data = read_data(path)
-
-    return data
+    return read_data(path)
 
 
 # Using the LRUCache decorator function with a maximum cache size of 3
@@ -71,18 +69,20 @@ def update_cached_ticker(
     Returns:
         _type_: _description_
     """
-    #result = (orjson.loads(data))
         
     instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
     
     if instrument_ticker:
         
         for item in data_orders:
+
             if "stats" not in item and "instrument_name" not in item and "type" not in item:
                 [o for o in ticker if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
-            #[o for o in ticker if instr
+
             if "stats"  in item:
+                
                 data_orders_stat = data_orders[item]
+                
                 for item in data_orders_stat:
                     [o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
     

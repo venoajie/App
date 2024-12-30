@@ -58,13 +58,9 @@ from utilities.system_tools import (
     raise_error_message,
     sleep_and_restart,)
 from utilities.caching import (
-    cached_ticker_data,
+    cached_ticker_data as cached_ticker,
     update_cached_ticker)
 
-
-def cached_ticker(currencies):
-
-    return cached_ticker_data (currencies)
 
 async def chart_trade_in_msg(
     message_channel,
@@ -119,9 +115,7 @@ def reading_from_pkl_data(
     path: str = provide_path_for_file (end_point,
                                       currency,
                                       status)
-    data = read_data(path)
-
-    return data
+    return read_data(path)
 
 
 def compute_notional_value(
@@ -233,7 +227,6 @@ class RunningStrategy(ModifyOrderDb):
             close_timeout=60,
         ) as self.websocket_client:
                 
-                
             try:
                     
                 # parsing config file
@@ -273,7 +266,6 @@ class RunningStrategy(ModifyOrderDb):
                                 
                 settlement_periods = get_settlement_period (strategy_attributes)
                 
-                                
                 futures_instruments = await get_futures_instruments (
                     currencies,
                     settlement_periods,
