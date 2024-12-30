@@ -736,6 +736,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                                         if send_order:
                                                                             await self.processing_orders(send_order)
+                                                                            
+                                                                            break
                                                         
                                                         # get labels from active trades
                                                         labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
