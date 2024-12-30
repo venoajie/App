@@ -859,6 +859,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     if send_order["order_allowed"]:
                                                                                     
                                                                                         await self.processing_orders(send_order)
+                                                                                        
+                                                                                        log.debug ("AAAAAAAAAAAAAAAAAAAAA")
                                                             
                                                                                         break            
                                                                 
