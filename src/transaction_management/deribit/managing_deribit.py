@@ -602,7 +602,6 @@ class ModifyOrderDb(SendApiRequest):
         data_orders, 
         currency, 
         order_db_table,
-        trade_db_table,
         archive_db_table,
         ) -> None:
         
@@ -721,7 +720,6 @@ class ModifyOrderDb(SendApiRequest):
         non_checked_strategies,
         data_orders, 
         order_db_table,
-        trade_db_table, 
         archive_db_table,
         transaction_log_trading
         ) -> None:

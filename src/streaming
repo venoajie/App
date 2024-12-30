@@ -350,9 +350,18 @@ class StreamAccountData(ModifyOrderDb):
                                             data_orders, 
                                             currency, 
                                             order_db_table,
-                                            trade_db_table, 
                                             archive_db_table,
-                                            )                                                             
+                                            )   
+                                        
+                                        trades = data_orders["trades"]
+                                        
+                                        if trades:
+                                            await self.modify_order_and_db.cancel_the_cancellables(
+                                                                        order_db_table,
+                                                                        currency,
+                                                                        cancellable_strategies
+                                                                        )
+                                                             
                                     
                                     TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
                                     WHERE_FILTER_TICK: str = "tick"
