@@ -23,7 +23,8 @@ from transaction_management.deribit.telegram_bot import (
 from transaction_management.deribit.transaction_log import (
     saving_transaction_log,)
 from transaction_management.deribit.api_requests import (
-    SendApiRequest,)
+    SendApiRequest,
+    get_cancel_order_byOrderId)
 from utilities.pickling import replace_data
 from utilities.string_modification import (
     extract_currency_from_text,)
@@ -831,3 +832,72 @@ class ModifyOrderDb(SendApiRequest):
                         order_db_table,
                         order_id
                         )                    
+
+async def cancel_the_cancellables(
+    order_db_table: str,
+    currency: str,
+    cancellable_strategies: list,
+    open_orders_sqlite: list = None
+    )-> None:
+
+    log.critical(f" cancel_the_cancellables")                           
+
+    where_filter = f"order_id"
+    
+    column_list= "label", where_filter
+    
+    if open_orders_sqlite is None:
+        open_orders_sqlite: list=  await get_query("orders_all_json", 
+                                                currency.upper(), 
+                                                "all",
+                                                "all",
+                                                column_list)
+    
+    if open_orders_sqlite:
+        
+        for strategy in cancellable_strategies:
+            open_orders_cancellables = [
+            o for o in open_orders_sqlite if strategy in o["label"]
+        ]
+            
+            if open_orders_cancellables:
+                open_orders_cancellables_id = [
+                o["order_id"] for o in open_orders_cancellables
+            ]
+                
+                for order_id in open_orders_cancellables_id:
+
+                    await cancel_by_order_id(
+                        order_db_table,
+                        order_id)
+
+    log.critical ("D")
+    #await self.resupply_sub_accountdb(currency.upper())      
+    
+async def cancel_by_order_id(
+    order_db_table: str,
+    open_order_id: str
+    )-> None:
+
+    where_filter = f"order_id"
+    
+    await deleting_row (
+        order_db_table,
+        "databases/trading.sqlite3",
+        where_filter,
+        "=",
+        open_order_id,
+    )
+
+    result = await get_cancel_order_byOrderId(open_order_id)
+    
+    try:
+        if (result["error"]["message"])=="not_open_order":
+            log.critical(f"CANCEL non-existing order_id {result} {open_order_id}")
+            
+            
+    except:
+
+        log.critical(f"""CANCEL_by_order_id {result["result"]} {open_order_id}""")
+
+        return result

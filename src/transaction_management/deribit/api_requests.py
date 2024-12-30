@@ -531,3 +531,17 @@ async def get_end_point_result(
     result_endpoint = get_api_end_point(endpoint,parameters
                                )
     return result_endpoint#["result"]
+
+
+async def get_cancel_order_byOrderId (
+    private_connection,
+    order_id: str
+    ) -> None:
+    # Set endpoint
+    endpoint: str = "private/cancel"
+
+    params = {"order_id": order_id}
+
+    result = await private_connection (endpoint=endpoint,
+                                        params=params)
+    return result
