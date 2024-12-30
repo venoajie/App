@@ -709,8 +709,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         BASIC_TICKS_FOR_AVERAGE_MOVEMENT
                                                                         )
                                                             
-                                                                    if send_order:
-                                                                        await self.processing_orders(send_order)
+                                                                    await self.processing_orders(send_order)
                                                         
                                                                     instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
                                                                         if o["instrument_name"] == instrument_name_future])- server_time)/ONE_MINUTE  
@@ -734,11 +733,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                             market_condition
                                                                             )
                                                                 
-                                                                        if send_order:
-                                                                            await self.processing_orders(send_order)
+                                                                        await self.processing_orders(send_order)
                                                                             
-                                                                            await sleep_and_restart ()   
-                                                        
                                                         # get labels from active trades
                                                         labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
                             
@@ -856,12 +852,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                                         random_instruments_name
                                                                                         )
                                                                         
-                                                                                    if send_order["order_allowed"]:
-                                                                                    
-                                                                                        await self.processing_orders(send_order)
-                                                                                                                                                    
-                                                                                        await sleep_and_restart ()            
-                                                                
+                                                                                    await self.processing_orders(send_order)
+                                                                                                       
                                                         if orders_currency_strategy:
                                                             for order in orders_currency_strategy:
                                                                 cancel_allowed: dict = await combo_auto.is_cancelling_orders_allowed(
@@ -1117,7 +1109,9 @@ class RunningStrategy(ModifyOrderDb):
                         pass 
                     
                     log.warning ("processing order done")
-                    #await sleep_and_restart ()
+                    
+                    if "-FS-" not in instrument_name:
+                        await sleep_and_restart ()
                     
         except Exception as error:
             await raise_error_message (error)
