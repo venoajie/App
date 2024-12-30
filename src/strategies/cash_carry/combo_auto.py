@@ -846,7 +846,11 @@ class ComboAuto (BasicStrategy):
                 
                 log.warning (f"PERPETUAL in instrument_name_future {"PERPETUAL" in instrument_name_future} PERPETUAL not in instrument_name_future {"PERPETUAL" not in instrument_name_future}")
                 
-                if strong_bullish or bullish or weak_bullish\
+
+                bullish_situation = (strong_bullish or bullish or weak_bullish)
+                bearish_situation = (strong_bearish or bearish or weak_bearish)
+                
+                if bullish_situation\
                     and "PERPETUAL" in instrument_name_future\
                         and len_orders_instrument_future_open_all == 0:
                         
@@ -856,7 +860,7 @@ class ComboAuto (BasicStrategy):
                         
                         params.update({"side": "buy"})        
                                         
-                if strong_bearish or bearish or weak_bearish\
+                if bearish_situation\
                     and "PERPETUAL" not in instrument_name_future\
                         and len_orders_instrument_future_open_all < max_order_currency:
                             
