@@ -357,6 +357,7 @@ def obtain_dataframe(selected_ticker):
     ticker = yf.Ticker(selected_ticker)
     log.error (f" ticker {ticker}")
     dataframe = ticker.history(period='max')
+    log.error (f" dataframe {dataframe}")
     dataframe.drop(columns=['Dividends', 'Stock Splits'], inplace=True)
     dataframe = dataframe.loc['2010-01-01':].copy()
     dataframe['Garman_Klass_Volatility'] = ((np.log(dataframe['High'])-np.log(dataframe['Low']))**2)/2-(2*np.log(2)-1)*((np.log(dataframe['Close'])-np.log(dataframe['Open']))**2)
