@@ -18,4 +18,4 @@ daily.tail(3)
   the 20 and 50 here should be changed to whatever timeframes you wish to use
   the values are added into the same dataframe
 """
-mpf.plot(aapl_df)
+mpf.plot(daily)
