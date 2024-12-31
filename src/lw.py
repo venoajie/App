@@ -13,11 +13,12 @@ pio.renderers.default = "notebook" # should change by looking into pio.renderers
 
 pd.options.display.max_columns = None
 
-
-symbols = ["AAPL"]
-
-df = yf.download(tickers=symbols)
-df.head()   
+# get historical data of S&P500(^GSPC)
+df = yf.download("^AAPL", period='1d', start='2019-01-01', end='2022-01-31')
+df.head()
+fig1 = go.Figure(data=go.Scatter(x=df.index, y=df['Close'], mode='lines'))
+fig1.update_layout(title={'text': 'S&P500', 'x': 0.5})
+fig1.show()
 # convert column names into lowercase
 df = df.rename(
         columns={
@@ -32,25 +33,3 @@ df = df.rename(
     )
 df.rename(columns={"adj close":"adj_close"},inplace=True)
 print(df)
-
-def moving_average(series, window=5, kind="sma"):
-    if kind=="sma":
-        return series.rolling(window=window, min_periods=window).mean()
-    elif kind=="ema":
-        return series.rolling(window=window, min_periods=window).mean()
-    elif kind=="wma":
-        return series.rolling(window=window, min_periods=window).apply(lambda x: np.average(x, weights=np.arange(1, window+1,1)))
-        
-        
-        
-
-tdf = df.copy()
-
-window=30
-tdf[f"close_sma_{window}"] = moving_average(tdf.close, window=window)
-tdf[f"close_ema_{window}"] = moving_average(tdf.close, window=window, kind="ema")
-tdf[f"close_wma_{window}"] = moving_average(tdf.close, window=window, kind="wma")
-tdf
-
-cols = [c for c in tdf.columns if "close" in c and "adj" not in c]
-tdf[cols].iplot(kind="line")
