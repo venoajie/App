@@ -10,6 +10,8 @@ import pandas_ta as ta
 from sklearn.preprocessing import MinMaxScaler 
 from keras.models import load_model # type: ignore
 from loguru import logger as log
+from transaction_management.deribit.api_requests import (
+    get_ohlc_data)
 
 def get_sp500_tickers():
     """
@@ -355,7 +357,19 @@ def obtain_dataframe(selected_ticker):
     """
 
     ticker = yf.Ticker(selected_ticker)
+
+    resolution = 5    
+    qty_candles = 5  
+    ohlc = get_ohlc_data (
+                "BTC-PERPETUAL", 
+                qty_candles, 
+                resolution
+                )
     log.error (f" ticker {ticker}")
+    log.error (f" ohlc {ohlc}")
+
+    dataframe = pd.DataFrame(ohlc)
+    log.error (f" dataframe {dataframe}")
     dataframe = ticker.history(period='max')
     log.error (f" dataframe {dataframe}")
     dataframe.drop(columns=['Dividends', 'Stock Splits'], inplace=True)
