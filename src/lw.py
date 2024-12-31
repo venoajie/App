@@ -14,7 +14,7 @@ mpf.plot(
     bitCoinUSD_values,
     type='candle',
     volume=True,
-    mav=(3,6,9),
+    ema=(3,6,9),
     #figratio=(3,1),
     #style='yahoo', 
     title='Bitcoin (USD) from: 21 September 2021',
