@@ -7,10 +7,11 @@ import mplfinance as mpf
 warnings.filterwarnings("ignore")
 
 pd.options.display.max_columns = None
-
-#download the historical stock data
-aapl_df = yf.download("AAPL", start="2018-03-24", end="2023-03-24")
-
+daily = pd.read_csv('SP500_NOV2019_Hist.csv',index_col=0,parse_dates=True)
+daily.index.name = 'Date'
+daily.shape
+daily.head(3)
+daily.tail(3)
 
 """
   calculate the short period and long period emas 
