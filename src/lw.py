@@ -4,6 +4,8 @@ import cufflinks
 import plotly.io as pio 
 import yfinance as yf
 import warnings 
+import numpy as np
+
 warnings.filterwarnings("ignore")
 cufflinks.go_offline()
 cufflinks.set_config_file(world_readable=True, theme='pearl')
