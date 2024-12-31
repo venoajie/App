@@ -1,7 +1,4 @@
 import pandas as pd
-import plotly.express as px
-import cufflinks
-import plotly.io as pio 
 import yfinance as yf
 import warnings 
 import numpy as np
@@ -55,4 +52,3 @@ ax1.plot(aapl_df.loc[aapl_df.crossover == -1.0].index,
 plt.legend(['Close', 'EMA Short', 'EMA Long', 'Buy', 'Sell'])
 plt.title('AAPL EMA Crossover')
 plt.title('AAPL EMA Crossover')
-# convert column names into lowercase
