@@ -11,13 +11,8 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.models import load_model # type: ignore
 from functions import get_sp500_tickers
 from functions import df_for_candlestick, plot_candlestick
-from functions import create_stats_dataframe
-from functions import income_statement, balance_sheet, cashflow, earnings_history
-from functions import calculate_current_ratio
-from functions import plot_income_statement, plot_assets_liabilities, plot_free_cashflow, plot_earnings_history
 from functions import obtain_dataframe
 from functions import get_features_targets, forecast, create_predictions_series, plot_forecast
-from functions import process_news
 
 pd.options.display.float_format = '{:.2f}'.format
 
