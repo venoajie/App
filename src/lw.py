@@ -11,9 +11,12 @@ warnings.filterwarnings("ignore")
 pd.options.display.max_columns = None
 
 # get historical data of S&P500(^GSPC)
-df = yf.download("^AAPL", period='1d', start='2019-01-01', end='2022-01-31')
+df = yf.download("^GSPC", period='1d', start='2019-01-01', end='2022-01-31')
 df.head()
+
 # use different colors to distinguish between an up or down day — green for up days, and red for down days. Otherwise the volume bars all have the same color.
+
+
 df['diff'] = df['Close'] - df['Open']
 df.loc[df['diff']>=0, 'color'] = 'green'
 df.loc[df['diff']<0, 'color'] = 'red'
