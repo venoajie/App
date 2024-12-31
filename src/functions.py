@@ -9,6 +9,7 @@ import plotly.express as px
 import pandas_ta as ta
 from sklearn.preprocessing import MinMaxScaler 
 from keras.models import load_model # type: ignore
+from loguru import logger as log
 
 def get_sp500_tickers():
     """
@@ -354,6 +355,7 @@ def obtain_dataframe(selected_ticker):
     """
 
     ticker = yf.Ticker(selected_ticker)
+    log.error (f" ticker {ticker}")
     dataframe = ticker.history(period='max')
     dataframe.drop(columns=['Dividends', 'Stock Splits'], inplace=True)
     dataframe = dataframe.loc['2010-01-01':].copy()
