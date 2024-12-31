@@ -52,4 +52,4 @@ ax1.plot(aapl_df.loc[aapl_df.crossover == -1.0].index,
 plt.legend(['Close', 'EMA Short', 'EMA Long', 'Buy', 'Sell'])
 plt.title('AAPL EMA Crossover')
 plt.title('AAPL EMA Crossover')
-fig.show()
+plt.grid()
