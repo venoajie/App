@@ -16,7 +16,7 @@ symbols = ["AAPL"]
 
 df = yf.download(tickers=symbols)
 df.head()   
-
+print(df)
 # convert column names into lowercase
 df.columns = [c.lower() for c in df.columns]
 df.rename(columns={"adj close":"adj_close"},inplace=True)
