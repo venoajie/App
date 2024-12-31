@@ -19,3 +19,4 @@ daily.tail(3)
   the values are added into the same dataframe
 """
 mpf.plot(daily)
+mpf.show()
