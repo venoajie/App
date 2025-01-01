@@ -237,6 +237,10 @@ def ewma_vectorized(
     ):
     
     """
+    
+    https://stackoverflow.com/questions/42869495/numpy-version-of-exponential-weighted-moving-average-equivalent-to-pandas-ewm
+    
+    
     Calculates the exponential moving average over a vector.
     Will fail for large inputs.
     :param data: Input data
