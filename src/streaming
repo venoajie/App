@@ -201,7 +201,7 @@ class StreamAccountData(ModifyOrderDb):
                 while True:
                     
                     # Authenticate WebSocket Connection
-                    await self.ws_auth(w)
+                    await self.ws_auth(ws)
                     
                     #! websocket as authenticator
                     #while self.websocket_client.open:
