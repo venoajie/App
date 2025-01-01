@@ -475,8 +475,8 @@ class StreamAccountData(ModifyOrderDb):
                 "client_secret": self.client_secret,
             },
         }
-        #log.debug (f" msg {msg}")
-        #log.error (f" json.dumps(msg) {json.dumps(msg)}")
+        log.debug (f" msg {msg}")
+        log.error (f" json.dumps(msg) {json_serialize(msg)}")
         log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
 
         try:
