@@ -95,7 +95,7 @@ def json_serialize(message):
     Serialize a message to JSON using orjson
     :param message: The message to serialize
     """
-    return str(orjson.dumps(message), "utf-8")
+    return (orjson.dumps(message), "utf-8").strip()
 
         
 @dataclass(unsafe_hash=True, slots=True)
