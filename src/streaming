@@ -201,7 +201,7 @@ class StreamAccountData(ModifyOrderDb):
                 while True:
                     
                     # Authenticate WebSocket Connection
-                    await self.ws_auth()
+                    await self.ws_auth(self.websocket_client)
                     
                     #! websocket as authenticator
                     #while self.websocket_client.open:
@@ -460,7 +460,7 @@ class StreamAccountData(ModifyOrderDb):
         except Exception as error:
             log.warning(error)
 
-    async def ws_auth(self) -> None:
+    async def ws_auth(self, ws) -> None:
         """
         Requests DBT's `public/auth` to
         authenticate the WebSocket Connection.
@@ -478,10 +478,10 @@ class StreamAccountData(ModifyOrderDb):
         log.debug (f" msg {msg}")
         log.error (f" json_serialize(msg) {json_serialize(msg)}")
         log.info (f" json.dumps(msg) {json.dumps(msg)}")
-        log.error (f"json_serialize {websockets.send(json_serialize(msg))}")
+        log.error (f"json_serialize {await ws.send(json_serialize(msg))}")
 
         try:
-            websockets.send(json_serialize(msg))
+            await ws.send(json_serialize(msg))
 
         except Exception as error:
             
