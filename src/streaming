@@ -95,7 +95,7 @@ def json_serialize(message):
     Serialize a message to JSON using orjson
     :param message: The message to serialize
     """
-    return (orjson.dumps(message.strip()), "utf-8")
+    return str(orjson.dumps(message), "utf-8")
 
         
 @dataclass(unsafe_hash=True, slots=True)
@@ -201,7 +201,7 @@ class StreamAccountData(ModifyOrderDb):
                 while True:
                     
                     # Authenticate WebSocket Connection
-                    await self.ws_auth(self.websocket_client)
+                    await self.ws_auth(w)
                     
                     #! websocket as authenticator
                     #while self.websocket_client.open:
