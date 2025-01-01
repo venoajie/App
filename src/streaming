@@ -475,7 +475,7 @@ class StreamAccountData(ModifyOrderDb):
                 "client_secret": self.client_secret,
             },
         }
-        log.debug (f" msg {msg}")
+        log.debug (f" msg {msg} {type(msg)}")
         log.error (f" json_serialize(msg) {json_serialize(msg)}")
         log.info (f" json.dumps(msg) {json.dumps(msg)}")
         log.error (f"json_serialize {await ws.send(json_serialize(msg))}")
