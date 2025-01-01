@@ -89,6 +89,14 @@ def get_settlement_period (strategy_attributes) -> list:
             [o["settlement_period"]for o in strategy_attributes]))
             )
 
+
+def json_serialize(message):
+    """
+    Serialize a message to JSON using orjson
+    :param message: The message to serialize
+    """
+    return str(orjson.dumps(message), "utf-8")
+
         
 @dataclass(unsafe_hash=True, slots=True)
 class StreamAccountData(ModifyOrderDb):
@@ -445,8 +453,10 @@ class StreamAccountData(ModifyOrderDb):
             "params": {},
         }
         
+        log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
+        
         try:
-            await self.websocket_client.send(json.dumps(msg))
+            await self.websocket_client.send(json_serialize(msg))
         except Exception as error:
             log.warning(error)
 
@@ -467,9 +477,10 @@ class StreamAccountData(ModifyOrderDb):
         }
         #log.debug (f" msg {msg}")
         #log.error (f" json.dumps(msg) {json.dumps(msg)}")
+        log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
 
         try:
-            await self.websocket_client.send(json.dumps(msg))
+            await self.websocket_client.send(json_serialize(msg))
 
         except Exception as error:
             
@@ -502,8 +513,10 @@ class StreamAccountData(ModifyOrderDb):
                             "refresh_token": self.refresh_token,
                         },
                     }
+                    
+                    log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
         
-                    await self.websocket_client.send(json.dumps(msg))
+                    await self.websocket_client.send(json_serialize(msg))
 
             await asyncio.sleep(150)
 
@@ -547,8 +560,9 @@ class StreamAccountData(ModifyOrderDb):
             log.info(extra_params)
             log.info(msg)
 
-            await self.websocket_client.send(json.dumps(msg))
+            await self.websocket_client.send(json_serialize(msg))
 
+        log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
         
         #msg: dict = {
         #    "jsonrpc": "2.0",
