@@ -478,7 +478,8 @@ class StreamAccountData(ModifyOrderDb):
         log.debug (f" msg {msg} {type(msg)}")
         log.error (f" json_serialize(msg)  {json_serialize(msg)} {type(json_serialize(msg))}")
         log.info (f" json.dumps(msg) {json.dumps(msg)} {type(json.dumps(msg))}")
-        log.error (f"json_serialize {await ws.send(({"type": "websocket.send", "text": msg}))}")
+        log.error (f"json_serialize {await ws.send(json.dumps(msg))}")
+        log.error (f"json_serialize {await ws.send(json_serialize(msg))}")
 
         try:
             await ws.send(json_serialize(msg))
