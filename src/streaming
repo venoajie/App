@@ -477,7 +477,7 @@ class StreamAccountData(ModifyOrderDb):
         }
         
         try:
-            await self.websocket_client.send(json.dumps(msg))
+            await ws.send(json.dumps(msg))
 
         except Exception as error:
             
