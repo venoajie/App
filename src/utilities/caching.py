@@ -7,7 +7,7 @@ from utilities.pickling import (
 from utilities.system_tools import (
     provide_path_for_file)
 from utilities.string_modification import (
-    remove_dict_elements)
+    remove_list_elements)
 from loguru import logger as log
 def reading_from_pkl_data(
     end_point, 
@@ -147,12 +147,14 @@ def update_cached_orders(
             
             order_state= order["order_state"]    
             
+            log.error (order_state)
+            
             if order_state != "cancelled" or order_state != "filled":
                 current_orders.append(order)
-                
-            
+             
             else:
-                remove_dict_elements(
+                log.debug (order)
+                remove_list_elements(
                     current_orders,
                     order
                     )
