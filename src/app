@@ -291,6 +291,7 @@ class RunningStrategy(ModifyOrderDb):
                 ticker_perpetual = cached_ticker(currencies)  
                 
                 orders_all = combining_order_data(currencies)  
+                log.warning(orders_all)
                     
                 while True:
                                
@@ -390,8 +391,6 @@ class RunningStrategy(ModifyOrderDb):
                                         )
                                     
                                     if "user.changes.any" in message_channel:
-                                        
-                                        log.warning(orders_all)
                                                                    
                                         log.info (data_orders)
                                         
