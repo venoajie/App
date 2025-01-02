@@ -396,8 +396,6 @@ class RunningStrategy(ModifyOrderDb):
                                             data_orders
                                             
                                         )
-                                        
-                                        log.error(orders_all)
                                     
                                     if not chart_trade:
                                     
@@ -467,8 +465,6 @@ class RunningStrategy(ModifyOrderDb):
                                             orders_currency = [] if not orders_all\
                                                 else [o for o in orders_all\
                                                     if currency_upper in o["instrument_name"]]
-                                            
-                                            log.warning(f"orders_currency {orders_currency}")
                 
                                             if orders_currency:
                                                 
