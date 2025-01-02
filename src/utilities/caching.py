@@ -85,7 +85,7 @@ def combining_order_data(currencies):
         
         if sub_accounts:
 
-            sub_account = sub_account[0]
+            sub_account = sub_accounts[0]
         
             sub_account_orders = sub_account["open_orders"]
             
