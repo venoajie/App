@@ -6,8 +6,6 @@ from utilities.pickling import (
     read_data,)
 from utilities.system_tools import (
     provide_path_for_file)
-from utilities.string_modification import (
-    remove_list_elements)
 from loguru import logger as log
 def reading_from_pkl_data(
     end_point, 

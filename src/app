@@ -291,7 +291,6 @@ class RunningStrategy(ModifyOrderDb):
                 ticker_perpetual = cached_ticker(currencies)  
                 
                 orders_all = combining_order_data(currencies)  
-                log.warning(orders_all)
                     
                 while True:
                                
@@ -466,6 +465,8 @@ class RunningStrategy(ModifyOrderDb):
                                                 if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
                                             
                                             orders_currency = await executing_query_with_return (query_orders)  
+                                            log.warning(orders_currency)
+                
                                             
                                             if orders_currency:
                                                 
