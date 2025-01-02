@@ -500,7 +500,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 my_trades_currency_all,
                                                 instrument_name_perpetual)
                                             
-                                            if  False and index_price is not None \
+                                            if index_price is not None \
                                                 and equity > 0 :
                                         
                                                 my_trades_currency: list= [ o for o in my_trades_currency_all \
@@ -620,7 +620,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                     instrument_name_future
                                                                     )
                                                                     
-                                                                if len_sub_account_orders_all < 50\
+                                                                if False and len_sub_account_orders_all < 50\
                                                                         and ticker_future and ticker_combo:
                                                                     #and not reduce_only \
                                                                     
@@ -742,7 +742,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         send_order = []
                                                                                                       
                                                                                                                                         
-                                                                        if size_perpetuals_reconciled:
+                                                                        if False and size_perpetuals_reconciled:
                                                                 
                                                                             for transaction in selected_transaction:
                                                                                                                                     
@@ -791,7 +791,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         
                                                         log.warning (f"strategy {strategy}-DONE")
                                                     
-                                                    if "hedgingSpot" in strategy \
+                                                    if False and "hedgingSpot" in strategy \
                                                         and size_perpetuals_reconciled:
                                                         
                                                         log.warning (f"strategy {strategy}-START")                                                    
