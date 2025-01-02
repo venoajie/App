@@ -725,7 +725,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         new_label = f"futureSpreadAuto-closed-{label_integer}"
                                                                     
                                                                     await update_status_data(
-                                                                        tables,
+                                                                        archive_db_table,
                                                                         "label",
                                                                         filter,
                                                                         label,
