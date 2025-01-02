@@ -394,7 +394,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                    
                                         log.info (data_orders)
                                         
-                                        update_cached_ticker(
+                                        update_cached_orders(
                                             orders_all,
                                             data_orders
                                             
