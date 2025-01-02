@@ -469,7 +469,7 @@ class RunningStrategy(ModifyOrderDb):
                                             if orders_currency:
                                                 
                                                 outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency\
-                                                    if (o["label"] is None or o["label"] == "") ])
+                                                    if o["label"] != '' ])
                                                 
                                                 for label in outstanding_order_id:
                                                     
