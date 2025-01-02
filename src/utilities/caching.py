@@ -149,13 +149,15 @@ def update_cached_orders(
             
             log.error (order_state)
             
-            if order_state != "cancelled" or order_state != "filled":
-                current_orders.append(order)
-             
-            else:
-                log.debug (order)
-                remove_list_elements(
+            if order_state == "cancelled" or order_state == "filled":
+               log.debug (order)
+               
+               remove_list_elements(
                     current_orders,
                     order
                     )
             
+            else:
+             
+                current_orders.append(order)
+             
