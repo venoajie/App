@@ -453,7 +453,7 @@ class StreamAccountData(ModifyOrderDb):
             "params": {},
         }
         
-        log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
+        #log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
         
         try:
             await self.websocket_client.send(json_serialize(msg))
@@ -483,7 +483,6 @@ class StreamAccountData(ModifyOrderDb):
             
             kill_process("app")
                         
-            
             raise_error_message (
             error, 
             1,
