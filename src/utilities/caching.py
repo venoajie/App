@@ -151,9 +151,9 @@ def update_cached_orders(
             
             if order_state == "cancelled" or order_state == "filled":
             
-                trade_id = order["trade_id"]
+                order_id = order["order_id"]
                 
-                selected_order = [o for o in current_orders if trade_id in o["trade_id"]]
+                selected_order = [o for o in current_orders if order_id in o["order_id"]]
                 
                 if selected_order:
                     
