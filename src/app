@@ -58,7 +58,9 @@ from utilities.system_tools import (
     raise_error_message,
     sleep_and_restart,)
 from utilities.caching import (
-    cached_ticker_data as cached_ticker,
+    combining_ticker_data as cached_ticker,
+    update_cached_orders,
+    combining_order_data,
     update_cached_ticker)
 
 
@@ -286,6 +288,10 @@ class RunningStrategy(ModifyOrderDb):
                     currencies
                     )
                 
+                ticker_perpetual = cached_ticker(currencies)  
+                
+                orders_all = combining_order_data(currencies)  
+                    
                 while True:
                                
                     # Authenticate WebSocket Connection
@@ -311,8 +317,12 @@ class RunningStrategy(ModifyOrderDb):
                                 ws_channel= f"chart.trades.{currency}-PERPETUAL.5",
                             ))
                         
-                    ticker_perpetual = cached_ticker(currencies)  
-                    
+                        self.loop.create_task(
+                            self.ws_operation(
+                                operation="subscribe",
+                                ws_channel= f"user.changes.any.{currency.upper()}.raw",
+                            ))
+                        
                     resolutions = [60,15, 5]     
                     qty_candles = 5  
                     dim_sequence = 3     
@@ -378,6 +388,20 @@ class RunningStrategy(ModifyOrderDb):
                                         data_orders,
                                         cached_candles_data,
                                         )
+                                    
+                                    if "user.changes.any" in message_channel:
+                                        
+                                        log.warning(orders_all)
+                                                                   
+                                        log.info (data_orders)
+                                        
+                                        update_cached_ticker(
+                                            orders_all,
+                                            data_orders
+                                            
+                                        )
+                                        
+                                        log.error(orders_all)
                                     
                                     if not chart_trade:
                                     
@@ -478,7 +502,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 my_trades_currency_all,
                                                 instrument_name_perpetual)
                                             
-                                            if  index_price is not None \
+                                            if  False and index_price is not None \
                                                 and equity > 0 :
                                         
                                                 my_trades_currency: list= [ o for o in my_trades_currency_all \

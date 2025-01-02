@@ -6,7 +6,9 @@ from utilities.pickling import (
     read_data,)
 from utilities.system_tools import (
     provide_path_for_file)
-
+from utilities.string_modification import (
+    remove_dict_elements)
+from loguru import logger as log
 def reading_from_pkl_data(
     end_point, 
     currency,
@@ -21,7 +23,7 @@ def reading_from_pkl_data(
 
 
 # Using the LRUCache decorator function with a maximum cache size of 3
-def cached_ticker_data(currencies):
+def combining_ticker_data(currencies):
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
     https://medium.com/@jodielovesmaths/memoization-in-python-using-cache-36b676cb21ef
@@ -56,6 +58,43 @@ def cached_ticker_data(currencies):
     return result
 
 
+
+# Using the LRUCache decorator function with a maximum cache size of 3
+def combining_order_data(currencies):
+    """_summary_
+    https://blog.apify.com/python-cache-complete-guide/]
+    https://medium.com/@jodielovesmaths/memoization-in-python-using-cache-36b676cb21ef
+    data caching
+    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
+
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    #result = (orjson.loads(data))
+    
+    result=[]
+    for currency in currencies:
+        
+        sub_accounts = reading_from_pkl_data(
+            "sub_accounts",
+            currency
+            )
+        
+        if sub_accounts:
+
+            sub_account = sub_account[0]
+        
+            sub_account_orders = sub_account["open_orders"]
+            
+            if sub_account_orders:
+                
+                result.append (sub_account_orders[0])
+
+    return result
+
 def update_cached_ticker(
     instrument_name,
     ticker,
@@ -86,4 +125,34 @@ def update_cached_ticker(
                 for item in data_orders_stat:
                     [o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
     
+    
+def update_cached_orders(
+    current_orders,
+    data_orders: list):
+    """_summary_
+    https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
 
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    
+    orders = data_orders["orders"]
+
+    if orders:
+        
+        for order in orders:
+            
+            order_state= order["order_state"]    
+            
+            if order_state != "cancelled" or order_state != "filled":
+                current_orders = order
+            
+            else:
+                remove_dict_elements(
+                    current_orders,
+                    order
+                    )
+            
