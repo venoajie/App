@@ -481,7 +481,6 @@ class StreamAccountData(ModifyOrderDb):
 
         except Exception as error:
             
-            
             kill_process("app")
                         
             
@@ -511,9 +510,10 @@ class StreamAccountData(ModifyOrderDb):
                         },
                     }
                     
-                    log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
+                    #log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
         
-                    await self.websocket_client.send(json_serialize(msg))
+                    #await self.websocket_client.send(json_serialize(msg))
+                    await self.websocket_client.send(json.dumps(msg))
 
             await asyncio.sleep(150)
 
@@ -557,9 +557,10 @@ class StreamAccountData(ModifyOrderDb):
             log.info(extra_params)
             log.info(msg)
 
-            await self.websocket_client.send(json_serialize(msg))
+            #await self.websocket_client.send(json_serialize(msg))
+            await self.websocket_client.send(json.dumps(msg))
 
-        log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
+        #log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
         
         #msg: dict = {
         #    "jsonrpc": "2.0",
