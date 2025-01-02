@@ -148,7 +148,8 @@ def update_cached_orders(
             order_state= order["order_state"]    
             
             if order_state != "cancelled" or order_state != "filled":
-                current_orders = current_orders [order]
+                current_orders.append(order)
+                
             
             else:
                 remove_dict_elements(
