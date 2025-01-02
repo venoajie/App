@@ -161,10 +161,6 @@ def update_cached_orders(
                     
                     current_orders.remove(selected_order[0])
                 
-                log.debug (order)
-                
-                current_orders.remove(order)
-            
             else:
              
                 current_orders.append(order)
