@@ -6,7 +6,8 @@ from utilities.pickling import (
     read_data,)
 from utilities.system_tools import (
     provide_path_for_file)
-from loguru import logger as log
+
+
 def reading_from_pkl_data(
     end_point, 
     currency,
@@ -145,8 +146,6 @@ def update_cached_orders(
             
             order_state= order["order_state"]    
             
-            log.error (order_state)
-            
             if order_state == "cancelled" or order_state == "filled":
             
                 order_id = order["order_id"]
@@ -154,9 +153,7 @@ def update_cached_orders(
                 selected_order = [o for o in current_orders if order_id in o["order_id"]]
                 
                 if selected_order:
-                    
-                    log.debug (selected_order)
-                    
+                                        
                     current_orders.remove(selected_order[0])
                 
             else:

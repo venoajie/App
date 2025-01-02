@@ -391,8 +391,6 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                     if "user.changes.any" in message_channel:
                                                                    
-                                        log.info (data_orders)
-                                        
                                         update_cached_orders(
                                             orders_all,
                                             data_orders
@@ -465,9 +463,8 @@ class RunningStrategy(ModifyOrderDb):
                                                 if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
                                             
                                             orders_currency = await executing_query_with_return (query_orders)  
-                                            log.warning(orders_currency)
+                                            log.error(f"orders_currency {orders_currency}")
                 
-                                            
                                             if orders_currency:
                                                 
                                                 outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency])
