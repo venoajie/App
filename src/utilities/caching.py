@@ -150,9 +150,20 @@ def update_cached_orders(
             log.error (order_state)
             
             if order_state == "cancelled" or order_state == "filled":
-               log.debug (order)
-               
-               current_orders.remove(order)
+            
+                trade_id = order["trade_id"]
+                
+                selected_order = [o for o in current_orders if trade_id in o["trade_id"]]
+                
+                if selected_order:
+                    
+                    log.debug (selected_order)
+                    
+                    current_orders.remove(selected_order[0])
+                
+                log.debug (order)
+                
+                current_orders.remove(order)
             
             else:
              
