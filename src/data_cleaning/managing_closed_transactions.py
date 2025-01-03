@@ -222,11 +222,13 @@ def get_unrecorded_trade_transactions(
     
 def get_transactions_with_closed_label(transactions_all: list) -> list:
     """ """
+    transactions_with_labels = [o for o in transactions_all\
+                    if o["label"] is  not None]
 
-    log.error( [o for o in transactions_all\
-                    if o["label"] is  None])
-    return [] if(not transactions_all) \
-        else [o for o in transactions_all if "closed" in o["label"]]
+    log.error(f"transactions_with_labels {transactions_with_labels}")
+    
+    return [] if not transactions_with_labels \
+        else [o for o in transactions_with_labels if "closed" in o["label"]]
 
 def transactions_under_label_int(
     label_integer: int, 
