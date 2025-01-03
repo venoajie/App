@@ -400,7 +400,7 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         log.debug (f"orders_all {orders_all}")
                                     
-                                    if ticker_perpetual\
+                                    if False and ticker_perpetual\
                                         and not chart_trade:
                                     
                                         instrument_name_perpetual = data_orders["instrument_name"]
