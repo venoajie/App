@@ -467,8 +467,9 @@ class RunningStrategy(ModifyOrderDb):
                 
                                             if orders_currency:
                                                 
-                                                len_sub_account_orders_all = len(sub_account_orders)
+                                                len_sub_account_orders_all = len(orders_currency)
                                                 
+                                                log.critical (f"orders_currency {orders_currency}")
                                                 log.critical (f"len_sub_account_orders_all {len_sub_account_orders_all}")
                                                 
                                                 outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency\
