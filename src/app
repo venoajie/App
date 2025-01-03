@@ -398,7 +398,6 @@ class RunningStrategy(ModifyOrderDb):
                                         update_cached_orders(
                                             orders_all,
                                             data_orders,
-                                            currencies
                                         )
                                         
                                         log.debug (f"orders_all {orders_all}")
@@ -418,7 +417,8 @@ class RunningStrategy(ModifyOrderDb):
                                         update_cached_ticker(
                                             instrument_name_perpetual,
                                             ticker_perpetual,
-                                            data_orders
+                                            data_orders,
+                                            currencies
                                             )
                                         
                                         # get portfolio data  
