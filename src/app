@@ -391,13 +391,13 @@ class RunningStrategy(ModifyOrderDb):
                                         )
                                     
                                     if "user.changes.any" in message_channel:
+                                        log.warning (f"data_orders {data_orders}")
                                                                    
                                         update_cached_orders(
                                             orders_all,
                                             data_orders
                                         )
                                         
-                                        log.warning (f"data_orders {data_orders}")
                                         log.debug (f"orders_all {orders_all}")
                                     
                                     if ticker_perpetual\
@@ -705,10 +705,10 @@ class RunningStrategy(ModifyOrderDb):
                                                                                                                                 
                                                                 if sum_selected_transaction == 0:  
                                                                     
-                                                                    normal_transaction = [o for o in selected_transaction \
-                                                                        if "open" in o["label"]]     
+                                                                    abnormal_transaction = [o for o in selected_transaction \
+                                                                        if "closed" in o["label"]]     
                                                                     
-                                                                    if normal_transaction:                                                        
+                                                                    if not abnormal_transaction:                                                        
                                                                         send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
                                                                         label,
                                                                         instrument_attributes_combo_all,
@@ -721,7 +721,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                             break
                                                                     
                                                                     else:                                                        
-                                                                        log.critical(f"normal_transaction {normal_transaction}")
+                                                                        log.critical(f"abnormal_transaction {abnormal_transaction}")
                                                                 else:                                                               
                                                                     
                                                                     new_label = f"futureSpread-open-{label_integer}"
