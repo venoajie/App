@@ -54,6 +54,7 @@ from utilities.string_modification import (
     remove_redundant_elements)
 from utilities.system_tools import (
     async_raise_error_message,
+    kill_process,
     provide_path_for_file,
     raise_error_message,
     sleep_and_restart,)
@@ -503,6 +504,9 @@ class RunningStrategy(ModifyOrderDb):
                                                 my_trades_currency_all,
                                                 instrument_name_perpetual)
                                             
+                                            if not size_future_reconciled:
+                                                kill_process("general_tasks")
+                                            
                                             if index_price is not None \
                                                 and equity > 0 :
                                         
@@ -600,6 +604,10 @@ class RunningStrategy(ModifyOrderDb):
                                                                     position_without_combo,
                                                                     my_trades_currency_all,
                                                                     instrument_name_combo)
+                                                                                    
+                                                                if not size_future_reconciled:
+                                                                    kill_process("general_tasks")
+                                                                
                                                             
                                                             except:
                                                                 instrument_name_combo = None
@@ -612,6 +620,10 @@ class RunningStrategy(ModifyOrderDb):
                                                                     position_without_combo,
                                                                     my_trades_currency_all,
                                                                     instrument_name_future)
+                                                                                         
+                                                                if not size_future_reconciled:
+                                                                    kill_process("general_tasks")
+                                                           
                                                                                                                     
                                                                 ticker_combo= reading_from_pkl_data(
                                                                     "ticker",
@@ -822,7 +834,10 @@ class RunningStrategy(ModifyOrderDb):
                                                             position_without_combo,
                                                             my_trades_currency_all,
                                                             instrument_name)
-                                                                                                     
+                                                                            
+                                                        if not size_future_reconciled:
+                                                            kill_process("general_tasks")
+                                                                                            
                                                         hedging = HedgingSpot(
                                                             strategy,
                                                             strategy_params,
