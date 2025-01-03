@@ -396,6 +396,9 @@ class RunningStrategy(ModifyOrderDb):
                                             orders_all,
                                             data_orders
                                         )
+                                        
+                                        log.warning (f"data_orders {data_orders}")
+                                        log.debug (f"orders_all {orders_all}")
                                     
                                     if ticker_perpetual\
                                         and not chart_trade:
@@ -554,9 +557,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                                 else [o for o in orders_currency 
                                                                                     if strategy in (o["label"]) ])
                                                     
+                                                    log.info (f"orders_currency_strategy {orders_currency_strategy}")
                                                     log.critical (f"len_sub_account_orders_all {len_sub_account_orders_all}")
                                                 
-
                                                     if  "futureSpread" in strategy :
                                                                             
                                                         log.warning (f"strategy {strategy}-START")    
@@ -698,6 +701,7 @@ class RunningStrategy(ModifyOrderDb):
                                                             if "Auto" in label and len_sub_account_orders_all < 50:
                                                                 
                                                                 log.critical (f"sum_selected_transaction {sum_selected_transaction}")
+                                                                log.info (f"selected_transaction {selected_transaction}")
                                                                                                                                 
                                                                 if sum_selected_transaction == 0:  
                                                                     
