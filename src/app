@@ -438,7 +438,7 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         sub_account = sub_account[0]
                                     
-                                        sub_account_orders = sub_account["open_orders"]
+                                        #sub_account_orders = sub_account["open_orders"]
                                         
                                         market_condition = get_market_condition(
                                             np,
@@ -451,15 +451,11 @@ class RunningStrategy(ModifyOrderDb):
                                         if sub_account :
                                             
                                             query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
-                                                                                    
-                                            #query_orders = f"SELECT * FROM  v_{currency_lower}_orders"
-
+                                                
                                             my_trades_currency_all_transactions: list= await executing_query_with_return (query_trades)
                                                                                     
                                             my_trades_currency_all: list= [o for o in my_trades_currency_all_transactions\
                                                 if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
-                                            
-                                            #orders_currency = await executing_query_with_return (query_orders)  
                                             
                                             orders_currency = [] if not orders_all\
                                                 else [o for o in orders_all\
@@ -469,7 +465,6 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                                 len_sub_account_orders_all = len(orders_currency)
                                                 
-                                                log.critical (f"orders_currency {orders_currency}")
                                                 log.critical (f"len_sub_account_orders_all {len_sub_account_orders_all}")
                                                 
                                                 outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency\
@@ -560,7 +555,7 @@ class RunningStrategy(ModifyOrderDb):
                                                     orders_currency_strategy = ([] if not orders_currency  
                                                                                 else [o for o in orders_currency 
                                                                                     if strategy in (o["label"]) ])
-                                                                                                                                    
+
                                                     if  "futureSpread" in strategy :
                                                                             
                                                         log.warning (f"strategy {strategy}-START")    
@@ -580,8 +575,6 @@ class RunningStrategy(ModifyOrderDb):
                                                         random_instruments_name = random.sample(([o for o in instruments_name\
                                                                                                     if "-FS-" not in o and currency_upper in o]),
                                                                                                 max_order_currency)
-                                                                    
-                        #                                tables = [archive_db_table, trade_db_table]
                                                                                             
                                                         combo_auto = ComboAuto(
                                                             strategy,
@@ -608,7 +601,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                                     
                                                                 if not size_future_reconciled:
                                                                     kill_process("general_tasks")
-                                                                
                                                             
                                                             except:
                                                                 instrument_name_combo = None
@@ -624,7 +616,6 @@ class RunningStrategy(ModifyOrderDb):
                                                                                          
                                                                 if not size_future_reconciled:
                                                                     kill_process("general_tasks")
-                                                           
                                                                                                                     
                                                                 ticker_combo= reading_from_pkl_data(
                                                                     "ticker",
@@ -709,7 +700,9 @@ class RunningStrategy(ModifyOrderDb):
                                                                     
                                                                     await self.processing_orders(send_order)
                                                                     
-                                                                    break
+                                                                    if send_order["order_allowed"]:
+                                                                        
+                                                                        break
                                                                     
                                                                 else:                                                               
                                                                     
