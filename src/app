@@ -400,7 +400,7 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         log.debug (f"orders_all {orders_all}")
                                     
-                                    if False and ticker_perpetual\
+                                    if ticker_perpetual\
                                         and not chart_trade:
                                     
                                         instrument_name_perpetual = data_orders["instrument_name"]
@@ -451,7 +451,7 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         log.warning (market_condition)
 
-                                        if sub_account :
+                                        if False and  sub_account :
                                             
                                             query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
                                                 
