@@ -459,7 +459,6 @@ class RunningStrategy(ModifyOrderDb):
                                                 if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
                                             
                                             #orders_currency = await executing_query_with_return (query_orders)  
-                                            log.info (f"orders_all {orders_all}")
                                             
                                             orders_currency = [] if not orders_all\
                                                 else [o for o in orders_all\
@@ -468,10 +467,6 @@ class RunningStrategy(ModifyOrderDb):
                                             if orders_currency:
                                                 
                                                 len_sub_account_orders_all = len(sub_account_orders)
-                                                
-                                                log.error (f"orders_currency {orders_currency}")
-                                                log.warning (f"sub_account_orders {sub_account_orders}")
-                                                log.debug (f"len_sub_account_orders_all {len_sub_account_orders_all}")
                                                 
                                                 outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency\
                                                     if o["label"] != '' ])
