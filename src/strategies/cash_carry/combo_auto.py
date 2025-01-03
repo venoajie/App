@@ -643,7 +643,7 @@ class ComboAuto (BasicStrategy):
             dict: _description_
         """
 
-        #log.info (f"is_send_exit_order_allowed_combo_auto {label}")
+        log.info (f"is_send_exit_order_allowed_combo_auto {label}")
                 
         order_allowed = False
         my_trades_currency = self.my_trades_currency_strategy
