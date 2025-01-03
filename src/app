@@ -397,7 +397,8 @@ class RunningStrategy(ModifyOrderDb):
                                             data_orders
                                         )
                                     
-                                    if not chart_trade:
+                                    if ticker_perpetual\
+                                        and not chart_trade:
                                     
                                         instrument_name_perpetual = data_orders["instrument_name"]
                                         
