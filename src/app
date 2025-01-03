@@ -506,7 +506,7 @@ class RunningStrategy(ModifyOrderDb):
                                             if not size_perpetuals_reconciled:
                                                 kill_process("general_tasks")
                                             
-                                            if False and index_price is not None \
+                                            if index_price is not None \
                                                 and equity > 0 :
                                         
                                                 my_trades_currency: list= [ o for o in my_trades_currency_all \

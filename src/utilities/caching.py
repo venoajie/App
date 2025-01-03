@@ -73,6 +73,7 @@ def combining_order_data(currencies):
         _type_: _description_
     """
     #result = (orjson.loads(data))
+    from loguru import logger as log
     
     result=[]
     for currency in currencies:
@@ -112,6 +113,8 @@ def update_cached_ticker(
         
     instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
     
+    log.debug (f"instrument_tickerbefore {instrument_ticker}")
+    
     if instrument_ticker:
         
         for item in data_orders:
@@ -126,6 +129,7 @@ def update_cached_ticker(
                 for item in data_orders_stat:
                     [o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
     
+    log.debug (f"instrument_ticker after {instrument_ticker}")
     
 def update_cached_orders(
     current_orders,
