@@ -90,7 +90,7 @@ def combining_order_data(currencies):
             
             if sub_account_orders:
                 
-                result.append (sub_account_orders[0])
+                result.append (sub_account_orders)
 
     return result
 
