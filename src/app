@@ -439,8 +439,6 @@ class RunningStrategy(ModifyOrderDb):
                                     
                                         sub_account_orders = sub_account["open_orders"]
                                         
-                                        len_sub_account_orders_all = len(sub_account_orders)
-                                        
                                         market_condition = get_market_condition(
                                             np,
                                             cached_candles_data,
@@ -467,6 +465,10 @@ class RunningStrategy(ModifyOrderDb):
                                                     if currency_upper in o["instrument_name"]]
                 
                                             if orders_currency:
+                                                
+                                                len_sub_account_orders_all = len(orders_currency)
+                                                
+                                                log.debug (f"len_sub_account_orders_all {len_sub_account_orders_all}")
                                                 
                                                 outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency\
                                                     if o["label"] != '' ])
