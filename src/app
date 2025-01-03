@@ -504,7 +504,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 my_trades_currency_all,
                                                 instrument_name_perpetual)
                                             
-                                            if not size_future_reconciled:
+                                            if not size_perpetuals_reconciled:
                                                 kill_process("general_tasks")
                                             
                                             if index_price is not None \
