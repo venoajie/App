@@ -1030,13 +1030,16 @@ class RunningStrategy(ModifyOrderDb):
                             archive_db_table,
                             transaction_log_trading_table)
             
+                        """
+                        non-combo transaction need to restart after sending order to ensure it recalculate orders and trades
+                        """
+                        if "-FS-" not in instrument_name:
+                            await sleep_and_restart ()
+                    
                     except Exception as error :
                         pass 
                     
                     log.warning ("processing order done")
-                    
-                    if "-FS-" not in instrument_name:
-                        await sleep_and_restart ()
                     
         except Exception as error:
             await raise_error_message (error)
