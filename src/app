@@ -459,7 +459,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
                                             
                                             #orders_currency = await executing_query_with_return (query_orders)  
-                                            log.info (f"orders_currency {orders_currency}")
+                                            log.info (f"orders_all {orders_all}")
                                             
                                             orders_currency = [] if not orders_all\
                                                 else [o for o in orders_all\
