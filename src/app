@@ -451,7 +451,7 @@ class RunningStrategy(ModifyOrderDb):
                                         
                                         log.warning (market_condition)
 
-                                        if False and  sub_account :
+                                        if  sub_account :
                                             
                                             query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
                                                 
@@ -506,7 +506,7 @@ class RunningStrategy(ModifyOrderDb):
                                             if not size_perpetuals_reconciled:
                                                 kill_process("general_tasks")
                                             
-                                            if index_price is not None \
+                                            if False and index_price is not None \
                                                 and equity > 0 :
                                         
                                                 my_trades_currency: list= [ o for o in my_trades_currency_all \
