@@ -466,7 +466,7 @@ class RunningStrategy(ModifyOrderDb):
                 
                                             if orders_currency:
                                                 
-                                                len_sub_account_orders_all = len(orders_currency)
+                                                len_sub_account_orders_all = len(sub_account_orders)
                                                 
                                                 log.error (f"orders_currency {orders_currency}")
                                                 log.warning (f"sub_account_orders {sub_account_orders}")
