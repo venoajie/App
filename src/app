@@ -699,18 +699,25 @@ class RunningStrategy(ModifyOrderDb):
                                                                 
                                                                 log.critical (f"sum_selected_transaction {sum_selected_transaction}")
                                                                                                                                 
-                                                                if sum_selected_transaction == 0:                                                               
-                                                                    send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
-                                                                    label,
-                                                                    instrument_attributes_combo_all,
-                                                                    THRESHOLD_MARKET_CONDITIONS_COMBO)
+                                                                if sum_selected_transaction == 0:  
                                                                     
-                                                                    await self.processing_orders(send_order)
+                                                                    normal_transaction = [o for o in selected_transaction \
+                                                                        if "open" in o["label"]]     
                                                                     
-                                                                    if send_order["order_allowed"]:
+                                                                    if normal_transaction:                                                        
+                                                                        send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
+                                                                        label,
+                                                                        instrument_attributes_combo_all,
+                                                                        THRESHOLD_MARKET_CONDITIONS_COMBO)
                                                                         
-                                                                        break
+                                                                        await self.processing_orders(send_order)
+                                                                        
+                                                                        if send_order["order_allowed"]:
+                                                                            
+                                                                            break
                                                                     
+                                                                    else:                                                        
+                                                                        log.critical(f"normal_transaction {normal_transaction}")
                                                                 else:                                                               
                                                                     
                                                                     new_label = f"futureSpread-open-{label_integer}"
