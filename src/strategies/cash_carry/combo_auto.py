@@ -713,14 +713,14 @@ class ComboAuto (BasicStrategy):
                             instrument_name_combo
                             )    
                                    
-                        log.debug  (f" {premium_pct > tp_threshold } basic_ordering_is_ok {basic_ordering_is_ok } current_premium > 0 {current_premium} {current_premium > 0} current_premium < transactions_premium {current_premium < transactions_premium}")
+                        #log.debug  (f" {premium_pct > tp_threshold } basic_ordering_is_ok {basic_ordering_is_ok } current_premium > 0 {current_premium} {current_premium > 0} current_premium < transactions_premium {current_premium < transactions_premium}")
                                         
                         #log.warning (f"transactions {transactions}")
                         #log.warning (f"orders_currency {orders_currency}")
                         len_label = len([o["label"] for o in orders_currency\
                             if str(label_integer) in o["label"]])
                         
-                        log.debug (f"len_label {len_label} label_integer {label_integer}")
+                        #log.debug (f"len_label {len_label} label_integer {label_integer}")
                         
                         if len_label == 0\
                             and premium_pct > tp_threshold \

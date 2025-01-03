@@ -700,8 +700,8 @@ class RunningStrategy(ModifyOrderDb):
                                                             #! closing combo auto trading
                                                             if "Auto" in label and len_sub_account_orders_all < 50:
                                                                 
-                                                                log.critical (f"sum_selected_transaction {sum_selected_transaction}")
-                                                                log.info (f"selected_transaction {selected_transaction}")
+                                                                #log.critical (f"sum_selected_transaction {sum_selected_transaction}")
+                                                                #log.info (f"selected_transaction {selected_transaction}")
                                                                                                                                 
                                                                 if sum_selected_transaction == 0:  
                                                                     
