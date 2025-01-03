@@ -574,7 +574,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                                                     if "-FS-" not in o and currency_upper in o]),
                                                                                                 max_order_currency)
                                                                     
-                                                        tables = [archive_db_table, trade_db_table]
+                        #                                tables = [archive_db_table, trade_db_table]
                                                                                             
                                                         combo_auto = ComboAuto(
                                                             strategy,
@@ -685,6 +685,8 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                             #! closing combo auto trading
                                                             if "Auto" in label and len_sub_account_orders_all < 50:
+                                                                
+                                                                log.debug (f"selected_transaction {selected_transaction}")
                                                                                                                                 
                                                                 if sum_selected_transaction == 0:                                                               
                                                                     send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
