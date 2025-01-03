@@ -663,6 +663,7 @@ class ComboAuto (BasicStrategy):
         
             transactions_len = len(transactions) # sum product function applied only for 2 items.
             
+            log.info (f"transactions {transactions} ")
             log.info (f"transactions_sum {transactions_sum} transactions_len {transactions_len}")
                         
             if transactions_sum== 0 \
