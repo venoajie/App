@@ -583,8 +583,12 @@ class ComboAuto (BasicStrategy):
             
             #log.warning(f"waiting_minute_before_cancel {waiting_minute_before_cancel} {waiting_minute_before_cancel {waiting_minute_before_cancel}}")
             log.warning(f"transaction {transaction}")
-            timestamp: int = transaction["timestamp"]
             
+            try:
+                timestamp: int = transaction["timestamp"]
+            except:
+                timestamp: int = transaction["last_update_timestamp"]
+                
             if "open" in transaction["label"]:
                 
                 cancel_allowed: bool = check_if_minimum_waiting_time_has_passed(
