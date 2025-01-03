@@ -722,6 +722,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                     
                                                                     else:                                                        
                                                                         log.critical(f"abnormal_transaction {abnormal_transaction}")
+                                                                        
+                                                                        break
                                                                 else:                                                               
                                                                     
                                                                     new_label = f"futureSpread-open-{label_integer}"
@@ -742,6 +744,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         currency,
                                                                         cancellable_strategies
                                                                         )
+                                                                    break
                                                                 
                                                             #! renaming combo auto trading
                                                             else:
@@ -761,6 +764,7 @@ class RunningStrategy(ModifyOrderDb):
                                                                         new_label,
                                                                         "="
                                                                         )
+                                                                    break
                                                                 
                                                                 #! closing unpaired transactions                                                            
                                                                 else:
