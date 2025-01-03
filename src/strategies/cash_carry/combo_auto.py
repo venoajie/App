@@ -643,7 +643,7 @@ class ComboAuto (BasicStrategy):
             dict: _description_
         """
 
-        log.info (f"is_send_exit_order_allowed_combo_auto {label}")
+        #log.info (f"is_send_exit_order_allowed_combo_auto {label}")
                 
         order_allowed = False
         my_trades_currency = self.my_trades_currency_strategy
@@ -658,6 +658,8 @@ class ComboAuto (BasicStrategy):
             transactions_sum = sum([ o["amount"] for o in transactions])
         
             transactions_len = len(transactions) # sum product function applied only for 2 items.
+            
+            log.info (f"transactions_sum {transactions_sum} transactions_len {transactions_len}")
                         
             if transactions_sum== 0 \
                 and transactions_len==0:
