@@ -582,7 +582,7 @@ class ComboAuto (BasicStrategy):
             waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
             
             #log.warning(f"waiting_minute_before_cancel {waiting_minute_before_cancel} {waiting_minute_before_cancel {waiting_minute_before_cancel}}")
-            
+            log.warning(f"transaction {transaction}")
             timestamp: int = transaction["timestamp"]
             
             if "open" in transaction["label"]:
