@@ -678,8 +678,6 @@ class ComboAuto (BasicStrategy):
                     traded_instrument_name_future = traded_future["instrument_name"] 
                     
                     instrument_name_combo = creating_instrument_name_combo(traded_instrument_name_future)
-                    
-                    log.warning (f"instrument_name_combo {instrument_name_combo} ")
                             
                     combo_ticker= reading_from_pkl_data(
                         "ticker", 
@@ -713,8 +711,6 @@ class ComboAuto (BasicStrategy):
                             take_profit_threshold_original,
                             instrument_name_combo
                             )    
-                                   
-                        log.debug  (f" {premium_pct > tp_threshold } basic_ordering_is_ok {basic_ordering_is_ok } current_premium > 0 {current_premium} {current_premium > 0} current_premium < transactions_premium {current_premium < transactions_premium}")
                                         
                         #log.warning (f"transactions {transactions}")
                         #log.warning (f"orders_currency {orders_currency}")
