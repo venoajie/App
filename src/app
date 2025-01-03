@@ -468,6 +468,7 @@ class RunningStrategy(ModifyOrderDb):
                                                 
                                                 len_sub_account_orders_all = len(orders_currency)
                                                 
+                                                log.error (f"orders_currency {orders_currency}")
                                                 log.debug (f"len_sub_account_orders_all {len_sub_account_orders_all}")
                                                 
                                                 outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency\
