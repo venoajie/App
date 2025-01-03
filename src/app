@@ -649,6 +649,10 @@ class RunningStrategy(ModifyOrderDb):
                                                                         )
                                                             
                                                                     await self.processing_orders(send_order)
+                                                                    
+                                                                    if send_order["order_allowed"]:
+                                                                        
+                                                                        break
                                                         
                                                                     instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
                                                                         if o["instrument_name"] == instrument_name_future])- server_time)/ONE_MINUTE  
@@ -692,6 +696,8 @@ class RunningStrategy(ModifyOrderDb):
                                                             
                                                             #! closing combo auto trading
                                                             if "Auto" in label and len_sub_account_orders_all < 50:
+                                                                
+                                                                log.critical (f"sum_selected_transaction {sum_selected_transaction}")
                                                                                                                                 
                                                                 if sum_selected_transaction == 0:                                                               
                                                                     send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
