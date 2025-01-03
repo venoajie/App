@@ -395,7 +395,6 @@ class RunningStrategy(ModifyOrderDb):
                                         update_cached_orders(
                                             orders_all,
                                             data_orders
-                                            
                                         )
                                     
                                     if not chart_trade:
@@ -707,6 +706,8 @@ class RunningStrategy(ModifyOrderDb):
                                                                     THRESHOLD_MARKET_CONDITIONS_COMBO)
                                                                     
                                                                     await self.processing_orders(send_order)
+                                                                    
+                                                                    break
                                                                     
                                                                 else:                                                               
                                                                     
