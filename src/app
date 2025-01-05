@@ -197,6 +197,12 @@ def modify_hedging_instrument (
                 
 @dataclass(unsafe_hash=True, slots=True)
 class RunningStrategy(ModifyOrderDb):
+    
+    """_summary_
+https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-implementing-asyncio-websockets-as-a-class
+    Returns:
+        _type_: _description_
+    """
 
     sub_account_id: str
     client_id: str = fields 
