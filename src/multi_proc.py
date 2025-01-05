@@ -1,5 +1,8 @@
 import time
 from multiprocessing import Process
+from loguru import logger as log
+import asyncio
+from utilities.system_tools import raise_error_message
 
 
 def sum_to_num(final_num: int) -> int:
@@ -31,3 +34,23 @@ def main():
     start_b = time.monotonic()
     process_b.join()
     print(f"Process_b completed in {time.monotonic() - start_b:.2f} seconds")
+    
+                    
+if __name__ == "__main__":
+    
+    try:
+        (main())
+        
+    except(
+        KeyboardInterrupt, 
+        SystemExit
+        ):
+        asyncio.get_event_loop().run_until_complete(main().stop_ws())
+        
+
+    except Exception as error:
+        raise_error_message(
+        error, 
+        5, 
+        "app"
+        )
