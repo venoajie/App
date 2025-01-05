@@ -5,6 +5,11 @@ from transaction_management.deribit.api_requests import (
 from utilities.string_modification import (
     remove_list_elements)
 
+"""
+
+https://www.dataleadsfuture.com/exploring-numexpr-a-powerful-engine-behind-pandas/
+
+    """
 def analysis_based_on_length(
     np: object,
     data_per_resolution: int):
