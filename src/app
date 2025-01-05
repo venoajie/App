@@ -332,6 +332,12 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
                                 ws_channel= f"user.changes.any.{currency.upper()}.raw",
                             ))
                         
+                        await self.modify_order_and_db.resupply_sub_accountdb (currency)
+
+                        await self.modify_order_and_db.resupply_portfolio (currency)
+                        
+                        await asyncio.sleep (.5)
+                        
                     resolutions = [60,15, 5]     
                     qty_candles = 5  
                     dim_sequence = 3     
