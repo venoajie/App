@@ -144,7 +144,7 @@ class StreamAccountData(ModifyOrderDb):
     
     async def ws_manager(
         self,
-        queue) -> None:
+        queue= None) -> None:
         async with websockets.connect(
             self.ws_connection_url,
             ping_interval=None,
@@ -348,8 +348,8 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     log.debug (data_orders)                         
                                                         
-                                    queue.put(data_orders)
-                                    queue.put(None)   
+                                    #queue.put(data_orders)
+                                    #queue.put(None)   
                                                                      
                         except Exception as error:
                             log.critical (error)
