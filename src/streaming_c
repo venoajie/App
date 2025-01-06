@@ -306,6 +306,7 @@ class StreamAccountData(ModifyOrderDb):
                             message: dict = orjson.loads(message)
                             message_channel: str = None
                             log.warning (message)
+                            queue.put(message)
                             if "id" in list(message):
                                 if message["id"] == 9929:
                                     
@@ -347,7 +348,7 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     log.debug (data_orders)                         
                                                         
-                                    queue.put(data_orders)
+                                    
                                                                      
                         except Exception as error:
                             log.critical (error)
@@ -572,35 +573,257 @@ async def worker(name: str, queue: Queue):
         await asyncio.sleep(10)
 
 
-async def capture_data(queue):
-    uri = "wss://www.bitmex.com/realtime?subscribe=instrument:XBTUSD"
-    #uri = "wss://www.bitmex.com/realtime"
-    async with websockets.connect(uri) as websocket:
-        while True:
-            data = await websocket.recv()
-            data = json.loads(data)
-                          #print('\n', data['data'][0]["lastPrice"])                
+@dataclass(unsafe_hash=True, slots=True)
+class StreamAccountData1(ModifyOrderDb):
 
-            log.info(f"captured data: {data}")
-            queue.put((data))
+    """
+
+    +----------------------------------------------------------------------------------------------+
+    referene: https://github.com/ElliotP123/crypto-exchange-code-samples/blob/master/deribit/websockets/dbt-ws-authenticated-example.py
+    +----------------------------------------------------------------------------------------------+
+
+    """
+
+    sub_account_id: str
+    client_id: str = fields 
+    client_secret: str = fields 
+    modify_order_and_db: object = fields 
+    # Async Event Loop
+    loop = asyncio.get_event_loop()
+    ws_connection_url: str = "wss://www.deribit.com/ws/api/v2"
+    # Instance Variables
+    connection_url: str = "https://www.deribit.com/api/v2/"
+    websocket_client: websockets.WebSocketClientProtocol = None
+    refresh_token: str = None
+    refresh_token_expiry_time: int = None
+            
+    def __post_init__(self):
+        self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
+        self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
+        self.client_secret: str = config_oci.get_oci_key(parse_dotenv(self.sub_account_id)["key_ocid"])
+
+        # Start Primary Coroutine
+        #self.loop.run_until_complete(self.ws_manager())
     
+    async def ws_manager(
+        self,
+        queue) -> None:
+        async with websockets.connect(
+            self.ws_connection_url,
+            ping_interval=None,
+            compression=None,
+            close_timeout=60,
+        ) as self.websocket_client:
+
+            # registering strategy config file    
+            file_toml = "config_strategies.toml"
+            
+            try:                    
+                
+                # parsing config file
+                config_app = get_config(file_toml)
+
+                # get tradable strategies
+                tradable_config_app = config_app["tradable"]
+                
+                # get TRADABLE currencies
+                currencies = [o["spot"] for o in tradable_config_app] [0]
+
+                strategy_attributes = config_app["strategies"]
+                
+                # get ALL traded currencies in deribit
+                get_currencies_all = await get_currencies()
+
+                currencies = [o["currency"] for o in get_currencies_all["result"]]
+                
+                settlement_periods = get_settlement_period (strategy_attributes)
+                                
+                futures_instruments =  await get_futures_instruments (
+                    currencies,
+                    settlement_periods)  
+                
+                instruments_name = futures_instruments["instruments_name"]   
+                                
+                resolution = 1  
+                
+                while True:
+                        
+                    for currency in currencies:
+                        
+                        # some pre-trading checks
+                        currency_lower = currency.lower ()
+                        
+                        column_trade: str= "instrument_name","label"
+                      
+                    for instrument in instruments_name:
+                                            
+                        ws_channel_instrument = [
+                            f"incremental_ticker.{instrument}",
+                            f"chart.trades.{instrument}.{resolution}"
+                            ]
+                    
+
+                    msg: dict = {
+                        "jsonrpc": "2.0",
+                    }
+                    
+                    operation = "subscribe"
+                    instrument = "BTC-PERPETUAL"
+                    ws_channel = f"incremental_ticker.{instrument}"
+                    id = id_numbering.id(operation, ws_channel)    
+
+                    extra_params: dict = dict(
+                        id= id,
+                        method= f"public/{operation}",
+                        params= {"channels": [ws_channel]}
+                    )
+                    msg.update(extra_params)
+                    #uri = "wss://www.bitmex.com/realtime?subscribe=instrument:XBTUSD"
+                    #uri = "wss://www.bitmex.com/realtime"
+                    self.loop.create_task(
+                            self.ws_operation(
+                                operation = "subscribe",
+                                ws_channel = ws_channel,
+                            ))
+
+                    #await self.websocket_client.send(json.dumps(msg))
+                    while self.websocket_client.open:
+                        
+                        message: bytes = await self.websocket_client.recv()
+                        message: dict = orjson.loads(message)
+                        message_channel: str = None
+                        log.warning (message)
+                        queue.put(message)
+                    
+            except Exception as error:
+                
+                await async_raise_error_message(
+                    error,
+                    "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
+                )
+            
+    async def ws_operation(
+        self, 
+        operation: str, 
+        ws_channel: str, 
+        source: str = "ws"
+    ) -> None:
+        """
+        Requests `public/subscribe` or `public/unsubscribe`
+        to DBT's API for the specific WebSocket Channel.
+        """
+        sleep_time: int = 5
+        
+        await asyncio.sleep(sleep_time)
+
+        id = id_numbering.id(operation, ws_channel)
+        
+        msg: dict = {
+            "jsonrpc": "2.0",
+        }
+        
+        if "ws" in source:
+
+            extra_params: dict = dict(
+                id= id,
+                method= f"private/{operation}",
+                params= {"channels": [ws_channel]}
+            )
+            msg.update(extra_params)
+            await self.websocket_client.send(json.dumps(msg))
+
+        if "rest_api" in source:
+
+            extra_params: dict = await get_end_point_result("get_open_orders",
+                                                 {"kind": "future",
+                                                  "type": "trigger_all"})
+            msg.update(extra_params)
+            
+            log.info(extra_params)
+            log.info(msg)
+
+            #await self.websocket_client.send(json_serialize(msg))
+            await self.websocket_client.send(json.dumps(msg))
+
+        #log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
+        
+        #msg: dict = {
+        #    "jsonrpc": "2.0",
+        #    "method": f"private/{operation}",
+        #    "id": id,
+        #    "params": {"channels": [ws_channel]},
+        #}
+
+        #log.info(ws_channel)
+        #
+
+async def capture_data(queue):
+
+    msg: dict = {
+        "jsonrpc": "2.0",
+    }
     
+    operation = "subscribe"
+    instrument = "BTC-PERPETUAL"
+    ws_channel = f"incremental_ticker.{instrument}"
+    id = id_numbering.id(operation, ws_channel)    
+
+    extra_params: dict = dict(
+        id= id,
+        method= f"public/{operation}",
+        params= {"channels": [ws_channel]}
+    )
+    msg.update(extra_params)
+        
+    try:
+        uri = "wss://www.deribit.com/ws/api/v2"
+        #uri = "wss://www.bitmex.com/realtime?subscribe=instrument:XBTUSD"
+        #uri = "wss://www.bitmex.com/realtime"
+        async with websockets.connect(uri) as websocket:
+            
+            await websocket.send(json.dumps(msg))
+            while True:
+                
+                data = await websocket.recv()
+                data = json.loads(data)
+                            #print('\n', data['data'][0]["lastPrice"])                
+
+                log.info(f"captured data: {data}")
+                queue.put((data))
+        
+            
+    except Exception as error:
+        
+        await async_raise_error_message(
+            error,
+            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
+        )
             
 async def main():
-    queue: Queue = Manager().Queue()
-    sub_account_id = "deribit-148510"
     
-    stream = StreamAccountData(sub_account_id)
-    #result = await (stream.ws_manager(queue))
-    producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
-
-    async with Pool() as pool:
-        c_tasks = [pool.apply(worker, args=(f"worker-{i}", queue)) 
-                   for i in range(5)]
-        await asyncio.gather(*c_tasks)
-
-        await producer_task
+    try:
         
+        queue: Queue = Manager().Queue()
+        sub_account_id = "deribit-148510"
+        
+        stream = StreamAccountData1(sub_account_id)
+        #result = await (stream.ws_manager(queue))
+        producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
+
+        async with Pool() as pool:
+            c_tasks = [pool.apply(worker, args=(f"worker-{i}", queue)) 
+                    for i in range(5)]
+            await asyncio.gather(*c_tasks)
+
+            await producer_task
+            
+    except Exception as error:
+        log.critical (error)
+        
+        await async_raise_error_message(
+            error,
+            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
+        )
         
 if __name__ == "__main__":
     
