@@ -288,6 +288,7 @@ class StreamAccountData(ModifyOrderDb):
                             
                                     
                             #return message
+                            log.warning (message)
                             
                             if "id" in list(message):
                                 if message["id"] == 9929:
