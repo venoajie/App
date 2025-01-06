@@ -4,7 +4,7 @@
 # built ins
 import asyncio
 from datetime import datetime, timedelta, timezone
-import os
+import os,sys
 
 # installed
 from dataclassy import dataclass, fields
@@ -652,7 +652,7 @@ if __name__ == "__main__":
         signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         print('Enter Ctrl-C to terminate.')
 
-        asyncio.run(main2())
+        asyncio.run(main())
         
     except(
         KeyboardInterrupt, 
