@@ -18,7 +18,7 @@ from loguru import logger as log
 
 from utilities.system_tools import raise_error_message
 # Function to subscribe to ticker information.
-def ws_tickerInfo():
+def ws_tickerInfo(queue: Queue):
     def on_open(wsapp):
         print("opened")
         subscribe_message = {
@@ -29,6 +29,7 @@ def ws_tickerInfo():
 
     def on_message(wsapp, message, prev=None):
         log.debug(f"Ticker Info, Received : {datetime.now()}")
+        queue.put(json.loads(message))
 
         ###### full json payloads ######
         # pprint.pprint(json.loads(message))
@@ -78,7 +79,7 @@ async def sleep_test(time):
     log.warning(f"Sleeping for {time} seconds.")    
     await asyncio.sleep(time)
 
-async def main():
+async def main2():
     tasks = []
     async with Pool() as pool:
         tasks.append(pool.apply(ws_tickerInfo,))
@@ -168,33 +169,6 @@ async def main():
         await producer_task
         
         
-# Function to subscribe to ticker information.
-def ws_tickerInfo():
-    def on_open(wsapp):
-        print("opened")
-        subscribe_message = {
-            "method": "subscribe",
-            "params": {'channel': "lightning_ticker_BTC_JPY"}
-        }
-        wsapp.send(json.dumps(subscribe_message))
-
-    def on_message(wsapp, message, prev=None):
-        log.debug(f"Ticker Info, Received : {datetime.now()}")
-
-        ###### full json payloads ######
-        # pprint.pprint(json.loads(message))
-
-    def on_close(wsapp):
-        print("closed connection")
-
-    endpoint = 'wss://ws.lightstream.bitflyer.com/json-rpc'
-    ws = websocket.WebSocketApp(endpoint,
-                                on_open=on_open,
-                                on_message=on_message,
-                                on_close=on_close)
-
-    ws.run_forever()
-
         
 async def worker(name: str, queue: Queue):
     while True:
@@ -221,7 +195,7 @@ async def producer(queue: Queue):
 async def main():
     
     queue: Queue = Manager().Queue()
-    producer_task = asyncio.create_task(producer(queue))
+    producer_task = ws_tickerInfo(queue)
     
 
     async with Pool() as pool:

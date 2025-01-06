@@ -5,6 +5,7 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 import os,sys
+import websocket
 
 # installed
 from dataclassy import dataclass, fields
@@ -349,7 +350,6 @@ class StreamAccountData(ModifyOrderDb):
                                     log.debug (data_orders)                         
                                                         
                                     queue.put(data_orders)
-                                    queue.put(None)   
                                                                      
                         except Exception as error:
                             log.critical (error)
@@ -558,110 +558,62 @@ async def distribute_ticker_result_as_per_data_type(
             "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
         )
 
-
-def main():
-    # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
-    sub_account_id = "deribit-148510"
-    
-    try:
-        StreamAccountData(sub_account_id)
-
-    except Exception as error:
-        log.critical (error)
-        raise_error_message (
-            error, 
-            3,
-            "app"
-            )
-                
-
     
 def handle_ctrl_c(signum, stack_frame):
     sys.exit(0)
     
-def producer(queue: Queue):
-    sub_account_id = "deribit-148510"
 
-    try:
-        
-        stream = StreamAccountData(sub_account_id)
-        loop = asyncio.get_event_loop()
-        #result = loop.run_until_complete(stream.ws_manager(queue))
-        
-        #log.debug (result)
-
-        queue.put(loop.run_until_complete(stream.ws_manager(queue)))
-        queue.put(None)
-
-    except Exception as error:
-        log.critical (error)
-        raise_error_message (
-            error, 
-            )
-        
 async def worker(name: str, queue: Queue):
     while True:
         item = queue.get()
-        log.debug(f"worker: {name} got value {item}")
-        queue.put(item)
+        log.error(f"worker: {name} got value {item}")
+        if not item:
+            log.warning(f"worker: {name} got the end signal, and will stop running.")
+            queue.put(item)
+                        
+        await asyncio.sleep(10)
 
-            
-async def main2():
-    sub_account_id = "deribit-148510"
 
-    try:
-        stream = StreamAccountData(sub_account_id)
-        #result = await (stream.ws_manager())
-        
-        stream = StreamAccountData(sub_account_id)
-        loop = asyncio.get_event_loop()
-        
+async def capture_data(queue):
+    uri = "wss://www.bitmex.com/realtime?subscribe=instrument:XBTUSD"
+    #uri = "wss://www.bitmex.com/realtime"
+    async with websockets.connect(uri) as websocket:
+        while True:
+            data = await websocket.recv()
+            data = json.loads(data)
+                          #print('\n', data['data'][0]["lastPrice"])                
 
+            log.info(f"captured data: {data}")
+            queue.put((data))
     
-        queue: Queue = Manager().Queue()
-        producer_task = loop.run_until_complete(stream.ws_manager(queue))
-        log.info (producer_task)
-        
-        async with Pool() as pool:
-            c_tasks = [pool.apply(worker, args=(f"worker-{i}", queue)) 
-                    for i in range(5)]
-            log.info (c_tasks)
-            await asyncio.gather(*c_tasks)
-
-            await producer_task
+    
             
-            
-    except Exception as error:
-        log.critical (error)
-        raise_error_message (
-            error, 
-            )
-def main():
-    # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
+async def main():
+    queue: Queue = Manager().Queue()
     sub_account_id = "deribit-148510"
     
-    try:
-        #asyncio.run(main2())
-        stream = StreamAccountData(sub_account_id)
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(stream.ws_manager())
+    stream = StreamAccountData(sub_account_id)
+    #result = await (stream.ws_manager(queue))
+    producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
-    except Exception as error:
-        log.critical (error)
-        raise_error_message (
-            error, 
-            3,
-            "app"
-            )
-                
+    async with Pool() as pool:
+        c_tasks = [pool.apply(worker, args=(f"worker-{i}", queue)) 
+                   for i in range(5)]
+        await asyncio.gather(*c_tasks)
+
+        await producer_task
+        
+        
 if __name__ == "__main__":
     
     
     try:
         signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         print('Enter Ctrl-C to terminate.')
+        
+        #asyncio.get_event_loop().run_until_complete(capture_data())
 
-        asyncio.run(main2())
+        asyncio.run(main())
         
     except(
         KeyboardInterrupt, 
