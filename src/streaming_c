@@ -5,7 +5,6 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 import os,sys
-import websocket
 
 # installed
 from dataclassy import dataclass, fields
@@ -16,7 +15,6 @@ import tomli
 import websockets
 
 import signal
-import random
 
 
 from multiprocessing import Manager
