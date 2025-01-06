@@ -680,7 +680,7 @@ class StreamAccountData1(ModifyOrderDb):
                     msg.update(extra_params)
                     #uri = "wss://www.bitmex.com/realtime?subscribe=instrument:XBTUSD"
                     #uri = "wss://www.bitmex.com/realtime"
-                    self.ws_operation(
+                    await self.ws_operation(
                                 operation = "subscribe",
                                 ws_channel = ws_channel,
                             )
