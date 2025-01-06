@@ -669,15 +669,15 @@ class StreamAccountData1(ModifyOrderDb):
                                         ws_channel = ws_channel,
                                     )
 
-                    #await self.websocket_client.send(json.dumps(msg))
-                    while self.websocket_client.open:
-                        
-                        message: bytes = await self.websocket_client.recv()
-                        message: dict = orjson.loads(message)
-                        message_channel: str = None
-                        log.warning (message)
-                        queue.put(message)
-                    
+                            #await self.websocket_client.send(json.dumps(msg))
+                            while self.websocket_client.open:
+                                
+                                message: bytes = await self.websocket_client.recv()
+                                message: dict = orjson.loads(message)
+                                message_channel: str = None
+                                log.warning (message)
+                                queue.put(message)
+                            
             except Exception as error:
                 
                 await async_raise_error_message(
