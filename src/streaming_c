@@ -619,7 +619,7 @@ async def main2():
 
     
         queue: Queue = Manager().Queue()
-        producer_task = producer(queue)
+        producer_task = loop.run_until_complete(stream.ws_manager(queue))
         log.info (producer_task)
         
         async with Pool() as pool:
