@@ -285,7 +285,7 @@ class StreamAccountData(ModifyOrderDb):
                             message: bytes = await self.websocket_client.recv()
                             message: dict = orjson.loads(message)
                             message_channel: str = None
-                            log.error (message)
+                            
                                     
                             #return message
                             
@@ -327,7 +327,7 @@ class StreamAccountData(ModifyOrderDb):
                                     message_channel = message["params"]["channel"]
 
                                     data_orders: list = message["params"]["data"] 
-                                    
+                                    log.error (data_orders)
                                                         
                                     queue.put(data_orders)
                                     queue.put(None)   
