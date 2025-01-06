@@ -586,7 +586,7 @@ def producer(queue: Queue):
         
         stream = StreamAccountData(sub_account_id)
         loop = asyncio.get_event_loop()
-        result = loop.run_until_complete(stream.ws_manager())
+        result = loop.run_until_complete(stream.ws_manager(queue))
         
         log.debug (result)
 
