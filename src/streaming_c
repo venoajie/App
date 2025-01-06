@@ -277,7 +277,7 @@ class StreamAccountData(ModifyOrderDb):
                     
                         for ws in ws_channel_currency:
 
-                            await (
+                            self.loop.create_task(
                                 self.ws_operation(
                                     operation = "subscribe", 
                                     ws_channel = ws)
@@ -291,10 +291,11 @@ class StreamAccountData(ModifyOrderDb):
                             ]
                         
                         for ws in ws_channel_instrument:
-                            await self.ws_operation(
+                            self.loop.create_task(
+                            self.ws_operation(
                                 operation = "subscribe",
                                 ws_channel = ws,
-                            )
+                            ))
                     
                     while self.websocket_client.open:
                         
@@ -724,7 +725,7 @@ class StreamAccountData1(ModifyOrderDb):
 
             extra_params: dict = dict(
                 id= id,
-                method= f"private/{operation}",
+                method= f"public/{operation}",
                 params= {"channels": [ws_channel]}
             )
             msg.update(extra_params)
@@ -804,7 +805,7 @@ async def main():
         queue: Queue = Manager().Queue()
         sub_account_id = "deribit-148510"
         
-        stream = StreamAccountData(sub_account_id)
+        stream = StreamAccountData1(sub_account_id)
         #result = await (stream.ws_manager(queue))
         producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
