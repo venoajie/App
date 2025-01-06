@@ -306,7 +306,7 @@ class StreamAccountData(ModifyOrderDb):
                             message: bytes = await self.websocket_client.recv()
                             message: dict = orjson.loads(message)
                             message_channel: str = None
-                            log.warning (message)
+                            #log.warning (message)
                             if "id" in list(message):
                                 if message["id"] == 9929:
                                     
@@ -348,8 +348,8 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     log.debug (data_orders)                         
                                                         
-                                    #queue.put(data_orders)
-                                    #queue.put(None)   
+                                    queue.put(data_orders)
+                                    queue.put(None)   
                                                                      
                         except Exception as error:
                             log.critical (error)
@@ -652,7 +652,7 @@ if __name__ == "__main__":
         signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         print('Enter Ctrl-C to terminate.')
 
-        asyncio.run(main2())
+        asyncio.run(main())
         
     except(
         KeyboardInterrupt, 
