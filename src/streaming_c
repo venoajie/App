@@ -14,6 +14,18 @@ import orjson
 import tomli
 import websockets
 
+import signal
+import random
+
+
+from multiprocessing import Manager
+from multiprocessing.queues import Queue
+from multiprocessing.queues import Queue
+from multiprocessing import cpu_count
+
+from aiomultiprocess import Pool
+from aiomultiprocess import Pool
+
 # user defined formula
 from configuration import id_numbering, config, config_oci
 from db_management.sqlite_management import (
@@ -130,7 +142,9 @@ class StreamAccountData(ModifyOrderDb):
         # Start Primary Coroutine
         self.loop.run_until_complete(self.ws_manager())
     
-    async def ws_manager(self) -> None:
+    async def ws_manager(
+        self,
+        queue) -> None:
         async with websockets.connect(
             self.ws_connection_url,
             ping_interval=None,
@@ -333,7 +347,10 @@ class StreamAccountData(ModifyOrderDb):
                                     data_orders: list = message["params"]["data"]    
                                     
                                     log.debug (data_orders)                         
-                                                                                        
+                                                        
+                                    queue.put(data_orders)
+                                    queue.put(None)   
+                                                                     
                         except Exception as error:
                             log.critical (error)
                             await telegram_bot_sendtext (
@@ -557,10 +574,85 @@ def main():
             "app"
             )
                 
-if __name__ == "__main__":
+
+    
+def handle_ctrl_c(signum, stack_frame):
+    sys.exit(0)
+    
+async def producer(queue: Queue):
+    sub_account_id = "deribit-148510"
+
+    try:
+        stream = StreamAccountData(sub_account_id)
+        result = await (stream.ws_manager())
+        log.debug(result)
+        queue.put(result)
+        queue.put(None)
+
+    except Exception as error:
+        log.critical (error)
+        raise_error_message (
+            error, 
+            )
+        
+async def worker(name: str, queue: Queue):
+    while True:
+        item = queue.get()
+        log.debug(f"worker: {name} got value {item}")
+        queue.put(item)
+
+            
+async def main2():
+    sub_account_id = "deribit-148510"
+
+    try:
+        stream = StreamAccountData(sub_account_id)
+        #result = await (stream.ws_manager())
+    
+        queue: Queue = Manager().Queue()
+        producer_task = asyncio.create_task(await stream.ws_manager(queue))
+        log.info (producer_task)
+        
+        async with Pool() as pool:
+            c_tasks = [pool.apply(worker, args=(f"worker-{i}", queue)) 
+                    for i in range(5)]
+            log.info (c_tasks)
+            await asyncio.gather(*c_tasks)
+
+            await producer_task
+            
+            
+    except Exception as error:
+        log.critical (error)
+        raise_error_message (
+            error, 
+            )
+def main():
+    # https://www.codementor.io/@jflevesque/python-asynchronous-programming-with-asyncio-library-eq93hghoc
+    sub_account_id = "deribit-148510"
     
     try:
-        main()
+        #asyncio.run(main2())
+        stream = StreamAccountData(sub_account_id)
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(stream.ws_manager())
+
+    except Exception as error:
+        log.critical (error)
+        raise_error_message (
+            error, 
+            3,
+            "app"
+            )
+                
+if __name__ == "__main__":
+    
+    
+    try:
+        signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
+        print('Enter Ctrl-C to terminate.')
+
+        asyncio.run(main2())
         
     except(
         KeyboardInterrupt, 
