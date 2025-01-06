@@ -662,22 +662,7 @@ class StreamAccountData1(ModifyOrderDb):
                             f"chart.trades.{instrument}.{resolution}"
                             ]
                     
-
-                    msg: dict = {
-                        "jsonrpc": "2.0",
-                    }
-                    
-                    operation = "subscribe"
-                    instrument = "BTC-PERPETUAL"
                     ws_channel = f"incremental_ticker.{instrument}"
-                    id = id_numbering.id(operation, ws_channel)    
-
-                    extra_params: dict = dict(
-                        id= id,
-                        method= f"public/{operation}",
-                        params= {"channels": [ws_channel]}
-                    )
-                    msg.update(extra_params)
                     #uri = "wss://www.bitmex.com/realtime?subscribe=instrument:XBTUSD"
                     #uri = "wss://www.bitmex.com/realtime"
                     await self.ws_operation(
