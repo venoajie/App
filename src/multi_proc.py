@@ -1,56 +1,246 @@
-import time
-from multiprocessing import Process
-from loguru import logger as log
+import websocket
+import json
+from datetime import datetime
+import sys
+import signal
 import asyncio
+import random
+
+#from asyncio import Queue
+from multiprocessing import Manager
+from multiprocessing.queues import Queue
+from multiprocessing.queues import Queue
+from multiprocessing import cpu_count
+
+from aiomultiprocess import Pool
+from aiomultiprocess import Pool
+from loguru import logger as log
+
 from utilities.system_tools import raise_error_message
+# Function to subscribe to ticker information.
+def ws_tickerInfo():
+    def on_open(wsapp):
+        print("opened")
+        subscribe_message = {
+            "method": "subscribe",
+            "params": {'channel': "lightning_ticker_BTC_JPY"}
+        }
+        wsapp.send(json.dumps(subscribe_message))
+
+    def on_message(wsapp, message, prev=None):
+        log.debug(f"Ticker Info, Received : {datetime.now()}")
+
+        ###### full json payloads ######
+        # pprint.pprint(json.loads(message))
+
+    def on_close(wsapp):
+        print("closed connection")
+
+    endpoint = 'wss://ws.lightstream.bitflyer.com/json-rpc'
+    ws = websocket.WebSocketApp(endpoint,
+                                on_open=on_open,
+                                on_message=on_message,
+                                on_close=on_close)
+
+    ws.run_forever()
 
 
-def sum_to_num(final_num: int) -> int:
-    start = time.monotonic()
+# Function to subscribe to order book updates.
+def ws_orderBookUpdates():
+    def on_open(wsapp):
+        print("opened")
+        subscribe_message = {
+            "method": "subscribe",
+            "params": {'channel': "lightning_board_BTC_JPY"}
+        }
+        wsapp.send(json.dumps(subscribe_message))
 
-    result = 0
-    for i in range(0, final_num+1, 1):
-        result += i
+    def on_message(wsapp, message):
+        log.warning(f"Order Book, Received : {datetime.now()}")
 
-    print(f"The method with {final_num} completed in {time.monotonic() - start:.2f} second(s).")
-    return result
+        ###### full json payloads ######
+        # pprint.pprint(json.loads(message))
 
-def main():
-    # We initialize the two processes with two parameters, from largest to smallest
-    process_a = Process(target=sum_to_num, args=(200_000_000,))
-    process_b = Process(target=sum_to_num, args=(50_000_000,))
+    def on_close(wsapp):
+        print("closed connection")
 
-    # And then let them start executing
-    process_a.start()
-    process_b.start()
+    endpoint = 'wss://ws.lightstream.bitflyer.com/json-rpc'
+    ws = websocket.WebSocketApp(endpoint,
+                                on_open=on_open,
+                                on_message=on_message,
+                                on_close=on_close)
+    ws.run_forever()
 
-    # Note that the join method is blocking and gets results sequentially
-    start_a = time.monotonic()
-    process_a.join()
-    print(f"Process_a completed in {time.monotonic() - start_a:.2f} seconds")
-
-    # Because when we wait process_a for join. The process_b has joined already.
-    # so the time counter is 0 seconds.
-    start_b = time.monotonic()
-    process_b.join()
-    print(f"Process_b completed in {time.monotonic() - start_b:.2f} seconds")
+def handle_ctrl_c(signum, stack_frame):
+    sys.exit(0)
     
-                    
-if __name__ == "__main__":
+async def sleep_test(time):
+    log.warning(f"Sleeping for {time} seconds.")    
+    await asyncio.sleep(time)
+
+async def main():
+    tasks = []
+    async with Pool() as pool:
+        tasks.append(pool.apply(ws_tickerInfo,))
+        tasks.append(pool.apply(ws_orderBookUpdates,))
+        tasks = await asyncio.gather(*tasks)
+        
+        log.info(tasks)
+        """
+        tasks.append(pool.apply(ws_tickerInfo,))
+        await sleep_test(1)
+        tasks.append(pool.apply(ws_orderBookUpdates,))
+        await sleep_test(5)
+
+        results = await asyncio.gather(*tasks)
+        if "ticker" in results:
+            log.info(results["ticker"])
+        log.info(results)  # Output: [2, 4, 6]
+        """
+        
+        
+
+async def worker(name: str, queue: Queue):
+    log.info(f"worker: {name} queue {queue}")
+    while True:
+        item = queue.get()
+        log.error(f"worker: {name} got value {item}", flush=True)
+        if not item:
+            log.info(f"worker: {name} got the end signal, and will stop running.")
+            queue.put(item)
+            break
+        log.warning(f"worker: {name} begin to process value {item}", flush=True)
+        #return item
+
+async def producer(queue: Queue):
+    log.error (ws_tickerInfo())
+    queue.put((ws_tickerInfo(),))
+    queue.put(None)
+
+# Function to subscribe to ticker information.
+def ws_subs(channel):
+    def on_open(wsapp):
+        print("opened")
+        subscribe_message = {
+            "method": "subscribe",
+            "params": {'channel': f"{channel}"}
+        }
+        wsapp.send(json.dumps(subscribe_message))
+
+    def on_message(wsapp, message, prev=None):
+        log.debug(f"Ticker Info, Received : {datetime.now()}")
+
+        ###### full json payloads ######
+        # pprint.pprint(json.loads(message))
+
+    def on_close(wsapp):
+        print("closed connection")
+
+    endpoint = 'wss://ws.lightstream.bitflyer.com/json-rpc'
+    ws = websocket.WebSocketApp(endpoint,
+                                on_open=on_open,
+                                on_message=on_message,
+                                on_close=on_close)
+
+    ws.run_forever()
+
+
+
+async def main():
     
+    endpoint = 'wss://ws.lightstream.bitflyer.com/json-rpc'
+    channels = ["lightning_ticker_BTC_JPY","lightning_board_BTC_JPY"]
+    num_consumers = cpu_count() 
+    log.info (f"num_consumers {num_consumers}")
+    queue: Queue = Manager().Queue()
+    log.error (queue)
+    producer_task = asyncio.create_task(producer(queue))
+    
+    log.error (producer_task)
+
+    async with Pool() as pool:
+        c_tasks =  [pool.apply(worker, args=(f"worker-{o}", queue)) 
+                   for o in num_consumers]
+        
+        log.error (c_tasks)
+        await asyncio.gather(*c_tasks)
+
+        await producer_task
+        
+        
+# Function to subscribe to ticker information.
+def ws_tickerInfo():
+    def on_open(wsapp):
+        print("opened")
+        subscribe_message = {
+            "method": "subscribe",
+            "params": {'channel': "lightning_ticker_BTC_JPY"}
+        }
+        wsapp.send(json.dumps(subscribe_message))
+
+    def on_message(wsapp, message, prev=None):
+        log.debug(f"Ticker Info, Received : {datetime.now()}")
+
+        ###### full json payloads ######
+        # pprint.pprint(json.loads(message))
+
+    def on_close(wsapp):
+        print("closed connection")
+
+    endpoint = 'wss://ws.lightstream.bitflyer.com/json-rpc'
+    ws = websocket.WebSocketApp(endpoint,
+                                on_open=on_open,
+                                on_message=on_message,
+                                on_close=on_close)
+
+    ws.run_forever()
+
+        
+async def worker(name: str, queue: Queue):
+    while True:
+        item = queue.get()
+        log.debug(f"worker: {name} got value {item}")
+        if not item:
+            log.error (f"worker: {name} got the end signal, and will stop running.")
+            queue.put(item)
+            break
+        await asyncio.sleep(random.uniform(0.2, 0.7))
+        log.info(f"worker: {name} begin to process value {item}", flush=True)
+
+
+async def producer(queue: Queue):
+    for i in range(20):
+        await asyncio.sleep(random.uniform(0.2, 0.7))
+        log.error (random.randint(1, 3))
+        
+        #log.info (ws_tickerInfo())
+        queue.put(random.randint(1, 3))
+    queue.put(None)
+
+
+async def main():
+    
+    queue: Queue = Manager().Queue()
+    producer_task = asyncio.create_task(producer(queue))
+    
+
+    async with Pool() as pool:
+        c_tasks = [pool.apply(worker, args=(f"worker-{i}", queue)) 
+                for i in range(5)]
+        await asyncio.gather(*c_tasks)
+
+        await producer_task
+
+if __name__ == '__main__':
+
+
     try:
-        (main())
+        #ws_tickerInfo()
         
-    except(
-        KeyboardInterrupt, 
-        SystemExit
-        ):
-        asyncio.get_event_loop().run_until_complete(main().stop_ws())
+        signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
+        print('Enter Ctrl-C to terminate.')
+        asyncio.run(main())
         
-
     except Exception as error:
-        raise_error_message(
-        error, 
-        5, 
-        "app"
-        )
+        raise_error_message (error)
+        
