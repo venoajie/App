@@ -610,7 +610,7 @@ async def main2():
         #result = await (stream.ws_manager())
     
         queue: Queue = Manager().Queue()
-        producer_task = asyncio.create_task(await stream.ws_manager(queue))
+        producer_task = (await stream.ws_manager(queue))
         log.info (producer_task)
         
         async with Pool() as pool:
