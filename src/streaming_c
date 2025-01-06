@@ -277,7 +277,7 @@ class StreamAccountData(ModifyOrderDb):
                     
                         for ws in ws_channel_currency:
 
-                            (
+                            await (
                                 self.ws_operation(
                                     operation = "subscribe", 
                                     ws_channel = ws)
@@ -291,7 +291,7 @@ class StreamAccountData(ModifyOrderDb):
                             ]
                         
                         for ws in ws_channel_instrument:
-                            self.ws_operation(
+                            await self.ws_operation(
                                 operation = "subscribe",
                                 ws_channel = ws,
                             )
