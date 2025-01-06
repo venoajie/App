@@ -579,13 +579,17 @@ def main():
 def handle_ctrl_c(signum, stack_frame):
     sys.exit(0)
     
-async def producer(queue: Queue):
+def producer(queue: Queue):
     sub_account_id = "deribit-148510"
 
     try:
+        
         stream = StreamAccountData(sub_account_id)
-        result = await (stream.ws_manager())
-        log.debug(result)
+        loop = asyncio.get_event_loop()
+        result = loop.run_until_complete(stream.ws_manager())
+        
+        log.debug (result)
+
         queue.put(result)
         queue.put(None)
 
@@ -608,9 +612,14 @@ async def main2():
     try:
         stream = StreamAccountData(sub_account_id)
         #result = await (stream.ws_manager())
+        
+        stream = StreamAccountData(sub_account_id)
+        loop = asyncio.get_event_loop()
+        
+
     
         queue: Queue = Manager().Queue()
-        producer_task = (await stream.ws_manager(queue))
+        producer_task = producer(queue)
         log.info (producer_task)
         
         async with Pool() as pool:
