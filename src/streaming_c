@@ -140,7 +140,7 @@ class StreamAccountData(ModifyOrderDb):
         self.client_secret: str = config_oci.get_oci_key(parse_dotenv(self.sub_account_id)["key_ocid"])
 
         # Start Primary Coroutine
-        self.loop.run_until_complete(self.ws_manager())
+        #self.loop.run_until_complete(self.ws_manager())
     
     async def ws_manager(
         self,
