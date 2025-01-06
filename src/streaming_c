@@ -652,7 +652,7 @@ if __name__ == "__main__":
         signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         print('Enter Ctrl-C to terminate.')
 
-        asyncio.run(main())
+        asyncio.run(main2())
         
     except(
         KeyboardInterrupt, 
