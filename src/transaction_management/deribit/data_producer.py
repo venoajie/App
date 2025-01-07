@@ -4,7 +4,7 @@
 # built ins
 import asyncio
 from datetime import datetime, timedelta, timezone
-import os,sys
+import os
 
 # installed
 from dataclassy import dataclass, fields
@@ -13,13 +13,7 @@ from loguru import logger as log
 import orjson
 import tomli
 import websockets
-import signal
-from multiprocessing import Manager
 from multiprocessing.queues import Queue
-from multiprocessing.queues import Queue
-from multiprocessing import cpu_count
-from aiomultiprocess import Pool
-from aiomultiprocess import Pool
 
 # user defined formula
 from configuration import id_numbering, config, config_oci
@@ -34,7 +28,6 @@ from transaction_management.deribit.telegram_bot import (
 from utilities.pickling import (
     replace_data,)
 from utilities.system_tools import (
-    async_raise_error_message,
     kill_process,
     provide_path_for_file,
     raise_error_message,)
@@ -391,75 +384,4 @@ class StreamAccountData(ModifyOrderDb):
                                                   "type": "trigger_all"})
             msg.update(extra_params)
             
-            log.info(extra_params)
-            log.info(msg)
-
             await self.websocket_client.send(json.dumps(msg))
-
-def handle_ctrl_c(
-    signum, 
-    stack_frame
-    )->None:
-    
-    sys.exit(0)
-    
-async def worker(name: str, queue: Queue):
-    while True:
-        item = queue.get()
-        log.error(f"worker: {name} got value {item}")
-                
-    
-async def main():
-    
-    try:
-        
-        queue: Queue = Manager().Queue()
-        sub_account_id = "deribit-148510"
-        
-        num_consumers = cpu_count() 
-        
-        stream = StreamAccountData(sub_account_id)
-        #result = await (stream.ws_manager(queue))
-        producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
-
-        async with Pool() as pool:
-            c_tasks = [pool.apply(worker, args=(f"worker-{i}", queue)) 
-                    for i in range(num_consumers)]
-            await asyncio.gather(*c_tasks)
-
-            await producer_task
-            
-    except Exception as error:
-        log.critical (error)
-        
-        await async_raise_error_message(
-            error,
-            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
-        )
-        
-if __name__ == "__main__":
-    
-    
-    try:
-        signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
-        print('Enter Ctrl-C to terminate.')
-        
-        asyncio.run(main())
-        
-    except(
-        KeyboardInterrupt, 
-        SystemExit
-        ):
-        asyncio.get_event_loop().run_until_complete(main().stop_ws())
-        
-    except Exception as error:
-        log.critical (error)
-        asyncio. telegram_bot_sendtext (
-            error,
-            "general_error"
-            )
-        raise_error_message(
-        error, 
-        3, 
-        "app"
-        )
