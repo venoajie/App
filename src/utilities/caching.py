@@ -37,6 +37,8 @@ def combining_ticker_data(currencies):
     """
     #result = (orjson.loads(data))
     
+    from loguru import logger as log
+    
     result=[]
     for currency in currencies:
         instrument_name = f"{currency}-PERPETUAL"
@@ -45,7 +47,7 @@ def combining_ticker_data(currencies):
                 "ticker",
                 instrument_name
                 )
-        
+        log.debug(f"result_instrument {result_instrument}")
         if result_instrument:
             result_instrument = result_instrument[0]
 
@@ -53,6 +55,7 @@ def combining_ticker_data(currencies):
             result_instrument = get_tickers (instrument_name)
         result.append (result_instrument)
 
+        log.warning(f"result_instrument {result_instrument}")
 
     return result
 
