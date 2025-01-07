@@ -45,8 +45,19 @@ from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
 
+from utilities.string_modification import (
+    extract_currency_from_text,
+    remove_double_brackets_in_list,
+    remove_redundant_elements,)
 from transaction_management.deribit.data_producer import (
     StreamAccountData)
+
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    update_cached_orders,
+    combining_order_data,
+    update_cached_ticker)
+
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
@@ -96,10 +107,217 @@ def handle_ctrl_c(
     
     sys.exit(0)
     
+                
+@dataclass(unsafe_hash=True, slots=True)
+class RunningStrategy(ModifyOrderDb):
+    
+    """_summary_
+https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-implementing-asyncio-websockets-as-a-class
+    Returns:
+        _type_: _description_
+    """
+
+    sub_account_id: str
+    client_id: str = fields 
+    client_secret: str = fields 
+    modify_order_and_db: object = fields 
+    # Async Event Loop
+    loop = asyncio.get_event_loop()
+    ws_connection_url: str = "wss://www.deribit.com/ws/api/v2"
+    # Instance Variables
+    connection_url: str = "https://www.deribit.com/api/v2/"
+    websocket_client: websockets.WebSocketClientProtocol = None
+    refresh_token: str = None
+    refresh_token_expiry_time: int = None
+    config_app: list = fields
+            
+    def __post_init__(self):
+        self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
+        self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
+        self.client_secret: str = config_oci.get_oci_key(parse_dotenv(self.sub_account_id)["key_ocid"])
+        # parsing config file
+        
+        self.config_app = get_config("config_strategies.toml")
+        # Start Primary Coroutine
+        self.loop.run_until_complete(self.ws_manager())
+    
+    async def ws_manager(
+        self,
+        queue: Queue
+        ) -> None:
+        
+        async with websockets.connect(
+            self.ws_connection_url,
+            ping_interval=None,
+            compression=None,
+            close_timeout=60,
+        ) as self.websocket_client:
+                
+            try:
+                    
+                # parsing config file
+                config_app = self.config_app
+                
+                # get tradable strategies
+                tradable_config_app = config_app["tradable"]
+                
+                # get tradable currencies
+                #currencies_spot= ([o["spot"] for o in tradable_config_app]) [0]
+                currencies= ([o["spot"] for o in tradable_config_app]) [0]
+                
+                #currencies= random.sample(currencies_spot,len(currencies_spot))
+                
+                strategy_attributes = config_app["strategies"]
+                
+                strategy_attributes_active = [o for o in strategy_attributes \
+                    if o["is_active"]==True]
+                                            
+                active_strategies =   [o["strategy_label"] for o in strategy_attributes_active]
+                
+                # get strategies that have not short/long attributes in the label 
+                non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
+                    if o["non_checked_for_size_label_consistency"]==True]
+                
+                cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
+                    if o["cancellable"]==True]
+                
+                contribute_to_hedging_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
+                    if o["contribute_to_hedging"]==True]
+                
+                relevant_tables = config_app["relevant_tables"][0]
+                
+                trade_db_table= relevant_tables["my_trades_table"]
+                
+                order_db_table= relevant_tables["orders_table"]        
+                                
+                settlement_periods = get_settlement_period (strategy_attributes)
+                
+                futures_instruments = await get_futures_instruments (
+                    currencies,
+                    settlement_periods,
+                    )  
+
+                instrument_attributes_futures_all = futures_instruments["active_futures"]   
+                
+                instrument_attributes_combo_all = futures_instruments["active_combo"]  
+                
+                instruments_name = futures_instruments["instruments_name"]   
+                
+                min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]   
+                
+                # filling currencies attributes
+                my_path_cur = provide_path_for_file("currencies")
+                replace_data(
+                    my_path_cur,
+                    currencies
+                    )
+                
+                ticker_perpetual = cached_ticker(currencies)  
+                
+                orders_all = combining_order_data(currencies)  
+                
+                log.warning (f"orders_all {orders_all}")
+                    
+                while True:
+                               
+                    # Authenticate WebSocket Connection
+                    await self.ws_auth()
+
+                    # Establish Heartbeat
+                    await self.establish_heartbeat()
+
+                    # Start Authentication Refresh Task
+                    self.loop.create_task(self.ws_refresh_auth())
+                    
+                    message = queue.get()
+                    log.error (f"message {message}")
+                  
+            except Exception as error:
+                await raise_error_message (error)
+                await telegram_bot_sendtext (
+                    error,
+                    "general_error")
+              
+                  
 async def worker(name: str, queue: Queue):
     while True:
-        item = queue.get()
-        log.error(f"worker: {name} got value {item}")
+        message = queue.get()
+        
+        message_channel = message["params"]["channel"]
+
+        data_orders: list = message["params"]["data"]    
+        
+        currency: str = extract_currency_from_text(message_channel)
+        
+        currency_lower = currency
+        
+        if message_channel == f"user.portfolio.{currency.lower()}":
+            # also always performed at restart                                
+            await update_db_pkl(
+                "portfolio", 
+                data_orders, 
+                currency
+                )
+
+            log.critical ("F")
+            await self.modify_order_and_db.resupply_sub_accountdb(currency)    
+            
+        if "user.changes.any" in message_channel:
+                                                    
+            await self.modify_order_and_db. update_user_changes(
+                non_checked_strategies,
+                data_orders, 
+                currency, 
+                order_db_table,
+                archive_db_table,
+                )   
+            
+            trades = data_orders["trades"]
+            
+            if trades:
+                await self.modify_order_and_db.cancel_the_cancellables(
+                                            order_db_table,
+                                            currency,
+                                            cancellable_strategies
+                                            )
+                                    
+        
+        TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+        WHERE_FILTER_TICK: str = "tick"
+        DATABASE: str = "databases/trading.sqlite3"
+        
+        if "chart.trades" in message_channel:
+            instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
+                                                    
+            await ohlc_result_per_time_frame(
+                instrument_ticker,
+                resolution,
+                data_orders,
+                TABLE_OHLC1,
+                WHERE_FILTER_TICK,
+                )
+            
+        instrument_ticker = (message_channel)[19:]  
+        
+        if (
+            message_channel
+            == f"incremental_ticker.{instrument_ticker}"):
+            
+            my_path_ticker = provide_path_for_file(
+                "ticker", instrument_ticker)
+            
+            await distribute_ticker_result_as_per_data_type(
+                my_path_ticker, data_orders, instrument_ticker)
+                    
+        
+            if "PERPETUAL" in data_orders["instrument_name"]:
+                
+                await inserting_open_interest(
+                    currency, 
+                    WHERE_FILTER_TICK, 
+                    TABLE_OHLC1, 
+                    data_orders
+                    )        
                 
     
 async def main():
@@ -112,11 +330,12 @@ async def main():
         num_consumers = cpu_count() 
         
         stream = StreamAccountData(sub_account_id)
+        running = RunningStrategy(sub_account_id)
         #result = await (stream.ws_manager(queue))
         producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
         async with Pool() as pool:
-            c_tasks = [pool.apply(worker, args=(f"worker-{i}", queue)) 
+            c_tasks = [pool.apply(running.ws_manager, args=(f"worker-{i}", queue)) 
                     for i in range(num_consumers)]
             await asyncio.gather(*c_tasks)
 
