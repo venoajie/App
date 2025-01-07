@@ -1,0 +1,157 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+# built ins
+import asyncio
+from datetime import datetime, timedelta, timezone
+import os,sys
+
+# installed
+from dataclassy import dataclass, fields
+import json
+from loguru import logger as log
+import orjson
+import tomli
+import websockets
+import signal
+from multiprocessing import Manager
+from multiprocessing.queues import Queue
+from multiprocessing.queues import Queue
+from multiprocessing import cpu_count
+from aiomultiprocess import Pool
+from aiomultiprocess import Pool
+
+# user defined formula
+from configuration import id_numbering, config, config_oci
+from transaction_management.deribit.api_requests import (
+    get_end_point_result,
+    get_currencies,
+    get_instruments,)
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,)
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
+from utilities.pickling import (
+    replace_data,)
+from utilities.system_tools import (
+    async_raise_error_message,
+    kill_process,
+    provide_path_for_file,
+    raise_error_message,)
+from utilities.string_modification import (
+    remove_double_brackets_in_list,
+    remove_redundant_elements,)
+from transaction_management.deribit.managing_deribit import (
+    ModifyOrderDb,
+    currency_inline_with_database_address,)
+
+from transaction_management.deribit.data_producer import StreamAccountData,ws_manager
+
+def parse_dotenv (sub_account) -> dict:
+    return config.main_dotenv(sub_account)
+
+def get_config(file_name: str) -> list:
+    """ """
+    config_path = provide_path_for_file (file_name)
+    
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, "rb") as handle:
+                read= tomli.load(handle)
+                return read
+    except:
+        return []
+
+
+async def update_db_pkl(
+    path, 
+    data_orders,
+    currency
+    ) -> None:
+
+    my_path_portfolio = provide_path_for_file (path,
+                                               currency)
+        
+    if currency_inline_with_database_address(
+        currency,
+        my_path_portfolio):
+        
+        replace_data (
+            my_path_portfolio, 
+            data_orders
+            )
+
+def get_settlement_period (strategy_attributes) -> list:
+    
+    return (remove_redundant_elements(
+        remove_double_brackets_in_list(
+            [o["settlement_period"]for o in strategy_attributes]))
+            )
+        
+def handle_ctrl_c(
+    signum, 
+    stack_frame
+    )->None:
+    
+    sys.exit(0)
+    
+async def worker(name: str, queue: Queue):
+    while True:
+        item = queue.get()
+        log.error(f"worker: {name} got value {item}")
+                
+    
+async def main():
+    
+    try:
+        
+        queue: Queue = Manager().Queue()
+        sub_account_id = "deribit-148510"
+        
+        num_consumers = cpu_count() 
+        
+        stream = StreamAccountData(sub_account_id)
+        #result = await (stream.ws_manager(queue))
+        producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
+
+        async with Pool() as pool:
+            c_tasks = [pool.apply(worker, args=(f"worker-{i}", queue)) 
+                    for i in range(num_consumers)]
+            await asyncio.gather(*c_tasks)
+
+            await producer_task
+            
+    except Exception as error:
+        log.critical (error)
+        
+        await async_raise_error_message(
+            error,
+            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
+        )
+        
+if __name__ == "__main__":
+    
+    
+    try:
+        signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
+        print('Enter Ctrl-C to terminate.')
+        
+        asyncio.run(main())
+        
+    except(
+        KeyboardInterrupt, 
+        SystemExit
+        ):
+        asyncio.get_event_loop().run_until_complete(main().stop_ws())
+        
+    except Exception as error:
+        log.critical (error)
+        asyncio. telegram_bot_sendtext (
+            error,
+            "general_error"
+            )
+        raise_error_message(
+        error, 
+        3, 
+        "app"
+        )
