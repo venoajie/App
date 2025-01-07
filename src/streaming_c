@@ -658,10 +658,10 @@ class StreamAccountData1(ModifyOrderDb):
                         
                         column_trade: str= "instrument_name","label"
                       
-                        await self.loop.create_task(self.ws_operation(
-                                        operation = "subscribe",
-                                        ws_channel = f"user.portfolio.{currency}",
-                                    ))
+                        await self.ws_operation(
+                            operation = "subscribe",
+                            ws_channel = f"user.portfolio.{currency}",
+                        )
 
                         #await self.websocket_client.send(json.dumps(msg))
                         while self.websocket_client.open:
