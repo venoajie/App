@@ -216,7 +216,7 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
                 
                 orders_all = combining_order_data(currencies)  
                 
-                log.warning (f"orders_all {orders_all}")
+                #log.warning (f"orders_all {orders_all}")
                     
                 while True:
                                
@@ -246,6 +246,7 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
                         log.info (f"data_orders {data_orders}")
                                                     
     
+                    instrument_ticker = (message_channel)[19:]  
                     if (
                         message_channel
                         == f"incremental_ticker.{instrument_ticker}"):
