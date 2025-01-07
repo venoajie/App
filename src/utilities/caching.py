@@ -61,6 +61,45 @@ def combining_ticker_data(currencies):
 
 
 
+def update_cached_ticker(
+    instrument_name,
+    ticker,
+    data_orders,
+    currencies):
+    """_summary_
+    https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
+
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    
+        
+    instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
+    
+    if instrument_ticker:
+        
+        for item in data_orders:
+
+            if "stats" not in item and "instrument_name" not in item and "type" not in item:
+                [o for o in ticker if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
+
+            if "stats"  in item:
+                
+                data_orders_stat = data_orders[item]
+                
+                for item in data_orders_stat:
+                    [o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
+    
+    else:
+        from loguru import logger as log
+        
+        log.critical (f"instrument_ticker before {instrument_ticker}")
+        combining_order_data(currencies)
+        log.debug (f"instrument_ticker after []-not ok {instrument_ticker}")
+    
 # Using the LRUCache decorator function with a maximum cache size of 3
 def combining_order_data(currencies):
     """_summary_
@@ -99,47 +138,6 @@ def combining_order_data(currencies):
 
     return result
 
-def update_cached_ticker(
-    instrument_name,
-    ticker,
-    data_orders,
-    currencies):
-    """_summary_
-    https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
-
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    
-        
-    instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
-    
-    
-    
-    if instrument_ticker:
-        
-        for item in data_orders:
-
-            if "stats" not in item and "instrument_name" not in item and "type" not in item:
-                [o for o in ticker if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
-
-            if "stats"  in item:
-                
-                data_orders_stat = data_orders[item]
-                
-                for item in data_orders_stat:
-                    [o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
-    
-    else:
-        from loguru import logger as log
-        
-        log.critical (f"instrument_ticker before {instrument_ticker}")
-        combining_order_data(currencies)
-        log.debug (f"instrument_ticker after []-not ok {instrument_ticker}")
-    
 def update_cached_orders(
     current_orders,
     data_orders: list):

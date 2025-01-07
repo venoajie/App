@@ -337,7 +337,7 @@ async def worker(sub_account_id,name: str, queue: Queue):
     
     orders_all = combining_order_data(currencies)  
     
-    log.warning (f"orders_all {orders_all}")
+    #log.warning (f"orders_all {orders_all}")
     
     while True:
 
@@ -361,8 +361,7 @@ async def worker(sub_account_id,name: str, queue: Queue):
         
         if "user.changes.any" in message_channel:
             log.warning (f"data_orders {data_orders}")
-                                
-                
+                             
             await modify_order_and_db. update_user_changes(
                 non_checked_strategies,
                 data_orders, 
