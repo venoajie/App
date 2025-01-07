@@ -686,7 +686,7 @@ class StreamAccountData1(ModifyOrderDb):
                             ]
                         
                         for ws in ws_channel_instrument:
-                            self.loop.create_task(
+                            asyncio.create_task(
                             self.ws_operation(
                                 operation = "subscribe",
                                 ws_channel = ws,
