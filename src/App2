@@ -118,7 +118,6 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
     """
 
     sub_account_id: str
-    queue: Queue
     client_id: str = fields 
     client_secret: str = fields 
     modify_order_and_db: object = fields 
@@ -144,6 +143,7 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
     
     async def ws_manager(
         self,
+        queue: Queue
         ) -> None:
         
         async with websockets.connect(
@@ -229,7 +229,7 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
                     
-                    message = self.queue.get()
+                    message = queue.get()
                     log.error (f"message {message}")
                   
             except Exception as error:
@@ -337,7 +337,7 @@ async def main():
         producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
         async with Pool() as pool:
-            c_tasks = [pool.apply(running.ws_manager, args=(f"worker-{i}")) 
+            c_tasks = [pool.apply(running.ws_manager, args=(f"worker-{i}",queue)) 
                     for i in range(num_consumers)]
             await asyncio.gather(*c_tasks)
 
