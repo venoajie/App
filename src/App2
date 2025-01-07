@@ -140,7 +140,7 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
         
         self.config_app = get_config("config_strategies.toml")
         # Start Primary Coroutine
-        self.loop.run_until_complete(self.ws_manager())
+        #self.loop.run_until_complete(self.ws_manager())
     
     async def ws_manager(
         self,
