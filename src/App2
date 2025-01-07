@@ -382,11 +382,10 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
         await self.websocket_client.send(json.dumps(msg))
 
                   
-async def worker(queue: Queue):
+async def worker(sub_account_id,name: str, queue: Queue):
     while True:
-        sub_account_id = "deribit-148510"
         message = queue.get()
-        log.info(f"received {message}")
+        log.info(f"{name} received {message}")
         #running = RunningStrategy(sub_account_id)
         #await running.ws_manager(message)
         
@@ -407,7 +406,7 @@ async def main():
         producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
         async with Pool() as pool:
-            c_tasks = [pool.apply(worker, args=(queue)) 
+            c_tasks = [pool.apply(worker, args=(sub_account_id,f"worker-{i}",queue)) 
                     for i in range(num_consumers)]
             await asyncio.gather(*c_tasks)
 
