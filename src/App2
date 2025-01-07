@@ -406,6 +406,7 @@ async def worker(sub_account_id,name: str, queue: Queue):
             cached_candles_data,
             )
         
+        log.error (f"ticker_perpetual {ticker_perpetual}")
         
 
         if ticker_perpetual\
