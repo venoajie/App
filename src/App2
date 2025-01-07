@@ -230,8 +230,27 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
                     self.loop.create_task(self.ws_refresh_auth())
                     
                     # Start Data Stream Task
-                    log.error (f"message {message}")
-                  
+                    #log.error (f"message {message}")
+                                        
+                    message_channel = message["params"]["channel"]
+                    
+                    data_orders: list = message["params"]["data"] 
+                    
+                    
+                    if "user.changes.any" in message_channel:
+                        log.warning (f"data_orders {data_orders}")
+                                            
+
+                    if "chart.trades" in message_channel:
+                        instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
+                        log.info (f"data_orders {data_orders}")
+                                                    
+    
+                    if (
+                        message_channel
+                        == f"incremental_ticker.{instrument_ticker}"):
+                        log.debug (f"data_orders {data_orders}")
+                        
             except Exception as error:
                 await raise_error_message (error)
                 await telegram_bot_sendtext (
