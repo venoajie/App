@@ -333,7 +333,7 @@ async def main():
         running = RunningStrategy(sub_account_id,
                                   queue)
         #result = await (stream.ws_manager(queue))
-        producer_task = asyncio.create_task(stream.ws_manager()) #(capture_data(queue))
+        producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
         async with Pool() as pool:
             c_tasks = [pool.apply(running.ws_manager, args=(f"worker-{i}", queue)) 
