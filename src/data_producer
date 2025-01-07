@@ -97,7 +97,6 @@ def get_settlement_period (strategy_attributes) -> list:
             [o["settlement_period"]for o in strategy_attributes]))
             )
 
-
 def json_serialize(message):
     """
     Serialize a message to JSON using orjson
@@ -188,16 +187,6 @@ class StreamAccountData(ModifyOrderDb):
 
                 strategy_attributes = config_app["strategies"]
                 
-                # get strategies that have not short/long attributes in the label 
-                non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                    if o["non_checked_for_size_label_consistency"]==True]
-                
-                relevant_tables = config_app["relevant_tables"][0]
-                
-                trade_db_table= relevant_tables["my_trades_table"]
-                
-                order_db_table= relevant_tables["orders_table"]        
-                   
                 settlement_periods = get_settlement_period (strategy_attributes)
                                 
                 futures_instruments =  await get_futures_instruments (
@@ -212,23 +201,6 @@ class StreamAccountData(ModifyOrderDb):
                     
                     # Authenticate WebSocket Connection
                     await self.ws_auth()
-                    
-                    #! websocket as authenticator
-                    #while self.websocket_client.open:
-                        
-                        #await self.ws_operation(
-                         #           operation = "get_open_orders", 
-                          #          ws_channel = {"kind": "future",
-                           #                       "type": "trigger_all"},
-                            #    source = "rest_api")
-                                
-                        #message: dict = orjson.loads(open_orders)
-
-                        #message: bytes = await self.websocket_client.recv()
-                        #message: dict = orjson.loads(message)
-
-                        #log.debug(message)
-
 
                     # Establish Heartbeat
                     await self.establish_heartbeat()
@@ -237,35 +209,6 @@ class StreamAccountData(ModifyOrderDb):
                     self.loop.create_task(self.ws_refresh_auth())
                     
                     for currency in currencies:
-                        
-                        # some pre-trading checks
-                        currency_lower = currency.lower ()
-                        archive_db_table= f"my_trades_all_{currency_lower}_json"                    
-                        
-                        strategy_attributes_active = [o for o in strategy_attributes \
-                            if o["is_active"]==True]
-                            
-                        cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
-                            if o["cancellable"]==True]
-                        
-                        await self.modify_order_and_db.cancel_the_cancellables(
-                                                                        order_db_table,
-                                                                        currency,
-                                                                        cancellable_strategies
-                                                                        )
-                  
-                        await self.modify_order_and_db.resupply_sub_accountdb (currency)
-
-                        await self.modify_order_and_db.resupply_portfolio (currency)
-                        
-                        column_trade: str= "instrument_name","label"
-                        my_trades_currency: list= await get_query(
-                            trade_db_table, 
-                            currency, 
-                            "all", 
-                            "all", 
-                            column_trade
-                            )
                             
                         ws_channel_currency = [
                             f"user.portfolio.{currency}",
@@ -298,10 +241,8 @@ class StreamAccountData(ModifyOrderDb):
                         
                         # Receive WebSocket messages
                         message: bytes = await self.websocket_client.recv()
-                        message: dict = orjson.loads(message)
-                        #log.warning (message)
-                    
-                        #log.warning (message)
+                        message: dict = json_serialize (message)
+
                         if "id" in list(message):
                             if message["id"] == 9929:
                                 
@@ -376,10 +317,8 @@ class StreamAccountData(ModifyOrderDb):
             "params": {},
         }
         
-        #log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
-        
         try:
-            await self.websocket_client.send(json_serialize(msg))
+            await self.websocket_client.send(json.dumps(msg))
         except Exception as error:
             log.warning(error)
 
@@ -431,10 +370,7 @@ class StreamAccountData(ModifyOrderDb):
                             "refresh_token": self.refresh_token,
                         },
                     }
-                    
-                    #log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
-        
-                    #await self.websocket_client.send(json_serialize(msg))
+
                     await self.websocket_client.send(json.dumps(msg))
 
             await asyncio.sleep(150)
@@ -479,65 +415,7 @@ class StreamAccountData(ModifyOrderDb):
             log.info(extra_params)
             log.info(msg)
 
-            #await self.websocket_client.send(json_serialize(msg))
             await self.websocket_client.send(json.dumps(msg))
-
-        #log.error (f"json_serialize {await self.websocket_client.send(json_serialize(msg))}")
-        
-        #msg: dict = {
-        #    "jsonrpc": "2.0",
-        #    "method": f"private/{operation}",
-        #    "id": id,
-        #    "params": {"channels": [ws_channel]},
-        #}
-
-        #log.info(ws_channel)
-        #
-
-    
-async def distribute_ticker_result_as_per_data_type(
-    my_path_ticker: str, 
-    data_orders: dict, 
-    instrument_name: str
-    ) -> None:
-    """ """
-
-    try:
-        # ticker: list = pickling.read_data(my_path_ticker)
-
-        if data_orders["type"] == "snapshot":
-            replace_data(
-                my_path_ticker, 
-                data_orders
-                )
-
-            # ticker_fr_snapshot: list = pickling.read_data(my_path_ticker)
-
-        else:
-            ticker_change: list = read_data(my_path_ticker)
-            if ticker_change != []:
-                # log.debug (ticker_change)
-
-                for item in data_orders:
-                    ticker_change[0][item] = data_orders[item]
-                    replace_data(
-                        my_path_ticker, 
-                        ticker_change
-                        )
-
-    except Exception as error:
-        
-        log.critical (error)
-
-        await telegram_bot_sendtext (
-            error,
-            "general_error"
-            )
-        await async_raise_error_message(
-            error,
-            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
-        )
-
 
 def handle_ctrl_c(
     signum, 
@@ -550,9 +428,6 @@ async def worker(name: str, queue: Queue):
     while True:
         item = queue.get()
         log.error(f"worker: {name} got value {item}")
-        if not item:
-            log.warning(f"worker: {name} got the end signal, and will stop running.")
-            queue.put(item)
                 
     
 async def main():
@@ -590,8 +465,6 @@ if __name__ == "__main__":
         signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         print('Enter Ctrl-C to terminate.')
         
-        #asyncio.get_event_loop().run_until_complete(capture_data())
-
         asyncio.run(main())
         
     except(
