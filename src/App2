@@ -391,13 +391,19 @@ async def worker(sub_account_id,name: str, queue: Queue):
             message_channel
             == f"incremental_ticker.{instrument_ticker}"):
             log.debug (f"data_orders {data_orders}")
+
             instrument_name = data_orders["instrument_name"]
+            
+            log.error (f"""ticker_perpetual before {[o for o in ticker_perpetual if instrument_name in o['instrument_name']]}""")
+            
+            
             update_cached_ticker(
                 instrument_name,
                 ticker_perpetual,
                 data_orders,
                 currencies
                 )
+            log.warning (f"""ticker_perpetual after {[o for o in ticker_perpetual if instrument_name in o['instrument_name']]}""")
             
         #running = RunningStrategy(sub_account_id)
         #await running.ws_manager(message)
@@ -408,8 +414,6 @@ async def worker(sub_account_id,name: str, queue: Queue):
             data_orders,
             cached_candles_data,
             )
-        
-        log.error (f"ticker_perpetual {ticker_perpetual}")
         
 
         if ticker_perpetual\
