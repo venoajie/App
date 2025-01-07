@@ -300,7 +300,45 @@ class StreamAccountData(ModifyOrderDb):
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
                         #log.warning (message)
-                        queue.put(message)
+                    
+                        #log.warning (message)
+                        if "id" in list(message):
+                            if message["id"] == 9929:
+                                
+                                if self.refresh_token is None:
+                                    log.info ("Successfully authenticated WebSocket Connection")
+
+                                else:
+                                    log.info ("Successfully refreshed the authentication of the WebSocket Connection")
+
+                                self.refresh_token = message["result"]["refresh_token"]
+
+                                # Refresh Authentication well before the required datetime
+                                if message["testnet"]:
+                                    expires_in: int = 300
+                                else:
+                                    expires_in: int = message["result"]["expires_in"] - 240
+
+                                now_utc = datetime.now(timezone.utc)
+                                
+                                self.refresh_token_expiry_time = now_utc + timedelta(
+                                    seconds=expires_in
+                                )
+
+                            elif message["id"] == 8212:
+                                # Avoid logging Heartbeat messages
+                                continue
+
+                        elif "method" in list(message):
+                            # Respond to Heartbeat Message
+                            if message["method"] == "heartbeat":
+                                await self.heartbeat_response()
+
+                        if "params" in list(message):
+                            
+                            if message["method"] != "heartbeat":
+                                
+                                queue.put(message)
                         
                     
             except Exception as error:
