@@ -570,7 +570,7 @@ async def worker(name: str, queue: Queue):
             log.warning(f"worker: {name} got the end signal, and will stop running.")
             queue.put(item)
                         
-        await asyncio.sleep(10)
+        #await asyncio.sleep(10)
 
 
 @dataclass(unsafe_hash=True, slots=True)
