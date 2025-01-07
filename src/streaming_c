@@ -658,7 +658,7 @@ class StreamAccountData1(ModifyOrderDb):
                         
                         column_trade: str= "instrument_name","label"
                       
-                        self.loop.create_task(self.ws_operation(
+                        await self.loop.create_task(self.ws_operation(
                                         operation = "subscribe",
                                         ws_channel = f"user.portfolio.{currency}",
                                     ))
