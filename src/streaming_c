@@ -645,56 +645,53 @@ class StreamAccountData1(ModifyOrderDb):
                 instruments_name = futures_instruments["instruments_name"]   
                                 
                 resolution = 1  
+                # Authenticate WebSocket Connection
+                await self.ws_auth()
                 
-                while True:
-                        
-                    # Authenticate WebSocket Connection
-                    await self.ws_auth()
+                for currency in currencies:
                     
-                    for currency in currencies:
-                        
-                        # some pre-trading checks
-                        currency_lower = currency.lower ()
-                        
-                        column_trade: str= "instrument_name","label"
-                        
-                        log.error (currency)
-                      
-                        asyncio.create_task( self.ws_operation(
-                            operation = "sub)scribe",
-                            ws_channel = f"user.portfolio.{currency}",
-                        ))
-                            
-                        ws_channel_currency = [
-                            f"user.portfolio.{currency}",
-                            f"user.changes.any.{currency.upper()}.raw",
-                            ]
+                    # some pre-trading checks
+                    currency_lower = currency.lower ()
                     
-                        for ws in ws_channel_currency:
+                    column_trade: str= "instrument_name","label"
+                    
+                    log.error (currency)
+                    
+                    asyncio.create_task( self.ws_operation(
+                        operation = "sub)scribe",
+                        ws_channel = f"user.portfolio.{currency}",
+                    ))
+                        
+                    ws_channel_currency = [
+                        f"user.portfolio.{currency}",
+                        f"user.changes.any.{currency.upper()}.raw",
+                        ]
+                
+                    for ws in ws_channel_currency:
 
-                            asyncio.create_task(
-                                self.ws_operation(
-                                    operation = "subscribe", 
-                                    ws_channel = ws)
-                                )
-                      
-                    for instrument in instruments_name:
-                                            
-                        ws_channel_instrument = [
-                            f"incremental_ticker.{instrument}",
-                            f"chart.trades.{instrument}.{resolution}"
-                            ]
-                        
-                        for ws in ws_channel_instrument:
-                            asyncio.create_task(
-                                self.ws_operation(
-                                    operation = "subscribe",
-                                    ws_channel = ws
-                                    ))
+                        asyncio.create_task(
+                            self.ws_operation(
+                                operation = "subscribe", 
+                                ws_channel = ws)
+                            )
                     
+                for instrument in instruments_name:
+                                        
+                    ws_channel_instrument = [
+                        f"incremental_ticker.{instrument}",
+                        f"chart.trades.{instrument}.{resolution}"
+                        ]
+                    
+                    for ws in ws_channel_instrument:
+                        asyncio.create_task(
+                            self.ws_operation(
+                                operation = "subscribe",
+                                ws_channel = ws
+                                ))
+                
 
                     #await self.websocket_client.send(json.dumps(msg))
-                    while self.websocket_client.open:
+                    while True:
                         
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
