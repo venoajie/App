@@ -55,7 +55,7 @@ def combining_ticker_data(currencies):
             result_instrument = get_tickers (instrument_name)
         result.append (result_instrument)
 
-        log.warning(f"result_instrument {result_instrument}")
+    log.warning(f"result {result}")
 
     return result
 
