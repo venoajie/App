@@ -340,7 +340,6 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 queue.put(message)
                         
-                    
             except Exception as error:
                 log.critical (error)
                 await telegram_bot_sendtext (
@@ -563,13 +562,15 @@ async def main():
         queue: Queue = Manager().Queue()
         sub_account_id = "deribit-148510"
         
+        num_consumers = cpu_count() 
+        
         stream = StreamAccountData(sub_account_id)
         #result = await (stream.ws_manager(queue))
         producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
         async with Pool() as pool:
             c_tasks = [pool.apply(worker, args=(f"worker-{i}", queue)) 
-                    for i in range(5)]
+                    for i in range(num_consumers)]
             await asyncio.gather(*c_tasks)
 
             await producer_task
