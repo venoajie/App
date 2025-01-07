@@ -55,11 +55,6 @@ from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
-from utilities.caching import (
-    combining_ticker_data as cached_ticker,
-    update_cached_orders,
-    combining_order_data,
-    update_cached_ticker)
 from utilities.number_modification import get_closest_value
 from utilities.pickling import (
     replace_data,
@@ -337,8 +332,9 @@ async def worker(sub_account_id,name: str, queue: Queue):
     
     orders_all = combining_order_data(currencies)  
     
-    #log.warning (f"orders_all {orders_all}")
-    
+    log.warning (f"instruments_name {instruments_name}")
+#    log.warning (f"orders_all {orders_all}")
+#    
     while True:
 
     #                    
