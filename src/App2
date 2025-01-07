@@ -393,7 +393,7 @@ async def worker(sub_account_id,name: str, queue: Queue):
         currency: str = extract_currency_from_text(message_channel)
                                     
         if message_channel == f"user.portfolio.{currency.lower()}":
-            log.debug (f"data_orders {data_orders}")
+            log.error (f"data_orders {data_orders}")
             
         
         if "user.changes.any" in message_channel:
