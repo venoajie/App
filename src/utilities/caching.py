@@ -22,7 +22,7 @@ def reading_from_pkl_data(
 
 
 # Using the LRUCache decorator function with a maximum cache size of 3
-def combining_ticker_data(currencies):
+def combining_ticker_data(instruments_name):
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
     https://medium.com/@jodielovesmaths/memoization-in-python-using-cache-36b676cb21ef
@@ -40,8 +40,7 @@ def combining_ticker_data(currencies):
     from loguru import logger as log
     
     result=[]
-    for currency in currencies:
-        instrument_name = f"{currency}-PERPETUAL"
+    for instrument_name in instruments_name:
                         
         result_instrument= reading_from_pkl_data(
                 "ticker",

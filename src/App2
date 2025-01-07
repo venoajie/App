@@ -328,11 +328,10 @@ async def worker(sub_account_id,name: str, queue: Queue):
         resolutions,
         dim_sequence)  
 
-    ticker_perpetual = cached_ticker(currencies)  
+    ticker_perpetual = cached_ticker(instruments_name)  
     
     orders_all = combining_order_data(currencies)  
     
-    log.warning (f"instruments_name {instruments_name}")
 #    log.warning (f"orders_all {orders_all}")
 #    
     while True:
