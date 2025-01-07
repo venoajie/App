@@ -215,8 +215,6 @@ class StreamAccountData(ModifyOrderDb):
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
                         
-                        log.error (message)
-
                         if "id" in list(message):
                             if message["id"] == 9929:
                                 
