@@ -385,7 +385,6 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
 async def worker(sub_account_id,name: str, queue: Queue):
     while True:
         message = queue.get()
-        log.info(f"{name} received {message}")
                         
         message_channel = message["params"]["channel"]
         
