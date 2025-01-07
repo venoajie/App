@@ -660,7 +660,7 @@ class StreamAccountData1(ModifyOrderDb):
                         
                         log.error (currency)
                       
-                        asyncio.create_task(self.ws_operation(
+                        self.loop.create_task(self.ws_operation(
                             operation = "subscribe",
                             ws_channel = f"user.portfolio.{currency}",
                         ))
