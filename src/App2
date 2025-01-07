@@ -143,7 +143,7 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
     
     async def ws_manager(
         self,
-        queue: Queue
+        message: object
         ) -> None:
         
         async with websockets.connect(
@@ -229,7 +229,7 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
                     
-                    message = queue.get()
+                    # Start Data Stream Task
                     log.error (f"message {message}")
                   
             except Exception as error:
@@ -241,83 +241,11 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
                   
 async def worker(name: str, queue: Queue):
     while True:
+        sub_account_id = "deribit-148510"
         message = queue.get()
+        running = RunningStrategy(sub_account_id)
+        ws = await running.ws_manager(message)
         
-        message_channel = message["params"]["channel"]
-
-        data_orders: list = message["params"]["data"]    
-        
-        currency: str = extract_currency_from_text(message_channel)
-        
-        currency_lower = currency
-        
-        if message_channel == f"user.portfolio.{currency.lower()}":
-            # also always performed at restart                                
-            await update_db_pkl(
-                "portfolio", 
-                data_orders, 
-                currency
-                )
-
-            log.critical ("F")
-            await self.modify_order_and_db.resupply_sub_accountdb(currency)    
-            
-        if "user.changes.any" in message_channel:
-                                                    
-            await self.modify_order_and_db. update_user_changes(
-                non_checked_strategies,
-                data_orders, 
-                currency, 
-                order_db_table,
-                archive_db_table,
-                )   
-            
-            trades = data_orders["trades"]
-            
-            if trades:
-                await self.modify_order_and_db.cancel_the_cancellables(
-                                            order_db_table,
-                                            currency,
-                                            cancellable_strategies
-                                            )
-                                    
-        
-        TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
-        WHERE_FILTER_TICK: str = "tick"
-        DATABASE: str = "databases/trading.sqlite3"
-        
-        if "chart.trades" in message_channel:
-            instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-                                                    
-            await ohlc_result_per_time_frame(
-                instrument_ticker,
-                resolution,
-                data_orders,
-                TABLE_OHLC1,
-                WHERE_FILTER_TICK,
-                )
-            
-        instrument_ticker = (message_channel)[19:]  
-        
-        if (
-            message_channel
-            == f"incremental_ticker.{instrument_ticker}"):
-            
-            my_path_ticker = provide_path_for_file(
-                "ticker", instrument_ticker)
-            
-            await distribute_ticker_result_as_per_data_type(
-                my_path_ticker, data_orders, instrument_ticker)
-                    
-        
-            if "PERPETUAL" in data_orders["instrument_name"]:
-                
-                await inserting_open_interest(
-                    currency, 
-                    WHERE_FILTER_TICK, 
-                    TABLE_OHLC1, 
-                    data_orders
-                    )        
                 
     
 async def main():
@@ -330,14 +258,13 @@ async def main():
         num_consumers = cpu_count() 
         
         stream = StreamAccountData(sub_account_id)
-        running = RunningStrategy(sub_account_id,
-                                  queue)
-        log.debug (f"running {running}")
+        
+
         #result = await (stream.ws_manager(queue))
         producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
         async with Pool() as pool:
-            c_tasks = [pool.apply(running.ws_manager, args=(f"worker-{i}",queue)) 
+            c_tasks = [pool.apply(worker, args=(f"worker-{i}",queue)) 
                     for i in range(num_consumers)]
             await asyncio.gather(*c_tasks)
 
