@@ -45,7 +45,8 @@ from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
 
-from transaction_management.deribit.data_producer import StreamAccountData,ws_manager
+from transaction_management.deribit.data_producer import (
+    StreamAccountData)
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
