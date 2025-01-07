@@ -386,8 +386,9 @@ async def worker(name: str, queue: Queue):
     while True:
         sub_account_id = "deribit-148510"
         message = queue.get()
-        running = RunningStrategy(sub_account_id)
-        await running.ws_manager(message)
+        log.info(f"{name} received {message}")
+        #running = RunningStrategy(sub_account_id)
+        #await running.ws_manager(message)
         
                 
     
