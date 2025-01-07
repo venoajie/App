@@ -387,7 +387,7 @@ async def worker(name: str, queue: Queue):
         sub_account_id = "deribit-148510"
         message = queue.get()
         running = RunningStrategy(sub_account_id)
-        ws = await running.ws_manager(message)
+        await running.ws_manager(message)
         
                 
     
@@ -401,7 +401,6 @@ async def main():
         num_consumers = cpu_count() 
         
         stream = StreamAccountData(sub_account_id)
-        
 
         #result = await (stream.ws_manager(queue))
         producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
