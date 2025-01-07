@@ -95,6 +95,9 @@ def update_cached_ticker(
     
     else:
         from loguru import logger as log
+    
+        log.warning (f" {ticker}")
+        log.debug(f" {instrument_name}")
         
         log.critical (f"instrument_ticker before {instrument_ticker}")
         combining_order_data(currencies)
