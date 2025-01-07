@@ -386,6 +386,27 @@ async def worker(sub_account_id,name: str, queue: Queue):
     while True:
         message = queue.get()
         log.info(f"{name} received {message}")
+                        
+        message_channel = message["params"]["channel"]
+        
+        data_orders: list = message["params"]["data"] 
+        
+        
+        if "user.changes.any" in message_channel:
+            log.warning (f"data_orders {data_orders}")
+                                
+
+        if "chart.trades" in message_channel:
+            instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
+            log.info (f"data_orders {data_orders}")
+                                        
+
+        instrument_ticker = (message_channel)[19:]  
+        if (
+            message_channel
+            == f"incremental_ticker.{instrument_ticker}"):
+            log.debug (f"data_orders {data_orders}")
+            
         #running = RunningStrategy(sub_account_id)
         #await running.ws_manager(message)
         
