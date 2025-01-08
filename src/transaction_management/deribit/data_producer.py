@@ -261,12 +261,8 @@ class StreamAccountData(ModifyOrderDb):
                                 #log.warning(message)
                                 queue.put(result)
                                 
-                                currency: str = extract_currency_from_text(message_channel)
-                                
-                                currency_lower: str =currency
-        
-                                                                
                                 message_channel = message["params"]["channel"]
+                                currency: str = extract_currency_from_text(message_channel)                                        
                                 log.warning (message_channel)
                                 log.error (message_channel == f"user.portfolio.{currency.lower()}")
                                 if message_channel == f"user.portfolio.{currency.lower()}":
