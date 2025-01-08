@@ -1119,7 +1119,7 @@ async def main():
 
         async with Pool() as pool:
             
-            while True:
+            while signal_handler.KEEP_PROCESSING:
                 c_tasks = [pool.apply(worker, args=(sub_account_id,f"worker-{i}",queue)) 
                         for i in range(num_consumers)]
                 await asyncio.gather(*c_tasks)
