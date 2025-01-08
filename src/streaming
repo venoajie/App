@@ -314,10 +314,10 @@ async def main():
 
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
         
-        async with get_context("spawn").Pool(maxtasksperchild=1) as pool:
+        async with Pool(maxtasksperchild=1) as pool:
             
             while signal_handler.KEEP_PROCESSING:
-                c_tasks = [pool.apply(
+                c_tasks = [pool.get_context("spawn").apply(
                     processing_orders, 
                     args=(sub_account_id,
                           f"worker-{i}",
@@ -360,7 +360,7 @@ if __name__ == "__main__":
     except Exception as error:
         parse_error_message(error)
         
-        asyncio. run(telegram_bot_sendtext (
+        asyncio.run(telegram_bot_sendtext (
             error,
             "general_error"
             ))
