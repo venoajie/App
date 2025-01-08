@@ -171,7 +171,7 @@ class StreamAccountData(ModifyOrderDb):
                 while True:
                     
                     # Authenticate WebSocket Connection
-                    await self.ws_auth()
+                    auth = await self.ws_auth()
 
                     # Establish Heartbeat
                     await self.establish_heartbeat()
