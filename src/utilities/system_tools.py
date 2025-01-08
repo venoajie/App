@@ -550,8 +550,6 @@ class SignalHandler:
 
 
 def handle_ctrl_c(
-    signum, 
-    stack_frame
     )->None:
     
     signal.signal(
