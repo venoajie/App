@@ -37,6 +37,7 @@ from utilities.string_modification import (
     remove_redundant_elements)
 from utilities.system_tools import (
     async_raise_error_message,
+    parse_error_message,
     provide_path_for_file,
     raise_error_message,)
 from websocket_management.allocating_ohlc import (
@@ -277,16 +278,12 @@ async def distribute_ticker_result_as_per_data_type(
 
     except Exception as error:
         
-        log.critical (error)
+        await parse_error_message(error)  
 
         await telegram_bot_sendtext (
             error,
             "general_error"
             )
-        await async_raise_error_message(
-            error,
-            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
-        )  
 
 
 class SignalHandler:
@@ -360,12 +357,9 @@ if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main().stop_ws())
         
     except Exception as error:
-        log.critical (error)
+        parse_error_message(error)
         
         asyncio. telegram_bot_sendtext (
             error,
             "general_error"
             )
-        raise_error_message(
-        error
-        )
