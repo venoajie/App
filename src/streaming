@@ -8,6 +8,7 @@ import os,sys
 # installed
 from loguru import logger as log
 import tomli
+import signal
 from multiprocessing import Manager
 from multiprocessing.queues import Queue
 from multiprocessing import cpu_count
@@ -36,7 +37,6 @@ from utilities.string_modification import (
     remove_redundant_elements)
 from utilities.system_tools import (
     async_raise_error_message,
-    handle_ctrl_c,
     parse_error_message,
     provide_path_for_file,
     raise_error_message,
@@ -96,6 +96,14 @@ def get_settlement_period (strategy_attributes) -> list:
             [o["settlement_period"]for o in strategy_attributes]))
             )
         
+def handle_ctrl_c(
+    signum, 
+    stack_frame
+    )->None:
+    
+    sys.exit(0)
+    
+                  
 async def processing_orders(
     sub_account_id,
     name: str, 
@@ -282,6 +290,7 @@ async def distribute_ticker_result_as_per_data_type(
             "general_error"
             )
 
+
 signal_handler = SignalHandler()
 
 async def main():
@@ -330,6 +339,7 @@ if __name__ == "__main__":
     
     
     try:
+        signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         
         asyncio.run(main())
         
