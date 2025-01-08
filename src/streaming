@@ -302,18 +302,18 @@ signal_handler = SignalHandler()
 
 async def main():
     
+    sub_account_id = "deribit-148510"
+    
     try:
         
         queue: Queue = Manager().Queue()
-        sub_account_id = "deribit-148510"
         
         num_consumers = cpu_count() 
         
         stream = StreamAccountData(sub_account_id)
 
-        #result = await (stream.ws_manager(queue))
-        producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
-
+        producer_task = asyncio.create_task(stream.ws_manager(queue)) 
+        
         async with Pool(maxtasksperchild=1) as pool:
             
             while signal_handler.KEEP_PROCESSING:
@@ -331,6 +331,7 @@ async def main():
                 await producer_task
                 
                 pool.close()
+                
                 await pool.join()
             
     except Exception as error:
