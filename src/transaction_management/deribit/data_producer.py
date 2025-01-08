@@ -250,7 +250,7 @@ class StreamAccountData(ModifyOrderDb):
                         if "params" in list(message):
                             
                             if message["method"] != "heartbeat":
-                                
+                                log.warning(message)
                                 queue.put(message)
                         
             except Exception as error:
