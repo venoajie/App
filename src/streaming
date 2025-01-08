@@ -360,7 +360,7 @@ if __name__ == "__main__":
     except Exception as error:
         parse_error_message(error)
         
-        asyncio. telegram_bot_sendtext (
+        asyncio. run(telegram_bot_sendtext (
             error,
             "general_error"
-            )
+            ))
