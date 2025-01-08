@@ -1117,7 +1117,7 @@ async def main():
         #result = await (stream.ws_manager(queue))
         producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
-        async with Pool() as pool:
+        async with Pool(maxtasksperchild=1) as pool:
             
             while signal_handler.KEEP_PROCESSING:
                 c_tasks = [pool.apply(worker, args=(sub_account_id,f"worker-{i}",queue)) 
