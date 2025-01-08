@@ -259,12 +259,10 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 #log.warning(message)
                                 queue.put(result)
-                                
-                                log.warning ("BBBBBBBBBBBBBBBBBBBB")
-                                
+                                                                
                                 message_channel = message["params"]["channel"]
                                 log.warning (message_channel)
-                                if "user.changes.any" in message_channel:
+                                if "user.potfolio" in message_channel:
                                     log.warning ("AAAAAAAAAAAAAAAAAAAAAA")
                                     
                                     operation = "private/get_subaccounts"
