@@ -235,8 +235,6 @@ def handle_ctrl_c(
                   
 async def worker(sub_account_id,name: str, queue: Queue):
     
-    resolution = 1    
-    
     modify_order_and_db = ModifyOrderDb(sub_account_id)
 
     # registering strategy config file    
@@ -291,6 +289,8 @@ async def worker(sub_account_id,name: str, queue: Queue):
     
     order_db_table= relevant_tables["orders_table"]        
     
+    resolution = 1    
+    
     while True:
 #                    
         message = queue.get()
@@ -301,15 +301,12 @@ async def worker(sub_account_id,name: str, queue: Queue):
         
         currency: str = extract_currency_from_text(message_channel)
         
-        log.warning (f"message_channel {message_channel}")
-        
-        currency_upper: str = currency.upper()
         currency_lower: str =currency
                                         
         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                                           
         if message_channel == f"user.portfolio.{currency.lower()}":
-            log.error (f"data_orders {data_orders}")
+            log.error (f"user.portfolio {data_orders}")
                                            
             await update_db_pkl(
                 "portfolio", 
@@ -317,11 +314,10 @@ async def worker(sub_account_id,name: str, queue: Queue):
                 currency
                 )
 
-            log.critical ("F")
             await modify_order_and_db.resupply_sub_accountdb(currency)    
                                         
         if "user.changes.any" in message_channel:
-            log.warning (f"data_orders {data_orders}")
+            log.warning (f"user.changes.any {data_orders}")
                              
             await modify_order_and_db. update_user_changes(
                 non_checked_strategies,
@@ -340,14 +336,12 @@ async def worker(sub_account_id,name: str, queue: Queue):
                     cancellable_strategies
                     )
                                     
-        
         TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
         WHERE_FILTER_TICK: str = "tick"
         DATABASE: str = "databases/trading.sqlite3"
                                     
         if "chart.trades" in message_channel:
             instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-            #log.info (f"data_orders {data_orders}")
                                                
             await ohlc_result_per_time_frame(
                 instrument_ticker,
@@ -358,17 +352,17 @@ async def worker(sub_account_id,name: str, queue: Queue):
                 )
         
         instrument_ticker = (message_channel)[19:]  
-        if (
-            message_channel
-            == f"incremental_ticker.{instrument_ticker}"):
+        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
 
             my_path_ticker = provide_path_for_file(
                 "ticker", instrument_ticker)
             
             await distribute_ticker_result_as_per_data_type(
-                my_path_ticker, data_orders, instrument_ticker)
-                    
-        
+                my_path_ticker,
+                data_orders, 
+                instrument_ticker
+                )
+                            
             if "PERPETUAL" in data_orders["instrument_name"]:
                 
                 await inserting_open_interest(
@@ -377,6 +371,7 @@ async def worker(sub_account_id,name: str, queue: Queue):
                     TABLE_OHLC1, 
                     data_orders
                     )                              
+    
     
 async def distribute_ticker_result_as_per_data_type(
     my_path_ticker: str, 
