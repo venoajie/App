@@ -13,6 +13,7 @@ from multiprocessing import Manager
 from multiprocessing.queues import Queue
 from multiprocessing import cpu_count
 from aiomultiprocess import Pool
+from multiprocessing import get_context
 
 from transaction_management.deribit.api_requests import (
     get_currencies,
@@ -313,7 +314,7 @@ async def main():
 
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
         
-        async with Pool(maxtasksperchild=1) as pool:
+        async with get_context("spawn").Pool(maxtasksperchild=1) as pool:
             
             while signal_handler.KEEP_PROCESSING:
                 c_tasks = [pool.apply(
