@@ -275,13 +275,16 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     ws_channel = {"with_portfolio": True}
                                     
-                                    potfolio= asyncio.create_task (self.ws_operation(
+                                    asyncio.create_task (self.ws_operation(
                                     operation,
                                     ws_channel,
                                     "rest_api"
                                     )   )
                                     
-                                    log.warning (potfolio)
+                                    message: bytes = await self.websocket_client.recv()
+                                    message: dict = orjson.loads(message)
+                                    
+                                    log.warning (message)
                         
             except Exception as error:
                 log.critical (error)
