@@ -1127,6 +1127,9 @@ async def main():
                 await asyncio.sleep(0.5)
 
                 await producer_task
+                
+                pool.close()
+                await pool.join()
             
     except Exception as error:
         log.critical (error)
