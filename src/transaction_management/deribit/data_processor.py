@@ -157,7 +157,7 @@ async def running_transactions(
     
     while not any_order:
                 
-        message = queues[0]
+        message = queues["message"]
                         
         message_channel = message["params"]["channel"]
         

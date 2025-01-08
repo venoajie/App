@@ -108,7 +108,9 @@ async def processing_orders(
     
     while not any_order:
                 
-        message = queues[0]
+        message = queues["message"]
+        
+        auth = queues["auth"]
                         
         message_channel = message["params"]["channel"]
         
@@ -129,7 +131,7 @@ async def processing_orders(
                 currency
                 )
 
-            await modify_order_and_db.resupply_sub_accountdb(currency)    
+            await auth.resupply_sub_accountdb(currency)    
                                         
         if "user.changes.any" in message_channel:
             log.warning (f"user.changes.any {data_orders}")
