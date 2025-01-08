@@ -9,12 +9,11 @@ import os,sys
 from loguru import logger as log
 import tomli
 import signal
-from multiprocessing import Manager
 from multiprocessing.queues import Queue
-from multiprocessing.queues import Queue
-from multiprocessing import cpu_count
-from aiomultiprocess import Pool
-from aiomultiprocess import Pool
+from multiprocessing import (
+    cpu_count,
+    Manager,
+    Pool)
 
 # user defined formula
 from transaction_management.deribit.api_requests import (
@@ -30,15 +29,11 @@ from utilities.pickling import (
     replace_data,
     read_data,)
 from utilities.string_modification import (
-    extract_currency_from_text,
-    remove_double_brackets_in_list,
-    #remove_list_elements,
-    remove_redundant_elements)
+    extract_currency_from_text,)
 from utilities.system_tools import (
     async_raise_error_message,
     provide_path_for_file,
-    raise_error_message,
-    sleep_and_restart,)
+    raise_error_message,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
@@ -99,9 +94,11 @@ def handle_ctrl_c(
     sys.exit(0)
     
                   
-async def processing_orders(sub_account_id,name: str, queue: Queue):
-    
-    resolution = 1    
+async def processing_orders(
+    sub_account_id,
+    name: str, 
+    queue: Queue
+    )-> None:
     
     modify_order_and_db = ModifyOrderDb(sub_account_id)
 
@@ -157,6 +154,8 @@ async def processing_orders(sub_account_id,name: str, queue: Queue):
     
     order_db_table= relevant_tables["orders_table"]        
     
+    resolution = 1    
+    
     while True:
 #                    
         message = queue.get()
@@ -167,15 +166,12 @@ async def processing_orders(sub_account_id,name: str, queue: Queue):
         
         currency: str = extract_currency_from_text(message_channel)
         
-        log.warning (f"message_channel {message_channel}")
-        
-        currency_upper: str = currency.upper()
         currency_lower: str =currency
                                         
         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                                           
         if message_channel == f"user.portfolio.{currency.lower()}":
-            log.error (f"data_orders {data_orders}")
+            log.error (f"user.portfolio {data_orders}")
                                            
             await update_db_pkl(
                 "portfolio", 
@@ -183,11 +179,10 @@ async def processing_orders(sub_account_id,name: str, queue: Queue):
                 currency
                 )
 
-            log.critical ("F")
             await modify_order_and_db.resupply_sub_accountdb(currency)    
                                         
         if "user.changes.any" in message_channel:
-            log.warning (f"data_orders {data_orders}")
+            log.warning (f"user.changes.any {data_orders}")
                              
             await modify_order_and_db. update_user_changes(
                 non_checked_strategies,
@@ -206,14 +201,12 @@ async def processing_orders(sub_account_id,name: str, queue: Queue):
                     cancellable_strategies
                     )
                                     
-        
         TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
         WHERE_FILTER_TICK: str = "tick"
         DATABASE: str = "databases/trading.sqlite3"
                                     
         if "chart.trades" in message_channel:
             instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-            #log.info (f"data_orders {data_orders}")
                                                
             await ohlc_result_per_time_frame(
                 instrument_ticker,
@@ -224,17 +217,17 @@ async def processing_orders(sub_account_id,name: str, queue: Queue):
                 )
         
         instrument_ticker = (message_channel)[19:]  
-        if (
-            message_channel
-            == f"incremental_ticker.{instrument_ticker}"):
+        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
 
             my_path_ticker = provide_path_for_file(
                 "ticker", instrument_ticker)
             
             await distribute_ticker_result_as_per_data_type(
-                my_path_ticker, data_orders, instrument_ticker)
-                    
-        
+                my_path_ticker,
+                data_orders, 
+                instrument_ticker
+                )
+                            
             if "PERPETUAL" in data_orders["instrument_name"]:
                 
                 await inserting_open_interest(
@@ -262,7 +255,6 @@ async def distribute_ticker_result_as_per_data_type(
         else:
             ticker_change: list = read_data(my_path_ticker)
             if ticker_change != []:
-                # log.debug (ticker_change)
 
                 for item in data_orders:
                     ticker_change[0][item] = data_orders[item]
@@ -272,17 +264,16 @@ async def distribute_ticker_result_as_per_data_type(
                         )
 
     except Exception as error:
-        
-        log.critical (error)
+
+        await async_raise_error_message(
+            error,
+            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
+        )
 
         await telegram_bot_sendtext (
             error,
             "general_error"
             )
-        await async_raise_error_message(
-            error,
-            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
-        )
           
 class SignalHandler:
     """
@@ -352,6 +343,7 @@ if __name__ == "__main__":
         KeyboardInterrupt, 
         SystemExit
         ):
+        
         asyncio.get_event_loop().run_until_complete(main().stop_ws())
         
     except Exception as error:
