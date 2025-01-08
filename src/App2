@@ -1123,6 +1123,8 @@ async def main():
                 c_tasks = [pool.apply(worker, args=(sub_account_id,f"worker-{i}",queue)) 
                         for i in range(num_consumers)]
                 await asyncio.gather(*c_tasks)
+                
+                await asyncio.sleep(0.5)
 
                 await producer_task
             
