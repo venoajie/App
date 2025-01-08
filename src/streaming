@@ -338,7 +338,6 @@ class StreamAccountData(ModifyOrderDb):
                                                                         
                                     archive_db_table= f"my_trades_all_{currency_lower}_json"
                                     
-                                    transaction_log_trading= f"transaction_log_{currency_lower}_json"
 
                                     if message_channel == f"user.portfolio.{currency.lower()}":
                                         # also always performed at restart                                

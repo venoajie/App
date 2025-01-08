@@ -3,24 +3,47 @@
 
 # built ins
 import asyncio
+from datetime import datetime, timedelta, timezone
 import os,sys
+from secrets import randbelow
+import random
 
 # installed
+from dataclassy import dataclass, fields
+import json
 from loguru import logger as log
+import orjson
 import tomli
+import websockets
 import signal
+from multiprocessing import Manager
 from multiprocessing.queues import Queue
-from multiprocessing import (
-    cpu_count,
-    Manager,
-    Pool)
+from multiprocessing.queues import Queue
+from multiprocessing import cpu_count
+from aiomultiprocess import Pool
+from aiomultiprocess import Pool
 
 # user defined formula
+import numpy as np
+
+from market_understanding.price_action.candles_analysis import (
+    combining_candles_data,
+    get_market_condition)
+from strategies.basic_strategy import (
+    get_label_integer,)
+from strategies.hedging_spot import (
+    HedgingSpot)
+from strategies.cash_carry.combo_auto import(
+    ComboAuto,
+    check_if_minimum_waiting_time_has_passed)
 from transaction_management.deribit.api_requests import (
     get_currencies,
-    get_instruments,)
+    get_instruments,
+    get_tickers,)
 from transaction_management.deribit.data_producer import (
     StreamAccountData)
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -29,18 +52,28 @@ from utilities.pickling import (
     replace_data,
     read_data,)
 from utilities.string_modification import (
-    extract_currency_from_text,)
+    extract_currency_from_text,
+    remove_double_brackets_in_list,
+    #remove_list_elements,
+    remove_redundant_elements)
 from utilities.system_tools import (
     async_raise_error_message,
     provide_path_for_file,
-    raise_error_message,)
+    raise_error_message,
+    sleep_and_restart,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    combining_order_data,)
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
 
+
+def parse_dotenv (sub_account) -> dict:
+    return config.main_dotenv(sub_account)
 
 def get_config(file_name: str) -> list:
     """ """
@@ -66,7 +99,107 @@ def reading_from_pkl_data(
                                       currency,
                                       status)
     return read_data(path)
+
+
+def compute_notional_value(
+    index_price: float,
+    equity: float
+    ) -> float:
+    """ """
+    return index_price * equity
+
+
+def get_index (
+    data_orders: dict, 
+    ticker: dict
+    ) -> float:
+
+    try:
+        index_price= data_orders["index_price"]
+        
+    except:
+        
+        index_price= ticker["index_price"]
+        
+        if index_price==[]:
+            index_price = ticker ["estimated_delivery_price"]
+        
+    return index_price
+
+
+def get_settlement_period (strategy_attributes) -> list:
     
+    return (remove_redundant_elements(
+        remove_double_brackets_in_list(
+            [o["settlement_period"]for o in strategy_attributes]))
+            )
+    
+def modify_hedging_instrument (
+    strong_bearish:  bool,
+    bearish:  bool,
+    instrument_attributes_futures_for_hedging: list,
+    ticker_perpetual_instrument_name: dict,
+    currency_upper: str,
+    ) -> dict:
+    
+
+    if bearish or not strong_bearish:
+                                
+        instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
+                                        if "PERPETUAL" not in o["instrument_name"]\
+                                            and currency_upper in o["instrument_name"]]
+        
+        if len(instrument_attributes_future) > 1:
+            index_attributes = randbelow(2)
+            instrument_attributes = instrument_attributes_future[index_attributes]
+        else:
+            instrument_attributes = instrument_attributes_future[0]
+            
+        instrument_name: str = instrument_attributes ["instrument_name"] 
+        
+        instrument_ticker: list = reading_from_pkl_data(
+            "ticker",
+            instrument_name
+            )
+                        
+        #log.error (f"instrument_ticker {instrument_ticker}")
+        if instrument_ticker:                    
+            instrument_ticker = instrument_ticker[0]
+            
+        else:                    
+            instrument_ticker =   get_tickers (instrument_name)
+            
+        return instrument_ticker
+
+    else:
+        return   ticker_perpetual_instrument_name
+    
+async def chart_trade_in_msg(
+    message_channel,
+    data_orders,
+    candles_data,
+    ):
+    """
+    """
+
+    if "chart.trades" in message_channel:
+        tick_from_exchange= data_orders["tick"]
+
+        tick_from_cache = max( [o["max_tick"] for o in candles_data \
+            if  o["resolution"] == 5])
+        
+        if tick_from_exchange <= tick_from_cache:
+            return True
+        
+        else:
+            
+            log.warning ("update ohlc")
+            await sleep_and_restart()            
+
+    else:
+        
+        return False
+
 async def update_db_pkl(
     path, 
     data_orders,
@@ -85,6 +218,12 @@ async def update_db_pkl(
             data_orders
             )
 
+def get_settlement_period (strategy_attributes) -> list:
+    
+    return (remove_redundant_elements(
+        remove_double_brackets_in_list(
+            [o["settlement_period"]for o in strategy_attributes]))
+            )
         
 def handle_ctrl_c(
     signum, 
@@ -94,11 +233,9 @@ def handle_ctrl_c(
     sys.exit(0)
     
                   
-async def processing_orders(
-    sub_account_id,
-    name: str, 
-    queue: Queue
-    )-> None:
+async def worker(sub_account_id,name: str, queue: Queue):
+    
+    resolution = 1    
     
     modify_order_and_db = ModifyOrderDb(sub_account_id)
 
@@ -154,8 +291,6 @@ async def processing_orders(
     
     order_db_table= relevant_tables["orders_table"]        
     
-    resolution = 1    
-    
     while True:
 #                    
         message = queue.get()
@@ -166,12 +301,15 @@ async def processing_orders(
         
         currency: str = extract_currency_from_text(message_channel)
         
+        log.warning (f"message_channel {message_channel}")
+        
+        currency_upper: str = currency.upper()
         currency_lower: str =currency
                                         
         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                                           
         if message_channel == f"user.portfolio.{currency.lower()}":
-            log.error (f"user.portfolio {data_orders}")
+            log.error (f"data_orders {data_orders}")
                                            
             await update_db_pkl(
                 "portfolio", 
@@ -179,10 +317,11 @@ async def processing_orders(
                 currency
                 )
 
+            log.critical ("F")
             await modify_order_and_db.resupply_sub_accountdb(currency)    
                                         
         if "user.changes.any" in message_channel:
-            log.warning (f"user.changes.any {data_orders}")
+            log.warning (f"data_orders {data_orders}")
                              
             await modify_order_and_db. update_user_changes(
                 non_checked_strategies,
@@ -201,12 +340,14 @@ async def processing_orders(
                     cancellable_strategies
                     )
                                     
+        
         TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
         WHERE_FILTER_TICK: str = "tick"
         DATABASE: str = "databases/trading.sqlite3"
                                     
         if "chart.trades" in message_channel:
             instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
+            #log.info (f"data_orders {data_orders}")
                                                
             await ohlc_result_per_time_frame(
                 instrument_ticker,
@@ -217,17 +358,17 @@ async def processing_orders(
                 )
         
         instrument_ticker = (message_channel)[19:]  
-        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
+        if (
+            message_channel
+            == f"incremental_ticker.{instrument_ticker}"):
 
             my_path_ticker = provide_path_for_file(
                 "ticker", instrument_ticker)
             
             await distribute_ticker_result_as_per_data_type(
-                my_path_ticker,
-                data_orders, 
-                instrument_ticker
-                )
-                            
+                my_path_ticker, data_orders, instrument_ticker)
+                    
+        
             if "PERPETUAL" in data_orders["instrument_name"]:
                 
                 await inserting_open_interest(
@@ -255,6 +396,7 @@ async def distribute_ticker_result_as_per_data_type(
         else:
             ticker_change: list = read_data(my_path_ticker)
             if ticker_change != []:
+                # log.debug (ticker_change)
 
                 for item in data_orders:
                     ticker_change[0][item] = data_orders[item]
@@ -264,21 +406,18 @@ async def distribute_ticker_result_as_per_data_type(
                         )
 
     except Exception as error:
-
-        await async_raise_error_message(
-            error,
-            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
-        )
+        
+        log.critical (error)
 
         await telegram_bot_sendtext (
             error,
             "general_error"
             )
-          
+        await async_raise_error_message(
+            error,
+            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
+        )  
 class SignalHandler:
-    """
-    https://medium.com/@cziegler_99189/gracefully-shutting-down-async-multiprocesses-in-python-2223be384510
-    """
     KEEP_PROCESSING = True
     def __init__(self):
         signal.signal(signal.SIGINT, self.exit_gracefully)
@@ -308,12 +447,8 @@ async def main():
         async with Pool(maxtasksperchild=1) as pool:
             
             while signal_handler.KEEP_PROCESSING:
-                c_tasks = [pool.apply(
-                    processing_orders, 
-                    args=(sub_account_id,f"worker-{i}",
-                          queue))
-                           for i in range(num_consumers)]
-                
+                c_tasks = [pool.apply(worker, args=(sub_account_id,f"worker-{i}",queue)) 
+                        for i in range(num_consumers)]
                 await asyncio.gather(*c_tasks)
                 
                 await asyncio.sleep(0.5)
@@ -333,6 +468,7 @@ async def main():
         
 if __name__ == "__main__":
     
+    
     try:
         signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         print('Enter Ctrl-C to terminate.')
@@ -343,7 +479,6 @@ if __name__ == "__main__":
         KeyboardInterrupt, 
         SystemExit
         ):
-        
         asyncio.get_event_loop().run_until_complete(main().stop_ws())
         
     except Exception as error:
