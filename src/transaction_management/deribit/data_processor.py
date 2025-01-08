@@ -161,7 +161,7 @@ async def running_transactions(
         
         currency: str = extract_currency_from_text(message_channel)
         
-        currency_lower: str =currency
+        currency_lower: str =currency.lower()
                                         
         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                                           

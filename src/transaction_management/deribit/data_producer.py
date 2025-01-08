@@ -264,6 +264,8 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     ws_channel = {"with_portfolio": True}
                                     
+                                    log.debug (message)
+                                    
                                     asyncio.create_task (self.ws_operation(
                                     operation,
                                     ws_channel,

@@ -102,8 +102,6 @@ async def processing_orders(
     
     any_order = False 
     
-    
-    
     while not any_order:
         message = queue.get()
                 
@@ -115,7 +113,7 @@ async def processing_orders(
         
         currency: str = extract_currency_from_text(message_channel)
         
-        currency_lower: str =currency
+        currency_lower: str =currency.lower()
                                         
         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                                           
