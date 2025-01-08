@@ -275,11 +275,11 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     ws_channel = {"with_portfolio": True}
                                     
-                                    potfolio= await self.ws_operation(
+                                    potfolio= asyncio.create_task (self.ws_operation(
                                     operation,
                                     ws_channel,
                                     "rest_api"
-                                    )   
+                                    )   )
                                     
                                     log.warning (potfolio)
                         
