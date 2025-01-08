@@ -3,24 +3,13 @@
 
 # built ins
 import asyncio
-import os,sys
+import os
 
 # installed
 from loguru import logger as log
 import tomli
-import signal
-from multiprocessing import Manager
 from multiprocessing.queues import Queue
-from multiprocessing import cpu_count
-from aiomultiprocess import Pool
 
-from transaction_management.deribit.api_requests import (
-    get_currencies,
-    get_instruments,)
-from transaction_management.deribit.data_producer import (
-    StreamAccountData,)
-from transaction_management.deribit.loading_data_to_db import (
-    processing_orders,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -34,15 +23,10 @@ from utilities.pickling import (
     replace_data,
     read_data,)
 from utilities.string_modification import (
-    extract_currency_from_text,
-    remove_double_brackets_in_list,
-    remove_redundant_elements)
+    extract_currency_from_text,)
 from utilities.system_tools import (
-    async_raise_error_message,
     parse_error_message,
-    provide_path_for_file,
-    raise_error_message,
-    SignalHandler)
+    provide_path_for_file,)
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
@@ -60,18 +44,6 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
-
-def reading_from_pkl_data(
-    end_point, 
-    currency,
-    status: str = None
-    ) -> dict:
-    """ """
-
-    path: str = provide_path_for_file (end_point,
-                                      currency,
-                                      status)
-    return read_data(path)
 
 async def update_db_pkl(
     path, 
@@ -91,20 +63,6 @@ async def update_db_pkl(
             data_orders
             )
 
-def get_settlement_period (strategy_attributes) -> list:
-    
-    return (remove_redundant_elements(
-        remove_double_brackets_in_list(
-            [o["settlement_period"]for o in strategy_attributes]))
-            )
-        
-def handle_ctrl_c(
-    signum, 
-    stack_frame
-    )->None:
-    
-    sys.exit(0)
-    
                   
 async def processing_orders(
     sub_account_id,
@@ -121,38 +79,8 @@ async def processing_orders(
     # registering strategy config file    
     file_toml = "config_strategies.toml"
 
-    # get ALL traded currencies in deribit
-    get_currencies_all = await get_currencies()
-
-    currencies = [o["currency"] for o in get_currencies_all["result"]]
-
-    for currency in currencies:
-        
-        instruments = await get_instruments(currency)
-
-        my_path_instruments = provide_path_for_file("instruments", 
-                                                    currency)
-
-        replace_data(
-            my_path_instruments,
-            instruments
-            )
-
-    my_path_cur = provide_path_for_file("currencies")
-
-    replace_data(
-        my_path_cur,
-        currencies
-        )
-    
     # parsing config file
     config_app = get_config(file_toml)
-
-    # get tradable strategies
-    tradable_config_app = config_app["tradable"]
-    
-    # get TRADABLE currencies
-    currencies = [o["spot"] for o in tradable_config_app] [0]
 
     strategy_attributes = config_app["strategies"]
 
@@ -291,71 +219,3 @@ async def distribute_ticker_result_as_per_data_type(
             error,
             "general_error"
             )
-
-
-signal_handler = SignalHandler()
-
-async def main():
-    
-    sub_account_id = "deribit-148510"
-    
-    try:
-        
-        queue: Queue = Manager().Queue()
-        
-        num_consumers = max(1,int (cpu_count() / 4) - 1)
-        
-        stream = StreamAccountData(sub_account_id)
-
-        producer_task = asyncio.create_task(stream.ws_manager(queue)) 
-        
-        async with Pool(maxtasksperchild=1) as pool:
-            
-            while signal_handler.KEEP_PROCESSING:
-                processing_orders_tasks = [pool.apply(
-                    processing_orders, 
-                    args=(sub_account_id,
-                          f"worker-{i}",
-                          queue)) 
-                                           for i in range(num_consumers)]
-                
-                await asyncio.gather(*processing_orders_tasks)
-                
-                await asyncio.sleep(0.5)
-
-                await producer_task
-                
-                pool.close()
-                
-                await pool.join()
-            
-    except Exception as error:
-        log.critical (error)
-        
-        await async_raise_error_message(
-            error,
-            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
-        )
-        
-if __name__ == "__main__":
-    
-    
-    try:
-        signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
-        
-        asyncio.run(main())
-        
-    except(
-        KeyboardInterrupt, 
-        SystemExit
-        ):
-        
-        asyncio.get_event_loop().run_until_complete(main().stop_ws())
-        
-    except Exception as error:
-        parse_error_message(error)
-        
-        asyncio.run(telegram_bot_sendtext (
-            error,
-            "general_error"
-            ))
