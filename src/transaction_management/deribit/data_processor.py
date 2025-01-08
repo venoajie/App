@@ -83,7 +83,7 @@ def get_settlement_period (strategy_attributes) -> list:
             [o["settlement_period"]for o in strategy_attributes]))
             )
                       
-async def saving_data_to_db(
+async def running_transactions(
     sub_account_id,
     name: str, 
     queue: Queue
