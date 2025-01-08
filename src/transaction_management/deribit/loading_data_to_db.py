@@ -102,9 +102,13 @@ async def processing_orders(
     
     any_order = False 
     
+    queues = queue.get()
+    
+    log.debug (f"queues {queues}")
+    
     while not any_order:
-        
-        message = queue.get()
+                
+        message = queues[0]
                         
         message_channel = message["params"]["channel"]
         
