@@ -1097,7 +1097,7 @@ async def main():
         queue: Queue = Manager().Queue()
         sub_account_id = "deribit-148510"
         
-        num_consumers = int(cpu_count() / 2)
+        num_consumers = cpu_count() /2
         
         stream = StreamAccountData(sub_account_id)
 
