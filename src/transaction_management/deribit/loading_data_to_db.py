@@ -102,16 +102,13 @@ async def processing_orders(
     
     any_order = False 
     
-    queues = queue.get()
+    
     
     while not any_order:
+        message = queue.get()
                 
-        message = queues["message"]
-        
         log.debug (f"message {message}")
-        
-        auth = queues["auth"]
-                        
+                
         message_channel = message["params"]["channel"]
         
         data_orders: list = message["params"]["data"] 

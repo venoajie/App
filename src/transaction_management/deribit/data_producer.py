@@ -172,10 +172,8 @@ class StreamAccountData(ModifyOrderDb):
                 while True:
                     
                     # Authenticate WebSocket Connection
-                    auth = await self.ws_auth()
+                    await self.ws_auth()
                     
-                    log.info (auth)
-
                     # Establish Heartbeat
                     await self.establish_heartbeat()
 
@@ -253,13 +251,8 @@ class StreamAccountData(ModifyOrderDb):
                             
                             if message["method"] != "heartbeat":
                                 
-                                result = dict(
-                                    message=message,
-                                    auth=auth, 
-                                    )
-                                
                                 #log.warning(message)
-                                queue.put(result)
+                                queue.put(message)
                                 
                                 message_channel = message["params"]["channel"]
                                 

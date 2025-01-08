@@ -151,13 +151,9 @@ async def running_transactions(
     
     any_order = False 
     
-    queues = queue.get()
-    
-    log.debug (f"queues {queues}")
-    
     while not any_order:
                 
-        message = queues["message"]
+        message = queue.get()
                         
         message_channel = message["params"]["channel"]
         
