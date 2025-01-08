@@ -261,10 +261,15 @@ class StreamAccountData(ModifyOrderDb):
                                 queue.put(result)
                                 message_channel = message["params"]["channel"]
                                 if "user.changes.any" in message_channel:
+                                    log.warning ("AAAAAAAAAAAAAAAAAAAAAA")
                                     
-                                    potfolio= self.ws_operation(
-                                    "subscribe",
-                                    None,
+                                    operation = "private/get_subaccounts"
+                                    
+                                    ws_channel = {"with_portfolio": True}
+                                    
+                                    potfolio= await self.ws_operation(
+                                    operation,
+                                    ws_channel,
                                     "rest_api"
                                     )   
                                     
@@ -394,8 +399,10 @@ class StreamAccountData(ModifyOrderDb):
 
         if "rest_api" in source:
 
-            extra_params: dict = await get_end_point_result("private/get_subaccounts",
-                                                  {"with_portfolio": True})
+            extra_params: dict = await get_end_point_result(operation,
+                                                  ws_channel)
             msg.update(extra_params)
+            
+            log.debug (msg)
             
             await self.websocket_client.send(json.dumps(msg))
