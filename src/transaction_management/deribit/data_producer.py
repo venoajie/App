@@ -403,6 +403,7 @@ class StreamAccountData(ModifyOrderDb):
                 params= {"channels": [ws_channel]}
             )
             msg.update(extra_params)
+            log.debug (msg)
             await self.websocket_client.send(json.dumps(msg))
 
         if "rest_api" in source:
