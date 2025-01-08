@@ -262,7 +262,13 @@ class StreamAccountData(ModifyOrderDb):
                                 message_channel = message["params"]["channel"]
                                 if "user.changes.any" in message_channel:
                                     
-                                    await auth.resupply_sub_accountdb(currency)    
+                                    potfolio= self.ws_operation(
+                                    "subscribe",
+                                    None,
+                                    "rest_api"
+                                    )   
+                                    
+                                    log.warning (potfolio)
                         
             except Exception as error:
                 log.critical (error)
@@ -388,9 +394,8 @@ class StreamAccountData(ModifyOrderDb):
 
         if "rest_api" in source:
 
-            extra_params: dict = await get_end_point_result("get_open_orders",
-                                                 {"kind": "future",
-                                                  "type": "trigger_all"})
+            extra_params: dict = await get_end_point_result("private/get_subaccounts",
+                                                  {"with_portfolio": True})
             msg.update(extra_params)
             
             await self.websocket_client.send(json.dumps(msg))
