@@ -253,7 +253,7 @@ async def worker(sub_account_id,name: str, queue: Queue):
     get_currencies_all = await get_currencies()
 
     currencies = [o["currency"] for o in get_currencies_all["result"]]
-    
+
     for currency in currencies:
         
         instruments = await get_instruments(currency)
@@ -275,8 +275,6 @@ async def worker(sub_account_id,name: str, queue: Queue):
     
     # parsing config file
     config_app = get_config(file_toml)
-
-    log.debug (f"config_app {config_app}")
 
     # get tradable strategies
     tradable_config_app = config_app["tradable"]
@@ -347,6 +345,8 @@ async def worker(sub_account_id,name: str, queue: Queue):
         
         currency: str = extract_currency_from_text(message_channel)
         
+        log.warning (f"message_channel {message_channel}")
+        
         currency_upper: str = currency.upper()
         currency_lower: str =currency
                                         
@@ -382,9 +382,7 @@ async def worker(sub_account_id,name: str, queue: Queue):
                                                                         )
                                     
         if "chart.trades" in message_channel:
-        
             instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-        
             log.info (f"data_orders {data_orders}")
                                         
 
@@ -1099,7 +1097,7 @@ async def main():
         queue: Queue = Manager().Queue()
         sub_account_id = "deribit-148510"
         
-        num_consumers = int(cpu_count() /2)
+        num_consumers = cpu_count() 
         
         stream = StreamAccountData(sub_account_id)
 
@@ -1107,7 +1105,6 @@ async def main():
         producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
         async with Pool() as pool:
-            
             c_tasks = [pool.apply(worker, args=(sub_account_id,f"worker-{i}",queue)) 
                     for i in range(num_consumers)]
             await asyncio.gather(*c_tasks)
