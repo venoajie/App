@@ -271,7 +271,7 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     log.warning ("AAAAAAAAAAAAAAAAAAAAAA")
                                     
-                                    operation = "private/get_subaccounts"
+                                    operation = "get_subaccounts"
                                     
                                     ws_channel = {"with_portfolio": True}
                                     
