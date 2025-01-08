@@ -28,7 +28,6 @@ from transaction_management.deribit.telegram_bot import (
 from utilities.pickling import (
     replace_data,)
 from utilities.system_tools import (
-    kill_process,
     provide_path_for_file,
     raise_error_message,)
 from utilities.string_modification import (
@@ -314,8 +313,6 @@ class StreamAccountData(ModifyOrderDb):
             await self.websocket_client.send(json.dumps(msg))
 
         except Exception as error:
-            
-            kill_process("app")
                         
             raise_error_message (
             error, 
