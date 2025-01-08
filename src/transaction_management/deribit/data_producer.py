@@ -262,6 +262,7 @@ class StreamAccountData(ModifyOrderDb):
                                                                 
                                 message_channel = message["params"]["channel"]
                                 log.warning (message_channel)
+                                log.error ("user.potfolio" in message_channel)
                                 if "user.potfolio" in message_channel:
                                     log.warning ("AAAAAAAAAAAAAAAAAAAAAA")
                                     
