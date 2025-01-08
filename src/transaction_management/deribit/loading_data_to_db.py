@@ -104,11 +104,11 @@ async def processing_orders(
     
     queues = queue.get()
     
-    log.debug (f"queues {queues}")
-    
     while not any_order:
                 
         message = queues["message"]
+        
+        log.debug (f"message {message}")
         
         auth = queues["auth"]
                         
