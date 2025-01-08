@@ -383,7 +383,7 @@ async def worker(sub_account_id,name: str, queue: Queue):
                                     
         if "chart.trades" in message_channel:
             instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-            log.info (f"data_orders {data_orders}")
+            #log.info (f"data_orders {data_orders}")
                                         
 
         instrument_ticker = (message_channel)[19:]  
@@ -1090,6 +1090,19 @@ async def processing_orders(
     except Exception as error:
         await raise_error_message (error)
             
+class SignalHandler:
+    KEEP_PROCESSING = True
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+    def exit_gracefully(self, signum, frame):
+        print(signum)
+        print("Exiting gracefully")
+        self.KEEP_PROCESSING = False
+
+signal_handler = SignalHandler()
+
 async def main():
     
     try:
