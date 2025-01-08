@@ -331,9 +331,6 @@ if __name__ == "__main__":
     
     try:
         
-        
-        handle_ctrl_c() # terminate on ctrl-c
-        
         asyncio.run(main())
         
     except(
