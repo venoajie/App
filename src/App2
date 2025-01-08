@@ -345,8 +345,6 @@ async def worker(sub_account_id,name: str, queue: Queue):
         
         currency: str = extract_currency_from_text(message_channel)
         
-        log.warning (f"message_channel {message_channel}")
-        
         currency_upper: str = currency.upper()
         currency_lower: str =currency
                                         
@@ -382,7 +380,9 @@ async def worker(sub_account_id,name: str, queue: Queue):
                                                                         )
                                     
         if "chart.trades" in message_channel:
+        
             instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
+        
             log.info (f"data_orders {data_orders}")
                                         
 
@@ -1090,6 +1090,19 @@ async def processing_orders(
     except Exception as error:
         await raise_error_message (error)
             
+class SignalHandler:
+    KEEP_PROCESSING = True
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+    def exit_gracefully(self, signum, frame):
+        print(signum)
+        print("Exiting gracefully")
+        self.KEEP_PROCESSING = False
+
+signal_handler = SignalHandler()
+
 async def main():
     
     try:
@@ -1097,7 +1110,7 @@ async def main():
         queue: Queue = Manager().Queue()
         sub_account_id = "deribit-148510"
         
-        num_consumers = cpu_count() 
+        num_consumers = int(cpu_count() /2)
         
         stream = StreamAccountData(sub_account_id)
 
@@ -1105,11 +1118,15 @@ async def main():
         producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
         async with Pool() as pool:
-            c_tasks = [pool.apply(worker, args=(sub_account_id,f"worker-{i}",queue)) 
-                    for i in range(num_consumers)]
-            await asyncio.gather(*c_tasks)
+            while signal_handler.KEEP_PROCESSING:
+                c_tasks = [pool.apply(worker, args=(sub_account_id,f"worker-{i}",queue)) 
+                        for i in range(num_consumers)]
 
-            await producer_task
+                await asyncio.sleep(0.0005) # Necessary to pass the GIL
+                
+                await asyncio.gather(*c_tasks)
+
+                await producer_task
             
     except Exception as error:
         log.critical (error)

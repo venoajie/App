@@ -35,9 +35,6 @@ def combining_ticker_data(instruments_name):
     Returns:
         _type_: _description_
     """
-    #result = (orjson.loads(data))
-    
-    from loguru import logger as log
     
     result=[]
     for instrument_name in instruments_name:
@@ -46,15 +43,13 @@ def combining_ticker_data(instruments_name):
                 "ticker",
                 instrument_name
                 )
-        log.debug(f"result_instrument {result_instrument}")
+
         if result_instrument:
             result_instrument = result_instrument[0]
 
         else:
             result_instrument = get_tickers (instrument_name)
         result.append (result_instrument)
-
-    log.warning(f"result {result}")
 
     return result
 
