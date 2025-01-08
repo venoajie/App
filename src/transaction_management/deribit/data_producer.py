@@ -252,10 +252,13 @@ class StreamAccountData(ModifyOrderDb):
                             
                             if message["method"] != "heartbeat":
                                 
+                                result = dict(
+                                    message=message,
+                                    auth=auth, 
+                                    )
+                                
                                 #log.warning(message)
-                                queue.put(
-                                    message,
-                                    auth)
+                                queue.put(result)
                         
             except Exception as error:
                 log.critical (error)
