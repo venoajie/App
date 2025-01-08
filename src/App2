@@ -1,27 +1,49 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-
 # built ins
 import asyncio
+from datetime import datetime, timedelta, timezone
 import os,sys
+from secrets import randbelow
+import random
 
 # installed
+from dataclassy import dataclass, fields
+import json
 from loguru import logger as log
+import orjson
 import tomli
+import websockets
 import signal
+from multiprocessing import Manager
 from multiprocessing.queues import Queue
-from multiprocessing import (
-    cpu_count,
-    Manager,
-    Pool)
+from multiprocessing.queues import Queue
+from multiprocessing import cpu_count
+from aiomultiprocess import Pool
+from aiomultiprocess import Pool
 
 # user defined formula
+import numpy as np
+
+from market_understanding.price_action.candles_analysis import (
+    combining_candles_data,
+    get_market_condition)
+from strategies.basic_strategy import (
+    get_label_integer,)
+from strategies.hedging_spot import (
+    HedgingSpot)
+from strategies.cash_carry.combo_auto import(
+    ComboAuto,
+    check_if_minimum_waiting_time_has_passed)
 from transaction_management.deribit.api_requests import (
     get_currencies,
-    get_instruments,)
+    get_instruments,
+    get_tickers,)
 from transaction_management.deribit.data_producer import (
     StreamAccountData)
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -30,14 +52,21 @@ from utilities.pickling import (
     replace_data,
     read_data,)
 from utilities.string_modification import (
-    extract_currency_from_text,)
+    extract_currency_from_text,
+    remove_double_brackets_in_list,
+    #remove_list_elements,
+    remove_redundant_elements)
 from utilities.system_tools import (
     async_raise_error_message,
     provide_path_for_file,
-    raise_error_message,)
+    raise_error_message,
+    sleep_and_restart,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    combining_order_data,)
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
@@ -70,106 +99,6 @@ def reading_from_pkl_data(
                                       currency,
                                       status)
     return read_data(path)
-
-
-def compute_notional_value(
-    index_price: float,
-    equity: float
-    ) -> float:
-    """ """
-    return index_price * equity
-
-
-def get_index (
-    data_orders: dict, 
-    ticker: dict
-    ) -> float:
-
-    try:
-        index_price= data_orders["index_price"]
-        
-    except:
-        
-        index_price= ticker["index_price"]
-        
-        if index_price==[]:
-            index_price = ticker ["estimated_delivery_price"]
-        
-    return index_price
-
-
-def get_settlement_period (strategy_attributes) -> list:
-    
-    return (remove_redundant_elements(
-        remove_double_brackets_in_list(
-            [o["settlement_period"]for o in strategy_attributes]))
-            )
-    
-def modify_hedging_instrument (
-    strong_bearish:  bool,
-    bearish:  bool,
-    instrument_attributes_futures_for_hedging: list,
-    ticker_perpetual_instrument_name: dict,
-    currency_upper: str,
-    ) -> dict:
-    
-
-    if bearish or not strong_bearish:
-                                
-        instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
-                                        if "PERPETUAL" not in o["instrument_name"]\
-                                            and currency_upper in o["instrument_name"]]
-        
-        if len(instrument_attributes_future) > 1:
-            index_attributes = randbelow(2)
-            instrument_attributes = instrument_attributes_future[index_attributes]
-        else:
-            instrument_attributes = instrument_attributes_future[0]
-            
-        instrument_name: str = instrument_attributes ["instrument_name"] 
-        
-        instrument_ticker: list = reading_from_pkl_data(
-            "ticker",
-            instrument_name
-            )
-                        
-        #log.error (f"instrument_ticker {instrument_ticker}")
-        if instrument_ticker:                    
-            instrument_ticker = instrument_ticker[0]
-            
-        else:                    
-            instrument_ticker =   get_tickers (instrument_name)
-            
-        return instrument_ticker
-
-    else:
-        return   ticker_perpetual_instrument_name
-    
-async def chart_trade_in_msg(
-    message_channel,
-    data_orders,
-    candles_data,
-    ):
-    """
-    """
-
-    if "chart.trades" in message_channel:
-        tick_from_exchange= data_orders["tick"]
-
-        tick_from_cache = max( [o["max_tick"] for o in candles_data \
-            if  o["resolution"] == 5])
-        
-        if tick_from_exchange <= tick_from_cache:
-            return True
-        
-        else:
-            
-            log.warning ("update ohlc")
-            await sleep_and_restart()            
-
-    else:
-        
-        return False
 
 async def update_db_pkl(
     path, 
@@ -387,6 +316,8 @@ async def distribute_ticker_result_as_per_data_type(
             error,
             "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
         )  
+
+
 class SignalHandler:
     KEEP_PROCESSING = True
     def __init__(self):
