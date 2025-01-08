@@ -259,6 +259,9 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 #log.warning(message)
                                 queue.put(result)
+                                
+                                log.warning ("BBBBBBBBBBBBBBBBBBBB")
+                                
                                 message_channel = message["params"]["channel"]
                                 if "user.changes.any" in message_channel:
                                     log.warning ("AAAAAAAAAAAAAAAAAAAAAA")
