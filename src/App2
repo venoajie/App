@@ -23,27 +23,11 @@ from multiprocessing import cpu_count
 from aiomultiprocess import Pool
 from aiomultiprocess import Pool
 
-# user defined formula
-import numpy as np
-
-from market_understanding.price_action.candles_analysis import (
-    combining_candles_data,
-    get_market_condition)
-from strategies.basic_strategy import (
-    get_label_integer,)
-from strategies.hedging_spot import (
-    HedgingSpot)
-from strategies.cash_carry.combo_auto import(
-    ComboAuto,
-    check_if_minimum_waiting_time_has_passed)
 from transaction_management.deribit.api_requests import (
     get_currencies,
-    get_instruments,
-    get_tickers,)
+    get_instruments,)
 from transaction_management.deribit.data_producer import (
     StreamAccountData)
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
@@ -54,19 +38,14 @@ from utilities.pickling import (
 from utilities.string_modification import (
     extract_currency_from_text,
     remove_double_brackets_in_list,
-    #remove_list_elements,
     remove_redundant_elements)
 from utilities.system_tools import (
     async_raise_error_message,
     provide_path_for_file,
-    raise_error_message,
-    sleep_and_restart,)
+    raise_error_message,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
-from utilities.caching import (
-    combining_ticker_data as cached_ticker,
-    combining_order_data,)
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
