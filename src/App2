@@ -1105,12 +1105,12 @@ async def main():
         producer_task = asyncio.create_task(stream.ws_manager(queue)) #(capture_data(queue))
 
         async with Pool() as pool:
-            while True:
-                c_tasks = [pool.apply(worker, args=(sub_account_id,f"worker-{i}",queue)) 
-                        for i in range(num_consumers)]
-                await asyncio.gather(*c_tasks)
+            #while True:
+            c_tasks = [pool.apply(worker, args=(sub_account_id,f"worker-{i}",queue)) 
+                    for i in range(num_consumers)]
+            await asyncio.gather(*c_tasks)
 
-                await producer_task
+            await producer_task
             
     except Exception as error:
         log.critical (error)
