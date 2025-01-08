@@ -8,12 +8,10 @@ import os,sys
 # installed
 from loguru import logger as log
 import tomli
-import signal
 from multiprocessing import Manager
 from multiprocessing.queues import Queue
 from multiprocessing import cpu_count
 from aiomultiprocess import Pool
-from multiprocessing import get_context
 
 from transaction_management.deribit.api_requests import (
     get_currencies,
@@ -38,9 +36,11 @@ from utilities.string_modification import (
     remove_redundant_elements)
 from utilities.system_tools import (
     async_raise_error_message,
+    handle_ctrl_c,
     parse_error_message,
     provide_path_for_file,
-    raise_error_message,)
+    raise_error_message,
+    SignalHandler)
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
@@ -96,19 +96,15 @@ def get_settlement_period (strategy_attributes) -> list:
             [o["settlement_period"]for o in strategy_attributes]))
             )
         
-def handle_ctrl_c(
-    signum, 
-    stack_frame
-    )->None:
-    
-    sys.exit(0)
-    
-                  
 async def processing_orders(
     sub_account_id,
     name: str, 
     queue: Queue
     ):
+    
+    """
+    https://blog.finxter.com/python-multiprocessing-pool-ultimate-guide/
+    """
     
     modify_order_and_db = ModifyOrderDb(sub_account_id)
 
@@ -286,18 +282,6 @@ async def distribute_ticker_result_as_per_data_type(
             "general_error"
             )
 
-
-class SignalHandler:
-    KEEP_PROCESSING = True
-    def __init__(self):
-        signal.signal(signal.SIGINT, self.exit_gracefully)
-        signal.signal(signal.SIGTERM, self.exit_gracefully)
-
-    def exit_gracefully(self, signum, frame):
-        print(signum)
-        print("Exiting gracefully")
-        self.KEEP_PROCESSING = False
-
 signal_handler = SignalHandler()
 
 async def main():
@@ -308,7 +292,7 @@ async def main():
         
         queue: Queue = Manager().Queue()
         
-        num_consumers = cpu_count() 
+        num_consumers = max(1,int (cpu_count() / 4) - 1)
         
         stream = StreamAccountData(sub_account_id)
 
@@ -346,7 +330,9 @@ if __name__ == "__main__":
     
     
     try:
-        signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
+        
+        
+        handle_ctrl_c() # terminate on ctrl-c
         
         asyncio.run(main())
         

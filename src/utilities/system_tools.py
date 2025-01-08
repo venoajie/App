@@ -3,6 +3,7 @@
 import os, sys
 from time import sleep
 import asyncio
+import signal
 
 import datetime
 from functools import lru_cache, wraps
@@ -515,3 +516,49 @@ def main():
 if __name__ == "__main__":
   ipdb_sys_excepthook()
   main()
+  
+  
+class SignalHandler:
+    
+    """
+    https://medium.com/@cziegler_99189/gracefully-shutting-down-async-multiprocesses-in-python-2223be384510
+    """
+    
+    KEEP_PROCESSING = True
+    
+    def __init__(self):
+        signal.signal(
+            signal.SIGINT, 
+            self.exit_gracefully
+            )
+        
+        signal.signal(
+            signal.SIGTERM,
+            self.exit_gracefully
+            )
+
+    def exit_gracefully(
+        self, 
+        signum, 
+        frame
+        ):
+        
+        print(signum)
+        print("Exiting gracefully")
+        
+        self.KEEP_PROCESSING = False
+
+
+def handle_ctrl_c(
+    signum, 
+    stack_frame
+    )->None:
+    
+    signal.signal(
+        signal.SIGINT,
+        sys.exit(0)
+        )
+    
+    
+    
+                  
