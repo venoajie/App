@@ -70,8 +70,8 @@ async def main():
                           queue)) 
                                            for i in range(num_consumers)]
                 
-                await asyncio.gather(processing_orders_tasks,
-                                     running_transactions_tasks)
+                await asyncio.gather(*processing_orders_tasks,
+                                     *running_transactions_tasks)
                 
                 await asyncio.sleep(0.5)
 
