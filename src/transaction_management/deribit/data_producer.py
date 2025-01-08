@@ -36,7 +36,8 @@ from utilities.string_modification import (
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
-
+from utilities.string_modification import (
+    extract_currency_from_text,)
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
@@ -259,11 +260,16 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 #log.warning(message)
                                 queue.put(result)
+                                
+                                currency: str = extract_currency_from_text(message_channel)
+                                
+                                currency_lower: str =currency
+        
                                                                 
                                 message_channel = message["params"]["channel"]
                                 log.warning (message_channel)
-                                log.error ("user.potfolio" in message_channel)
-                                if "user.potfolio" in message_channel:
+                                log.error (message_channel == f"user.portfolio.{currency.lower()}")
+                                if message_channel == f"user.portfolio.{currency.lower()}":
                                     log.warning ("AAAAAAAAAAAAAAAAAAAAAA")
                                     
                                     operation = "private/get_subaccounts"
