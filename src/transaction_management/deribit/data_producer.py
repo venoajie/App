@@ -262,10 +262,13 @@ class StreamAccountData(ModifyOrderDb):
                                 queue.put(result)
                                 
                                 message_channel = message["params"]["channel"]
+                                
                                 currency: str = extract_currency_from_text(message_channel)                                        
-                                log.warning (message_channel)
-                                log.error (message_channel == f"user.portfolio.{currency.lower()}")
+                                
                                 if message_channel == f"user.portfolio.{currency.lower()}":
+                                    
+                                    log.error (message_channel)
+                                    
                                     log.warning ("AAAAAAAAAAAAAAAAAAAAAA")
                                     
                                     operation = "private/get_subaccounts"
