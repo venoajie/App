@@ -162,10 +162,12 @@ async def processing_orders(
     
     order_db_table= relevant_tables["orders_table"]        
     
-    resolution = 1    
+    resolution = 1   
     
-    while True:
-#                    
+    any_order = False 
+    
+    while not any_order:
+        
         message = queue.get()
                         
         message_channel = message["params"]["channel"]
