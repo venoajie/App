@@ -338,6 +338,8 @@ async def worker(sub_account_id,name: str, queue: Queue):
 
     #                    
         message = queue.get()
+        
+        log.warning (f"message {message}")
                         
         message_channel = message["params"]["channel"]
         
