@@ -69,15 +69,19 @@ async def main():
                     processing_orders, 
                     args=(sub_account_id,
                           f"worker-{i}",
-                          queue)) 
+                          queue
+                          )
+                    )
                                            for i in range(num_consumers)]
        
                 running_transactions_tasks = [pool.apply(
-                    running_strategy.ws_manager(), 
+                    running_strategy.ws_manager, 
                     args=(
                           f"worker-{i}",
-                          queue)) 
-                                           for i in range(num_consumers)]
+                          queue
+                          )
+                    )
+                                              for i in range(num_consumers)]
                 
                 await asyncio.gather(*processing_orders_tasks,
                                      *running_transactions_tasks)

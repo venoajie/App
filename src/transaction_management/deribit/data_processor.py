@@ -211,13 +211,9 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
     client_secret: str = fields 
     modify_order_and_db: object = fields 
     # Async Event Loop
-    loop = asyncio.get_event_loop()
-    ws_connection_url: str = "wss://www.deribit.com/ws/api/v2"
     # Instance Variables
     connection_url: str = "https://www.deribit.com/api/v2/"
     websocket_client: websockets.WebSocketClientProtocol = None
-    refresh_token: str = None
-    refresh_token_expiry_time: int = None
     config_app: list = fields
             
     def __post_init__(self):
@@ -228,12 +224,12 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
         
         self.config_app = get_config("config_strategies.toml")
         # Start Primary Coroutine
-        self.loop.run_until_complete(self.ws_manager())
     
     async def ws_manager(
         self,
+        name: int
         queue: Queue,
-        name: int) -> None:
+        ) -> None:
         
         async with websockets.connect(
             self.ws_connection_url,
