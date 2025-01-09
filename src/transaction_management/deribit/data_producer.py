@@ -287,6 +287,8 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     message: dict = orjson.loads(message)
 
+                                    log.error (message)
+
                                     message: dict = message["result"]
                                     
                                     log.warning (message)
