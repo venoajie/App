@@ -313,8 +313,12 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     message: bytes = await self.websocket_client.recv()
                                     
+                                    log.error (message)
+                                    
                                     message: dict = orjson.loads(message)
              
+                                    
+                                    log.error (message)
                                     message = asyncio.create_task (self.ws_operation(
                                     operation_subaccounts,
                                     ws_channel_subaccounts,
@@ -330,6 +334,15 @@ class StreamAccountData(ModifyOrderDb):
                                     "rest_api"
                                     )   
                                     
+                                    log.error (message)
+
+                                    message =  self.ws_operation(
+                                    operation_subaccounts,
+                                    ws_channel_subaccounts,
+                                    "rest_api"
+                                    )   
+                                    
+                                    log.error (message)
                                     message: dict = orjson.loads(message)
                                     
                                     
