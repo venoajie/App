@@ -271,6 +271,34 @@ class StreamAccountData(ModifyOrderDb):
                                         currency
                                         )
                                     
+                                    
+                                    
+                                    
+                                    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                                    
+                                                
+                                    operation = "get_subaccounts"
+                                    
+                                    ws_channel = {"with_portfolio": True}
+                                    
+                                    log.debug (message)
+                                    
+                                    asyncio.create_task (self.ws_operation(
+                                    operation,
+                                    ws_channel,
+                                    "rest_api"
+                                    )   )
+                                    
+                                    message: bytes = await self.websocket_client.recv()
+                                    
+                                    message: dict = orjson.loads(message)
+                                    
+                                    log.warning (message)
+                                    
+                                    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                                    
+                                    
+                                    
                                     operation = "get_subaccounts_details"
                                     
                                     ws_channel = {"currency": currency, 
@@ -454,5 +482,7 @@ class StreamAccountData(ModifyOrderDb):
             extra_params: dict = await get_end_point_result(operation,
                                                   ws_channel)
             msg.update(extra_params)
+            
+            log.debug (msg)
             
             await self.websocket_client.send(json.dumps(msg))
