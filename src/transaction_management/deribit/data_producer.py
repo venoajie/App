@@ -25,19 +25,18 @@ from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
+from transaction_management.deribit.managing_deribit import (
+    ModifyOrderDb,
+    currency_inline_with_database_address,)
 from utilities.pickling import (
     replace_data,)
 from utilities.system_tools import (
     provide_path_for_file,
-    raise_error_message,)
+    parse_error_message,)
 from utilities.string_modification import (
     remove_double_brackets_in_list,
     remove_redundant_elements,)
-from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,
-    currency_inline_with_database_address,)
-from utilities.string_modification import (
-    extract_currency_from_text,)
+
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
@@ -86,7 +85,7 @@ class StreamAccountData(ModifyOrderDb):
     """
 
     +----------------------------------------------------------------------------------------------+
-    referene: https://github.com/ElliotP123/crypto-exchange-code-samples/blob/master/deribit/websockets/dbt-ws-authenticated-example.py
+    reference: https://github.com/ElliotP123/crypto-exchange-code-samples/blob/master/deribit/websockets/dbt-ws-authenticated-example.py
     +----------------------------------------------------------------------------------------------+
 
     """
@@ -166,8 +165,6 @@ class StreamAccountData(ModifyOrderDb):
                     settlement_periods)  
                 
                 instruments_name = futures_instruments["instruments_name"]   
-                                
-                resolution = 1                
                 
                 while True:
                     
@@ -179,6 +176,8 @@ class StreamAccountData(ModifyOrderDb):
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
+                                
+                    resolution = 1                
                     
                     for currency in currencies:
                         
@@ -254,18 +253,19 @@ class StreamAccountData(ModifyOrderDb):
                         if "params" in list(message):
                             
                             if message["method"] != "heartbeat":
-                                
-                                message_params = message["params"]
-                                #log.warning(message)
-                                queue.put(message_params)
+                                                                
+                                # queing result
+                                queue.put(message["params"])
                                                                 
 
             except Exception as error:
-                log.critical (error)
+
+                await parse_error_message(error)  
+
                 await telegram_bot_sendtext (
                     error,
-                    "general_error")
-                await raise_error_message (error)
+                    "general_error"
+                    )
                 
     async def establish_heartbeat(self) -> None:
         """
@@ -282,7 +282,13 @@ class StreamAccountData(ModifyOrderDb):
         try:        
             await self.websocket_client.send(json.dumps(msg))
         except Exception as error:
-            log.warning(error)
+
+            await parse_error_message(error)  
+
+            await telegram_bot_sendtext (
+                error,
+                "general_error"
+                )
 
     async def heartbeat_response(self) -> None:
         """
@@ -299,7 +305,13 @@ class StreamAccountData(ModifyOrderDb):
         try:
             await self.websocket_client.send(json.dumps(msg))
         except Exception as error:
-            log.warning(error)
+
+            await parse_error_message(error)  
+
+            await telegram_bot_sendtext (
+                error,
+                "general_error"
+                )
 
     async def ws_auth(self) -> None:
         """
@@ -321,12 +333,14 @@ class StreamAccountData(ModifyOrderDb):
             await self.websocket_client.send(json.dumps(msg))
 
         except Exception as error:
-                        
-            raise_error_message (
-            error, 
-            1,
-            "app"
-            )
+                            
+            await parse_error_message(error)  
+
+            await telegram_bot_sendtext (
+                error,
+                "general_error"
+                )
+
                 
     async def ws_refresh_auth(self) -> None:
         """
@@ -366,7 +380,10 @@ class StreamAccountData(ModifyOrderDb):
         
         await asyncio.sleep(sleep_time)
 
-        id = id_numbering.id(operation, ws_channel)
+        id = id_numbering.id(
+            operation,
+            ws_channel
+            )
         
         msg: dict = {
             "jsonrpc": "2.0",
@@ -379,14 +396,17 @@ class StreamAccountData(ModifyOrderDb):
                 method= f"private/{operation}",
                 params= {"channels": [ws_channel]}
             )
+            
             msg.update(extra_params)
 
             await self.websocket_client.send(json.dumps(msg))
 
         if "rest_api" in source:
 
-            extra_params: dict = await get_end_point_result(operation,
-                                                  ws_channel)
+            extra_params: dict = await get_end_point_result(
+                operation,
+                ws_channel)
+            
             msg.update(extra_params)
             
             await self.websocket_client.send(json.dumps(msg))
