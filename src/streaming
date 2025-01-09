@@ -40,6 +40,11 @@ signal_handler = SignalHandler()
 
 async def main():
     
+    """
+        https://blog.finxter.com/python-multiprocessing-pool-ultimate-guide/
+
+    """
+    
     sub_account_id = "deribit-148510"
     
     try:

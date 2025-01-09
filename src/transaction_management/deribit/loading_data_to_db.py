@@ -46,9 +46,9 @@ def get_config(file_name: str) -> list:
 
 
 async def update_db_pkl(
-    path, 
-    data_orders,
-    currency
+    path: str, 
+    data_orders: dict,
+    currency: str
     ) -> None:
 
     my_path_portfolio = provide_path_for_file (path,
@@ -66,18 +66,17 @@ async def update_db_pkl(
                   
 async def processing_orders(
     sub_account_id,
-    name: str, 
+    name: int, 
     queue: Queue
     ):
     
     """
-    https://blog.finxter.com/python-multiprocessing-pool-ultimate-guide/
     """
     
-    modify_order_and_db = ModifyOrderDb(sub_account_id)
+    modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
     # registering strategy config file    
-    file_toml = "config_strategies.toml"
+    file_toml: str = "config_strategies.toml"
 
     # parsing config file
     config_app = get_config(file_toml)
@@ -98,22 +97,21 @@ async def processing_orders(
     
     order_db_table= relevant_tables["orders_table"]        
     
-    resolution = 1   
+    resolution: int = 1   
     
-    any_order = False 
-    
-    while not any_order:
-        message = queue.get()
-                
-        message_channel = message["channel"]
+    while True:
         
-        data_orders: list = message["data"] 
+        message: str = queue.get()
+                
+        message_channel: str = message["channel"]
+        
+        data_orders: dict = message["data"] 
         
         currency: str = extract_currency_from_text(message_channel)
         
         currency_lower: str = currency.lower()
                                         
-        archive_db_table= f"my_trades_all_{currency_lower}_json"
+        archive_db_table: str = f"my_trades_all_{currency_lower}_json"
                                                           
         if message_channel == f"user.portfolio.{currency_lower}":
                                            
@@ -150,12 +148,12 @@ async def processing_orders(
             
             instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
 
-            TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
-            WHERE_FILTER_TICK: str = "tick"
-            DATABASE: str = "databases/trading.sqlite3"
-            
             if "PERPETUAL" in instrument_ticker:
 
+                TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+                WHERE_FILTER_TICK: str = "tick"
+                DATABASE: str = "databases/trading.sqlite3"
+                
                 await ohlc_result_per_time_frame(
                     instrument_ticker,
                     resolution,
@@ -173,7 +171,6 @@ async def processing_orders(
             await distribute_ticker_result_as_per_data_type(
                 my_path_ticker,
                 data_orders, 
-                instrument_ticker
                 )
                             
             if "PERPETUAL" in data_orders["instrument_name"]:
@@ -183,13 +180,11 @@ async def processing_orders(
                     WHERE_FILTER_TICK, 
                     TABLE_OHLC1, 
                     data_orders
-                    )                              
-    
+                    )                                  
     
 async def distribute_ticker_result_as_per_data_type(
     my_path_ticker: str, 
     data_orders: dict, 
-    instrument_name: str
     ) -> None:
     """ """
 
@@ -203,11 +198,13 @@ async def distribute_ticker_result_as_per_data_type(
 
         else:
             ticker_change: list = read_data(my_path_ticker)
+
             if ticker_change != []:
-                # log.debug (ticker_change)
 
                 for item in data_orders:
+                    
                     ticker_change[0][item] = data_orders[item]
+                    
                     replace_data(
                         my_path_ticker, 
                         ticker_change
