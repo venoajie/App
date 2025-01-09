@@ -18,7 +18,7 @@ from transaction_management.deribit.data_producer import (
 from transaction_management.deribit.loading_data_to_db import (
     processing_orders,)
 from transaction_management.deribit.data_processor import (
-    running_transactions,)
+    RunningStrategy,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from transaction_management.deribit.telegram_bot import (
@@ -55,6 +55,10 @@ async def main():
         
         stream = StreamAccountData(sub_account_id)
 
+        running_strategy = RunningStrategy(sub_account_id)
+        
+        strategy = running_strategy.ws_manager()
+
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
         
         async with Pool(maxtasksperchild=1) as pool:
@@ -69,8 +73,8 @@ async def main():
                                            for i in range(num_consumers)]
        
                 running_transactions_tasks = [pool.apply(
-                    running_transactions, 
-                    args=(sub_account_id,
+                    running_strategy.ws_manager(), 
+                    args=(
                           f"worker-{i}",
                           queue)) 
                                            for i in range(num_consumers)]
