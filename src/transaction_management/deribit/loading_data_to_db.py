@@ -105,8 +105,6 @@ async def processing_orders(
     while not any_order:
         message = queue.get()
                 
-        log.debug (f"message {message}")
-                
         message_channel = message["channel"]
         
         data_orders: list = message["data"] 
@@ -154,7 +152,7 @@ async def processing_orders(
                                     
         if "chart.trades" in message_channel:
             instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-                                               
+            log.debug (f"chart.trades {data_orders}")                                   
             await ohlc_result_per_time_frame(
                 instrument_ticker,
                 resolution,
