@@ -111,11 +111,11 @@ async def processing_orders(
         
         currency: str = extract_currency_from_text(message_channel)
         
-        currency_lower: str =currency.lower
+        currency_lower: str = currency.lower()
                                         
         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                                           
-        if message_channel == f"user.portfolio.{currency.lower()}":
+        if message_channel == f"user.portfolio.{currency_lower}":
             log.error (f"user.portfolio {data_orders}")
                                            
             await update_db_pkl(
