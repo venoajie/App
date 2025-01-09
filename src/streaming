@@ -56,9 +56,7 @@ async def main():
         stream = StreamAccountData(sub_account_id)
 
         running_strategy = RunningStrategy(sub_account_id)
-        
-        strategy = running_strategy.ws_manager()
-
+       
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
         
         async with Pool(maxtasksperchild=1) as pool:
