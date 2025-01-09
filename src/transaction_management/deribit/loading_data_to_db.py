@@ -64,7 +64,7 @@ async def update_db_pkl(
             )
 
                   
-async def processing_orders(
+async def loading_data(
     sub_account_id,
     name: int, 
     queue: Queue

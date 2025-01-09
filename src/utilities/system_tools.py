@@ -543,7 +543,7 @@ class SignalHandler:
         frame
         ):
         
-        print(signum)
+        print(f"signum {signum} frame {frame}")
         print("Exiting gracefully")
         
         self.KEEP_PROCESSING = False

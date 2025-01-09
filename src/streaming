@@ -16,9 +16,9 @@ from aiomultiprocess import Pool
 from transaction_management.deribit.data_producer import (
     StreamAccountData,)
 from transaction_management.deribit.loading_data_to_db import (
-    processing_orders,)
+    loading_data,)
 from transaction_management.deribit.data_processor import (
-    RunningStrategy,)
+    running_strategy,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from transaction_management.deribit.telegram_bot import (
@@ -54,8 +54,6 @@ async def main():
         num_consumers = max(1,int (cpu_count() / 4) - 1)
         
         stream = StreamAccountData(sub_account_id)
-
-        running_strategy = RunningStrategy(sub_account_id)
        
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
         
@@ -64,7 +62,7 @@ async def main():
             while signal_handler.KEEP_PROCESSING:
        
                 processing_orders_tasks = [pool.apply(
-                    processing_orders, 
+                    loading_data, 
                     args=(sub_account_id,
                           f"worker-{i}",
                           queue
@@ -73,8 +71,8 @@ async def main():
                                            for i in range(num_consumers)]
        
                 running_transactions_tasks = [pool.apply(
-                    running_strategy.ws_manager, 
-                    args=(
+                    running_strategy, 
+                    args=(sub_account_id,
                           f"worker-{i}",
                           queue
                           )
