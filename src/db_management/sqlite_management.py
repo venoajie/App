@@ -95,7 +95,10 @@ async def insert_tables(
                 if isinstance(params, str):
                     insert_table_json = f"""INSERT OR IGNORE INTO {table_name} (data) VALUES (json ('{(params)}'));"""                    
                     await db.execute(insert_table_json)
-
+            
+            await db.commit()
+            await db.close()
+                
     except Exception as error:
         log.critical (f"insert_tables {table_name} {error}")
         await telegram_bot_sendtext(f"sqlite operation insert_tables, failed_order  {table_name} {error} ")
@@ -143,10 +146,15 @@ async def querying_table(
                 head = map(lambda attr: attr[0], 
                            cur.description)
                 headers = list(head)
-
+                
+            await db.commit()
+            await db.close()
+        
         for i in fetchall:
             combine_result.append(dict(zip(headers, 
                                            i)))
+            
+        
 
     except Exception as error:
         log.critical (f"querying_table  {table} {error}") 
@@ -179,7 +187,10 @@ async def deleting_row(
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
             await db.execute(query_table, filter_val)
-
+    
+            await db.commit()
+            await db.close()
+        
     except Exception as error:
         log.critical (f"deleting_row {error}")
         await telegram_bot_sendtext("sqlite operation", "failed_order")
@@ -206,7 +217,10 @@ async def querying_duplicated_transactions(
 
                 head = map(lambda attr: attr[0], cur.description)
                 headers = list(head)
-
+    
+        await db.commit()
+        await db.close()
+    
         for i in fetchall:
             combine_result.append(dict(zip(headers, i)))
 
@@ -241,7 +255,10 @@ async def deleting_row(
                 await db.execute(query_table_filter_none)
             else:
                 await db.execute(query_table, filter_val)
-
+    
+            await db.commit()
+            await db.close()
+        
     except Exception as error:
         log.critical (f"deleting_row {query_table} {error}")
         await telegram_bot_sendtext("sqlite operation", "failed_order")
@@ -264,7 +281,10 @@ async def add_additional_column(
 
             async with db as cur:
                 result = await cur.fetchone()
-
+    
+            await db.commit()
+            await db.close()
+        
     except Exception as error:
         print(f"querying_table {query_table} {error}")
         await telegram_bot_sendtext("sqlite operation", "failed get_last_tick")
@@ -331,7 +351,10 @@ async def update_status_data(
             ) as db:
             
             await db.execute(query)
-
+    
+            await db.commit()
+            await db.close()
+        
     except Exception as error:
         log.critical (f" ERROR {error}")
         log.info (f"query update status data {query}")
@@ -571,7 +594,10 @@ async def executing_query_with_return(
 
                 head = map(lambda attr: attr[0], cur.description)
                 headers = list(head)
-
+    
+            await db.commit()
+            await db.close()
+        
         for i in fetchall:
             combine_result.append(dict(zip(headers, i)))
 
