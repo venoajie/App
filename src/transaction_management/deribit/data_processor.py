@@ -227,7 +227,7 @@ https://stackoverflow.com/questions/61216022/receiving-streaming-data-after-impl
     
     async def ws_manager(
         self,
-        name: int
+        name: int,
         queue: Queue,
         ) -> None:
         
