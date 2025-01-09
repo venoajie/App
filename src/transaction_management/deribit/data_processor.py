@@ -11,7 +11,6 @@ from multiprocessing.queues import Queue
 
 # installed
 from dataclassy import dataclass, fields
-import json, orjson
 from loguru import logger as log
 import tomli
 import websockets
