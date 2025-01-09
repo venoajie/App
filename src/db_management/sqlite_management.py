@@ -6,9 +6,17 @@ import asyncio
 import aiosqlite
 from loguru import logger as log
 import json
+from multiprocessing.dummy import Pool as ThreadPool
+import multiprocessing
+
 from utilities.string_modification import extract_currency_from_text
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext as telegram_bot,)
+
+
+lock = multiprocessing.dummy.Lock()
+pool = ThreadPool(2)
+
 
 def catch_error(error, idle: int = None) -> list:
     """ """
@@ -75,6 +83,8 @@ async def insert_tables(
 
     """
     try:
+        
+        lock.acquire(True)
 
         async with aiosqlite.connect("databases/trading.sqlite3",
                                      isolation_level = None) as db:
@@ -95,13 +105,13 @@ async def insert_tables(
                 if isinstance(params, str):
                     insert_table_json = f"""INSERT OR IGNORE INTO {table_name} (data) VALUES (json ('{(params)}'));"""                    
                     await db.execute(insert_table_json)
-            
-            await db.commit()
-            await db.close()
-                
+
     except Exception as error:
         log.critical (f"insert_tables {table_name} {error}")
         await telegram_bot_sendtext(f"sqlite operation insert_tables, failed_order  {table_name} {error} ")
+
+    finally:
+        lock.release()
 
 
 async def querying_table(
@@ -133,6 +143,8 @@ async def querying_table(
     combine_result = []
 
     try:
+        lock.acquire(True)
+
         async with aiosqlite.connect(database, isolation_level=None) as db:
             db = (
                 db.execute(query_table)
@@ -146,19 +158,17 @@ async def querying_table(
                 head = map(lambda attr: attr[0], 
                            cur.description)
                 headers = list(head)
-                
-            await db.commit()
-            await db.close()
-        
+
         for i in fetchall:
             combine_result.append(dict(zip(headers, 
                                            i)))
-            
-        
 
     except Exception as error:
         log.critical (f"querying_table  {table} {error}") 
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
+
+    finally:
+        lock.release()
 
     return dict(
         all=[] if combine_result in NONE_DATA else (combine_result),
@@ -185,16 +195,19 @@ async def deleting_row(
     filter_val = (f"{filter_value}",)
 
     try:
+
+        lock.acquire(True)
+        
         async with aiosqlite.connect(database, isolation_level=None) as db:
             await db.execute(query_table, filter_val)
-    
-            await db.commit()
-            await db.close()
-        
+
     except Exception as error:
         log.critical (f"deleting_row {error}")
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
+
+    finally:
+        lock.release()
 
 
 async def querying_duplicated_transactions(
@@ -209,6 +222,9 @@ async def querying_duplicated_transactions(
     combine_result = []
 
     try:
+        
+        lock.acquire(True)
+        
         async with aiosqlite.connect(database, isolation_level=None) as db:
             db = db.execute(query_table)
 
@@ -217,10 +233,7 @@ async def querying_duplicated_transactions(
 
                 head = map(lambda attr: attr[0], cur.description)
                 headers = list(head)
-    
-        await db.commit()
-        await db.close()
-    
+
         for i in fetchall:
             combine_result.append(dict(zip(headers, i)))
 
@@ -228,6 +241,9 @@ async def querying_duplicated_transactions(
         log.critical (f"querying_table {query_table} {error}")
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
+
+    finally:
+        lock.release()
 
     return 0 if (combine_result == [] or combine_result == None) else (combine_result)
 
@@ -250,19 +266,22 @@ async def deleting_row(
         filter_val = (f"""' %{filter_value}%' """,)
 
     try:
+        
+        lock.acquire(True)
+        
         async with aiosqlite.connect(database, isolation_level=None) as db:
             if filter == None:
                 await db.execute(query_table_filter_none)
             else:
                 await db.execute(query_table, filter_val)
-    
-            await db.commit()
-            await db.close()
-        
+
     except Exception as error:
         log.critical (f"deleting_row {query_table} {error}")
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
+
+    finally:
+        lock.release()
 
 
 async def add_additional_column(
@@ -274,6 +293,9 @@ async def add_additional_column(
     """ """
 
     try:
+        
+        lock.acquire(True)
+        
         query_table = f"ALTER TABLE {table} ADD {column_name} {dataType}"
 
         async with aiosqlite.connect(database, isolation_level=None) as db:
@@ -281,13 +303,13 @@ async def add_additional_column(
 
             async with db as cur:
                 result = await cur.fetchone()
-    
-            await db.commit()
-            await db.close()
-        
+
     except Exception as error:
         print(f"querying_table {query_table} {error}")
         await telegram_bot_sendtext("sqlite operation", "failed get_last_tick")
+
+    finally:
+        lock.release()
 
     try:
         return 0 if result == None else int(result[0])
@@ -344,6 +366,8 @@ async def update_status_data(
 
     #log.warning (f"query {query}")
     try:
+        
+        lock.acquire(True)
 
         async with aiosqlite.connect(
             "databases/trading.sqlite3", 
@@ -351,10 +375,7 @@ async def update_status_data(
             ) as db:
             
             await db.execute(query)
-    
-            await db.commit()
-            await db.close()
-        
+
     except Exception as error:
         log.critical (f" ERROR {error}")
         log.info (f"query update status data {query}")
@@ -362,6 +383,8 @@ async def update_status_data(
         await telegram_bot_sendtext("sqlite operation insert_tables", "failed_order")
         # await telegram_bot_sendtext(f"sqlite operation","failed_order")
 
+    finally:
+        lock.release()
 
 def querying_open_interest(
     price: float = "close", 
@@ -582,6 +605,9 @@ async def executing_query_with_return(
     combine_result = []
 
     try:
+        
+        lock.acquire(True)
+        
         async with aiosqlite.connect(database, isolation_level=None) as db:
             db = (
                 db.execute(query_table)
@@ -594,10 +620,7 @@ async def executing_query_with_return(
 
                 head = map(lambda attr: attr[0], cur.description)
                 headers = list(head)
-    
-            await db.commit()
-            await db.close()
-        
+
         for i in fetchall:
             combine_result.append(dict(zip(headers, i)))
 
@@ -607,6 +630,9 @@ async def executing_query_with_return(
         #traceback.format_exc()
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
+
+    finally:
+        lock.release()
 
     return 0 if (combine_result == [] or combine_result == None) else (combine_result)
 
