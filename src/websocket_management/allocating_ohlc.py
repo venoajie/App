@@ -6,7 +6,6 @@
 import asyncio
 
 #import json
-from loguru import logger as log
 import httpx
 
 from db_management.sqlite_management import (
@@ -99,8 +98,6 @@ async def last_tick_fr_sqlite(last_tick_query_ohlc1) -> int:
             last_tick_query_ohlc1
             )
         
-        log.debug(f" last_tick1 {last_tick1}")
-
     except Exception as error:
         await async_raise_error_message(
             error,
@@ -161,12 +158,9 @@ async def ohlc_result_per_time_frame(
         TABLE_OHLC1
         )
 
-    log.warning (f"last_tick_query_ohlc1 {last_tick_query_ohlc1}")
     last_tick1_fr_sqlite: int = await last_tick_fr_sqlite (last_tick_query_ohlc1)
-    log.info (f"last_tick1_fr_sqlite {last_tick1_fr_sqlite}")
 
     last_tick_fr_data_orders: int = data_orders ["tick"]
-    log.error (f"last_tick_fr_data_orders {last_tick_fr_data_orders}")
     
     # refilling current ohlc table with updated data
     refilling_current_ohlc_table_with_updated_streaming_data = last_tick1_fr_sqlite == last_tick_fr_data_orders
@@ -174,9 +168,7 @@ async def ohlc_result_per_time_frame(
     insert_new_ohlc_and_replace_previous_ohlc_using_fix_data = last_tick_fr_data_orders > last_tick1_fr_sqlite
     
     if refilling_current_ohlc_table_with_updated_streaming_data:
-        
-    #    print (refilling_current_ohlc_table_with_updated_streaming_data)
-    
+            
         await update_status_data(
             TABLE_OHLC1, 
             "data", 
@@ -186,9 +178,7 @@ async def ohlc_result_per_time_frame(
             "is")
     
     if insert_new_ohlc_and_replace_previous_ohlc_using_fix_data:
-        
-    #    print (insert_new_ohlc_and_replace_previous_ohlc_using_fix_data)
-    
+            
         await insert_tables(
             TABLE_OHLC1,
             data_orders

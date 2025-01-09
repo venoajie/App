@@ -116,7 +116,6 @@ async def processing_orders(
         archive_db_table= f"my_trades_all_{currency_lower}_json"
                                                           
         if message_channel == f"user.portfolio.{currency_lower}":
-            log.error (f"user.portfolio {data_orders}")
                                            
             await update_db_pkl(
                 "portfolio", 
@@ -156,8 +155,7 @@ async def processing_orders(
             DATABASE: str = "databases/trading.sqlite3"
             
             if "PERPETUAL" in instrument_ticker:
-                log.debug (f" {instrument_ticker}")                                   
-                log.debug (f"chart.trades {data_orders}")                                   
+
                 await ohlc_result_per_time_frame(
                     instrument_ticker,
                     resolution,
@@ -179,9 +177,6 @@ async def processing_orders(
                 )
                             
             if "PERPETUAL" in data_orders["instrument_name"]:
-                
-                log.debug (f" {instrument_ticker}")                                   
-                log.debug (f"incremental_ticker {data_orders}")
                 
                 await inserting_open_interest(
                     currency, 
