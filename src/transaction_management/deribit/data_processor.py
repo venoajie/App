@@ -287,7 +287,7 @@ async def running_strategy(
                 
                 currency_lower: str = currency.lower()
             
-                log.info (message)
+                #log.info (message)
         
                 if message_channel == f"user.portfolio.{currency_lower}":
                                                 

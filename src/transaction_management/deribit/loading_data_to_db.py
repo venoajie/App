@@ -123,6 +123,8 @@ async def loading_data(
 
             await modify_order_and_db.resupply_sub_accountdb(currency)    
                                         
+        log.debug (f"message_channel {message_channel}")
+        log.warning ("user.changes.any" in message_channel)
         if "user.changes.any" in message_channel:
             log.warning (f"user.changes.any {data_orders}")
                              
