@@ -146,15 +146,17 @@ async def processing_orders(
                     cancellable_strategies
                     )
                                     
-        TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
-        WHERE_FILTER_TICK: str = "tick"
-        DATABASE: str = "databases/trading.sqlite3"
                                     
         if "chart.trades" in message_channel:
+            
             instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
+
+            TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+            WHERE_FILTER_TICK: str = "tick"
+            DATABASE: str = "databases/trading.sqlite3"
             
             if "PERPETUAL" in instrument_ticker:
-                log.debug (f"instrument_ticker {instrument_ticker}")                                   
+                log.debug (f" {instrument_ticker}")                                   
                 log.debug (f"chart.trades {data_orders}")                                   
                 await ohlc_result_per_time_frame(
                     instrument_ticker,
@@ -177,6 +179,9 @@ async def processing_orders(
                 )
                             
             if "PERPETUAL" in data_orders["instrument_name"]:
+                
+                log.debug (f" {instrument_ticker}")                                   
+                log.debug (f"incremental_ticker {data_orders}")
                 
                 await inserting_open_interest(
                     currency, 
