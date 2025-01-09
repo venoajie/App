@@ -107,27 +107,16 @@ async def processing_orders(
                 
         log.debug (f"message {message}")
                 
-        message_channel = message["params"]["channel"]
+        message_channel = message["channel"]
         
-        data_orders: list = message["params"]["data"] 
+        data_orders: list = message["data"] 
         
         currency: str = extract_currency_from_text(message_channel)
         
         currency_lower: str =currency.lower()
                                         
         archive_db_table= f"my_trades_all_{currency_lower}_json"
-                                                          
-        if message_channel == f"user.portfolio.{currency.lower()}":
-            log.error (f"user.portfolio {data_orders}")
-                                           
-            await update_db_pkl(
-                "portfolio", 
-                data_orders, 
-                currency
-                )
-
-            await modify_order_and_db.resupply_sub_accountdb(currency)    
-                                        
+                                          
         if "user.changes.any" in message_channel:
             log.warning (f"user.changes.any {data_orders}")
                              

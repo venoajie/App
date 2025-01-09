@@ -251,13 +251,59 @@ class StreamAccountData(ModifyOrderDb):
                             
                             if message["method"] != "heartbeat":
                                 
+                                message_params = message["params"]
                                 #log.warning(message)
-                                queue.put(message)
+                                queue.put(message_params)
+                                                                
+                                data_orders: list = message_params["data"]
                                 
-                                message_channel = message["params"]["channel"]
+                                message_channel = message_params["channel"]
                                 
                                 currency: str = extract_currency_from_text(message_channel)                                        
                                 
+                                if message_channel == f"user.portfolio.{currency.lower()}": 
+                                    
+                                    log.error (f"user.portfolio {data_orders}")
+                                                                
+                                    await update_db_pkl(
+                                        "portfolio", 
+                                        data_orders, 
+                                        currency
+                                        )
+                                    
+                                    operation = "get_subaccounts_details"
+                                    
+                                    ws_channel = {"currency": currency, 
+                                                  "with_open_orders": True
+                                                  }
+                                                                        
+                                    asyncio.create_task (self.ws_operation(
+                                    operation,
+                                    ws_channel,
+                                    "rest_api"
+                                    )   )
+                                    
+                                    message: bytes = await self.websocket_client.recv()
+                                    
+                                    message: dict = orjson.loads(message)
+
+                                    message: dict = message["result"]
+                                    
+                                    log.warning (message)
+                                    
+                                    my_path_sub_account = provide_path_for_file(
+                                        "sub_accounts",
+                                        currency
+                                        )
+                                    
+                                    replace_data(
+                                        my_path_sub_account, 
+                                        message
+                                        )
+                                
+                                    log.info(f"resupply {currency.upper()} sub account db-DONE")
+        
+                        
                                 if message_channel == f"user.portfolio.{currency.lower()}":
                                                                         
                                     operation = "get_subaccounts"
@@ -406,7 +452,5 @@ class StreamAccountData(ModifyOrderDb):
             extra_params: dict = await get_end_point_result(operation,
                                                   ws_channel)
             msg.update(extra_params)
-            
-            log.debug (msg)
             
             await self.websocket_client.send(json.dumps(msg))

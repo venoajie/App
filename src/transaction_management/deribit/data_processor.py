@@ -155,9 +155,9 @@ async def running_transactions(
                 
         message = queue.get()
                         
-        message_channel = message["params"]["channel"]
+        message_channel = message["channel"]
         
-        data_orders: list = message["params"]["data"] 
+        data_orders: list = message["data"] 
         
         currency: str = extract_currency_from_text(message_channel)
         
