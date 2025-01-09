@@ -152,15 +152,17 @@ async def processing_orders(
                                     
         if "chart.trades" in message_channel:
             instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-            log.debug (f"instrument_ticker {instrument_ticker}")                                   
-            log.debug (f"chart.trades {data_orders}")                                   
-            await ohlc_result_per_time_frame(
-                instrument_ticker,
-                resolution,
-                data_orders,
-                TABLE_OHLC1,
-                WHERE_FILTER_TICK,
-                )
+            
+            if "PERPETUAL" in instrument_ticker:
+                log.debug (f"instrument_ticker {instrument_ticker}")                                   
+                log.debug (f"chart.trades {data_orders}")                                   
+                await ohlc_result_per_time_frame(
+                    instrument_ticker,
+                    resolution,
+                    data_orders,
+                    TABLE_OHLC1,
+                    WHERE_FILTER_TICK,
+                    )
         
         instrument_ticker = (message_channel)[19:]  
         if (message_channel  == f"incremental_ticker.{instrument_ticker}"):

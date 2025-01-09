@@ -181,10 +181,15 @@ class StreamAccountData(ModifyOrderDb):
                     self.loop.create_task(self.ws_refresh_auth())
                     
                     for currency in currencies:
+                        
+                        currency_upper = currency.upper()
+                        
+                        instrument_perpetual = (f"{currency_upper}-PERPETUAL")
                             
                         ws_channel_currency = [
                             f"user.portfolio.{currency}",
-                            f"user.changes.any.{currency.upper()}.raw",
+                            f"user.changes.any.{currency_upper}.raw",
+                            f"chart.trades.{instrument_perpetual}.{resolution}"
                             ]
                     
                         for ws in ws_channel_currency:
@@ -199,7 +204,6 @@ class StreamAccountData(ModifyOrderDb):
                                             
                         ws_channel_instrument = [
                             f"incremental_ticker.{instrument}",
-                            f"chart.trades.{instrument}.{resolution}"
                             ]
                         
                         for ws in ws_channel_instrument:
