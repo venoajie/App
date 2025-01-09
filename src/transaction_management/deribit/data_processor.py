@@ -306,7 +306,10 @@ async def running_strategy(
                                 
             if ticker_perpetual\
                 and not chart_trade:
+                    
+                    
             
+                log.info (data_orders)
                 instrument_name_perpetual = data_orders["instrument_name"]
                 
                 currency: str = extract_currency_from_text(instrument_name_perpetual)
