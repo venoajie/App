@@ -330,6 +330,8 @@ class StreamAccountData(ModifyOrderDb):
                                     "rest_api"
                                     )   
                                     
+                                    message: dict = orjson.loads(message)
+                                    
                                     
                                     log.error (message)
 
