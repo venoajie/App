@@ -299,22 +299,38 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     
                                     
-                                    operation = "get_subaccounts_details"
+                                    operation_subaccounts = "get_subaccounts_details"
                                     
-                                    ws_channel = {"currency": currency, 
+                                    ws_channel_subaccounts = {"currency": currency, 
                                                   "with_open_orders": True
                                                   }
                                                                         
                                     asyncio.create_task (self.ws_operation(
-                                    operation,
-                                    ws_channel,
+                                    operation_subaccounts,
+                                    ws_channel_subaccounts,
                                     "rest_api"
                                     )   )
                                     
                                     message: bytes = await self.websocket_client.recv()
                                     
                                     message: dict = orjson.loads(message)
+             
+                                    message = asyncio.create_task (self.ws_operation(
+                                    operation_subaccounts,
+                                    ws_channel_subaccounts,
+                                    "rest_api"
+                                    )   )
+                                    
+                                    
+                                    log.error (message)
 
+                                    message = await self.ws_operation(
+                                    operation_subaccounts,
+                                    ws_channel_subaccounts,
+                                    "rest_api"
+                                    )   
+                                    
+                                    
                                     log.error (message)
 
                                     message: dict = message["result"]
