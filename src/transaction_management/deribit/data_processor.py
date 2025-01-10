@@ -279,12 +279,11 @@ async def running_strategy(
             message_channel: str = message["channel"]
             
             data_orders: dict = message["data"] 
+            
+            currency_lower: str = message["currency"] 
         
             instrument_ticker = (message_channel)[19:]  
     
-            if message_channel == f"user.portfolio.{currency_lower}":
-                                            
-                pass    
                                             
             if "user.changes.any" in message_channel:
                 update_cached_orders(
@@ -295,6 +294,7 @@ async def running_strategy(
             if "chart.trades" in message_channel:
                 
                 pass
+    
             if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
                                                                             
                 currency: str = extract_currency_from_text(message_channel)

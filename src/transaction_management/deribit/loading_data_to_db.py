@@ -106,10 +106,8 @@ async def loading_data(
         message_channel: str = message["channel"]
         
         data_orders: dict = message["data"] 
-        
-        currency: str = extract_currency_from_text(message_channel)
-        
-        currency_lower: str = currency.lower()
+                
+        currency_lower: str = message["currency"]
                                         
         archive_db_table: str = f"my_trades_all_{currency_lower}_json"
                                                           
@@ -118,23 +116,23 @@ async def loading_data(
             await update_db_pkl(
                 "portfolio", 
                 data_orders, 
-                currency
+                currency_lower
                 )
 
-            await modify_order_and_db.resupply_sub_accountdb(currency)    
+            await modify_order_and_db.resupply_sub_accountdb(currency_lower)    
                                                 
         if "user.changes.any" in message_channel:
             log.critical (f"message_channel {message_channel}")
             log.warning (f"user.changes.any {data_orders}")
             
-            await modify_order_and_db.resupply_sub_accountdb(currency)
+            await modify_order_and_db.resupply_sub_accountdb(currency_lower)
                                                               
             trades = data_orders["trades"]
             
             if trades:
                 await modify_order_and_db.cancel_the_cancellables(
                     order_db_table,
-                    currency,
+                    currency_lower,
                     cancellable_strategies
                     )
                                                        

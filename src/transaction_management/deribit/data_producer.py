@@ -290,14 +290,19 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 data = message_params["data"]
                                 
-                                queue.put(data)
                                 
                                 message_channel: str = message_params["channel"]
                                                         
                                 currency: str = extract_currency_from_text(message_channel)
                                 
                                 currency_lower: str = currency.lower()
+
+                                result = dict(data= data, 
+                                              channel= message_channel,
+                                              currency= currency_lower)
                                 
+                                
+                                queue.put(result)
                                             
                                 if "user.changes.any" in message_channel:
                                     
