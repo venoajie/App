@@ -34,8 +34,12 @@ from utilities.system_tools import (
     provide_path_for_file,
     parse_error_message,)
 from utilities.string_modification import (
+    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,)
+from websocket_management.allocating_ohlc import (
+    ohlc_result_per_time_frame,
+    inserting_open_interest,)
 
 
 def parse_dotenv (sub_account) -> dict:
@@ -212,6 +216,10 @@ class StreamAccountData(ModifyOrderDb):
                                     ws_channel = ws,
                                     ))
                     
+                    incremental_ticker_buffer = []
+                    user_changes_buffer = []
+                    chart_trades_buffer = []
+                    
                     while True:
                         
                         # Receive WebSocket messages
@@ -255,8 +263,94 @@ class StreamAccountData(ModifyOrderDb):
                             if message["method"] != "heartbeat":
                                                                 
                                 # queing result
-                                queue.put(message["params"])
-                                                                
+                                
+                                data = message["params"]["data"]
+                                
+                                queue.put(data)
+                                
+                                message_channel: str = message["channel"]
+                                                        
+                                currency: str = extract_currency_from_text(message_channel)
+                                
+                                currency_lower: str = currency.lower()
+                                
+                                            
+                                if "user.changes.any" in message_channel:
+                                    user_changes_buffer.append(data)
+                                    
+                                    log.error (f"user_changes_buffer {user_changes_buffer}")
+                                    
+                                    if len(user_changes_buffer) > 0:
+                                        
+                                        await modify_order_and_db. update_user_changes(
+                                            non_checked_strategies,
+                                            data_orders, 
+                                            currency, 
+                                            order_db_table,
+                                            archive_db_table,
+                                            )   
+                                                       
+                                                                         
+                                        user_changes_buffer = []
+
+                                                            
+                                if "chart.trades" in message_channel:
+                                    
+                                    chart_trades_buffer.append(data)
+                                    
+                                    log.warning (f"chart_trades_buffer {chart_trades_buffer}")
+                                    
+                                    if len(chart_trades_buffer) > 0:
+
+                                        instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
+
+                                        if "PERPETUAL" in instrument_ticker:
+
+                                            TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+                                            WHERE_FILTER_TICK: str = "tick"
+                                            DATABASE: str = "databases/trading.sqlite3"
+                                            
+                                            await ohlc_result_per_time_frame(
+                                                instrument_ticker,
+                                                resolution,
+                                                chart_trades_buffer[0],
+                                                TABLE_OHLC1,
+                                                WHERE_FILTER_TICK,
+                                                )
+                                            
+                                            chart_trades_buffer = []
+                                    
+                                
+                                instrument_ticker = (message_channel)[19:]
+                                if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
+
+                                    incremental_ticker_buffer.append(data)
+                                    
+                                    log.debug (f"incremental_ticker_buffer {incremental_ticker_buffer}")
+                                    
+                                    if len(incremental_ticker_buffer) > 0:                                      
+                                            
+
+                                        my_path_ticker = provide_path_for_file(
+                                            "ticker", instrument_ticker)
+                                        
+                                        await distribute_ticker_result_as_per_data_type(
+                                            my_path_ticker,
+                                            incremental_ticker_buffer[0], 
+                                            )
+                                                        
+                                        if "PERPETUAL" in incremental_ticker_buffer[0]["instrument_name"]:
+                                            
+                                            await inserting_open_interest(
+                                                currency, 
+                                                WHERE_FILTER_TICK, 
+                                                TABLE_OHLC1, 
+                                                incremental_ticker_buffer[0]
+                                                )   
+                                            
+                                        incremental_ticker_buffer = []                        
+                                    
+                                                                    
 
             except Exception as error:
 
@@ -410,3 +504,41 @@ class StreamAccountData(ModifyOrderDb):
             msg.update(extra_params)
             
             await self.websocket_client.send(json.dumps(msg))
+
+
+async def distribute_ticker_result_as_per_data_type(
+    my_path_ticker: str, 
+    data_orders: dict, 
+    ) -> None:
+    """ """
+
+    try:
+    
+        if data_orders["type"] == "snapshot":
+            replace_data(
+                my_path_ticker, 
+                data_orders
+                )
+
+        else:
+            ticker_change: list = read_data(my_path_ticker)
+
+            if ticker_change != []:
+
+                for item in data_orders:
+                    
+                    ticker_change[0][item] = data_orders[item]
+                    
+                    replace_data(
+                        my_path_ticker, 
+                        ticker_change
+                        )
+
+    except Exception as error:
+        
+        await parse_error_message(error)  
+
+        await telegram_bot_sendtext (
+            error,
+            "general_error"
+            )

@@ -122,20 +122,13 @@ async def loading_data(
                 )
 
             await modify_order_and_db.resupply_sub_accountdb(currency)    
-                                        
-        log.debug (f"message_channel {message_channel}")
-        log.warning ("user.changes.any" in message_channel)
+                                                
         if "user.changes.any" in message_channel:
+            log.critical (f"message_channel {message_channel}")
             log.warning (f"user.changes.any {data_orders}")
-                             
-            await modify_order_and_db. update_user_changes(
-                non_checked_strategies,
-                data_orders, 
-                currency, 
-                order_db_table,
-                archive_db_table,
-                )   
-                                 
+            
+            await modify_order_and_db.resupply_sub_accountdb(currency)
+                                                              
             trades = data_orders["trades"]
             
             if trades:
@@ -144,45 +137,7 @@ async def loading_data(
                     currency,
                     cancellable_strategies
                     )
-                                    
-                                    
-        if "chart.trades" in message_channel:
-            
-            instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-
-            if "PERPETUAL" in instrument_ticker:
-
-                TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
-                WHERE_FILTER_TICK: str = "tick"
-                DATABASE: str = "databases/trading.sqlite3"
-                
-                await ohlc_result_per_time_frame(
-                    instrument_ticker,
-                    resolution,
-                    data_orders,
-                    TABLE_OHLC1,
-                    WHERE_FILTER_TICK,
-                    )
-        
-        instrument_ticker = (message_channel)[19:]  
-        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-
-            my_path_ticker = provide_path_for_file(
-                "ticker", instrument_ticker)
-            
-            await distribute_ticker_result_as_per_data_type(
-                my_path_ticker,
-                data_orders, 
-                )
-                            
-            if "PERPETUAL" in data_orders["instrument_name"]:
-                
-                await inserting_open_interest(
-                    currency, 
-                    WHERE_FILTER_TICK, 
-                    TABLE_OHLC1, 
-                    data_orders
-                    )                                  
+                                                       
     
 async def distribute_ticker_result_as_per_data_type(
     my_path_ticker: str, 

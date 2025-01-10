@@ -281,6 +281,20 @@ async def running_strategy(
             data_orders: dict = message["data"] 
         
             instrument_ticker = (message_channel)[19:]  
+    
+            if message_channel == f"user.portfolio.{currency_lower}":
+                                            
+                pass    
+                                            
+            if "user.changes.any" in message_channel:
+                update_cached_orders(
+                    orders_all,
+                    data_orders,
+                    )
+                                        
+            if "chart.trades" in message_channel:
+                
+                pass
             if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
                                                                             
                 currency: str = extract_currency_from_text(message_channel)
@@ -289,19 +303,6 @@ async def running_strategy(
             
                 #log.info (message)
         
-                if message_channel == f"user.portfolio.{currency_lower}":
-                                                
-                    pass    
-                                                
-                if "user.changes.any" in message_channel:
-                    update_cached_orders(
-                        orders_all,
-                        data_orders,
-                        )
-                                            
-                if "chart.trades" in message_channel:
-                    
-                    pass
                                                 
                 archive_db_table: str = f"my_trades_all_{currency_lower}_json"
                                         
