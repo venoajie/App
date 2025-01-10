@@ -63,7 +63,18 @@ async def main():
             
             while signal_handler.KEEP_PROCESSING:
        
-       
+                running_transactions_tasks = [
+                    pool.apply(
+                        running_strategy, 
+                        args=(
+                            sub_account_id,
+                            f"worker-{i}",
+                            queue
+                            )
+                        )
+                    for i in range(num_consumers)
+                    ]
+                
                 loading_user_data_tasks = [
                     pool.apply(
                         loading_user_data, 
@@ -87,18 +98,6 @@ async def main():
                     for i in range(num_consumers)
                     ]
        
-                running_transactions_tasks = [
-                    pool.apply(
-                        running_strategy, 
-                        args=(
-                            sub_account_id,
-                            f"worker-{i}",
-                            queue
-                            )
-                        )
-                    for i in range(num_consumers)
-                    ]
-                
                 await asyncio.gather(
                     *processing_orders_tasks,
                     *loading_user_data_tasks,
