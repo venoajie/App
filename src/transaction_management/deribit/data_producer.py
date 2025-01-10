@@ -304,7 +304,7 @@ class StreamAccountData(ModifyOrderDb):
                                             
                                 if "user.changes.any" in message_channel:
                                     
-                                    log.info (f"{message_params}")
+                                    log.critical (f"{message_params}")
                                     
                                     trades = data["trades"]
                                     
