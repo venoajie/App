@@ -186,6 +186,12 @@ class StreamAccountData(ModifyOrderDb):
                 
                 instruments_name = futures_instruments["instruments_name"]   
                 
+                strategy_attributes = config_app["strategies"]
+                
+                # get strategies that have not short/long attributes in the label 
+                non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                    if o["non_checked_for_size_label_consistency"]==True]
+                                            
                 while True:
                     
                     # Authenticate WebSocket Connection
@@ -323,78 +329,18 @@ class StreamAccountData(ModifyOrderDb):
                                                             )
                                                         
                                             else:
-                                                
-                                                if "oto_order_ids" in (orders[0]):
-                                                                        
-                                                    len_oto_order_ids = len(orders[0]["oto_order_ids"])
-                                                    
-                                                    transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
-                                                    log.debug (f"transaction_main {transaction_main}")
-                                                    
-                                                    if len_oto_order_ids==1:
-                                                        pass
-                                                    
-                                                    transaction_main_oto = transaction_main ["oto_order_ids"][0]
-                                                    log.warning (f"transaction_main_oto {transaction_main_oto}")
-                                                    
-                                                    kind= "future"
-                                                    type = "trigger_all"
-                                                    
-                                                    open_orders_from_exchange =  await self.private_data.get_open_orders(kind, type)
-                                                    log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
-
-                                                    transaction_secondary = [o for o in open_orders_from_exchange\
-                                                        if transaction_main_oto in o["order_id"]]
-                                                    
-                                                    log.warning (f"transaction_secondary {transaction_secondary}")
-                                                    
-                                                    if transaction_secondary:
-                                                        
-                                                        transaction_secondary = transaction_secondary[0]
-                                                        
-                                                        # no label
-                                                        if transaction_main["label"] == ''\
-                                                            and "open" in transaction_main["order_state"]:
-                                                            
-                                                            order_attributes = labelling_unlabelled_order_oto (transaction_main,
-                                                                                                        transaction_secondary)                   
-
-                                                            log.debug (f"order_attributes {order_attributes}")
-                                                            await insert_tables(
-                                                                order_db_table, 
-                                                                transaction_main
-                                                                )
-                                                            
-                                                            await self. cancel_by_order_id (
-                                                                order_db_table,
-                                                                transaction_main["order_id"]
-                                                                )  
-                                                            
-                                                            await self.if_order_is_true(
-                                                                non_checked_strategies,
-                                                                order_attributes, 
-                                                                )
-
-                                                        else:
-                                                            await insert_tables(
-                                                                order_db_table, 
-                                                                transaction_main
-                                                                )
-                                                                
-                                                else:
-                                                                                        
-                                                    for order in orders:
-                                                        
-                                                        if  'OTO' not in order["order_id"]:
-                                                            
-                                                            log.warning (f"order {order}")
+                                            
                                                                                     
-                                                            await self.saving_order(
-                                                                non_checked_strategies,
-                                                                instrument_name,
-                                                                order,
-                                                                order_db_table
-                                                            )
+                                                for order in orders:
+                                                    
+                                                    if  'OTO' not in order["order_id"]:
+                                                        
+                                                        log.warning (f"order {order}")
+                                                                                
+                await saving_order_based_on_state (
+                    order_db_table, 
+                    order
+                    )
 
                                         
                                         await modify_order_and_db. update_user_changes(
@@ -657,3 +603,4 @@ async def distribute_ticker_result_as_per_data_type(
             error,
             "general_error"
             )
+
