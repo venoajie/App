@@ -122,10 +122,12 @@ async def loading_data(
                                     
         if "chart.trades" in message_channel:
             
-            log.warning (f"{data_orders}")
+            #log.warning (f"{data_orders}")
+            pass
                                             
                     
         instrument_ticker = (message_channel)[19:]
         if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-            log.debug (f"{data_orders}")
+            #log.debug (f"{data_orders}")
+            pass
     
