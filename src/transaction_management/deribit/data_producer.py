@@ -26,20 +26,19 @@ from transaction_management.deribit.api_requests import (
     get_end_point_result,
     get_currencies,
     get_instruments,)
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,)
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,)
 from transaction_management.deribit.orders_management import (
-    labelling_unlabelled_order,
-    labelling_unlabelled_order_oto,
     saving_order_based_on_state,
     saving_traded_orders,)
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
 from utilities.pickling import (
-    replace_data,)
+    replace_data,
+    read_data,)
 from utilities.system_tools import (
     provide_path_for_file,
     parse_error_message,)
@@ -50,7 +49,6 @@ from utilities.string_modification import (
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
-
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
@@ -306,57 +304,46 @@ class StreamAccountData(ModifyOrderDb):
                                             
                                 if "user.changes.any" in message_channel:
                                     
-                                    user_changes_buffer.append(data)
+                                    trades = data["trades"]
                                     
-                                    log.error (f"user_changes_buffer {user_changes_buffer}")
-                                    
-                                    if len(user_changes_buffer) > 0:
-                                        
-                                        trades = data["trades"]
-                                        
-                                        orders = data["orders"]
+                                    orders = data["orders"]
 
-                                        instrument_name = data["instrument_name"]
-                                        
-                                        if orders:
-                                                        
-                                            if trades:
+                                    if orders:
+                                                    
+                                        if trades:
+                                            
+                                            archive_db_table= f"my_trades_all_{currency_lower}_json"
+                                            
+                                            for trade in trades:
                                                 
-                                                archive_db_table= f"my_trades_all_{currency_lower}_json"
+                                                log.info (f"{trade}")
                                                 
-                                                for trade in trades:
-                                                    
-                                                    log.info (f"{trade}")
+                                                instrument_name = data["instrument_name"]
+                                                                                
+                                                if f"f{currency.upper()}-FS-" not in instrument_name:
                                                 
-                                                    if f"f{currency.upper()}-FS-" not in instrument_name:
+                                                    await saving_traded_orders(
+                                                        trade, 
+                                                        archive_db_table, 
+                                                        order_db_table
+                                                        )
                                                     
-                                                        await saving_traded_orders(
-                                                            trade, 
-                                                            archive_db_table, 
-                                                            order_db_table
-                                                            )
-                                                        
-                                            else:
-                                                                            
-                                                for order in orders:
-                                                    
-                                                    log.info (f"{order}")
-                                                    
-                                                    await saving_order_based_on_state (
-                                                            order_db_table, 
-                                                            order
-                                                            )
-                             
-                                        user_changes_buffer = []
-
+                                        else:
+                                                                        
+                                            for order in orders:
+                                                
+                                                log.info (f"{order}")
+                                                
+                                                await saving_order_based_on_state (
+                                                        order_db_table, 
+                                                        order
+                                                        )
                                                             
                                 if "chart.trades" in message_channel:
                                     
                                     chart_trades_buffer.append(data)
-                                    
-                                    log.warning (f"chart_trades_buffer {chart_trades_buffer}")
-                                    
-                                    if len(chart_trades_buffer) > 0:
+                                                                        
+                                    if len(chart_trades_buffer) > 3:
 
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
 
@@ -366,45 +353,37 @@ class StreamAccountData(ModifyOrderDb):
                                             WHERE_FILTER_TICK: str = "tick"
                                             DATABASE: str = "databases/trading.sqlite3"
                                             
-                                            await ohlc_result_per_time_frame(
-                                                instrument_ticker,
-                                                resolution,
-                                                chart_trades_buffer[0],
-                                                TABLE_OHLC1,
-                                                WHERE_FILTER_TICK,
+                                            for data in chart_trades_buffer:    
+                                                await ohlc_result_per_time_frame(
+                                                    instrument_ticker,
+                                                    resolution,
+                                                    data,
+                                                    TABLE_OHLC1,
+                                                    WHERE_FILTER_TICK,
                                                 )
                                             
                                             chart_trades_buffer = []
                                     
-                                
                                 instrument_ticker = (message_channel)[19:]
                                 if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-
-                                    incremental_ticker_buffer.append(data)
                                     
-                                    log.debug (f"incremental_ticker_buffer {incremental_ticker_buffer}")
+                                    my_path_ticker = provide_path_for_file(
+                                        "ticker", instrument_ticker)
                                     
-                                    if len(incremental_ticker_buffer) > 0:                                      
-                                           
-                                        my_path_ticker = provide_path_for_file(
-                                            "ticker", instrument_ticker)
+                                    await distribute_ticker_result_as_per_data_type(
+                                        my_path_ticker,
+                                        data, 
+                                        )
+                                                    
+                                    if "PERPETUAL" in incremental_ticker_buffer[0]["instrument_name"]:
                                         
-                                        await distribute_ticker_result_as_per_data_type(
-                                            my_path_ticker,
-                                            incremental_ticker_buffer[0], 
-                                            )
-                                                        
-                                        if "PERPETUAL" in incremental_ticker_buffer[0]["instrument_name"]:
+                                        await inserting_open_interest(
+                                            currency, 
+                                            WHERE_FILTER_TICK, 
+                                            TABLE_OHLC1, 
+                                            data
+                                            )   
                                             
-                                            await inserting_open_interest(
-                                                currency, 
-                                                WHERE_FILTER_TICK, 
-                                                TABLE_OHLC1, 
-                                                incremental_ticker_buffer[0]
-                                                )   
-                                            
-                                        incremental_ticker_buffer = []                                                
-
             except Exception as error:
 
                 await parse_error_message(error)  
