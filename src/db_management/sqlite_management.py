@@ -80,7 +80,7 @@ async def insert_tables(
         async with aiosqlite.connect("databases/trading.sqlite3",
                                      isolation_level = None) as db:
             
-            db.execute('pragma journal_mode=wal;')
+            await db.execute('pragma journal_mode=wal;')
 
             if "json" in table_name:
 
@@ -135,7 +135,7 @@ async def querying_table(
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
-            db.execute('pragma journal_mode=wal;')
+            await db.execute('pragma journal_mode=wal;')
 
             db = (
                 db.execute(query_table)
@@ -185,7 +185,7 @@ async def deleting_row(
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
-            db.execute('pragma journal_mode=wal;')
+            await db.execute('pragma journal_mode=wal;')
 
             await db.execute(query_table, filter_val)
 
@@ -209,7 +209,7 @@ async def querying_duplicated_transactions(
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
-            db.execute('pragma journal_mode=wal;')
+            await db.execute('pragma journal_mode=wal;')
 
             db = db.execute(query_table)
 
@@ -253,7 +253,7 @@ async def deleting_row(
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
             
-            db.execute('pragma journal_mode=wal;')
+            await db.execute('pragma journal_mode=wal;')
 
             if filter == None:
                 await db.execute(query_table_filter_none)
@@ -279,7 +279,7 @@ async def add_additional_column(
 
         async with aiosqlite.connect(database, isolation_level=None) as db:
             
-            db.execute('pragma journal_mode=wal;')
+            await db.execute('pragma journal_mode=wal;')
 
             db = await db.execute(query_table)
 
@@ -351,7 +351,7 @@ async def update_status_data(
             isolation_level=None
             ) as db:
             
-            db.execute('pragma journal_mode=wal;')
+            await db.execute('pragma journal_mode=wal;')
 
             
             await db.execute(query)
@@ -585,7 +585,7 @@ async def executing_query_with_return(
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
             
-            db.execute('pragma journal_mode=wal;')
+            await db.execute('pragma journal_mode=wal;')
 
             db = (
                 db.execute(query_table)
