@@ -53,13 +53,90 @@ async def main():
         
         queue: Queue = Manager().Queue()
         
-        num_consumers = max(1,int (cpu_count() / 4) - 1)
+        processes = max(1,int (cpu_count() / 4) - 1)
+        
+        maxtasksperchild=1
         
         stream = StreamAccountData(sub_account_id)
        
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
         
-        async with Pool(maxtasksperchild=1) as pool:
+        async with Pool(maxtasksperchild=maxtasksperchild) as pool:
+            
+            while signal_handler.KEEP_PROCESSING:
+       
+                running_transactions_tasks =   pool.apply(
+                        running_strategy, 
+                        args=(
+                            sub_account_id,
+                            processes,
+                            queue
+                            )
+                        )
+                    
+                
+                loading_user_data_tasks =    pool.apply(
+                        loading_user_data, 
+                        args=(sub_account_id,
+                          processes,
+                          queue
+                          )
+                        )
+       
+                processing_orders_tasks = pool.apply(
+                        loading_data, 
+                        args=(sub_account_id,
+                              processes,
+                              queue
+                              )
+                        )
+       
+                await asyncio.gather(
+                    *running_transactions_tasks,
+                    *loading_user_data_tasks,
+                    *processing_orders_tasks,
+                    )
+                
+                await asyncio.sleep(0.0005)
+
+                await producer_task
+                
+                pool.close()
+                
+                await pool.join()
+            
+    except Exception as error:
+        log.critical (error)
+        
+        await async_raise_error_message(
+            error,
+            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
+        )
+        
+        
+        
+async def main__():
+    
+    """
+        https://blog.finxter.com/python-multiprocessing-pool-ultimate-guide/
+
+    """
+    
+    sub_account_id = "deribit-148510"
+    
+    try:
+        
+        queue: Queue = Manager().Queue()
+        
+        processes = max(1,int (cpu_count() / 4) - 1)
+        
+        maxtasksperchild=1
+        
+        stream = StreamAccountData(sub_account_id)
+       
+        producer_task = asyncio.create_task(stream.ws_manager(queue)) 
+        
+        async with Pool(maxtasksperchild=maxtasksperchild) as pool:
             
             while signal_handler.KEEP_PROCESSING:
        
@@ -72,7 +149,7 @@ async def main():
                             queue
                             )
                         )
-                    for i in range(num_consumers)
+                    for i in range(processes)
                     ]
                 
                 loading_user_data_tasks = [
@@ -83,10 +160,9 @@ async def main():
                           queue
                           )
                         )
-                    for i in range(num_consumers)
+                    for i in range(processes)
                     ]
        
-      
                 processing_orders_tasks = [
                     pool.apply(
                         loading_data, 
@@ -95,7 +171,7 @@ async def main():
                               queue
                               )
                         )
-                    for i in range(num_consumers)
+                    for i in range(processes)
                     ]
        
                 await asyncio.gather(
@@ -104,7 +180,7 @@ async def main():
                     *processing_orders_tasks,
                     )
                 
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.0005)
 
                 await producer_task
                 
