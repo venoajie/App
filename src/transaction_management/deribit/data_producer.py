@@ -349,7 +349,7 @@ class StreamAccountData(ModifyOrderDb):
                                                                             
                                 if "chart.trades" in message_channel:
                                     
-                                    log.warning (f"{data}")
+                                    #log.warning (f"{data}")
                                     
                                     chart_trades_buffer.append(data)
                                                                         
@@ -372,7 +372,7 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                 instrument_ticker = (message_channel)[19:]
                                 if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-                                   log.debug (f"{data}")
+                                   #log.debug (f"{data}")
                                    
                                    my_path_ticker = provide_path_for_file(
                                         "ticker", instrument_ticker)
