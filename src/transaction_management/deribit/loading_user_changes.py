@@ -177,7 +177,7 @@ async def loading_user_data(
                                         transaction_main
                                         )
                                     
-                                    await cancel_by_order_id (
+                                    await modify_order_and_db.cancel_by_order_id (
                                         order_db_table,
                                         transaction_main["order_id"]
                                         )  
@@ -242,7 +242,7 @@ async def saving_order (
                 )
             
             if "OTO" not in order ["order_id"]:
-                await cancel_by_order_id (
+                await modify_order_and_db.cancel_by_order_id (
                     order_db_table,
                     order_id)  
             
@@ -275,7 +275,7 @@ async def saving_order (
                     order
                     )
 
-                await  cancel_by_order_id (
+                await  modify_order_and_db.cancel_by_order_id (
                     order_db_table,
                     order_id
                     )                    

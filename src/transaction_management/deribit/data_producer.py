@@ -333,9 +333,7 @@ class StreamAccountData(ModifyOrderDb):
                                         else:
                                                                         
                                             for order in orders:
-                                                
-                                                log.info (f"{order}")
-                                                
+                                                                                                
                                                 await saving_order_based_on_state (
                                                         order_db_table, 
                                                         order
