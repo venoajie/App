@@ -21,16 +21,13 @@ from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
-    cancel_by_order_id,
     currency_inline_with_database_address)
 from transaction_management.deribit.orders_management import (
     labelling_unlabelled_order,
     labelling_unlabelled_order_oto,
-    saving_order_based_on_state,
-    saving_traded_orders,)
+    saving_order_based_on_state,)
 from utilities.pickling import (
-    replace_data,
-    read_data,)
+    replace_data,)
 from utilities.system_tools import (
     parse_error_message,
     provide_path_for_file,)

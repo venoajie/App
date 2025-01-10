@@ -66,7 +66,7 @@ async def loading_data(
     try:
 
 
-        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
+#        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         while True:
             
@@ -85,9 +85,7 @@ async def loading_data(
                     data_orders, 
                     currency_lower
                     )
-
-                await modify_order_and_db.resupply_sub_accountdb(currency_lower)    
-
+                
     except Exception as error:
         
         await parse_error_message(error)  
