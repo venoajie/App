@@ -12,24 +12,15 @@ from multiprocessing.queues import Queue
 
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
 from utilities.pickling import (
-    replace_data,
-    read_data,)
-from utilities.string_modification import (
-    extract_currency_from_text,)
+    replace_data,)
 from utilities.system_tools import (
     parse_error_message,
-    provide_path_for_file,)
-from websocket_management.allocating_ohlc import (
-    ohlc_result_per_time_frame,
-    inserting_open_interest,)
+    provide_path_for_file,
+    telegram_bot_sendtext,)
 
 
 def get_config(file_name: str) -> list:
@@ -73,61 +64,36 @@ async def loading_data(
     """
     """
     
-    modify_order_and_db: object = ModifyOrderDb(sub_account_id)
+    try:
 
-    # registering strategy config file    
-    file_toml: str = "config_strategies.toml"
 
-    # parsing config file
-    config_app = get_config(file_toml)
+        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
-    strategy_attributes = config_app["strategies"]
-
-    strategy_attributes_active = [o for o in strategy_attributes \
-        if o["is_active"]==True]
-                
-    # get strategies that have not short/long attributes in the label 
-    non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
-        if o["non_checked_for_size_label_consistency"]==True]
-    
-    cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
-        if o["cancellable"]==True]
-    
-    relevant_tables = config_app["relevant_tables"][0]
-    
-    order_db_table= relevant_tables["orders_table"]        
-    
-    resolution: int = 1   
-    
-    while True:
-        
-        message: str = queue.get()
-                
-        message_channel: str = message["channel"]
-        
-        data_orders: dict = message["data"] 
-                
-        currency_lower: str = message["currency"]
-                                                                                                  
-        if message_channel == f"user.portfolio.{currency_lower}":
-                                           
-            await update_db_pkl(
-                "portfolio", 
-                data_orders, 
-                currency_lower
-                )
-
-            await modify_order_and_db.resupply_sub_accountdb(currency_lower)    
-                                                
-                                    
-        if "chart.trades" in message_channel:
+        while True:
             
-            #log.warning (f"{data_orders}")
-            pass
-                                            
+            message: str = queue.get()
                     
-        instrument_ticker = (message_channel)[19:]
-        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-            #log.debug (f"{data_orders}")
-            pass
-    
+            message_channel: str = message["channel"]
+            
+            data_orders: dict = message["data"] 
+                    
+            currency_lower: str = message["currency"]
+                                                                                                        
+            if message_channel == f"user.portfolio.{currency_lower}":
+                                                
+                await update_db_pkl(
+                    "portfolio", 
+                    data_orders, 
+                    currency_lower
+                    )
+
+                await modify_order_and_db.resupply_sub_accountdb(currency_lower)    
+
+    except Exception as error:
+        
+        await parse_error_message(error)  
+
+        await telegram_bot_sendtext (
+            error,
+            "general_error"
+            )

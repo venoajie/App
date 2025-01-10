@@ -302,92 +302,15 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 queue.put(result)
                                             
-                                if "user.changes.any" in message_channel:
-                                    
-                                    log.critical (f"{message_params}")
-                                    
-                                    trades = data["trades"]
-                                    
-                                    orders = data["orders"]
-
-                                    if orders:
-                                                    
-                                        if trades:
-                                            
-                                            archive_db_table= f"my_trades_all_{currency_lower}_json"
-                                            
-                                            for trade in trades:
-                                                
-                                                log.info (f"{trade}")
-                                                
-                                                instrument_name = data["instrument_name"]
-                                                                                
-                                                if f"f{currency.upper()}-FS-" not in instrument_name:
-                                                
-                                                    await saving_traded_orders(
-                                                        trade, 
-                                                        archive_db_table, 
-                                                        order_db_table
-                                                        )
-                                                    
-                                        else:
-                                                                        
-                                            for order in orders:
-                                                                                                
-                                                await saving_order_based_on_state (
-                                                        order_db_table, 
-                                                        order
-                                                        )
-                                                            
-                                WHERE_FILTER_TICK: str = "tick"
-
-                                TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+                                await saving_result(
+                                    data,
+                                    message_channel,
+                                    order_db_table,
+                                    resolution,
+                                    currency,
+                                    currency_lower, 
+                                    )
                                 
-                                DATABASE: str = "databases/trading.sqlite3"
-                                                                            
-                                if "chart.trades" in message_channel:
-                                    
-                                    #log.warning (f"{data}")
-                                    
-                                    chart_trades_buffer.append(data)
-                                                                        
-                                    if  len(chart_trades_buffer) > 3:
-
-                                        instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-
-                                        if "PERPETUAL" in instrument_ticker:
-
-                                            for data in chart_trades_buffer:    
-                                                await ohlc_result_per_time_frame(
-                                                    instrument_ticker,
-                                                    resolution,
-                                                    data,
-                                                    TABLE_OHLC1,
-                                                    WHERE_FILTER_TICK,
-                                                )
-                                            
-                                            chart_trades_buffer = []
-                                    
-                                instrument_ticker = (message_channel)[19:]
-                                if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-                                   #log.debug (f"{data}")
-                                   
-                                   my_path_ticker = provide_path_for_file(
-                                        "ticker", instrument_ticker)
-                                   
-                                   await distribute_ticker_result_as_per_data_type(
-                                        my_path_ticker,
-                                        data, 
-                                        )
-                                   
-                                   if "PERPETUAL" in data["instrument_name"]:
-                                        
-                                        await inserting_open_interest(
-                                            currency, 
-                                            WHERE_FILTER_TICK, 
-                                            TABLE_OHLC1, 
-                                            data
-                                            )   
                                         
             except Exception as error:
 
@@ -471,7 +394,6 @@ class StreamAccountData(ModifyOrderDb):
                 error,
                 "general_error"
                 )
-
                 
     async def ws_refresh_auth(self) -> None:
         """
@@ -541,6 +463,115 @@ class StreamAccountData(ModifyOrderDb):
             msg.update(extra_params)
             
             await self.websocket_client.send(json.dumps(msg))
+
+
+async def saving_result(
+    data: dict, 
+    message_channel: dict,
+    order_db_table: str,
+    resolution: int,
+    currency,
+    currency_lower: str, 
+    ) -> None:
+    """ """
+
+    try:
+
+        if "user.changes.any" in message_channel:
+            
+            trades = data["trades"]
+            
+            orders = data["orders"]
+
+            if orders:
+                        
+                if trades:
+                    
+                    archive_db_table= f"my_trades_all_{currency_lower}_json"
+                    
+                    for trade in trades:
+                        
+                        log.warning (f"{trade}")
+                        
+                        instrument_name = data["instrument_name"]
+                                                        
+                        if f"f{currency.upper()}-FS-" not in instrument_name:
+                        
+                            await saving_traded_orders(
+                                trade, 
+                                archive_db_table, 
+                                order_db_table
+                                )
+                            
+                else:
+                                                
+                    for order in orders:
+                        
+                        log.warning (f"{order}")
+                        
+                        await saving_order_based_on_state (
+                                order_db_table, 
+                                order
+                                )
+                                    
+        WHERE_FILTER_TICK: str = "tick"
+
+        TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+        
+        DATABASE: str = "databases/trading.sqlite3"
+                                                    
+        if "chart.trades" in message_channel:
+            
+            #log.warning (f"{data}")
+            
+            chart_trades_buffer.append(data)
+                                                
+            if  len(chart_trades_buffer) > 3:
+
+                instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
+
+                if "PERPETUAL" in instrument_ticker:
+
+                    for data in chart_trades_buffer:    
+                        await ohlc_result_per_time_frame(
+                            instrument_ticker,
+                            resolution,
+                            data,
+                            TABLE_OHLC1,
+                            WHERE_FILTER_TICK,
+                        )
+                    
+                    chart_trades_buffer = []
+            
+        instrument_ticker = (message_channel)[19:]
+        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
+            #log.debug (f"{data}")
+            
+            my_path_ticker = provide_path_for_file(
+                "ticker", instrument_ticker)
+            
+            await distribute_ticker_result_as_per_data_type(
+                my_path_ticker,
+                data, 
+                )
+            
+            if "PERPETUAL" in data["instrument_name"]:
+                
+                await inserting_open_interest(
+                    currency, 
+                    WHERE_FILTER_TICK, 
+                    TABLE_OHLC1, 
+                    data
+                    )   
+                
+    except Exception as error:
+        
+        await parse_error_message(error)  
+
+        await telegram_bot_sendtext (
+            error,
+            "general_error"
+            )
 
 
 async def distribute_ticker_result_as_per_data_type(
