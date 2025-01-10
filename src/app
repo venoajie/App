@@ -13,10 +13,23 @@ from multiprocessing.queues import Queue
 from multiprocessing import cpu_count
 from aiomultiprocess import Pool
 
+from transaction_management.deribit.data_producer import (
+    StreamAccountData,)
+from transaction_management.deribit.loading_data_to_db import (
+    loading_data,)
+from transaction_management.deribit.loading_user_changes import (
+    loading_user_data,)
+from transaction_management.deribit.data_processor import (
+    running_strategy,)
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
 from utilities.system_tools import (
     async_raise_error_message,
     parse_error_message,
     SignalHandler)
+        
 def handle_ctrl_c(
     signum, 
     stack_frame
@@ -33,20 +46,6 @@ async def main():
         https://blog.finxter.com/python-multiprocessing-pool-ultimate-guide/
 
     """
-        
-    from transaction_management.deribit.data_producer import (
-        StreamAccountData,)
-    from transaction_management.deribit.loading_data_to_db import (
-        loading_data,)
-    from transaction_management.deribit.loading_user_changes import (
-        loading_user_data,)
-    from transaction_management.deribit.data_processor import (
-        running_strategy,)
-    from transaction_management.deribit.telegram_bot import (
-        telegram_bot_sendtext,)
-    from transaction_management.deribit.telegram_bot import (
-        telegram_bot_sendtext,)
-        
     
     sub_account_id = "deribit-148510"
     
@@ -137,3 +136,10 @@ if __name__ == "__main__":
         
         asyncio.get_event_loop().run_until_complete(main().stop_ws())
         
+    except Exception as error:
+        parse_error_message(error)
+        
+        asyncio.run(telegram_bot_sendtext (
+            error,
+            "general_error"
+            ))
