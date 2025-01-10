@@ -13,7 +13,6 @@ from multiprocessing.queues import Queue
 from dataclassy import dataclass, fields
 from loguru import logger as log
 import tomli
-import websockets
 import numpy as np
 
 from configuration import id_numbering, config, config_oci
@@ -293,7 +292,7 @@ async def running_strategy(
                                         
             if "chart.trades" in message_channel:
                 
-                pass
+                log.error (message_channel)
     
             if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
                                                                             
@@ -301,7 +300,7 @@ async def running_strategy(
                 
                 currency_lower: str = currency.lower()
             
-                #log.info (message)
+                log.info (message)
         
                                                 
                 archive_db_table: str = f"my_trades_all_{currency_lower}_json"
