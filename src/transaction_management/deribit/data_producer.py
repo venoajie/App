@@ -340,7 +340,11 @@ class StreamAccountData(ModifyOrderDb):
                                                         )
                                                             
                                 WHERE_FILTER_TICK: str = "tick"
+
+                                TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
                                 
+                                DATABASE: str = "databases/trading.sqlite3"
+                                                                            
                                 if "chart.trades" in message_channel:
                                     
                                     chart_trades_buffer.append(data)
@@ -351,10 +355,6 @@ class StreamAccountData(ModifyOrderDb):
 
                                         if "PERPETUAL" in instrument_ticker:
 
-                                            TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
-                                            
-                                            DATABASE: str = "databases/trading.sqlite3"
-                                            
                                             for data in chart_trades_buffer:    
                                                 await ohlc_result_per_time_frame(
                                                     instrument_ticker,
