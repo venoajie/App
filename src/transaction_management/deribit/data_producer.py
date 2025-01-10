@@ -288,16 +288,6 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 queue.put(result)
                                             
-                                await saving_result(
-                                    data,
-                                    message_channel,
-                                    order_db_table,
-                                    resolution,
-                                    currency,
-                                    currency_lower, 
-                                    chart_trades_buffer
-                                    )
-                                
                                         
             except Exception as error:
 
