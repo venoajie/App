@@ -298,6 +298,7 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                             
                                 if "user.changes.any" in message_channel:
+                                    
                                     user_changes_buffer.append(data)
                                     
                                     log.error (f"user_changes_buffer {user_changes_buffer}")
@@ -329,29 +330,16 @@ class StreamAccountData(ModifyOrderDb):
                                                             )
                                                         
                                             else:
-                                            
-                                                                                    
+                                                                            
                                                 for order in orders:
                                                     
-                                                    if  'OTO' not in order["order_id"]:
-                                                        
-                                                        log.warning (f"order {order}")
-                                                                                
-                await saving_order_based_on_state (
-                    order_db_table, 
-                    order
-                    )
-
-                                        
-                                        await modify_order_and_db. update_user_changes(
-                                            non_checked_strategies,
-                                            data_orders, 
-                                            currency, 
-                                            order_db_table,
-                                            archive_db_table,
-                                            )   
-                                                       
-                                                                         
+                                                    log.info (f"{order}")
+                                                    
+                                                    await saving_order_based_on_state (
+                                                            order_db_table, 
+                                                            order
+                                                            )
+                             
                                         user_changes_buffer = []
 
                                                             
@@ -390,8 +378,7 @@ class StreamAccountData(ModifyOrderDb):
                                     log.debug (f"incremental_ticker_buffer {incremental_ticker_buffer}")
                                     
                                     if len(incremental_ticker_buffer) > 0:                                      
-                                            
-
+                                           
                                         my_path_ticker = provide_path_for_file(
                                             "ticker", instrument_ticker)
                                         
@@ -409,9 +396,7 @@ class StreamAccountData(ModifyOrderDb):
                                                 incremental_ticker_buffer[0]
                                                 )   
                                             
-                                        incremental_ticker_buffer = []                        
-                                    
-                                                                    
+                                        incremental_ticker_buffer = []                                                
 
             except Exception as error:
 
