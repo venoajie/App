@@ -188,7 +188,7 @@ class StreamAccountData(ModifyOrderDb):
                     await self.establish_heartbeat()
 
                     # Start Authentication Refresh Task
-                    await self.ws_refresh_auth()
+                    self.loop.create_task(self.ws_refresh_auth())
                                 
                     resolution = 1                
                     
