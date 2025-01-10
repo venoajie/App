@@ -10,29 +10,13 @@ from multiprocessing.queues import Queue
 # installedi
 from loguru import logger as log
 
-from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,)
-from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,
-    currency_inline_with_database_address,)
-from transaction_management.deribit.orders_management import (
-    saving_order_based_on_state,
-    saving_traded_orders,)
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
-from utilities.pickling import (
-    replace_data,
-    read_data)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,)
-from websocket_management.allocating_ohlc import (
-    ohlc_result_per_time_frame,
-    inserting_open_interest,)
-
-
 def get_config(file_name: str) -> list:
     """ """
+    
+    from utilities.system_tools import (
+        parse_error_message,
+        provide_path_for_file,)
+    
     config_path = provide_path_for_file (file_name)
     
     try:
@@ -49,6 +33,17 @@ async def update_db_pkl(
     data_orders: dict,
     currency: str
     ) -> None:
+
+    from transaction_management.deribit.managing_deribit import (
+        ModifyOrderDb,
+        currency_inline_with_database_address,)
+    from utilities.system_tools import (
+        parse_error_message,
+        provide_path_for_file,)
+        
+    from utilities.pickling import (
+        replace_data,
+        read_data,)
 
     my_path_portfolio = provide_path_for_file (path,
                                                currency)
@@ -72,6 +67,18 @@ async def loading_data(
     """
     """
     
+
+    from utilities.system_tools import (
+        parse_error_message,
+        provide_path_for_file,)
+    from transaction_management.deribit.managing_deribit import (
+        ModifyOrderDb,)
+    from transaction_management.deribit.telegram_bot import (
+        telegram_bot_sendtext,)
+    from utilities.pickling import (
+        replace_data,
+        read_data)
+
 
     # registering strategy config file    
     file_toml = "config_strategies.toml"
@@ -99,7 +106,7 @@ async def loading_data(
             
             data_orders: dict = message["data"] 
 
-            data_orders: dict = message["data"] 
+            log.info (data_orders)
                     
             currency: str = message["currency"]
             
@@ -145,6 +152,16 @@ async def saving_result(
     chart_trades_buffer: list
     ) -> None:
     """ """
+    from websocket_management.allocating_ohlc import (
+        ohlc_result_per_time_frame,
+        inserting_open_interest,)
+    from transaction_management.deribit.orders_management import (
+        saving_order_based_on_state,
+        saving_traded_orders,)
+
+    from utilities.system_tools import (
+        parse_error_message,
+        provide_path_for_file,)
 
     try:
 
@@ -239,10 +256,10 @@ async def saving_result(
         
         await parse_error_message(error)  
 
-        await telegram_bot_sendtext (
-            error,
-            "general_error"
-            )
+        #await telegram_bot_sendtext (
+         #   error,
+          #  "general_error"
+           # )
 
 
 async def distribute_ticker_result_as_per_data_type(
@@ -251,6 +268,14 @@ async def distribute_ticker_result_as_per_data_type(
     ) -> None:
     """ """
 
+    from utilities.system_tools import (
+        provide_path_for_file,
+        parse_error_message,)
+
+    from utilities.pickling import (
+        replace_data,
+        read_data)
+    
     try:
     
         if data_orders["type"] == "snapshot":
@@ -277,8 +302,8 @@ async def distribute_ticker_result_as_per_data_type(
         
         await parse_error_message(error)  
 
-        await telegram_bot_sendtext (
-            error,
-            "general_error"
-            )
+ #       await telegram_bot_sendtext (
+  #          error,
+   #         "general_error"
+    #        )
 
