@@ -5,9 +5,7 @@
 import asyncio
 import os
 
-# installed
-from loguru import logger as log
-import tomli
+# installedi
 from multiprocessing.queues import Queue
 
 from transaction_management.deribit.managing_deribit import (
@@ -15,12 +13,13 @@ from transaction_management.deribit.managing_deribit import (
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
 from utilities.pickling import (
     replace_data,)
 from utilities.system_tools import (
     parse_error_message,
-    provide_path_for_file,
-    telegram_bot_sendtext,)
+    provide_path_for_file,)
 
 
 def get_config(file_name: str) -> list:

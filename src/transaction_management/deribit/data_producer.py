@@ -17,11 +17,6 @@ from multiprocessing.queues import Queue
 
 # user defined formula
 from configuration import id_numbering, config, config_oci
-from db_management.sqlite_management import (
-    deleting_row,
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-    executing_query_with_return,
-    insert_tables,)
 from transaction_management.deribit.api_requests import (
     get_end_point_result,
     get_currencies,
