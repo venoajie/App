@@ -225,8 +225,6 @@ class StreamAccountData(ModifyOrderDb):
                                     ws_channel = ws,
                                     ))
                     
-                    incremental_ticker_buffer = []
-                    user_changes_buffer = []
                     chart_trades_buffer = []
                     
                     while True:
@@ -276,7 +274,6 @@ class StreamAccountData(ModifyOrderDb):
                                 message_params: dict = message["params"]
                                 
                                 data = message_params["data"]
-                                
                                 
                                 message_channel: str = message_params["channel"]
                                                         
@@ -513,7 +510,7 @@ async def saving_result(
                                                     
         if "chart.trades" in message_channel:
             
-            #log.warning (f"{data}")
+            log.warning (f"{data}")
             
             chart_trades_buffer.append(data)
                                                 
@@ -536,7 +533,7 @@ async def saving_result(
             
         instrument_ticker = (message_channel)[19:]
         if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-            #log.debug (f"{data}")
+            log.debug (f"{data}")
             
             my_path_ticker = provide_path_for_file(
                 "ticker", instrument_ticker)
