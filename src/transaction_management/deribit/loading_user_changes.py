@@ -22,8 +22,7 @@ from transaction_management.deribit.managing_deribit import (
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     cancel_by_order_id,
-    currency_inline_with_database_address,
-    if_order_is_true,)
+    currency_inline_with_database_address)
 from transaction_management.deribit.orders_management import (
     labelling_unlabelled_order,
     labelling_unlabelled_order_oto,
@@ -183,7 +182,7 @@ async def loading_user_data(
                                         transaction_main["order_id"]
                                         )  
                                     
-                                    await if_order_is_true(
+                                    await modify_order_and_db.if_order_is_true(
                                         non_checked_strategies,
                                         order_attributes, 
                                         )
@@ -203,6 +202,7 @@ async def loading_user_data(
                                     log.warning (f"order {order}")
                                                             
                                     await saving_order(
+                                        modify_order_and_db,
                                         non_checked_strategies,
                                         instrument_name,
                                         order,
@@ -217,6 +217,7 @@ async def loading_user_data(
         log.error (parse_error_message(error))
     
 async def saving_order (
+    modify_order_and_db,
     non_checked_strategies,
     instrument_name,
     order,
@@ -245,7 +246,7 @@ async def saving_order (
                     order_db_table,
                     order_id)  
             
-            await if_order_is_true(
+            await modify_order_and_db.if_order_is_true(
                 non_checked_strategies,
                 order_attributes, 
                 )
