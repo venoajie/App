@@ -286,11 +286,13 @@ class StreamAccountData(ModifyOrderDb):
                                                                 
                                 # queing result
                                 
-                                data = message["params"]["data"]
+                                message_params: dict = message["params"]
+                                
+                                data = message_params["data"]
                                 
                                 queue.put(data)
                                 
-                                message_channel: str = message["channel"]
+                                message_channel: str = message_params["channel"]
                                                         
                                 currency: str = extract_currency_from_text(message_channel)
                                 
