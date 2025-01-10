@@ -159,8 +159,6 @@ class StreamAccountData(ModifyOrderDb):
 
                 relevant_tables = config_app["relevant_tables"][0]
                 
-                trade_db_table= relevant_tables["my_trades_table"]
-                
                 order_db_table= relevant_tables["orders_table"]        
                                 
                 # get tradable strategies
@@ -180,11 +178,7 @@ class StreamAccountData(ModifyOrderDb):
                 instruments_name = futures_instruments["instruments_name"]   
                 
                 strategy_attributes = config_app["strategies"]
-                
-                # get strategies that have not short/long attributes in the label 
-                non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                    if o["non_checked_for_size_label_consistency"]==True]
-                                            
+                                  
                 while True:
                     
                     # Authenticate WebSocket Connection
@@ -304,6 +298,7 @@ class StreamAccountData(ModifyOrderDb):
                                     resolution,
                                     currency,
                                     currency_lower, 
+                                    chart_trades_buffer
                                     )
                                 
                                         
@@ -467,6 +462,7 @@ async def saving_result(
     resolution: int,
     currency,
     currency_lower: str, 
+    chart_trades_buffer: list
     ) -> None:
     """ """
 
