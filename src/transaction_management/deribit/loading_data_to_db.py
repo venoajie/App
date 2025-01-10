@@ -135,41 +135,14 @@ async def loading_data(
                     currency_lower,
                     cancellable_strategies
                     )
-                                                       
-    
-async def distribute_ticker_result_as_per_data_type(
-    my_path_ticker: str, 
-    data_orders: dict, 
-    ) -> None:
-    """ """
-
-    try:
-    
-        if data_orders["type"] == "snapshot":
-            replace_data(
-                my_path_ticker, 
-                data_orders
-                )
-
-        else:
-            ticker_change: list = read_data(my_path_ticker)
-
-            if ticker_change != []:
-
-                for item in data_orders:
+                         
+                                    
+        if "chart.trades" in message_channel:
+            
+            log.warning (f"{message_channel}")
+                                            
                     
-                    ticker_change[0][item] = data_orders[item]
-                    
-                    replace_data(
-                        my_path_ticker, 
-                        ticker_change
-                        )
-
-    except Exception as error:
-        
-        await parse_error_message(error)  
-
-        await telegram_bot_sendtext (
-            error,
-            "general_error"
-            )
+        instrument_ticker = (message_channel)[19:]
+        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
+            log.debug (f"{message_channel}")
+    
