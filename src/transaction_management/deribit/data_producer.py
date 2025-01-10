@@ -349,9 +349,11 @@ class StreamAccountData(ModifyOrderDb):
                                                                             
                                 if "chart.trades" in message_channel:
                                     
+                                    log.warning (f"{data}")
+                                    
                                     chart_trades_buffer.append(data)
                                                                         
-                                    if len(chart_trades_buffer) > 3:
+                                    if False and len(chart_trades_buffer) > 3:
 
                                         instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
 
@@ -370,24 +372,25 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                 instrument_ticker = (message_channel)[19:]
                                 if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-                                    
-                                    my_path_ticker = provide_path_for_file(
-                                        "ticker", instrument_ticker)
-                                    
-                                    await distribute_ticker_result_as_per_data_type(
-                                        my_path_ticker,
-                                        data, 
-                                        )
-                                    
-                                                    
-                                    if "PERPETUAL" in data["instrument_name"]:
+                                   log.debug (f"{data}")
+                                   if False: 
+                                        my_path_ticker = provide_path_for_file(
+                                            "ticker", instrument_ticker)
                                         
-                                        await inserting_open_interest(
-                                            currency, 
-                                            WHERE_FILTER_TICK, 
-                                            TABLE_OHLC1, 
-                                            data
-                                            )   
+                                        await distribute_ticker_result_as_per_data_type(
+                                            my_path_ticker,
+                                            data, 
+                                            )
+                                        
+                                                        
+                                        if "PERPETUAL" in data["instrument_name"]:
+                                            
+                                            await inserting_open_interest(
+                                                currency, 
+                                                WHERE_FILTER_TICK, 
+                                                TABLE_OHLC1, 
+                                                data
+                                                )   
                                             
             except Exception as error:
 
