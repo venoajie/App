@@ -367,6 +367,7 @@ class StreamAccountData(ModifyOrderDb):
                                 instrument_ticker = (message_channel)[19:]
                                 if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
                                     
+                                    log.info (f"{data}")
                                     my_path_ticker = provide_path_for_file(
                                         "ticker", instrument_ticker)
                                     
@@ -374,8 +375,9 @@ class StreamAccountData(ModifyOrderDb):
                                         my_path_ticker,
                                         data, 
                                         )
+                                    
                                                     
-                                    if "PERPETUAL" in incremental_ticker_buffer[0]["instrument_name"]:
+                                    if "PERPETUAL" in data["instrument_name"]:
                                         
                                         await inserting_open_interest(
                                             currency, 
