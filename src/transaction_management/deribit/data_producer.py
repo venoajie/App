@@ -17,6 +17,11 @@ from multiprocessing.queues import Queue
 
 # user defined formula
 from configuration import id_numbering, config, config_oci
+from db_management.sqlite_management import (
+    deleting_row,
+    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
+    executing_query_with_return,
+    insert_tables,)
 from transaction_management.deribit.api_requests import (
     get_end_point_result,
     get_currencies,
@@ -28,6 +33,11 @@ from transaction_management.deribit.telegram_bot import (
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
+from transaction_management.deribit.orders_management import (
+    labelling_unlabelled_order,
+    labelling_unlabelled_order_oto,
+    saving_order_based_on_state,
+    saving_traded_orders,)
 from utilities.pickling import (
     replace_data,)
 from utilities.system_tools import (
@@ -154,6 +164,12 @@ class StreamAccountData(ModifyOrderDb):
                 # parsing config file
                 config_app = get_config(file_toml)
 
+                relevant_tables = config_app["relevant_tables"][0]
+                
+                trade_db_table= relevant_tables["my_trades_table"]
+                
+                order_db_table= relevant_tables["orders_table"]        
+                                
                 # get tradable strategies
                 tradable_config_app = config_app["tradable"]
                 
@@ -281,6 +297,105 @@ class StreamAccountData(ModifyOrderDb):
                                     log.error (f"user_changes_buffer {user_changes_buffer}")
                                     
                                     if len(user_changes_buffer) > 0:
+                                        
+                                        trades = data["trades"]
+                                        
+                                        orders = data["orders"]
+
+                                        instrument_name = data["instrument_name"]
+                                        
+                                        if orders:
+                                                        
+                                            if trades:
+                                                
+                                                archive_db_table= f"my_trades_all_{currency_lower}_json"
+                                                
+                                                for trade in trades:
+                                                    
+                                                    log.info (f"{trade}")
+                                                
+                                                    if f"f{currency.upper()}-FS-" not in instrument_name:
+                                                    
+                                                        await saving_traded_orders(
+                                                            trade, 
+                                                            archive_db_table, 
+                                                            order_db_table
+                                                            )
+                                                        
+                                            else:
+                                                
+                                                if "oto_order_ids" in (orders[0]):
+                                                                        
+                                                    len_oto_order_ids = len(orders[0]["oto_order_ids"])
+                                                    
+                                                    transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
+                                                    log.debug (f"transaction_main {transaction_main}")
+                                                    
+                                                    if len_oto_order_ids==1:
+                                                        pass
+                                                    
+                                                    transaction_main_oto = transaction_main ["oto_order_ids"][0]
+                                                    log.warning (f"transaction_main_oto {transaction_main_oto}")
+                                                    
+                                                    kind= "future"
+                                                    type = "trigger_all"
+                                                    
+                                                    open_orders_from_exchange =  await self.private_data.get_open_orders(kind, type)
+                                                    log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
+
+                                                    transaction_secondary = [o for o in open_orders_from_exchange\
+                                                        if transaction_main_oto in o["order_id"]]
+                                                    
+                                                    log.warning (f"transaction_secondary {transaction_secondary}")
+                                                    
+                                                    if transaction_secondary:
+                                                        
+                                                        transaction_secondary = transaction_secondary[0]
+                                                        
+                                                        # no label
+                                                        if transaction_main["label"] == ''\
+                                                            and "open" in transaction_main["order_state"]:
+                                                            
+                                                            order_attributes = labelling_unlabelled_order_oto (transaction_main,
+                                                                                                        transaction_secondary)                   
+
+                                                            log.debug (f"order_attributes {order_attributes}")
+                                                            await insert_tables(
+                                                                order_db_table, 
+                                                                transaction_main
+                                                                )
+                                                            
+                                                            await self. cancel_by_order_id (
+                                                                order_db_table,
+                                                                transaction_main["order_id"]
+                                                                )  
+                                                            
+                                                            await self.if_order_is_true(
+                                                                non_checked_strategies,
+                                                                order_attributes, 
+                                                                )
+
+                                                        else:
+                                                            await insert_tables(
+                                                                order_db_table, 
+                                                                transaction_main
+                                                                )
+                                                                
+                                                else:
+                                                                                        
+                                                    for order in orders:
+                                                        
+                                                        if  'OTO' not in order["order_id"]:
+                                                            
+                                                            log.warning (f"order {order}")
+                                                                                    
+                                                            await self.saving_order(
+                                                                non_checked_strategies,
+                                                                instrument_name,
+                                                                order,
+                                                                order_db_table
+                                                            )
+
                                         
                                         await modify_order_and_db. update_user_changes(
                                             non_checked_strategies,
