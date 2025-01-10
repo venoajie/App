@@ -55,7 +55,7 @@ async def main():
         
         processes = max(1,int (cpu_count() / 4) - 1)
         
-        maxtasksperchild=1
+        maxtasksperchild=3
         
         stream = StreamAccountData(sub_account_id)
        
