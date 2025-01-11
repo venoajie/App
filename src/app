@@ -12,6 +12,7 @@ from multiprocessing import Manager
 from multiprocessing.queues import Queue
 from multiprocessing import cpu_count
 from aiomultiprocess import Pool
+from multiprocessing import get_context
 
 from transaction_management.deribit.data_producer import (
     StreamAccountData,)
@@ -62,11 +63,32 @@ async def main():
         stream = StreamAccountData(sub_account_id)
        
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
-        
-        async with Pool(maxtasksperchild=2) as pool:
+
+        async with get_context("spawn").Pool(maxtasksperchild=2) as pool:
             log.debug (signal_handler.KEEP_PROCESSING)
             while signal_handler.KEEP_PROCESSING:
        
+                running_transactions_tasks = [
+                    asyncio.create_task(pool.apply(
+                        running_strategy, 
+                        args=(
+                            sub_account_id,
+                            #f"worker-{i}",
+                            queue
+                            )
+                        ))
+                    #for i in range(processes)
+                    ]
+                
+                loading_user_data_tasks = [
+                    asyncio.create_task(pool.apply(
+                        loading_user_data, 
+                        args=(sub_account_id,
+                          #f"worker-{i}",
+                          queue
+                          )
+                        ))
+                    ]
        
                 processing_orders_tasks = [
                     asyncio.create_task(pool.apply(
@@ -117,61 +139,8 @@ if __name__ == "__main__":
     
     try:
         signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
-            
-        sub_account_id = "deribit-148510"
         
-        try:
-            
-            queue: Queue = Manager().Queue()
-            
-            processes = max(1,int (cpu_count() / 4) - 1)
-            
-            maxtasksperchild=1
-            
-            stream = StreamAccountData(sub_account_id)
-        
-            producer_task = asyncio.create_task(stream.ws_manager(queue)) 
-            
-            async with Pool(maxtasksperchild=2) as pool:
-                log.debug (signal_handler.KEEP_PROCESSING)
-                while signal_handler.KEEP_PROCESSING:
-        
-        
-                    processing_orders_tasks = [
-                        asyncio.create_task(pool.apply(
-                            loading_data, 
-                            args=(sub_account_id,
-                        #         f"worker-{i}",
-                                queue
-                                )
-                            ))
-                        #for i in range(processes)
-                        ]
-                    processing_orders_tasks2 = [
-                        asyncio.create_task(pool.apply(
-                            loading_data2, 
-                            args=(sub_account_id,
-                        #         f"worker-{i}",
-                                queue
-                                )
-                            ))
-                        #for i in range(processes)
-                        ]
-        
-                    await asyncio.gather(
-                        #*running_transactions_tasks,
-                        *processing_orders_tasks,
-                        *processing_orders_tasks2,
-                        #*loading_user_data_tasks,
-                        )
-                    
-                    await asyncio.sleep(0.0005)
-
-                    await producer_task
-                    
-                    pool.close()
-                    
-                    await pool.join()
+        asyncio.run(main())
         
     except(
         KeyboardInterrupt, 
