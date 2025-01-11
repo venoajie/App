@@ -101,7 +101,7 @@ async def main():
                 await asyncio.gather(
                     #*running_transactions_tasks,
                     *processing_orders_tasks,
-                    #*loading_user_data_tasks,
+                    *loading_user_data_tasks,
                     )
                 
                 await asyncio.sleep(0.5)
