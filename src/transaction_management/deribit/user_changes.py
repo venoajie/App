@@ -152,6 +152,8 @@ async def loading_user_data(
             
             data_orders: dict = message["data"] 
 
+            log.critical (data_orders)
+                    
             currency: str = message["currency"]
             
             currency_lower: str = currency.lower()
@@ -253,7 +255,9 @@ async def loading_user_data(
                                     )
 
                 log.warning (f"resupply_sub_accountdb")
-                    
+                
+                await modify_order_and_db.resupply_sub_accountdb(currency_lower)
+    
     except Exception as error:
         
         await parse_error_message(error)  
