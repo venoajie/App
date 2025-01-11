@@ -380,8 +380,6 @@ async def executing_strategies(
                 if ticker_perpetual\
                     and not chart_trade:
                         
-                    
-                    
     
                     archive_db_table= f"my_trades_all_{currency_lower}_json"
                     
