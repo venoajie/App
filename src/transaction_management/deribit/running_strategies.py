@@ -432,7 +432,7 @@ async def executing_strategies(
                                 
                             my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency ])
                             my_labels= remove_redundant_elements([parsing_label(o["label"])["main"] for o in my_trades_currency ])
-                            
+                            log.critical (orders_all)
                             for label in my_labels: 
                                 log.debug (f"label {label}")
                                 amount = sum([o["amount"] for o in my_trades_currency if label in o["label"]])
