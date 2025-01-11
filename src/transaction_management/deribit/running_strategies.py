@@ -233,7 +233,18 @@ async def executing_strategies(
         orders_all = combining_order_data(currencies)  
         
 #        log.warning (f"orders_all {orders_all}")
-         
+                
+        resolutions = [60,15, 5]     
+        qty_candles = 5  
+        dim_sequence = 3     
+        
+        cached_candles_data = combining_candles_data(
+            np,
+            currencies,
+            qty_candles,
+            resolutions,
+            dim_sequence)  
+    
         while True:
             
             message: str = queue.get()
@@ -247,8 +258,9 @@ async def executing_strategies(
             currency: str = message["currency"]
             
             currency_lower: str = currency.lower()
+            currency_upper: str = currency.upper()
             
-            resolution = 1
+            instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
                         
             if "user.changes.any" in message_channel:
                 update_cached_orders(
@@ -355,27 +367,9 @@ async def executing_strategies(
             if "chart.trades" in message_channel:
                 
                 log.error (message_channel)
-                                                                            
-                currency: str = extract_currency_from_text(message_channel)
-                
-                currency_lower: str = currency.lower()
-            
-                log.info (message_channel)
         
                                                 
                 archive_db_table: str = f"my_trades_all_{currency_lower}_json"
-                                        
-                    
-                resolutions = [60,15, 5]     
-                qty_candles = 5  
-                dim_sequence = 3     
-                
-                cached_candles_data = combining_candles_data(
-                    np,
-                    currencies,
-                    qty_candles,
-                    resolutions,
-                    dim_sequence)  
                                 
                 chart_trade = await chart_trade_in_msg(
                     message_channel,
@@ -387,14 +381,8 @@ async def executing_strategies(
                     and not chart_trade:
                         
                     
-                    instrument_name_perpetual = data_orders["instrument_name"]
+                    
     
-                
-                    currency: str = extract_currency_from_text(instrument_name_perpetual)
-                    
-                    currency_upper: str = currency.upper()
-                    currency_lower: str =currency
-                    
                     archive_db_table= f"my_trades_all_{currency_lower}_json"
                     
                     update_cached_ticker(
