@@ -10,6 +10,19 @@ from multiprocessing.queues import Queue
 # installedi
 from loguru import logger as log
 
+
+
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,)
+from transaction_management.deribit.managing_deribit import (
+    ModifyOrderDb,)
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
+from utilities.pickling import (
+    replace_data,
+    read_data)
+
 def get_config(file_name: str) -> list:
     """ """
     
@@ -67,18 +80,6 @@ async def loading_data2(
     """
     """
     
-
-    from utilities.system_tools import (
-        parse_error_message,
-        provide_path_for_file,)
-    from transaction_management.deribit.managing_deribit import (
-        ModifyOrderDb,)
-    from transaction_management.deribit.telegram_bot import (
-        telegram_bot_sendtext,)
-    from utilities.pickling import (
-        replace_data,
-        read_data)
-
 
     # registering strategy config file    
     file_toml = "config_strategies.toml"
