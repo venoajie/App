@@ -187,7 +187,7 @@ async def executing_strategies(
         ticker_perpetual = cached_ticker(instruments_name)  
                 
         orders_all = combining_order_data(
-            private_data,
+            await private_data,
             currencies)  
         
         log.warning (f"orders_all {orders_all}")
