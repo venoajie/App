@@ -1352,6 +1352,8 @@ async def saving_user_changes(
         orders = data["orders"]
 
         if orders:
+            
+            instrument_name = data["instrument_name"]
                     
             if trades:
                 
@@ -1367,7 +1369,7 @@ async def saving_user_changes(
                         cancellable_strategies
                         )
                     
-                    instrument_name = data["instrument_name"]
+                    
                                                     
                     if f"f{currency.upper()}-FS-" not in instrument_name:
                     
