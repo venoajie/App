@@ -323,7 +323,6 @@ async def executing_strategies(
                 if ticker_perpetual\
                     and not chart_trade:
                         
-    
                     archive_db_table= f"my_trades_all_{currency_lower}_json"
                     
                     update_cached_ticker(
@@ -983,195 +982,6 @@ def get_index (
         
     return index_price
 
-
-async def saving_order (
-    modify_order_and_db,
-    non_checked_strategies,
-    instrument_name,
-    order,
-    order_db_table
-    ) -> None:
-    
-    
-    label= order["label"]
-
-    order_id= order["order_id"]    
-    order_state= order["order_state"]    
-    
-    log.error (f"order_state {order_state}")
-    
-    # no label
-    if label == '':
-        
-        if "open" in order_state\
-            or "untriggered" in order_state:
-            
-            order_attributes = labelling_unlabelled_order (order)       
-            
-            log.error (f"order_attributes {order_attributes}")            
-
-            await insert_tables(
-                order_db_table, 
-                order
-                )
-            
-            if "OTO" not in order ["order_id"]:
-                await modify_order_and_db.cancel_by_order_id (
-                    order_db_table,
-                    order_id)  
-            
-            await modify_order_and_db.if_order_is_true(
-                non_checked_strategies,
-                order_attributes, 
-                )
-                
-    else:
-        label_and_side_consistent= is_label_and_side_consistent(
-            non_checked_strategies,
-            order)
-        
-        if label_and_side_consistent and label:
-            
-            await saving_order_based_on_state (
-                order_db_table, 
-                order
-                )
-            
-        # check if transaction has label. Provide one if not any
-        if  not label_and_side_consistent:
-
-            if order_state != "cancelled" or order_state != "filled":
-                
-                log.warning (f" not label_and_side_consistent {order} {order_state}")
-            
-                await insert_tables(
-                    order_db_table, 
-                    order
-                    )
-
-                await  modify_order_and_db.cancel_by_order_id (
-                    order_db_table,
-                    order_id
-                    )                    
-
-
-async def saving_result(
-    data: dict, 
-    message_channel: dict,
-    order_db_table: str,
-    resolution: int,
-    currency,
-    currency_lower: str, 
-    chart_trades_buffer: list
-    ) -> None:
-    """ """
-    
-    try:
-
-        if "user.changes.any" in message_channel:
-            
-            trades = data["trades"]
-            
-            orders = data["orders"]
-
-            if orders:
-                        
-                if trades:
-                    
-                    archive_db_table= f"my_trades_all_{currency_lower}_json"
-                    
-                    for trade in trades:
-                        
-                        log.critical (f"{trade}")
-                        
-                        instrument_name = data["instrument_name"]
-                                                        
-                        if f"f{currency.upper()}-FS-" not in instrument_name:
-                        
-                            await saving_traded_orders(
-                                trade, 
-                                archive_db_table, 
-                                order_db_table
-                                )
-                            
-                else:
-                                                
-                    for order in orders:
-                        
-                        log.warning (f"{order}")
-                        
-                        await saving_order_based_on_state (
-                                order_db_table, 
-                                order
-                                )
-                                    
-        WHERE_FILTER_TICK: str = "tick"
-
-        TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
-        
-        DATABASE: str = "databases/trading.sqlite3"
-                                                    
-        if "chart.trades" in message_channel:
-            
-            log.warning (f"{data}")
-            
-            chart_trades_buffer.append(data)
-                                                
-            if  len(chart_trades_buffer) > 3:
-
-                instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-
-                if "PERPETUAL" in instrument_ticker:
-
-                    for data in chart_trades_buffer:    
-                        await ohlc_result_per_time_frame(
-                            instrument_ticker,
-                            resolution,
-                            data,
-                            TABLE_OHLC1,
-                            WHERE_FILTER_TICK,
-                        )
-                    
-                    chart_trades_buffer = []
-            
-        instrument_ticker = (message_channel)[19:]
-        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-            
-            my_path_ticker = provide_path_for_file(
-                "ticker", instrument_ticker)
-            
-            await distribute_ticker_result_as_per_data_type(
-                my_path_ticker,
-                data, 
-                )
-            
-            if "PERPETUAL" in data["instrument_name"]:
-                
-                await inserting_open_interest(
-                    currency, 
-                    WHERE_FILTER_TICK, 
-                    TABLE_OHLC1, 
-                    data
-                    )   
-                                                                                                                      
-        if message_channel == f"user.portfolio.{currency_lower}":
-                                            
-            await update_db_pkl(
-                "portfolio", 
-                data, 
-                currency_lower
-                )
-            
-    except Exception as error:
-        
-        await parse_error_message(error)  
-
-        #await telegram_bot_sendtext (
-         #   error,
-          #  "general_error"
-           # )
-
-
 async def distribute_ticker_result_as_per_data_type(
     my_path_ticker: str, 
     data_orders: dict, 
@@ -1464,3 +1274,193 @@ async def saving_user_changes(
          #   error,
           #  "general_error"
            # )
+
+
+async def saving_result(
+    data: dict, 
+    message_channel: dict,
+    order_db_table: str,
+    resolution: int,
+    currency,
+    currency_lower: str, 
+    chart_trades_buffer: list
+    ) -> None:
+    """ """
+    
+    try:
+
+        if "user.changes.any" in message_channel:
+            
+            trades = data["trades"]
+            
+            orders = data["orders"]
+
+            if orders:
+                        
+                if trades:
+                    
+                    archive_db_table= f"my_trades_all_{currency_lower}_json"
+                    
+                    for trade in trades:
+                        
+                        log.critical (f"{trade}")
+                        
+                        instrument_name = data["instrument_name"]
+                                                        
+                        if f"f{currency.upper()}-FS-" not in instrument_name:
+                        
+                            await saving_traded_orders(
+                                trade, 
+                                archive_db_table, 
+                                order_db_table
+                                )
+                            
+                else:
+                                                
+                    for order in orders:
+                        
+                        log.warning (f"{order}")
+                        
+                        await saving_order_based_on_state (
+                                order_db_table, 
+                                order
+                                )
+                                    
+        WHERE_FILTER_TICK: str = "tick"
+
+        TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+        
+        DATABASE: str = "databases/trading.sqlite3"
+                                                    
+        if "chart.trades" in message_channel:
+            
+            log.warning (f"{data}")
+            
+            chart_trades_buffer.append(data)
+                                                
+            if  len(chart_trades_buffer) > 3:
+
+                instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
+
+                if "PERPETUAL" in instrument_ticker:
+
+                    for data in chart_trades_buffer:    
+                        await ohlc_result_per_time_frame(
+                            instrument_ticker,
+                            resolution,
+                            data,
+                            TABLE_OHLC1,
+                            WHERE_FILTER_TICK,
+                        )
+                    
+                    chart_trades_buffer = []
+            
+        instrument_ticker = (message_channel)[19:]
+        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
+            
+            my_path_ticker = provide_path_for_file(
+                "ticker", instrument_ticker)
+            
+            await distribute_ticker_result_as_per_data_type(
+                my_path_ticker,
+                data, 
+                )
+            
+            if "PERPETUAL" in data["instrument_name"]:
+                
+                await inserting_open_interest(
+                    currency, 
+                    WHERE_FILTER_TICK, 
+                    TABLE_OHLC1, 
+                    data
+                    )   
+                                                                                                                      
+        if message_channel == f"user.portfolio.{currency_lower}":
+                                            
+            await update_db_pkl(
+                "portfolio", 
+                data, 
+                currency_lower
+                )
+            
+    except Exception as error:
+        
+        await parse_error_message(error)  
+
+        #await telegram_bot_sendtext (
+         #   error,
+          #  "general_error"
+           # )
+
+
+
+async def saving_order (
+    modify_order_and_db,
+    non_checked_strategies,
+    instrument_name,
+    order,
+    order_db_table
+    ) -> None:
+    
+    
+    label= order["label"]
+
+    order_id= order["order_id"]    
+    order_state= order["order_state"]    
+    
+    log.error (f"order_state {order_state}")
+    
+    # no label
+    if label == '':
+        
+        if "open" in order_state\
+            or "untriggered" in order_state:
+            
+            order_attributes = labelling_unlabelled_order (order)       
+            
+            log.error (f"order_attributes {order_attributes}")            
+
+            await insert_tables(
+                order_db_table, 
+                order
+                )
+            
+            if "OTO" not in order ["order_id"]:
+                await modify_order_and_db.cancel_by_order_id (
+                    order_db_table,
+                    order_id)  
+            
+            await modify_order_and_db.if_order_is_true(
+                non_checked_strategies,
+                order_attributes, 
+                )
+                
+    else:
+        label_and_side_consistent= is_label_and_side_consistent(
+            non_checked_strategies,
+            order)
+        
+        if label_and_side_consistent and label:
+            
+            await saving_order_based_on_state (
+                order_db_table, 
+                order
+                )
+            
+        # check if transaction has label. Provide one if not any
+        if  not label_and_side_consistent:
+
+            if order_state != "cancelled" or order_state != "filled":
+                
+                log.warning (f" not label_and_side_consistent {order} {order_state}")
+            
+                await insert_tables(
+                    order_db_table, 
+                    order
+                    )
+
+                await  modify_order_and_db.cancel_by_order_id (
+                    order_db_table,
+                    order_id
+                    )                    
+
