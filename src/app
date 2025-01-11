@@ -117,8 +117,61 @@ if __name__ == "__main__":
     
     try:
         signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
+            
+        sub_account_id = "deribit-148510"
         
-        asyncio.run(main())
+        try:
+            
+            queue: Queue = Manager().Queue()
+            
+            processes = max(1,int (cpu_count() / 4) - 1)
+            
+            maxtasksperchild=1
+            
+            stream = StreamAccountData(sub_account_id)
+        
+            producer_task = asyncio.create_task(stream.ws_manager(queue)) 
+            
+            async with Pool(maxtasksperchild=2) as pool:
+                log.debug (signal_handler.KEEP_PROCESSING)
+                while signal_handler.KEEP_PROCESSING:
+        
+        
+                    processing_orders_tasks = [
+                        asyncio.create_task(pool.apply(
+                            loading_data, 
+                            args=(sub_account_id,
+                        #         f"worker-{i}",
+                                queue
+                                )
+                            ))
+                        #for i in range(processes)
+                        ]
+                    processing_orders_tasks2 = [
+                        asyncio.create_task(pool.apply(
+                            loading_data2, 
+                            args=(sub_account_id,
+                        #         f"worker-{i}",
+                                queue
+                                )
+                            ))
+                        #for i in range(processes)
+                        ]
+        
+                    await asyncio.gather(
+                        #*running_transactions_tasks,
+                        *processing_orders_tasks,
+                        *processing_orders_tasks2,
+                        #*loading_user_data_tasks,
+                        )
+                    
+                    await asyncio.sleep(0.0005)
+
+                    await producer_task
+                    
+                    pool.close()
+                    
+                    await pool.join()
         
     except(
         KeyboardInterrupt, 
