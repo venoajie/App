@@ -121,9 +121,7 @@ async def combining_order_data(
     for currency in currencies:
         
         sub_accounts = await private_data.get_subaccounts_details (currency)
-        
-        print (f"sub_accounts {sub_accounts}")
-        
+                
         if sub_accounts:
 
             sub_account = sub_accounts[0]
