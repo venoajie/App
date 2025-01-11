@@ -10,31 +10,14 @@ from loguru import logger as log
 import tomli
 from multiprocessing.queues import Queue
 
-
-from transaction_management.deribit.api_requests import (
-    SendApiRequest,)
-from db_management.sqlite_management import (
-    insert_tables,)
-from strategies.basic_strategy import (
-    is_label_and_side_consistent,)
-from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,)
-from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,
-    currency_inline_with_database_address)
-from transaction_management.deribit.orders_management import (
-    labelling_unlabelled_order,
-    labelling_unlabelled_order_oto,
-    saving_order_based_on_state,)
-from utilities.pickling import (
-    replace_data,)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,)
-
-
 def get_config(file_name: str) -> list:
     """ """
+
+    from utilities.system_tools import (
+        parse_error_message,
+        provide_path_for_file,)
+
+
     config_path = provide_path_for_file (file_name)
     
     try:
@@ -51,6 +34,15 @@ async def update_db_pkl(
     data_orders: dict,
     currency: str
     ) -> None:
+    
+    from utilities.system_tools import (
+        parse_error_message,
+        provide_path_for_file,)
+    from transaction_management.deribit.managing_deribit import (
+        ModifyOrderDb,
+        currency_inline_with_database_address)
+    from utilities.pickling import (
+        replace_data,)
 
     my_path_portfolio = provide_path_for_file (path,
                                                currency)
@@ -73,6 +65,25 @@ async def loading_user_data(
     
     """
     """
+
+    from transaction_management.deribit.api_requests import (
+        SendApiRequest,)
+    from db_management.sqlite_management import (
+        insert_tables,)
+    from transaction_management.deribit.managing_deribit import (
+        ModifyOrderDb,)
+    from transaction_management.deribit.managing_deribit import (
+        ModifyOrderDb,
+        currency_inline_with_database_address)
+
+    from transaction_management.deribit.orders_management import (
+        labelling_unlabelled_order,
+        labelling_unlabelled_order_oto,
+        saving_order_based_on_state,)
+    
+    from utilities.system_tools import (
+        parse_error_message,
+        provide_path_for_file,)
     
     try:
         
@@ -220,6 +231,22 @@ async def saving_order (
     order,
     order_db_table
     ) -> None:
+    
+    from strategies.basic_strategy import (
+        is_label_and_side_consistent,)
+    
+    from transaction_management.deribit.orders_management import (
+        labelling_unlabelled_order,
+        labelling_unlabelled_order_oto,
+        saving_order_based_on_state,)
+    
+    from db_management.sqlite_management import (
+        insert_tables,)
+    
+    from utilities.system_tools import (
+        parse_error_message,
+        provide_path_for_file,)
+
     
     label= order["label"]
 
