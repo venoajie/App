@@ -122,6 +122,8 @@ def combining_order_data(
         
         sub_accounts = private_data.get_subaccounts_details (currency)
         
+        print (f"sub_accounts {sub_accounts}")
+        
         if sub_accounts:
 
             sub_account = sub_accounts[0]
