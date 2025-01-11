@@ -287,7 +287,17 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 
                                 queue.put(result)
-                                         
+                                            
+                                await saving_result(
+                                    data,
+                                    message_channel,
+                                    order_db_table,
+                                    resolution,
+                                    currency,
+                                    currency_lower, 
+                                    chart_trades_buffer
+                                    )
+                                
                                         
             except Exception as error:
 
@@ -500,7 +510,7 @@ async def saving_result(
                                                     
         if "chart.trades" in message_channel:
             
-            log.warning (f"{data}")
+            #log.warning (f"{data}")
             
             chart_trades_buffer.append(data)
                                                 
@@ -523,7 +533,7 @@ async def saving_result(
             
         instrument_ticker = (message_channel)[19:]
         if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-            log.debug (f"{data}")
+            #log.debug (f"{data}")
             
             my_path_ticker = provide_path_for_file(
                 "ticker", instrument_ticker)

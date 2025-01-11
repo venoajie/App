@@ -10,20 +10,12 @@ from loguru import logger as log
 import signal
 from multiprocessing import Manager
 from multiprocessing.queues import Queue
-from multiprocessing import cpu_count
+#from multiprocessing import cpu_count
 from aiomultiprocess import Pool
 
 from transaction_management.deribit.data_producer import (
     StreamAccountData,)
-from transaction_management.deribit.loading_data_to_db import (
-    loading_data,)
 from transaction_management.deribit.running_strategies import executing_strategies
-from transaction_management.deribit.loading_data_to_db2 import (
-    loading_data2,)
-from transaction_management.deribit.user_changes import (
-    loading_user_data,)
-from transaction_management.deribit.data_processor import (
-    running_strategy,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from transaction_management.deribit.telegram_bot import (
@@ -56,9 +48,9 @@ async def main():
         
         queue: Queue = Manager().Queue()
         
-        processes = max(1,int (cpu_count() / 4) - 1)
+        #processes = max(1,int (cpu_count() / 4) - 1)
         
-        maxtasksperchild=1
+        #maxtasksperchild=1
         
         stream = StreamAccountData(sub_account_id)
        
@@ -69,24 +61,6 @@ async def main():
 
             while signal_handler.KEEP_PROCESSING:
        
-                processing_orders_tasks = [
-                    asyncio.create_task(pool.apply(
-                        loading_data, 
-                        args=(sub_account_id,
-                              queue
-                              )
-                        ))
-                    ]
-                
-       
-                loading_user_data_tasks = [
-                    asyncio.create_task(pool.apply(
-                        loading_user_data, 
-                        args=(sub_account_id,
-                              queue
-                              )
-                        ))
-                    ]
        
                 executing_strategies_tasks = [
                     asyncio.create_task(pool.apply(
@@ -99,8 +73,7 @@ async def main():
        
                 await asyncio.gather(
                     *executing_strategies_tasks,
-                    *processing_orders_tasks,
-                    *loading_user_data_tasks,
+       
                     )
                 
                 await asyncio.sleep(0.0005)

@@ -118,7 +118,6 @@ async def loading_data(
             
             data_orders: dict = message["data"] 
 
-            log.info (message_channel)
                     
             currency: str = message["currency"]
             

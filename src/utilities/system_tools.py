@@ -551,7 +551,9 @@ class SignalHandler:
 
 def handle_ctrl_c(
     )->None:
-    
+    """
+    https://stackoverflow.com/questions/67866293/how-to-subscribe-to-multiple-websocket-streams-using-muiltiprocessing
+    """
     signal.signal(
         signal.SIGINT,
         sys.exit(0)

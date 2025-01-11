@@ -12,6 +12,20 @@ from loguru import logger as log
 
 from configuration.label_numbering import get_now_unix_time
 
+from strategies.basic_strategy import (
+    is_label_and_side_consistent,)
+
+from transaction_management.deribit.orders_management import (
+    labelling_unlabelled_order,
+    labelling_unlabelled_order_oto,
+    saving_order_based_on_state,)
+
+from transaction_management.deribit.api_requests import (
+    SendApiRequest,)
+
+from db_management.sqlite_management import (
+    insert_tables,)
+
 from utilities.system_tools import (
     async_raise_error_message,
     kill_process,
@@ -150,6 +164,8 @@ async def executing_strategies(
         config_app = get_config(file_toml)
 
        
+        private_data: str = SendApiRequest (sub_account_id)
+        
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # registering strategy config file    
@@ -239,6 +255,102 @@ async def executing_strategies(
                     orders_all,
                     data_orders,
                     )
+                
+                log.critical (f"message_channel {message_channel}")
+                log.warning (f"user.changes.any {data_orders}")
+                                                                
+                trades = data_orders["trades"]
+                    
+                orders = data_orders["orders"]
+                
+                instrument_name = data_orders["instrument_name"]
+                    
+                if orders:
+                    
+                    if trades:
+                        await modify_order_and_db.cancel_the_cancellables(
+                            order_db_table,
+                            currency_lower,
+                            cancellable_strategies
+                            )
+                                                    
+                    else:
+                        
+                        if "oto_order_ids" in (orders[0]):
+                                                
+                            len_oto_order_ids = len(orders[0]["oto_order_ids"])
+                            
+                            transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
+                            log.debug (f"transaction_main {transaction_main}")
+                            
+                            if len_oto_order_ids==1:
+                                pass
+                            
+                            transaction_main_oto = transaction_main ["oto_order_ids"][0]
+                            log.warning (f"transaction_main_oto {transaction_main_oto}")
+                            
+                            kind= "future"
+                            type = "trigger_all"
+                            
+                            open_orders_from_exchange =  await private_data.get_open_orders(kind, type)
+                            log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
+
+                            transaction_secondary = [o for o in open_orders_from_exchange\
+                                if transaction_main_oto in o["order_id"]]
+                            
+                            log.warning (f"transaction_secondary {transaction_secondary}")
+                            
+                            if transaction_secondary:
+                                
+                                transaction_secondary = transaction_secondary[0]
+                                
+                                # no label
+                                if transaction_main["label"] == ''\
+                                    and "open" in transaction_main["order_state"]:
+                                    
+                                    order_attributes = labelling_unlabelled_order_oto (transaction_main,
+                                                                                transaction_secondary)                   
+
+                                    log.debug (f"order_attributes {order_attributes}")
+                                    await insert_tables(
+                                        order_db_table, 
+                                        transaction_main
+                                        )
+                                    
+                                    await modify_order_and_db.cancel_by_order_id (
+                                        order_db_table,
+                                        transaction_main["order_id"]
+                                        )  
+                                    
+                                    await modify_order_and_db.if_order_is_true(
+                                        non_checked_strategies,
+                                        order_attributes, 
+                                        )
+
+                                else:
+                                    await insert_tables(
+                                        order_db_table, 
+                                        transaction_main
+                                        )
+                                        
+                        else:
+                                                                
+                            for order in orders:
+                                
+                                if  'OTO' not in order["order_id"]:
+                                    
+                                    log.warning (f"order {order}")
+                                                            
+                                    await saving_order(
+                                        modify_order_and_db,
+                                        non_checked_strategies,
+                                        instrument_name,
+                                        order,
+                                        order_db_table
+                                    )
+
+                log.warning (f"resupply_sub_accountdb")
+                    
                                         
             if "chart.trades" in message_channel:
                 
@@ -500,4 +612,75 @@ def get_index (
             index_price = ticker ["estimated_delivery_price"]
         
     return index_price
+
+
+async def saving_order (
+    modify_order_and_db,
+    non_checked_strategies,
+    instrument_name,
+    order,
+    order_db_table
+    ) -> None:
+    
+    
+    label= order["label"]
+
+    order_id= order["order_id"]    
+    order_state= order["order_state"]    
+    
+    log.error (f"order_state {order_state}")
+    
+    # no label
+    if label == '':
+        
+        if "open" in order_state\
+            or "untriggered" in order_state:
+            
+            order_attributes = labelling_unlabelled_order (order)       
+            
+            log.error (f"order_attributes {order_attributes}")            
+
+            await insert_tables(
+                order_db_table, 
+                order
+                )
+            
+            if "OTO" not in order ["order_id"]:
+                await modify_order_and_db.cancel_by_order_id (
+                    order_db_table,
+                    order_id)  
+            
+            await modify_order_and_db.if_order_is_true(
+                non_checked_strategies,
+                order_attributes, 
+                )
+                
+    else:
+        label_and_side_consistent= is_label_and_side_consistent(
+            non_checked_strategies,
+            order)
+        
+        if label_and_side_consistent and label:
+            
+            await saving_order_based_on_state (
+                order_db_table, 
+                order
+                )
+            
+        # check if transaction has label. Provide one if not any
+        if  not label_and_side_consistent:
+
+            if order_state != "cancelled" or order_state != "filled":
+                
+                log.warning (f" not label_and_side_consistent {order} {order_state}")
+            
+                await insert_tables(
+                    order_db_table, 
+                    order
+                    )
+
+                await  modify_order_and_db.cancel_by_order_id (
+                    order_db_table,
+                    order_id
+                    )                    
 
