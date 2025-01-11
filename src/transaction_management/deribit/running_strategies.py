@@ -11,6 +11,18 @@ from multiprocessing.queues import Queue
 from loguru import logger as log
 
 
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    update_cached_orders,
+    combining_order_data,
+    update_cached_ticker)
+
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    update_cached_orders,
+    combining_order_data,
+    update_cached_ticker)
+
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
@@ -182,11 +194,11 @@ async def executing_strategies(
             currencies
             )
         
-        #ticker_perpetual = cached_ticker(instruments_name)  
+        ticker_perpetual = cached_ticker(instruments_name)  
         
-        #orders_all = combining_order_data(currencies)  
+        orders_all = combining_order_data(currencies)  
         
-        #log.warning (f"orders_all {orders_all}")
+        log.warning (f"orders_all {orders_all}")
          
         while True:
             
@@ -203,7 +215,17 @@ async def executing_strategies(
             currency_lower: str = currency.lower()
             
             resolution = 1
-            
+                        
+            if "user.changes.any" in message_channel:
+                update_cached_orders(
+                    orders_all,
+                    data_orders,
+                    )
+                                        
+            if "chart.trades" in message_channel:
+                
+                log.error (message_channel)
+    
                 
     except Exception as error:
         
