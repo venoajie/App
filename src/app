@@ -91,17 +91,17 @@ async def main():
                     pool.apply(
                         loading_data, 
                         args=(sub_account_id,
-                              f"worker-{i}",
+                     #         f"worker-{i}",
                               queue
                               )
                         )
-                    for i in range(processes)
+                    #for i in range(processes)
                     ]
        
                 await asyncio.gather(
                     #*running_transactions_tasks,
-                    #*processing_orders_tasks,
-                    *loading_user_data_tasks,
+                    *processing_orders_tasks,
+                    #*loading_user_data_tasks,
                     )
                 
                 await asyncio.sleep(0.5)
