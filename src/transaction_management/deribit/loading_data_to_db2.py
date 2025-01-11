@@ -106,7 +106,7 @@ async def loading_data2(
             
             data_orders: dict = message["data"] 
 
-            log.info (data_orders)
+            log.critical (data_orders)
                     
             currency: str = message["currency"]
             
