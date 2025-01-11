@@ -10,6 +10,21 @@ import numpy as np
 # installedi
 from loguru import logger as log
 
+from configuration.label_numbering import get_now_unix_time
+
+from utilities.system_tools import (
+    async_raise_error_message,
+    kill_process,
+    provide_path_for_file,
+    raise_error_message,
+    sleep_and_restart,)
+from data_cleaning.reconciling_db import (
+    #reconciling_orders,
+    is_size_sub_account_and_my_trades_reconciled)
+from db_management.sqlite_management import (
+    executing_query_with_return,
+    #querying_table,
+    update_status_data)
 
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
@@ -263,6 +278,147 @@ async def executing_strategies(
                     instrument_name_perpetual = data_orders["instrument_name"]
     
                 
+                    currency: str = extract_currency_from_text(instrument_name_perpetual)
+                    
+                    currency_upper: str = currency.upper()
+                    currency_lower: str =currency
+                    
+                    archive_db_table= f"my_trades_all_{currency_lower}_json"
+                    
+                    update_cached_ticker(
+                        instrument_name_perpetual,
+                        ticker_perpetual,
+                        data_orders,
+                        currencies
+                        )
+                    
+                    # get portfolio data  
+                    portfolio = reading_from_pkl_data (
+                        "portfolio",
+                        currency
+                        )[0]
+                    
+                    equity: float = portfolio["equity"]    
+                    
+                    ticker_perpetual_instrument_name = [o for o in ticker_perpetual \
+                        if instrument_name_perpetual == o["instrument_name"]][0]                                   
+                                                                        
+                    index_price= get_index (
+                        data_orders,
+                        ticker_perpetual_instrument_name
+                        )
+                    
+                    sub_account = reading_from_pkl_data(
+                        "sub_accounts",
+                        currency
+                        )
+                    
+                    sub_account = sub_account[0]
+                
+                    #sub_account_orders = sub_account["open_orders"]
+                    
+                    market_condition = get_market_condition(
+                        np,
+                        cached_candles_data,
+                        currency_upper
+                        )
+                    
+                    #log.warning (market_condition)
+
+                    if  sub_account :
+                        
+                        query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
+                            
+                        my_trades_currency_all_transactions: list= await executing_query_with_return (query_trades)
+                                                                                        
+                        my_trades_currency_all: list= [o for o in my_trades_currency_all_transactions\
+                            if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
+                        
+                        orders_currency = [] if not orders_all\
+                            else [o for o in orders_all\
+                                if currency_upper in o["instrument_name"]]
+                        
+                        len_sub_account_orders_all = len(orders_currency)
+
+                        if orders_currency:
+                            
+                            outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency\
+                                if o["label"] != '' ])
+                            
+                            for label in outstanding_order_id:
+                                
+                                orders = ([o for o in orders_currency\
+                                    if label in o["label"]])
+                                
+                                len_label = len(orders)
+                                
+                                if len_label >1:
+                                    
+                                    for order in orders:
+                                        log.critical (f"double ids {label}")
+                                        log.critical ([o for o in orders_currency if label in o["label"]])
+                                        await  modify_order_and_db. cancel_by_order_id (
+                                            order_db_table,
+                                            order["order_id"]
+                                            )
+                                        break
+                        
+                        position = [o for o in sub_account["positions"]]
+                        #log.debug (f"position {position}")
+                        position_without_combo = [ o for o in position \
+                            if f"{currency_upper}-FS" not in o["instrument_name"]]
+                                                                
+                        server_time = get_now_unix_time()  
+                        
+                        size_perpetuals_reconciled = is_size_sub_account_and_my_trades_reconciled(
+                            position_without_combo,
+                            my_trades_currency_all,
+                            instrument_name_perpetual)
+                        
+                        if not size_perpetuals_reconciled:
+                            kill_process("general_tasks")
+                        
+                        if index_price is not None \
+                            and equity > 0 :
+                    
+                            my_trades_currency: list= [ o for o in my_trades_currency_all \
+                                if o["label"] is not None] 
+                            
+                            my_trades_currency_contribute_to_hedging = [o for o in my_trades_currency \
+                                if (parsing_label(o["label"])["main"] ) in contribute_to_hedging_strategies ]
+                            my_trades_currency_contribute_to_hedging_sum = 0 if  not my_trades_currency_contribute_to_hedging\
+                                else sum([o["amount"] for o in my_trades_currency_contribute_to_hedging])
+                                
+                            my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency ])
+                            my_labels= remove_redundant_elements([parsing_label(o["label"])["main"] for o in my_trades_currency ])
+                            
+                            for label in my_labels: 
+                                log.debug (f"label {label}")
+                                amount = sum([o["amount"] for o in my_trades_currency if label in o["label"]])
+                                                                                                                    
+                                log.debug (f"amount {amount}")
+                                
+                            log.debug (sum([o["amount"] for o in my_trades_currency]))
+                            for instrument in my_trades: 
+                                log.debug (f"instrument {instrument}")
+                                amount = sum([o["amount"] for o in my_trades_currency if instrument in o["instrument_name"]])
+                                                                                                                    
+                                log.debug (f"amount {amount}")
+                                
+                            ONE_PCT = 1 / 100
+                            
+                            THRESHOLD_DELTA_TIME_SECONDS = 120
+                            
+                            THRESHOLD_MARKET_CONDITIONS_COMBO = .1 * ONE_PCT
+                            
+                            INSTRUMENT_EXPIRATION_THRESHOLD = 60 * 8 # 8 hours
+                            
+                            ONE_SECOND = 1000
+                            
+                            ONE_MINUTE = ONE_SECOND * 60   
+                            
+                            notional: float = compute_notional_value(index_price, equity)
+                
     except Exception as error:
         
         await parse_error_message(error)  
@@ -304,4 +460,44 @@ async def chart_trade_in_msg(
     else:
         
         return False
+
+
+
+def reading_from_pkl_data(
+    end_point, 
+    currency,
+    status: str = None
+    ) -> dict:
+    """ """
+
+    path: str = provide_path_for_file (end_point,
+                                      currency,
+                                      status)
+    return read_data(path)
+
+
+def compute_notional_value(
+    index_price: float,
+    equity: float
+    ) -> float:
+    """ """
+    return index_price * equity
+
+
+def get_index (
+    data_orders: dict, 
+    ticker: dict
+    ) -> float:
+
+    try:
+        index_price= data_orders["index_price"]
+        
+    except:
+        
+        index_price= ticker["index_price"]
+        
+        if index_price==[]:
+            index_price = ticker ["estimated_delivery_price"]
+        
+    return index_price
 
