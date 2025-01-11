@@ -455,7 +455,7 @@ async def chart_trade_in_msg(
         else:
             
             log.warning ("update ohlc")
-            await sleep_and_restart()            
+            #await sleep_and_restart()            
 
     else:
         
