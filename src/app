@@ -81,7 +81,7 @@ async def main():
                     pool.apply(
                         loading_user_data, 
                         args=(sub_account_id,
-                          f"worker-{i}",
+                          #f"worker-{i}",
                           queue
                           )
                         )
