@@ -67,27 +67,6 @@ async def main():
             log.debug (signal_handler.KEEP_PROCESSING)
             while signal_handler.KEEP_PROCESSING:
        
-                running_transactions_tasks = [
-                    asyncio.create_task(pool.apply(
-                        running_strategy, 
-                        args=(
-                            sub_account_id,
-                            #f"worker-{i}",
-                            queue
-                            )
-                        ))
-                    #for i in range(processes)
-                    ]
-                
-                loading_user_data_tasks = [
-                    asyncio.create_task(pool.apply(
-                        loading_user_data, 
-                        args=(sub_account_id,
-                          #f"worker-{i}",
-                          queue
-                          )
-                        ))
-                    ]
        
                 processing_orders_tasks = [
                     asyncio.create_task(pool.apply(
