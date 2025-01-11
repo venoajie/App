@@ -216,7 +216,7 @@ async def executing_strategies(
         
         orders_all = combining_order_data(currencies)  
         
-        log.warning (f"orders_all {orders_all}")
+#        log.warning (f"orders_all {orders_all}")
          
         while True:
             
@@ -248,7 +248,7 @@ async def executing_strategies(
                 
                 currency_lower: str = currency.lower()
             
-                log.info (message)
+                log.info (message_channel)
         
                                                 
                 archive_db_table: str = f"my_trades_all_{currency_lower}_json"

@@ -78,14 +78,6 @@ async def main():
                         ))
                     ]
                 
-                processing_orders_tasks2 = [
-                    asyncio.create_task(pool.apply(
-                        loading_data2, 
-                        args=(sub_account_id,
-                              queue
-                              )
-                        ))
-                    ]
        
                 executing_strategies_tasks = [
                     asyncio.create_task(pool.apply(
@@ -108,7 +100,6 @@ async def main():
                 await asyncio.gather(
                     *executing_strategies_tasks,
                     *processing_orders_tasks,
-                    *processing_orders_tasks2,
                     *loading_user_data_tasks,
                     )
                 
