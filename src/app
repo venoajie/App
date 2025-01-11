@@ -17,6 +17,8 @@ from transaction_management.deribit.data_producer import (
     StreamAccountData,)
 from transaction_management.deribit.loading_data_to_db import (
     loading_data,)
+from transaction_management.deribit.loading_data_to_db2 import (
+    loading_data2,)
 from transaction_management.deribit.loading_user_changes import (
     loading_user_data,)
 from transaction_management.deribit.data_processor import (
@@ -97,10 +99,21 @@ async def main():
                         )
                     #for i in range(processes)
                     ]
+                processing_orders_tasks2 = [
+                    pool.apply(
+                        loading_data2, 
+                        args=(sub_account_id,
+                     #         f"worker-{i}",
+                              queue
+                              )
+                        )
+                    #for i in range(processes)
+                    ]
        
                 await asyncio.gather(
                     #*running_transactions_tasks,
                     *processing_orders_tasks,
+                    *processing_orders_tasks2,
                     #*loading_user_data_tasks,
                     )
                 

@@ -58,7 +58,7 @@ async def update_db_pkl(
             )
 
                   
-async def loading_data2(
+async def loading_data(
     sub_account_id,
     #name: int, 
     queue: Queue
@@ -179,7 +179,7 @@ async def saving_result(
                     
                     for trade in trades:
                         
-                        log.critical (f"{trade}")
+                        log.warning (f"{trade}")
                         
                         instrument_name = data["instrument_name"]
                                                         
