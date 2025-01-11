@@ -6,11 +6,14 @@ import asyncio
 import os
 import tomli
 from multiprocessing.queues import Queue
-
+import numpy as np
 # installedi
 from loguru import logger as log
 
 
+from market_understanding.price_action.candles_analysis import (
+    combining_candles_data,
+    get_market_condition)
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
     update_cached_orders,
@@ -225,6 +228,39 @@ async def executing_strategies(
             if "chart.trades" in message_channel:
                 
                 log.error (message_channel)
+                                                                            
+                currency: str = extract_currency_from_text(message_channel)
+                
+                currency_lower: str = currency.lower()
+            
+                log.info (message)
+        
+                                                
+                archive_db_table: str = f"my_trades_all_{currency_lower}_json"
+                                        
+                    
+                resolutions = [60,15, 5]     
+                qty_candles = 5  
+                dim_sequence = 3     
+                
+                cached_candles_data = combining_candles_data(
+                    np,
+                    currencies,
+                    qty_candles,
+                    resolutions,
+                    dim_sequence)  
+                                
+                chart_trade = await chart_trade_in_msg(
+                    message_channel,
+                    data_orders,
+                    cached_candles_data,
+                    ) 
+                                    
+                if ticker_perpetual\
+                    and not chart_trade:
+                        
+                    
+                    instrument_name_perpetual = data_orders["instrument_name"]
     
                 
     except Exception as error:
@@ -243,3 +279,29 @@ def get_settlement_period (strategy_attributes) -> list:
         remove_double_brackets_in_list(
             [o["settlement_period"]for o in strategy_attributes]))
             )
+async def chart_trade_in_msg(
+    message_channel,
+    data_orders,
+    candles_data,
+    ):
+    """
+    """
+
+    if "chart.trades" in message_channel:
+        tick_from_exchange= data_orders["tick"]
+
+        tick_from_cache = max( [o["max_tick"] for o in candles_data \
+            if  o["resolution"] == 5])
+        
+        if tick_from_exchange <= tick_from_cache:
+            return True
+        
+        else:
+            
+            log.warning ("update ohlc")
+            await sleep_and_restart()            
+
+    else:
+        
+        return False
+
