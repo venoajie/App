@@ -64,7 +64,8 @@ async def main():
        
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
         
-        async with Pool(maxtasksperchild=2) as pool:
+#        async with Pool(maxtasksperchild=2) as pool:
+        async with Pool() as pool:
 
             while signal_handler.KEEP_PROCESSING:
        
