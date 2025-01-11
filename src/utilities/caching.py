@@ -136,8 +136,8 @@ def combining_order_data(currencies):
     return result
 
 def update_cached_orders(
-    current_orders,
-    data_orders: list):
+    current_orders: list,
+    data_orders: dict):
     """_summary_
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
 
@@ -149,24 +149,40 @@ def update_cached_orders(
     """
     
     orders = data_orders["orders"]
+    
+    trades = data_orders["trades"]
 
     if orders:
-        
-        for order in orders:
+          
+        if trades :
             
-            order_state= order["order_state"]    
-            
-            if order_state == "cancelled" or order_state == "filled":
-            
-                order_id = order["order_id"]
+            for trade in trades:
+                
+                order_id = trade["order_id"]
                 
                 selected_order = [o for o in current_orders if order_id in o["order_id"]]
                 
                 if selected_order:
                                         
-                    current_orders.remove(selected_order[0])
+                    current_orders.remove(trade[0])
                 
-            else:
-             
-                current_orders.append(order)
-             
+        if orders:
+        
+            for order in orders:
+                
+                order_state= order["order_state"]    
+                
+                if order_state == "cancelled" or order_state == "filled":
+                
+                    order_id = order["order_id"]
+                    
+                    selected_order = [o for o in current_orders if order_id in o["order_id"]]
+                    
+                    if selected_order:
+                                            
+                        current_orders.remove(selected_order[0])
+                    
+                else:
+                
+                    current_orders.append(order)
+                

@@ -210,6 +210,7 @@ async def executing_strategies(
             message: str = queue.get()
                     
             message_channel: str = message["channel"]
+            log.info(message_channel)
             
             data_orders: dict = message["data"] 
                     
@@ -219,16 +220,6 @@ async def executing_strategies(
             currency_upper: str = currency.upper()
             
             instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
-                                                                    
-            await saving_result(
-                data_orders,
-                message_channel,
-                order_db_table,
-                resolution,
-                currency,
-                currency_lower, 
-                chart_trades_buffer
-                )                                
 
             if "user.changes.any" in message_channel:
                                                                 
@@ -243,7 +234,17 @@ async def executing_strategies(
                     currency,
                     currency_lower, 
                     )          
-                                 
+                                                                                 
+            await saving_result(
+                data_orders,
+                message_channel,
+                order_db_table,
+                resolution,
+                currency,
+                currency_lower, 
+                chart_trades_buffer
+                )                                
+                    
             if "chart.trades" in message_channel:
                                         
                 archive_db_table: str = f"my_trades_all_{currency_lower}_json"
