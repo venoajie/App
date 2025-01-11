@@ -463,6 +463,7 @@ async def saving_result(
     ) -> None:
     """ """
 
+    log.warning (data)
     try:
 
         if "user.changes.any" in message_channel:
@@ -551,6 +552,15 @@ async def saving_result(
                     TABLE_OHLC1, 
                     data
                     )   
+
+                                                                                                        
+        if message_channel == f"user.portfolio.{currency_lower}":
+                                            
+            await update_db_pkl(
+                "portfolio", 
+                data, 
+                currency_lower
+                )
                 
     except Exception as error:
         
