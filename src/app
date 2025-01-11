@@ -111,9 +111,9 @@ async def main():
                     ]
        
                 await asyncio.gather(
-                    *running_transactions_tasks,
-                    #*processing_orders_tasks,
-                    #*processing_orders_tasks2,
+                    #*running_transactions_tasks,
+                    *processing_orders_tasks,
+                    *processing_orders_tasks2,
                     #*loading_user_data_tasks,
                     )
                 
