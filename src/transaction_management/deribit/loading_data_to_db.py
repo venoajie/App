@@ -7,15 +7,51 @@ import os
 import tomli
 from multiprocessing.queues import Queue
 
+
+
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,)
+from transaction_management.deribit.managing_deribit import (
+    ModifyOrderDb,)
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
+from utilities.pickling import (
+    replace_data,
+    read_data)
+
+
+
+from transaction_management.deribit.managing_deribit import (
+    ModifyOrderDb,
+    currency_inline_with_database_address,)
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,)
+    
+from utilities.pickling import (
+    replace_data,
+        read_data,)
+from websocket_management.allocating_ohlc import (
+    ohlc_result_per_time_frame,
+    inserting_open_interest,)
+from transaction_management.deribit.orders_management import (
+    saving_order_based_on_state,
+    saving_traded_orders,)
+
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,)
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,)
+
 # installedi
 from loguru import logger as log
 
 def get_config(file_name: str) -> list:
     """ """
     
-    from utilities.system_tools import (
-        parse_error_message,
-        provide_path_for_file,)
     
     config_path = provide_path_for_file (file_name)
     
@@ -33,17 +69,6 @@ async def update_db_pkl(
     data_orders: dict,
     currency: str
     ) -> None:
-
-    from transaction_management.deribit.managing_deribit import (
-        ModifyOrderDb,
-        currency_inline_with_database_address,)
-    from utilities.system_tools import (
-        parse_error_message,
-        provide_path_for_file,)
-        
-    from utilities.pickling import (
-        replace_data,
-        read_data,)
 
     my_path_portfolio = provide_path_for_file (path,
                                                currency)
@@ -67,19 +92,6 @@ async def loading_data(
     """
     """
     
-
-    from utilities.system_tools import (
-        parse_error_message,
-        provide_path_for_file,)
-    from transaction_management.deribit.managing_deribit import (
-        ModifyOrderDb,)
-    from transaction_management.deribit.telegram_bot import (
-        telegram_bot_sendtext,)
-    from utilities.pickling import (
-        replace_data,
-        read_data)
-
-
     # registering strategy config file    
     file_toml = "config_strategies.toml"
 
@@ -152,17 +164,7 @@ async def saving_result(
     chart_trades_buffer: list
     ) -> None:
     """ """
-    from websocket_management.allocating_ohlc import (
-        ohlc_result_per_time_frame,
-        inserting_open_interest,)
-    from transaction_management.deribit.orders_management import (
-        saving_order_based_on_state,
-        saving_traded_orders,)
-
-    from utilities.system_tools import (
-        parse_error_message,
-        provide_path_for_file,)
-
+    
     try:
 
         if "user.changes.any" in message_channel:

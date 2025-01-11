@@ -134,14 +134,6 @@ async def executing_strategies(
             
             resolution = 1
             
-                                                                                                        
-            if message_channel == f"user.portfolio.{currency_lower}":
-                                                
-                await update_db_pkl(
-                    "portfolio", 
-                    data_orders, 
-                    currency_lower
-                    )
                 
     except Exception as error:
         
