@@ -68,14 +68,14 @@ async def main():
             while signal_handler.KEEP_PROCESSING:
        
                 running_transactions_tasks = [
-                    pool.apply(
+                    asyncio.create_task(pool.apply(
                         running_strategy, 
                         args=(
                             sub_account_id,
                             #f"worker-{i}",
                             queue
                             )
-                        )
+                        ))
                     #for i in range(processes)
                     ]
                 
