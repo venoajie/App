@@ -98,7 +98,11 @@ def update_cached_ticker(
         log.debug (f"instrument_ticker after []-not ok {instrument_ticker}")
     
 # Using the LRUCache decorator function with a maximum cache size of 3
-def combining_order_data(currencies):
+def combining_order_data(
+    private_data: object,
+    currencies: list
+    )-> list:
+    
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
     https://medium.com/@jodielovesmaths/memoization-in-python-using-cache-36b676cb21ef
@@ -116,10 +120,7 @@ def combining_order_data(currencies):
     result=[]
     for currency in currencies:
         
-        sub_accounts = reading_from_pkl_data(
-            "sub_accounts",
-            currency
-            )
+        sub_accounts = private_data.get_subaccounts_details (currency)
         
         if sub_accounts:
 
