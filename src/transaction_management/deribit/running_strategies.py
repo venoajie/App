@@ -3,65 +3,53 @@
 
 # built ins
 import asyncio
-import os
-import tomli
 from multiprocessing.queues import Queue
-import numpy as np
-
-
-import asyncio
-from datetime import datetime, timedelta, timezone
 import os
-from secrets import randbelow
-import random
-from multiprocessing.queues import Queue
 
 # installed
-from dataclassy import dataclass, fields
 from loguru import logger as log
-import tomli
 import numpy as np
-
-# installedi
-from loguru import logger as log
+import random
+from secrets import randbelow
+import tomli
 
 from configuration.label_numbering import get_now_unix_time
-
-from strategies.basic_strategy import (
-    is_label_and_side_consistent,)
-
-from transaction_management.deribit.orders_management import (
-    labelling_unlabelled_order,
-    labelling_unlabelled_order_oto,
-    saving_order_based_on_state,)
-from utilities.number_modification import get_closest_value
-
-from transaction_management.deribit.api_requests import (
-    SendApiRequest,)
-
+from data_cleaning.reconciling_db import (
+    is_size_sub_account_and_my_trades_reconciled)
 from db_management.sqlite_management import (
-    insert_tables,)
+    executing_query_with_return,
+    insert_tables,
+    update_status_data)
 from strategies.basic_strategy import (
-    get_label_integer,)
+    get_label_integer,
+    is_label_and_side_consistent,)
 from strategies.hedging_spot import (
     HedgingSpot)
 from strategies.cash_carry.combo_auto import(
     ComboAuto,
     check_if_minimum_waiting_time_has_passed)
+from transaction_management.deribit.api_requests import (
+    SendApiRequest,
+    get_tickers)
+from transaction_management.deribit.orders_management import (
+    labelling_unlabelled_order,
+    labelling_unlabelled_order_oto,
+    saving_order_based_on_state,
+    saving_traded_orders,)
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,)
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
+from transaction_management.deribit.managing_deribit import (
+    ModifyOrderDb,
+    currency_inline_with_database_address,)
+from utilities.number_modification import get_closest_value
 from utilities.system_tools import (
-    async_raise_error_message,
     kill_process,
+    parse_error_message,
     provide_path_for_file,
     raise_error_message,
     sleep_and_restart,)
-from data_cleaning.reconciling_db import (
-    #reconciling_orders,
-    is_size_sub_account_and_my_trades_reconciled)
-from db_management.sqlite_management import (
-    executing_query_with_return,
-    #querying_table,
-    update_status_data)
-
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition)
@@ -70,66 +58,18 @@ from utilities.caching import (
     update_cached_orders,
     combining_order_data,
     update_cached_ticker)
-
-from utilities.caching import (
-    combining_ticker_data as cached_ticker,
-    update_cached_orders,
-    combining_order_data,
-    update_cached_ticker)
-
-from websocket_management.allocating_ohlc import (
-    ohlc_result_per_time_frame,
-    inserting_open_interest,)
-from transaction_management.deribit.orders_management import (
-    saving_order_based_on_state,
-    saving_traded_orders,)
-
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,)
-
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,)
-
+from utilities.pickling import (
+    replace_data,
+    read_data)
 from utilities.string_modification import (
     extract_currency_from_text,
     parsing_label,
     remove_double_brackets_in_list,
-    #remove_list_elements,
     remove_redundant_elements)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,)
-from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,)
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
-from utilities.pickling import (
-    replace_data,
-    read_data)
+from websocket_management.allocating_ohlc import (
+    ohlc_result_per_time_frame,
+    inserting_open_interest,)
 
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,)
-
-from utilities.system_tools import (
-    provide_path_for_file,
-    parse_error_message,)
-
-from utilities.pickling import (
-    replace_data,
-    read_data)
-
-from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,
-    currency_inline_with_database_address,)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,)
-    
-from utilities.pickling import (
-    replace_data,
-    read_data,)
 
 def get_config(file_name: str) -> list:
     """ """
@@ -172,18 +112,13 @@ async def executing_strategies(
     """
     """
     
-
     # registering strategy config file    
     file_toml = "config_strategies.toml"
 
     try:
-
-#        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
-
-                
+            
         # parsing config file
         config_app = get_config(file_toml)
-
        
         private_data: str = SendApiRequest (sub_account_id)
         
@@ -293,8 +228,7 @@ async def executing_strategies(
                 currency,
                 currency_lower, 
                 chart_trades_buffer
-                )
-                                
+                )                                
 
             if "user.changes.any" in message_channel:
                                                                 
@@ -898,8 +832,7 @@ async def executing_strategies(
                                                     )
                                         
                                     log.warning (f"strategy {strategy}-DONE")
-                            
-                
+                 
     except Exception as error:
         
         await parse_error_message(error)  
@@ -1179,8 +1112,6 @@ async def saving_user_changes(
                         cancellable_strategies
                         )
                     
-                    
-                                                    
                     if f"f{currency.upper()}-FS-" not in instrument_name:
                     
                         await saving_traded_orders(
@@ -1263,9 +1194,7 @@ async def saving_user_changes(
                                 order,
                                 order_db_table
                             )
-
-        
-                             
+               
     except Exception as error:
         
         await parse_error_message(error)  
@@ -1274,125 +1203,6 @@ async def saving_user_changes(
          #   error,
           #  "general_error"
            # )
-
-
-async def saving_result(
-    data: dict, 
-    message_channel: dict,
-    order_db_table: str,
-    resolution: int,
-    currency,
-    currency_lower: str, 
-    chart_trades_buffer: list
-    ) -> None:
-    """ """
-    
-    try:
-
-        if "user.changes.any" in message_channel:
-            
-            trades = data["trades"]
-            
-            orders = data["orders"]
-
-            if orders:
-                        
-                if trades:
-                    
-                    archive_db_table= f"my_trades_all_{currency_lower}_json"
-                    
-                    for trade in trades:
-                        
-                        log.critical (f"{trade}")
-                        
-                        instrument_name = data["instrument_name"]
-                                                        
-                        if f"f{currency.upper()}-FS-" not in instrument_name:
-                        
-                            await saving_traded_orders(
-                                trade, 
-                                archive_db_table, 
-                                order_db_table
-                                )
-                            
-                else:
-                                                
-                    for order in orders:
-                        
-                        log.warning (f"{order}")
-                        
-                        await saving_order_based_on_state (
-                                order_db_table, 
-                                order
-                                )
-                                    
-        WHERE_FILTER_TICK: str = "tick"
-
-        TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
-        
-        DATABASE: str = "databases/trading.sqlite3"
-                                                    
-        if "chart.trades" in message_channel:
-            
-            log.warning (f"{data}")
-            
-            chart_trades_buffer.append(data)
-                                                
-            if  len(chart_trades_buffer) > 3:
-
-                instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-
-                if "PERPETUAL" in instrument_ticker:
-
-                    for data in chart_trades_buffer:    
-                        await ohlc_result_per_time_frame(
-                            instrument_ticker,
-                            resolution,
-                            data,
-                            TABLE_OHLC1,
-                            WHERE_FILTER_TICK,
-                        )
-                    
-                    chart_trades_buffer = []
-            
-        instrument_ticker = (message_channel)[19:]
-        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-            
-            my_path_ticker = provide_path_for_file(
-                "ticker", instrument_ticker)
-            
-            await distribute_ticker_result_as_per_data_type(
-                my_path_ticker,
-                data, 
-                )
-            
-            if "PERPETUAL" in data["instrument_name"]:
-                
-                await inserting_open_interest(
-                    currency, 
-                    WHERE_FILTER_TICK, 
-                    TABLE_OHLC1, 
-                    data
-                    )   
-                                                                                                                      
-        if message_channel == f"user.portfolio.{currency_lower}":
-                                            
-            await update_db_pkl(
-                "portfolio", 
-                data, 
-                currency_lower
-                )
-            
-    except Exception as error:
-        
-        await parse_error_message(error)  
-
-        #await telegram_bot_sendtext (
-         #   error,
-          #  "general_error"
-           # )
-
-
 
 async def saving_order (
     modify_order_and_db,
@@ -1463,4 +1273,84 @@ async def saving_order (
                     order_db_table,
                     order_id
                     )                    
+
+
+async def saving_result(
+    data: dict, 
+    message_channel: dict,
+    order_db_table: str,
+    resolution: int,
+    currency,
+    currency_lower: str, 
+    chart_trades_buffer: list
+    ) -> None:
+    """ """
+    
+    try:
+                            
+        WHERE_FILTER_TICK: str = "tick"
+
+        TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+        
+        DATABASE: str = "databases/trading.sqlite3"
+                                                    
+        if "chart.trades" in message_channel:
+            
+            log.warning (f"{data}")
+            
+            chart_trades_buffer.append(data)
+                                                
+            if  len(chart_trades_buffer) > 3:
+
+                instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
+
+                if "PERPETUAL" in instrument_ticker:
+
+                    for data in chart_trades_buffer:    
+                        await ohlc_result_per_time_frame(
+                            instrument_ticker,
+                            resolution,
+                            data,
+                            TABLE_OHLC1,
+                            WHERE_FILTER_TICK,
+                        )
+                    
+                    chart_trades_buffer = []
+            
+        instrument_ticker = (message_channel)[19:]
+        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
+            
+            my_path_ticker = provide_path_for_file(
+                "ticker", instrument_ticker)
+            
+            await distribute_ticker_result_as_per_data_type(
+                my_path_ticker,
+                data, 
+                )
+            
+            if "PERPETUAL" in data["instrument_name"]:
+                
+                await inserting_open_interest(
+                    currency, 
+                    WHERE_FILTER_TICK, 
+                    TABLE_OHLC1, 
+                    data
+                    )   
+                                                                                                                      
+        if message_channel == f"user.portfolio.{currency_lower}":
+                                            
+            await update_db_pkl(
+                "portfolio", 
+                data, 
+                currency_lower
+                )
+            
+    except Exception as error:
+        
+        await parse_error_message(error)  
+
+        #await telegram_bot_sendtext (
+         #   error,
+          #  "general_error"
+           # )
 
