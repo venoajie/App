@@ -12,7 +12,6 @@ from multiprocessing import Manager
 from multiprocessing.queues import Queue
 from multiprocessing import cpu_count
 from aiomultiprocess import Pool
-from multiprocessing import set_start_method
 
 from transaction_management.deribit.data_producer import (
     StreamAccountData,)
@@ -51,7 +50,7 @@ async def main():
     """
     
     sub_account_id = "deribit-148510"
-        
+    
     try:
         
         queue: Queue = Manager().Queue()
@@ -63,7 +62,7 @@ async def main():
         stream = StreamAccountData(sub_account_id)
        
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
-
+        
         async with Pool(maxtasksperchild=2) as pool:
             log.debug (signal_handler.KEEP_PROCESSING)
             while signal_handler.KEEP_PROCESSING:
