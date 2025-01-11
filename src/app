@@ -101,11 +101,22 @@ async def main():
                     #for i in range(processes)
                     ]
        
+                loading_user_data_tasks = [
+                    asyncio.create_task(pool.apply(
+                        loading_user_data, 
+                        args=(sub_account_id,
+                     #         f"worker-{i}",
+                              queue
+                              )
+                        ))
+                    #for i in range(processes)
+                    ]
+       
                 await asyncio.gather(
                     *executing_strategies_tasks,
                     *processing_orders_tasks,
                     *processing_orders_tasks2,
-                    #*loading_user_data_tasks,
+                    *loading_user_data_tasks,
                     )
                 
                 await asyncio.sleep(0.0005)
