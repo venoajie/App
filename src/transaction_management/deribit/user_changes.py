@@ -152,8 +152,6 @@ async def loading_user_data(
             
             data_orders: dict = message["data"] 
 
-            log.critical (data_orders)
-                    
             currency: str = message["currency"]
             
             currency_lower: str = currency.lower()
