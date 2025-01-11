@@ -23,12 +23,12 @@ from utilities.pickling import (
     replace_data,
     read_data)
 
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,)
+
 def get_config(file_name: str) -> list:
     """ """
-    
-    from utilities.system_tools import (
-        parse_error_message,
-        provide_path_for_file,)
     
     config_path = provide_path_for_file (file_name)
     
