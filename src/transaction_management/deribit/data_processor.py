@@ -197,7 +197,7 @@ def modify_hedging_instrument (
     
 async def running_strategy(
     sub_account_id,
-    name: int, 
+    #name: int, 
     queue: Queue
     ) -> None:
 

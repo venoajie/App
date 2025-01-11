@@ -70,11 +70,11 @@ async def main():
                         running_strategy, 
                         args=(
                             sub_account_id,
-                            f"worker-{i}",
+                            #f"worker-{i}",
                             queue
                             )
                         )
-                    for i in range(processes)
+                    #for i in range(processes)
                     ]
                 
                 loading_user_data_tasks = [
