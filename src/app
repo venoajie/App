@@ -20,7 +20,7 @@ from transaction_management.deribit.loading_data_to_db import (
 from transaction_management.deribit.running_strategies import executing_strategies
 from transaction_management.deribit.loading_data_to_db2 import (
     loading_data2,)
-from transaction_management.deribit.loading_user_changes import (
+from transaction_management.deribit.user_changes import (
     loading_user_data,)
 from transaction_management.deribit.data_processor import (
     running_strategy,)
@@ -73,40 +73,43 @@ async def main():
                     asyncio.create_task(pool.apply(
                         loading_data, 
                         args=(sub_account_id,
-                     #         f"worker-{i}",
                               queue
                               )
                         ))
-                    #for i in range(processes)
                     ]
                 
                 processing_orders_tasks2 = [
                     asyncio.create_task(pool.apply(
                         loading_data2, 
                         args=(sub_account_id,
-                     #         f"worker-{i}",
                               queue
                               )
                         ))
-                    #for i in range(processes)
                     ]
        
                 executing_strategies_tasks = [
                     asyncio.create_task(pool.apply(
                         executing_strategies, 
                         args=(sub_account_id,
-                     #         f"worker-{i}",
                               queue
                               )
                         ))
-                    #for i in range(processes)
+                    ]
+       
+                loading_user_data_tasks = [
+                    asyncio.create_task(pool.apply(
+                        loading_user_data, 
+                        args=(sub_account_id,
+                              queue
+                              )
+                        ))
                     ]
        
                 await asyncio.gather(
                     *executing_strategies_tasks,
                     *processing_orders_tasks,
                     *processing_orders_tasks2,
-                    #*loading_user_data_tasks,
+                    *loading_user_data_tasks,
                     )
                 
                 await asyncio.sleep(0.0005)
