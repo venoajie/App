@@ -4,55 +4,36 @@
 # built ins
 import asyncio
 import os
+
+# installed
+from loguru import logger as log
 import tomli
 from multiprocessing.queues import Queue
 
-
-
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
-from utilities.pickling import (
-    replace_data,
-    read_data)
-
-
-
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
+from utilities.pickling import (
+    replace_data,
+    read_data,)
+from utilities.string_modification import (
+    extract_currency_from_text,)
 from utilities.system_tools import (
     parse_error_message,
     provide_path_for_file,)
-    
-from utilities.pickling import (
-    replace_data,
-        read_data,)
 from websocket_management.allocating_ohlc import (
     ohlc_result_per_time_frame,
     inserting_open_interest,)
-from transaction_management.deribit.orders_management import (
-    saving_order_based_on_state,
-    saving_traded_orders,)
 
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,)
-
-# installedi
-from loguru import logger as log
 
 def get_config(file_name: str) -> list:
     """ """
-    
-    
     config_path = provide_path_for_file (file_name)
     
     try:
@@ -85,198 +66,85 @@ async def update_db_pkl(
                   
 async def loading_data(
     sub_account_id,
-    #name: int, 
+    name: int, 
     queue: Queue
     ):
     
     """
     """
     
+    modify_order_and_db: object = ModifyOrderDb(sub_account_id)
+
     # registering strategy config file    
-    file_toml = "config_strategies.toml"
+    file_toml: str = "config_strategies.toml"
 
-    try:
+    # parsing config file
+    config_app = get_config(file_toml)
 
-#        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
+    strategy_attributes = config_app["strategies"]
 
+    strategy_attributes_active = [o for o in strategy_attributes \
+        if o["is_active"]==True]
                 
-        # parsing config file
-        config_app = get_config(file_toml)
-
-
-        chart_trades_buffer = []
-        
-        relevant_tables = config_app["relevant_tables"][0]
-        
-        order_db_table= relevant_tables["orders_table"]        
-        
-        while True:
-            
-            message: str = queue.get()
-                    
-            message_channel: str = message["channel"]
-            
-            data_orders: dict = message["data"] 
-
-                    
-            currency: str = message["currency"]
-            
-            currency_lower: str = currency.lower()
-            
-            resolution = 1
-            
-            await saving_result(
-                                    data_orders,
-                                    message_channel,
-                                    order_db_table,
-                                    resolution,
-                                    currency,
-                                    currency_lower, 
-                                    chart_trades_buffer
-                                    )
-                                
-                                                                                                        
-            if message_channel == f"user.portfolio.{currency_lower}":
-                                                
-                await update_db_pkl(
-                    "portfolio", 
-                    data_orders, 
-                    currency_lower
-                    )
-                
-    except Exception as error:
-        
-        await parse_error_message(error)  
-
-        await telegram_bot_sendtext (
-            error,
-            "general_error"
-            )
-
-async def saving_result(
-    data: dict, 
-    message_channel: dict,
-    order_db_table: str,
-    resolution: int,
-    currency,
-    currency_lower: str, 
-    chart_trades_buffer: list
-    ) -> None:
-    """ """
+    # get strategies that have not short/long attributes in the label 
+    non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
+        if o["non_checked_for_size_label_consistency"]==True]
     
-    try:
-
-        if "user.changes.any" in message_channel:
-            
-            trades = data["trades"]
-            
-            orders = data["orders"]
-
-            if orders:
-                        
-                if trades:
-                    
-                    archive_db_table= f"my_trades_all_{currency_lower}_json"
-                    
-                    for trade in trades:
-                        
-                        log.critical (f"{trade}")
-                        
-                        instrument_name = data["instrument_name"]
-                                                        
-                        if f"f{currency.upper()}-FS-" not in instrument_name:
-                        
-                            await saving_traded_orders(
-                                trade, 
-                                archive_db_table, 
-                                order_db_table
-                                )
-                            
-                else:
-                                                
-                    for order in orders:
-                        
-                        log.warning (f"{order}")
-                        
-                        await saving_order_based_on_state (
-                                order_db_table, 
-                                order
-                                )
-                                    
-        WHERE_FILTER_TICK: str = "tick"
-
-        TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+    cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
+        if o["cancellable"]==True]
+    
+    relevant_tables = config_app["relevant_tables"][0]
+    
+    order_db_table= relevant_tables["orders_table"]        
+    
+    resolution: int = 1   
+    
+    while True:
         
-        DATABASE: str = "databases/trading.sqlite3"
-                                                    
-        if "chart.trades" in message_channel:
-            
-            log.warning (f"{data}")
-            
-            chart_trades_buffer.append(data)
-                                                
-            if  len(chart_trades_buffer) > 3:
-
-                instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-
-                if "PERPETUAL" in instrument_ticker:
-
-                    for data in chart_trades_buffer:    
-                        await ohlc_result_per_time_frame(
-                            instrument_ticker,
-                            resolution,
-                            data,
-                            TABLE_OHLC1,
-                            WHERE_FILTER_TICK,
-                        )
-                    
-                    chart_trades_buffer = []
-            
-        instrument_ticker = (message_channel)[19:]
-        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-            log.debug (f"{data}")
-            
-            my_path_ticker = provide_path_for_file(
-                "ticker", instrument_ticker)
-            
-            await distribute_ticker_result_as_per_data_type(
-                my_path_ticker,
-                data, 
+        message: str = queue.get()
+                
+        message_channel: str = message["channel"]
+        
+        data_orders: dict = message["data"] 
+        
+        currency: str = extract_currency_from_text(message_channel)
+        
+        currency_lower: str = currency.lower()
+                                        
+        archive_db_table: str = f"my_trades_all_{currency_lower}_json"
+                                                          
+        if message_channel == f"user.portfolio.{currency_lower}":
+                                           
+            await update_db_pkl(
+                "portfolio", 
+                data_orders, 
+                currency
                 )
+
+            await modify_order_and_db.resupply_sub_accountdb(currency)    
+                                                
+        if "user.changes.any" in message_channel:
+            log.critical (f"message_channel {message_channel}")
+            log.warning (f"user.changes.any {data_orders}")
             
-            if "PERPETUAL" in data["instrument_name"]:
-                
-                await inserting_open_interest(
-                    currency, 
-                    WHERE_FILTER_TICK, 
-                    TABLE_OHLC1, 
-                    data
-                    )   
-                
-    except Exception as error:
-        
-        await parse_error_message(error)  
-
-        #await telegram_bot_sendtext (
-         #   error,
-          #  "general_error"
-           # )
-
-
+            await modify_order_and_db.resupply_sub_accountdb(currency)
+                                                              
+            trades = data_orders["trades"]
+            
+            if trades:
+                await modify_order_and_db.cancel_the_cancellables(
+                    order_db_table,
+                    currency,
+                    cancellable_strategies
+                    )
+                                                       
+    
 async def distribute_ticker_result_as_per_data_type(
     my_path_ticker: str, 
     data_orders: dict, 
     ) -> None:
     """ """
 
-    from utilities.system_tools import (
-        provide_path_for_file,
-        parse_error_message,)
-
-    from utilities.pickling import (
-        replace_data,
-        read_data)
-    
     try:
     
         if data_orders["type"] == "snapshot":
@@ -303,8 +171,7 @@ async def distribute_ticker_result_as_per_data_type(
         
         await parse_error_message(error)  
 
- #       await telegram_bot_sendtext (
-  #          error,
-   #         "general_error"
-    #        )
-
+        await telegram_bot_sendtext (
+            error,
+            "general_error"
+            )
