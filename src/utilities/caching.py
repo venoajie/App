@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import asyncio
 from transaction_management.deribit.api_requests import (
     get_tickers,)
 from utilities.pickling import (
@@ -94,11 +94,11 @@ def update_cached_ticker(
         log.debug(f" {instrument_name}")
         
         log.critical (f"instrument_ticker before {instrument_ticker}")
-        combining_order_data(currencies)
+        #combining_order_data(currencies)
         log.debug (f"instrument_ticker after []-not ok {instrument_ticker}")
     
 # Using the LRUCache decorator function with a maximum cache size of 3
-def combining_order_data(
+async def combining_order_data(
     private_data: object,
     currencies: list
     )-> list:
@@ -120,7 +120,7 @@ def combining_order_data(
     result=[]
     for currency in currencies:
         
-        sub_accounts = private_data.get_subaccounts_details (currency)
+        sub_accounts = await private_data.get_subaccounts_details (currency)
         
         print (f"sub_accounts {sub_accounts}")
         
