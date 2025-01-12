@@ -12,6 +12,7 @@ from multiprocessing import Manager
 from multiprocessing.queues import Queue
 #from multiprocessing import cpu_count
 from aiomultiprocess import Pool
+import uvloop
 
 from transaction_management.deribit.data_producer import (
     StreamAccountData,)
@@ -98,7 +99,7 @@ if __name__ == "__main__":
     try:
         signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         
-        asyncio.run(main())
+        uvloop.run(main())
         
     except(
         KeyboardInterrupt, 
