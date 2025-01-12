@@ -228,7 +228,7 @@ async def executing_strategies(
             before = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
             #log.debug (before)
                                                             
-            await saving_user_changes(
+            not_order = await saving_user_changes(
                 data_orders, 
                 message_channel,
                 orders_all,
@@ -241,7 +241,7 @@ async def executing_strategies(
                 currency_lower, 
                 )          
 
-            log.warning (f"not_order {not_order}")
+            #log.warning (f"not_order {not_order}")
         
             after = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
             #log.error (after)
@@ -1084,6 +1084,8 @@ async def saving_user_changes(
     
     try:
                 
+        not_order = False
+        
         if "user.changes.any" in message_channel:
 
             update_cached_orders(
@@ -1200,6 +1202,8 @@ async def saving_user_changes(
        
                 
                 not_order = True
+                
+                return not_order
                 log.critical (f"not_order {not_order}")
                  
         
