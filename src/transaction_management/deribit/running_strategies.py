@@ -14,43 +14,41 @@ from secrets import randbelow
 import tomli
 
 from configuration.label_numbering import get_now_unix_time
-from data_cleaning.reconciling_db import (
-    is_size_sub_account_and_my_trades_reconciled)
+from data_cleaning.reconciling_db import (is_size_sub_account_and_my_trades_reconciled)
 from db_management.sqlite_management import (
     executing_query_with_return,
     update_status_data)
+from market_understanding.price_action.candles_analysis import (
+    combining_candles_data,
+    get_market_condition)
 from strategies.basic_strategy import (get_label_integer,)
-from strategies.hedging_spot import (
-    HedgingSpot)
+from strategies.hedging_spot import (HedgingSpot)
 from strategies.cash_carry.combo_auto import(
     ComboAuto,
     check_if_minimum_waiting_time_has_passed)
 from transaction_management.deribit.api_requests import (
     SendApiRequest,
     get_tickers)
-from transaction_management.deribit.orders_management import (saving_orders,)
 from transaction_management.deribit.get_instrument_summary import (get_futures_instruments,)
-from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
-from utilities.number_modification import get_closest_value
-from utilities.system_tools import (
-    kill_process,
-    parse_error_message,
-    provide_path_for_file,
-    raise_error_message,)
-from market_understanding.price_action.candles_analysis import (
-    combining_candles_data,
-    get_market_condition)
+from transaction_management.deribit.orders_management import (saving_orders,)
+from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
     update_cached_orders,
     combining_order_data,
     update_cached_ticker)
+from utilities.number_modification import get_closest_value
 from utilities.pickling import (
     replace_data,
     read_data)
+from utilities.system_tools import (
+    kill_process,
+    parse_error_message,
+    provide_path_for_file,
+    raise_error_message,)
 from utilities.string_modification import (
     extract_currency_from_text,
     parsing_label,
@@ -113,12 +111,6 @@ async def executing_strategies(
         private_data: str = SendApiRequest (sub_account_id)
         
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
-
-        # registering strategy config file    
-        file_toml: str = "config_strategies.toml"
-
-        # parsing config file
-        config_app = get_config(file_toml)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
@@ -239,9 +231,7 @@ async def executing_strategies(
                     )                                
                         
                 if "chart.trades" in message_channel:
-                    
-                    log.debug (message_channel)
-                                            
+                                          
                     archive_db_table: str = f"my_trades_all_{currency_lower}_json"
                                     
                     chart_trade = await chart_trade_in_msg(
