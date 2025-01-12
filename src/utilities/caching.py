@@ -115,12 +115,23 @@ async def combining_order_data(
     Returns:
         _type_: _description_
     """
-    #result = (orjson.loads(data))
+    
+    from utilities.pickling import replace_data
     
     result=[]
     for currency in currencies:
         
         sub_accounts = await private_data.get_subaccounts_details (currency)
+        
+        my_path_sub_account = provide_path_for_file(
+            "sub_accounts",
+            currency
+            )
+        
+        replace_data(
+            my_path_sub_account, 
+            sub_accounts
+            )
                 
         if sub_accounts:
 

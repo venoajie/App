@@ -184,7 +184,9 @@ async def executing_strategies(
             currencies
             )
         
-        ticker_perpetual = cached_ticker(instruments_name)  
+        ticker_all = cached_ticker(instruments_name)  
+        
+        log.debug (ticker_all)
                 
         orders_all = await combining_order_data(
             private_data,
@@ -257,14 +259,14 @@ async def executing_strategies(
                     cached_candles_data,
                     ) 
                                     
-                if ticker_perpetual\
+                if ticker_all\
                     and not chart_trade:
                         
                     archive_db_table= f"my_trades_all_{currency_lower}_json"
                     
                     update_cached_ticker(
                         instrument_name_perpetual,
-                        ticker_perpetual,
+                        ticker_all,
                         data_orders,
                         currencies
                         )
@@ -277,7 +279,7 @@ async def executing_strategies(
                     
                     equity: float = portfolio["equity"]    
                     
-                    ticker_perpetual_instrument_name = [o for o in ticker_perpetual \
+                    ticker_perpetual_instrument_name = [o for o in ticker_all \
                         if instrument_name_perpetual == o["instrument_name"]][0]                                   
                                                                         
                     index_price= get_index (
@@ -369,6 +371,7 @@ async def executing_strategies(
                             my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency ])
                             my_labels= remove_redundant_elements([parsing_label(o["label"])["main"] for o in my_trades_currency ])
                             log.critical (orders_all)
+                        
                             for label in my_labels: 
                                 log.debug (f"label {label}")
                                 amount = sum([o["amount"] for o in my_trades_currency if label in o["label"]])
@@ -1324,7 +1327,8 @@ async def saving_result(
         if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
             
             my_path_ticker = provide_path_for_file(
-                "ticker", instrument_ticker)
+                "ticker", 
+                instrument_ticker)
             
             await distribute_ticker_result_as_per_data_type(
                 my_path_ticker,
