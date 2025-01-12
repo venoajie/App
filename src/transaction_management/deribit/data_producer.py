@@ -221,11 +221,10 @@ class StreamAccountData(ModifyOrderDb):
                             ]
                         
                         for ws in ws_channel_instrument:
-                            asyncio.create_task(
-                                self.ws_operation(
+                            await self.ws_operation self.ws_operation(
                                     operation = "subscribe",
                                     ws_channel = ws,
-                                    ))
+                                    )
                     
                     
                     
@@ -407,7 +406,7 @@ class StreamAccountData(ModifyOrderDb):
         Requests `public/subscribe` or `public/unsubscribe`
         to DBT's API for the specific WebSocket Channel.
         """
-        sleep_time: int = 5
+        sleep_time: int = .05
         
         await asyncio.sleep(sleep_time)
 
