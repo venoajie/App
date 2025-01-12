@@ -211,6 +211,8 @@ async def executing_strategies(
                 
         while not not_order:
             
+            log.critical (f"not_order {not_order}")
+            
             message: str = queue.get()
                     
             message_channel: str = message["channel"]
@@ -1194,7 +1196,7 @@ async def saving_user_changes(
                                     order_db_table
                                 )
        
-                log.critical (f"not_order {not_order}")
+                
                 not_order = True
                 log.critical (f"not_order {not_order}")
                  
