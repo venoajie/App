@@ -14,6 +14,8 @@ import orjson
 import tomli
 import websockets
 from multiprocessing.queues import Queue
+import uvloop
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # user defined formula
 from configuration import id_numbering, config, config_oci

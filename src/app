@@ -13,6 +13,7 @@ from multiprocessing.queues import Queue
 #from multiprocessing import cpu_count
 from aiomultiprocess import Pool
 import uvloop
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from transaction_management.deribit.data_producer import (
     StreamAccountData,)
@@ -61,7 +62,6 @@ async def main():
         async with Pool() as pool:
 
             while signal_handler.KEEP_PROCESSING:
-       
        
                 executing_strategies_tasks = [
                     asyncio.create_task(pool.apply(

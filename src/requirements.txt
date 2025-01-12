@@ -69,3 +69,5 @@ websockets==13.1
     # via -r requirements.txt
 yarl==1.17.0
     # via aiohttp
+uvloop
+    # via -r requirements.txt
