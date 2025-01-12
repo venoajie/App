@@ -1327,6 +1327,8 @@ async def saving_result(
                 )
             after = [o for o in ticker_all if instrument_ticker in o["instrument_name"]]
             
+            log.critical (instrument_ticker)
+            log.error (data)
             log.debug (before)
             log.error (after)
                     
