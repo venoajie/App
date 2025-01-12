@@ -211,7 +211,7 @@ async def executing_strategies(
                 
         while not not_order:
             
-            log.critical (f"not_order {not_order}")
+            log.critical (f"not_order {not not_order}")
             
             message: str = queue.get()
                     
@@ -247,9 +247,9 @@ async def executing_strategies(
                         currency_lower, 
                         )    
                     
-                    #not_order = True 
+                    not_order = True 
                     
-            log.warning (f"not_order {not_order}")
+            log.warning (f"not_order {not not_order}")
         
             after = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
             #log.error (after)
