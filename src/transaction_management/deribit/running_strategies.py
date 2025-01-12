@@ -209,9 +209,9 @@ async def executing_strategies(
         
         log.warning (f"orders_all {orders_all}")
                 
-        while True:
+        while not_order:
             
-            log.critical (f"not_order {not not_order}")
+            log.critical (f"not_order {not_order}")
             
             message: str = queue.get()
                     
@@ -249,7 +249,7 @@ async def executing_strategies(
                     
                     not_order = False 
                     
-            log.warning (f"not_order {not not_order}")
+            log.warning (f"not_order {not_order}")
         
             after = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
             #log.error (after)
