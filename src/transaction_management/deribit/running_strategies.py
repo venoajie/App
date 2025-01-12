@@ -197,7 +197,7 @@ async def executing_strategies(
         
         chart_trades_buffer = []
         
-        not_order = False
+        not_order = True
         
         resolution = 1
         
@@ -209,7 +209,7 @@ async def executing_strategies(
         
         log.warning (f"orders_all {orders_all}")
                 
-        while not not_order:
+        while True:
             
             log.critical (f"not_order {not not_order}")
             
@@ -247,7 +247,7 @@ async def executing_strategies(
                         currency_lower, 
                         )    
                     
-                    not_order = True 
+                    not_order = False 
                     
             log.warning (f"not_order {not not_order}")
         
