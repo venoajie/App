@@ -28,14 +28,10 @@ from transaction_management.deribit.managing_deribit import (
     currency_inline_with_database_address,)
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,)
-from transaction_management.deribit.orders_management import (
-    saving_order_based_on_state,
-    saving_traded_orders,)
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from utilities.pickling import (
-    replace_data,
-    read_data,)
+    replace_data)
 from utilities.system_tools import (
     provide_path_for_file,
     parse_error_message,)
@@ -43,9 +39,7 @@ from utilities.string_modification import (
     extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,)
-from websocket_management.allocating_ohlc import (
-    ohlc_result_per_time_frame,
-    inserting_open_interest,)
+
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
