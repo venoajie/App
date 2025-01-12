@@ -208,11 +208,11 @@ class StreamAccountData(ModifyOrderDb):
                     
                         for ws in ws_channel_currency:
 
-                            asyncio.create_task(
-                                self.ws_operation(
+                            #asyncio.create_task(
+                            await self.ws_operation(
                                     operation = "subscribe", 
                                     ws_channel = ws)
-                                )
+                                
                       
                     for instrument in instruments_name:
                                             
