@@ -254,6 +254,8 @@ async def executing_strategies(
                     )                                
                         
                 if "chart.trades" in message_channel:
+                    
+                    log.debug (message_channel)
                                             
                     archive_db_table: str = f"my_trades_all_{currency_lower}_json"
                                     
@@ -298,7 +300,7 @@ async def executing_strategies(
                             currency_upper
                             )
                         
-                        #log.warning (market_condition)
+                        log.warning (market_condition)
 
                         if  sub_account :
                             
