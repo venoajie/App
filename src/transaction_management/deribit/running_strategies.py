@@ -223,21 +223,25 @@ async def executing_strategies(
             currency_upper: str = currency.upper()
             
             instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
+            before = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
+            log.debug (before)
+                                                            
+            await saving_user_changes(
+                data_orders, 
+                message_channel,
+                orders_all,
+                order_db_table,
+                modify_order_and_db,
+                private_data,
+                cancellable_strategies,
+                non_checked_strategies,
+                currency,
+                currency_lower, 
+                )          
+            after = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
+            log.error (after)
 
-            if "user.changes.any" in message_channel:
-                                                                
-                await saving_user_changes(
-                    data_orders, 
-                    orders_all,
-                    order_db_table,
-                    modify_order_and_db,
-                    private_data,
-                    cancellable_strategies,
-                    non_checked_strategies,
-                    currency,
-                    currency_lower, 
-                    )          
-                                                                                 
+                                                                                
             await saving_result(
                 data_orders,
                 message_channel,
@@ -258,12 +262,9 @@ async def executing_strategies(
                     cached_candles_data,
                     ) 
                                     
-                if ticker_all\
-                    and not chart_trade:
+                if not chart_trade:
                         
                     archive_db_table= f"my_trades_all_{currency_lower}_json"
-                    
-                    before = [o for o in ticker_all ]
                     
                     # get portfolio data  
                     portfolio = reading_from_pkl_data (
@@ -1072,6 +1073,7 @@ def modify_hedging_instrument (
     
 async def saving_user_changes(
     data: dict, 
+    message_channel: str,
     orders_all: list,
     order_db_table: str,
     modify_order_and_db: int,
@@ -1084,116 +1086,118 @@ async def saving_user_changes(
     """ """
     
     try:
-
-        update_cached_orders(
-            orders_all,
-            data,
-            )
         
-        trades = data["trades"]
-        
-        orders = data["orders"]
+        if "user.changes.any" in message_channel:
 
-        if orders:
+            update_cached_orders(
+                orders_all,
+                data,
+                )
             
-            instrument_name = data["instrument_name"]
-                    
-            if trades:
+            trades = data["trades"]
+            
+            orders = data["orders"]
+
+            if orders:
                 
-                archive_db_table= f"my_trades_all_{currency_lower}_json"
-                
-                for trade in trades:
+                instrument_name = data["instrument_name"]
+                        
+                if trades:
                     
-                    log.critical (f"{trade}")
+                    archive_db_table= f"my_trades_all_{currency_lower}_json"
                     
-                    await modify_order_and_db.cancel_the_cancellables(
-                        order_db_table,
-                        currency_lower,
-                        cancellable_strategies
-                        )
-                    
-                    if f"f{currency.upper()}-FS-" not in instrument_name:
-                    
-                        await saving_traded_orders(
-                            trade, 
-                            archive_db_table, 
-                            order_db_table
+                    for trade in trades:
+                        
+                        log.critical (f"{trade}")
+                        
+                        await modify_order_and_db.cancel_the_cancellables(
+                            order_db_table,
+                            currency_lower,
+                            cancellable_strategies
                             )
                         
-            else:
-                
-                if "oto_order_ids" in (orders[0]):
-                                        
-                    len_oto_order_ids = len(orders[0]["oto_order_ids"])
-                    
-                    transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
-                    log.debug (f"transaction_main {transaction_main}")
-                    
-                    if len_oto_order_ids==1:
-                        pass
-                    
-                    transaction_main_oto = transaction_main ["oto_order_ids"][0]
-                    log.warning (f"transaction_main_oto {transaction_main_oto}")
-                    
-                    kind= "future"
-                    type = "trigger_all"
-                    
-                    open_orders_from_exchange =  await private_data.get_open_orders(kind, type)
-                    log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
-
-                    transaction_secondary = [o for o in open_orders_from_exchange\
-                        if transaction_main_oto in o["order_id"]]
-                    
-                    log.warning (f"transaction_secondary {transaction_secondary}")
-                    
-                    if transaction_secondary:
+                        if f"f{currency.upper()}-FS-" not in instrument_name:
                         
-                        transaction_secondary = transaction_secondary[0]
-                        
-                        # no label
-                        if transaction_main["label"] == ''\
-                            and "open" in transaction_main["order_state"]:
-                            
-                            order_attributes = labelling_unlabelled_order_oto (transaction_main,
-                                                                        transaction_secondary)                   
-
-                            log.debug (f"order_attributes {order_attributes}")
-                            await insert_tables(
-                                order_db_table, 
-                                transaction_main
-                                )
-                            
-                            await modify_order_and_db.cancel_by_order_id (
-                                order_db_table,
-                                transaction_main["order_id"]
-                                )  
-                            
-                            await modify_order_and_db.if_order_is_true(
-                                non_checked_strategies,
-                                order_attributes, 
-                                )
-
-                        else:
-                            await insert_tables(
-                                order_db_table, 
-                                transaction_main
-                                )
-                                
-                else:
-                                                        
-                    for order in orders:
-                        
-                        if  'OTO' not in order["order_id"]:
-                            
-                            log.warning (f"order {order}")
-                                                    
-                            await saving_order(
-                                modify_order_and_db,
-                                non_checked_strategies,
-                                instrument_name,
-                                order,
+                            await saving_traded_orders(
+                                trade, 
+                                archive_db_table, 
                                 order_db_table
-                            )
+                                )
+                            
+                else:
+                    
+                    if "oto_order_ids" in (orders[0]):
+                                            
+                        len_oto_order_ids = len(orders[0]["oto_order_ids"])
+                        
+                        transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
+                        log.debug (f"transaction_main {transaction_main}")
+                        
+                        if len_oto_order_ids==1:
+                            pass
+                        
+                        transaction_main_oto = transaction_main ["oto_order_ids"][0]
+                        log.warning (f"transaction_main_oto {transaction_main_oto}")
+                        
+                        kind= "future"
+                        type = "trigger_all"
+                        
+                        open_orders_from_exchange =  await private_data.get_open_orders(kind, type)
+                        log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
+
+                        transaction_secondary = [o for o in open_orders_from_exchange\
+                            if transaction_main_oto in o["order_id"]]
+                        
+                        log.warning (f"transaction_secondary {transaction_secondary}")
+                        
+                        if transaction_secondary:
+                            
+                            transaction_secondary = transaction_secondary[0]
+                            
+                            # no label
+                            if transaction_main["label"] == ''\
+                                and "open" in transaction_main["order_state"]:
+                                
+                                order_attributes = labelling_unlabelled_order_oto (transaction_main,
+                                                                            transaction_secondary)                   
+
+                                log.debug (f"order_attributes {order_attributes}")
+                                await insert_tables(
+                                    order_db_table, 
+                                    transaction_main
+                                    )
+                                
+                                await modify_order_and_db.cancel_by_order_id (
+                                    order_db_table,
+                                    transaction_main["order_id"]
+                                    )  
+                                
+                                await modify_order_and_db.if_order_is_true(
+                                    non_checked_strategies,
+                                    order_attributes, 
+                                    )
+
+                            else:
+                                await insert_tables(
+                                    order_db_table, 
+                                    transaction_main
+                                    )
+                                    
+                    else:
+                                                            
+                        for order in orders:
+                            
+                            if  'OTO' not in order["order_id"]:
+                                
+                                log.warning (f"order {order}")
+                                                        
+                                await saving_order(
+                                    modify_order_and_db,
+                                    non_checked_strategies,
+                                    instrument_name,
+                                    order,
+                                    order_db_table
+                                )
                
     except Exception as error:
         
@@ -1319,18 +1323,16 @@ async def saving_result(
             
         instrument_ticker = (message_channel)[19:]
         if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-            before = [o for o in ticker_all if instrument_ticker in o["instrument_name"]]
+            
             update_cached_ticker(
                 instrument_ticker,
                 ticker_all,
                 data,
                 )
-            after = [o for o in ticker_all if instrument_ticker in o["instrument_name"]]
             
-            log.critical (instrument_ticker)
-            log.error (data)
-            log.debug (before)
-            log.error (after)
+            if "PERPETUAL" in instrument_ticker:
+                log.critical (instrument_ticker)
+                log.error (data)
                     
             my_path_ticker = provide_path_for_file(
                 "ticker", 
