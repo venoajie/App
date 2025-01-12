@@ -172,16 +172,15 @@ def update_cached_orders(
         if trades :
             
             for trade in trades:
-                print(f"trade {trade}")
+
                 order_id = trade["order_id"]
                 
                 selected_order = [o for o in current_orders 
                                   if order_id in o["order_id"]]
                 
-                print(f"selected_order {selected_order}")
                 if selected_order:
                                         
-                    current_orders.remove(trade[0])
+                    current_orders.remove(selected_order[0])
                 
         if orders:
         
@@ -198,7 +197,7 @@ def update_cached_orders(
                     selected_order = [o for o in current_orders 
                                       if order_id in o["order_id"]]
                     
-                    print(f"selected_order {selected_order}")
+                    print(f"caching selected_order {selected_order}")
                     
                     if selected_order:
                                             
