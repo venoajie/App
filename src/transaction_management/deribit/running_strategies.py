@@ -248,7 +248,8 @@ async def executing_strategies(
                         )    
                     
                     not_order = True 
-                    break     
+                    
+                    return not_order     
 
             log.warning (f"not_order {not_order}")
         
