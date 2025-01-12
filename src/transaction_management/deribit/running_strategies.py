@@ -211,8 +211,6 @@ async def executing_strategies(
             
             while not_order:
             
-                log.critical (f"not_order {not_order} len_orders {len(orders_all)}")
-                
                 message: str = queue.get()
                         
                 message_channel: str = message["channel"]
@@ -239,9 +237,6 @@ async def executing_strategies(
                             currency,
                             currency_lower, 
                             )    
-                        
-                         
-                log.warning (f"not_order {not_order} len_orders {len(orders_all)}")
                                                 
                 await saving_result(
                     data_orders,
