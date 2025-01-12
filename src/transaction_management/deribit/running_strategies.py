@@ -247,7 +247,8 @@ async def executing_strategies(
                         currency_lower, 
                         )    
                     
-                    not_order = True      
+                    not_order = True 
+                    break     
 
             log.warning (f"not_order {not_order}")
         
