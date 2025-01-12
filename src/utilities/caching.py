@@ -56,10 +56,10 @@ def combining_ticker_data(instruments_name):
 
 
 def update_cached_ticker(
-    instrument_name,
-    ticker,
-    data_orders,
-    currencies):
+    instrument_name: str,
+    ticker: list,
+    data_orders: dict,
+    )-> None:
     """_summary_
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
 
@@ -71,7 +71,7 @@ def update_cached_ticker(
     """
     
         
-    instrument_ticker = [o for o in ticker if instrument_name in o["instrument_name"]]
+    instrument_ticker: list = [o for o in ticker if instrument_name in o["instrument_name"]]
     
     if instrument_ticker:
         

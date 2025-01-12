@@ -214,7 +214,6 @@ async def executing_strategies(
             message: str = queue.get()
                     
             message_channel: str = message["channel"]
-            log.info(message_channel)
             
             data_orders: dict = message["data"] 
                     
@@ -242,7 +241,7 @@ async def executing_strategies(
             await saving_result(
                 data_orders,
                 message_channel,
-                order_db_table,
+                ticker_all,
                 resolution,
                 currency,
                 currency_lower, 
@@ -264,12 +263,7 @@ async def executing_strategies(
                         
                     archive_db_table= f"my_trades_all_{currency_lower}_json"
                     
-                    update_cached_ticker(
-                        instrument_name_perpetual,
-                        ticker_all,
-                        data_orders,
-                        currencies
-                        )
+                    before = [o for o in ticker_all ]
                     
                     # get portfolio data  
                     portfolio = reading_from_pkl_data (
@@ -1284,7 +1278,7 @@ async def saving_order (
 async def saving_result(
     data: dict, 
     message_channel: dict,
-    order_db_table: str,
+    ticker_all: list,
     resolution: int,
     currency,
     currency_lower: str, 
@@ -1325,7 +1319,17 @@ async def saving_result(
             
         instrument_ticker = (message_channel)[19:]
         if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
+            before = [o for o in ticker_all if instrument_ticker in o["instrument_name"]]
+            update_cached_ticker(
+                instrument_ticker,
+                ticker_all,
+                data,
+                )
+            after = [o for o in ticker_all if instrument_ticker in o["instrument_name"]]
             
+            log.debug (before)
+            log.error (after)
+                    
             my_path_ticker = provide_path_for_file(
                 "ticker", 
                 instrument_ticker)
