@@ -187,50 +187,48 @@ async def executing_strategies(
             private_data,
             currencies)  
         
-        not_order = True
-            
         while True:
-
-            message: str = queue.get()
-                    
-            message_channel: str = message["channel"]
             
-            data_orders: dict = message["data"] 
-                    
-            currency: str = message["currency"]
+            not_order = True
             
-            currency_lower: str = currency.lower()
-            
-            currency_upper: str = currency.upper()
-            
-            instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
-            
-            await saving_user_changes(
-                        data_orders, 
-                        message_channel,
-                        orders_all,
-                        order_db_table,
-                        modify_order_and_db,
-                        private_data,
-                        cancellable_strategies,
-                        non_checked_strategies,
-                        currency,
-                        currency_lower, 
-                        ) 
-            
-            log.debug (f"orders_all {len (orders_all)}")   
-                                            
-            await saving_result(
-                data_orders,
-                message_channel,
-                ticker_all,
-                resolution,
-                currency,
-                currency_lower, 
-                chart_trades_buffer
-                )                                
-        
             while not_order:
+            
+                message: str = queue.get()
+                        
+                message_channel: str = message["channel"]
+                
+                data_orders: dict = message["data"] 
+                        
+                currency: str = message["currency"]
+                
+                currency_lower: str = currency.lower()
+                
+                currency_upper: str = currency.upper()
+                
+                instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
+                
+                await saving_user_changes(
+                            data_orders, 
+                            message_channel,
+                            orders_all,
+                            order_db_table,
+                            modify_order_and_db,
+                            private_data,
+                            cancellable_strategies,
+                            non_checked_strategies,
+                            currency,
+                            currency_lower, 
+                            )    
+                                                
+                await saving_result(
+                    data_orders,
+                    message_channel,
+                    ticker_all,
+                    resolution,
+                    currency,
+                    currency_lower, 
+                    chart_trades_buffer
+                    )                                
                         
                 if "chart.trades" in message_channel:
                                           
