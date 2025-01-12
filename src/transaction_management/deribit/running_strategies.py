@@ -18,11 +18,9 @@ from data_cleaning.reconciling_db import (
     is_size_sub_account_and_my_trades_reconciled)
 from db_management.sqlite_management import (
     executing_query_with_return,
-    insert_tables,
     update_status_data)
 from strategies.basic_strategy import (
-    get_label_integer,
-    is_label_and_side_consistent,)
+    get_label_integer,)
 from strategies.hedging_spot import (
     HedgingSpot)
 from strategies.cash_carry.combo_auto import(
@@ -32,9 +30,7 @@ from transaction_management.deribit.api_requests import (
     SendApiRequest,
     get_tickers)
 from transaction_management.deribit.orders_management import (
-    labelling_unlabelled_order,
-    labelling_unlabelled_order_oto,
-    saving_order_based_on_state,
+    saving_orders,
     saving_traded_orders,)
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,)
@@ -48,8 +44,7 @@ from utilities.system_tools import (
     kill_process,
     parse_error_message,
     provide_path_for_file,
-    raise_error_message,
-    sleep_and_restart,)
+    raise_error_message,)
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition)
@@ -1089,45 +1084,16 @@ async def saving_user_changes(
                 data,
                 )
             
-            trades = data["trades"]
-            
-            orders = data["orders"]
-            
             await modify_order_and_db.resupply_sub_accountdb(currency)
 
-            if orders:
-                
-                instrument_name = data["instrument_name"]
-                        
-                if trades:
-                    
-                    archive_db_table= f"my_trades_all_{currency_lower}_json"
-                    
-                    for trade in trades:
-                        
-                        log.critical (f"{trade}")
-                        
-                        await modify_order_and_db.cancel_the_cancellables(
-                            order_db_table,
-                            currency_lower,
-                            cancellable_strategies
-                            )
-                        
-                        if f"f{currency.upper()}-FS-" not in instrument_name:
-                        
-                            await saving_traded_orders(
-                                trade, 
-                                archive_db_table, 
-                                order_db_table
-                                )
-                else:
-                    
-                    await saving_order(
-                        modify_order_and_db,
-                        private_data,
-                        non_checked_strategies,
-                        orders,
-                        order_db_table
+            await saving_orders(
+                modify_order_and_db,
+                private_data,
+                cancellable_strategies,
+                non_checked_strategies,
+                data,
+                order_db_table,
+                currency_lower
                     )
                     
             not_order = False
@@ -1140,156 +1106,6 @@ async def saving_user_changes(
             error,
             "general_error"
             )
-
-async def saving_oto_order (
-    modify_order_and_db,
-    private_data,
-    non_checked_strategies,
-    orders,
-    order_db_table
-    ) -> None:
-              
-    len_oto_order_ids = len(orders[0]["oto_order_ids"])
-    
-    transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
-    log.debug (f"transaction_main {transaction_main}")
-    
-    if len_oto_order_ids==1:
-        pass
-    
-    transaction_main_oto = transaction_main ["oto_order_ids"][0]
-    log.warning (f"transaction_main_oto {transaction_main_oto}")
-    
-    kind= "future"
-    type = "trigger_all"
-    
-    open_orders_from_exchange =  await private_data.get_open_orders(kind, type)
-    log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
-
-    transaction_secondary = [o for o in open_orders_from_exchange\
-        if transaction_main_oto in o["order_id"]]
-    
-    log.warning (f"transaction_secondary {transaction_secondary}")
-    
-    if transaction_secondary:
-        
-        transaction_secondary = transaction_secondary[0]
-        
-        # no label
-        if transaction_main["label"] == ''\
-            and "open" in transaction_main["order_state"]:
-            
-            order_attributes = labelling_unlabelled_order_oto (transaction_main,
-                                                        transaction_secondary)                   
-
-            log.debug (f"order_attributes {order_attributes}")
-            await insert_tables(
-                order_db_table, 
-                transaction_main
-                )
-            
-            await modify_order_and_db.cancel_by_order_id (
-                order_db_table,
-                transaction_main["order_id"]
-                )  
-            
-            await modify_order_and_db.if_order_is_true(
-                non_checked_strategies,
-                order_attributes, 
-                )
-
-        else:
-            await insert_tables(
-                order_db_table, 
-                transaction_main
-                )
-                
-async def saving_order (
-    modify_order_and_db,
-    private_data,
-    non_checked_strategies,
-    orders,
-    order_db_table
-    ) -> None:
-    
-    if "oto_order_ids" in (orders[0]):
-                            
-        await saving_oto_order (
-            modify_order_and_db,
-            private_data,
-            non_checked_strategies,
-            orders,
-            order_db_table
-            ) 
-                        
-    else:
-                                            
-        for order in orders:
-            
-            if  'OTO' not in order["order_id"]:
-                
-                log.warning (f"order {order}")
-                         
-                label= order["label"]
-
-                order_id= order["order_id"]    
-                order_state= order["order_state"]    
-                
-                log.error (f"order_state {order_state}")
-                
-                # no label
-                if label == '':
-                    
-                    if "open" in order_state\
-                        or "untriggered" in order_state:
-                        
-                        order_attributes = labelling_unlabelled_order (order)       
-                        
-                        log.error (f"order_attributes {order_attributes}")            
-
-                        await insert_tables(
-                            order_db_table, 
-                            order
-                            )
-                        
-                        if "OTO" not in order ["order_id"]:
-                            await modify_order_and_db.cancel_by_order_id (
-                                order_db_table,
-                                order_id)  
-                        
-                        await modify_order_and_db.if_order_is_true(
-                            non_checked_strategies,
-                            order_attributes, 
-                            )
-                            
-                else:
-                    label_and_side_consistent= is_label_and_side_consistent(
-                        non_checked_strategies,
-                        order)
-                    
-                    if label_and_side_consistent and label:
-                        
-                        await saving_order_based_on_state (
-                            order_db_table, 
-                            order
-                            )
-                        
-                    # check if transaction has label. Provide one if not any
-                    if  not label_and_side_consistent:
-
-                        if order_state != "cancelled" or order_state != "filled":
-                            
-                            log.warning (f" not label_and_side_consistent {order} {order_state}")
-                        
-                            await insert_tables(
-                                order_db_table, 
-                                order
-                                )
-
-                            await  modify_order_and_db.cancel_by_order_id (
-                                order_db_table,
-                                order_id
-                                )                    
 
 async def saving_result(
     data: dict, 
