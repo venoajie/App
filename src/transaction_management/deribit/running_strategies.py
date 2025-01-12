@@ -186,8 +186,6 @@ async def executing_strategies(
         
         ticker_all = cached_ticker(instruments_name)  
         
-        log.debug (ticker_all)
-                
         orders_all = await combining_order_data(
             private_data,
             currencies)  
@@ -238,10 +236,10 @@ async def executing_strategies(
                 currency,
                 currency_lower, 
                 )          
+        
             after = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
             log.error (after)
-
-                                                                                
+                                               
             await saving_result(
                 data_orders,
                 message_channel,
@@ -275,7 +273,7 @@ async def executing_strategies(
                     equity: float = portfolio["equity"]    
                     
                     ticker_perpetual_instrument_name = [o for o in ticker_all \
-                        if instrument_name_perpetual == o["instrument_name"]][0]                                   
+                        if instrument_name_perpetual in o["instrument_name"]][0]                                   
                                                                         
                     index_price= get_index (
                         data_orders,
@@ -471,16 +469,13 @@ async def executing_strategies(
                                             if not size_future_reconciled:
                                                 kill_process("general_tasks")
                                                                                                 
-                                            ticker_combo= reading_from_pkl_data(
-                                                "ticker",
-                                                instrument_name_combo
-                                                )
+                                            ticker_combo = [o for o in ticker_all 
+                                                            if instrument_name_combo in o["instrument_name"]]
                                             
-                                            ticker_future= reading_from_pkl_data(
-                                                "ticker",
-                                                instrument_name_future
-                                                )
-                                                
+                                            
+                                            ticker_future= [o for o in ticker_all 
+                                                            if instrument_name_future in o["instrument_name"]]
+                                            
                                             if False and len_sub_account_orders_all < 50\
                                                     and ticker_future and ticker_combo:
                                                 #and not reduce_only \
@@ -641,10 +636,8 @@ async def executing_strategies(
 
                                                             instrument_name = transaction["instrument_name"]
                                                             
-                                                            ticker_transaction= reading_from_pkl_data(
-                                                                "ticker",
-                                                                instrument_name
-                                                                )
+                                                            ticker_transaction= [o for o in ticker_all 
+                                                                                 if instrument_name in o["instrument_name"]]
                                                             
                                                             if ticker_transaction and len_sub_account_orders_all < 50:
                                                                 
@@ -693,6 +686,7 @@ async def executing_strategies(
                                         strong_bearish,
                                         bearish,
                                         instrument_attributes_futures_for_hedging,
+                                        ticker_all,
                                         ticker_perpetual_instrument_name,
                                         currency_upper)
                                                 
@@ -763,9 +757,8 @@ async def executing_strategies(
                                                         
                                                         for instrument_name in transaction_instrument_name:
                                                             
-                                                            instrument_ticker: list = reading_from_pkl_data(
-                                                                "ticker",
-                                                                instrument_name)
+                                                            instrument_ticker: list =  [o for o in ticker_all 
+                                                                                        if instrument_name in o["instrument_name"]]
                                                             
                                                             if instrument_ticker:
                                                                 
@@ -1033,11 +1026,11 @@ def modify_hedging_instrument (
     strong_bearish:  bool,
     bearish:  bool,
     instrument_attributes_futures_for_hedging: list,
+    ticker_all: list,
     ticker_perpetual_instrument_name: dict,
     currency_upper: str,
     ) -> dict:
     
-
     if bearish or not strong_bearish:
                                 
         instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
@@ -1047,15 +1040,14 @@ def modify_hedging_instrument (
         if len(instrument_attributes_future) > 1:
             index_attributes = randbelow(2)
             instrument_attributes = instrument_attributes_future[index_attributes]
+            
         else:
             instrument_attributes = instrument_attributes_future[0]
             
         instrument_name: str = instrument_attributes ["instrument_name"] 
         
-        instrument_ticker: list = reading_from_pkl_data(
-            "ticker",
-            instrument_name
-            )
+        instrument_ticker =  [o for o in ticker_all 
+                          if instrument_name in o["instrument_name"]]
                         
         #log.error (f"instrument_ticker {instrument_ticker}")
         if instrument_ticker:                    
@@ -1068,7 +1060,6 @@ def modify_hedging_instrument (
 
     else:
         return   ticker_perpetual_instrument_name
-    
     
     
 async def saving_user_changes(
