@@ -184,14 +184,6 @@ async def executing_strategies(
             currencies
             )
         
-        ticker_all = cached_ticker(instruments_name)  
-        
-        orders_all = await combining_order_data(
-            private_data,
-            currencies)  
-        
-        log.warning (f"orders_all {orders_all}")
-                
         resolutions = [60,15, 5]     
         qty_candles = 5  
         dim_sequence = 3     
@@ -205,9 +197,19 @@ async def executing_strategies(
         
         chart_trades_buffer = []
         
+        not_order = False
+        
         resolution = 1
         
-        while True:
+        ticker_all = cached_ticker(instruments_name)  
+        
+        orders_all = await combining_order_data(
+            private_data,
+            currencies)  
+        
+        log.warning (f"orders_all {orders_all}")
+                
+        while not not_order:
             
             message: str = queue.get()
                     
@@ -310,7 +312,7 @@ async def executing_strategies(
                             else [o for o in orders_all\
                                 if currency_upper in o["instrument_name"]]
                         
-                        len_sub_account_orders_all = len(orders_currency)
+                        len_orders_all = len(orders_currency)
 
                         if orders_currency:
                             
@@ -406,7 +408,7 @@ async def executing_strategies(
                                                                 if strategy in (o["label"]) ])
                                 
                                 log.info (f"orders_currency_strategy {orders_currency_strategy}")
-                                log.critical (f"len_sub_account_orders_all {len_sub_account_orders_all}")
+                                log.critical (f"len_orders_all {len_orders_all}")
                             
                                 if  False and "futureSpread" in strategy :
                                                         
@@ -476,7 +478,7 @@ async def executing_strategies(
                                             ticker_future= [o for o in ticker_all 
                                                             if instrument_name_future in o["instrument_name"]]
                                             
-                                            if False and len_sub_account_orders_all < 50\
+                                            if False and len_orders_all < 50\
                                                     and ticker_future and ticker_combo:
                                                 #and not reduce_only \
                                                 
@@ -543,7 +545,7 @@ async def executing_strategies(
                                         len_selected_transaction = len(selected_transaction_amount)
                                         
                                         #! closing combo auto trading
-                                        if "Auto" in label and len_sub_account_orders_all < 50:
+                                        if "Auto" in label and len_orders_all < 50:
                                             
                                             #log.critical (f"sum_selected_transaction {sum_selected_transaction}")
                                             #log.info (f"selected_transaction {selected_transaction}")
@@ -639,7 +641,7 @@ async def executing_strategies(
                                                             ticker_transaction= [o for o in ticker_all 
                                                                                  if instrument_name in o["instrument_name"]]
                                                             
-                                                            if ticker_transaction and len_sub_account_orders_all < 50:
+                                                            if ticker_transaction and len_orders_all < 50:
                                                                 
                                                                 TP_THRESHOLD = THRESHOLD_MARKET_CONDITIONS_COMBO * 5
                                                                 
@@ -718,7 +720,7 @@ async def executing_strategies(
                                                                                                 
                                         #something was wrong because perpetuals were actively traded. cancell  orders
                                         if instrument_time_left_exceed_threshold\
-                                            and len_sub_account_orders_all < 50:
+                                            and len_orders_all < 50:
                                             
                                             best_ask_prc: float = instrument_ticker["best_ask_price"] 
 
@@ -736,7 +738,7 @@ async def executing_strategies(
                                             status_transaction =["open",
                                                         "closed"]
                                             
-                                            if len_sub_account_orders_all < 50:
+                                            if len_orders_all < 50:
                                                 
                                                 log.error (f"{orders_currency_strategy} ")
                                                                                                                                     
@@ -1077,7 +1079,7 @@ async def saving_user_changes(
     """ """
     
     try:
-        
+                
         if "user.changes.any" in message_channel:
 
             update_cached_orders(
@@ -1088,6 +1090,8 @@ async def saving_user_changes(
             trades = data["trades"]
             
             orders = data["orders"]
+            
+            await modify_order_and_db.modify_order_and_db(currency)
 
             if orders:
                 
@@ -1189,7 +1193,12 @@ async def saving_user_changes(
                                     order,
                                     order_db_table
                                 )
-               
+       
+                
+                not_order = True
+                 
+        
+       
     except Exception as error:
         
         await parse_error_message(error)  
