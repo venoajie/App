@@ -240,6 +240,8 @@ async def executing_strategies(
                 currency,
                 currency_lower, 
                 )          
+
+            log.warning (f"not_order {not_order}")
         
             after = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
             #log.error (after)
