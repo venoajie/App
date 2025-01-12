@@ -19,8 +19,7 @@ from data_cleaning.reconciling_db import (
 from db_management.sqlite_management import (
     executing_query_with_return,
     update_status_data)
-from strategies.basic_strategy import (
-    get_label_integer,)
+from strategies.basic_strategy import (get_label_integer,)
 from strategies.hedging_spot import (
     HedgingSpot)
 from strategies.cash_carry.combo_auto import(
@@ -29,13 +28,9 @@ from strategies.cash_carry.combo_auto import(
 from transaction_management.deribit.api_requests import (
     SendApiRequest,
     get_tickers)
-from transaction_management.deribit.orders_management import (
-    saving_orders,
-    saving_traded_orders,)
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,)
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
+from transaction_management.deribit.orders_management import (saving_orders,)
+from transaction_management.deribit.get_instrument_summary import (get_futures_instruments,)
+from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
@@ -1083,8 +1078,6 @@ async def saving_user_changes(
                 orders_all,
                 data,
                 )
-            
-            await modify_order_and_db.resupply_sub_accountdb(currency)
 
             await saving_orders(
                 modify_order_and_db,
@@ -1095,6 +1088,8 @@ async def saving_user_changes(
                 order_db_table,
                 currency_lower
                     )
+            
+            await modify_order_and_db.resupply_sub_accountdb(currency)
                     
             not_order = False
             
