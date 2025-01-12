@@ -197,8 +197,6 @@ async def executing_strategies(
         
         chart_trades_buffer = []
         
-        
-        
         resolution = 1
         
         ticker_all = cached_ticker(instruments_name)  
@@ -317,29 +315,8 @@ async def executing_strategies(
                             
                             len_orders_all = len(orders_currency)
 
-                            if orders_currency:
-                                
-                                outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency\
-                                    if o["label"] != '' ])
-                                
-                                for label in outstanding_order_id:
-                                    
-                                    orders = ([o for o in orders_currency\
-                                        if label in o["label"]])
-                                    
-                                    len_label = len(orders)
-                                    
-                                    if len_label >1:
-                                        
-                                        for order in orders:
-                                            log.critical (f"double ids {label}")
-                                            log.critical ([o for o in orders_currency if label in o["label"]])
-                                            await  modify_order_and_db. cancel_by_order_id (
-                                                order_db_table,
-                                                order["order_id"]
-                                                )
-                                            break
-                            
+                            #if orders_currency:
+                                                            
                             position = [o for o in sub_account["positions"]]
                             #log.debug (f"position {position}")
                             position_without_combo = [ o for o in position \
@@ -409,6 +386,32 @@ async def executing_strategies(
                                     orders_currency_strategy = ([] if not orders_currency  
                                                                 else [o for o in orders_currency 
                                                                     if strategy in (o["label"]) ])
+                                    
+                                    if orders_currency_strategy:
+                                        
+                                        outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency_strategy])
+                                        
+                                        for label in outstanding_order_id:
+                                            
+                                            orders = ([o for o in orders_currency\
+                                                if label in o["label"]])
+                                            
+                                            len_label = len(orders)
+                                            
+                                            if len_label >1:
+                                                
+                                                for order in orders:
+                                                    log.critical (f"double ids {label}")
+                                                    log.critical ([o for o in orders_currency if label in o["label"]])
+                                                    await  modify_order_and_db. cancel_by_order_id (
+                                                        order_db_table,
+                                                        order["order_id"]
+                                                        )
+                                                    
+                                                    not_order = False
+                                                    
+                                                    break
+
                                     
                                     log.info (f"orders_currency_strategy {orders_currency_strategy}")
                                     log.critical (f"len_orders_all {len_orders_all}")
@@ -999,7 +1002,6 @@ async def processing_orders(
                     transaction_log_trading_table= f"transaction_log_{currency.lower()}_json"
                     
                     archive_db_table= f"my_trades_all_{currency.lower()}_json"
-                    
                     
                     relevant_tables = config_app["relevant_tables"][0]
                                 
