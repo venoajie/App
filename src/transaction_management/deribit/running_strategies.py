@@ -229,8 +229,9 @@ async def executing_strategies(
                     currency_lower, 
                     chart_trades_buffer
                     )                                
-                        
-                if "chart.trades" in message_channel:
+                
+                instrument_ticker = (message_channel)[19:]
+                if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
                                           
                     archive_db_table: str = f"my_trades_all_{currency_lower}_json"
                                     
