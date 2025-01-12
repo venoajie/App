@@ -221,7 +221,7 @@ class StreamAccountData(ModifyOrderDb):
                             ]
                         
                         for ws in ws_channel_instrument:
-                            await self.ws_operation self.ws_operation(
+                            await self.ws_operation(
                                     operation = "subscribe",
                                     ws_channel = ws,
                                     )
