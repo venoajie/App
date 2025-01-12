@@ -12,6 +12,8 @@ import numpy as np
 import random
 from secrets import randbelow
 import tomli
+import uvloop
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from configuration.label_numbering import get_now_unix_time
 from data_cleaning.reconciling_db import (is_size_sub_account_and_my_trades_reconciled)
