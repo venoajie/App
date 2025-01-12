@@ -224,7 +224,7 @@ async def executing_strategies(
             
             instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
             before = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
-            log.debug (before)
+            #log.debug (before)
                                                             
             await saving_user_changes(
                 data_orders, 
@@ -240,7 +240,7 @@ async def executing_strategies(
                 )          
         
             after = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
-            log.error (after)
+            #log.error (after)
                                                
             await saving_result(
                 data_orders,
@@ -1194,8 +1194,9 @@ async def saving_user_changes(
                                     order_db_table
                                 )
        
-                
+                log.critical (f"not_order {not_order}")
                 not_order = True
+                log.critical (f"not_order {not_order}")
                  
         
        
@@ -1330,9 +1331,9 @@ async def saving_result(
                 data,
                 )
             
-            if "PERPETUAL" in instrument_ticker:
-                log.critical (instrument_ticker)
-                log.error (data)
+            #if "PERPETUAL" in instrument_ticker:
+             #   log.critical (instrument_ticker)
+              #  log.error (data)
                     
             my_path_ticker = provide_path_for_file(
                 "ticker", 
