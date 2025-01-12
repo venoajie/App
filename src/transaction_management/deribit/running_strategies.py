@@ -227,21 +227,29 @@ async def executing_strategies(
             instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
             before = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
             #log.debug (before)
-                                                            
-            not_order = await saving_user_changes(
-                data_orders, 
-                message_channel,
-                orders_all,
-                order_db_table,
-                modify_order_and_db,
-                private_data,
-                cancellable_strategies,
-                non_checked_strategies,
-                currency,
-                currency_lower, 
-                )          
+            
+            if "user.changes.any" in message_channel:
+                
+                orders = data_orders["orders"]
+                
+                if orders:
+                    
+                    await saving_user_changes(
+                        data_orders, 
+                        message_channel,
+                        orders_all,
+                        order_db_table,
+                        modify_order_and_db,
+                        private_data,
+                        cancellable_strategies,
+                        non_checked_strategies,
+                        currency,
+                        currency_lower, 
+                        )    
+                    
+                    not_order = True      
 
-            #log.warning (f"not_order {not_order}")
+            log.warning (f"not_order {not_order}")
         
             after = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
             #log.error (after)
@@ -1083,131 +1091,119 @@ async def saving_user_changes(
     """ """
     
     try:
-                
-        not_order = False
+               
+        update_cached_orders(
+            orders_all,
+            data,
+            )
         
-        if "user.changes.any" in message_channel:
+        trades = data["trades"]
+        
+        orders = data["orders"]
+        
+        await modify_order_and_db.resupply_sub_accountdb(currency)
 
-            update_cached_orders(
-                orders_all,
-                data,
-                )
+        if orders:
             
-            trades = data["trades"]
-            
-            orders = data["orders"]
-            
-            await modify_order_and_db.resupply_sub_accountdb(currency)
-
-            if orders:
+            instrument_name = data["instrument_name"]
+                    
+            if trades:
                 
-                instrument_name = data["instrument_name"]
-                        
-                if trades:
+                archive_db_table= f"my_trades_all_{currency_lower}_json"
+                
+                for trade in trades:
                     
-                    archive_db_table= f"my_trades_all_{currency_lower}_json"
+                    log.critical (f"{trade}")
                     
-                    for trade in trades:
-                        
-                        log.critical (f"{trade}")
-                        
-                        await modify_order_and_db.cancel_the_cancellables(
-                            order_db_table,
-                            currency_lower,
-                            cancellable_strategies
+                    await modify_order_and_db.cancel_the_cancellables(
+                        order_db_table,
+                        currency_lower,
+                        cancellable_strategies
+                        )
+                    
+                    if f"f{currency.upper()}-FS-" not in instrument_name:
+                    
+                        await saving_traded_orders(
+                            trade, 
+                            archive_db_table, 
+                            order_db_table
                             )
                         
-                        if f"f{currency.upper()}-FS-" not in instrument_name:
-                        
-                            await saving_traded_orders(
-                                trade, 
-                                archive_db_table, 
-                                order_db_table
-                                )
-                            
-                else:
+            else:
+                
+                if "oto_order_ids" in (orders[0]):
+                                        
+                    len_oto_order_ids = len(orders[0]["oto_order_ids"])
                     
-                    if "oto_order_ids" in (orders[0]):
-                                            
-                        len_oto_order_ids = len(orders[0]["oto_order_ids"])
-                        
-                        transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
-                        log.debug (f"transaction_main {transaction_main}")
-                        
-                        if len_oto_order_ids==1:
-                            pass
-                        
-                        transaction_main_oto = transaction_main ["oto_order_ids"][0]
-                        log.warning (f"transaction_main_oto {transaction_main_oto}")
-                        
-                        kind= "future"
-                        type = "trigger_all"
-                        
-                        open_orders_from_exchange =  await private_data.get_open_orders(kind, type)
-                        log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
+                    transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
+                    log.debug (f"transaction_main {transaction_main}")
+                    
+                    if len_oto_order_ids==1:
+                        pass
+                    
+                    transaction_main_oto = transaction_main ["oto_order_ids"][0]
+                    log.warning (f"transaction_main_oto {transaction_main_oto}")
+                    
+                    kind= "future"
+                    type = "trigger_all"
+                    
+                    open_orders_from_exchange =  await private_data.get_open_orders(kind, type)
+                    log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
 
-                        transaction_secondary = [o for o in open_orders_from_exchange\
-                            if transaction_main_oto in o["order_id"]]
+                    transaction_secondary = [o for o in open_orders_from_exchange\
+                        if transaction_main_oto in o["order_id"]]
+                    
+                    log.warning (f"transaction_secondary {transaction_secondary}")
+                    
+                    if transaction_secondary:
                         
-                        log.warning (f"transaction_secondary {transaction_secondary}")
+                        transaction_secondary = transaction_secondary[0]
                         
-                        if transaction_secondary:
+                        # no label
+                        if transaction_main["label"] == ''\
+                            and "open" in transaction_main["order_state"]:
                             
-                            transaction_secondary = transaction_secondary[0]
-                            
-                            # no label
-                            if transaction_main["label"] == ''\
-                                and "open" in transaction_main["order_state"]:
-                                
-                                order_attributes = labelling_unlabelled_order_oto (transaction_main,
-                                                                            transaction_secondary)                   
+                            order_attributes = labelling_unlabelled_order_oto (transaction_main,
+                                                                        transaction_secondary)                   
 
-                                log.debug (f"order_attributes {order_attributes}")
-                                await insert_tables(
-                                    order_db_table, 
-                                    transaction_main
-                                    )
-                                
-                                await modify_order_and_db.cancel_by_order_id (
-                                    order_db_table,
-                                    transaction_main["order_id"]
-                                    )  
-                                
-                                await modify_order_and_db.if_order_is_true(
-                                    non_checked_strategies,
-                                    order_attributes, 
-                                    )
-
-                            else:
-                                await insert_tables(
-                                    order_db_table, 
-                                    transaction_main
-                                    )
-                                    
-                    else:
-                                                            
-                        for order in orders:
-                            
-                            if  'OTO' not in order["order_id"]:
-                                
-                                log.warning (f"order {order}")
-                                                        
-                                await saving_order(
-                                    modify_order_and_db,
-                                    non_checked_strategies,
-                                    instrument_name,
-                                    order,
-                                    order_db_table
+                            log.debug (f"order_attributes {order_attributes}")
+                            await insert_tables(
+                                order_db_table, 
+                                transaction_main
                                 )
-       
-                
-                not_order = True
-                
-                return not_order
-                log.critical (f"not_order {not_order}")
-                 
-        
-       
+                            
+                            await modify_order_and_db.cancel_by_order_id (
+                                order_db_table,
+                                transaction_main["order_id"]
+                                )  
+                            
+                            await modify_order_and_db.if_order_is_true(
+                                non_checked_strategies,
+                                order_attributes, 
+                                )
+
+                        else:
+                            await insert_tables(
+                                order_db_table, 
+                                transaction_main
+                                )
+                                
+                else:
+                                                        
+                    for order in orders:
+                        
+                        if  'OTO' not in order["order_id"]:
+                            
+                            log.warning (f"order {order}")
+                                                    
+                            await saving_order(
+                                modify_order_and_db,
+                                non_checked_strategies,
+                                instrument_name,
+                                order,
+                                order_db_table
+                            )
+    
     except Exception as error:
         
         await parse_error_message(error)  
