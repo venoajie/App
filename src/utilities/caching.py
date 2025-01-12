@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import asyncio
 from transaction_management.deribit.api_requests import (
     get_tickers,)
@@ -78,14 +79,16 @@ def update_cached_ticker(
         for item in data_orders:
 
             if "stats" not in item and "instrument_name" not in item and "type" not in item:
-                [o for o in ticker if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
+                [o for o in ticker 
+                 if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
 
             if "stats"  in item:
                 
                 data_orders_stat = data_orders[item]
                 
                 for item in data_orders_stat:
-                    [o for o in ticker if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
+                    [o for o in ticker 
+                     if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
     
     else:
         from loguru import logger as log
@@ -172,11 +175,12 @@ def update_cached_orders(
                 
                 order_id = trade["order_id"]
                 
-                selected_order = [o for o in current_orders if order_id in o["order_id"]]
+                selected_order = [o for o in current_orders 
+                                  if order_id in o["order_id"]]
                 
                 if selected_order:
                                         
-                    current_orders.remove(trade[0])
+                    current_orders.remove(trade)
                 
         if orders:
         
@@ -188,11 +192,12 @@ def update_cached_orders(
                 
                     order_id = order["order_id"]
                     
-                    selected_order = [o for o in current_orders if order_id in o["order_id"]]
+                    selected_order = [o for o in current_orders 
+                                      if order_id in o["order_id"]]
                     
                     if selected_order:
                                             
-                        current_orders.remove(selected_order[0])
+                        current_orders.remove(selected_order)
                     
                 else:
                 

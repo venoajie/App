@@ -224,6 +224,7 @@ async def executing_strategies(
                 currency: str = message["currency"]
                 
                 currency_lower: str = currency.lower()
+                
                 currency_upper: str = currency.upper()
                 
                 instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
