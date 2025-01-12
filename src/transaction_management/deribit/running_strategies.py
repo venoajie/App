@@ -249,8 +249,6 @@ async def executing_strategies(
                     
                     not_order = True 
                     
-                    return not_order     
-
             log.warning (f"not_order {not_order}")
         
             after = [o for o in ticker_all if instrument_name_perpetual in o["instrument_name"]]
