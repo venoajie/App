@@ -1014,8 +1014,8 @@ async def processing_orders(
                     """
                     non-combo transaction need to restart after sending order to ensure it recalculate orders and trades
                     """
-                    if "-FS-" not in instrument_name:
-                        await sleep_and_restart ()
+                    
+                    not_order = False
                 
                 except Exception as error :
                     pass 
