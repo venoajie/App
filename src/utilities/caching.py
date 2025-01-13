@@ -151,9 +151,8 @@ async def combining_order_data(
     return result
 
 async def update_cached_orders(
-    queue,
-    queue_cached_orders,
-    data_orders: dict):
+    orders_all,
+    queue: dict):
     """_summary_
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
 
@@ -164,13 +163,12 @@ async def update_cached_orders(
         _type_: _description_
     """
     
+    data_orders= await queue.get()
+    
     orders = data_orders["orders"]
     
     trades = data_orders["trades"]
     
-    current_orders= await queue.get()
-    
-
     if orders:
           
         if trades :
@@ -179,12 +177,12 @@ async def update_cached_orders(
 
                 order_id = trade["order_id"]
                 
-                selected_order = [o for o in current_orders 
+                selected_order = [o for o in orders_all 
                                   if order_id in o["order_id"]]
                 
                 if selected_order:
                                         
-                    current_orders.remove(selected_order[0])
+                    orders_all.remove(selected_order[0])
                 
         if orders:
         
@@ -198,18 +196,18 @@ async def update_cached_orders(
                 
                     order_id = order["order_id"]
                     
-                    selected_order = [o for o in current_orders 
+                    selected_order = [o for o in orders_all 
                                       if order_id in o["order_id"]]
                     
                     print(f"caching selected_order {selected_order}")
                     
                     if selected_order:
                                             
-                        current_orders.remove(selected_order[0])
+                        orders_all.remove(selected_order[0])
                     
                 else:
                 
-                    current_orders.append(order)
+                    orders_all.append(order)
                 
-    await queue_cached_orders.put(current_orders)
-    await queue_cached_orders.task_done()
+    await queue.put(orders_all)
+    await queue.task_done()
