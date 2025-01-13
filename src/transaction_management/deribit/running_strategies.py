@@ -248,16 +248,14 @@ async def executing_strategies(
                             currency_upper
                             )
                         
-                        #log.warning (market_condition)
+                        log.warning (market_condition)
 
                         if  sub_account :
                             
                             query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
                                 
                             my_trades_currency_all_transactions: list= await executing_query_with_return (query_trades)
-                            
-                            log.error (my_trades_currency_all_transactions)
-                                                                                            
+                                                 
                             my_trades_currency_all: list= [] if my_trades_currency_all_transactions == 0 \
                                 else [o for o in my_trades_currency_all_transactions
                                       if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
@@ -288,7 +286,6 @@ async def executing_strategies(
                             if index_price is not None \
                                 and equity > 0 :
                         
-                                log.error (my_trades_currency_all)
                                 my_trades_currency: list= [ o for o in my_trades_currency_all \
                                     if o["label"] is not None] 
                                 
