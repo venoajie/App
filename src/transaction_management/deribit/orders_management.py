@@ -352,27 +352,14 @@ async def saving_orders (
                         # no label
                         if label == '':
                             
-                            if "open" in order_state\
-                                or "untriggered" in order_state:
-                                
-                                order_attributes = labelling_unlabelled_order (order)       
-                                
-                                log.error (f"order_attributes {order_attributes}")            
-
-                                await insert_tables(
-                                    order_db_table, 
-                                    order
-                                    )
-                                
-                                if "OTO" not in order ["order_id"]:
-                                    await modify_order_and_db.cancel_by_order_id (
-                                        order_db_table,
-                                        order_id)  
-                                
-                                await modify_order_and_db.if_order_is_true(
-                                    non_checked_strategies,
-                                    order_attributes, 
-                                    )
+                            await cancelling_and_relabelling (
+                                modify_order_and_db,
+                                non_checked_strategies,
+                                order_db_table,
+                                order,
+                                label,
+                                order_state,
+                                order_id,)
                                     
                         else:
                             label_and_side_consistent= is_label_and_side_consistent(
@@ -402,3 +389,42 @@ async def saving_orders (
                                         order_db_table,
                                         order_id
                                         )                    
+
+                
+async def cancelling_and_relabelling (
+    modify_order_and_db,
+    non_checked_strategies,
+    order_db_table,
+    order,
+    label,
+    order_state,
+    order_id,
+    ) -> None:
+    
+
+
+    # no label
+    if label == '':
+        
+        if "open" in order_state\
+            or "untriggered" in order_state:
+            
+            order_attributes = labelling_unlabelled_order (order)       
+            
+            log.error (f"order_attributes {order_attributes}")            
+
+            await insert_tables(
+                order_db_table, 
+                order
+                )
+            
+            if "OTO" not in order ["order_id"]:
+                await modify_order_and_db.cancel_by_order_id (
+                    order_db_table,
+                    order_id)  
+            
+            await modify_order_and_db.if_order_is_true(
+                non_checked_strategies,
+                order_attributes, 
+                )
+                

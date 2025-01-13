@@ -3,42 +3,19 @@
 
 # built ins
 import asyncio
-import sys
 
 # installed
 from loguru import logger as log
-import signal
-from multiprocessing import Manager
-from multiprocessing.queues import Queue
-#from multiprocessing import cpu_count
-from aiomultiprocess import Pool
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from transaction_management.deribit.data_producer import (
     StreamAccountData,)
 from transaction_management.deribit.running_strategies import executing_strategies
-from transaction_management.deribit.user_chg import executing_strategies as save_user
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
+from transaction_management.deribit.user_chg import saving_and_relabelling_orders
 from utilities.system_tools import (
-    async_raise_error_message,
-    parse_error_message,
-    SignalHandler)
+    async_raise_error_message,)
         
-async def producer(queue):
-    for i in range(5):
-        await queue.put(i)
-        print(f'Produced {i}')
-
-async def consumer(queue):
-    while True:
-        item = await queue.get()
-        print(f'Consumed {item}')
-            
-
 async def main():
     
     sub_account_id = "deribit-148510"
@@ -60,7 +37,7 @@ async def main():
             executing_strategies(
                 sub_account_id,
                 queue),
-            save_user(
+            saving_and_relabelling_orders(
                 sub_account_id,
                 queue),)
         

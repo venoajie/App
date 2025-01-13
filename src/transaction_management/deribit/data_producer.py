@@ -278,8 +278,6 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 send_queue = asyncio.Queue()
                                 
-                                data_json = send_queue.get()
-
                                 result = dict(data= data, 
                                               channel= message_channel,
                                               currency= currency_lower)

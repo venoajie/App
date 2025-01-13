@@ -15,11 +15,11 @@ from aiomultiprocess import Pool
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
+
 from transaction_management.deribit.data_producer import (
     StreamAccountData,)
 from transaction_management.deribit.running_strategies import executing_strategies
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
+from transaction_management.deribit.user_chg import saving_and_relabelling_orders
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from utilities.system_tools import (
@@ -37,7 +37,7 @@ def handle_ctrl_c(
                   
 signal_handler = SignalHandler()
 
-async def main():
+async def main2():
     
     """
         https://blog.finxter.com/python-multiprocessing-pool-ultimate-guide/
@@ -93,6 +93,31 @@ async def main():
             "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
         )
         
+async def main():
+    
+    sub_account_id = "deribit-148510"
+    
+    try:
+        
+        queue: Queue = asyncio.Queue(maxsize=10)
+        
+        stream = StreamAccountData(sub_account_id)
+       
+        producer_task = asyncio.create_task(stream.ws_manager(queue)) 
+        
+        await asyncio.gather(
+            producer_task, 
+            executing_strategies(
+                sub_account_id,
+                queue),
+            saving_and_relabelling_orders(
+                sub_account_id,
+                queue),)
+        
+    except Exception as error:
+        
+        parse_error_message(error)
+
 if __name__ == "__main__":
     
     
