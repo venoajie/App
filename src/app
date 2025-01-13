@@ -20,6 +20,7 @@ from transaction_management.deribit.data_producer import (
     StreamAccountData,)
 from transaction_management.deribit.running_strategies import executing_strategies
 from transaction_management.deribit.user_chg import saving_and_relabelling_orders
+from transaction_management.deribit.saving_result import saving_ws_data
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
 from utilities.system_tools import (
@@ -114,7 +115,13 @@ async def main():
             
             saving_and_relabelling_orders(
                 sub_account_id,
-                queue),)
+                queue),
+            
+            saving_ws_data(
+                sub_account_id,
+                queue),
+            
+            )
         
     except Exception as error:
         
