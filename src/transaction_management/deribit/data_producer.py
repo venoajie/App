@@ -4,6 +4,7 @@
 # built ins
 import asyncio
 from datetime import datetime, timedelta, timezone
+from collections import deque
 import os
 
 # installed
@@ -275,19 +276,29 @@ class StreamAccountData(ModifyOrderDb):
                                 currency: str = extract_currency_from_text(message_channel)
                                 
                                 currency_lower: str = currency.lower()
-                                
-                                send_queue = asyncio.Queue()
-                                
+                                                                
                                 result = dict(data= data, 
                                               channel= message_channel,
                                               currency= currency_lower)
-                                
+                                deque = (result)
                                 
                                 if "user.changes.any" in message_channel:
-                                    log.error (data)
+                                    log.error (deque)
                         
                                 #queue.put(result)
-                                await queue.put(result)
+                                try:
+                                    if deque:       
+                                        await queue.put(deque)
+                                    else:
+                                        break
+                                    
+                                    await queue.task_done()
+                                        
+                                except:
+                                    pass
+                                        
+                                else:
+                                    await queue.task_done()
                                         
             except Exception as error:
 

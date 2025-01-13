@@ -38,13 +38,6 @@ async def saving_traded_orders(
         
         log.critical (f"{trade}")
         
-        await modify_order_and_db.cancel_the_cancellables(
-            order_db_table,
-            currency_lower,
-            cancellable_strategies
-            )
-        
-            
         # remove respective transaction from order db            
         await deleting_row (
             order_db_table,
@@ -60,6 +53,13 @@ async def saving_traded_orders(
                     trade_table, 
                     trade
                     )
+            
+        
+        await modify_order_and_db.cancel_the_cancellables(
+            order_db_table,
+            currency_lower,
+            cancellable_strategies
+            )
         
 async def saving_order_based_on_state(
     order_table: str,
@@ -241,24 +241,24 @@ async def saving_oto_order (
     len_oto_order_ids = len(orders[0]["oto_order_ids"])
     
     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
-    log.debug (f"transaction_main {transaction_main}")
+    #log.debug (f"transaction_main {transaction_main}")
     
     if len_oto_order_ids==1:
         pass
     
     transaction_main_oto = transaction_main ["oto_order_ids"][0]
-    log.warning (f"transaction_main_oto {transaction_main_oto}")
+    #log.warning (f"transaction_main_oto {transaction_main_oto}")
     
     kind= "future"
     type = "trigger_all"
     
     open_orders_from_exchange =  await private_data.get_open_orders(kind, type)
-    log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
+    #log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
 
     transaction_secondary = [o for o in open_orders_from_exchange\
         if transaction_main_oto in o["order_id"]]
     
-    log.warning (f"transaction_secondary {transaction_secondary}")
+    #log.warning (f"transaction_secondary {transaction_secondary}")
     
     if transaction_secondary:
         
@@ -267,15 +267,16 @@ async def saving_oto_order (
         # no label
         if transaction_main["label"] == ''\
             and "open" in transaction_main["order_state"]:
-            
-            order_attributes = labelling_unlabelled_order_oto (transaction_main,
-                                                        transaction_secondary)                   
-
-            log.debug (f"order_attributes {order_attributes}")
+                
             await insert_tables(
                 order_db_table, 
                 transaction_main
                 )
+            
+            order_attributes = labelling_unlabelled_order_oto (transaction_main,
+                                                        transaction_secondary)                   
+
+            #log.debug (f"order_attributes {order_attributes}")
             
             await modify_order_and_db.cancel_by_order_id (
                 order_db_table,
@@ -340,14 +341,14 @@ async def saving_orders (
                     
                     if  'OTO' not in order["order_id"]:
                         
-                        log.warning (f"order {order}")
+                        #log.warning (f"order {order}")
                                 
                         label= order["label"]
 
                         order_id= order["order_id"]    
                         order_state= order["order_state"]    
                         
-                        log.error (f"order_state {order_state}")
+                        #log.error (f"order_state {order_state}")
                         
                         # no label
                         if label == '':
@@ -378,7 +379,7 @@ async def saving_orders (
 
                                 if order_state != "cancelled" or order_state != "filled":
                                     
-                                    log.warning (f" not label_and_side_consistent {order} {order_state}")
+                                    #log.warning (f" not label_and_side_consistent {order} {order_state}")
                                 
                                     await insert_tables(
                                         order_db_table, 
@@ -411,7 +412,7 @@ async def cancelling_and_relabelling (
             
             order_attributes = labelling_unlabelled_order (order)       
             
-            log.error (f"order_attributes {order_attributes}")            
+            #og.error (f"order_attributes {order_attributes}")            
 
             await insert_tables(
                 order_db_table, 

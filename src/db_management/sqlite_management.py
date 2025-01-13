@@ -76,7 +76,6 @@ async def insert_tables(
 
     """
     try:
-        log.info (f"insert_tables {table_name} {params}")
 
         async with aiosqlite.connect("databases/trading.sqlite3",
                                      isolation_level = None) as db:
