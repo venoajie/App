@@ -153,6 +153,7 @@ async def combining_order_data(
 
 async def update_cached_orders(
     queue_orders_all,
+    queue_orders,
     queue: dict):
     """_summary_
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
@@ -170,7 +171,7 @@ async def update_cached_orders(
             
             orders_all = queue_orders_all
                       
-            message= await queue.get()
+            message= await queue_orders.get()
             
             print (f"message {message}")
 

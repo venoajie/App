@@ -146,6 +146,7 @@ async def main():
         
         queue = asyncio.Queue(maxsize=10)
         queue_cached_orders = asyncio.Queue()
+        queue_orders = asyncio.Queue()
         
         stream = StreamAccountData(sub_account_id)
                 
@@ -156,9 +157,9 @@ async def main():
        
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
         
-        producer_cached_orders = asyncio.create_task(update_cached_orders(
-                        
+        producer_cached_orders = asyncio.create_task(update_cached_orders(                        
                         orders_all,
+                        queue_orders,
                         queue,
                         )) 
 
@@ -179,6 +180,7 @@ async def main():
             
             update_cached_orders(
                 orders_all,
+                queue_orders,
                 queue),
             
             #saving_ws_data(
