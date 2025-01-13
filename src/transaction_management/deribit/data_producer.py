@@ -112,7 +112,7 @@ class StreamAccountData(ModifyOrderDb):
     
     async def ws_manager(
         self,
-        queue: Queue) -> None:
+        queue: object) -> None:
         
         async with websockets.connect(
             self.ws_connection_url,
