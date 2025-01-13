@@ -206,12 +206,11 @@ async def executing_strategies(
                 
                 if "user.changes.any" in message_channel:
                     
-                    orders = data_orders["orders"]
+                    log.warning(message_channel)
                     
-                    if orders:
-                        update_cached_orders(
-                            orders_all,
-                            data_orders)
+                    update_cached_orders(
+                        orders_all,
+                        data_orders)
                 
                 
                 instrument_name_future = (message_channel)[19:]
