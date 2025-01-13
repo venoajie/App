@@ -196,7 +196,6 @@ async def executing_strategies(
             
                 #message: str = queue.get()
                 
-
                 message_channel: str = message["channel"]
                 
                 data_orders: dict = message["data"] 
@@ -208,15 +207,6 @@ async def executing_strategies(
                 currency_upper: str = currency.upper()
                 
                 instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
-                
-                if "user.changes.any" in message_channel:
-                    
-                    log.warning(message_channel)
-                    
-                    update_cached_orders(
-                        orders_all,
-                        data_orders)
-                
                 
                 instrument_name_future = (message_channel)[19:]
                 if (message_channel  == f"incremental_ticker.{instrument_name_future}"):
