@@ -203,10 +203,25 @@ async def executing_strategies(
                 currency_upper: str = currency.upper()
                 
                 instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
+                
+                if "user.changes.any" in message_channel:
                     
-                instrument_ticker = (message_channel)[19:]
+                    orders = data_orders["orders"]
+                    
+                    if orders:
+                        update_cached_orders(
+                            orders_all,
+                            data_orders)
+                
+                
+                instrument_name_future = (message_channel)[19:]
                 if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-                                          
+                    
+                    update_cached_ticker(instrument_name_future,
+                                         ticker_all,
+                                         data_orders,
+                                         )
+                    
                     archive_db_table: str = f"my_trades_all_{currency_lower}_json"
                                     
                     chart_trade = await chart_trade_in_msg(
@@ -326,7 +341,8 @@ async def executing_strategies(
                                                                 else [o for o in orders_currency 
                                                                     if strategy in (o["label"]) ])
                                     
-                                    log.critical (f"orders_currency_strategy {len(orders_currency_strategy)}")
+                                    log.info (f"orders_currency_strategy {len(orders_currency_strategy)}")
+                                    log.critical (f"orders_currency_strategy {(orders_currency_strategy)}")
                                     if orders_currency_strategy:
                                         
                                         outstanding_order_id = remove_redundant_elements (
