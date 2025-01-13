@@ -105,6 +105,8 @@ async def main():
         stream = StreamAccountData(sub_account_id)
        
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
+
+        await asyncio.sleep(0.0005)
         
         await asyncio.gather(
             producer_task, 
@@ -123,6 +125,7 @@ async def main():
             
             )
         
+
     except Exception as error:
         
         parse_error_message(error)
