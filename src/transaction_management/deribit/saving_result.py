@@ -55,6 +55,8 @@ async def saving_ws_data(
         
         resolution = 1
         
+        chart_trades_buffer = []
+        
         while True:
                     
             message: str = await queue.get()
@@ -96,7 +98,9 @@ async def saving_ws_data(
             DATABASE: str = "databases/trading.sqlite3"
                                                         
             if "chart.trades" in message_channel:
-                                                    
+                
+                chart_trades_buffer.append(data)
+                
                 if  len(chart_trades_buffer) > 3:
 
                     instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
