@@ -442,15 +442,18 @@ async def executing_strategies(
                                                         AVERAGE_MOVEMENT,
                                                         BASIC_TICKS_FOR_AVERAGE_MOVEMENT
                                                         )
-                                            
-                                                    await self.processing_orders(
-                                                        modify_order_and_db,
-                                                        send_order)
                                                     
                                                     if send_order["order_allowed"]:
                                                         
+                                                        await self.processing_orders(
+                                                        modify_order_and_db,
+                                                        send_order)
+                                                        
+                                                        not_order = False
+                                                        
                                                         break
-                                        
+
+                                                    
                                                     instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
                                                         if o["instrument_name"] == instrument_name_future])- server_time)/ONE_MINUTE  
                                                     
@@ -472,10 +475,16 @@ async def executing_strategies(
                                                             min(1,max_order_currency),
                                                             market_condition
                                                             )
-                                                
-                                                        await self.processing_orders(
+                                                        
+                                                        if send_order["order_allowed"]:
+                                                            
+                                                            await self.processing_orders(
                                                             modify_order_and_db,
                                                             send_order)
+                                                            
+                                                            not_order = False
+                                                            
+                                                            break
                                                             
                                         # get labels from active trades
                                         labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
@@ -510,11 +519,13 @@ async def executing_strategies(
                                                         instrument_attributes_combo_all,
                                                         THRESHOLD_MARKET_CONDITIONS_COMBO)
                                                         
-                                                        await processing_orders(
+                                                        if send_order["order_allowed"]:
+                                                            
+                                                            await processing_orders(
                                                             modify_order_and_db,
                                                             send_order)
-                                                        
-                                                        if send_order["order_allowed"]:
+                                                            
+                                                            not_order = False
                                                             
                                                             break
                                                     
@@ -604,10 +615,16 @@ async def executing_strategies(
                                                                         waiting_time_for_selected_transaction,
                                                                         random_instruments_name
                                                                         )
-                                                        
-                                                                    await self.processing_orders(
+                                                                    
+                                                                    if send_order["order_allowed"]:
+                                                                        
+                                                                        await self.processing_orders(
                                                                         modify_order_and_db,
                                                                         send_order)
+                                                                        
+                                                                        not_order = False
+                                                                        
+                                                                        break
                                                                                         
                                         if orders_currency_strategy:
                                             for order in orders_currency_strategy:
@@ -686,10 +703,16 @@ async def executing_strategies(
                                                     archive_db_table,
                                                     trade_db_table)
                                                 
-                                                await processing_orders(
-                                                    modify_order_and_db,
-                                                    send_order,
+                                                if send_order["order_allowed"]:
+                                                    
+                                                    await processing_orders(
+                                                        modify_order_and_db,
+                                                        send_order,
                                                     )
+                                                    
+                                                    not_order = False
+                                                    
+                                                    break
                                                 
                                                 status_transaction =["open",
                                                             "closed"]
@@ -746,9 +769,15 @@ async def executing_strategies(
                                                                         #orders_currency_strategy
                                                                         )
                                                                         
-                                                                        await processing_orders(
+                                                                        if send_order["order_allowed"]:
+                                                                            
+                                                                            await processing_orders(
                                                                             send_closing_order,
                                                                             modify_order_and_db)
+                                                                                                
+                                                                            not_order = False
+                                                                            
+                                                                            break
                     
                                                                     if status == "closed":
                                                                     
@@ -768,9 +797,17 @@ async def executing_strategies(
                                                                         nearest_transaction_to_index,
                                                                         #orders_currency_strategy
                                                                         )
-                                                                        await processing_orders(
+                                                                        
+                                                                        if send_order["order_allowed"]:
+                                                                            
+                                                                            await processing_orders(
                                                                             modify_order_and_db,
                                                                             send_closing_order)
+                                                                                                
+                                                                            not_order = False
+                                                                            
+                                                                            break
+
                     
                                         if orders_currency_strategy:
                                             
@@ -940,6 +977,7 @@ async def processing_orders(
                 )
             
             if result_order:
+                
                 log.error (f"result_order {result_order}")
                 
                 try:
@@ -972,8 +1010,6 @@ async def processing_orders(
                     non-combo transaction need to restart after sending order to ensure it recalculate orders and trades
                     """
                     
-                    not_order = False
-                    log.critical (f"not_order {not_order}")
             
                 except Exception as error :
                     pass 
