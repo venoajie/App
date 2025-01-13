@@ -220,10 +220,10 @@ def get_market_condition(
     candle_15_type = np.sum([o["candle_type"] for o in candle_15])
     candle_15_is_long = np.sum([o["is_long_body"] for o in candle_15])
     
-    log.warning (candle_60)
-    log.debug (candle_5)
-    log.debug (candle_60_type)
-    log.warning (candle_15)
+    #log.warning (candle_60)
+    #log.debug (candle_5)
+    #log.debug (candle_60_type)
+    #log.warning (candle_15)
     
     candle_60_long_body_more_than_2 = candle_60_is_long >= 2
     candle_5_long_body_any = candle_5_is_long >0

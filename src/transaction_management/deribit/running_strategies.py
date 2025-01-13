@@ -210,17 +210,7 @@ async def executing_strategies(
                 currency_upper: str = currency.upper()
                 
                 instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
-                                          
-                await saving_result(
-                    data_orders,
-                    message_channel,
-                    ticker_all,
-                    resolution,
-                    currency,
-                    currency_lower, 
-                    chart_trades_buffer
-                    )                                
-                
+                    
                 instrument_ticker = (message_channel)[19:]
                 if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
                                           
@@ -316,19 +306,6 @@ async def executing_strategies(
                                 my_labels= remove_redundant_elements([parsing_label(o["label"])["main"] for o in my_trades_currency ])
                                 #log.critical (orders_all)
                             
-                                for label in my_labels: 
-                                    log.debug (f"label {label}")
-                                    amount = sum([o["amount"] for o in my_trades_currency if label in o["label"]])
-                                                                                                                        
-                                    log.debug (f"amount {amount}")
-                                    
-                                log.debug (sum([o["amount"] for o in my_trades_currency]))
-                                for instrument in my_trades: 
-                                    log.debug (f"instrument {instrument}")
-                                    amount = sum([o["amount"] for o in my_trades_currency if instrument in o["instrument_name"]])
-                                                                                                                        
-                                    log.debug (f"amount {amount}")
-                                    
                                 ONE_PCT = 1 / 100
                                 
                                 THRESHOLD_DELTA_TIME_SECONDS = 120
@@ -342,7 +319,6 @@ async def executing_strategies(
                                 ONE_MINUTE = ONE_SECOND * 60   
                                 
                                 notional: float = compute_notional_value(index_price, equity)
-                                
                                 
                                 for strategy in active_strategies:
                                     
@@ -382,8 +358,8 @@ async def executing_strategies(
                                                     break
 
                                     
-                                    log.info (f"orders_currency_strategy {orders_currency_strategy}")
-                                    log.critical (f"len_orders_all {len_orders_all}")
+                                    #log.info (f"orders_currency_strategy {orders_currency_strategy}")
+                                    #log.critical (f"len_orders_all {len_orders_all}")
                                 
                                     if  False and "futureSpread" in strategy :
                                                             
