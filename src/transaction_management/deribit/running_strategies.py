@@ -195,7 +195,7 @@ async def executing_strategies(
             
             while not_order:
             
-                message: str = queue.get()
+                #message: str = queue.get()
                 
                 message: str = await queue.get()
 
