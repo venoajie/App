@@ -170,6 +170,8 @@ async def update_cached_orders(
                 
             
             message= await queue.get()
+            
+            print (f"message {message}")
 
             message_channel: str = message["channel"]
             
