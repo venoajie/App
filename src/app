@@ -169,6 +169,11 @@ async def main():
             producer_task, 
             producer_cached_orders,
             
+            update_cached_orders(
+                orders_all,
+                queue_orders,
+                queue),
+            
             executing_strategies(
                 sub_account_id,
                 queue,
@@ -176,11 +181,6 @@ async def main():
             
             saving_and_relabelling_orders(
                 sub_account_id,
-                queue),
-            
-            update_cached_orders(
-                orders_all,
-                queue_orders,
                 queue),
             
             #saving_ws_data(

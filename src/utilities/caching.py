@@ -230,8 +230,8 @@ async def update_cached_orders(
                                     orders_all.append(order)
                                 
                     #print(f"orders_all {orders_all}")
-                    await queue.put(orders_all)
-                    await queue.task_done()
+                await queue.put(orders_all)
+                await queue.task_done()
                     
     except Exception as error:
         
