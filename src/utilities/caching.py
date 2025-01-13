@@ -171,9 +171,9 @@ async def update_cached_orders(
             
             orders_all = queue_orders_all
             
-            print (f"orders_all {orders_all}")
+            print (f"queue_orders {queue_orders}")
             
-            if orders_all:
+            if queue_orders:
                       
                 message= await queue_orders.get()
                 
