@@ -283,6 +283,9 @@ class StreamAccountData(ModifyOrderDb):
                                               currency= currency_lower)
                                 
                                 
+                                if "user.changes.any" in message_channel:
+                                    log.error (data)
+                        
                                 #queue.put(result)
                                 await queue.put(result)
                                         

@@ -100,7 +100,7 @@ async def main():
     
     try:
         
-        queue: Queue = asyncio.Queue(maxsize=10)
+        queue = asyncio.Queue(maxsize=10)
         
         stream = StreamAccountData(sub_account_id)
        
@@ -117,9 +117,9 @@ async def main():
                 sub_account_id,
                 queue),
             
-            saving_ws_data(
-                sub_account_id,
-                queue),
+            #saving_ws_data(
+            #    sub_account_id,
+            #    queue),
             
             )
         
