@@ -444,7 +444,9 @@ async def executing_strategies(
                                                         BASIC_TICKS_FOR_AVERAGE_MOVEMENT
                                                         )
                                             
-                                                    await self.processing_orders(send_order)
+                                                    await self.processing_orders(
+                                                        modify_order_and_db,
+                                                        send_order)
                                                     
                                                     if send_order["order_allowed"]:
                                                         
@@ -472,7 +474,9 @@ async def executing_strategies(
                                                             market_condition
                                                             )
                                                 
-                                                        await self.processing_orders(send_order)
+                                                        await self.processing_orders(
+                                                            modify_order_and_db,
+                                                            send_order)
                                                             
                                         # get labels from active trades
                                         labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
@@ -507,7 +511,9 @@ async def executing_strategies(
                                                         instrument_attributes_combo_all,
                                                         THRESHOLD_MARKET_CONDITIONS_COMBO)
                                                         
-                                                        await processing_orders(send_order)
+                                                        await processing_orders(
+                                                            modify_order_and_db,
+                                                            send_order)
                                                         
                                                         if send_order["order_allowed"]:
                                                             
@@ -600,7 +606,9 @@ async def executing_strategies(
                                                                         random_instruments_name
                                                                         )
                                                         
-                                                                    await self.processing_orders(send_order)
+                                                                    await self.processing_orders(
+                                                                        modify_order_and_db,
+                                                                        send_order)
                                                                                         
                                         if orders_currency_strategy:
                                             for order in orders_currency_strategy:
@@ -679,7 +687,10 @@ async def executing_strategies(
                                                     archive_db_table,
                                                     trade_db_table)
                                                 
-                                                await processing_orders(send_order)
+                                                await processing_orders(
+                                                    modify_order_and_db,
+                                                    send_order,
+                                                    )
                                                 
                                                 status_transaction =["open",
                                                             "closed"]
@@ -736,7 +747,9 @@ async def executing_strategies(
                                                                         #orders_currency_strategy
                                                                         )
                                                                         
-                                                                        await processing_orders(send_closing_order)
+                                                                        await processing_orders(
+                                                                            send_closing_order,
+                                                                            modify_order_and_db)
                     
                                                                     if status == "closed":
                                                                     
@@ -756,7 +769,9 @@ async def executing_strategies(
                                                                         nearest_transaction_to_index,
                                                                         #orders_currency_strategy
                                                                         )
-                                                                        await processing_orders(send_closing_order)
+                                                                        await processing_orders(
+                                                                            modify_order_and_db,
+                                                                            send_closing_order)
                     
                                         if orders_currency_strategy:
                                             
