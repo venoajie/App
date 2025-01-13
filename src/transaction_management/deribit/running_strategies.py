@@ -255,9 +255,12 @@ async def executing_strategies(
                             query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
                                 
                             my_trades_currency_all_transactions: list= await executing_query_with_return (query_trades)
+                            
+                            log.error (my_trades_currency_all_transactions)
                                                                                             
-                            my_trades_currency_all: list= [o for o in my_trades_currency_all_transactions\
-                                if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
+                            my_trades_currency_all: list= [] if my_trades_currency_all_transactions == []\
+                                else [o for o in my_trades_currency_all_transactions
+                                      if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
                             
                             orders_currency = [] if not orders_all\
                                 else [o for o in orders_all\
