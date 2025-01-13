@@ -171,6 +171,8 @@ async def update_cached_orders(
             
             orders_all = queue_orders_all
             
+            print (f"orders_all {orders_all}")
+            
             if orders_all:
                       
                 message= await queue_orders.get()
