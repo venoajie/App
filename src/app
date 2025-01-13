@@ -159,7 +159,7 @@ async def main():
         
         producer_cached_orders = asyncio.create_task(update_cached_orders(                        
                         orders_all,
-                        queue_orders,
+                        queue_cached_orders,
                         queue,
                         )) 
 
