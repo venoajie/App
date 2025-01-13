@@ -258,7 +258,7 @@ async def executing_strategies(
                             
                             log.error (my_trades_currency_all_transactions)
                                                                                             
-                            my_trades_currency_all: list= [] if my_trades_currency_all_transactions == []\
+                            my_trades_currency_all: list= [] if my_trades_currency_all_transactions == 0 \
                                 else [o for o in my_trades_currency_all_transactions
                                       if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
                             
