@@ -170,9 +170,7 @@ async def update_cached_orders(
         while True:
             
             orders_all = queue_orders_all
-            
-            print (f"queue_orders {queue_orders.empty()}")
-            
+                        
             if not queue_orders.empty():
                       
                 message= await queue_orders.get()
@@ -238,7 +236,7 @@ async def update_cached_orders(
                     await queue.task_done()
                             
                 else:
-                    continue
+                    break
                         
                 
 
