@@ -326,9 +326,11 @@ async def executing_strategies(
                                                                 else [o for o in orders_currency 
                                                                     if strategy in (o["label"]) ])
                                     
+                                    log.critical (f"orders_currency_strategy {len(orders_currency_strategy)}")
                                     if orders_currency_strategy:
                                         
-                                        outstanding_order_id = remove_redundant_elements ([o["label"] for o in orders_currency_strategy])
+                                        outstanding_order_id = remove_redundant_elements (
+                                            [o["label"] for o in orders_currency_strategy])
                                         
                                         for label in outstanding_order_id:
                                             

@@ -274,10 +274,7 @@ class StreamAccountData(ModifyOrderDb):
                                               channel= message_channel,
                                               currency= currency_lower)
                                 deque = (result)
-                                
-                                if "user.changes.any" in message_channel:
-                                    log.error (deque)
-                        
+                             
                                 #queue.put(result)
                                 try:
                                     if deque:       
