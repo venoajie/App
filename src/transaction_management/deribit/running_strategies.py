@@ -184,7 +184,7 @@ async def executing_strategies(
             
             not_order = True
             
-            log.error (f"result_order")
+            log.error (f"not_order")
             
             while not_order:
             
@@ -973,7 +973,7 @@ async def processing_orders(
                     """
                     
                     not_order = False
-                    log.critical (f"result_order {result_order}")
+                    log.critical (f"not_order {not_order}")
             
                 except Exception as error :
                     pass 
