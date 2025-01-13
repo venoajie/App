@@ -152,7 +152,7 @@ async def combining_order_data(
     return result
 
 async def update_cached_orders(
-    orders_all,
+    queue_orders_all,
     queue: dict):
     """_summary_
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
@@ -165,8 +165,10 @@ async def update_cached_orders(
     """
     
     try:
-        print(f"orders_all {orders_all}")
+        print(f"orders_all {queue_orders_all}")
         while True:
+            
+            orders_all = queue_orders_all
                       
                 
             message= await queue.get()
@@ -177,10 +179,7 @@ async def update_cached_orders(
             
             data_orders: dict = message["data"]         
             
-            
             if "user.changes.any" in message_channel:
-                
-                
                 
                 print(f"data_orders {data_orders}")
                 
@@ -231,8 +230,8 @@ async def update_cached_orders(
                                     orders_all.append(order)
                                 
                     print(f"orders_all {orders_all}")
-                    await queue.put(orders_all)
-                    await queue.task_done()
+                    await queue_orders_all.put(orders_all)
+                    await queue_orders_all.task_done()
                     
     except Exception as error:
         
