@@ -170,6 +170,7 @@ async def update_cached_orders(
         message_channel: str = data_orders["channel"]
     
         print(f"data_orders {data_orders}")
+        print(f"orders_all {orders_all}")
         
         if "user.changes.any" in message_channel:
             
@@ -219,6 +220,7 @@ async def update_cached_orders(
                             
                                 orders_all.append(order)
                             
+                print(f"orders_all {orders_all}")
                 await queue.put(orders_all)
                 await queue.task_done()
                 

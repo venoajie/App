@@ -177,6 +177,10 @@ async def main():
                 sub_account_id,
                 queue),
             
+            update_cached_orders(
+                orders_all,
+                queue),
+            
             #saving_ws_data(
             #    sub_account_id,
             #    queue),
