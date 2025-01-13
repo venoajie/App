@@ -175,7 +175,7 @@ async def update_cached_orders(
                       
                 message= await queue_orders.get()
                 
-                #print (f"message {message}")
+                print (f"message {message}")
 
                 message_channel: str = message["channel"]
                 
@@ -236,7 +236,7 @@ async def update_cached_orders(
                     await queue.task_done()
                         
             else:
-                continue
+                break
                         
                 
 
