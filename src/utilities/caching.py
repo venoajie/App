@@ -170,6 +170,9 @@ async def update_cached_orders(
         while True:
             
             orders_all = queue_orders_all
+            
+            print (f"orders_all {orders_all}")
+            print (f"orders_all {not queue_orders.empty()}")
                         
             if not queue_orders.empty():
                       
