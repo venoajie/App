@@ -167,7 +167,7 @@ async def update_cached_orders(
     
     try:
         #print(f"orders_all {queue_orders_all}")
-        while True:
+        while not queue_orders.empty():
             
             orders_all = queue_orders_all
             
