@@ -285,6 +285,7 @@ async def executing_strategies(
                             if index_price is not None \
                                 and equity > 0 :
                         
+                                log.error (my_trades_currency_all)
                                 my_trades_currency: list= [ o for o in my_trades_currency_all \
                                     if o["label"] is not None] 
                                 

@@ -291,7 +291,7 @@ class StreamAccountData(ModifyOrderDb):
                                     pass
                                         
                                 else:
-                                    await queue.task_done()
+                                    await queue.join()
                                         
             except Exception as error:
 
