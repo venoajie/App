@@ -190,6 +190,7 @@ async def executing_strategies(
 
                 message: str = await queue.get()
                 
+                log.debug(f"message {message}")
                 orders_all_update = await queue_cached_orders.get()
                 
                 log.debug(f"orders_all_update {orders_all_update}")
@@ -197,6 +198,7 @@ async def executing_strategies(
                 #message: str = queue.get()
                 
                 message_channel: str = message["channel"]
+                log.debug(f"message_channel {message_channel}")
                 
                 data_orders: dict = message["data"] 
                         
