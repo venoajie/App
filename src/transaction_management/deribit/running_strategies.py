@@ -3,7 +3,6 @@
 
 # built ins
 import asyncio
-from multiprocessing.queues import Queue
 import os
 
 # installed
@@ -91,7 +90,8 @@ async def update_db_pkl(
                   
 async def executing_strategies(
     sub_account_id,
-    queue: Queue
+    queue,
+    queue_cached_orders
     ):
     
     """
@@ -187,10 +187,15 @@ async def executing_strategies(
             log.error (f"not_order")
             
             while not_order:
+
+                message: str = await queue.get()
+                
+                orders_all_update = await queue_cached_orders.get()
+                
+                log.debug(f"orders_all_update {orders_all_update}")
             
                 #message: str = queue.get()
                 
-                message: str = await queue.get()
 
                 message_channel: str = message["channel"]
                 

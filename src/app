@@ -3,6 +3,7 @@
 
 # built ins
 import asyncio
+import os
 import sys
 
 # installed
@@ -12,10 +13,12 @@ from loguru import logger as log
 #from multiprocessing.queues import Queue
 #from multiprocessing import cpu_count
 #from aiomultiprocess import Pool
+import tomli
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
+from transaction_management.deribit.api_requests import (SendApiRequest)
 from transaction_management.deribit.data_producer import (
     StreamAccountData,)
 from transaction_management.deribit.running_strategies import executing_strategies
@@ -23,10 +26,22 @@ from transaction_management.deribit.user_chg import saving_and_relabelling_order
 from transaction_management.deribit.saving_result import saving_ws_data
 from transaction_management.deribit.telegram_bot import (
     telegram_bot_sendtext,)
+
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    update_cached_orders,
+    combining_order_data,
+    update_cached_ticker)
 from utilities.system_tools import (
     async_raise_error_message,
     parse_error_message,
     SignalHandler)
+
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,
+    raise_error_message,)
+
         
 def handle_ctrl_c(
     signum, 
@@ -94,26 +109,67 @@ async def main2():
             "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
         )
         
+
+
+def get_config(file_name: str) -> list:
+    """ """
+    
+    config_path = provide_path_for_file (file_name)
+    
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, "rb") as handle:
+                read= tomli.load(handle)
+                return read
+    except:
+        return []
+
 async def main():
     
     sub_account_id = "deribit-148510"
+
+    file_toml = "config_strategies.toml"
+
+    # parsing config file
+    config_app = get_config(file_toml)
+    
+    private_data: str = SendApiRequest (sub_account_id)
+
+    # get tradable strategies
+    tradable_config_app = config_app["tradable"]
+    
+    # get tradable currencies
+    #currencies_spot= ([o["spot"] for o in tradable_config_app]) [0]
+    currencies= ([o["spot"] for o in tradable_config_app]) [0]
     
     try:
         
         queue = asyncio.Queue(maxsize=10)
+        queue_cached_orders = asyncio.Queue()
         
         stream = StreamAccountData(sub_account_id)
+                
+        
+        orders_all = await combining_order_data(
+            private_data,
+            currencies)  
        
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
+        producer_cached_orders = asyncio.create_task(update_cached_orders(
+                        orders_all,
+                        queue,
+                        queue_cached_orders)) 
 
         await asyncio.sleep(0.0005)
         
         await asyncio.gather(
             producer_task, 
+            producer_cached_orders,
             
             executing_strategies(
                 sub_account_id,
-                queue),
+                queue,
+                queue_cached_orders),
             
             saving_and_relabelling_orders(
                 sub_account_id,
