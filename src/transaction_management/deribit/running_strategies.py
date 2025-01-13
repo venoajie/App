@@ -10,7 +10,6 @@ import os
 from loguru import logger as log
 import numpy as np
 import random
-from secrets import randbelow
 import tomli
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -24,18 +23,17 @@ from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition)
 from strategies.basic_strategy import (get_label_integer,)
-from strategies.hedging_spot import (HedgingSpot)
+from strategies.hedging_spot import (
+    HedgingSpot,
+    async_get_tickers)
 from strategies.cash_carry.combo_auto import(
     ComboAuto,
     check_if_minimum_waiting_time_has_passed)
-from transaction_management.deribit.api_requests import (
-    SendApiRequest,
-    get_tickers)
+from transaction_management.deribit.api_requests import (SendApiRequest)
 from transaction_management.deribit.get_instrument_summary import (get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
-from transaction_management.deribit.orders_management import (saving_orders,)
 from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
@@ -56,9 +54,6 @@ from utilities.string_modification import (
     parsing_label,
     remove_double_brackets_in_list,
     remove_redundant_elements)
-from websocket_management.allocating_ohlc import (
-    ohlc_result_per_time_frame,
-    inserting_open_interest,)
 
 
 def get_config(file_name: str) -> list:
@@ -179,10 +174,6 @@ async def executing_strategies(
             resolutions,
             dim_sequence)  
         
-        chart_trades_buffer = []
-        
-        resolution = 1
-        
         ticker_all = cached_ticker(instruments_name)  
         
         orders_all = await combining_order_data(
@@ -205,7 +196,7 @@ async def executing_strategies(
                         
                 currency: str = message["currency"]
                 
-                currency_lower: str = currency.lower()
+                currency_lower: str = currency
                 
                 currency_upper: str = currency.upper()
                 
@@ -620,14 +611,14 @@ async def executing_strategies(
                                                         
                                         log.warning (f"strategy {strategy}-DONE")
                                     
-                                    if False and "hedgingSpot" in strategy \
+                                    if "hedgingSpot" in strategy \
                                         and size_perpetuals_reconciled:
                                         
                                         log.warning (f"strategy {strategy}-START")                                                    
                                         
-                                        instrument_attributes_futures_for_hedging = [o for o in futures_instruments["active_futures"] \
-                                            if o["settlement_period"] != "month" and\
-                                                o["kind"] == "future"] 
+                                        instrument_attributes_futures_for_hedging = [o for o in futures_instruments["active_futures"] 
+                                                                                     if o["settlement_period"] != "month" and
+                                                                                     o["kind"] == "future"] 
                                                 
                                         strong_bearish = market_condition["strong_bearish"]
                                     
@@ -635,7 +626,7 @@ async def executing_strategies(
                                         
                                         max_position: int = notional * -1 
                                                     
-                                        instrument_ticker =   modify_hedging_instrument (
+                                        instrument_ticker =   await async_get_tickers (
                                             strong_bearish,
                                             bearish,
                                             instrument_attributes_futures_for_hedging,
@@ -973,180 +964,4 @@ async def processing_orders(
     except Exception as error:
         await raise_error_message (error)
         
-        
-def modify_hedging_instrument (
-    strong_bearish:  bool,
-    bearish:  bool,
-    instrument_attributes_futures_for_hedging: list,
-    ticker_all: list,
-    ticker_perpetual_instrument_name: dict,
-    currency_upper: str,
-    ) -> dict:
     
-    if bearish or not strong_bearish:
-                                
-        instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
-                                        if "PERPETUAL" not in o["instrument_name"]\
-                                            and currency_upper in o["instrument_name"]]
-        
-        if len(instrument_attributes_future) > 1:
-            index_attributes = randbelow(2)
-            instrument_attributes = instrument_attributes_future[index_attributes]
-            
-        else:
-            instrument_attributes = instrument_attributes_future[0]
-            
-        instrument_name: str = instrument_attributes ["instrument_name"] 
-        
-        instrument_ticker =  [o for o in ticker_all 
-                          if instrument_name in o["instrument_name"]]
-                        
-        #log.error (f"instrument_ticker {instrument_ticker}")
-        if instrument_ticker:                    
-            instrument_ticker = instrument_ticker[0]
-            
-        else:                    
-            instrument_ticker =   get_tickers (instrument_name)
-            
-        return instrument_ticker
-
-    else:
-        return   ticker_perpetual_instrument_name
-    
-    
-async def saving_user_changes(
-    data: dict, 
-    message_channel: str,
-    orders_all: list,
-    order_db_table: str,
-    modify_order_and_db: int,
-    private_data,
-    cancellable_strategies,
-    non_checked_strategies,
-    currency,
-    currency_lower: str, 
-    ) -> None:
-    """ """
-    
-    try:
-        
-        if "user.changes.any" in message_channel:
-                    
-            update_cached_orders(
-                orders_all,
-                data,
-                )
-
-            await saving_orders(
-                modify_order_and_db,
-                private_data,
-                cancellable_strategies,
-                non_checked_strategies,
-                data,
-                order_db_table,
-                currency_lower
-                    )
-            
-            await modify_order_and_db.resupply_sub_accountdb(currency)
-                    
-            not_order = False
-            
-    except Exception as error:
-        
-        await parse_error_message(error)  
-
-        await telegram_bot_sendtext (
-            error,
-            "general_error"
-            )
-
-async def saving_result(
-    data: dict, 
-    message_channel: dict,
-    ticker_all: list,
-    resolution: int,
-    currency,
-    currency_lower: str, 
-    chart_trades_buffer: list
-    ) -> None:
-    """ """
-    
-    try:
-                            
-        WHERE_FILTER_TICK: str = "tick"
-
-        TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
-        
-        DATABASE: str = "databases/trading.sqlite3"
-                                                    
-        if "chart.trades" in message_channel:
-            
-            log.warning (f"{data}")
-            
-            chart_trades_buffer.append(data)
-                                                
-            if  len(chart_trades_buffer) > 3:
-
-                instrument_ticker = ((message_channel)[13:]).partition('.')[0] 
-
-                if "PERPETUAL" in instrument_ticker:
-
-                    for data in chart_trades_buffer:    
-                        await ohlc_result_per_time_frame(
-                            instrument_ticker,
-                            resolution,
-                            data,
-                            TABLE_OHLC1,
-                            WHERE_FILTER_TICK,
-                        )
-                    
-                    chart_trades_buffer = []
-            
-        instrument_ticker = (message_channel)[19:]
-        if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
-            
-            update_cached_ticker(
-                instrument_ticker,
-                ticker_all,
-                data,
-                )
-            
-            #if "PERPETUAL" in instrument_ticker:
-             #   log.critical (instrument_ticker)
-              #  log.error (data)
-                    
-            my_path_ticker = provide_path_for_file(
-                "ticker", 
-                instrument_ticker)
-            
-            await distribute_ticker_result_as_per_data_type(
-                my_path_ticker,
-                data, 
-                )
-            
-            if "PERPETUAL" in data["instrument_name"]:
-                
-                await inserting_open_interest(
-                    currency, 
-                    WHERE_FILTER_TICK, 
-                    TABLE_OHLC1, 
-                    data
-                    )   
-                                                                                                                      
-        if message_channel == f"user.portfolio.{currency_lower}":
-                                            
-            await update_db_pkl(
-                "portfolio", 
-                data, 
-                currency_lower
-                )
-            
-    except Exception as error:
-        
-        await parse_error_message(error)  
-
-        await telegram_bot_sendtext (
-            error,
-            "general_error"
-            )
-

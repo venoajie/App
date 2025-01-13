@@ -14,7 +14,6 @@ from loguru import logger as log
 import orjson
 import tomli
 import websockets
-from multiprocessing.queues import Queue
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -154,10 +153,6 @@ class StreamAccountData(ModifyOrderDb):
                 # parsing config file
                 config_app = get_config(file_toml)
 
-                relevant_tables = config_app["relevant_tables"][0]
-                
-                order_db_table= relevant_tables["orders_table"]        
-                                
                 # get tradable strategies
                 tradable_config_app = config_app["tradable"]
                 
@@ -220,8 +215,6 @@ class StreamAccountData(ModifyOrderDb):
                                     operation = "subscribe",
                                     ws_channel = ws,
                                     )
-                    
-                    
                     
                     while True:
                         

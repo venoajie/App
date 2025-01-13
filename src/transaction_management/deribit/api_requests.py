@@ -125,6 +125,21 @@ def get_tickers(
     
     return result
     
+async def async_get_tickers(
+    instrument_name: str
+    )-> list:
+    # Set endpoint
+    
+    import httpx
+    
+    end_point = (f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}")
+    
+    async with httpx.AsyncClient() as client:
+        result = client.get(end_point,
+                            follow_redirects=True).json()["result"]
+    
+    return result
+    
     
 def ohlc_end_point(
     instrument_ticker: str,

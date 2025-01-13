@@ -2,6 +2,7 @@
 
 # built ins
 import asyncio
+from secrets import randbelow
 
 # installed
 from dataclassy import dataclass, fields
@@ -18,6 +19,8 @@ from strategies.basic_strategy import (
     is_label_and_side_consistent,
     is_minimum_waiting_time_has_passed,
     size_rounding,)
+from transaction_management.deribit.api_requests import (
+    async_get_tickers)
 from utilities.string_modification import (
     parsing_label)
 
@@ -259,6 +262,47 @@ def size_to_be_hedged (notional,
                 else notional
     
     return multiply * max_position
+    
+async def modify_hedging_instrument (
+    strong_bearish:  bool,
+    bearish:  bool,
+    instrument_attributes_futures_for_hedging: list,
+    ticker_all: list,
+    ticker_perpetual_instrument_name: dict,
+    currency_upper: str,
+    ) -> dict:
+    
+    if bearish or not strong_bearish:
+                                
+        instrument_attributes_future = [o for o in instrument_attributes_futures_for_hedging 
+                                        if "PERPETUAL" not in o["instrument_name"]\
+                                            and currency_upper in o["instrument_name"]]
+        
+        if len(instrument_attributes_future) > 1:
+            index_attributes = randbelow(2)
+            instrument_attributes = instrument_attributes_future[index_attributes]
+            
+        else:
+            instrument_attributes = instrument_attributes_future[0]
+            
+        instrument_name: str = instrument_attributes ["instrument_name"] 
+        
+        instrument_ticker =  [o for o in ticker_all 
+                          if instrument_name in o["instrument_name"]]
+                        
+        #log.error (f"instrument_ticker {instrument_ticker}")
+        if instrument_ticker:                    
+            instrument_ticker = instrument_ticker[0]
+            
+        else:                    
+            instrument_ticker =   await async_get_tickers (instrument_name)
+            
+        return instrument_ticker
+
+    else:
+        return   ticker_perpetual_instrument_name
+    
+    
 
 @dataclass(unsafe_hash=True, slots=True)
 class HedgingSpot(BasicStrategy):
