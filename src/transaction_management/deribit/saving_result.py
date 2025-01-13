@@ -96,8 +96,6 @@ async def saving_ws_data(
             DATABASE: str = "databases/trading.sqlite3"
                                                         
             if "chart.trades" in message_channel:
-                
-                chart_trades_buffer.append(data)
                                                     
                 if  len(chart_trades_buffer) > 3:
 
