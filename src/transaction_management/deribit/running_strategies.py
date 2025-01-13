@@ -184,7 +184,7 @@ async def executing_strategies(
             
             not_order = True
             
-            log.error (f"not_order")
+            log.error (f"not_order {not_order}")
             
             while not_order:
 
