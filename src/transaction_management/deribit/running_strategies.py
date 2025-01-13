@@ -257,7 +257,7 @@ async def executing_strategies(
                             currency_upper
                             )
                         
-                        log.warning (market_condition)
+                        #log.warning (market_condition)
 
                         if  sub_account :
                             
