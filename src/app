@@ -7,11 +7,11 @@ import sys
 
 # installed
 from loguru import logger as log
-import signal
-from multiprocessing import Manager
-from multiprocessing.queues import Queue
+#import signal
+#from multiprocessing import Manager
+#from multiprocessing.queues import Queue
 #from multiprocessing import cpu_count
-from aiomultiprocess import Pool
+#from aiomultiprocess import Pool
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -35,7 +35,7 @@ def handle_ctrl_c(
     sys.exit(0)
     
                   
-signal_handler = SignalHandler()
+#signal_handler = SignalHandler()
 
 async def main2():
     
