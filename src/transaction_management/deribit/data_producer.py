@@ -275,13 +275,18 @@ class StreamAccountData(ModifyOrderDb):
                                 currency: str = extract_currency_from_text(message_channel)
                                 
                                 currency_lower: str = currency.lower()
+                                
+                                send_queue = asyncio.Queue()
+                                
+                                data_json = send_queue.get()
 
                                 result = dict(data= data, 
                                               channel= message_channel,
                                               currency= currency_lower)
                                 
                                 
-                                queue.put(result)
+                                #queue.put(result)
+                                await queue.put(result)
                                         
             except Exception as error:
 

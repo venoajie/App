@@ -196,7 +196,9 @@ async def executing_strategies(
             while not_order:
             
                 message: str = queue.get()
-                        
+                
+                message: str = await queue.get()
+
                 message_channel: str = message["channel"]
                 
                 data_orders: dict = message["data"] 
@@ -208,20 +210,7 @@ async def executing_strategies(
                 currency_upper: str = currency.upper()
                 
                 instrument_name_perpetual = (f"{currency_upper}-PERPETUAL")
-                
-                await saving_user_changes(
-                            data_orders, 
-                            message_channel,
-                            orders_all,
-                            order_db_table,
-                            modify_order_and_db,
-                            private_data,
-                            cancellable_strategies,
-                            non_checked_strategies,
-                            currency,
-                            currency_lower, 
-                            )    
-                                                
+                                          
                 await saving_result(
                     data_orders,
                     message_channel,
