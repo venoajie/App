@@ -184,6 +184,8 @@ async def executing_strategies(
             
             not_order = True
             
+            log.error (f"result_order")
+            
             while not_order:
             
                 #message: str = queue.get()
@@ -971,7 +973,8 @@ async def processing_orders(
                     """
                     
                     not_order = False
-                
+                    log.critical (f"result_order {result_order}")
+            
                 except Exception as error :
                     pass 
                 
