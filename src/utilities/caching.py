@@ -170,69 +170,76 @@ async def update_cached_orders(
         while True:
             
             orders_all = queue_orders_all
+            
+            if orders_all:
                       
-            message= await queue_orders.get()
-            
-            #print (f"message {message}")
+                message= await queue_orders.get()
+                
+                #print (f"message {message}")
 
-            message_channel: str = message["channel"]
-            
-            data_orders: dict = message["data"]         
-            
-            if "user.changes.any" in message_channel:
+                message_channel: str = message["channel"]
                 
-                #print(f"data_orders {data_orders}")
+                data_orders: dict = message["data"]         
                 
-                if data_orders:
+                if "user.changes.any" in message_channel:
                     
-                    orders = data_orders["orders"]
+                    #print(f"data_orders {data_orders}")
                     
-                    trades = data_orders["trades"]
-                    
-                    if orders:
+                    if data_orders:
                         
-                        if trades :
-                            
-                            for trade in trades:
-
-                                order_id = trade["order_id"]
-                                
-                                selected_order = [o for o in orders_all 
-                                                if order_id in o["order_id"]]
-                                
-                                if selected_order:
-                                                        
-                                    orders_all.remove(selected_order[0])
-                                
+                        orders = data_orders["orders"]
+                        
+                        trades = data_orders["trades"]
+                        
                         if orders:
-                        
-                            for order in orders:
+                            
+                            if trades :
                                 
-                                print(f"cached order {order}")
-                                
-                                order_state= order["order_state"]    
-                                
-                                if order_state == "cancelled" or order_state == "filled":
-                                
-                                    order_id = order["order_id"]
+                                for trade in trades:
+
+                                    order_id = trade["order_id"]
                                     
                                     selected_order = [o for o in orders_all 
                                                     if order_id in o["order_id"]]
-                                    
-                                    print(f"caching selected_order {selected_order}")
                                     
                                     if selected_order:
                                                             
                                         orders_all.remove(selected_order[0])
                                     
-                                else:
-                                
-                                    orders_all.append(order)
-                                
-                    #print(f"orders_all {orders_all}")
-                await queue.put(orders_all)
-                await queue.task_done()
-                    
+                            if orders:
+                            
+                                for order in orders:
+                                    
+                                    print(f"cached order {order}")
+                                    
+                                    order_state= order["order_state"]    
+                                    
+                                    if order_state == "cancelled" or order_state == "filled":
+                                    
+                                        order_id = order["order_id"]
+                                        
+                                        selected_order = [o for o in orders_all 
+                                                        if order_id in o["order_id"]]
+                                        
+                                        print(f"caching selected_order {selected_order}")
+                                        
+                                        if selected_order:
+                                                                
+                                            orders_all.remove(selected_order[0])
+                                        
+                                    else:
+                                    
+                                        orders_all.append(order)
+                                    
+                        #print(f"orders_all {orders_all}")
+                    await queue.put(orders_all)
+                    await queue.task_done()
+                            
+                else:
+                    continue
+                        
+                
+
     except Exception as error:
         
         parse_error_message(error)
