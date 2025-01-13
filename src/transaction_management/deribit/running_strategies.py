@@ -215,7 +215,7 @@ async def executing_strategies(
                 
                 
                 instrument_name_future = (message_channel)[19:]
-                if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
+                if (message_channel  == f"incremental_ticker.{instrument_name_future}"):
                     
                     update_cached_ticker(instrument_name_future,
                                          ticker_all,
