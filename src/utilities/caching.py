@@ -173,7 +173,7 @@ async def update_cached_orders(
             
             print (f"queue_orders {queue_orders.empty()}")
             
-            if queue_orders:
+            if not queue_orders.empty():
                       
                 message= await queue_orders.get()
                 
