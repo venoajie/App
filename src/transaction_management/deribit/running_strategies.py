@@ -25,7 +25,7 @@ from market_understanding.price_action.candles_analysis import (
 from strategies.basic_strategy import (get_label_integer,)
 from strategies.hedging_spot import (
     HedgingSpot,
-    async_get_tickers)
+    modify_hedging_instrument)
 from strategies.cash_carry.combo_auto import(
     ComboAuto,
     check_if_minimum_waiting_time_has_passed)
@@ -630,7 +630,7 @@ async def executing_strategies(
                                         
                                         max_position: int = notional * -1 
                                                     
-                                        instrument_ticker =   await async_get_tickers (
+                                        instrument_ticker =   await modify_hedging_instrument (
                                             strong_bearish,
                                             bearish,
                                             instrument_attributes_futures_for_hedging,
