@@ -562,7 +562,7 @@ async def executing_query_based_on_currency_or_instrument_and_strategy(
     #log.error (f"table {query}")
     #log.warning (f"result {result}")
 
-    return [] if result in NONE_DATA else (result)
+    return [] if not result else (result)
 
 async def executing_query_with_return(
     query_table,
@@ -609,7 +609,7 @@ async def executing_query_with_return(
         await telegram_bot_sendtext("sqlite operation", "failed_order")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
-    return 0 if (combine_result == [] or combine_result == None) else (combine_result)
+    return [] if not combine_result  else (combine_result)
 
 
 def query_pd(

@@ -302,32 +302,34 @@ class ModifyOrderDb(SendApiRequest):
             )
         
         first_tick_query_result = await executing_query_with_return(first_tick_query)
+        
+        if first_tick_query_result:
+            
+            first_tick_fr_sqlite= first_tick_query_result [0]["MIN (timestamp)"] 
+            
+            if not first_tick_fr_sqlite:
+                                
+                first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (count)
                     
-        first_tick_fr_sqlite= first_tick_query_result [0]["MIN (timestamp)"] 
-        
-        if not first_tick_fr_sqlite:
-                            
-            first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty (count)
+            transaction_log = await self.private_data.get_transaction_log(
+                            currency, 
+                            first_tick_fr_sqlite, 
+                            count)
+            
+            await asyncio.sleep(.5)
+                    
+            if transaction_log:
                 
-        transaction_log = await self.private_data.get_transaction_log(
-                        currency, 
-                        first_tick_fr_sqlite, 
-                        count)
-        
-        await asyncio.sleep(.5)
+                transaction_log_instrument_name = [o for o in transaction_log \
+                    if instrument_name in  o["instrument_name"]\
+                        and o["timestamp"] > first_tick_fr_sqlite]
                 
-        if transaction_log:
-            
-            transaction_log_instrument_name = [o for o in transaction_log \
-                if instrument_name in  o["instrument_name"]\
-                    and o["timestamp"] > first_tick_fr_sqlite]
-            
-            await saving_transaction_log (
-                transaction_log_trading,
-                transaction_log_instrument_name, 
-                first_tick_fr_sqlite
-                )
-            
+                await saving_transaction_log (
+                    transaction_log_trading,
+                    transaction_log_instrument_name, 
+                    first_tick_fr_sqlite
+                    )
+                
     async def resupply_transaction_log(
         self,
         currency: str,
