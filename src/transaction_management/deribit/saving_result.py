@@ -70,7 +70,9 @@ async def saving_ws_data(
             currency_lower: str = currency.lower()
             
             WHERE_FILTER_TICK: str = "tick"
-
+             
+            TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+            
             instrument_ticker = (message_channel)[19:]
             if (message_channel  == f"incremental_ticker.{instrument_ticker}"):
                         
@@ -91,10 +93,7 @@ async def saving_ws_data(
                         TABLE_OHLC1, 
                         data
                         ) 
-                    
-                    
-            TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
-            
+               
             DATABASE: str = "databases/trading.sqlite3"
                                                         
             if "chart.trades" in message_channel:
