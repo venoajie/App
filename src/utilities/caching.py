@@ -165,10 +165,10 @@ async def update_cached_orders(
     """
     
     try:
-        
+        print(f"orders_all {orders_all}")
         while True:
+                      
                 
-            
             message= await queue.get()
             
             print (f"message {message}")
@@ -180,7 +180,7 @@ async def update_cached_orders(
             
             if "user.changes.any" in message_channel:
                 
-                print(f"orders_all {orders_all}")
+                
                 
                 print(f"data_orders {data_orders}")
                 
