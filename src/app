@@ -107,9 +107,11 @@ async def main():
         
         await asyncio.gather(
             producer_task, 
+            
             executing_strategies(
                 sub_account_id,
                 queue),
+            
             saving_and_relabelling_orders(
                 sub_account_id,
                 queue),)
@@ -122,7 +124,7 @@ if __name__ == "__main__":
     
     
     try:
-        signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
+        #signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         
         uvloop.run(main())
         
