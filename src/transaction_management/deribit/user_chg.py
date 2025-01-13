@@ -73,30 +73,32 @@ async def saving_and_relabelling_orders(
         relevant_tables = config_app["relevant_tables"][0]
         
         order_db_table= relevant_tables["orders_table"]        
-                        
-        message: str = await queue.get()
+                   
+        while True:
+                 
+            message: str = await queue.get()
 
-        message_channel: str = message["channel"]
-        
-        data_orders: dict = message["data"] 
-                
-        currency: str = message["currency"]
-        
-        currency_lower: str = currency.lower()
-                        
-        if "user.changes.any" in message_channel:
-                    
-            await saving_orders(
-                modify_order_and_db,
-                private_data,
-                cancellable_strategies,
-                non_checked_strategies,
-                data_orders,
-                order_db_table,
-                currency_lower
-                    )
+            message_channel: str = message["channel"]
             
-            await modify_order_and_db.resupply_sub_accountdb(currency)
+            data_orders: dict = message["data"] 
+                    
+            currency: str = message["currency"]
+            
+            currency_lower: str = currency.lower()
+                            
+            if "user.changes.any" in message_channel:
+                        
+                await saving_orders(
+                    modify_order_and_db,
+                    private_data,
+                    cancellable_strategies,
+                    non_checked_strategies,
+                    data_orders,
+                    order_db_table,
+                    currency_lower
+                        )
+                
+                await modify_order_and_db.resupply_sub_accountdb(currency)
     
     except Exception as error:
         
