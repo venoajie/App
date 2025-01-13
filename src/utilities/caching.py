@@ -234,9 +234,9 @@ async def update_cached_orders(
                         #print(f"orders_all {orders_all}")
                     await queue.put(orders_all)
                     await queue.task_done()
-                            
-                else:
-                    break
+                        
+            else:
+                continue
                         
                 
 
