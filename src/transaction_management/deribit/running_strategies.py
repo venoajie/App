@@ -725,7 +725,7 @@ async def executing_strategies(
                                                 
                                                 if len_orders_all < 50:
                                                     
-                                                    log.error (f"{orders_currency_strategy} ")
+                                                    #log.error (f"{orders_currency_strategy} ")
                                                                                                                                         
                                                     for status in status_transaction:
                                                         
@@ -735,7 +735,7 @@ async def executing_strategies(
                                                         orders_currency_strategy_label_contra_status = [o for o in orders_currency_strategy \
                                                             if status not in o["label"] ]
                                                 
-                                                        log.error (f"{status} ")
+                                                        #log.error (f"{status} ")
                                                                                                                                     
                                                         if my_trades_currency_strategy_status:
                                                             
