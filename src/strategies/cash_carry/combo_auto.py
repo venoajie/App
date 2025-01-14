@@ -586,7 +586,7 @@ class ComboAuto (BasicStrategy):
             waiting_minute_before_cancel= strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE
             
             #log.warning(f"waiting_minute_before_cancel {waiting_minute_before_cancel} {waiting_minute_before_cancel {waiting_minute_before_cancel}}")
-            log.warning(f"transaction {transaction}")
+            #log.warning(f"transaction {transaction}")
             
             try:
                 timestamp: int = transaction["timestamp"]
