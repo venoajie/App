@@ -17,7 +17,8 @@ import tomli
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from strategies.hedging.hedging_spot.app_hedging_spot import hedging_spot
+
+from strategies.app_hedging_spot import hedging_spot
 from transaction_management.deribit.api_requests import (SendApiRequest)
 from transaction_management.deribit.cancelling_active_orders import cancelling_orders
 from transaction_management.deribit.avoiding_double_ids import avoiding_double_ids
