@@ -13,7 +13,7 @@ from db_management.sqlite_management import(
     
     
 async def saving_traded_orders(
-    trades: str,
+    trade: str,
     trade_table: str,
     order_db_table: str,
     ) -> None:
@@ -24,33 +24,28 @@ async def saving_traded_orders(
         trades (_type_): _description_
         orders (_type_): _description_
     """
+     
+    instrument_name = trade["instrument_name"]
 
-
-    log.critical (f"{trades}")
-    for trade in trades:
+    filter_trade="order_id"
             
-        log.critical (f"{trade}")
-        instrument_name = trade["instrument_name"]
+    order_id = trade[f"{filter_trade}"]
 
-        filter_trade="order_id"
-                
-        order_id = trade[f"{filter_trade}"]
-
-        # remove respective transaction from order db            
-        await deleting_row (
-            order_db_table,
-            "databases/trading.sqlite3",
-            filter_trade,
-            "=",
-            order_id,
-                    )
-        
-        # record trading transaction
-        if "-FS-" not in instrument_name:
-            await insert_tables(
-                    trade_table, 
-                    trade
-                    )
+    # remove respective transaction from order db            
+    await deleting_row (
+        order_db_table,
+        "databases/trading.sqlite3",
+        filter_trade,
+        "=",
+        order_id,
+                )
+    
+    # record trading transaction
+    if "-FS-" not in instrument_name:
+        await insert_tables(
+                trade_table, 
+                trade
+                )
             
 async def saving_order_based_on_state(
     order_table: str,
@@ -305,9 +300,10 @@ async def saving_orders (
         if trades:
             
             archive_db_table= f"my_trades_all_{currency_lower}_json"
-
-            await saving_traded_orders(
-                trades, 
+            
+            for trade in trades:
+                await saving_traded_orders(
+                trade, 
                 archive_db_table, 
                 order_db_table,
                 )
