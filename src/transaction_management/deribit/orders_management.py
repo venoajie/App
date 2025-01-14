@@ -26,6 +26,7 @@ async def saving_traded_orders(
     """
 
 
+    log.critical (f"{trades}")
     for trade in trades:
             
         log.critical (f"{trade}")
