@@ -228,7 +228,7 @@ async def executing_strategies(
                             currency
                             )[0]
                         
-                        equity: float = portfolio["equity"]    * 50/100
+                        equity: float = portfolio["equity"]    * (50/100 if "BTC" in currency_upper else 1)
                         
                         ticker_perpetual_instrument_name = [o for o in ticker_all \
                             if instrument_name_perpetual in o["instrument_name"]][0]                                   
