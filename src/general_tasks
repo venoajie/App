@@ -436,7 +436,7 @@ async def reconciling_size(
                                             my_trades_currency_active,
                                             sub_account
                                             )  
-                                #log.info (f" my_trades_currency_all_transactions {my_trades_currency_all_transactions}")
+                                log.info (f" my_trades_and_sub_account_size_reconciled_archive {my_trades_and_sub_account_size_reconciled_archive}")
                                 if  not my_trades_and_sub_account_size_reconciled_archive:
                                     
                                     my_trades_instrument_name_archive = [o for o in my_trades_currency_all_transactions\
