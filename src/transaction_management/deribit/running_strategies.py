@@ -228,7 +228,7 @@ async def executing_strategies(
                             currency
                             )[0]
                         
-                        equity: float = portfolio["equity"]    * 50%
+                        equity: float = portfolio["equity"]    * 50/100
                         
                         ticker_perpetual_instrument_name = [o for o in ticker_all \
                             if instrument_name_perpetual in o["instrument_name"]][0]                                   
@@ -362,7 +362,7 @@ async def executing_strategies(
                                     #log.info (f"orders_currency_strategy {orders_currency_strategy}")
                                     #log.critical (f"len_orders_all {len_orders_all}")
                                 
-                                    if  False and "futureSpread" in strategy :
+                                    if   "futureSpread" in strategy :
                                                             
                                         log.warning (f"strategy {strategy}-START")    
                                         #log.warning (f"strategy {strategy_params}-START")    
@@ -430,7 +430,7 @@ async def executing_strategies(
                                                 ticker_future= [o for o in ticker_all 
                                                                 if instrument_name_future in o["instrument_name"]]
                                                 
-                                                if False and len_orders_all < 50\
+                                                if  len_orders_all < 50\
                                                         and ticker_future and ticker_combo:
                                                     #and not reduce_only \
                                                     
@@ -452,7 +452,7 @@ async def executing_strategies(
                                                     
                                                     if send_order["order_allowed"]:
                                                         
-                                                        await self.processing_orders(
+                                                        await processing_orders(
                                                         modify_order_and_db,
                                                         send_order)
                                                         
@@ -485,7 +485,7 @@ async def executing_strategies(
                                                         
                                                         if send_order["order_allowed"]:
                                                             
-                                                            await self.processing_orders(
+                                                            await processing_orders(
                                                             modify_order_and_db,
                                                             send_order)
                                                             
@@ -591,7 +591,7 @@ async def executing_strategies(
                                                         send_order = []
                                                                                         
                                                                                                                         
-                                                        if False and size_perpetuals_reconciled:
+                                                        if  size_perpetuals_reconciled:
                                                 
                                                             for transaction in selected_transaction:
                                                                                                                     
@@ -625,7 +625,7 @@ async def executing_strategies(
                                                                     
                                                                     if send_order["order_allowed"]:
                                                                         
-                                                                        await self.processing_orders(
+                                                                        await processing_orders(
                                                                         modify_order_and_db,
                                                                         send_order)
                                                                         
