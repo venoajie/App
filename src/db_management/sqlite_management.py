@@ -215,7 +215,7 @@ async def querying_duplicated_transactions(
 
             async with db as cur:
                 
-                cur.execute('pragma journal_mode=wal;')
+                await cur.execute('pragma journal_mode=wal;')
                 
                 fetchall = await cur.fetchall()
 
