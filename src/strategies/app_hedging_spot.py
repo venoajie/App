@@ -136,13 +136,6 @@ async def hedging_spot(
         
         instruments_name = futures_instruments["instruments_name"]   
         
-        # filling currencies attributes
-        my_path_cur = provide_path_for_file("currencies")
-        replace_data(
-            my_path_cur,
-            currencies
-            )
-        
         resolutions = [60,15, 5]     
         qty_candles = 5  
         dim_sequence = 3     

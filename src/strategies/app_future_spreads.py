@@ -90,12 +90,14 @@ async def update_db_pkl(
 async def executing_strategies(
     sub_account_id,
     queue,
-    queue_cached_orders
+    
     ):
     
     """
     """
     
+    strategy = "futureSpread"
+    log.critical (f"starting {strategy}")
     # registering strategy config file    
     file_toml = "config_strategies.toml"
 
@@ -104,8 +106,6 @@ async def executing_strategies(
         # parsing config file
         config_app = get_config(file_toml)
        
-        private_data: str = SendApiRequest (sub_account_id)
-        
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # get tradable strategies
@@ -124,19 +124,10 @@ async def executing_strategies(
                                     
         active_strategies =   [o["strategy_label"] for o in strategy_attributes_active]
         
-        # get strategies that have not short/long attributes in the label 
-        non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
-            if o["non_checked_for_size_label_consistency"]==True]
-        
         cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
             if o["cancellable"]==True]
         
-        contribute_to_hedging_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
-            if o["contribute_to_hedging"]==True]
-        
         relevant_tables = config_app["relevant_tables"][0]
-        
-        trade_db_table= relevant_tables["my_trades_table"]
         
         order_db_table= relevant_tables["orders_table"]        
                         
@@ -152,8 +143,6 @@ async def executing_strategies(
         instrument_attributes_combo_all = futures_instruments["active_combo"]  
         
         instruments_name = futures_instruments["instruments_name"]   
-        
-        min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]   
         
         resolutions = [60,15, 5]     
         qty_candles = 5  
@@ -285,15 +274,6 @@ async def executing_strategies(
                                 my_trades_currency: list= [ o for o in my_trades_currency_all \
                                     if o["label"] is not None] 
                                 
-                                my_trades_currency_contribute_to_hedging = [o for o in my_trades_currency \
-                                    if (parsing_label(o["label"])["main"] ) in contribute_to_hedging_strategies ]
-                                my_trades_currency_contribute_to_hedging_sum = 0 if  not my_trades_currency_contribute_to_hedging\
-                                    else sum([o["amount"] for o in my_trades_currency_contribute_to_hedging])
-                                    
-                                my_trades= remove_redundant_elements([o["instrument_name"] for o in my_trades_currency ])
-                                my_labels= remove_redundant_elements([parsing_label(o["label"])["main"] for o in my_trades_currency ])
-                                #log.critical (orders_all)
-                            
                                 ONE_PCT = 1 / 100
                                 
                                 THRESHOLD_DELTA_TIME_SECONDS = 120
@@ -326,10 +306,8 @@ async def executing_strategies(
                                     #log.info (f"orders_currency_strategy {orders_currency_strategy}")
                                     #log.critical (f"len_orders_all {len_orders_all}")
                                 
-                                    if   "futureSpread" in strategy :
-                                                            
-                                        log.warning (f"strategy {strategy}-START")    
-                                        #log.warning (f"strategy {strategy_params}-START")    
+                                    if   (strategy in active_strategies
+                                          and size_perpetuals_reconciled) :
                                                                     
                                         BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = strategy_params["waiting_minute_before_relabelling"]
                                                         
@@ -342,8 +320,8 @@ async def executing_strategies(
                                         
                                         max_order_currency = 2
                                         
-                                        random_instruments_name = random.sample(([o for o in instruments_name\
-                                                                                    if "-FS-" not in o and currency_upper in o]),
+                                        random_instruments_name = random.sample(([o for o in instruments_name
+                                                                                  if "-FS-" not in o and currency_upper in o]),
                                                                                 max_order_currency)
                                                                             
                                         combo_auto = ComboAuto(
@@ -364,18 +342,11 @@ async def executing_strategies(
                                             try:
                                                 instrument_name_combo = instrument_attributes_combo["instrument_name"]
                                             
-                                                size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
-                                                    position_without_combo,
-                                                    my_trades_currency_all,
-                                                    instrument_name_combo)
-                                                                    
-                                                if not size_future_reconciled:
-                                                    kill_process("general_tasks")
-                                            
                                             except:
                                                 instrument_name_combo = None
                                                 
-                                            if  instrument_name_combo is not None and currency_upper in instrument_name_combo:
+                                            if  (instrument_name_combo is not None 
+                                                 and currency_upper in instrument_name_combo):
                                                 
                                                 instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
 
@@ -596,181 +567,7 @@ async def executing_strategies(
                                                                         not_order = False
                                                                         
                                                                         break
-                                                        
-                                        log.warning (f"strategy {strategy}-DONE")
                                     
-                                    if  "hedgingSpot" in strategy \
-                                        and size_perpetuals_reconciled:
-                                        
-                                        log.warning (f"strategy {strategy}-START")                                                    
-                                        
-                                        instrument_attributes_futures_for_hedging = [o for o in futures_instruments["active_futures"] 
-                                                                                     if o["settlement_period"] != "month" and
-                                                                                     o["kind"] == "future"] 
-                                                
-                                        strong_bearish = market_condition["strong_bearish"]
-                                    
-                                        bearish = market_condition["bearish"]
-                                        
-                                        max_position: int = notional * -1 
-                                                    
-                                        instrument_ticker =   await modify_hedging_instrument (
-                                            strong_bearish,
-                                            bearish,
-                                            instrument_attributes_futures_for_hedging,
-                                            ticker_all,
-                                            ticker_perpetual_instrument_name,
-                                            currency_upper)
-                                                    
-                                        instrument_name = instrument_ticker ["instrument_name"]    
-                                            
-                                        size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
-                                            position_without_combo,
-                                            my_trades_currency_all,
-                                            instrument_name)
-                                                            
-                                        if not size_future_reconciled:
-                                            kill_process("general_tasks")
-                                                                            
-                                        hedging = HedgingSpot(
-                                            strategy,
-                                            strategy_params,
-                                            max_position,
-                                            my_trades_currency_strategy,
-                                            market_condition,
-                                            index_price,
-                                            my_trades_currency_all,
-                                            )
-                                                                    
-                                        if size_future_reconciled:      
-                                    
-                                            instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
-                                                if o["instrument_name"] == instrument_name])- server_time)/ONE_MINUTE  
-                                            
-                                            instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
-                                                                                                    
-                                            #something was wrong because perpetuals were actively traded. cancell  orders
-                                            if instrument_time_left_exceed_threshold\
-                                                and len_orders_all < 50:
-                                                
-                                                best_ask_prc: float = instrument_ticker["best_ask_price"] 
-
-                                                send_order: dict = await hedging.is_send_open_order_allowed(
-                                                    non_checked_strategies,
-                                                    instrument_name,
-                                                    instrument_attributes_futures_for_hedging,
-                                                    orders_currency_strategy,
-                                                    best_ask_prc,
-                                                    archive_db_table,
-                                                    trade_db_table)
-                                                
-                                                if send_order["order_allowed"]:
-                                                    
-                                                    await processing_orders(
-                                                        modify_order_and_db,
-                                                        send_order,
-                                                    )
-                                                    
-                                                    not_order = False
-                                                    
-                                                    break
-                                                
-                                                status_transaction =["open",
-                                                            "closed"]
-                                                
-                                                if len_orders_all < 50:
-                                                    
-                                                    #log.error (f"{orders_currency_strategy} ")
-                                                                                                                                        
-                                                    for status in status_transaction:
-                                                        
-                                                        my_trades_currency_strategy_status = [o for o in my_trades_currency_strategy \
-                                                            if status in (o["label"])]
-                                                        
-                                                        orders_currency_strategy_label_contra_status = [o for o in orders_currency_strategy \
-                                                            if status not in o["label"] ]
-                                                
-                                                        #log.error (f"{status} ")
-                                                                                                                                    
-                                                        if my_trades_currency_strategy_status:
-                                                            
-                                                            transaction_instrument_name = remove_redundant_elements (
-                                                                [o["instrument_name"] for o in my_trades_currency_strategy_status])
-                                                            
-                                                            for instrument_name in transaction_instrument_name:
-                                                                
-                                                                instrument_ticker: list =  [o for o in ticker_all 
-                                                                                            if instrument_name in o["instrument_name"]]
-                                                                
-                                                                if instrument_ticker:
-                                                                    
-                                                                    instrument_ticker = instrument_ticker[0]
-                                                                    
-                                                                    get_prices_in_label_transaction_main = [o["price"] for o in my_trades_currency_strategy_status\
-                                                                        if instrument_name in  o["instrument_name"]]
-                                                                    
-                                                                    log.error (f"my_trades_currency_contribute_to_hedging_sum {my_trades_currency_contribute_to_hedging_sum}")
-
-                                                                    if status == "open" and my_trades_currency_contribute_to_hedging_sum <=0:
-                                                                        
-                                                                        best_bid_prc: float = instrument_ticker["best_bid_price"]
-                                                                    
-                                                                        closest_price = get_closest_value(
-                                                                            get_prices_in_label_transaction_main,
-                                                                            best_bid_prc
-                                                                            )
-
-                                                                        nearest_transaction_to_index = [o for o in my_trades_currency_strategy_status \
-                                                                            if o["price"] == closest_price]
-                                                                        
-                                                                        send_closing_order: dict = await hedging.is_send_exit_order_allowed(
-                                                                        orders_currency_strategy_label_contra_status,
-                                                                        best_bid_prc,
-                                                                        nearest_transaction_to_index,
-                                                                        #orders_currency_strategy
-                                                                        )
-                                                                        
-                                                                        if send_order["order_allowed"]:
-                                                                            
-                                                                            await processing_orders(
-                                                                            send_closing_order,
-                                                                            modify_order_and_db)
-                                                                                                
-                                                                            not_order = False
-                                                                            
-                                                                            break
-                    
-                                                                    if status == "closed":
-                                                                    
-                                                                        best_ask_prc: float = instrument_ticker["best_ask_price"]
-                                                                    
-                                                                        closest_price = get_closest_value(
-                                                                            get_prices_in_label_transaction_main,
-                                                                            best_ask_prc
-                                                                            )
-
-                                                                        nearest_transaction_to_index = [o for o in my_trades_currency_strategy_status \
-                                                                            if o["price"] == closest_price]
-                                                                    
-                                                                        send_closing_order: dict = await hedging.send_contra_order_for_orphaned_closed_transctions(
-                                                                        orders_currency_strategy_label_contra_status,
-                                                                        best_ask_prc,
-                                                                        nearest_transaction_to_index,
-                                                                        #orders_currency_strategy
-                                                                        )
-                                                                        
-                                                                        if send_order["order_allowed"]:
-                                                                            
-                                                                            await processing_orders(
-                                                                            modify_order_and_db,
-                                                                            send_closing_order)
-                                                                                                
-                                                                            not_order = False
-                                                                            
-                                                                            break
-
-                                                                
-                                        log.warning (f"strategy {strategy}-DONE")
                     
     except Exception as error:
         

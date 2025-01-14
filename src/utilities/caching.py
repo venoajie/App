@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-from transaction_management.deribit.api_requests import (
-    get_tickers,)
-from utilities.pickling import (
-    read_data,)
+from transaction_management.deribit.api_requests import (get_tickers,)
+from utilities.pickling import (read_data,)
 from utilities.system_tools import (
     parse_error_message,
     provide_path_for_file)
@@ -259,10 +257,7 @@ async def update_cached_orders(
     """
     
     try:
-        #print(f"orders_all {queue_orders_all}")
         
-        #if "user.changes.any" in message_channel:
-    
         orders_all = queue_orders_all
         
         if queue_orders:
@@ -280,7 +275,7 @@ async def update_cached_orders(
                         order_id = trade["order_id"]
                         
                         selected_order = [o for o in orders_all 
-                                        if order_id in o["order_id"]]
+                                          if order_id in o["order_id"]]
                         
                         if selected_order:
                                                 
@@ -311,7 +306,6 @@ async def update_cached_orders(
                         
                             orders_all.append(order)
                         
-            
 
     except Exception as error:
         
