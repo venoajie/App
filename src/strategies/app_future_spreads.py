@@ -22,34 +22,26 @@ from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition)
 from strategies.basic_strategy import (get_label_integer,)
-from strategies.hedging.hedging_spot import (
-    HedgingSpot,
-    modify_hedging_instrument)
 from strategies.cash_carry.combo_auto import(
     ComboAuto,
     check_if_minimum_waiting_time_has_passed)
 from transaction_management.deribit.processing_orders import processing_orders
-from transaction_management.deribit.api_requests import (SendApiRequest)
 from transaction_management.deribit.get_instrument_summary import (get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
 from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
-from transaction_management.deribit.api_requests import (SendApiRequest)
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
     update_cached_ticker)
-from utilities.number_modification import get_closest_value
 from utilities.pickling import (
     replace_data,
     read_data)
 from utilities.system_tools import (
     kill_process,
     parse_error_message,
-    provide_path_for_file,
-    raise_error_message,)
+    provide_path_for_file,)
 from utilities.string_modification import (
-    parsing_label,
     remove_double_brackets_in_list,
     remove_redundant_elements)
 
@@ -361,7 +353,6 @@ async def executing_strategies(
                                                 ticker_combo = [o for o in ticker_all 
                                                                 if instrument_name_combo in o["instrument_name"]]
                                                 
-                                                
                                                 ticker_future= [o for o in ticker_all 
                                                                 if instrument_name_future in o["instrument_name"]]
                                                 
@@ -372,29 +363,6 @@ async def executing_strategies(
                                                     ticker_combo= ticker_combo[0]
 
                                                     ticker_future= ticker_future[0]
-                                        
-                                                    send_order: dict = await combo_auto.is_send_open_order_allowed_auto_combo(
-                                                        ticker_future,
-                                                        ticker_combo,
-                                                        notional,
-                                                        instrument_name_combo,
-                                                        instrument_attributes_futures_all,
-                                                        instrument_attributes_combo,
-                                                        monthly_target_profit,
-                                                        AVERAGE_MOVEMENT,
-                                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT
-                                                        )
-                                                    
-                                                    if False and send_order["order_allowed"]:
-                                                        
-                                                        await processing_orders(
-                                                        modify_order_and_db,
-                                                        send_order)
-                                                        
-                                                        not_order = False
-                                                        
-                                                        break
-
                                                     
                                                     instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
                                                         if o["instrument_name"] == instrument_name_future])- server_time)/ONE_MINUTE  
@@ -446,9 +414,6 @@ async def executing_strategies(
                                             
                                             #! closing combo auto trading
                                             if "Auto" in label and len_orders_all < 50:
-                                                
-                                                #log.critical (f"sum_selected_transaction {sum_selected_transaction}")
-                                                #log.info (f"selected_transaction {selected_transaction}")
                                                                                                                 
                                                 if sum_selected_transaction == 0:  
                                                     
@@ -495,6 +460,9 @@ async def executing_strategies(
                                                         currency,
                                                         cancellable_strategies
                                                         )
+                                                    
+                                                    not_order = False
+                                                    
                                                     break
                                                 
                                             #! renaming combo auto trading
@@ -515,6 +483,9 @@ async def executing_strategies(
                                                         new_label,
                                                         "="
                                                         )
+                                                    
+                                                    not_order = False
+                                                    
                                                     break
                                                 
                                                 #! closing unpaired transactions                                                            
@@ -524,7 +495,6 @@ async def executing_strategies(
                                                         and "closed" not in label:
                                                         
                                                         send_order = []
-                                                                                        
                                                                                                                         
                                                         if  size_perpetuals_reconciled:
                                                 
