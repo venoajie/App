@@ -469,8 +469,6 @@ class HedgingSpot(BasicStrategy):
                 
         cancel_allowed: bool = False
 
-        log.info (f"transaction {transaction}")
-        
         ONE_SECOND = 1000
         ONE_MINUTE = ONE_SECOND * 60
 

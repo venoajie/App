@@ -185,15 +185,15 @@ async def executing_strategies(
             
                 message: str = await queue.get()
                 queue.task_done
-                log.debug(f"message {message}")
                 #message: str = queue.get()
                 
                 message_channel: str = message["channel"]
-                log.debug(f"message_channel {message_channel}")
+                #log.debug(f"message_channel {message_channel}")
                 
                 data_orders: dict = message["data"] 
 
                 orders_all: dict = message["orders_all"] 
+                log.debug(f"orders_all {orders_all}")
                         
                 currency: str = message["currency"]
                 
