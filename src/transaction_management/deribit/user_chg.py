@@ -78,8 +78,6 @@ async def saving_and_relabelling_orders(
                  
             message: str = await queue.get()
             
-            print (f" message {message}")
-
             message_channel: str = message["channel"]
             
             data_orders: dict = message["data"] 
