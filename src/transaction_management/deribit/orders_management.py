@@ -52,35 +52,6 @@ async def saving_traded_orders(
                     trade
                     )
             
-        
-async def saving_traded_orders_with_cancel(
-    trades: str,
-    trade_table: str,
-    order_db_table: str,
-    modify_order_and_db,
-    cancellable_strategies,
-    currency_lower: str 
-    ) -> None:
-    
-    """_summary_
-
-    Args:
-        trades (_type_): _description_
-        orders (_type_): _description_
-    """
-
-    await saving_traded_orders(
-    trades,
-    trade_table,
-    order_db_table,
-    )   
-    
-    await modify_order_and_db.cancel_the_cancellables(
-            order_db_table,
-            currency_lower,
-            cancellable_strategies
-            )
-        
 async def saving_order_based_on_state(
     order_table: str,
     order: dict
@@ -334,15 +305,19 @@ async def saving_orders (
         if trades:
             
             archive_db_table= f"my_trades_all_{currency_lower}_json"
-    
-            await saving_traded_orders_with_cancel(
+
+            await saving_traded_orders(
                 trades, 
                 archive_db_table, 
                 order_db_table,
-                modify_order_and_db,
-                cancellable_strategies,
-                currency_lower
                 )
+                                        
+            await modify_order_and_db.cancel_the_cancellables(
+                    order_db_table,
+                    currency_lower,
+                    cancellable_strategies
+                    )
+            
         else:
                         
             if "oto_order_ids" in (orders[0]):
