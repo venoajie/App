@@ -450,7 +450,7 @@ async def executing_strategies(
                                                         BASIC_TICKS_FOR_AVERAGE_MOVEMENT
                                                         )
                                                     
-                                                    if send_order["order_allowed"]:
+                                                    if False and send_order["order_allowed"]:
                                                         
                                                         await processing_orders(
                                                         modify_order_and_db,
