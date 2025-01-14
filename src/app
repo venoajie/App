@@ -151,28 +151,12 @@ async def main():
         stream = StreamAccountData(sub_account_id)
                 
         
-        orders_all = await combining_order_data(
-            private_data,
-            currencies)  
-       
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
         
-        producer_cached_orders = asyncio.create_task(update_cached_orders(                        
-                        orders_all,
-                        queue_cached_orders,
-                        queue,
-                        )) 
-
         await asyncio.sleep(0.0005)
         
         await asyncio.gather(
             producer_task, 
-            producer_cached_orders,
-            
-            update_cached_orders(
-                orders_all,
-                queue_orders,
-                queue),
             
             executing_strategies(
                 sub_account_id,

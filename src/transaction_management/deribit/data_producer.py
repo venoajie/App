@@ -39,7 +39,9 @@ from utilities.string_modification import (
     extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,)
-
+from utilities.caching import (
+    combining_order_data,
+    update_cached_orders)
 
 def parse_dotenv (sub_account) -> dict:
     return config.main_dotenv(sub_account)
@@ -170,7 +172,13 @@ class StreamAccountData(ModifyOrderDb):
                 instruments_name = futures_instruments["instruments_name"]   
                 
                 strategy_attributes = config_app["strategies"]
-                                  
+                
+                private_data: str = SendApiRequest (self.sub_account_id)
+                
+                orders_all = await combining_order_data(
+                    private_data,
+                    currencies)
+                
                 while True:
                     
                     # Authenticate WebSocket Connection
@@ -265,13 +273,18 @@ class StreamAccountData(ModifyOrderDb):
                                 data = message_params["data"]
                                 
                                 message_channel: str = message_params["channel"]
-                                                        
+                                
+                                await update_cached_orders(
+                                    orders_all,
+                                    data)
+                                
                                 currency: str = extract_currency_from_text(message_channel)
                                 
                                 currency_lower: str = currency.lower()
                                                                 
                                 result = dict(data= data, 
                                               channel= message_channel,
+                                              orders_all= orders_all,
                                               currency= currency_lower)
                                 deque = (result)
                              

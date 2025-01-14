@@ -34,10 +34,9 @@ from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
 from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
+from transaction_management.deribit.api_requests import (SendApiRequest)
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
-    update_cached_orders,
-    combining_order_data,
     update_cached_ticker)
 from utilities.number_modification import get_closest_value
 from utilities.pickling import (
@@ -176,10 +175,6 @@ async def executing_strategies(
         
         ticker_all = cached_ticker(instruments_name)  
         
-        orders_all = await combining_order_data(
-            private_data,
-            currencies)  
-        
         while True:
             
             not_order = True
@@ -187,11 +182,6 @@ async def executing_strategies(
             log.error (f"not_order {not_order}")
             
             while not_order:
-
-                orders_all_update = await queue_cached_orders.get()
-                queue_cached_orders.task_done
-                
-                log.debug(f"orders_all_update {orders_all_update}")
             
                 message: str = await queue.get()
                 queue.task_done
@@ -202,6 +192,8 @@ async def executing_strategies(
                 log.debug(f"message_channel {message_channel}")
                 
                 data_orders: dict = message["data"] 
+
+                orders_all: dict = message["orders_all"] 
                         
                 currency: str = message["currency"]
                 

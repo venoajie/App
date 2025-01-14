@@ -151,7 +151,7 @@ async def combining_order_data(
 
     return result
 
-async def update_cached_orders(
+async def update_cached_orders_(
     queue_orders_all,
     queue_orders,
     queue: dict):
@@ -238,6 +238,95 @@ async def update_cached_orders(
                     await queue.put(orders_all)
                     await queue.task_done()
                         
+                
+
+    except Exception as error:
+        
+        parse_error_message(error)
+
+
+async def update_cached_orders(
+    queue_orders_all,
+    queue_orders):
+    """_summary_
+    https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
+
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    
+    try:
+        #print(f"orders_all {queue_orders_all}")
+        
+        if "user.changes.any" in message_channel:
+            
+            while not queue_orders.empty():
+            
+                orders_all = queue_orders_all
+                
+                print (f"queue_orders {queue_orders}")
+                print (f"queue_orders {not queue_orders.empty()}")
+                            
+                if not queue_orders.empty():
+                        
+                    message= await queue_orders.get()
+                    
+                    print (f"message {message}")
+
+                    message_channel: str = message["channel"]
+                    
+                    data_orders: dict = message["data"]         
+                    #print(f"data_orders {data_orders}")
+                    
+                    if data_orders:
+                        
+                        orders = data_orders["orders"]
+                        
+                        trades = data_orders["trades"]
+                        
+                        if orders:
+                            
+                            if trades :
+                                
+                                for trade in trades:
+
+                                    order_id = trade["order_id"]
+                                    
+                                    selected_order = [o for o in orders_all 
+                                                    if order_id in o["order_id"]]
+                                    
+                                    if selected_order:
+                                                            
+                                        orders_all.remove(selected_order[0])
+                                    
+                            if orders:
+                            
+                                for order in orders:
+                                    
+                                    print(f"cached order {order}")
+                                    
+                                    order_state= order["order_state"]    
+                                    
+                                    if order_state == "cancelled" or order_state == "filled":
+                                    
+                                        order_id = order["order_id"]
+                                        
+                                        selected_order = [o for o in orders_all 
+                                                        if order_id in o["order_id"]]
+                                        
+                                        print(f"caching selected_order {selected_order}")
+                                        
+                                        if selected_order:
+                                                                
+                                            orders_all.remove(selected_order[0])
+                                        
+                                    else:
+                                    
+                                        orders_all.append(order)
+                                    
                 
 
     except Exception as error:
