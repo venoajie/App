@@ -271,7 +271,7 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 message_params: dict = message["params"]
                                 
-                                data = message_params["data"]
+                                data = deque(message_params["data"])
                                 
                                 message_channel: str = message_params["channel"]
                                 
@@ -285,10 +285,10 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 currency_lower: str = currency.lower()
                                                                 
-                                result_deque = (data= deque(data), 
-                                              channel= deque(message_channel),
-                                              orders_all= deque(orders_all),
-                                              currency= deque(currency_lower))
+                                result_deque = dict(data= (data), 
+                                              channel= (message_channel),
+                                              orders_all= (orders_all),
+                                              currency= (currency_lower))
                                 #result_deque = deque (result)
                              
                                 #queue.put(result)
