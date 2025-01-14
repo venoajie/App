@@ -331,6 +331,7 @@ async def executing_strategies(
                                     
                                     log.info (f"orders_currency_all {len(orders_currency)}")
                                     log.info (f"orders_currency_strategy {len(orders_currency_strategy)}")
+                                    
                                     if orders_currency_strategy:
                                         
                                         outstanding_order_id = remove_redundant_elements (

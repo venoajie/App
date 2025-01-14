@@ -289,12 +289,12 @@ class StreamAccountData(ModifyOrderDb):
                                               channel= message_channel,
                                               orders_all= orders_all,
                                               currency= currency_lower)
-                                deque = (result)
+                                result_deque = deque (result)
                              
                                 #queue.put(result)
                                 try:
-                                    if deque:       
-                                        await queue.put(deque)
+                                    if result_deque:       
+                                        await queue.put(result_deque)
                                     else:
                                         break
                                     
