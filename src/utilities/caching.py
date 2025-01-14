@@ -262,60 +262,55 @@ async def update_cached_orders(
         #print(f"orders_all {queue_orders_all}")
         
         #if "user.changes.any" in message_channel:
+    
+        orders_all = queue_orders_all
         
-        while True:
-        
-            orders_all = queue_orders_all
+        if queue_orders:
             
-            print (f"queue_orders {queue_orders}")
-                
+            orders = queue_orders["orders"]
             
-            if queue_orders:
+            trades = queue_orders["trades"]
+            
+            if orders:
                 
-                orders = queue_orders["orders"]
-                
-                trades = queue_orders["trades"]
-                
-                if orders:
+                if trades :
                     
-                    if trades :
-                        
-                        for trade in trades:
+                    for trade in trades:
 
-                            order_id = trade["order_id"]
+                        order_id = trade["order_id"]
+                        
+                        selected_order = [o for o in orders_all 
+                                        if order_id in o["order_id"]]
+                        
+                        if selected_order:
+                                                
+                            orders_all.remove(selected_order[0])
+                        
+                if orders:
+                
+                    for order in orders:
+                        
+                        print(f"cached order {order}")
+                        
+                        order_state= order["order_state"]    
+                        
+                        if order_state == "cancelled" or order_state == "filled":
+                        
+                            order_id = order["order_id"]
                             
                             selected_order = [o for o in orders_all 
                                             if order_id in o["order_id"]]
+                            
+                            print(f"caching selected_order {selected_order}")
                             
                             if selected_order:
                                                     
                                 orders_all.remove(selected_order[0])
                             
-                    if orders:
-                    
-                        for order in orders:
-                            
-                            print(f"cached order {order}")
-                            
-                            order_state= order["order_state"]    
-                            
-                            if order_state == "cancelled" or order_state == "filled":
-                            
-                                order_id = order["order_id"]
-                                
-                                selected_order = [o for o in orders_all 
-                                                if order_id in o["order_id"]]
-                                
-                                print(f"caching selected_order {selected_order}")
-                                
-                                if selected_order:
-                                                        
-                                    orders_all.remove(selected_order[0])
-                                
-                            else:
-                            
-                                orders_all.append(order)
-                            
+                        else:
+                        
+                            orders_all.append(order)
+                        
             
 
     except Exception as error:
