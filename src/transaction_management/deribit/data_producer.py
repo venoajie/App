@@ -275,9 +275,11 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 message_channel: str = message_params["channel"]
                                 
-                                await update_cached_orders(
-                                    orders_all,
-                                    data)
+                                if "user.changes.any" in message_channel:
+                                    
+                                    await update_cached_orders(
+                                        orders_all,
+                                        data)
                                 
                                 currency: str = extract_currency_from_text(message_channel)
                                 
