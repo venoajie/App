@@ -41,7 +41,7 @@ async def avoiding_double_ids(
     
     """
     """
-    
+    log.critical ("AVoiding double ids START")
     # registering strategy config file    
     file_toml = "config_strategies.toml"
 

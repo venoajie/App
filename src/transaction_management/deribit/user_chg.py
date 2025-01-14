@@ -44,6 +44,8 @@ async def saving_and_relabelling_orders(
     """
     """
     
+    print ("saving_and_relabelling_orders START")
+    
     # registering strategy config file    
     file_toml = "config_strategies.toml"
 
