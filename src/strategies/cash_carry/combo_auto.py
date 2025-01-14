@@ -472,8 +472,12 @@ class ComboAuto (BasicStrategy):
         if open_orders_instrument:
 
             len_open_orders_instrument: list=  len (open_orders_instrument)
-                        
-            last_order_time= max([o["timestamp"] for o in open_orders_instrument])
+            
+            try:
+                last_order_time= max([o["timestamp"] for o in open_orders_instrument])
+                
+            except:
+                last_order_time= max([o["last_update_timestamp"] for o in open_orders_instrument])
                             
             delta_time = self.server_time-last_order_time
             
