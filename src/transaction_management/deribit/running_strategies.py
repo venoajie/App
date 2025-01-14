@@ -193,7 +193,6 @@ async def executing_strategies(
                 data_orders: dict = message["data"] 
 
                 orders_all: dict = message["orders_all"] 
-                log.debug(f"orders_all {orders_all}")
                         
                 currency: str = message["currency"]
                 
@@ -332,7 +331,6 @@ async def executing_strategies(
                                     
                                     log.info (f"orders_currency_all {len(orders_currency)}")
                                     log.info (f"orders_currency_strategy {len(orders_currency_strategy)}")
-                                    log.critical (f"orders_currency_strategy {(orders_currency_strategy)}")
                                     if orders_currency_strategy:
                                         
                                         outstanding_order_id = remove_redundant_elements (
@@ -647,7 +645,7 @@ async def executing_strategies(
                                                         
                                         log.warning (f"strategy {strategy}-DONE")
                                     
-                                    if "hedgingSpot" in strategy \
+                                    if False and "hedgingSpot" in strategy \
                                         and size_perpetuals_reconciled:
                                         
                                         log.warning (f"strategy {strategy}-START")                                                    
