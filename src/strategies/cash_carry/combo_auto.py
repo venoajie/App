@@ -429,7 +429,7 @@ class ComboAuto (BasicStrategy):
     orders_currency_strategy: list
     server_time: int
     market_condition: list
-    my_trades_currency_strategy: list = None
+    my_trades_currency_strategy: list
     ticker_perpetual: dict = None
     delta: float = fields 
     basic_params: object = fields 
@@ -781,8 +781,16 @@ class ComboAuto (BasicStrategy):
         """ """
         
         order_allowed = False
+        server_time =self.server_time
+        my_trades = self.my_trades_currency_strategy
+        my_trades_long = [o for o in my_trades if "sell" in o["side"] ]
+        my_trades_short = [o for o in my_trades if "buy" in o["side"]]
+        
+        my_trades_long_timestamp = max([o["timestamp"] for o in my_trades_long])
+        my_trades_short_timestamp = max([o["timestamp"] for o in my_trades_short])
         
         delta = self.delta
+        strategy_params: dict = self.strategy_parameters
         log.warning (f"constructing_manual_combo")
         #log.warning (f"{ticker_future}")
 
@@ -796,12 +804,12 @@ class ComboAuto (BasicStrategy):
                                             if instrument_name_future in o["instrument_name"]]
                             
         orders_instrument_future_open_all: list=  [o for o in orders_currency 
-                                            if "PERPETUAL" not in o["instrument_name"]\
-                                                and "-FS-" not in o["instrument_name"]\
-                                                    and "open" in o["label"]]
+                                                   if "PERPETUAL" not in o["instrument_name"]
+                                                   and "-FS-" not in o["instrument_name"]
+                                                   and "open" in o["label"]]
                             
-        len_orders_instrument_future_open_all = 0 if orders_instrument_future_open_all == []\
-            else len(orders_instrument_future_open_all)
+        len_orders_instrument_future_open_all = (0 if orders_instrument_future_open_all == []
+                                                 else len(orders_instrument_future_open_all))
         
         orders_instrument_future_open: list=  [o for o in orders_instrument_future 
                                                 if "open" in o["label"]]
@@ -809,8 +817,8 @@ class ComboAuto (BasicStrategy):
         orders_instrument_open: list=  [o for o in orders_instrument_future_open 
                                     if instrument_name_future in o["instrument_name"]]
         
-        len_orders_instrument: list=  0 if not  orders_instrument_open \
-            else len(orders_instrument_open)
+        len_orders_instrument: list=  (0 if not  orders_instrument_open 
+                                       else len(orders_instrument_open))
             
         bullish, strong_bullish, weak_bullish = market_condition["bullish"], market_condition["strong_bullish"], market_condition["weak_bullish"]
         bearish, strong_bearish, weak_bearish = market_condition["bearish"], market_condition["strong_bearish"], market_condition["weak_bearish"]
@@ -825,8 +833,8 @@ class ComboAuto (BasicStrategy):
                 )
             #log.debug (f"contango {contango} len_orders_instrument_future_open_all {len_orders_instrument_future_open_all}")
             
-            if len_orders_instrument == 0 \
-                    and contango: 
+            if (len_orders_instrument == 0 
+                and contango): 
     
                 basic_size = determine_opening_size(
                     instrument_name_future, 
@@ -836,8 +844,7 @@ class ComboAuto (BasicStrategy):
                     average_movement,
                     basic_ticks_for_average_meovement
                     )
-        
-                    
+            
                 label_open: str = get_label(
                     "open", 
                     self.strategy_label
@@ -853,15 +860,45 @@ class ComboAuto (BasicStrategy):
                 # default type: limit
                 params.update({"type": "limit"})
                 
-                log.warning (f"PERPETUAL in instrument_name_future {"PERPETUAL" in instrument_name_future} PERPETUAL not in instrument_name_future {"PERPETUAL" not in instrument_name_future}")
+                log.warning (f"""PERPETUAL in instrument_name_future {"PERPETUAL" in instrument_name_future} 
+                             PERPETUAL not in instrument_name_future {"PERPETUAL" not in instrument_name_future}""")
                 
-
-                bullish_situation = (strong_bullish or bullish or weak_bullish)
-                bearish_situation = (strong_bearish or bearish or weak_bearish)
+                bullish_situation = (
+                    strong_bullish 
+                    or bullish 
+                    or weak_bullish
+                    )
                 
-                if bullish_situation\
-                    and "PERPETUAL" in instrument_name_future\
-                        and len_orders_instrument_future_open_all == 0:
+                bearish_situation = (
+                    strong_bearish
+                    or bearish
+                    or weak_bearish
+                    )
+                    
+                ONE_SECOND = 1000
+                ONE_MINUTE = ONE_SECOND * 60
+                
+                
+                last_buy_exceed_time_threshold = (server_time - my_trades_long_timestamp 
+                                                  > strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE)
+                no_outstanding_long_position = len(my_trades_long) < 1
+                
+                last_sell_exceed_time_threshold = (server_time - my_trades_short_timestamp > 
+                                                   strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE)
+                
+                no_outstanding_short_position = len(my_trades_short)< 1
+                
+                log.error (f"last_buy_exceed_time_threshold {last_buy_exceed_time_threshold} 
+                             no_outstanding_long_position {no_outstanding_long_position}")
+                
+                log.debug (f"last_sell_exceed_time_threshold {last_sell_exceed_time_threshold} 
+                             no_outstanding_short_position {no_outstanding_short_position}")
+                
+                if (bullish_situation
+                    and "PERPETUAL" in instrument_name_future
+                    and len_orders_instrument_future_open_all == 0
+                    and (last_buy_exceed_time_threshold
+                    or no_outstanding_long_position)):
                         
                         order_allowed = True
                         
@@ -869,9 +906,11 @@ class ComboAuto (BasicStrategy):
                         
                         params.update({"side": "buy"})        
                                         
-                if bearish_situation\
-                    and "PERPETUAL" not in instrument_name_future\
-                        and len_orders_instrument_future_open_all < max_order_currency:
+                if (bearish_situation
+                    and "PERPETUAL" not in instrument_name_future
+                    and len_orders_instrument_future_open_all < max_order_currency
+                    and (last_sell_exceed_time_threshold
+                    or no_outstanding_short_position)):
                             
                         order_allowed = True
                         
@@ -879,8 +918,6 @@ class ComboAuto (BasicStrategy):
                         
                         params.update({"side": "sell"})        
                         
-                
-        
         return dict(
             order_allowed=order_allowed,
             order_parameters=[] if order_allowed == False else params,
@@ -1005,21 +1042,31 @@ class ComboAuto (BasicStrategy):
             selected_transaction_side = selected_transaction ["side"]
                 
             orders_instrument_perpetual: list=  [o for o in orders_currency 
-                                                if instrument_name_perpetual in o["instrument_name"]]
-                #ask_price_future = ticker_future ["best_ask_price"]
+                                                if instrument_name_perpetual 
+                                                in o["instrument_name"]]
+
             bid_price_perpetual, ask_price_perpetual = ticker_perpetual ["best_bid_price"], ticker_perpetual ["best_ask_price"] 
     
-            orders_instrument_transaction: list=  [o for o in orders_currency 
-                                            if instrument_name_transaction in o["instrument_name"]]
+            orders_instrument_transaction: list=  [
+                o for o in orders_currency
+                if instrument_name_transaction 
+                in o["instrument_name"]
+                ]
             
-            orders_instrument_transaction_closed: list=  [o for o in orders_instrument_transaction 
-                                                if "closed" in o["label"]]
+            orders_instrument_transaction_closed: list=  [
+                o for o in orders_instrument_transaction 
+                if "closed" in o["label"]
+                ]
 
-            orders_instrument_transaction_net: int= 0 if orders_instrument_transaction == []\
+            orders_instrument_transaction_net: int= (
+                0 if orders_instrument_transaction == []
                 else sum([o["amount"] for o in orders_instrument_transaction])
+                )
         
-            orders_instrument_perpetual_open: list=  [o for o in orders_instrument_perpetual 
-                                                    if "open" in o["label"]]
+            orders_instrument_perpetual_open: list=  [
+                o for o in orders_instrument_perpetual 
+                if "open" in o["label"]
+                ]
             
             len_orders_instrument_transaction: int=  0 if not  orders_instrument_transaction \
                 else len(orders_instrument_transaction)
@@ -1031,8 +1078,10 @@ class ComboAuto (BasicStrategy):
             
             label_integer = get_label_integer (selected_transaction["label"])
             
-            instrument_current_size = sum([ o["amount"] for o in (self.my_trades_currency_strategy)\
-                if instrument_name_transaction in o["instrument_name"]])
+            instrument_current_size = sum(
+                [o["amount"] for o in (self.my_trades_currency_strategy)
+                 if instrument_name_transaction in o["instrument_name"]]
+                )
             
             log.error (f"instrument_current_size {instrument_current_size} orders_instrument_transaction_net {orders_instrument_transaction_net} selected_transaction_size {selected_transaction_size}")
 
@@ -1121,10 +1170,12 @@ class ComboAuto (BasicStrategy):
                     log.error (f"selected_transaction_price <= bid_price_perpetual {selected_transaction_price <= bid_price_perpetual} ")
                     log.warning (f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}")
                         
-                    if reduce_only\
-                        and len_orders_instrument_perpetual == 0\
-                            and sum_orders_instrument_perpetual_open < abs(delta)  \
-                                and delta <=0 :
+                    if (
+                        reduce_only
+                        and len_orders_instrument_perpetual == 0
+                        and sum_orders_instrument_perpetual_open < abs(delta) 
+                        and delta <=0
+                        ) :
             
                         # opening new perpetual
                         if selected_transaction_price <= bid_price_perpetual:

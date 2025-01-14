@@ -1,0 +1,199 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+# built ins
+import asyncio
+import os
+import sys
+
+# installed
+from loguru import logger as log
+#import signal
+#from multiprocessing import Manager
+#from multiprocessing.queues import Queue
+#from multiprocessing import cpu_count
+#from aiomultiprocess import Pool
+import tomli
+import uvloop
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+
+from strategies.app_hedging_spot import hedging_spot
+from transaction_management.deribit.api_requests import (SendApiRequest)
+from transaction_management.deribit.cancelling_active_orders import cancelling_orders
+from transaction_management.deribit.avoiding_double_ids import avoiding_double_ids
+from transaction_management.deribit.data_producer import (StreamAccountData,)
+from transaction_management.deribit.running_strategies import executing_strategies
+from transaction_management.deribit.user_chg import saving_and_relabelling_orders
+from transaction_management.deribit.saving_result import saving_ws_data
+from transaction_management.deribit.telegram_bot import (
+    telegram_bot_sendtext,)
+
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    update_cached_orders,
+    combining_order_data,
+    update_cached_ticker)
+from utilities.system_tools import (
+    async_raise_error_message,
+    parse_error_message,
+    SignalHandler)
+
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,
+    raise_error_message,)
+
+        
+def handle_ctrl_c(
+    signum, 
+    stack_frame
+    )->None:
+    
+    sys.exit(0)
+    
+                  
+#signal_handler = SignalHandler()
+
+async def main2():
+    
+    """
+        https://blog.finxter.com/python-multiprocessing-pool-ultimate-guide/
+
+    """
+    
+    sub_account_id = "deribit-148510"
+    
+    try:
+        
+        queue: Queue = Manager().Queue()
+        
+        #processes = max(1,int (cpu_count() / 4) - 1)
+        
+        #maxtasksperchild=1
+        
+        stream = StreamAccountData(sub_account_id)
+       
+        producer_task = asyncio.create_task(stream.ws_manager(queue)) 
+        
+#        async with Pool(maxtasksperchild=2) as pool:
+        async with Pool() as pool:
+
+            while signal_handler.KEEP_PROCESSING:
+       
+                executing_strategies_tasks = [
+                    asyncio.create_task(pool.apply(
+                        executing_strategies, 
+                        args=(sub_account_id,
+                              queue
+                              )
+                        ))
+                    ]
+       
+                await asyncio.gather(
+                    *executing_strategies_tasks,
+       
+                    )
+                
+                await asyncio.sleep(0.0005)
+
+                await producer_task
+                
+                pool.close()
+                
+                await pool.join()
+            
+    except Exception as error:
+        log.critical (error)
+        
+        await async_raise_error_message(
+            error,
+            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
+        )
+        
+
+
+def get_config(file_name: str) -> list:
+    """ """
+    
+    config_path = provide_path_for_file (file_name)
+    
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, "rb") as handle:
+                read= tomli.load(handle)
+                return read
+    except:
+        return []
+
+async def main():
+    
+    sub_account_id = "deribit-148510"
+    
+    try:
+        
+        queue = asyncio.Queue(maxsize=10)
+        queue_cached_orders = asyncio.Queue()
+        queue_orders = asyncio.Queue()
+        
+        stream = StreamAccountData(sub_account_id)
+                
+        
+        producer_task = asyncio.create_task(stream.ws_manager(queue)) 
+        
+        await asyncio.sleep(0.0005)
+        
+        await asyncio.gather(
+            producer_task, 
+            
+            hedging_spot(
+                sub_account_id,
+                queue),
+            
+            cancelling_orders(
+                sub_account_id,
+                queue),
+            
+            avoiding_double_ids(
+                sub_account_id,
+                queue),
+            
+            saving_and_relabelling_orders(
+                sub_account_id,
+                queue),
+            
+            #saving_ws_data(
+            #    sub_account_id,
+            #    queue),
+            
+            )
+
+        await queue.join()
+        
+
+    except Exception as error:
+        
+        parse_error_message(error)
+
+if __name__ == "__main__":
+    
+    
+    try:
+        #signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
+        
+        uvloop.run(main())
+        
+    except(
+        KeyboardInterrupt, 
+        SystemExit
+        ):
+        
+        asyncio.get_event_loop().run_until_complete(main().stop_ws())
+        
+    except Exception as error:
+        parse_error_message(error)
+        
+        asyncio.run(telegram_bot_sendtext (
+            error,
+            "general_error"
+            ))
