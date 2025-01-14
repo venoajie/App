@@ -209,8 +209,6 @@ async def querying_duplicated_transactions(
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
-            await db.execute('pragma journal_mode=wal;')
-
             db = db.execute(query_table)
 
             async with db as cur:
