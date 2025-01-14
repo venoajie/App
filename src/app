@@ -146,11 +146,6 @@ async def main():
         await asyncio.gather(
             producer_task, 
             
-            executing_strategies(
-                sub_account_id,
-                queue,
-                queue_cached_orders),
-
             hedging_spot(
                 sub_account_id,
                 queue),
