@@ -22,7 +22,8 @@ from configuration import id_numbering, config, config_oci
 from transaction_management.deribit.api_requests import (
     get_end_point_result,
     get_currencies,
-    get_instruments,)
+    get_instruments,
+    SendApiRequest)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
