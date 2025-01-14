@@ -447,17 +447,28 @@ async def reconciling_size(
                                         timestamp_log = min(
                                             [o["timestamp"] for o in my_trades_instrument_name_archive]
                                             )
+                                    else:
                                         
-                                        log.critical(f"timestamp_log {timestamp_log}")
-                                                                            
-                                        await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
-                                            instrument_name,
-                                            timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
-                                            archive_db_table,
-                                            trade_db_table,
-                                            order_db_table,
-                                            1000
-                                            )
+                                        ONE_SECOND = 1000
+                                        
+                                        one_minute = ONE_SECOND * 60
+                                        
+                                        end_timestamp =     get_now_unix_time() 
+                                        
+                                        five_days_ago = end_timestamp - (one_minute * 60 * 24 * 5)
+                                        
+                                        timestamp_log = five_days_ago
+                                        
+                                    log.critical(f"timestamp_log {timestamp_log}")
+                                                                        
+                                    await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
+                                        instrument_name,
+                                        timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                                        archive_db_table,
+                                        trade_db_table,
+                                        order_db_table,
+                                        1000
+                                        )
                                     
                     settlement_periods = get_settlement_period (strategy_attributes)
                     
