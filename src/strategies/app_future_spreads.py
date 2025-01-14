@@ -90,6 +90,7 @@ async def future_spreads(
     
     strategy = "futureSpread"
     log.critical (f"starting {strategy}")
+    
     # registering strategy config file    
     file_toml = "config_strategies.toml"
 
@@ -280,268 +281,266 @@ async def future_spreads(
                                 
                                 notional: float = compute_notional_value(index_price, equity)
                                 
-                                for strategy in active_strategies:
+                                strategy_params= [o for o in strategy_attributes \
+                                if o["strategy_label"] == strategy][0]   
+                                
+                                log.warning (strategy_params)
+                            
+                                my_trades_currency_strategy = [o for o in my_trades_currency \
+                                    if strategy in (o["label"]) ]
+                                
+                                orders_currency_strategy = ([] if not orders_currency  
+                                                            else [o for o in orders_currency 
+                                                                if strategy in (o["label"]) ])
+                                
+                                log.info (f"orders_currency_all {len(orders_currency)}")
+                                log.info (f"orders_currency_strategy {len(orders_currency_strategy)}")
+                                
+                                #log.info (f"orders_currency_strategy {orders_currency_strategy}")
+                                #log.critical (f"len_orders_all {len_orders_all}")
+                            
+                                if   (strategy in active_strategies
+                                        and size_perpetuals_reconciled) :
+                                    
+                                    extra = 3 # waiting minute before reorder  15 min
+                                                                
+                                    BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = strategy_params["waiting_minute_before_relabelling"] + extra
+                                    
+                                    AVERAGE_MOVEMENT: float = .15/100
+                                    
+                                    monthly_target_profit = strategy_params["monthly_profit_pct"]
                                     
                                     strategy_params= [o for o in strategy_attributes \
-                                    if o["strategy_label"] == strategy][0]   
+                                        if o["strategy_label"] == strategy][0]   
                                     
-                                    log.warning (strategy_params)
-                                
-                                    my_trades_currency_strategy = [o for o in my_trades_currency \
-                                        if strategy in (o["label"]) ]
+                                    max_order_currency = 2
                                     
-                                    orders_currency_strategy = ([] if not orders_currency  
-                                                                else [o for o in orders_currency 
-                                                                    if strategy in (o["label"]) ])
+                                    random_instruments_name = random.sample(([o for o in instruments_name
+                                                                                if "-FS-" not in o and currency_upper in o]),
+                                                                            max_order_currency)
+                                                                        
+                                    combo_auto = ComboAuto(
+                                        strategy,
+                                        strategy_params,
+                                        orders_currency_strategy,
+                                        server_time,
+                                        market_condition,
+                                        my_trades_currency_strategy,
+                                        ticker_perpetual_instrument_name,
+                                        )
                                     
-                                    log.info (f"orders_currency_all {len(orders_currency)}")
-                                    log.info (f"orders_currency_strategy {len(orders_currency_strategy)}")
-                                    
-                                    #log.info (f"orders_currency_strategy {orders_currency_strategy}")
-                                    #log.critical (f"len_orders_all {len_orders_all}")
-                                
-                                    if   (strategy in active_strategies
-                                          and size_perpetuals_reconciled) :
-                                        
-                                        multiply = 6 # waiting minute before reorder  15 min
-                                                                    
-                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = strategy_params["waiting_minute_before_cancel"] * multiply
-                                                        
-                                        AVERAGE_MOVEMENT: float = .15/100
-                                        
-                                        monthly_target_profit = strategy_params["monthly_profit_pct"]
-                                        
-                                        strategy_params= [o for o in strategy_attributes \
-                                            if o["strategy_label"] == strategy][0]   
-                                        
-                                        max_order_currency = 2
-                                        
-                                        random_instruments_name = random.sample(([o for o in instruments_name
-                                                                                  if "-FS-" not in o and currency_upper in o]),
-                                                                                max_order_currency)
-                                                                            
-                                        combo_auto = ComboAuto(
-                                            strategy,
-                                            strategy_params,
-                                            orders_currency_strategy,
-                                            server_time,
-                                            market_condition,
-                                            my_trades_currency_strategy,
-                                            ticker_perpetual_instrument_name,
-                                            )
-                                        
-                                        my_trades_currency_strategy_labels: list = [o["label"] for o in my_trades_currency_strategy  ]
-                                                    
-                                        # send combo orders
-                                        for instrument_attributes_combo in instrument_attributes_combo_all:
-                                            
-                                            try:
-                                                instrument_name_combo = instrument_attributes_combo["instrument_name"]
-                                            
-                                            except:
-                                                instrument_name_combo = None
+                                    my_trades_currency_strategy_labels: list = [o["label"] for o in my_trades_currency_strategy  ]
                                                 
-                                            if  (instrument_name_combo is not None 
-                                                 and currency_upper in instrument_name_combo):
-                                                
-                                                instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
+                                    # send combo orders
+                                    for instrument_attributes_combo in instrument_attributes_combo_all:
+                                        
+                                        try:
+                                            instrument_name_combo = instrument_attributes_combo["instrument_name"]
+                                        
+                                        except:
+                                            instrument_name_combo = None
+                                            
+                                        if  (instrument_name_combo is not None 
+                                                and currency_upper in instrument_name_combo):
+                                            
+                                            instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
 
-                                                size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
-                                                    position_without_combo,
-                                                    my_trades_currency_all,
-                                                    instrument_name_future)
-                                                                            
-                                                if not size_future_reconciled:
-                                                    kill_process("general_tasks")
-                                                                                                    
-                                                ticker_combo = [o for o in ticker_all 
-                                                                if instrument_name_combo in o["instrument_name"]]
+                                            size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
+                                                position_without_combo,
+                                                my_trades_currency_all,
+                                                instrument_name_future)
+                                                                        
+                                            if not size_future_reconciled:
+                                                kill_process("general_tasks")
+                                                                                                
+                                            ticker_combo = [o for o in ticker_all 
+                                                            if instrument_name_combo in o["instrument_name"]]
+                                            
+                                            ticker_future= [o for o in ticker_all 
+                                                            if instrument_name_future in o["instrument_name"]]
+                                            
+                                            if  len_orders_all < 50\
+                                                    and ticker_future and ticker_combo:
+                                                #and not reduce_only \
                                                 
-                                                ticker_future= [o for o in ticker_all 
-                                                                if instrument_name_future in o["instrument_name"]]
-                                                
-                                                if  len_orders_all < 50\
-                                                        and ticker_future and ticker_combo:
-                                                    #and not reduce_only \
-                                                    
-                                                    ticker_combo= ticker_combo[0]
+                                                ticker_combo= ticker_combo[0]
 
-                                                    ticker_future= ticker_future[0]
-                                                    
-                                                    instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
-                                                        if o["instrument_name"] == instrument_name_future])- server_time)/ONE_MINUTE  
-                                                    
-                                                    instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
-                                                                                                                    
-                                                    if instrument_time_left_exceed_threshold\
-                                                        and instrument_name_future in  random_instruments_name \
-                                                            and size_perpetuals_reconciled\
-                                                                and size_future_reconciled\
-                                                                    and size_future_reconciled:
-                                                                
-                                                        send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
-                                                            ticker_future,
-                                                            instrument_attributes_futures_all,
-                                                            notional,
-                                                            monthly_target_profit,
-                                                            AVERAGE_MOVEMENT,
-                                                            BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
-                                                            min(1,max_order_currency),
-                                                            market_condition
-                                                            )
-                                                        
-                                                        if send_order["order_allowed"]:
-                                                            
-                                                            await processing_orders(
-                                                            modify_order_and_db,
-                                                            send_order)
-                                                            
-                                                            not_order = False
-                                                            
-                                                            break
-                                                            
-                                        # get labels from active trades
-                                        labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
-                                        
-                                        filter = "label"
-            
-                                        #! closing active trades
-                                        for label in labels:
-                                            
-                                            label_integer: int = get_label_integer (label)
-                                            selected_transaction = [o for o in my_trades_currency_strategy \
-                                                if str(label_integer) in o["label"]]
-                                            
-                                            selected_transaction_amount = ([o["amount"] for o in selected_transaction])
-                                            sum_selected_transaction = sum(selected_transaction_amount)
-                                            len_selected_transaction = len(selected_transaction_amount)
-                                            
-                                            #! closing combo auto trading
-                                            if "Auto" in label and len_orders_all < 50:
+                                                ticker_future= ticker_future[0]
+                                                
+                                                instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
+                                                    if o["instrument_name"] == instrument_name_future])- server_time)/ONE_MINUTE  
+                                                
+                                                instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
                                                                                                                 
-                                                if sum_selected_transaction == 0:  
+                                                if instrument_time_left_exceed_threshold\
+                                                    and instrument_name_future in  random_instruments_name \
+                                                        and size_perpetuals_reconciled\
+                                                            and size_future_reconciled\
+                                                                and size_future_reconciled:
+                                                            
+                                                    send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
+                                                        ticker_future,
+                                                        instrument_attributes_futures_all,
+                                                        notional,
+                                                        monthly_target_profit,
+                                                        AVERAGE_MOVEMENT,
+                                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
+                                                        min(1,max_order_currency),
+                                                        market_condition
+                                                        )
                                                     
-                                                    abnormal_transaction = [o for o in selected_transaction \
-                                                        if "closed" in o["label"]]     
-                                                    
-                                                    if not abnormal_transaction:                                                        
-                                                        send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
-                                                        label,
-                                                        instrument_attributes_combo_all,
-                                                        THRESHOLD_MARKET_CONDITIONS_COMBO)
+                                                    if send_order["order_allowed"]:
                                                         
-                                                        if send_order["order_allowed"]:
-                                                            
-                                                            await processing_orders(
-                                                            modify_order_and_db,
-                                                            send_order)
-                                                            
-                                                            not_order = False
-                                                            
-                                                            break
-                                                    
-                                                    else:                                                        
-                                                        log.critical(f"abnormal_transaction {abnormal_transaction}")
+                                                        await processing_orders(
+                                                        modify_order_and_db,
+                                                        send_order)
+                                                        
+                                                        not_order = False
                                                         
                                                         break
-                                                else:                                                               
-                                                    
-                                                    new_label = f"futureSpread-open-{label_integer}"
-                                                                                                                    
-                                                    await update_status_data(
-                                                        archive_db_table,
-                                                        "label",
-                                                        filter,
-                                                        label,
-                                                        new_label,
-                                                        "="
-                                                        )
-                                                    
-                                                    log.debug ("renaming combo Auto done")
-                                                    
-                                                    await modify_order_and_db.cancel_the_cancellables(
-                                                        order_db_table,
-                                                        currency,
-                                                        cancellable_strategies
-                                                        )
-                                                    
-                                                    not_order = False
-                                                    
-                                                    break
-                                                
-                                            #! renaming combo auto trading
-                                            else:
-                                            
-                                                if sum_selected_transaction == 0:
-                                                    if "open" in label:
-                                                        new_label = f"futureSpreadAuto-open-{label_integer}"
-                                                
-                                                    if "closed" in label:
-                                                        new_label = f"futureSpreadAuto-closed-{label_integer}"
-                                                    
-                                                    await update_status_data(
-                                                        archive_db_table,
-                                                        "label",
-                                                        filter,
-                                                        label,
-                                                        new_label,
-                                                        "="
-                                                        )
-                                                    
-                                                    not_order = False
-                                                    
-                                                    break
-                                                
-                                                #! closing unpaired transactions                                                            
-                                                else:
-                                                    
-                                                    if len_selected_transaction == 1 \
-                                                        and "closed" not in label:
                                                         
-                                                        send_order = []
-                                                                                                                        
-                                                        if  size_perpetuals_reconciled:
-                                                
-                                                            for transaction in selected_transaction:
-                                                                                                                    
-                                                                waiting_minute_before_ordering = strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE 
-                                                                
-                                                                timestamp: int = transaction["timestamp"]
-                                                            
-                                                                waiting_time_for_selected_transaction: bool = check_if_minimum_waiting_time_has_passed(
-                                                                        waiting_minute_before_ordering,
-                                                                        timestamp,
-                                                                        server_time,
-                                                                    ) * 2
-
-                                                                instrument_name = transaction["instrument_name"]
-                                                                
-                                                                ticker_transaction= [o for o in ticker_all 
-                                                                                    if instrument_name in o["instrument_name"]]
-                                                                
-                                                                if ticker_transaction and len_orders_all < 50:
-                                                                    
-                                                                    TP_THRESHOLD = THRESHOLD_MARKET_CONDITIONS_COMBO * 5
-                                                                    
-                                                                    send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                        ticker_transaction[0],
-                                                                        instrument_attributes_futures_all,
-                                                                        TP_THRESHOLD,
-                                                                        transaction,
-                                                                        waiting_time_for_selected_transaction,
-                                                                        random_instruments_name
-                                                                        )
-                                                                    
-                                                                    if send_order["order_allowed"]:
-                                                                        
-                                                                        await processing_orders(
-                                                                        modify_order_and_db,
-                                                                        send_order)
-                                                                        
-                                                                        not_order = False
-                                                                        
-                                                                        break
+                                    # get labels from active trades
+                                    labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
                                     
+                                    filter = "label"
+        
+                                    #! closing active trades
+                                    for label in labels:
+                                        
+                                        label_integer: int = get_label_integer (label)
+                                        selected_transaction = [o for o in my_trades_currency_strategy \
+                                            if str(label_integer) in o["label"]]
+                                        
+                                        selected_transaction_amount = ([o["amount"] for o in selected_transaction])
+                                        sum_selected_transaction = sum(selected_transaction_amount)
+                                        len_selected_transaction = len(selected_transaction_amount)
+                                        
+                                        #! closing combo auto trading
+                                        if "Auto" in label and len_orders_all < 50:
+                                                                                                            
+                                            if sum_selected_transaction == 0:  
+                                                
+                                                abnormal_transaction = [o for o in selected_transaction \
+                                                    if "closed" in o["label"]]     
+                                                
+                                                if not abnormal_transaction:                                                        
+                                                    send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
+                                                    label,
+                                                    instrument_attributes_combo_all,
+                                                    THRESHOLD_MARKET_CONDITIONS_COMBO)
+                                                    
+                                                    if send_order["order_allowed"]:
+                                                        
+                                                        await processing_orders(
+                                                        modify_order_and_db,
+                                                        send_order)
+                                                        
+                                                        not_order = False
+                                                        
+                                                        break
+                                                
+                                                else:                                                        
+                                                    log.critical(f"abnormal_transaction {abnormal_transaction}")
+                                                    
+                                                    break
+                                            else:                                                               
+                                                
+                                                new_label = f"futureSpread-open-{label_integer}"
+                                                                                                                
+                                                await update_status_data(
+                                                    archive_db_table,
+                                                    "label",
+                                                    filter,
+                                                    label,
+                                                    new_label,
+                                                    "="
+                                                    )
+                                                
+                                                log.debug ("renaming combo Auto done")
+                                                
+                                                await modify_order_and_db.cancel_the_cancellables(
+                                                    order_db_table,
+                                                    currency,
+                                                    cancellable_strategies
+                                                    )
+                                                
+                                                not_order = False
+                                                
+                                                break
+                                            
+                                        #! renaming combo auto trading
+                                        else:
+                                        
+                                            if sum_selected_transaction == 0:
+                                                if "open" in label:
+                                                    new_label = f"futureSpreadAuto-open-{label_integer}"
+                                            
+                                                if "closed" in label:
+                                                    new_label = f"futureSpreadAuto-closed-{label_integer}"
+                                                
+                                                await update_status_data(
+                                                    archive_db_table,
+                                                    "label",
+                                                    filter,
+                                                    label,
+                                                    new_label,
+                                                    "="
+                                                    )
+                                                
+                                                not_order = False
+                                                
+                                                break
+                                            
+                                            #! closing unpaired transactions                                                            
+                                            else:
+                                                
+                                                if len_selected_transaction == 1 \
+                                                    and "closed" not in label:
+                                                    
+                                                    send_order = []
+                                                                                                                    
+                                                    if  size_perpetuals_reconciled:
+                                            
+                                                        for transaction in selected_transaction:
+                                                                                                                
+                                                            waiting_minute_before_ordering = strategy_params["waiting_minute_before_cancel"] * ONE_MINUTE 
+                                                            
+                                                            timestamp: int = transaction["timestamp"]
+                                                        
+                                                            waiting_time_for_selected_transaction: bool = check_if_minimum_waiting_time_has_passed(
+                                                                    waiting_minute_before_ordering,
+                                                                    timestamp,
+                                                                    server_time,
+                                                                ) * 2
+
+                                                            instrument_name = transaction["instrument_name"]
+                                                            
+                                                            ticker_transaction= [o for o in ticker_all 
+                                                                                if instrument_name in o["instrument_name"]]
+                                                            
+                                                            if ticker_transaction and len_orders_all < 50:
+                                                                
+                                                                TP_THRESHOLD = THRESHOLD_MARKET_CONDITIONS_COMBO * 5
+                                                                
+                                                                send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                                    ticker_transaction[0],
+                                                                    instrument_attributes_futures_all,
+                                                                    TP_THRESHOLD,
+                                                                    transaction,
+                                                                    waiting_time_for_selected_transaction,
+                                                                    random_instruments_name
+                                                                    )
+                                                                
+                                                                if send_order["order_allowed"]:
+                                                                    
+                                                                    await processing_orders(
+                                                                    modify_order_and_db,
+                                                                    send_order)
+                                                                    
+                                                                    not_order = False
+                                                                    
+                                                                    break
+                                
                     
     except Exception as error:
 
