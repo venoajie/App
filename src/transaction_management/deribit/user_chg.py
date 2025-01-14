@@ -77,6 +77,8 @@ async def saving_and_relabelling_orders(
         while True:
                  
             message: str = await queue.get()
+            
+            print (f" message {message}")
 
             message_channel: str = message["channel"]
             
