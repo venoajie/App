@@ -488,7 +488,11 @@ class HedgingSpot(BasicStrategy):
         bearish, strong_bearish = market_condition["bearish"], market_condition["strong_bearish"]
         #neutral = market_condition["neutral_price"]
         
-        timestamp: int = transaction["timestamp"]
+        try:
+            timestamp: int = transaction["timestamp"]
+        
+        except:
+            timestamp: int = transaction["last_update_timestamp"]
         
         
         if timestamp:
