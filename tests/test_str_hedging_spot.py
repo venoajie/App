@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from strategies.hedging_spot import (
+from strategies.hedging.hedging_spot import (
     get_timing_factor,
     get_waiting_time_factor,
     max_order_stack_has_not_exceeded,

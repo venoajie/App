@@ -19,7 +19,7 @@ from db_management.sqlite_management import (
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition)
-from strategies.hedging_spot import (HedgingSpot)
+from strategies.hedging.hedging_spot import (HedgingSpot)
 from strategies.cash_carry.combo_auto import(
     ComboAuto,)
 from transaction_management.deribit.get_instrument_summary import (get_futures_instruments,)

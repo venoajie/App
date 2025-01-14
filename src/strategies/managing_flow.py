@@ -10,8 +10,9 @@ from loguru import logger as log
 
 # user defined formula
 import deribit_get
+from strategies.hedging import hedging_spot
 from utilities import system_tools
-from strategies import hedging_spot, market_maker as MM, basic_strategy
+from strategies import market_maker as MM, basic_strategy
 
 ONE_MINUTE: int = 60000
 ONE_PCT: float = 1 / 100

@@ -22,12 +22,13 @@ from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition)
 from strategies.basic_strategy import (get_label_integer,)
-from strategies.hedging_spot import (
+from strategies.hedging.hedging_spot import (
     HedgingSpot,
     modify_hedging_instrument)
 from strategies.cash_carry.combo_auto import(
     ComboAuto,
     check_if_minimum_waiting_time_has_passed)
+from transaction_management.deribit.processing_orders import processing_orders
 from transaction_management.deribit.api_requests import (SendApiRequest)
 from transaction_management.deribit.get_instrument_summary import (get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
@@ -48,7 +49,6 @@ from utilities.system_tools import (
     provide_path_for_file,
     raise_error_message,)
 from utilities.string_modification import (
-    extract_currency_from_text,
     parsing_label,
     remove_double_brackets_in_list,
     remove_redundant_elements)
@@ -603,17 +603,6 @@ async def executing_strategies(
                                                                         not_order = False
                                                                         
                                                                         break
-                                                                                        
-                                        if orders_currency_strategy:
-                                            for order in orders_currency_strategy:
-                                                cancel_allowed: dict = await combo_auto.is_cancelling_orders_allowed(
-                                                    order,
-                                                    server_time,
-                                                    )
-                                                if cancel_allowed["cancel_allowed"]:
-                                                    await modify_order_and_db.if_cancel_is_true(
-                                                        order_db_table,
-                                                        cancel_allowed)
                                                         
                                         log.warning (f"strategy {strategy}-DONE")
                                     
@@ -787,22 +776,7 @@ async def executing_strategies(
                                                                             
                                                                             break
 
-                    
-                                        if orders_currency_strategy:
-                                            
-                                            for order in orders_currency_strategy:
-                                                cancel_allowed: dict = await hedging.is_cancelling_orders_allowed(
-                                                    order,
-                                                    orders_currency_strategy,
-                                                    server_time,
-                                                    )
-
-                                                if cancel_allowed["cancel_allowed"]:
-                                                    await modify_order_and_db.if_cancel_is_true(
-                                                        order_db_table,
-                                                        cancel_allowed
-                                                        )
-                                            
+                                                                
                                         log.warning (f"strategy {strategy}-DONE")
                     
     except Exception as error:
@@ -886,116 +860,3 @@ def get_index (
             index_price = ticker ["estimated_delivery_price"]
         
     return index_price
-
-async def distribute_ticker_result_as_per_data_type(
-    my_path_ticker: str, 
-    data_orders: dict, 
-    ) -> None:
-    """ """
-
-    try:
-    
-        if data_orders["type"] == "snapshot":
-            replace_data(
-                my_path_ticker, 
-                data_orders
-                )
-
-        else:
-            ticker_change: list = read_data(my_path_ticker)
-
-            if ticker_change != []:
-
-                for item in data_orders:
-                    
-                    ticker_change[0][item] = data_orders[item]
-                    
-                    replace_data(
-                        my_path_ticker, 
-                        ticker_change
-                        )
-
-    except Exception as error:
-        
-        await parse_error_message(error)  
-
-        await telegram_bot_sendtext (
-            error,
-            "general_error"
-            )
-
-
-async def processing_orders(
-    modify_order_and_db,
-    order_analysis_result: dict,
-    ) -> None:
-    """
-    """
-    
-    try:
-        
-        if order_analysis_result["order_allowed"]:
-                
-            log.error (f"send_order {order_analysis_result}")
-
-            # registering strategy config file    
-            file_toml: str = "config_strategies.toml"
-
-            # parsing config file
-            config_app = get_config(file_toml)
-                        
-            strategy_attributes = config_app["strategies"]
-            
-            # get strategies that have not short/long attributes in the label 
-            non_checked_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                if o["non_checked_for_size_label_consistency"]==True]
-                                                                                
-            result_order = await modify_order_and_db.if_order_is_true(
-                non_checked_strategies,
-                order_analysis_result, 
-                )
-            
-            if result_order:
-                
-                log.error (f"result_order {result_order}")
-                
-                try:
-                    data_orders = result_order["result"]
-                    
-                    try:
-                        instrument_name = data_orders["order"]["instrument_name"]
-
-                    except:
-                        instrument_name = data_orders["trades"]["instrument_name"]
-
-                    currency = extract_currency_from_text (instrument_name)
-                    
-                    transaction_log_trading_table= f"transaction_log_{currency.lower()}_json"
-                    
-                    archive_db_table= f"my_trades_all_{currency.lower()}_json"
-                    
-                    relevant_tables = config_app["relevant_tables"][0]
-                                
-                    order_db_table= relevant_tables["orders_table"]           
-            
-                    await modify_order_and_db.update_user_changes_non_ws(
-                        non_checked_strategies,
-                        data_orders, 
-                        order_db_table,
-                        archive_db_table,
-                        transaction_log_trading_table)
-        
-                    """
-                    non-combo transaction need to restart after sending order to ensure it recalculate orders and trades
-                    """
-                    
-            
-                except Exception as error :
-                    pass 
-                
-                log.warning ("processing order done")
-                
-    except Exception as error:
-        await raise_error_message (error)
-        
-    
