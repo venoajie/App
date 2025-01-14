@@ -285,7 +285,7 @@ class StreamAccountData(ModifyOrderDb):
                                 
                                 currency_lower: str = currency.lower()
                                                                 
-                                result_deque = dict(data= deque(data), 
+                                result_deque = (data= deque(data), 
                                               channel= deque(message_channel),
                                               orders_all= deque(orders_all),
                                               currency= deque(currency_lower))
