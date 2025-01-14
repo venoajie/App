@@ -330,33 +330,6 @@ async def executing_strategies(
                                     log.info (f"orders_currency_all {len(orders_currency)}")
                                     log.info (f"orders_currency_strategy {len(orders_currency_strategy)}")
                                     
-                                    if orders_currency_strategy:
-                                        
-                                        outstanding_order_id = remove_redundant_elements (
-                                            [o["label"] for o in orders_currency_strategy])
-                                        
-                                        for label in outstanding_order_id:
-                                            
-                                            orders = ([o for o in orders_currency\
-                                                if label in o["label"]])
-                                            
-                                            len_label = len(orders)
-                                            
-                                            if len_label >1:
-                                                
-                                                for order in orders:
-                                                    log.critical (f"double ids {label}")
-                                                    log.critical ([o for o in orders_currency if label in o["label"]])
-                                                    await  modify_order_and_db. cancel_by_order_id (
-                                                        order_db_table,
-                                                        order["order_id"]
-                                                        )
-                                                    
-                                                    not_order = False
-                                                    
-                                                    break
-
-                                    
                                     #log.info (f"orders_currency_strategy {orders_currency_strategy}")
                                     #log.critical (f"len_orders_all {len_orders_all}")
                                 
