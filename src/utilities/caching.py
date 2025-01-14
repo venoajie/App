@@ -269,18 +269,12 @@ async def update_cached_orders(
             
             print (f"queue_orders {queue_orders}")
                 
-            message= await queue_orders.get()
             
-            print (f"message {message}")
-
-            data_orders: dict = message["data"]         
-            #print(f"data_orders {data_orders}")
-            
-            if data_orders:
+            if queue_orders:
                 
-                orders = data_orders["orders"]
+                orders = queue_orders["orders"]
                 
-                trades = data_orders["trades"]
+                trades = queue_orders["trades"]
                 
                 if orders:
                     
