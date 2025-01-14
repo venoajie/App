@@ -284,6 +284,8 @@ async def future_spreads(
                                     
                                     strategy_params= [o for o in strategy_attributes \
                                     if o["strategy_label"] == strategy][0]   
+                                    
+                                    log.warning (strategy_params)
                                 
                                     my_trades_currency_strategy = [o for o in my_trades_currency \
                                         if strategy in (o["label"]) ]
