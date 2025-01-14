@@ -441,7 +441,7 @@ async def reconciling_size(
                                     
                                     my_trades_instrument_name_archive = [o for o in my_trades_currency_all_transactions\
                                         if instrument_name in o["instrument_name"]]
-                                    
+                                    log.info (f" my_trades_instrument_name_archive {my_trades_instrument_name_archive}")
                                     if my_trades_instrument_name_archive:
                                         
                                         timestamp_log = min(
