@@ -302,8 +302,10 @@ async def future_spreads(
                                 
                                     if   (strategy in active_strategies
                                           and size_perpetuals_reconciled) :
+                                        
+                                        multiply = 6 # waiting minute before reorder  15 min
                                                                     
-                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = strategy_params["waiting_minute_before_relabelling"]
+                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = strategy_params["waiting_minute_before_cancel"] * multiply
                                                         
                                         AVERAGE_MOVEMENT: float = .15/100
                                         
@@ -542,13 +544,14 @@ async def future_spreads(
                                     
                     
     except Exception as error:
-        
-        await parse_error_message(error)  
 
         await telegram_bot_sendtext (
-            error,
+            f"app future spreads - {error}",
             "general_error"
             )
+                
+        parse_error_message(error)  
+
 
 
 def get_settlement_period (strategy_attributes) -> list:

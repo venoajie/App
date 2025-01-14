@@ -104,7 +104,7 @@ async def saving_and_relabelling_orders(
     
     except Exception as error:
         
-        await parse_error_message(error)  
+        parse_error_message(error)  
 
         await telegram_bot_sendtext (
             error,
@@ -113,8 +113,8 @@ async def saving_and_relabelling_orders(
 
     except Exception as error:
         
-        await parse_error_message(error)  
-
+        parse_error_message(error)  
+        
         await telegram_bot_sendtext (
             error,
             "general_error"

@@ -14,14 +14,12 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from configuration.label_numbering import get_now_unix_time
 from data_cleaning.reconciling_db import (is_size_sub_account_and_my_trades_reconciled)
-from db_management.sqlite_management import (
-    executing_query_with_return,)
+from db_management.sqlite_management import (executing_query_with_return,)
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition)
 from strategies.hedging.hedging_spot import (HedgingSpot)
-from strategies.cash_carry.combo_auto import(
-    ComboAuto,)
+from strategies.cash_carry.combo_auto import(ComboAuto,)
 from transaction_management.deribit.get_instrument_summary import (get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
@@ -324,10 +322,10 @@ async def cancelling_orders(
                                                 
     except Exception as error:
         
-        await parse_error_message(error)  
+        parse_error_message(error)  
 
         await telegram_bot_sendtext (
-            error,
+            f"cancelling active orders - {error}",
             "general_error"
             )
 
@@ -358,8 +356,7 @@ async def chart_trade_in_msg(
         
         else:
             
-            log.warning ("update ohlc")
-            #await sleep_and_restart()            
+            log.warning ("update ohlc")           
 
     else:
         

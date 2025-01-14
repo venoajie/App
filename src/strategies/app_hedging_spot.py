@@ -467,10 +467,10 @@ async def hedging_spot(
 
     except Exception as error:
         
-        await parse_error_message(error)  
+        parse_error_message(f"app hedging spot {error}")  
 
         await telegram_bot_sendtext (
-            error,
+            f"app hedging spot-{error}",
             "general_error"
             )
 

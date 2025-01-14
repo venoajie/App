@@ -16,8 +16,7 @@ from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
 from utilities.system_tools import (
     parse_error_message,
     provide_path_for_file)
-from utilities.string_modification import (
-    remove_redundant_elements)
+from utilities.string_modification import (remove_redundant_elements)
 
 
 def get_config(file_name: str) -> list:
@@ -114,10 +113,10 @@ async def avoiding_double_ids(
                                 
     except Exception as error:
         
-        await parse_error_message(error)  
+        parse_error_message(error)  
 
         await telegram_bot_sendtext (
-            error,
+            f"avoiding double ids - {error}",
             "general_error"
             )
 

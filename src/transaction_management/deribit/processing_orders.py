@@ -11,9 +11,11 @@ import tomli
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
+from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
 from utilities.system_tools import (
     provide_path_for_file,
-    raise_error_message,)
+    provide_path_for_file,
+    parse_error_message,)
 from utilities.string_modification import (extract_currency_from_text)
 
 
@@ -102,6 +104,11 @@ async def processing_orders(
                 log.warning ("processing order done")
                 
     except Exception as error:
-        await raise_error_message (error)
         
+        parse_error_message (f"procesing orders {error}")  
+        
+        await telegram_bot_sendtext (
+                    f"processing order - {error}",
+                    "general_error"
+                    )
     

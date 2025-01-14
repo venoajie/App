@@ -307,10 +307,10 @@ class StreamAccountData(ModifyOrderDb):
                                         
             except Exception as error:
 
-                await parse_error_message(error)  
+                parse_error_message(error)  
 
                 await telegram_bot_sendtext (
-                    error,
+                    f"data producer - {error}",
                     "general_error"
                     )
                 
@@ -328,12 +328,13 @@ class StreamAccountData(ModifyOrderDb):
 
         try:        
             await self.websocket_client.send(json.dumps(msg))
+            
         except Exception as error:
 
-            await parse_error_message(error)  
+            parse_error_message(error)  
 
             await telegram_bot_sendtext (
-                error,
+                f"data producer - {error}",
                 "general_error"
                 )
 
@@ -353,10 +354,10 @@ class StreamAccountData(ModifyOrderDb):
             await self.websocket_client.send(json.dumps(msg))
         except Exception as error:
 
-            await parse_error_message(error)  
+            parse_error_message(error)  
 
             await telegram_bot_sendtext (
-                error,
+                f"data producer - {error}",
                 "general_error"
                 )
 
@@ -381,10 +382,10 @@ class StreamAccountData(ModifyOrderDb):
 
         except Exception as error:
                             
-            await parse_error_message(error)  
+            parse_error_message(error)  
 
             await telegram_bot_sendtext (
-                error,
+                f"data producer - {error}",
                 "general_error"
                 )
                 
