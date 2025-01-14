@@ -436,26 +436,28 @@ async def reconciling_size(
                                             my_trades_currency_active,
                                             sub_account
                                             )  
-                                log.info (f" my_trades_currency_all_transactions {my_trades_currency_all_transactions}")
+                                #log.info (f" my_trades_currency_all_transactions {my_trades_currency_all_transactions}")
                                 if  not my_trades_and_sub_account_size_reconciled_archive:
                                     
                                     my_trades_instrument_name_archive = [o for o in my_trades_currency_all_transactions\
                                         if instrument_name in o["instrument_name"]]
                                     
-                                    timestamp_log = min(
-                                        [o["timestamp"] for o in my_trades_instrument_name_archive]
-                                        )
-                                    
-                                    log.critical(f"timestamp_log {timestamp_log}")
-                                                                        
-                                    await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
-                                        instrument_name,
-                                        timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
-                                        archive_db_table,
-                                        trade_db_table,
-                                        order_db_table,
-                                        1000
-                                        )
+                                    if my_trades_instrument_name_archive:
+                                        
+                                        timestamp_log = min(
+                                            [o["timestamp"] for o in my_trades_instrument_name_archive]
+                                            )
+                                        
+                                        log.critical(f"timestamp_log {timestamp_log}")
+                                                                            
+                                        await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp (
+                                            instrument_name,
+                                            timestamp_log-10, # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                                            archive_db_table,
+                                            trade_db_table,
+                                            order_db_table,
+                                            1000
+                                            )
                                     
                     settlement_periods = get_settlement_period (strategy_attributes)
                     
