@@ -188,6 +188,7 @@ async def main():
             #    queue),
             
             )
+        await queue.join()
         
 
     except Exception as error:
