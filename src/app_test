@@ -5,7 +5,7 @@
 import asyncio
 import os
 import sys
-
+import signal
 # installed
 from loguru import logger as log
 #import signal
@@ -54,7 +54,7 @@ def handle_ctrl_c(
     sys.exit(0)
     
                   
-#signal_handler = SignalHandler()
+signal_handler = SignalHandler()
 
 async def main2():
     
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     
     
     try:
-        #signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
+        signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         
         uvloop.run(main())
         
