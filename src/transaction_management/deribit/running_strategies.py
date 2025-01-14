@@ -646,7 +646,7 @@ async def executing_strategies(
                                                         
                                         log.warning (f"strategy {strategy}-DONE")
                                     
-                                    if False and "hedgingSpot" in strategy \
+                                    if  "hedgingSpot" in strategy \
                                         and size_perpetuals_reconciled:
                                         
                                         log.warning (f"strategy {strategy}-START")                                                    
@@ -686,6 +686,7 @@ async def executing_strategies(
                                             my_trades_currency_strategy,
                                             market_condition,
                                             index_price,
+                                            my_trades_currency_all,
                                             )
                                                                     
                                         if size_future_reconciled:      

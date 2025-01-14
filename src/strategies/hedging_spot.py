@@ -312,12 +312,15 @@ class HedgingSpot(BasicStrategy):
     my_trades_currency_strategy: int
     market_condition: list
     index_price: float
+    my_trades_currency_all: float 
     sum_my_trades_currency_strategy: int= fields 
     over_hedged_opening: bool= fields 
     over_hedged_closing: bool= fields 
     max_position: float= fields 
+    max_position: float= fields 
 
     def __post_init__(self):
+           
         self.sum_my_trades_currency_strategy =  get_transactions_sum (self.my_trades_currency_strategy)   
         self.over_hedged_opening = current_hedge_position_exceed_max_position (
             self.sum_my_trades_currency_strategy, 
@@ -362,9 +365,17 @@ class HedgingSpot(BasicStrategy):
 
         order_allowed: bool = False
         
-        if len_orders == 0:
+        max_position = self.max_position
+        
+        my_trades_currency_all_sum = get_transactions_sum (self.my_trades_currency_all)
+        
+        over_hendge_opening_all =   my_trades_currency_all_sum <  max_position
+        
+        log.debug (f"my_trades_currency_all_sum {my_trades_currency_all_sum} max_position {max_position} over_hendge_opening_all {over_hendge_opening_all}")
+        
+        if len_orders == 0 and not over_hendge_opening_all:
             
-            max_position = self.max_position
+            
             
             over_hedged_cls  =  self.over_hedged_closing
             
