@@ -189,11 +189,12 @@ async def executing_strategies(
             while not_order:
 
                 orders_all_update = await queue_cached_orders.get()
+                queue_cached_orders.task_done
                 
                 log.debug(f"orders_all_update {orders_all_update}")
             
                 message: str = await queue.get()
-                
+                queue.task_done
                 log.debug(f"message {message}")
                 #message: str = queue.get()
                 
