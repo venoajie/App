@@ -179,8 +179,6 @@ async def executing_strategies(
             
             not_order = True
             
-            log.error (f"not_order {not_order}")
-            
             while not_order:
             
                 message: str = await queue.get()

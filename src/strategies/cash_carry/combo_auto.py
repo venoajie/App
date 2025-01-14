@@ -458,7 +458,7 @@ class ComboAuto (BasicStrategy):
         basic_ticks_for_average_meovement: int
         ) -> dict:
         """ """
-        log.warning (f"auto_combo {instrument_name_combo}")
+        #log.warning (f"auto_combo {instrument_name_combo}")
         
         order_allowed = False
         
@@ -784,7 +784,7 @@ class ComboAuto (BasicStrategy):
         
         delta = self.delta
         log.warning (f"constructing_manual_combo")
-        log.warning (f"{ticker_future}")
+        #log.warning (f"{ticker_future}")
 
         instrument_name_future = ticker_future["instrument_name"]       
         
