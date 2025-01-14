@@ -347,19 +347,19 @@ async def reconciling_size(
                     query_trades = f"SELECT * FROM  v_{currency_lower}_trading"
                     query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log"
 
-                    query_orders = f"SELECT * FROM  v_{currency_lower}_orders"
+                    #query_orders = f"SELECT * FROM  v_{currency_lower}_orders"
                     
-                    orders_currency = await executing_query_with_return (query_orders)  
+                    #orders_currency = await executing_query_with_return (query_orders)  
         
-                    reconciliation_direction = ["from_sub_account_to_order_db","from_order_db_to_sub_account"]
-                    for  direction in reconciliation_direction:
-                        await reconciling_orders(
-                            modify_order_and_db,
-                            sub_account,
-                            orders_currency,
-                            direction,
-                            order_db_table
-                        )
+                    #reconciliation_direction = ["from_sub_account_to_order_db","from_order_db_to_sub_account"]
+                    #for  direction in reconciliation_direction:
+                    #    await reconciling_orders(
+                    #        modify_order_and_db,
+                    #        sub_account,
+                    #        orders_currency,
+                    #        direction,
+                    #        order_db_table
+                    #    )
                                             
                     my_trades_currency_all_transactions: list= await executing_query_with_return (query_trades)
                                                                     
