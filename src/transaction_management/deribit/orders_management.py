@@ -28,14 +28,13 @@ async def saving_traded_orders(
 
     for trade in trades:
             
+        log.critical (f"{trade}")
         instrument_name = trade["instrument_name"]
 
         filter_trade="order_id"
                 
         order_id = trade[f"{filter_trade}"]
-        
-        log.critical (f"{trade}")
-        
+
         # remove respective transaction from order db            
         await deleting_row (
             order_db_table,
