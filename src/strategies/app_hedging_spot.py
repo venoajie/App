@@ -87,7 +87,7 @@ async def hedging_spot(
     """
 
     strategy = "hedgingSpot"
-    log.criticaal (f"starting {strategy}")
+    log.critical (f"starting {strategy}")
     # registering strategy config file    
     file_toml = "config_strategies.toml"
 
