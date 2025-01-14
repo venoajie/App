@@ -471,6 +471,8 @@ class ModifyOrderDb(SendApiRequest):
                                 start_timestamp,
                                 count
                                 )
+        
+        log.debug (trades_from_exchange)
             
         if trades_from_exchange:
             
