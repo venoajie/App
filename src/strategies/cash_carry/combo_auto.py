@@ -888,11 +888,9 @@ class ComboAuto (BasicStrategy):
                 
                 no_outstanding_short_position = len(my_trades_short)< 1
                 
-                log.error (f"last_buy_exceed_time_threshold {last_buy_exceed_time_threshold} 
-                             no_outstanding_long_position {no_outstanding_long_position}")
+                log.error (f"last_buy_exceed_time_threshold {last_buy_exceed_time_threshold} no_outstanding_long_position {no_outstanding_long_position}")
                 
-                log.debug (f"last_sell_exceed_time_threshold {last_sell_exceed_time_threshold} 
-                             no_outstanding_short_position {no_outstanding_short_position}")
+                log.debug (f"last_sell_exceed_time_threshold {last_sell_exceed_time_threshold} no_outstanding_short_position {no_outstanding_short_position}")
                 
                 if (bullish_situation
                     and "PERPETUAL" in instrument_name_future
