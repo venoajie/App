@@ -5,6 +5,7 @@
 import asyncio
 
 # installed
+from loguru import logger as log
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -48,7 +49,7 @@ async def saving_ws_data(
     
     """
     """
-    
+    log.critical ("Saving result")
     # registering strategy config file    
     
     try:
@@ -128,10 +129,10 @@ async def saving_ws_data(
                 
     except Exception as error:
         
-        await parse_error_message(error)  
+        parse_error_message(error)  
 
         await telegram_bot_sendtext (
-            error,
+            f"saving result {error}",
             "general_error"
             )
 

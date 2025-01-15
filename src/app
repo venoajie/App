@@ -20,6 +20,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 from strategies.app_hedging_spot import hedging_spot
+from strategies.relabelling_trading_result import relabelling_trades
 from transaction_management.deribit.api_requests import (SendApiRequest)
 from transaction_management.deribit.cancelling_active_orders import cancelling_orders
 from transaction_management.deribit.avoiding_double_ids import avoiding_double_ids
@@ -27,8 +28,7 @@ from transaction_management.deribit.data_producer import (StreamAccountData,)
 from transaction_management.deribit.running_strategies import executing_strategies
 from transaction_management.deribit.user_chg import saving_and_relabelling_orders
 from transaction_management.deribit.saving_result import saving_ws_data
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
+from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
 
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
@@ -163,9 +163,13 @@ async def main():
                 sub_account_id,
                 queue),
             
-            #saving_ws_data(
-            #    sub_account_id,
-            #    queue),
+            relabelling_trades(
+                sub_account_id,
+                queue),
+            
+            saving_ws_data(
+                sub_account_id,
+                queue),
             
             )
 
@@ -175,6 +179,11 @@ async def main():
     except Exception as error:
         
         parse_error_message(error)
+        await telegram_bot_sendtext (
+            f"app-{error}",
+            "general_error"
+            )
+
 
 if __name__ == "__main__":
     

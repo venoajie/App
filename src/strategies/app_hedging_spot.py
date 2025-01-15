@@ -464,7 +464,8 @@ async def hedging_spot(
                                                                         not_order = False
                                                                         
                                                                         break
-
+                not_order = False
+            
     except Exception as error:
         
         parse_error_message(f"app hedging spot {error}")  

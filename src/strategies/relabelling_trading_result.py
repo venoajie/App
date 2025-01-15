@@ -81,6 +81,8 @@ async def relabelling_trades(
     """
     """
     
+    log.critical ("Relabelling_trades")
+    
     # registering strategy config file    
     file_toml = "config_strategies.toml"
 
@@ -111,7 +113,6 @@ async def relabelling_trades(
         
         relevant_tables = config_app["relevant_tables"][0]
         
-        
         order_db_table= relevant_tables["orders_table"]        
                         
         settlement_periods = get_settlement_period (strategy_attributes)
@@ -124,7 +125,6 @@ async def relabelling_trades(
         instrument_attributes_futures_all = futures_instruments["active_futures"]   
         
         while True:
-            log.critical("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             
             for currency in currencies:
             
@@ -200,8 +200,8 @@ async def relabelling_trades(
                             
                             log.error (f"pairing_label {pairing_label}")
                             
-                            cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                                if o["cancellable"]==True]
+                            cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes 
+                                                        if o["cancellable"]==True]
                             
                             await modify_order_and_db.cancel_the_cancellables(
                                 order_db_table,
@@ -223,8 +223,8 @@ async def relabelling_trades(
                             for label in labels:
                                 
                                 label_integer: int = get_label_integer (label)
-                                selected_transaction = [o for o in my_trades_currency_strategy \
-                                    if str(label_integer) in o["label"]]
+                                selected_transaction = [o for o in my_trades_currency_strategy
+                                                        if str(label_integer) in o["label"]]
                                 
                                 selected_transaction_amount = ([o["amount"] for o in selected_transaction])
                                 sum_selected_transaction = sum(selected_transaction_amount)
@@ -232,8 +232,7 @@ async def relabelling_trades(
                                 
                                 #! closing combo auto trading
                                 if "Auto" in label :
-                                    
-                                                                                                    
+                                                                                
                                     if sum_selected_transaction == 0:  
                                         
                                         abnormal_transaction = [o for o in selected_transaction \
@@ -259,6 +258,7 @@ async def relabelling_trades(
                                             currency,
                                             cancellable_strategies
                                             )
+                                    
                                         break
                                     
                                 #! renaming combo auto trading
@@ -295,8 +295,7 @@ async def relabelling_trades(
                             
                             pass
 
-            log.critical ("sleep 1")
-            await asyncio.sleep(5)
+            await asyncio.sleep(1)
                 
     except Exception as error:
         

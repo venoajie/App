@@ -155,7 +155,7 @@ async def future_spreads(
             not_order = True
             
             while not_order:
-            
+                
                 message: str = await queue.get()
                 queue.task_done
                 #message: str = queue.get()
@@ -537,7 +537,9 @@ async def future_spreads(
                                                                     not_order = False
                                                                     
                                                                     break
-                    
+                
+                not_order = False
+                
     except Exception as error:
 
         await telegram_bot_sendtext (
