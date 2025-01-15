@@ -13,8 +13,7 @@ from db_management.sqlite_management import(
     deleting_row,
     insert_tables,
     update_status_data)
-from strategies.basic_strategy import(
-    get_label_integer,)
+from strategies.basic_strategy import(get_label_integer,)
 from utilities.string_modification import(
     extract_currency_from_text,
     extract_integers_aggregation_from_text,
@@ -23,8 +22,7 @@ from utilities.string_modification import(
     parsing_sqlite_json_output,
     remove_redundant_elements,
     )
-from utilities.system_tools import (
-    raise_error_message,)
+from utilities.system_tools import (raise_error_message,)
 
 def get_label_main(
     result: list, 

@@ -11,25 +11,20 @@ from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     executing_query_with_return,
     insert_tables,)
-from strategies.basic_strategy import (
-    is_label_and_side_consistent,)
+from messaging.telegram_bot import (telegram_bot_sendtext,)
+from strategies.basic_strategy import (is_label_and_side_consistent,)
 from transaction_management.deribit.orders_management import (
     labelling_unlabelled_order,
     labelling_unlabelled_order_oto,
     saving_order_based_on_state,
     saving_traded_orders,)
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
-from transaction_management.deribit.transaction_log import (
-    saving_transaction_log,)
+from transaction_management.deribit.transaction_log import (saving_transaction_log,)
 from transaction_management.deribit.api_requests import (
     SendApiRequest,
     get_cancel_order_byOrderId)
 from utilities.pickling import replace_data
-from utilities.string_modification import (
-    extract_currency_from_text,)
-from utilities.system_tools import (
-    provide_path_for_file)
+from utilities.string_modification import (extract_currency_from_text,)
+from utilities.system_tools import (provide_path_for_file)
 
 
 def get_first_tick_query(

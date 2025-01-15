@@ -19,18 +19,14 @@ from db_management.sqlite_management import (
     executing_query_with_return,
     querying_duplicated_transactions,
     update_status_data)
+from messaging.telegram_bot import (telegram_bot_sendtext,)
 from strategies.basic_strategy import (get_label_integer,)
 from strategies.cash_carry.reassigning_labels import (
-    pairing_single_label,
-    relabelling_double_ids)
+    pairing_single_label,)
 from transaction_management.deribit.get_instrument_summary import (get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
-from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
-from utilities.caching import (
-    combining_ticker_data as cached_ticker,
-    update_cached_ticker)
 from utilities.pickling import (
     replace_data,
     read_data)

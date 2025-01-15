@@ -9,9 +9,8 @@ from loguru import logger as log
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from transaction_management.deribit.managing_deribit import (
-    currency_inline_with_database_address,)
-from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
+from messaging.telegram_bot import (telegram_bot_sendtext,)
+from transaction_management.deribit.managing_deribit import (currency_inline_with_database_address,)
 from utilities.pickling import (
     replace_data,
     read_data)

@@ -14,8 +14,7 @@ import httpx
 
 # user defined formula
 from configuration import id_numbering, config, config_oci
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
+from messaging.telegram_bot import (telegram_bot_sendtext,)
 from utilities import time_modification
 from utilities.time_modification import convert_time_to_unix
 

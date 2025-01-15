@@ -7,15 +7,12 @@ import asyncio
 from loguru import logger as log
 
 # user defined formula
-from db_management.sqlite_management import (
-    update_status_data,)
+from db_management.sqlite_management import (update_status_data,)
 from utilities.string_modification import (
     remove_redundant_elements,
     sorting_list)
-from strategies.basic_strategy import (
-    get_label_integer,)
-from strategies.cash_carry.combo_auto import(
-    check_if_minimum_waiting_time_has_passed)
+from strategies.basic_strategy import (get_label_integer,)
+from strategies.cash_carry.combo_auto import(check_if_minimum_waiting_time_has_passed)
 
     
 def waiting_time_has_expired(

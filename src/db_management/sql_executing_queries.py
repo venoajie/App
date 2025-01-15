@@ -7,8 +7,7 @@ import aiosqlite
 #from loguru import logger as log
 import json
 
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
+from messaging.telegram_bot import (telegram_bot_sendtext,)
 
 def catch_error(error, idle: int = None) -> list:
     """ """

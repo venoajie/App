@@ -11,31 +11,24 @@ import tomli
 from configuration.label_numbering import get_now_unix_time
 from data_cleaning.managing_closed_transactions import (
     clean_up_closed_transactions,
-    get_unrecorded_trade_transactions,
-    refill_db)
+    get_unrecorded_trade_transactions,)
 from data_cleaning.managing_delivered_transactions import (
     is_instrument_name_has_delivered,
     updating_delivered_instruments)
-from data_cleaning.reconciling_db import(
-    is_my_trades_and_sub_account_size_reconciled_each_other,
-    reconciling_orders)
+from data_cleaning.reconciling_db import(is_my_trades_and_sub_account_size_reconciled_each_other)
 from data_cleaning.pruning_db import count_and_delete_ohlc_rows
 from db_management.sqlite_management import (
     back_up_db_sqlite,
     executing_query_with_return,
     insert_tables, 
     querying_arithmetic_operator,)
-from market_understanding.technical_analysis import (
-    insert_market_condition_result)
+from market_understanding.technical_analysis import (insert_market_condition_result)
+from messaging.telegram_bot import (telegram_bot_sendtext,)
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,)
-from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,)
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
+from transaction_management.deribit.get_instrument_summary import (get_futures_instruments,)
+from transaction_management.deribit.managing_deribit import (ModifyOrderDb,)
 from utilities.pickling import (
     read_data,
     replace_data,)

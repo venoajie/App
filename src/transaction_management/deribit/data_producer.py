@@ -19,6 +19,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # user defined formula
 from configuration import id_numbering, config, config_oci
+from messaging.telegram_bot import (telegram_bot_sendtext,)
 from transaction_management.deribit.api_requests import (
     get_end_point_result,
     get_currencies,
@@ -29,10 +30,7 @@ from transaction_management.deribit.managing_deribit import (
     currency_inline_with_database_address,)
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,)
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
-from utilities.pickling import (
-    replace_data)
+from utilities.pickling import (replace_data)
 from utilities.system_tools import (
     provide_path_for_file,
     parse_error_message,)

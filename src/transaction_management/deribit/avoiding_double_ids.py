@@ -11,8 +11,8 @@ import tomli
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
+from messaging.telegram_bot import (telegram_bot_sendtext,)
 from transaction_management.deribit.managing_deribit import (ModifyOrderDb,)
-from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
 from utilities.system_tools import (
     parse_error_message,
     provide_path_for_file)

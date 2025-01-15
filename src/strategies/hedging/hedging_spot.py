@@ -10,8 +10,7 @@ from loguru import logger as log
 
 # user defined formula
 
-from db_management.sqlite_management import (
-    update_status_data)
+from db_management.sqlite_management import (update_status_data)
 from strategies.basic_strategy import (
     BasicStrategy,
     are_size_and_order_appropriate,
@@ -19,10 +18,8 @@ from strategies.basic_strategy import (
     is_label_and_side_consistent,
     is_minimum_waiting_time_has_passed,
     size_rounding,)
-from transaction_management.deribit.api_requests import (
-    async_get_tickers)
-from utilities.string_modification import (
-    parsing_label)
+from transaction_management.deribit.api_requests import (async_get_tickers)
+from utilities.string_modification import (parsing_label)
 
 
 def get_transactions_len(result_strategy_label) -> int:

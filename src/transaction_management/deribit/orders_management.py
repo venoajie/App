@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 from loguru import logger as log
 
-from strategies.basic_strategy import (
-    is_label_and_side_consistent,)
-
-from db_management.sqlite_management import (
-    insert_tables,)
 # user defined formula
+from db_management.sqlite_management import (insert_tables,)
 from db_management.sqlite_management import(
     deleting_row,
     insert_tables)
+from strategies.basic_strategy import (is_label_and_side_consistent,)
     
     
 async def saving_traded_orders(

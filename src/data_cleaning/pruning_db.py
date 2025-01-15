@@ -8,8 +8,7 @@ from db_management.sqlite_management import(
     deleting_row,
     executing_query_with_return,
     querying_arithmetic_operator,)
-from transaction_management.deribit.telegram_bot import(
-    telegram_bot_sendtext,)
+from messaging.telegram_bot import(telegram_bot_sendtext,)
 
 
 async def count_and_delete_ohlc_rows(

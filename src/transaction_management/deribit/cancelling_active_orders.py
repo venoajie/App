@@ -18,13 +18,13 @@ from db_management.sqlite_management import (executing_query_with_return,)
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition)
+from messaging.telegram_bot import (telegram_bot_sendtext,)
 from strategies.hedging.hedging_spot import (HedgingSpot)
 from strategies.cash_carry.combo_auto import(ComboAuto,)
 from transaction_management.deribit.get_instrument_summary import (get_futures_instruments,)
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,)
-from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
     update_cached_ticker)

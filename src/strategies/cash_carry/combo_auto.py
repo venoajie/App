@@ -1128,9 +1128,22 @@ class ComboAuto (BasicStrategy):
                     
                         params.update({"label": label})
                         params.update({"entry_price": bid_price_perpetual})
+            
+                else:
+
+                    if len_orders_instrument_transaction == 0:
+                        
+                        order_allowed = True      
+
+                        params.update({"instrument_name": instrument_name_transaction})
+                    
+                        label = f"{strategy_label}-closed-{label_integer}"
+                    
+                        params.update({"label": label})
+                        params.update({"entry_price": bid_price_selected_transaction})
         
-            if "PERPETUAL" not in instrument_name_transaction\
-                and closing_size_ok:
+            if ("PERPETUAL" not in instrument_name_transaction
+                and closing_size_ok):
             
                 bid_price_selected_transaction = ticker_selected_transaction ["best_bid_price"]
                 ask_price_selected_transaction = ticker_selected_transaction ["best_ask_price"]
@@ -1180,7 +1193,7 @@ class ComboAuto (BasicStrategy):
                     
                             order_allowed = True
         
-                        # pairing with perpetuak    
+                        # pairing with perpetual    
                         if selected_transaction_price > bid_price_perpetual:
                             params.update({"label": selected_transaction["label"]})
                         
@@ -1255,7 +1268,7 @@ class ComboAuto (BasicStrategy):
             params.update({"size": size_abs})
             
             orders_instrument_transaction: list=  [o for o in orders_currency 
-                            if instrument_name_transaction in o["instrument_name"]]
+                                                   if instrument_name_transaction in o["instrument_name"]]
             
             orders_instrument_perpetual: list=  [o for o in orders_currency 
                                                 if instrument_name_perpetual in o["instrument_name"]]
@@ -1286,9 +1299,9 @@ class ComboAuto (BasicStrategy):
                 and ticker_selected_transaction:
                 
                 sum_order_under_closed_label = sum_order_under_closed_label_int (
-                orders_instrument_transaction_closed,
-                label_integer
-                )
+                    orders_instrument_transaction_closed,
+                    label_integer
+                    )
                 
                 net_size = (basic_size + sum_order_under_closed_label)
                 
@@ -1333,13 +1346,12 @@ class ComboAuto (BasicStrategy):
                             
                             order_allowed = True     
                                                          
-                    #using other future isntrument (should with higher price)
+                    #using other future instrument (should with higher price)
                     else:
                         
                         orders_instrument_future: list=  [o for o in orders_currency 
                         if instrument_name_future in o["instrument_name"]]
         
-
                         len_orders_instrument_future: int=  0 if not  orders_instrument_future \
                             else len(orders_instrument_future)
             

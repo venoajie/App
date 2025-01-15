@@ -19,6 +19,7 @@ import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
+from messaging.telegram_bot import (telegram_bot_sendtext,)
 from strategies.app_future_spreads import future_spreads
 from strategies.app_hedging_spot import hedging_spot
 from strategies.relabelling_trading_result import relabelling_trades
@@ -29,7 +30,6 @@ from transaction_management.deribit.data_producer import (StreamAccountData,)
 from transaction_management.deribit.running_strategies import executing_strategies
 from transaction_management.deribit.user_chg import saving_and_relabelling_orders
 from transaction_management.deribit.saving_result import saving_ws_data
-from transaction_management.deribit.telegram_bot import (telegram_bot_sendtext,)
 
 from utilities.caching import (
     combining_ticker_data as cached_ticker,

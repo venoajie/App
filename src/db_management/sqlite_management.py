@@ -7,9 +7,8 @@ import aiosqlite
 from loguru import logger as log
 import json
 
+from messaging.telegram_bot import (telegram_bot_sendtext as telegram_bot,)
 from utilities.string_modification import extract_currency_from_text
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext as telegram_bot,)
 
 def catch_error(error, idle: int = None) -> list:
     """ """
