@@ -261,7 +261,6 @@ async def relabelling_double_ids(
     
 async def pairing_single_label(
     strategy_attributes: list,
-    trade_db_table: str,
     archive_db_table: str,
     my_trades_currency_active: dict,
     server_time: int 
@@ -364,13 +363,15 @@ async def pairing_single_label(
                                 if  side_future == "sell"\
                                     and side_perpetual == "buy":
                                         
-                                    await updating_db_with_new_label(
-                                        trade_db_table,
+                                    await update_status_data(
                                         archive_db_table,
-                                        trade_id,
+                                        "label",
                                         filter,
-                                        new_label
+                                        trade_id,
+                                        new_label,
+                                        "="
                                         )
+    
                                     
                                     log.warning (future_trade)
                                     log.debug (perpetual_trade)

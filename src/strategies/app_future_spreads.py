@@ -284,8 +284,6 @@ async def future_spreads(
                                 strategy_params= [o for o in strategy_attributes \
                                 if o["strategy_label"] == strategy][0]   
                                 
-                                log.warning (strategy_params)
-                            
                                 my_trades_currency_strategy = [o for o in my_trades_currency \
                                     if strategy in (o["label"]) ]
                                 
@@ -309,10 +307,7 @@ async def future_spreads(
                                     AVERAGE_MOVEMENT: float = .15/100
                                     
                                     monthly_target_profit = strategy_params["monthly_profit_pct"]
-                                    
-                                    strategy_params= [o for o in strategy_attributes \
-                                        if o["strategy_label"] == strategy][0]   
-                                    
+                                
                                     max_order_currency = 2
                                     
                                     random_instruments_name = random.sample(([o for o in instruments_name
@@ -359,24 +354,26 @@ async def future_spreads(
                                             ticker_future= [o for o in ticker_all 
                                                             if instrument_name_future in o["instrument_name"]]
                                             
-                                            if  len_orders_all < 50\
-                                                    and ticker_future and ticker_combo:
+                                            if  (len_orders_all < 50
+                                                 and ticker_future and ticker_combo):
                                                 #and not reduce_only \
                                                 
                                                 ticker_combo= ticker_combo[0]
 
                                                 ticker_future= ticker_future[0]
                                                 
-                                                instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
-                                                    if o["instrument_name"] == instrument_name_future])- server_time)/ONE_MINUTE  
+                                                instrument_time_left = (max(
+                                                    [o["expiration_timestamp"] for o in instrument_attributes_futures_all
+                                                     if o["instrument_name"] == instrument_name_future])
+                                                                        - server_time)/ONE_MINUTE  
                                                 
                                                 instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
                                                                                                                 
-                                                if instrument_time_left_exceed_threshold\
-                                                    and instrument_name_future in  random_instruments_name \
-                                                        and size_perpetuals_reconciled\
-                                                            and size_future_reconciled\
-                                                                and size_future_reconciled:
+                                                if (instrument_time_left_exceed_threshold
+                                                    and instrument_name_future in  random_instruments_name 
+                                                    and size_perpetuals_reconciled
+                                                    and size_future_reconciled
+                                                    and size_future_reconciled):
                                                             
                                                     send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
                                                         ticker_future,
@@ -408,8 +405,8 @@ async def future_spreads(
                                     for label in labels:
                                         
                                         label_integer: int = get_label_integer (label)
-                                        selected_transaction = [o for o in my_trades_currency_strategy \
-                                            if str(label_integer) in o["label"]]
+                                        selected_transaction = [o for o in my_trades_currency_strategy 
+                                                                if str(label_integer) in o["label"]]
                                         
                                         selected_transaction_amount = ([o["amount"] for o in selected_transaction])
                                         sum_selected_transaction = sum(selected_transaction_amount)
@@ -420,8 +417,8 @@ async def future_spreads(
                                                                                                             
                                             if sum_selected_transaction == 0:  
                                                 
-                                                abnormal_transaction = [o for o in selected_transaction \
-                                                    if "closed" in o["label"]]     
+                                                abnormal_transaction = [o for o in selected_transaction 
+                                                                        if "closed" in o["label"]]     
                                                 
                                                 if not abnormal_transaction:                                                        
                                                     send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto (
@@ -494,8 +491,8 @@ async def future_spreads(
                                             #! closing unpaired transactions                                                            
                                             else:
                                                 
-                                                if len_selected_transaction == 1 \
-                                                    and "closed" not in label:
+                                                if (len_selected_transaction == 1 
+                                                    and "closed" not in label):
                                                     
                                                     send_order = []
                                                                                                                     
@@ -540,7 +537,6 @@ async def future_spreads(
                                                                     not_order = False
                                                                     
                                                                     break
-                                
                     
     except Exception as error:
 
@@ -550,8 +546,6 @@ async def future_spreads(
             )
                 
         parse_error_message(error)  
-
-
 
 def get_settlement_period (strategy_attributes) -> list:
     

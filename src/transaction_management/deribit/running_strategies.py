@@ -337,9 +337,6 @@ async def executing_strategies(
                                         
                                         monthly_target_profit = strategy_params["monthly_profit_pct"]
                                         
-                                        strategy_params= [o for o in strategy_attributes \
-                                            if o["strategy_label"] == strategy][0]   
-                                        
                                         max_order_currency = 2
                                         
                                         random_instruments_name = random.sample(([o for o in instruments_name\
@@ -774,7 +771,7 @@ async def executing_strategies(
                     
     except Exception as error:
         
-        await parse_error_message(error)  
+        parse_error_message(error)  
 
         await telegram_bot_sendtext (
             error,

@@ -22,16 +22,11 @@ from data_cleaning.reconciling_db import(
 from data_cleaning.pruning_db import count_and_delete_ohlc_rows
 from db_management.sqlite_management import (
     back_up_db_sqlite,
-    deleting_row,
     executing_query_with_return,
     insert_tables, 
-    querying_arithmetic_operator,
-    querying_duplicated_transactions)
+    querying_arithmetic_operator,)
 from market_understanding.technical_analysis import (
     insert_market_condition_result)
-from strategies.cash_carry.reassigning_labels import (
-    pairing_single_label,
-    relabelling_double_ids)
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,)
@@ -52,8 +47,7 @@ from utilities.system_tools import (
     async_raise_error_message,
     kill_process,
     provide_path_for_file,
-    raise_error_message,
-    sleep_and_restart)
+    raise_error_message,)
 from websocket_management.allocating_ohlc import (
     ohlc_end_point, 
     ohlc_result_per_time_frame,
@@ -376,51 +370,6 @@ async def reconciling_size(
                     
                     my_trades_currency_active_free_blanks = [o for o in my_trades_currency_active\
                         if o["label"] is not None]
-
-                    if my_trades_currency_active:
-                        
-                        pairing_label = await pairing_single_label(
-                        strategy_attributes,
-                        trade_db_table,
-                        archive_db_table,
-                        my_trades_currency_active,
-                        server_time 
-                        )
-                            
-                        duplicated_trade_id_transactions = await querying_duplicated_transactions(
-                            archive_db_table,"trade_id"
-                        )
-                        
-                        if duplicated_trade_id_transactions:
-                            
-                            log.critical (f"duplicated_trade_id_transactions {duplicated_trade_id_transactions}")
-
-                            ids = [o["id"] for o in duplicated_trade_id_transactions]
-                            
-                            for id in ids:
-                                await deleting_row(
-                                archive_db_table,
-                                "databases/trading.sqlite3",
-                                "id",
-                                "=",
-                                id,)
-                                
-                                break
-                            
-                            await sleep_and_restart()
-                            
-                        if  pairing_label:
-                            
-                            log.error (f"pairing_label {pairing_label}")
-                            
-                            cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
-                                if o["cancellable"]==True]
-                            
-                            await modify_order_and_db.cancel_the_cancellables(
-                                order_db_table,
-                                currency,
-                                cancellable_strategies
-                                )
 
                     # FROM sub account to other db's
                     if  sub_account_positions_instrument:
