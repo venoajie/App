@@ -22,10 +22,10 @@ async def main():
             
             response = await client.get('https://agile-cliffs-23967.herokuapp.com/ok')
             log.info (f"response1 {response}")
-            response_json = json.loads(response.text)
+            response_json = json.loads(response.text)['resu']
             log.warning (f"response_json {response_json}")
             
-            rows = [str(i).split('|') for i in response_json['resu'][:-1]]
+            rows = [str(i).split('|') for i in response_json[:-1]]
             
             if rows:
                 data = [dict(zip(headers, l)) for l in response_json]
