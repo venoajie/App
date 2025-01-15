@@ -17,9 +17,15 @@ while True:
     response = s.get('https://agile-cliffs-23967.herokuapp.com/ok', headers={'Connection': 'keep-alive'})
     d = json.loads(response.text)
     rows = [str(i).split('|') for i in d['resu'][:-1]]
+    print (f"rows {rows}")
+    lst = []
     if rows:
         data = [dict(zip(headers, l)) for l in rows]
         df = df.append(data, ignore_index=True)
         print (df)
         df.to_csv('filename.csv', index=False)
+        for row in rows:
+            lst.append(row)
+            print (f"row {row}")
+        print (f"lst {lst}")
     time.sleep(60.0 - ((time.time() - starttime) % 60.0))
