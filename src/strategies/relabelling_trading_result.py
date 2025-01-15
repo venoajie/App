@@ -124,7 +124,7 @@ async def relabelling_trades(
         instrument_attributes_futures_all = futures_instruments["active_futures"]   
         
         while True:
-            log.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            log.critical("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             
             for currency in currencies:
             
@@ -295,7 +295,7 @@ async def relabelling_trades(
                             
                             pass
 
-            log.debug ("sleep 5")
+            log.critical ("sleep 1")
             await asyncio.sleep(5)
                 
     except Exception as error:
