@@ -300,6 +300,7 @@ async def relabelling_trades(
                                     else:
                                         
                                         if len_selected_transaction != 1:
+                                            log.warning (f"selected_transaction {selected_transaction} ")
                                             selected_transaction_trade_id = ([o["trade_id"] for o in selected_transaction])[0]
                                                                                         
                                             filter = "trade_id"
@@ -314,7 +315,7 @@ async def relabelling_trades(
 
                                             await update_status_data(
                                                 archive_db_table,
-                                                "trade_id",
+                                                "label",
                                                 filter,
                                                 selected_transaction_trade_id,
                                                 new_label,
