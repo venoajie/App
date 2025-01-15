@@ -20,7 +20,7 @@ starttime = time.time()
 
 
 while True:
-    response = s.get('https://agile-cliffs-23967.herokuapp.com/ok', headers={'Connection': 'keep-alive'})
+    response = httpx.get('https://agile-cliffs-23967.herokuapp.com/ok', headers={'Connection': 'keep-alive'})
     d = json.loads(response.text)
     rows = [str(i).split('|') for i in d['resu'][:-1]]
     print (f"rows {rows}")
