@@ -239,6 +239,9 @@ async def relabelling_trades(
                                                         if str(label_integer) in o["label"]]
                                 
                                 selected_transaction_amount = ([o["amount"] for o in selected_transaction])
+                                
+                                log.info (f"selected_transaction {selected_transaction}")
+                                
                                 sum_selected_transaction = sum(selected_transaction_amount)
                                 len_selected_transaction = len(selected_transaction_amount)
                                 

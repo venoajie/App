@@ -465,7 +465,7 @@ async def executing_strategies(
                                             label_integer: int = get_label_integer (label)
                                             selected_transaction = [o for o in my_trades_currency_strategy \
                                                 if str(label_integer) in o["label"]]
-                                            log.info (f"selected_transaction {selected_transaction}")
+                                            
                                             selected_transaction_amount = ([o["amount"] for o in selected_transaction])
                                             sum_selected_transaction = sum(selected_transaction_amount)
                                             len_selected_transaction = len(selected_transaction_amount)
