@@ -29,6 +29,6 @@ async def main():
                 log.debug (f"data5 {data}")
 
 
-        time.sleep(60.0 - ((time.time() - starttime) % 60.0))
+        asyncio.sleep(60.0 - ((time.time() - starttime) % 60.0))
 
 asyncio.run (main())
