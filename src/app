@@ -19,6 +19,7 @@ import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
+from market_understanding.scanning_volume_spike import scanning_volume
 from messaging.telegram_bot import (telegram_bot_sendtext,)
 from strategies.app_future_spreads import future_spreads
 from strategies.app_hedging_spot import hedging_spot
@@ -175,6 +176,8 @@ async def main():
             saving_ws_data(
                 sub_account_id,
                 queue),
+            
+            scanning_volume()
             
             )
 

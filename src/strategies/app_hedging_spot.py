@@ -14,8 +14,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from configuration.label_numbering import get_now_unix_time
 from data_cleaning.reconciling_db import (is_size_sub_account_and_my_trades_reconciled)
-from db_management.sqlite_management import (
-    executing_query_with_return,)
+from db_management.sqlite_management import (executing_query_with_return,)
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition)
