@@ -500,12 +500,6 @@ async def reconciling_size(
                                             
                                 break
 
-                    # handling transactions with no label                    
-                    await refill_db(
-                        currency,
-                        my_trades_currency_active,
-                        archive_db_table,
-                            )
                 
                     await clean_up_closed_transactions(
                         currency, 

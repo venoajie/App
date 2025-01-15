@@ -12,6 +12,8 @@ import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from configuration.label_numbering import get_now_unix_time
+from data_cleaning.managing_closed_transactions import (
+    refill_db)
 from db_management.sqlite_management import (
     deleting_row,
     executing_query_with_return,
@@ -152,14 +154,22 @@ async def relabelling_trades(
                         
                     my_trades_currency_all_transactions: list= await executing_query_with_return (query_trades)
                                             
-                    my_trades_currency_all: list= [] if my_trades_currency_all_transactions == 0 \
-                        else [o for o in my_trades_currency_all_transactions
-                                if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
+                    my_trades_currency_all: list= ([] if my_trades_currency_all_transactions == 0 
+                                                   else [o for o in my_trades_currency_all_transactions
+                                                         if o["instrument_name"] 
+                                                         in [o["instrument_name"] for o in instrument_attributes_futures_all]])
                         
                     my_trades_currency: list= [ o for o in my_trades_currency_all \
                         if o["label"] is not None] 
                     
                     server_time = get_now_unix_time()  
+                        
+                    # handling transactions with no label                    
+                    await refill_db(
+                        currency,
+                        my_trades_currency_all_transactions,
+                        archive_db_table,
+                            )
                     
                     for strategy in active_strategies:
                         
@@ -169,46 +179,6 @@ async def relabelling_trades(
                         my_trades_currency_strategy = [o for o in my_trades_currency \
                             if strategy in (o["label"]) ]
                         
-                        pairing_label = await pairing_single_label(
-                            strategy_attributes,
-                            archive_db_table,
-                            my_trades_currency_strategy,
-                            server_time 
-                            )
-                        
-                        duplicated_trade_id_transactions = await querying_duplicated_transactions(
-                            archive_db_table,"trade_id"
-                        )
-                        
-                        if duplicated_trade_id_transactions:
-                            
-                            log.critical (f"duplicated_trade_id_transactions {duplicated_trade_id_transactions}")
-
-                            ids = [o["id"] for o in duplicated_trade_id_transactions]
-                            
-                            for id in ids:
-                                await deleting_row(
-                                archive_db_table,
-                                "databases/trading.sqlite3",
-                                "id",
-                                "=",
-                                id,)
-                                
-                                break
-                            
-                        if  pairing_label:
-                            
-                            log.error (f"pairing_label {pairing_label}")
-                            
-                            cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes 
-                                                        if o["cancellable"]==True]
-                            
-                            await modify_order_and_db.cancel_the_cancellables(
-                                order_db_table,
-                                currency,
-                                cancellable_strategies
-                                )
-
                         
                         if   "futureSpread" in strategy :
                             
@@ -218,6 +188,49 @@ async def relabelling_trades(
                             labels=  remove_redundant_elements(my_trades_currency_strategy_labels)
                             
                             filter = "label"
+
+
+                            pairing_label = await pairing_single_label(
+                                strategy_attributes,
+                                archive_db_table,
+                                my_trades_currency_strategy,
+                                server_time 
+                                )
+                            
+                            duplicated_trade_id_transactions = await querying_duplicated_transactions(
+                                archive_db_table,
+                                "trade_id"
+                            )
+                            
+                            if duplicated_trade_id_transactions:
+                                
+                                log.critical (f"duplicated_trade_id_transactions {duplicated_trade_id_transactions}")
+
+                                ids = [o["id"] for o in duplicated_trade_id_transactions]
+                                
+                                for id in ids:
+                                    await deleting_row(
+                                    archive_db_table,
+                                    "databases/trading.sqlite3",
+                                    "id",
+                                    "=",
+                                    id,)
+                                    
+                                    break
+                                
+                            if  pairing_label:
+                                
+                                log.error (f"pairing_label {pairing_label}")
+                                
+                                cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes 
+                                                            if o["cancellable"]==True]
+                                
+                                await modify_order_and_db.cancel_the_cancellables(
+                                    order_db_table,
+                                    currency,
+                                    cancellable_strategies
+                                    )
+
 
                             #! closing active trades
                             for label in labels:
