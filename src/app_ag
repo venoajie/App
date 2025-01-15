@@ -18,14 +18,7 @@ starttime = time.time()
     
 async def main():
     while True:
-        response = httpx.get('https://agile-cliffs-23967.herokuapp.com/ok', headers={'Connection': 'keep-alive'})
-        d = json.loads(response.text)
-        log.debug (f"d1 {d}")
-        rows = [str(i).split('|') for i in d['resu'][:-1]]
-        log.error (f"rows {rows}")
-        lst = []
-        
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(headers={'Connection': 'keep-alive'}) as client:
             
             response = await client.get('https://agile-cliffs-23967.herokuapp.com/ok')
             log.info (f"response1 {response}")
@@ -39,19 +32,6 @@ async def main():
             log.debug (f"data5 {data}")
 
 
-        async with httpx.AsyncClient(headers={'Connection': 'keep-alive'}) as client:
-            
-            response = await client.get('https://agile-cliffs-23967.herokuapp.com/ok')
-            log.error (f"response2 {response}")
-
-        if rows:
-            data = [dict(zip(headers, l)) for l in rows]
-            log.info (f"data {data}")
-
-            for row in rows:
-                lst.append(row)
-                print (f"row {row}")
-            print (f"lst {lst}")
         time.sleep(60.0 - ((time.time() - starttime) % 60.0))
 
 asyncio.run (main())
