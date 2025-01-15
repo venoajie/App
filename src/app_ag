@@ -31,6 +31,10 @@ async def main():
             print (f"response1 {response}")
             d = json.loads(response.text)
             print (f"d2 {d}")
+            
+            data = [dict(zip(headers, l)) for l in d]
+            print (f"data5 {data}")
+
 
         async with httpx.AsyncClient(headers={'Connection': 'keep-alive'}) as client:
             
