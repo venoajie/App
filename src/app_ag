@@ -22,14 +22,14 @@ async def main():
             
             response = await client.get('https://agile-cliffs-23967.herokuapp.com/ok')
             log.info (f"response1 {response}")
-            d = json.loads(response.text)
-            log.warning (f"d2 {d}")
+            response_json = json.loads(response.text)
+            log.warning (f"response_json {response_json}")
             
-            rows = [str(i).split('|') for i in d['resu'][:-1]]
-            log.info (f"rows {rows}")
+            rows = [str(i).split('|') for i in response_json['resu'][:-1]]
             
-            data = [dict(zip(headers, l)) for l in d]
-            log.debug (f"data5 {data}")
+            if rows:
+                data = [dict(zip(headers, l)) for l in response_json]
+                log.debug (f"data5 {data}")
 
 
         time.sleep(60.0 - ((time.time() - starttime) % 60.0))
