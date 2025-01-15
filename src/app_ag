@@ -28,6 +28,8 @@ async def main():
             
             response = await client.get('https://agile-cliffs-23967.herokuapp.com/ok')
             print (f"response1 {response}")
+            d = json.loads(response.text)
+            print (f"d {d}")
 
         async with httpx.AsyncClient(headers={'Connection': 'keep-alive'}) as client:
             
@@ -36,7 +38,7 @@ async def main():
 
         if rows:
             data = [dict(zip(headers, l)) for l in rows]
-            print (data)
+            print (f"data {data}")
 
             for row in rows:
                 lst.append(row)
