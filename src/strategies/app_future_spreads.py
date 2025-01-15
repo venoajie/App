@@ -293,6 +293,7 @@ async def future_spreads(
                                 
                                 log.info (f"orders_currency_all {len(orders_currency)}")
                                 log.info (f"orders_currency_strategy {len(orders_currency_strategy)}")
+                                log.info (f"orders_currency_strategy {(orders_currency_strategy)}")
                                 
                                 #log.info (f"orders_currency_strategy {orders_currency_strategy}")
                                 #log.critical (f"len_orders_all {len_orders_all}")
