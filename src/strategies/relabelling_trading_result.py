@@ -332,7 +332,6 @@ async def relabelling_trades(
                             pass
 
             await asyncio.sleep(1)
-            break
                 
     except Exception as error:
         
