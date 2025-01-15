@@ -13,7 +13,6 @@ import httpx
 # https://stackoverflow.com/questions/66686458/how-to-scrape-an-updating-html-table-using-selenium
 headers = ['Coin','Pings','Net Vol BTC','Net Vol %','Recent Total Vol BTC', 'Recent Vol %', 'Recent Net Vol', 'Datetime (UTC)']
 
-s = httpx.Session()
 starttime = time.time()
 
     
