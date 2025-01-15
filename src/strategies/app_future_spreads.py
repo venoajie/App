@@ -430,8 +430,9 @@ async def future_spreads(
                                                     if send_order["order_allowed"]:
                                                         
                                                         await processing_orders(
-                                                        modify_order_and_db,
-                                                        send_order)
+                                                            modify_order_and_db,
+                                                            send_order
+                                                            )
                                                         
                                                         not_order = False
                                                         
@@ -470,24 +471,7 @@ async def future_spreads(
                                         else:
                                         
                                             if sum_selected_transaction == 0:
-                                                if "open" in label:
-                                                    new_label = f"futureSpreadAuto-open-{label_integer}"
-                                            
-                                                if "closed" in label:
-                                                    new_label = f"futureSpreadAuto-closed-{label_integer}"
-                                                
-                                                await update_status_data(
-                                                    archive_db_table,
-                                                    "label",
-                                                    filter,
-                                                    label,
-                                                    new_label,
-                                                    "="
-                                                    )
-                                                
-                                                not_order = False
-                                                
-                                                break
+                                                pass
                                             
                                             #! closing unpaired transactions                                                            
                                             else:
