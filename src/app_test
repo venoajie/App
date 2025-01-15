@@ -147,9 +147,9 @@ async def main():
         await asyncio.gather(
             producer_task, 
             
-            future_spreads(
-                sub_account_id,
-                queue),
+#            future_spreads(
+#                sub_account_id,
+#                queue),
             
             
             relabelling_trades(
