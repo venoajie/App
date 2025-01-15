@@ -6,7 +6,7 @@ import requests
 import time
 import json
 import pandas as pd
-
+from loguru import logger as log
 import asyncio
 import httpx
 
@@ -20,30 +20,30 @@ async def main():
     while True:
         response = httpx.get('https://agile-cliffs-23967.herokuapp.com/ok', headers={'Connection': 'keep-alive'})
         d = json.loads(response.text)
-        print (f"d1 {d}")
+        log.debug (f"d1 {d}")
         rows = [str(i).split('|') for i in d['resu'][:-1]]
-        print (f"rows {rows}")
+        log.error (f"rows {rows}")
         lst = []
         
         async with httpx.AsyncClient() as client:
             
             response = await client.get('https://agile-cliffs-23967.herokuapp.com/ok')
-            print (f"response1 {response}")
+            log.info (f"response1 {response}")
             d = json.loads(response.text)
-            print (f"d2 {d}")
+            log.warning (f"d2 {d}")
             
             data = [dict(zip(headers, l)) for l in d]
-            print (f"data5 {data}")
+            log.debug (f"data5 {data}")
 
 
         async with httpx.AsyncClient(headers={'Connection': 'keep-alive'}) as client:
             
             response = await client.get('https://agile-cliffs-23967.herokuapp.com/ok')
-            print (f"response2 {response}")
+            log.error (f"response2 {response}")
 
         if rows:
             data = [dict(zip(headers, l)) for l in rows]
-            print (f"data {data}")
+            log.info (f"data {data}")
 
             for row in rows:
                 lst.append(row)
