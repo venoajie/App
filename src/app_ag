@@ -1,0 +1,21 @@
+import requests
+import time
+import json
+import pandas as pd
+# https://stackoverflow.com/questions/66686458/how-to-scrape-an-updating-html-table-using-selenium
+headers = ['Coin','Pings','Net Vol BTC','Net Vol %','Recent Total Vol BTC', 'Recent Vol %', 'Recent Net Vol', 'Datetime (UTC)']
+df = pd.DataFrame(columns=headers)
+
+s = requests.Session()
+starttime = time.time()
+
+while True:
+    response = s.get('https://agile-cliffs-23967.herokuapp.com/ok', headers={'Connection': 'keep-alive'})
+    d = json.loads(response.text)
+    rows = [str(i).split('|') for i in d['resu'][:-1]]
+    if rows:
+        data = [dict(zip(headers, l)) for l in rows]
+        df = df.append(data, ignore_index=True)
+        print (df)
+        df.to_csv('filename.csv', index=False)
+    time.sleep(60.0 - ((time.time() - starttime) % 60.0))
