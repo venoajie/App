@@ -26,9 +26,10 @@ async def main():
             log.warning (f"response_json {response_json}")
             
             rows = [str(i).split('|') for i in response_json[:-1]]
+            log.warning (f"rows {rows}")
             
             if rows:
-                data = [dict(zip(headers, l)) for l in response_json]
+                data = [dict(zip(headers, l)) for l in rows]
                 log.debug (f"data5 {data}")
 
 
