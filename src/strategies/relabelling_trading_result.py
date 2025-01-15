@@ -240,8 +240,6 @@ async def relabelling_trades(
                                 
                                 selected_transaction_amount = ([o["amount"] for o in selected_transaction])
                                 
-                                log.info (f"selected_transaction {selected_transaction}")
-                                
                                 sum_selected_transaction = sum(selected_transaction_amount)
                                 len_selected_transaction = len(selected_transaction_amount)
                                 
@@ -303,9 +301,7 @@ async def relabelling_trades(
                                         
                                         if len_selected_transaction != 1:
                                             selected_transaction_trade_id = ([o["trade_id"] for o in selected_transaction])[0]
-                                            
-                                            log.debug (f"selected_transaction {selected_transaction}")
-                                            
+                                                                                        
                                             filter = "trade_id"
                                             
                                             if "open" in label:
@@ -314,6 +310,8 @@ async def relabelling_trades(
                                             if "closed" in label:
                                                 new_label = f"futureSpread-closed-{server_time}"
                                             
+                                            log.debug (f"selected_transaction {selected_transaction} selected_transaction_trade_id {selected_transaction_trade_id} new_label {new_label}")
+
                                             await update_status_data(
                                                 archive_db_table,
                                                 "trade_id",
