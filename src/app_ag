@@ -21,9 +21,8 @@ while True:
     lst = []
     if rows:
         data = [dict(zip(headers, l)) for l in rows]
-        df = df.append(data, ignore_index=True)
-        print (df)
-        df.to_csv('filename.csv', index=False)
+        print (data)
+
         for row in rows:
             lst.append(row)
             print (f"row {row}")
