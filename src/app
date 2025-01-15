@@ -19,6 +19,7 @@ import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
+from strategies.app_future_spreads import future_spreads
 from strategies.app_hedging_spot import hedging_spot
 from strategies.relabelling_trading_result import relabelling_trades
 from transaction_management.deribit.api_requests import (SendApiRequest)
@@ -148,6 +149,10 @@ async def main():
             producer_task, 
             
             hedging_spot(
+                sub_account_id,
+                queue),
+        
+            future_spreads(
                 sub_account_id,
                 queue),
             
