@@ -170,15 +170,35 @@ async def relabelling_trades(
                         my_trades_currency_all_transactions,
                         archive_db_table,
                             )
+            
+                    duplicated_trade_id_transactions = await querying_duplicated_transactions(
+                        archive_db_table,
+                        "trade_id"
+                    )
                     
+                    if duplicated_trade_id_transactions:
+                        
+                        log.critical (f"duplicated_trade_id_transactions {duplicated_trade_id_transactions}")
+
+                        ids = [o["id"] for o in duplicated_trade_id_transactions]
+                        
+                        for id in ids:
+                            await deleting_row(
+                            archive_db_table,
+                            "databases/trading.sqlite3",
+                            "id",
+                            "=",
+                            id,)
+                            
+                            break
+                        
                     for strategy in active_strategies:
                         
                         strategy_params= [o for o in strategy_attributes \
                         if o["strategy_label"] == strategy][0]   
                     
                         my_trades_currency_strategy = [o for o in my_trades_currency \
-                            if strategy in (o["label"]) ]
-                        
+                            if strategy in (o["label"]) ]                        
                         
                         if   "futureSpread" in strategy :
                             
@@ -189,7 +209,6 @@ async def relabelling_trades(
                             
                             filter = "label"
 
-
                             pairing_label = await pairing_single_label(
                                 strategy_attributes,
                                 archive_db_table,
@@ -197,26 +216,6 @@ async def relabelling_trades(
                                 server_time 
                                 )
                             
-                            duplicated_trade_id_transactions = await querying_duplicated_transactions(
-                                archive_db_table,
-                                "trade_id"
-                            )
-                            
-                            if duplicated_trade_id_transactions:
-                                
-                                log.critical (f"duplicated_trade_id_transactions {duplicated_trade_id_transactions}")
-
-                                ids = [o["id"] for o in duplicated_trade_id_transactions]
-                                
-                                for id in ids:
-                                    await deleting_row(
-                                    archive_db_table,
-                                    "databases/trading.sqlite3",
-                                    "id",
-                                    "=",
-                                    id,)
-                                    
-                                    break
                                 
                             if  pairing_label:
                                 
@@ -299,16 +298,39 @@ async def relabelling_trades(
                                     #! closing unpaired transactions                                                            
                                     else:
                                         
-                                        if len_selected_transaction == 1 \
-                                            and "closed" not in label:
+                                        if len_selected_transaction != 1:
+                                            selected_transaction_trade_id = ([o["trade_id"] for o in selected_transaction])[0]
                                             
-                                            pass
+                                            filter = "trade_id"
+                                            
+                                            if "open" in label:
+                                                new_label = f"futureSpread-open-{server_time}"
+                                        
+                                            if "closed" in label:
+                                                new_label = f"futureSpread-closed-{server_time}"
+                                            
+                                            await update_status_data(
+                                                archive_db_table,
+                                                "trade_id",
+                                                filter,
+                                                selected_transaction_trade_id,
+                                                new_label,
+                                                "="
+                                                )
+                                            
+                                            break
                         
+                                        else:
+
+                                            if "closed" not in label:
+                                                pass
+                                                                    
                         if  "hedgingSpot" in strategy:
                             
                             pass
 
             await asyncio.sleep(1)
+            break
                 
     except Exception as error:
         
