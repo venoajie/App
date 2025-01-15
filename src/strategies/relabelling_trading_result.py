@@ -300,7 +300,7 @@ async def relabelling_trades(
                                     else:
                                         
                                         if len_selected_transaction != 1:
-                                            selected_transaction_trade_id = ([o["trade_id"] for o in selected_transaction])
+                                            selected_transaction_trade_id = ([o["trade_id"] for o in selected_transaction])[0]
                                                                                         
                                             filter = "trade_id"
                                             
