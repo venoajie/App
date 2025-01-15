@@ -274,9 +274,7 @@ class StreamAccountData(ModifyOrderDb):
                                 data = message_params["data"]
                                 
                                 message_channel: str = message_params["channel"]
-                                
-                                log.warning (f"  {message_channel}")
-                                
+                                                                
                                 if "user.changes.any" in message_channel:
                                     
                                     log.warning (f" data {data}")
