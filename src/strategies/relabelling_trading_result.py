@@ -301,6 +301,8 @@ async def relabelling_trades(
                                         if len_selected_transaction != 1:
                                             selected_transaction_trade_id = ([o["trade_id"] for o in selected_transaction])[0]
                                             
+                                            log.debug (f"selected_transaction {selected_transaction}")
+                                            
                                             filter = "trade_id"
                                             
                                             if "open" in label:
