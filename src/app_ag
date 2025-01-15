@@ -32,6 +32,9 @@ async def main():
             d = json.loads(response.text)
             log.warning (f"d2 {d}")
             
+            rows = [str(i).split('|') for i in d['resu'][:-1]]
+            log.info (f"rows {rows}")
+            
             data = [dict(zip(headers, l)) for l in d]
             log.debug (f"data5 {data}")
 
