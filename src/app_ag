@@ -25,7 +25,7 @@ async def main():
         resp = await client.get(cat_url)
 
         cat = resp.json()
-        print(cat['url'])
+        print(cat)
 
 asyncio.run(main())
 
