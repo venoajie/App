@@ -27,7 +27,12 @@ async def main():
         async with httpx.AsyncClient() as client:
             
             response = await client.get('https://agile-cliffs-23967.herokuapp.com/ok')
-            print (response)
+            print (f"response1 {response}")
+
+        async with httpx.AsyncClient(headers={'Connection': 'keep-alive'}) as client:
+            
+            response = await client.get('https://agile-cliffs-23967.herokuapp.com/ok')
+            print (f"response2 {response}")
 
         if rows:
             data = [dict(zip(headers, l)) for l in rows]
