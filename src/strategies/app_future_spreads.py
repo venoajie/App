@@ -442,39 +442,12 @@ async def future_spreads(
                                                     log.critical(f"abnormal_transaction {abnormal_transaction}")
                                                     
                                                     break
-                                            else:                                                               
-                                                
-                                                new_label = f"futureSpread-open-{label_integer}"
-                                                                                                                
-                                                await update_status_data(
-                                                    archive_db_table,
-                                                    "label",
-                                                    filter,
-                                                    label,
-                                                    new_label,
-                                                    "="
-                                                    )
-                                                
-                                                log.debug ("renaming combo Auto done")
-                                                
-                                                await modify_order_and_db.cancel_the_cancellables(
-                                                    order_db_table,
-                                                    currency,
-                                                    cancellable_strategies
-                                                    )
-                                                
-                                                not_order = False
-                                                
-                                                break
                                             
-                                        #! renaming combo auto trading
                                         else:
                                         
-                                            if sum_selected_transaction == 0:
-                                                pass
-                                            
-                                            #! closing unpaired transactions                                                            
-                                            else:
+                                            #! closing unpaired transactions  
+                                            log.critical (f"selected_transaction {selected_transaction} {sum_selected_transaction}")                                                          
+                                            if sum_selected_transaction != 0:
                                                 
                                                 if (len_selected_transaction == 1 
                                                     and "closed" not in label):
