@@ -6,28 +6,17 @@ import requests
 import time
 import json
 import pandas as pd
-# https://stackoverflow.com/questions/66686458/how-to-scrape-an-updating-html-table-using-selenium
-headers = ['Coin','Pings','Net Vol BTC','Net Vol %','Recent Total Vol BTC', 'Recent Vol %', 'Recent Net Vol', 'Datetime (UTC)']
 
-s = requests.Session()
-starttime = time.time()
-
-    
 import asyncio
 import httpx
 
+# https://stackoverflow.com/questions/66686458/how-to-scrape-an-updating-html-table-using-selenium
+headers = ['Coin','Pings','Net Vol BTC','Net Vol %','Recent Total Vol BTC', 'Recent Vol %', 'Recent Net Vol', 'Datetime (UTC)']
 
-async def main():
-    cat_url = 'https://agile-cliffs-23967.herokuapp.com/ok'
+s = httpx.Session()
+starttime = time.time()
 
-    async with httpx.AsyncClient(headers={'Connection': 'keep-alive'}) as client:
-
-        resp = await client.get(cat_url)
-
-        cat = resp.json()
-        print(cat)
-
-asyncio.run(main())
+    
 
 
 while True:
