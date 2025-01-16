@@ -34,33 +34,11 @@ async def scanning_volume():
             if rows:
                 data_all = [dict(zip(headers, l)) for l in rows]
                 
-                for data in data_all:
-                    data_was_in_result = [] if result == [] else [o for o in result if data in  result]
-                    
-                    print (f"result {result}")
-                    
-                    await telegram_bot_sendtext (
+                await telegram_bot_sendtext (
                         f"data_all - {data_all}",
                         "general_error"
                         )
-                    
-                    await telegram_bot_sendtext (
-                        f"data_all - {data_all}",
-                        "general_error"
-                        )
-                    await telegram_bot_sendtext (
-                        f"data_was_in_result - {data_was_in_result}",
-                        "general_error"
-                        )
-                    
-                    if data_was_in_result != []:
-                        await telegram_bot_sendtext (
-                        f"data_was_in_result != [] {data}",
-                        "general_error"
-                        )
-                        result.append (data)
-                        print (f"result {result}")
-
+                
         random_sleep_time = max(
             sample(
                 [5,10,15,20,30],
