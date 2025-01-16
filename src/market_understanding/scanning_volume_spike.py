@@ -39,13 +39,13 @@ async def scanning_volume():
                     
                     print (f"data_was_in_result {data_was_in_result}")
                     await telegram_bot_sendtext (
-                        data,
+                        f"data_was_in_result - {data_was_in_result}",
                         "general_error"
                         )
                     
                     if data_was_in_result != []:
                         await telegram_bot_sendtext (
-                        data,
+                        f"data_was_in_result != [] {data}",
                         "general_error"
                         )
                         result.append (data)
