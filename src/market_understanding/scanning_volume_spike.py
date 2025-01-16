@@ -18,6 +18,8 @@ async def scanning_volume():
     https://stackoverflow.com/questions/66686458/how-to-scrape-an-updating-html-table-using-selenium
 
     """
+    
+    print("Scanning volume")
 
     while True:
         async with httpx.AsyncClient(headers={'Connection': 'keep-alive'}) as client:
@@ -35,6 +37,11 @@ async def scanning_volume():
                     "general_error"
                     )
 
-        random_sleep_time = max(sample([5,10,15,30],1))
-        print (random_sleep_time)
+        random_sleep_time = max(
+            sample(
+                [5,10,15,20,30],
+                1
+                )
+                                )
+
         await asyncio.sleep((random_sleep_time))
