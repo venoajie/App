@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # built ins
@@ -8,7 +7,7 @@ import os
 # installed
 from loguru import logger as log
 import numpy as np
-import random
+from random import sample
 import tomli
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -113,13 +112,6 @@ async def future_spreads(
             if o["is_active"]==True]
                                     
         active_strategies =   [o["strategy_label"] for o in strategy_attributes_active]
-        
-        cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes_active \
-            if o["cancellable"]==True]
-        
-        relevant_tables = config_app["relevant_tables"][0]
-        
-        order_db_table= relevant_tables["orders_table"]        
                         
         settlement_periods = get_settlement_period (strategy_attributes)
         
@@ -179,9 +171,7 @@ async def future_spreads(
                                          ticker_all,
                                          data_orders,
                                          )
-                    
-                    archive_db_table: str = f"my_trades_all_{currency_lower}_json"
-                                    
+                                     
                     chart_trade = await chart_trade_in_msg(
                         message_channel,
                         data_orders,
@@ -198,7 +188,7 @@ async def future_spreads(
                             currency
                             )[0]
                         
-                        equity: float = portfolio["equity"]    * (50/100 if "BTC" in currency_upper else 1)
+                        equity: float = portfolio["equity"] 
                         
                         ticker_perpetual_instrument_name = [o for o in ticker_all \
                             if instrument_name_perpetual in o["instrument_name"]][0]                                   
@@ -231,17 +221,16 @@ async def future_spreads(
                                 
                             my_trades_currency_all_transactions: list= await executing_query_with_return (query_trades)
                                                  
-                            my_trades_currency_all: list= [] if my_trades_currency_all_transactions == 0 \
-                                else [o for o in my_trades_currency_all_transactions
-                                      if o["instrument_name"] in [o["instrument_name"] for o in instrument_attributes_futures_all]]
+                            my_trades_currency_all: list= ([] if my_trades_currency_all_transactions == 0 
+                                                           else [o for o in my_trades_currency_all_transactions
+                                                                 if o["instrument_name"] 
+                                                                 in [o["instrument_name"] for o in instrument_attributes_futures_all]])
                             
-                            orders_currency = [] if not orders_all\
-                                else [o for o in orders_all\
-                                    if currency_upper in o["instrument_name"]]
+                            orders_currency = ([] if not orders_all
+                                               else [o for o in orders_all
+                                                     if currency_upper in o["instrument_name"]])
                             
                             len_orders_all = len(orders_currency)
-
-                            #if orders_currency:
                                                             
                             position = [o for o in sub_account["positions"]]
                             #log.debug (f"position {position}")
@@ -255,11 +244,11 @@ async def future_spreads(
                                 my_trades_currency_all,
                                 instrument_name_perpetual)
                             
-                            if index_price is not None \
-                                and equity > 0 :
+                            if (index_price is not None 
+                                and equity > 0 ):
                         
-                                my_trades_currency: list= [ o for o in my_trades_currency_all \
-                                    if o["label"] is not None] 
+                                my_trades_currency: list= [ o for o in my_trades_currency_all 
+                                                           if o["label"] is not None] 
                                 
                                 ONE_PCT = 1 / 100
                                 
@@ -275,23 +264,18 @@ async def future_spreads(
                                 
                                 notional: float = compute_notional_value(index_price, equity)
                                 
-                                strategy_params= [o for o in strategy_attributes \
-                                if o["strategy_label"] == strategy][0]   
+                                strategy_params= [o for o in strategy_attributes 
+                                                  if o["strategy_label"] == strategy][0]   
                                 
-                                my_trades_currency_strategy = [o for o in my_trades_currency \
-                                    if strategy in (o["label"]) ]
+                                my_trades_currency_strategy = [o for o in my_trades_currency 
+                                                               if strategy in (o["label"]) ]
                                 
                                 orders_currency_strategy = ([] if not orders_currency  
                                                             else [o for o in orders_currency 
                                                                 if strategy in (o["label"]) ])
                                 
-                                log.info (f"orders_currency_all {len(orders_currency)}")
-                                log.info (f"orders_currency_strategy {len(orders_currency_strategy)}")
                                 log.info (f"orders_currency_strategy {(orders_currency_strategy)}")
                                 
-                                #log.info (f"orders_currency_strategy {orders_currency_strategy}")
-                                #log.critical (f"len_orders_all {len_orders_all}")
-                            
                                 if   (strategy in active_strategies
                                         and size_perpetuals_reconciled) :
                                     
@@ -305,7 +289,7 @@ async def future_spreads(
                                 
                                     max_order_currency = 2
                                     
-                                    random_instruments_name = random.sample(([o for o in instruments_name
+                                    random_instruments_name = sample(([o for o in instruments_name
                                                                                 if "-FS-" not in o and currency_upper in o]),
                                                                             max_order_currency)
                                                                         
@@ -330,10 +314,17 @@ async def future_spreads(
                                         except:
                                             instrument_name_combo = None
                                             
-                                        if  (instrument_name_combo is not None 
-                                                and currency_upper in instrument_name_combo):
+                                        if  (instrument_name_combo 
+                                             and currency_upper in instrument_name_combo):
                                             
                                             instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
+                                            
+                                            instrument_time_left = (max(
+                                                [o["expiration_timestamp"] for o in instrument_attributes_futures_all
+                                                    if o["instrument_name"] == instrument_name_future])
+                                                                    - server_time)/ONE_MINUTE  
+                                            
+                                            instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
 
                                             size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
                                                 position_without_combo,
@@ -350,21 +341,10 @@ async def future_spreads(
                                                  and ticker_future and ticker_combo):
                                                 #and not reduce_only \
                                                 
-                                                ticker_combo= ticker_combo[0]
-
-                                                ticker_future= ticker_future[0]
-                                                
-                                                instrument_time_left = (max(
-                                                    [o["expiration_timestamp"] for o in instrument_attributes_futures_all
-                                                     if o["instrument_name"] == instrument_name_future])
-                                                                        - server_time)/ONE_MINUTE  
-                                                
-                                                instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
+                                                ticker_combo, ticker_future= ticker_combo[0], ticker_future[0]
                                                                                                                 
                                                 if (instrument_time_left_exceed_threshold
                                                     and instrument_name_future in  random_instruments_name 
-                                                    and size_perpetuals_reconciled
-                                                    and size_future_reconciled
                                                     and size_future_reconciled):
                                                             
                                                     send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(

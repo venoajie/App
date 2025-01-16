@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+
+from loguru import logger as log
+
 from transaction_management.deribit.api_requests import (get_tickers,)
 from utilities.pickling import (read_data,)
 from utilities.system_tools import (
@@ -52,7 +55,6 @@ def combining_ticker_data(instruments_name):
         result.append (result_instrument)
 
     return result
-
 
 
 def update_cached_ticker(
@@ -169,69 +171,69 @@ async def update_cached_orders_(
             
             orders_all = queue_orders_all
             
-            print (f"queue_orders {queue_orders}")
-            print (f"queue_orders {not queue_orders.empty()}")
-                        
             if not queue_orders.empty():
                       
                 message= await queue_orders.get()
                 
-                print (f"message {message}")
-
-                message_channel: str = message["channel"]
+                #message_channel: str = message["channel"]
                 
-                data_orders: dict = message["data"]         
-                
-                if "user.changes.any" in message_channel:
+                data_orders: dict = message["data"]   
+                      
+                log.warning (f" user.changes.any data {data_orders}")
+                #if "user.changes.any" in message_channel:
                     
                     #print(f"data_orders {data_orders}")
+                
+                if data_orders:
                     
-                    if data_orders:
+                    orders = data_orders["orders"]
+                    
+                    trades = data_orders["trades"]
+                    
+                    if orders:
                         
-                        orders = data_orders["orders"]
-                        
-                        trades = data_orders["trades"]
-                        
-                        if orders:
+                        if trades :
                             
-                            if trades :
-                                
-                                for trade in trades:
+                            for trade in trades:
 
-                                    order_id = trade["order_id"]
+                                order_id = trade["order_id"]
+                                
+                                selected_order = [o for o in orders_all 
+                                                if order_id in o["order_id"]]
+                                
+                                if selected_order:
+                                                        
+                                    orders_all.remove(selected_order[0])
+                                
+                        if orders:
+                        
+                            log.debug (f" orders_currency_all before {len(orders_all)}")
+                            
+                            for order in orders:
+                                
+                                print(f"cached order {order}")
+                                
+                                order_state= order["order_state"]    
+                                
+                                if order_state == "cancelled" or order_state == "filled":
+                                
+                                    order_id = order["order_id"]
                                     
                                     selected_order = [o for o in orders_all 
                                                     if order_id in o["order_id"]]
+                                    
+                                    print(f"caching selected_order {selected_order}")
                                     
                                     if selected_order:
                                                             
                                         orders_all.remove(selected_order[0])
                                     
-                            if orders:
+                                else:
+                                
+                                    orders_all.append(order)
                             
-                                for order in orders:
-                                    
-                                    print(f"cached order {order}")
-                                    
-                                    order_state= order["order_state"]    
-                                    
-                                    if order_state == "cancelled" or order_state == "filled":
-                                    
-                                        order_id = order["order_id"]
-                                        
-                                        selected_order = [o for o in orders_all 
-                                                        if order_id in o["order_id"]]
-                                        
-                                        print(f"caching selected_order {selected_order}")
-                                        
-                                        if selected_order:
-                                                                
-                                            orders_all.remove(selected_order[0])
-                                        
-                                    else:
-                                    
-                                        orders_all.append(order)
-                                    
+                            log.error (f" orders_currency_all after {len(orders_all)}")                        
+                                
                         #print(f"orders_all {orders_all}")
                     await queue.put(orders_all)
                     await queue.task_done()

@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # built ins
@@ -271,8 +270,8 @@ async def hedging_spot(
                             if index_price is not None \
                                 and equity > 0 :
                         
-                                my_trades_currency: list= [ o for o in my_trades_currency_all \
-                                    if o["label"] is not None] 
+                                my_trades_currency: list= [ o for o in my_trades_currency_all 
+                                                           if o["label"] is not None] 
                                 
                                 my_trades_currency_contribute_to_hedging = [o for o in my_trades_currency 
                                                                             if (parsing_label(o["label"])["main"] ) in contribute_to_hedging_strategies ]
@@ -290,7 +289,6 @@ async def hedging_spot(
                                 
                                 notional: float = compute_notional_value(index_price, equity)
                                 
-                                
                                 if (strategy in active_strategies
                                     and size_perpetuals_reconciled):
                                     
@@ -304,7 +302,6 @@ async def hedging_spot(
                                                                 else [o for o in orders_currency 
                                                                     if strategy in (o["label"]) ])
                                     
-                                    log.info (f"orders_currency_all {len_orders_all}")
                                     log.info (f"orders_currency_strategy {len(orders_currency_strategy)}")
                                         
                                     log.warning (f"strategy {strategy}-START")                                                    
@@ -333,7 +330,12 @@ async def hedging_spot(
                                         position_without_combo,
                                         my_trades_currency_all,
                                         instrument_name)
-                                                        
+                                
+                                    instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
+                                        if o["instrument_name"] == instrument_name])- server_time)/ONE_MINUTE  
+                                    
+                                    instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
+                                                    
                                     if not size_future_reconciled:
                                         await telegram_bot_sendtext (
                                             f"size_futures_not_reconciled-{size_future_reconciled}",
@@ -345,24 +347,19 @@ async def hedging_spot(
                                         kill_process("general_tasks")
                                         
                                         break
-                                                                    
-                                    hedging = HedgingSpot(
-                                        strategy,
-                                        strategy_params,
-                                        max_position,
-                                        my_trades_currency_strategy,
-                                        market_condition,
-                                        index_price,
-                                        my_trades_currency_all,
-                                        )
-                                                                
+
                                     if size_future_reconciled:      
-                                
-                                        instrument_time_left = (max([o["expiration_timestamp"] for o in instrument_attributes_futures_all\
-                                            if o["instrument_name"] == instrument_name])- server_time)/ONE_MINUTE  
-                                        
-                                        instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
-                                                                                                
+                                                                        
+                                        hedging = HedgingSpot(
+                                            strategy,
+                                            strategy_params,
+                                            max_position,
+                                            my_trades_currency_strategy,
+                                            market_condition,
+                                            index_price,
+                                            my_trades_currency_all,
+                                            )
+                                                                
                                         #something was wrong because perpetuals were actively traded. cancell  orders
                                         if instrument_time_left_exceed_threshold\
                                             and len_orders_all < 50:
