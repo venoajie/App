@@ -38,6 +38,10 @@ async def scanning_volume():
                     data_was_in_result = [] if result == [] else [o for o in result if data in  result]
                     
                     print (f"data_was_in_result {data_was_in_result}")
+                    await telegram_bot_sendtext (
+                        data,
+                        "general_error"
+                        )
                     
                     if data_was_in_result != []:
                         await telegram_bot_sendtext (
