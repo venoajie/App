@@ -36,7 +36,6 @@ from utilities.pickling import (
     replace_data,
     read_data)
 from utilities.system_tools import (
-    kill_process,
     parse_error_message,
     provide_path_for_file,)
 from utilities.string_modification import (
@@ -256,9 +255,6 @@ async def future_spreads(
                                 my_trades_currency_all,
                                 instrument_name_perpetual)
                             
-                            if not size_perpetuals_reconciled:
-                                kill_process("general_tasks")
-                            
                             if index_price is not None \
                                 and equity > 0 :
                         
@@ -343,9 +339,6 @@ async def future_spreads(
                                                 position_without_combo,
                                                 my_trades_currency_all,
                                                 instrument_name_future)
-                                                                        
-                                            if not size_future_reconciled:
-                                                kill_process("general_tasks")
                                                                                                 
                                             ticker_combo = [o for o in ticker_all 
                                                             if instrument_name_combo in o["instrument_name"]]

@@ -257,6 +257,8 @@ async def hedging_spot(
                             
                             if not size_perpetuals_reconciled:
                                 kill_process("general_tasks")
+                                
+                                await asyncio.sleep (10)
                             
                             if index_price is not None \
                                 and equity > 0 :
