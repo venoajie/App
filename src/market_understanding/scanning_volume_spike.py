@@ -5,6 +5,7 @@ import json
 import asyncio
 import httpx
 from random import sample
+from collections import deque
 
 from messaging.telegram_bot import telegram_bot_sendtext
 
@@ -29,13 +30,22 @@ async def scanning_volume():
             response_json = json.loads(response.text)['resu']
             
             rows = [str(i).split('|') for i in response_json[:-1]]
-            
+            result = []
             if rows:
-                data = [dict(zip(headers, l)) for l in rows]
-                await telegram_bot_sendtext (
-                    data,
-                    "general_error"
-                    )
+                data_all = [dict(zip(headers, l)) for l in rows]
+                
+                for data in data_all:
+                    data_was_in_result = [] if result == [] else [o for o in result if data in  result]
+                    
+                    print (f"data_was_in_result {data_was_in_result}")
+                    
+                    if data_was_in_result != []:
+                        await telegram_bot_sendtext (
+                        data,
+                        "general_error"
+                        )
+                        result.append (data)
+                        print (f"result {result}")
 
         random_sleep_time = max(
             sample(
