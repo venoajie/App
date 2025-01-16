@@ -32,7 +32,6 @@ from utilities.pickling import (
     replace_data,
     read_data)
 from utilities.system_tools import (
-    kill_process,
     parse_error_message,
     provide_path_for_file)
 from utilities.string_modification import (
@@ -234,9 +233,6 @@ async def cancelling_orders(
                             position_without_combo,
                             my_trades_currency_all,
                             instrument_name_perpetual)
-                        
-                        if not size_perpetuals_reconciled:
-                            kill_process("general_tasks")
                         
                         if index_price is not None \
                             and equity > 0 :
