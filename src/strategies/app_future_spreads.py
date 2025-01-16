@@ -274,7 +274,7 @@ async def future_spreads(
                                                             else [o for o in orders_currency 
                                                                 if strategy in (o["label"]) ])
                                 
-                                log.info (f"orders_currency_strategy {(orders_currency_strategy)}")
+                                log.info (f"orders_currency_strategy {len (orders_currency_strategy)}")
                                 
                                 if   (strategy in active_strategies
                                         and size_perpetuals_reconciled) :

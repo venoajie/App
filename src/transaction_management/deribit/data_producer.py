@@ -134,6 +134,8 @@ class StreamAccountData(ModifyOrderDb):
 
                 for currency in currencies:
                     
+                    await self.modify_order_and_db.resupply_sub_accountdb(currency)
+                    
                     instruments = await get_instruments(currency)
 
                     my_path_instruments = provide_path_for_file("instruments", 
@@ -272,27 +274,21 @@ class StreamAccountData(ModifyOrderDb):
                                 data = message_params["data"]
                                 
                                 message_channel: str = message_params["channel"]
-                                                                
+
+                                currency: str = extract_currency_from_text(message_channel)
+                                                  
                                 if "user.changes.any" in message_channel:
                                     
-                                    log.warning (f" user.changes.any data {data}")
-                                    
-                                    log.debug (f" orders_currency_all before {len(orders_all)}")
-
                                     await update_cached_orders(
                                         orders_all,
                                         data)
-
-                                    log.error (f" orders_currency_all after {len(orders_all)}")
-                                
-                                currency: str = extract_currency_from_text(message_channel)
-                                
-                                currency_lower: str = currency.lower()
-                                                                
-                                result = dict(data= data, 
-                                              channel= message_channel,
-                                              orders_all= orders_all,
-                                              currency= currency_lower)
+                                                
+                                result = dict(
+                                    data= data, 
+                                    channel= message_channel,
+                                    orders_all= orders_all,
+                                    currency= currency.lower()
+                                    )
                              
                                 #queue.put(result)
                                 try:
