@@ -256,9 +256,17 @@ async def hedging_spot(
                                 instrument_name_perpetual)
                             
                             if not size_perpetuals_reconciled:
+                                
                                 kill_process("general_tasks")
                                 
-                                await asyncio.sleep (10)
+                                await telegram_bot_sendtext (
+                                    f"size_perpetuals_not_reconciled-{size_perpetuals_reconciled}",
+                                    "general_error"
+                                    )
+                                
+                                not_order = False
+                                
+                                break
                             
                             if index_price is not None \
                                 and equity > 0 :
@@ -327,8 +335,17 @@ async def hedging_spot(
                                         instrument_name)
                                                         
                                     if not size_future_reconciled:
+                                        await telegram_bot_sendtext (
+                                            f"size_futures_not_reconciled-{size_future_reconciled}",
+                                            "general_error"
+                                    )
+                                
+                                        not_order = False
+                                        
                                         kill_process("general_tasks")
-                                                                        
+                                        
+                                        break
+                                                                    
                                     hedging = HedgingSpot(
                                         strategy,
                                         strategy_params,
