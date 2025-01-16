@@ -4,7 +4,7 @@ import time
 import json
 import asyncio
 import httpx
-import random
+from random import sample
 
 from messaging.telegram_bot import telegram_bot_sendtext
 
@@ -35,6 +35,6 @@ async def scanning_volume():
                     "general_error"
                     )
 
-        random_sleep_time = random.sample([5,10,15,30],1)
+        random_sleep_time = sample([5,10,15,30],1)
         print (random_sleep_time)
-        await asyncio.sleep(random.sample(random_sleep_time))
+        await asyncio.sleep((random_sleep_time))
