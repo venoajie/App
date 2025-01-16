@@ -35,6 +35,6 @@ async def scanning_volume():
                     "general_error"
                     )
 
-        random_sleep_time = sample([5,10,15,30],1)
+        random_sleep_time = max(sample([5,10,15,30],1))
         print (random_sleep_time)
         await asyncio.sleep((random_sleep_time))
