@@ -1143,6 +1143,7 @@ class ComboAuto (BasicStrategy):
                         params.update({"entry_price": bid_price_selected_transaction})
         
             if ("PERPETUAL" not in instrument_name_transaction
+                and ticker_selected_transaction
                 and closing_size_ok):
             
                 bid_price_selected_transaction = ticker_selected_transaction ["best_bid_price"]
@@ -1248,7 +1249,7 @@ class ComboAuto (BasicStrategy):
             counter_side
             )
         
-        if new_transaction_will_reduce_delta and  reduce_only:
+        if (new_transaction_will_reduce_delta):
 
             instrument_name_perpetual = ticker_perpetual["instrument_name"]
         
@@ -1295,8 +1296,8 @@ class ComboAuto (BasicStrategy):
                 instrument_name_future
                 ) 
                             
-            if "PERPETUAL" not in instrument_name_transaction\
-                and ticker_selected_transaction:
+            if ("PERPETUAL" not in instrument_name_transaction
+                and ticker_selected_transaction):
                 
                 sum_order_under_closed_label = sum_order_under_closed_label_int (
                     orders_instrument_transaction_closed,

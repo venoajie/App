@@ -482,6 +482,9 @@ class ModifyOrderDb(SendApiRequest):
             trades_from_exchange_without_futures_combo = [o for o in trades_from_exchange \
                 if f"-FS-" not in o["instrument_name"]]
             
+            await telegram_bot_sendtext (f"size_futures_not_reconciled-{instrument_name}",
+                                            "general_error"
+                                    )
             for trade in trades_from_exchange_without_futures_combo:
                 
                 if not my_trades_instrument_name_archive:

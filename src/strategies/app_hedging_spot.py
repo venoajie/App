@@ -256,13 +256,6 @@ async def hedging_spot(
                             
                             if not size_perpetuals_reconciled:
                                 
-                                kill_process("general_tasks")
-                                
-                                await telegram_bot_sendtext (
-                                    f"size_perpetuals_not_reconciled-{size_perpetuals_reconciled}",
-                                    "general_error"
-                                    )
-                                
                                 not_order = False
                                 
                                 break
@@ -337,11 +330,7 @@ async def hedging_spot(
                                     instrument_time_left_exceed_threshold = instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
                                                     
                                     if not size_future_reconciled:
-                                        await telegram_bot_sendtext (
-                                            f"size_futures_not_reconciled-{size_future_reconciled}",
-                                            "general_error"
-                                    )
-                                
+                                        
                                         not_order = False
                                         
                                         kill_process("general_tasks")
