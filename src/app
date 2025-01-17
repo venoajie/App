@@ -151,7 +151,6 @@ async def main():
         
         stream = StreamAccountData(sub_account_id)
                 
-        
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
         
         await asyncio.sleep(0.0005)
@@ -161,14 +160,17 @@ async def main():
             
             hedging_spot(
                 sub_account_id,
+                config_app,
                 queue),
         
             future_spreads(
                 sub_account_id,
+                config_app,
                 queue),
             
             cancelling_orders(
                 sub_account_id,
+                config_app,
                 queue),
             
             avoiding_double_ids(

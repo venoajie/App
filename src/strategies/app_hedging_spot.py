@@ -2,12 +2,10 @@
 
 # built ins
 import asyncio
-import os
 
 # installed
 from loguru import logger as log
 import numpy as np
-import tomli
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -42,21 +40,6 @@ from utilities.string_modification import (
     remove_double_brackets_in_list,
     remove_redundant_elements)
 
-
-def get_config(file_name: str) -> list:
-    """ """
-    
-    config_path = provide_path_for_file (file_name)
-    
-    try:
-        if os.path.exists(config_path):
-            with open(config_path, "rb") as handle:
-                read= tomli.load(handle)
-                return read
-    except:
-        return []
-
-
 async def update_db_pkl(
     path: str, 
     data_orders: dict,
@@ -78,6 +61,7 @@ async def update_db_pkl(
                   
 async def hedging_spot(
     sub_account_id,
+    config_app: list,
     queue,
     ):
     
@@ -86,14 +70,9 @@ async def hedging_spot(
 
     strategy = "hedgingSpot"
     log.critical (f"starting {strategy}")
-    # registering strategy config file    
-    file_toml = "config_strategies.toml"
-
+    
     try:
             
-        # parsing config file
-        config_app = get_config(file_toml)
-       
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # get tradable strategies
