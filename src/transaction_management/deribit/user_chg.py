@@ -4,10 +4,9 @@
 # built ins
 import asyncio
 from multiprocessing.queues import Queue
-import os
 
 # installed
-import tomli
+from loguru import logger as log
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -17,43 +16,21 @@ from transaction_management.deribit.api_requests import (
 from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,)
 from transaction_management.deribit.orders_management import (saving_orders,)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,)
+from utilities.system_tools import (parse_error_message)
 
-
-def get_config(file_name: str) -> list:
-    """ """
     
-    config_path = provide_path_for_file (file_name)
-    
-    try:
-        if os.path.exists(config_path):
-            with open(config_path, "rb") as handle:
-                read= tomli.load(handle)
-                return read
-    except:
-        return []
-
-        
 async def saving_and_relabelling_orders(
     sub_account_id,
+    config_app: list,
     queue: Queue
     ):
     
     """
     """
     
-    print ("saving_and_relabelling_orders START")
+    log.critical ("saving_and_relabelling_orders START")
     
-    # registering strategy config file    
-    file_toml = "config_strategies.toml"
-
     try:
-            
-        # parsing config file
-        config_app = get_config(file_toml)
-       
         private_data: str = SendApiRequest (sub_account_id)
         
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)

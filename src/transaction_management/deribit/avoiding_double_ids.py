@@ -3,52 +3,29 @@
 
 # built ins
 import asyncio
-import os
 
 # installed
 from loguru import logger as log
-import tomli
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import (telegram_bot_sendtext,)
 from transaction_management.deribit.managing_deribit import (ModifyOrderDb,)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file)
+from utilities.system_tools import (parse_error_message,)
 from utilities.string_modification import (remove_redundant_elements)
 
 
-def get_config(file_name: str) -> list:
-    """ """
-    
-    config_path = provide_path_for_file (file_name)
-    
-    try:
-        if os.path.exists(config_path):
-            with open(config_path, "rb") as handle:
-                read= tomli.load(handle)
-                return read
-    except:
-        return []
-
-                  
 async def avoiding_double_ids(
     sub_account_id,
+    config_app: list,
     queue,
     ):
     
     """
     """
     log.critical ("Avoiding double ids START")
-    # registering strategy config file    
-    file_toml = "config_strategies.toml"
-
+    
     try:
-            
-        # parsing config file
-        config_app = get_config(file_toml)
-        
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
         
         strategy_attributes = config_app["strategies"]
@@ -57,14 +34,11 @@ async def avoiding_double_ids(
             if o["is_active"]==True]
                                     
         active_strategies =   [o["strategy_label"] for o in strategy_attributes_active]
-        
-        
+                
         relevant_tables = config_app["relevant_tables"][0]
-        
         
         order_db_table= relevant_tables["orders_table"]        
 
-        
         while True:
         
             message: str = await queue.get()
@@ -109,7 +83,6 @@ async def avoiding_double_ids(
                                     order_db_table,
                                     order["order_id"]
                                     )
-                                
                                 
     except Exception as error:
         

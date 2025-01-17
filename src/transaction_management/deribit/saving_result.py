@@ -41,10 +41,7 @@ async def update_db_pkl(
             )
 
                   
-async def saving_ws_data(
-    sub_account_id,
-    queue
-    ):
+async def saving_ws_data(queue):
     
     """
     """

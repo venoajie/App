@@ -138,11 +138,13 @@ async def main():
     # registering strategy config file    
     file_toml = "config_strategies.toml"
     
-    # parsing config file
-    config_app = get_config(file_toml)
-
     try:
+    
+        # parsing config file
+        config_app = get_config(file_toml)
+
         idle_time = 1
+
         queue = asyncio.Queue(maxsize=10)
         queue_cached_orders = asyncio.Queue()
         queue_orders = asyncio.Queue()
@@ -171,19 +173,20 @@ async def main():
             
             avoiding_double_ids(
                 sub_account_id,
+                config_app,
                 queue),
             
             saving_and_relabelling_orders(
                 sub_account_id,
+                config_app,
                 queue),
             
             relabelling_trades(
                 sub_account_id,
+                config_app,
                 queue),
             
-            saving_ws_data(
-                sub_account_id,
-                queue),
+            saving_ws_data(queue),
             
             reconciling_size(
                 sub_account_id,

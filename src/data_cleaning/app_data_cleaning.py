@@ -120,6 +120,9 @@ async def reconciling_size(
 
                 
     try:
+        
+        log.critical (f"Data cleaning")
+        
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
         
@@ -274,9 +277,7 @@ async def reconciling_size(
                         instrument_name_has_delivered = is_instrument_name_has_delivered(
                             my_trade_instrument,
                             instrument_attributes_futures_all,)
-                        
-                        log.debug (f"instrument_name_has_delivered {instrument_name_has_delivered}")
-                        
+                                                
                         if instrument_name_has_delivered:
                             
                             await updating_delivered_instruments(
@@ -285,8 +286,8 @@ async def reconciling_size(
              
                             await update_instruments_per_currency(currency)
                             
-                            log.debug (f" inactive instrument_name {my_trade_instrument}")
-                            
+                            log.debug (f"instrument_name_has_delivered {my_trade_instrument} {instrument_name_has_delivered}")
+
                             query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log_type"
                             from_transaction_log = await executing_query_with_return (query_log)  
                             
