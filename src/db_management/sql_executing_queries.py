@@ -20,7 +20,7 @@ def catch_error(error, idle: int = None) -> list:
 
 
 async def create_dataBase_sqlite(
-    db_name: str = 'databases/trading', ext: str = 'sqlite3'
+    db_name: str = "databases/trading", ext: str = "sqlite3"
 ) -> None:
     """
     https://stackoverflow.com/questions/71729956/aiosqlite-result-object-has-no-attribue-execute
@@ -36,7 +36,7 @@ async def create_dataBase_sqlite(
         await conn.close()
 
     except Exception as error:
-        print(f'failed create db {error}')
+        print(f"failed create db {error}")
 
 
 def texting_table_json(table) -> str:
@@ -48,7 +48,7 @@ def texting_table_json(table) -> str:
                     (id INTEGER PRIMARY KEY, data TEXT)
             """
 
-    if 'ohlc1' in table:
+    if "ohlc1" in table:
         query = f"""
                         CREATE 
                         TABLE IF NOT EXISTS 
@@ -61,10 +61,10 @@ def texting_table_json(table) -> str:
 
 def texting_virtual_table(table: str, item: str, item_data_type: str) -> str:
     """ """
-    item2 = 'last_update_timestamp' if 'order' in table else item
+    item2 = "last_update_timestamp" if "order" in table else item
 
-    if 'side' in item:
-        item2 = 'direction'
+    if "side" in item:
+        item2 = "direction"
 
     query = f""" 
             ALTER 
@@ -99,7 +99,7 @@ async def create_tables_json_sqlite(table, type: str = None):
     https://www.beekeeperstudio.io/blog/sqlite-json-with-text
     """
     async with aiosqlite.connect(
-        'databases/trading.sqlite3', isolation_level=None
+        "databases/trading.sqlite3", isolation_level=None
     ) as cur:
 
         try:
@@ -109,56 +109,48 @@ async def create_tables_json_sqlite(table, type: str = None):
 
             create_table = texting_table_json(table)
 
-            await cur.execute(f'{create_table}')
+            await cur.execute(f"{create_table}")
 
-            create_table_alter_instrument_name_strategy = (
-                texting_virtual_table(table, 'instrument_name', 'TEXT')
+            create_table_alter_instrument_name_strategy = texting_virtual_table(
+                table, "instrument_name", "TEXT"
             )
 
             create_table_alter_label_strategy = texting_virtual_table(
-                table, 'label', 'TEXT'
+                table, "label", "TEXT"
             )
 
             create_table_alter_label_strategy_order = texting_virtual_table(
-                table, 'timestamp', 'INTEGER'
+                table, "timestamp", "INTEGER"
             )
 
             create_table_alter_order_id = texting_virtual_table(
-                table, 'order_id', 'TEXT'
+                table, "order_id", "TEXT"
             )
 
             create_table_alter_has_closed_label = texting_virtual_table(
-                table, 'has_closed_label', 'INTEGER'
+                table, "has_closed_label", "INTEGER"
             )
 
             create_table_alter_trade_id = texting_virtual_table(
-                table, 'trade_id', 'TEXT'
+                table, "trade_id", "TEXT"
             )
 
             create_table_alter_timestamp = texting_virtual_table(
-                table, 'timestamp', 'INTEGER'
+                table, "timestamp", "INTEGER"
             )
 
-            create_table_alter_price = texting_virtual_table(
-                table, 'price', 'REAL'
-            )
+            create_table_alter_price = texting_virtual_table(table, "price", "REAL")
 
             create_table_alter_position = texting_virtual_table(
-                table, 'position', 'integer'
+                table, "position", "integer"
             )
-            create_table_alter_type = texting_virtual_table(
-                table, 'type', 'TEXT'
-            )
+            create_table_alter_type = texting_virtual_table(table, "type", "TEXT")
 
-            create_table_alter_side = texting_virtual_table(
-                table, 'side', 'TEXT'
-            )
+            create_table_alter_side = texting_virtual_table(table, "side", "TEXT")
 
-            create_table_alter_side = texting_virtual_table(
-                table, 'side', 'TEXT'
-            )
+            create_table_alter_side = texting_virtual_table(table, "side", "TEXT")
 
-            if 'trades' in table or 'orders' in table:
+            if "trades" in table or "orders" in table:
 
                 create_table_alter_sum_pos = f""" 
                                                 ALTER 
@@ -181,95 +173,77 @@ async def create_tables_json_sqlite(table, type: str = None):
                                                 """
 
                 print(
-                    f'create virtual columns {create_table_alter_instrument_name_strategy}'
+                    f"create virtual columns {create_table_alter_instrument_name_strategy}"
                 )
-                await cur.execute(
-                    f'{create_table_alter_instrument_name_strategy}'
-                )
+                await cur.execute(f"{create_table_alter_instrument_name_strategy}")
 
-                print(
-                    f'create virtual columns {create_table_alter_label_strategy}'
-                )
-                await cur.execute(f'{create_table_alter_label_strategy}')
+                print(f"create virtual columns {create_table_alter_label_strategy}")
+                await cur.execute(f"{create_table_alter_label_strategy}")
 
-                if 'orders_all' in table:
+                if "orders_all" in table:
 
-                    await cur.execute(
-                        f'{create_table_alter_label_strategy_order}'
-                    )
+                    await cur.execute(f"{create_table_alter_label_strategy_order}")
                     print(
-                        f'create virtual columns {create_table_alter_label_strategy_order}'
+                        f"create virtual columns {create_table_alter_label_strategy_order}"
                     )
 
-                if 'my_trades' in table:
+                if "my_trades" in table:
 
-                    await cur.execute(f'{create_table_alter_trade_id}')
-                    print(
-                        f'create virtual columns {create_table_alter_trade_id}'
-                    )
+                    await cur.execute(f"{create_table_alter_trade_id}")
+                    print(f"create virtual columns {create_table_alter_trade_id}")
 
-                    await cur.execute(f'{create_table_alter_timestamp}')
-                    print(
-                        f'create virtual columns {create_table_alter_timestamp}'
-                    )
+                    await cur.execute(f"{create_table_alter_timestamp}")
+                    print(f"create virtual columns {create_table_alter_timestamp}")
 
-                    if 'closed' not in table:
-                        await cur.execute(
-                            f'{create_table_alter_has_closed_label}'
-                        )
+                    if "closed" not in table:
+                        await cur.execute(f"{create_table_alter_has_closed_label}")
                         print(
-                            f'create virtual columns {create_table_alter_has_closed_label}'
+                            f"create virtual columns {create_table_alter_has_closed_label}"
                         )
 
-                if 'transaction_log_json' in table:
+                if "transaction_log_json" in table:
 
-                    await cur.execute(f'{create_table_alter_position}')
-                    print(
-                        f'create virtual columns {create_table_alter_position}'
-                    )
+                    await cur.execute(f"{create_table_alter_position}")
+                    print(f"create virtual columns {create_table_alter_position}")
 
-                    await cur.execute(f'{create_table_alter_type}')
-                    print(f'create virtual columns {create_table_alter_type}')
-                print(f'create virtual columns {create_table_alter_order_id}')
-                await cur.execute(f'{create_table_alter_order_id}')
+                    await cur.execute(f"{create_table_alter_type}")
+                    print(f"create virtual columns {create_table_alter_type}")
+                print(f"create virtual columns {create_table_alter_order_id}")
+                await cur.execute(f"{create_table_alter_order_id}")
 
-                print(f'create virtual columns {create_table_alter_sum_pos}')
-                await cur.execute(f'{create_table_alter_sum_pos}')
+                print(f"create virtual columns {create_table_alter_sum_pos}")
+                await cur.execute(f"{create_table_alter_sum_pos}")
 
-                print(f'create virtual columns {create_table_alter_price}')
-                await cur.execute(f'{create_table_alter_price}')
+                print(f"create virtual columns {create_table_alter_price}")
+                await cur.execute(f"{create_table_alter_price}")
 
-                print(f'create virtual columns {create_table_alter_side}')
-                await cur.execute(f'{create_table_alter_side}')
+                print(f"create virtual columns {create_table_alter_side}")
+                await cur.execute(f"{create_table_alter_side}")
 
-                create_index = (
-                    f"""CREATE INDEX order_id ON  {table} (order_id);"""
-                )
+                create_index = f"""CREATE INDEX order_id ON  {table} (order_id);"""
 
-                if 'my_trades' in table:
+                if "my_trades" in table:
 
-                    create_index = (
-                        f"""CREATE INDEX trade_id ON  {table} (trade_id);"""
-                    )
-                    print(f'create_index trd_id {create_index}')
+                    create_index = f"""CREATE INDEX trade_id ON  {table} (trade_id);"""
+                    print(f"create_index trd_id {create_index}")
 
                 else:
-                    await cur.execute(f'{create_index}')
+                    await cur.execute(f"{create_index}")
 
-            if 'ohlc' in table or 'market_analytics' in table:
+            if "ohlc" in table or "market_analytics" in table:
 
                 create_table_alter_tick = texting_virtual_table(
-                    table, 'tick', 'INTEGER'
+                    table, "tick", "INTEGER"
                 )
 
                 create_index = f"""CREATE INDEX tick ON  {table} (tick);"""
-                await cur.execute(f'{create_table_alter_tick}')
-                await cur.execute(f'{create_index}')
+                await cur.execute(f"{create_table_alter_tick}")
+                await cur.execute(f"{create_index}")
 
         except Exception as error:
-            print(f'create_tables {error}')
+            print(f"create_tables {error}")
             await telegram_bot_sendtext(
-                'sqlite operation-failed_create_table', 'failed_order'
+                "sqlite operation-failed_create_table", "failed_order"
             )
 
 
@@ -277,7 +251,7 @@ async def executing_query_with_return(
     query_table,
     filter: str = None,
     filter_value=None,
-    database: str = 'databases/trading.sqlite3',
+    database: str = "databases/trading.sqlite3",
 ) -> list:
     """
     Reference
@@ -287,7 +261,7 @@ async def executing_query_with_return(
 
     """
 
-    filter_val = (f'{filter_value}',)
+    filter_val = (f"{filter_value}",)
 
     combine_result = []
 
@@ -309,17 +283,11 @@ async def executing_query_with_return(
             combine_result.append(dict(zip(headers, i)))
 
     except Exception as error:
-        print(f'querying_table {error}')
-        await telegram_bot_sendtext('sqlite operation', 'failed_order')
-        await telegram_bot_sendtext(
-            f'sqlite operation-{query_table}', 'failed_order'
-        )
+        print(f"querying_table {error}")
+        await telegram_bot_sendtext("sqlite operation", "failed_order")
+        await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
-    return (
-        0
-        if (combine_result == [] or combine_result is None)
-        else (combine_result)
-    )
+    return 0 if (combine_result == [] or combine_result is None) else (combine_result)
 
 
 async def querying_tables_item_data(table_name: str):
@@ -328,13 +296,9 @@ async def querying_tables_item_data(table_name: str):
 
     # Read sqlite query results into a pandas DataFrame
 
-    query_table = f'SELECT data  FROM {table_name}'
+    query_table = f"SELECT data  FROM {table_name}"
 
     # fetch all
     result = await executing_query_with_return(query_table)
 
-    return (
-        []
-        if result == []
-        else [ast.literal_eval(str(i['data'])) for i in result]
-    )
+    return [] if result == [] else [ast.literal_eval(str(i["data"])) for i in result]

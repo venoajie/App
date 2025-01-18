@@ -18,9 +18,7 @@ from utilities.string_modification import transform_nested_dict_to_list
 from utilities.time_modification import convert_time_to_unix
 
 
-async def telegram_bot_sendtext(
-    bot_message, purpose: str = 'general_error'
-) -> None:
+async def telegram_bot_sendtext(bot_message, purpose: str = "general_error") -> None:
     import deribit_get
 
     return await deribit_get.telegram_bot_sendtext(bot_message, purpose)
@@ -38,34 +36,34 @@ async def insert_ohlc(
     now_utc = datetime.now()
     now_unix = convert_time_to_unix(now_utc)
 
-    if resolution == '1D':
+    if resolution == "1D":
         resolution2 = 60 * 24
         start_timestamp = now_unix - (60000 * resolution2) * qty_candles
-        ohlc_endPoint = f' https://deribit.com/api/v2/public/get_tradingview_chart_data?end_timestamp={now_unix}&instrument_name={instrument_name}&resolution={resolution}&start_timestamp={start_timestamp}'
+        ohlc_endPoint = f" https://deribit.com/api/v2/public/get_tradingview_chart_data?end_timestamp={now_unix}&instrument_name={instrument_name}&resolution={resolution}&start_timestamp={start_timestamp}"
 
     else:
         start_timestamp = now_unix - (60000 * resolution) * qty_candles
-        ohlc_endPoint = f' https://deribit.com/api/v2/public/get_tradingview_chart_data?end_timestamp={now_unix}&instrument_name={instrument_name}&resolution={resolution}&start_timestamp={start_timestamp}'
+        ohlc_endPoint = f" https://deribit.com/api/v2/public/get_tradingview_chart_data?end_timestamp={now_unix}&instrument_name={instrument_name}&resolution={resolution}&start_timestamp={start_timestamp}"
 
     try:
 
         log.warning(ohlc_endPoint)
         # log.warning (requests.get(ohlc_endPoint).json())
-        ohlc_request = requests.get(ohlc_endPoint).json()['result']
+        ohlc_request = requests.get(ohlc_endPoint).json()["result"]
 
         result = transform_nested_dict_to_list(ohlc_request)
 
-        table = f'ohlc{resolution}_{currency.lower()}_perp_json'
+        table = f"ohlc{resolution}_{currency.lower()}_perp_json"
 
         for data in result:
-            log.debug(f'insert tables {table}')
+            log.debug(f"insert tables {table}")
             await sqlite_management.insert_tables(table, data)
 
     except Exception as error:
         system_tools.catch_error_message(
             error,
             10,
-            'WebSocket connection - failed to get ohlc',
+            "WebSocket connection - failed to get ohlc",
         )
 
 
@@ -77,13 +75,11 @@ async def main():
 
         for currency in currencies:
 
-            instrument_name = f'{currency.upper()}-PERPETUAL'
+            instrument_name = f"{currency.upper()}-PERPETUAL"
 
-            log.critical(
-                f'instrument_name {instrument_name} currency {currency}'
-            )
+            log.critical(f"instrument_name {instrument_name} currency {currency}")
 
-            resolutions = ['4H', 240]  # [60, 30,5,15,1,"1D",3]
+            resolutions = ["4H", 240]  # [60, 30,5,15,1,"1D",3]
 
             qty_candles = 6000
 
@@ -93,11 +89,11 @@ async def main():
 
     except Exception as error:
         system_tools.catch_error_message(
-            error, 10, 'fetch and save MARKET data from deribit'
+            error, 10, "fetch and save MARKET data from deribit"
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         asyncio.get_event_loop().run_until_complete(main())
 
@@ -106,5 +102,5 @@ if __name__ == '__main__':
 
     except Exception as error:
         system_tools.catch_error_message(
-            error, 10, 'fetch and save MARKET data from deribit'
+            error, 10, "fetch and save MARKET data from deribit"
         )

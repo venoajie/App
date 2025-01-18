@@ -8,7 +8,7 @@ Provide table manipulation queries:
 """
 
 
-def create_db(db_name: str = 'databases/trading', ext: str = 'sqlite3') -> str:
+def create_db(db_name: str = "databases/trading", ext: str = "sqlite3") -> str:
     """
     db_name: folder location + file name
     """
@@ -28,7 +28,7 @@ def create_table_json(table) -> str:
             """
 
     # 1 minute time frame, + open interest
-    if 'ohlc1_' in table:
+    if "ohlc1_" in table:
         query = f"""
                         CREATE 
                         TABLE IF NOT EXISTS 

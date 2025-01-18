@@ -25,7 +25,7 @@ def get_config(file_name: str) -> list:
 
     try:
         if os.path.exists(config_path):
-            with open(config_path, 'rb') as handle:
+            with open(config_path, "rb") as handle:
                 read = tomli.load(handle)
                 return read
     except:
@@ -40,23 +40,23 @@ async def processing_orders(
 
     try:
 
-        if order_analysis_result['order_allowed']:
+        if order_analysis_result["order_allowed"]:
 
-            log.error(f'send_order {order_analysis_result}')
+            log.error(f"send_order {order_analysis_result}")
 
             # registering strategy config file
-            file_toml: str = 'config_strategies.toml'
+            file_toml: str = "config_strategies.toml"
 
             # parsing config file
             config_app = get_config(file_toml)
 
-            strategy_attributes = config_app['strategies']
+            strategy_attributes = config_app["strategies"]
 
             # get strategies that have not short/long attributes in the label
             non_checked_strategies = [
-                o['strategy_label']
+                o["strategy_label"]
                 for o in strategy_attributes
-                if o['non_checked_for_size_label_consistency'] == True
+                if o["non_checked_for_size_label_consistency"] == True
             ]
 
             result_order = await modify_order_and_db.if_order_is_true(
@@ -66,32 +66,28 @@ async def processing_orders(
 
             if result_order:
 
-                log.error(f'result_order {result_order}')
+                log.error(f"result_order {result_order}")
 
                 try:
-                    data_orders = result_order['result']
+                    data_orders = result_order["result"]
 
                     try:
-                        instrument_name = data_orders['order'][
-                            'instrument_name'
-                        ]
+                        instrument_name = data_orders["order"]["instrument_name"]
 
                     except:
-                        instrument_name = data_orders['trades'][
-                            'instrument_name'
-                        ]
+                        instrument_name = data_orders["trades"]["instrument_name"]
 
                     currency = extract_currency_from_text(instrument_name)
 
                     transaction_log_trading_table = (
-                        f'transaction_log_{currency.lower()}_json'
+                        f"transaction_log_{currency.lower()}_json"
                     )
 
-                    archive_db_table = f'my_trades_all_{currency.lower()}_json'
+                    archive_db_table = f"my_trades_all_{currency.lower()}_json"
 
-                    relevant_tables = config_app['relevant_tables'][0]
+                    relevant_tables = config_app["relevant_tables"][0]
 
-                    order_db_table = relevant_tables['orders_table']
+                    order_db_table = relevant_tables["orders_table"]
 
                     await modify_order_and_db.update_user_changes_non_ws(
                         non_checked_strategies,
@@ -108,12 +104,10 @@ async def processing_orders(
                 except Exception as error:
                     pass
 
-                log.warning('processing order done')
+                log.warning("processing order done")
 
     except Exception as error:
 
-        parse_error_message(f'procesing orders {error}')
+        parse_error_message(f"procesing orders {error}")
 
-        await telegram_bot_sendtext(
-            f'processing order - {error}', 'general_error'
-        )
+        await telegram_bot_sendtext(f"processing order - {error}", "general_error")

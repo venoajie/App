@@ -41,15 +41,13 @@ class Read_Configuration:
             # if section is not provided
             else:
                 raise Exception(
-                    'Section {0} not found in the {1} file'.format(
-                        section, filename
-                    )
+                    "Section {0} not found in the {1} file".format(section, filename)
                 )
 
         return parameters
 
 
-def main_dotenv(header: str = 'None', filename: str = '.env') -> dict:
+def main_dotenv(header: str = "None", filename: str = ".env") -> dict:
     """
     https://www.python-engineer.com/posts/run-python-github-actions/
     """
@@ -74,7 +72,7 @@ def main_dotenv(header: str = 'None', filename: str = '.env') -> dict:
 
         from dotenv import load_dotenv
 
-        dotenv_path = join(dirname(__file__), '.env')
+        dotenv_path = join(dirname(__file__), ".env")
         load_dotenv(dotenv_path)
 
         # github env
@@ -84,12 +82,12 @@ def main_dotenv(header: str = 'None', filename: str = '.env') -> dict:
     return credentials
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
-        test = main_dotenv('telegram-failed_order')
+        test = main_dotenv("telegram-failed_order")
         print(test)
 
-        test = main_dotenv('deribit-147691')
+        test = main_dotenv("deribit-147691")
         print(test)
 
     except KeyboardInterrupt:

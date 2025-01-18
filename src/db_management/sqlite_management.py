@@ -19,15 +19,13 @@ def catch_error(error, idle: int = None) -> list:
     system_tools.catch_error_message(error, idle)
 
 
-async def telegram_bot_sendtext(
-    bot_message, purpose: str = 'general_error'
-) -> None:
+async def telegram_bot_sendtext(bot_message, purpose: str = "general_error") -> None:
 
     return await telegram_bot(bot_message, purpose)
 
 
 async def create_dataBase_sqlite(
-    db_name: str = 'databases/trading.sqlite3',
+    db_name: str = "databases/trading.sqlite3",
 ) -> None:
     """
     https://stackoverflow.com/questions/71729956/aiosqlite-result-object-has-no-attribue-execute
@@ -44,7 +42,7 @@ async def create_dataBase_sqlite(
 
 
 @contextmanager
-async def db_ops(db_name: str = 'databases/trading.sqlite3'):
+async def db_ops(db_name: str = "databases/trading.sqlite3"):
     """
     # prepare sqlite initial connection + close
             Return and rtype: None
@@ -60,8 +58,8 @@ async def db_ops(db_name: str = 'databases/trading.sqlite3'):
 
     except Exception as e:
 
-        await telegram_bot_sendtext('sqlite operation', 'failed_order')
-        await telegram_bot_sendtext(str(e), 'failed_order')
+        await telegram_bot_sendtext("sqlite operation", "failed_order")
+        await telegram_bot_sendtext(str(e), "failed_order")
         log.critical(e)
         await conn.rollback()
         raise e
@@ -80,12 +78,12 @@ async def insert_tables(table_name: str, params: list | dict | str):
     try:
 
         async with aiosqlite.connect(
-            'databases/trading.sqlite3', isolation_level=None
+            "databases/trading.sqlite3", isolation_level=None
         ) as db:
 
-            await db.execute('pragma journal_mode=wal;')
+            await db.execute("pragma journal_mode=wal;")
 
-            if 'json' in table_name:
+            if "json" in table_name:
 
                 # input was in list format. Insert them to db one by one
                 if isinstance(params, list):
@@ -103,15 +101,15 @@ async def insert_tables(table_name: str, params: list | dict | str):
                     await db.execute(insert_table_json)
 
     except Exception as error:
-        log.critical(f'insert_tables {table_name} {error}')
+        log.critical(f"insert_tables {table_name} {error}")
         await telegram_bot_sendtext(
-            f'sqlite operation insert_tables, failed_order  {table_name} {error} '
+            f"sqlite operation insert_tables, failed_order  {table_name} {error} "
         )
 
 
 async def querying_table(
-    table: str = 'mytrades',
-    database: str = 'databases/trading.sqlite3',
+    table: str = "mytrades",
+    database: str = "databases/trading.sqlite3",
     filter: str = None,
     operator=None,
     filter_value=None,
@@ -125,24 +123,22 @@ async def querying_table(
 
     NONE_DATA: None = [0, None, []]
 
-    query_table = f'SELECT  * FROM {table} WHERE  {filter} {operator}?'
+    query_table = f"SELECT  * FROM {table} WHERE  {filter} {operator}?"
 
-    filter_val = (f'{filter_value}',)
+    filter_val = (f"{filter_value}",)
 
     if filter == None:
-        query_table = f'SELECT  * FROM {table}'
+        query_table = f"SELECT  * FROM {table}"
 
-    if 'market_analytics' in table and 'last' in table:
-        query_table = (
-            f'SELECT  * FROM market_analytics_json ORDER BY id DESC LIMIT 1'
-        )
+    if "market_analytics" in table and "last" in table:
+        query_table = f"SELECT  * FROM market_analytics_json ORDER BY id DESC LIMIT 1"
 
     combine_result = []
 
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
-            await db.execute('pragma journal_mode=wal;')
+            await db.execute("pragma journal_mode=wal;")
 
             db = (
                 db.execute(query_table)
@@ -160,56 +156,50 @@ async def querying_table(
             combine_result.append(dict(zip(headers, i)))
 
     except Exception as error:
-        log.critical(f'querying_table  {table} {error}')
-        await telegram_bot_sendtext(
-            f'sqlite operation-{query_table}', 'failed_order'
-        )
+        log.critical(f"querying_table  {table} {error}")
+        await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
     return dict(
         all=[] if combine_result in NONE_DATA else (combine_result),
         list_data_only=(
             []
             if combine_result in NONE_DATA
-            else str_mod.parsing_sqlite_json_output(
-                [o['data'] for o in combine_result]
-            )
+            else str_mod.parsing_sqlite_json_output([o["data"] for o in combine_result])
         ),
     )
 
 
 async def deleting_row(
-    table: str = 'mytrades',
-    database: str = 'databases/trading.sqlite3',
+    table: str = "mytrades",
+    database: str = "databases/trading.sqlite3",
     filter: str = None,
     operator=None,
     filter_value=None,
 ) -> list:
     """ """
 
-    query_table = f'DELETE  FROM {table} WHERE  {filter} {operator}?'
-    log.debug(f'deleting_row {query_table}')
+    query_table = f"DELETE  FROM {table} WHERE  {filter} {operator}?"
+    log.debug(f"deleting_row {query_table}")
 
-    filter_val = (f'{filter_value}',)
+    filter_val = (f"{filter_value}",)
 
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
-            await db.execute('pragma journal_mode=wal;')
+            await db.execute("pragma journal_mode=wal;")
 
             await db.execute(query_table, filter_val)
 
     except Exception as error:
-        log.critical(f'deleting_row {error}')
-        await telegram_bot_sendtext('sqlite operation', 'failed_order')
-        await telegram_bot_sendtext(
-            f'sqlite operation-{query_table}', 'failed_order'
-        )
+        log.critical(f"deleting_row {error}")
+        await telegram_bot_sendtext("sqlite operation", "failed_order")
+        await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
 
 async def querying_duplicated_transactions(
-    label: str = 'my_trades_all_json',
-    group_by: str = 'trade_id',
-    database: str = 'databases/trading.sqlite3',
+    label: str = "my_trades_all_json",
+    group_by: str = "trade_id",
+    database: str = "databases/trading.sqlite3",
 ) -> list:
     """ """
 
@@ -235,40 +225,34 @@ async def querying_duplicated_transactions(
             combine_result.append(dict(zip(headers, i)))
 
     except Exception as error:
-        log.critical(f'querying_table {query_table} {error}')
-        await telegram_bot_sendtext('sqlite operation', 'failed_order')
-        await telegram_bot_sendtext(
-            f'sqlite operation-{query_table}', 'failed_order'
-        )
+        log.critical(f"querying_table {query_table} {error}")
+        await telegram_bot_sendtext("sqlite operation", "failed_order")
+        await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
-    return (
-        0
-        if (combine_result == [] or combine_result == None)
-        else (combine_result)
-    )
+    return 0 if (combine_result == [] or combine_result == None) else (combine_result)
 
 
 async def deleting_row(
-    table: str = 'mytrades',
-    database: str = 'databases/trading.sqlite3',
+    table: str = "mytrades",
+    database: str = "databases/trading.sqlite3",
     filter: str = None,
     operator=None,
     filter_value=None,
 ) -> list:
     """ """
 
-    query_table = f'DELETE  FROM {table} WHERE  {filter} {operator}?'
-    query_table_filter_none = f'DELETE FROM {table}'
+    query_table = f"DELETE  FROM {table} WHERE  {filter} {operator}?"
+    query_table_filter_none = f"DELETE FROM {table}"
 
-    filter_val = (f'{filter_value}',)
+    filter_val = (f"{filter_value}",)
 
-    if 'LIKE' in operator:
+    if "LIKE" in operator:
         filter_val = (f"""' %{filter_value}%' """,)
 
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
-            await db.execute('pragma journal_mode=wal;')
+            await db.execute("pragma journal_mode=wal;")
 
             if filter == None:
                 await db.execute(query_table_filter_none)
@@ -276,27 +260,25 @@ async def deleting_row(
                 await db.execute(query_table, filter_val)
 
     except Exception as error:
-        log.critical(f'deleting_row {query_table} {error}')
-        await telegram_bot_sendtext('sqlite operation', 'failed_order')
-        await telegram_bot_sendtext(
-            f'sqlite operation-{query_table}', 'failed_order'
-        )
+        log.critical(f"deleting_row {query_table} {error}")
+        await telegram_bot_sendtext("sqlite operation", "failed_order")
+        await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
 
 async def add_additional_column(
     column_name,
     dataType,
-    table: str = 'ohlc1_eth_perp_json',
-    database: str = 'databases/trading.sqlite3',
+    table: str = "ohlc1_eth_perp_json",
+    database: str = "databases/trading.sqlite3",
 ) -> list:
     """ """
 
     try:
-        query_table = f'ALTER TABLE {table} ADD {column_name} {dataType}'
+        query_table = f"ALTER TABLE {table} ADD {column_name} {dataType}"
 
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
-            await db.execute('pragma journal_mode=wal;')
+            await db.execute("pragma journal_mode=wal;")
 
             db = await db.execute(query_table)
 
@@ -304,8 +286,8 @@ async def add_additional_column(
                 result = await cur.fetchone()
 
     except Exception as error:
-        print(f'querying_table {query_table} {error}')
-        await telegram_bot_sendtext('sqlite operation', 'failed get_last_tick')
+        print(f"querying_table {query_table} {error}")
+        await telegram_bot_sendtext("sqlite operation", "failed get_last_tick")
 
     try:
         return 0 if result == None else int(result[0])
@@ -313,19 +295,19 @@ async def add_additional_column(
         return None
 
 
-def querying_additional_params(table: str = 'supporting_items_json') -> str:
+def querying_additional_params(table: str = "supporting_items_json") -> str:
 
     return f"""SELECT JSON_EXTRACT (data, '$.label') AS label, JSON_EXTRACT (data, '$.take_profit')  AS take_profit FROM {table}"""
 
 
 def querying_last_open_interest_tick(
-    last_tick: int, table: str = 'ohlc1_eth_perp_json'
+    last_tick: int, table: str = "ohlc1_eth_perp_json"
 ) -> str:
 
-    return f'SELECT open_interest FROM {table} WHERE tick is {last_tick}'
+    return f"SELECT open_interest FROM {table} WHERE tick is {last_tick}"
 
 
-def querying_hedged_strategy(table: str = 'my_trades_all_json') -> str:
+def querying_hedged_strategy(table: str = "my_trades_all_json") -> str:
 
     return f"SELECT * from {table} where not (label LIKE '%value1%' or label LIKE '%value2%' or label LIKE'%value3%');"
 
@@ -348,41 +330,41 @@ async def update_status_data(
 
     query = f"""UPDATE {table} SET data = JSON_REPLACE (data, '$.{data_column}', '{new_value}') {where_clause};"""
 
-    if 'is_open' in data_column:
+    if "is_open" in data_column:
         query = f"""UPDATE {table} SET {data_column} = ({new_value}) {where_clause};"""
 
-    if 'ohlc' in table:
+    if "ohlc" in table:
 
         query = f"""UPDATE {table} SET {data_column} = JSON_REPLACE ('{json.dumps(new_value)}')   {where_clause};"""
 
-        if data_column == 'open_interest':
+        if data_column == "open_interest":
 
-            query = f"""UPDATE {table} SET {data_column} = ({new_value})  {where_clause};"""
+            query = (
+                f"""UPDATE {table} SET {data_column} = ({new_value})  {where_clause};"""
+            )
 
     # log.warning (f"query {query}")
     try:
 
         async with aiosqlite.connect(
-            'databases/trading.sqlite3', isolation_level=None
+            "databases/trading.sqlite3", isolation_level=None
         ) as db:
 
-            await db.execute('pragma journal_mode=wal;')
+            await db.execute("pragma journal_mode=wal;")
 
             await db.execute(query)
 
     except Exception as error:
-        log.critical(f' ERROR {error}')
-        log.info(f'query update status data {query}')
+        log.critical(f" ERROR {error}")
+        log.info(f"query update status data {query}")
 
-        await telegram_bot_sendtext(
-            'sqlite operation insert_tables', 'failed_order'
-        )
+        await telegram_bot_sendtext("sqlite operation insert_tables", "failed_order")
         # await telegram_bot_sendtext(f"sqlite operation","failed_order")
 
 
 def querying_open_interest(
-    price: float = 'close',
-    table: str = 'ohlc1_eth_perp_json',
+    price: float = "close",
+    table: str = "ohlc1_eth_perp_json",
     limit: int = None,
 ) -> str:
 
@@ -392,8 +374,8 @@ def querying_open_interest(
 
 
 def querying_ohlc_price_vol(
-    price: float = 'close',
-    table: str = 'ohlc1_eth_perp_json',
+    price: float = "close",
+    table: str = "ohlc1_eth_perp_json",
     limit: int = None,
 ) -> str:
 
@@ -403,8 +385,8 @@ def querying_ohlc_price_vol(
 
 
 def querying_ohlc_closed(
-    price: float = 'close',
-    table: str = 'ohlc1_eth_perp_json',
+    price: float = "close",
+    table: str = "ohlc1_eth_perp_json",
     limit: int = None,
 ) -> str:
 
@@ -414,20 +396,20 @@ def querying_ohlc_closed(
 
 
 def querying_arithmetic_operator(
-    item: str, operator: str = 'MAX', table: str = 'ohlc1_eth_perp_json'
+    item: str, operator: str = "MAX", table: str = "ohlc1_eth_perp_json"
 ) -> float:
 
-    return f'SELECT {operator} ({item}) FROM {table}'
+    return f"SELECT {operator} ({item}) FROM {table}"
 
 
 def querying_label_and_size(table) -> str:
-    tab = f'SELECT instrument_name, label, amount_dir as amount, price, timestamp, order_id FROM {table}'
+    tab = f"SELECT instrument_name, label, amount_dir as amount, price, timestamp, order_id FROM {table}"
 
-    if 'trade' in table:
-        tab = f'SELECT instrument_name, label, amount_dir as amount, price, has_closed_label, timestamp, order_id, trade_id FROM {table}'
+    if "trade" in table:
+        tab = f"SELECT instrument_name, label, amount_dir as amount, price, has_closed_label, timestamp, order_id, trade_id FROM {table}"
 
-        if 'closed' in table:
-            tab = f'SELECT instrument_name, label, amount_dir as amount, order_id, trade_id FROM {table}'
+        if "closed" in table:
+            tab = f"SELECT instrument_name, label, amount_dir as amount, order_id, trade_id FROM {table}"
 
     return tab
 
@@ -436,33 +418,33 @@ def querying_label_and_size(table) -> str:
 def generate_insert_sql(table_name, data, columns):
     # Construct the column and placeholder strings
 
-    columns_str = ', '.join(columns)
-    placeholders = ', '.join(['%s'] * len(columns))   # (%s ,%s)
+    columns_str = ", ".join(columns)
+    placeholders = ", ".join(["%s"] * len(columns))  # (%s ,%s)
 
     # Create the SQL INSERT statement
-    sql = f'INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})'
+    sql = f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
 
     # Extract values from data
     values = [tuple(row[col] for col in columns) for row in data]
 
-    balance = 'sum(amount_dir) OVER (ORDER BY timestamp) as balance'
+    balance = "sum(amount_dir) OVER (ORDER BY timestamp) as balance"
     columns = (
-        'instrument_name',
-        'label',
-        'amount_dir',
-        'timestamp',
-        'order_id',
+        "instrument_name",
+        "label",
+        "amount_dir",
+        "timestamp",
+        "order_id",
         balance,
     )
 
-    table_name = 'test'
-    columns_str = ', '.join(columns)
+    table_name = "test"
+    columns_str = ", ".join(columns)
     print(columns_str)
-    placeholders = ', '.join(['%s'] * len(columns))   # (%s ,%s)
+    placeholders = ", ".join(["%s"] * len(columns))  # (%s ,%s)
     print(placeholders)
 
     # Create the SQL INSERT statement
-    sql = f'SELECT {columns_str}) FROM {table_name}'
+    sql = f"SELECT {columns_str}) FROM {table_name}"
     print(sql)
 
     return sql, values
@@ -471,14 +453,13 @@ def generate_insert_sql(table_name, data, columns):
 def querying_based_on_currency_or_instrument_and_strategy(
     table: str,
     currency_or_instrument: str,
-    strategy: str = 'all',
-    status: str = 'all',
-    columns: list = 'standard',
+    strategy: str = "all",
+    status: str = "all",
+    columns: list = "standard",
     limit: int = 0,
     order: str = None,
-    ordering: str = 'DESC',
+    ordering: str = "DESC",
 ) -> str:
-
     """_summary_
 
     status: all, open, closed
@@ -489,61 +470,61 @@ def querying_based_on_currency_or_instrument_and_strategy(
         _type_: _description_
     """
     standard_columns = (
-        f'instrument_name, label, amount_dir as amount, timestamp, order_id'
+        f"instrument_name, label, amount_dir as amount, timestamp, order_id"
     )
 
-    balance = f'sum(amount_dir) OVER (ORDER BY timestamp) as balance'
+    balance = f"sum(amount_dir) OVER (ORDER BY timestamp) as balance"
 
-    if 'balance' in columns:
-        standard_columns = f'instrument_name, label, amount_dir as amount, {balance}, timestamp, order_id'
+    if "balance" in columns:
+        standard_columns = f"instrument_name, label, amount_dir as amount, {balance}, timestamp, order_id"
 
-    if 'trade' in table or 'order' in table:
-        standard_columns = f'{standard_columns}, price'
+    if "trade" in table or "order" in table:
+        standard_columns = f"{standard_columns}, price"
 
-        if 'trade' in table:
+        if "trade" in table:
 
-            standard_columns = f'{standard_columns}, trade_id'
+            standard_columns = f"{standard_columns}, trade_id"
 
-    if 'transaction_log' in table:
+    if "transaction_log" in table:
 
-        standard_columns = f'{standard_columns}, trade_id, price, type'
+        standard_columns = f"{standard_columns}, trade_id, price, type"
 
-        table = f'transaction_log_{extract_currency_from_text(currency_or_instrument).lower()}_json'
+        table = f"transaction_log_{extract_currency_from_text(currency_or_instrument).lower()}_json"
 
         # log.error (f"table transaction_log {table}")
 
-    if columns != 'standard':
+    if columns != "standard":
 
-        if 'data' in columns:
-            standard_columns = ','.join(
+        if "data" in columns:
+            standard_columns = ",".join(
                 str(f"""{i}{("_dir as amount") if i=="amount" else ""}""")
                 for i in columns
             )
 
         else:
-            standard_columns = ','.join(
+            standard_columns = ",".join(
                 str(f"""{i}{("_dir as amount") if i=="amount" else ""}""")
                 for i in columns
             )
 
     where_clause = f"WHERE (instrument_name LIKE '%{currency_or_instrument}%')"
 
-    if strategy != 'all':
+    if strategy != "all":
         where_clause = f"WHERE (instrument_name LIKE '%{currency_or_instrument}%' AND label LIKE '%{strategy}%')"
 
-    if status != 'all':
+    if status != "all":
         where_clause = f"WHERE (instrument_name LIKE '%{currency_or_instrument}%' AND label LIKE '%{strategy}%' AND label LIKE '%{status}%')"
 
-    tab = f'SELECT {standard_columns},{balance} FROM {table} {where_clause}'
+    tab = f"SELECT {standard_columns},{balance} FROM {table} {where_clause}"
 
     if order is not None:
 
         # tab = f"SELECT instrument_name, label_main as label, amount_dir as amount, order_id, trade_seq FROM {table} {where_clause} ORDER BY {order}"
-        tab = f'SELECT {standard_columns},{balance} FROM {table} {where_clause} ORDER BY {order} {ordering} '
+        tab = f"SELECT {standard_columns},{balance} FROM {table} {where_clause} ORDER BY {order} {ordering} "
 
     if limit > 0:
 
-        tab = f'{tab} LIMIT {limit}'
+        tab = f"{tab} LIMIT {limit}"
 
     #    log.error (f"table {tab}")
     return tab
@@ -552,11 +533,11 @@ def querying_based_on_currency_or_instrument_and_strategy(
 async def executing_query_based_on_currency_or_instrument_and_strategy(
     table: str,
     currency_or_instrument,
-    strategy: str = 'all',
-    status: str = 'all',
-    columns: list = 'standard',
+    strategy: str = "all",
+    status: str = "all",
+    columns: list = "standard",
     limit: int = 0,
-    order: str = 'id',
+    order: str = "id",
 ) -> dict:
     """
     Provide execution template for querying summary of trading results from sqlite.
@@ -587,7 +568,7 @@ async def executing_query_with_return(
     query_table,
     filter: str = None,
     filter_value=None,
-    database: str = 'databases/trading.sqlite3',
+    database: str = "databases/trading.sqlite3",
 ) -> list:
     """
     Reference
@@ -597,14 +578,14 @@ async def executing_query_with_return(
 
     """
 
-    filter_val = (f'{filter_value}',)
+    filter_val = (f"{filter_value}",)
 
     combine_result = []
 
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
-            await db.execute('pragma journal_mode=wal;')
+            await db.execute("pragma journal_mode=wal;")
 
             db = (
                 db.execute(query_table)
@@ -623,12 +604,10 @@ async def executing_query_with_return(
 
     except Exception as error:
         # import traceback
-        log.critical(f'querying_table {query_table} {error}')
+        log.critical(f"querying_table {query_table} {error}")
         # traceback.format_exc()
-        await telegram_bot_sendtext('sqlite operation', 'failed_order')
-        await telegram_bot_sendtext(
-            f'sqlite operation-{query_table}', 'failed_order'
-        )
+        await telegram_bot_sendtext("sqlite operation", "failed_order")
+        await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
     return [] if not combine_result else (combine_result)
 
@@ -642,19 +621,19 @@ def query_pd(table_name: str, field: str = None):
     import pandas as pd
 
     # Read sqlite query results into a pandas DataFrame
-    con = sqlite3.connect('databases/trading.sqlite3')
-    query_table = f'SELECT *  FROM {table_name}'
+    con = sqlite3.connect("databases/trading.sqlite3")
+    query_table = f"SELECT *  FROM {table_name}"
 
     if field != None:
-        query_table = f'SELECT {field}  FROM {table_name}'
+        query_table = f"SELECT {field}  FROM {table_name}"
 
     # fetch all
     result = pd.read_sql_query(query_table, con)
 
     # transform dataframe to dict
-    result = result.to_dict('records')
+    result = result.to_dict("records")
 
-    result_cleaned = [o['data'] for o in result]
+    result_cleaned = [o["data"] for o in result]
 
     # close connection sqlite
     con.close()
@@ -666,10 +645,10 @@ async def back_up_db_sqlite():
 
     from datetime import datetime
 
-    TIMESTAMP = datetime.now().strftime('%Y%m%d-%H-%M-%S')
+    TIMESTAMP = datetime.now().strftime("%Y%m%d-%H-%M-%S")
 
-    src = sqlite3.connect('databases/trading.sqlite3')
-    dst = sqlite3.connect(f'databases/trdg-{TIMESTAMP}.bak')
+    src = sqlite3.connect("databases/trading.sqlite3")
+    dst = sqlite3.connect(f"databases/trdg-{TIMESTAMP}.bak")
     with dst:
         src.backup(dst)
     dst.close()

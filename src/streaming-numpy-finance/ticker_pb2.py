@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
 )
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'ticker_pb2', globals())
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "ticker_pb2", globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
     DESCRIPTOR._options = None

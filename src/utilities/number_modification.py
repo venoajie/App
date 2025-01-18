@@ -25,19 +25,11 @@ def convert_str_to_float_single(data_json: list) -> list:
 
     if isinstance(data_json, dict):
         return [
-            {
-                k: float(eval(v)) if is_floatable(v) else v
-                for k, v in data_json.items()
-            }
+            {k: float(eval(v)) if is_floatable(v) else v for k, v in data_json.items()}
         ]
     if isinstance(data_json, list):
         data_json = data_json[0]
-        return [
-            {
-                k: float(v) if is_floatable(v) else v
-                for k, v in data_json.items()
-            }
-        ]
+        return [{k: float(v) if is_floatable(v) else v for k, v in data_json.items()}]
 
 
 def convert_str_to_float(data_json: list) -> object:
@@ -47,23 +39,23 @@ def convert_str_to_float(data_json: list) -> object:
             Catatan:
     """
     excluded = [
-        'id',
-        'reduceOnly',
-        'postOnly',
-        'liquidation',
-        'ioc',
-        'market',
-        'future',
-        'type',
-        'side',
-        'orderId',
-        'time',
-        'tradeId',
-        'feeCurrency',
-        'liquidity',
-        'baseCurrency',
-        'quoteCurrency',
-        'coin',
+        "id",
+        "reduceOnly",
+        "postOnly",
+        "liquidation",
+        "ioc",
+        "market",
+        "future",
+        "type",
+        "side",
+        "orderId",
+        "time",
+        "tradeId",
+        "feeCurrency",
+        "liquidity",
+        "baseCurrency",
+        "quoteCurrency",
+        "coin",
     ]
 
     if isinstance(data_json, dict):
@@ -79,16 +71,12 @@ def convert_str_to_float(data_json: list) -> object:
             if isinstance(i, dict):
                 data_json = [data_json]
                 position = {
-                    k: float(v)
-                    if (is_floatable(v) and (k) not in excluded)
-                    else v
+                    k: float(v) if (is_floatable(v) and (k) not in excluded) else v
                     for k, v in i.items()
                 }
             if isinstance(i, list):
                 position = {
-                    k: float(v)
-                    if (is_floatable(v) and (k) not in excluded)
-                    else v
+                    k: float(v) if (is_floatable(v) and (k) not in excluded) else v
                     for k, v in i.items()
                 }
             list_combination.append(position)
@@ -116,7 +104,7 @@ def presisi_pembulatan(angka):
 
     angka = str(format_float(angka))
 
-    return int(angka[::-1].find('.'))
+    return int(angka[::-1].find("."))
 
 
 def rounding(variable, TICK, presisi):
@@ -147,18 +135,10 @@ def net_position(selected_transactions: list) -> float:
     if selected_transactions != []:
         try:
             sum_sell = sum(
-                [
-                    o['amount']
-                    for o in selected_transactions
-                    if o['direction'] == 'sell'
-                ]
+                [o["amount"] for o in selected_transactions if o["direction"] == "sell"]
             )  # sell = + sign
             sum_buy = sum(
-                [
-                    o['amount']
-                    for o in selected_transactions
-                    if o['direction'] == 'buy'
-                ]
+                [o["amount"] for o in selected_transactions if o["direction"] == "buy"]
             )
 
             #! -1 + 1 = 0, -10+10 = 0, [] = 0, None = 0. [] = No transcations, diff with net = 0 (could affect to leverage)
@@ -166,9 +146,7 @@ def net_position(selected_transactions: list) -> float:
             return sum_buy - sum_sell
 
         except:
-            return ([o['size'] for o in selected_transactions])[
-                0
-            ]  # sell = (-) sign
+            return ([o["size"] for o in selected_transactions])[0]  # sell = (-) sign
 
     else:
         return selected_transactions

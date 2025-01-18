@@ -58,12 +58,10 @@ def first_tick_fr_sqlite_if_database_still_empty(count: int) -> int:
     balancing_params = paramaters_to_balancing_transactions()
 
     max_closed_transactions_downloaded_from_sqlite = balancing_params[
-        'max_closed_transactions_downloaded_from_sqlite'
+        "max_closed_transactions_downloaded_from_sqlite"
     ]
 
-    count_at_first_download = max(
-        count, max_closed_transactions_downloaded_from_sqlite
-    )
+    count_at_first_download = max(count, max_closed_transactions_downloaded_from_sqlite)
 
     some_days_ago = 3600000 * count_at_first_download
 
@@ -81,9 +79,7 @@ async def update_db_pkl(path, data_orders, currency) -> None:
         replace_data(my_path_portfolio, data_orders)
 
 
-def currency_inline_with_database_address(
-    currency: str, database_address: str
-) -> bool:
+def currency_inline_with_database_address(currency: str, database_address: str) -> bool:
     return currency.lower() in str(database_address)
 
 
@@ -91,11 +87,11 @@ def extract_portfolio_per_id_and_currency(
     sub_account_id: str, sub_accounts: list, currency: str
 ) -> list:
 
-    portfolio_all = [
-        o for o in sub_accounts if str(o['id']) in sub_account_id
-    ][0]['portfolio']
+    portfolio_all = [o for o in sub_accounts if str(o["id"]) in sub_account_id][0][
+        "portfolio"
+    ]
 
-    return portfolio_all[f'{currency.lower()}']
+    return portfolio_all[f"{currency.lower()}"]
 
 
 @dataclass(unsafe_hash=True, slots=True)
@@ -108,35 +104,27 @@ class ModifyOrderDb(SendApiRequest):
         # Provide class object to access private get API
         self.private_data: str = SendApiRequest(self.sub_account_id)
 
-    async def cancel_by_order_id(
-        self, order_db_table: str, open_order_id: str
-    ) -> None:
+    async def cancel_by_order_id(self, order_db_table: str, open_order_id: str) -> None:
 
-        where_filter = f'order_id'
+        where_filter = f"order_id"
 
         await deleting_row(
             order_db_table,
-            'databases/trading.sqlite3',
+            "databases/trading.sqlite3",
             where_filter,
-            '=',
+            "=",
             open_order_id,
         )
 
-        result = await self.private_data.get_cancel_order_byOrderId(
-            open_order_id
-        )
+        result = await self.private_data.get_cancel_order_byOrderId(open_order_id)
 
         try:
-            if (result['error']['message']) == 'not_open_order':
-                log.critical(
-                    f'CANCEL non-existing order_id {result} {open_order_id}'
-                )
+            if (result["error"]["message"]) == "not_open_order":
+                log.critical(f"CANCEL non-existing order_id {result} {open_order_id}")
 
         except:
 
-            log.critical(
-                f"""CANCEL_by_order_id {result["result"]} {open_order_id}"""
-            )
+            log.critical(f"""CANCEL_by_order_id {result["result"]} {open_order_id}""")
 
             return result
 
@@ -148,38 +136,37 @@ class ModifyOrderDb(SendApiRequest):
         open_orders_sqlite: list = None,
     ) -> None:
 
-        log.critical(f' cancel_the_cancellables')
+        log.critical(f" cancel_the_cancellables")
 
-        where_filter = f'order_id'
+        where_filter = f"order_id"
 
-        column_list = 'label', where_filter
+        column_list = "label", where_filter
 
         if open_orders_sqlite is None:
             open_orders_sqlite: list = await get_query(
-                'orders_all_json', currency.upper(), 'all', 'all', column_list
+                "orders_all_json", currency.upper(), "all", "all", column_list
             )
 
         if open_orders_sqlite:
 
             for strategy in cancellable_strategies:
                 open_orders_cancellables = [
-                    o for o in open_orders_sqlite if strategy in o['label']
+                    o for o in open_orders_sqlite if strategy in o["label"]
                 ]
 
                 if open_orders_cancellables:
                     open_orders_cancellables_id = [
-                        o['order_id'] for o in open_orders_cancellables
+                        o["order_id"] for o in open_orders_cancellables
                     ]
 
                     for order_id in open_orders_cancellables_id:
 
                         await self.cancel_by_order_id(order_db_table, order_id)
 
-        log.critical('D')
+        log.critical("D")
         await self.resupply_sub_accountdb(currency.upper())
 
     async def get_sub_account(self, currency) -> list:
-
         """
         Returns example:
          [
@@ -221,18 +208,18 @@ class ModifyOrderDb(SendApiRequest):
     async def resupply_sub_accountdb(self, currency) -> None:
 
         # resupply sub account db
-        log.info(f'resupply {currency.upper()} sub account db-START')
+        log.info(f"resupply {currency.upper()} sub account db-START")
         sub_accounts = await self.get_sub_account(currency)
 
-        my_path_sub_account = provide_path_for_file('sub_accounts', currency)
+        my_path_sub_account = provide_path_for_file("sub_accounts", currency)
 
         replace_data(my_path_sub_account, sub_accounts)
 
-        log.info(f'resupply {currency.upper()} sub account db-DONE')
+        log.info(f"resupply {currency.upper()} sub account db-DONE")
 
     async def resupply_portfolio(self, currency) -> None:
 
-        log.info(f'resupply {currency.upper()} portfolio-START')
+        log.info(f"resupply {currency.upper()} portfolio-START")
         # fetch data from exchange
         sub_accounts = await self.private_data.get_subaccounts()
 
@@ -240,9 +227,9 @@ class ModifyOrderDb(SendApiRequest):
             self.sub_account_id, sub_accounts, currency
         )
 
-        await update_db_pkl('portfolio', portfolio, currency)
+        await update_db_pkl("portfolio", portfolio, currency)
 
-        log.info(f'resupply {currency.upper()} portfolio-DONE')
+        log.info(f"resupply {currency.upper()} portfolio-DONE")
 
     async def save_transaction_log_by_instrument(
         self,
@@ -252,26 +239,22 @@ class ModifyOrderDb(SendApiRequest):
         count: int = 1,
     ) -> None:
 
-        where_filter = 'timestamp'
+        where_filter = "timestamp"
 
         first_tick_query = get_first_tick_query(
             where_filter, transaction_log_trading, instrument_name, count
         )
 
-        first_tick_query_result = await executing_query_with_return(
-            first_tick_query
-        )
+        first_tick_query_result = await executing_query_with_return(first_tick_query)
 
         if first_tick_query_result:
 
-            first_tick_fr_sqlite = first_tick_query_result[0][
-                'MIN (timestamp)'
-            ]
+            first_tick_fr_sqlite = first_tick_query_result[0]["MIN (timestamp)"]
 
             if not first_tick_fr_sqlite:
 
-                first_tick_fr_sqlite = (
-                    first_tick_fr_sqlite_if_database_still_empty(count)
+                first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty(
+                    count
                 )
 
             transaction_log = await self.private_data.get_transaction_log(
@@ -285,8 +268,8 @@ class ModifyOrderDb(SendApiRequest):
                 transaction_log_instrument_name = [
                     o
                     for o in transaction_log
-                    if instrument_name in o['instrument_name']
-                    and o['timestamp'] > first_tick_fr_sqlite
+                    if instrument_name in o["instrument_name"]
+                    and o["timestamp"] > first_tick_fr_sqlite
                 ]
 
                 await saving_transaction_log(
@@ -302,9 +285,8 @@ class ModifyOrderDb(SendApiRequest):
         instrument_name: str = None,
         count: int = 1,
     ) -> None:
-
         """ """
-        log.info(f'resupply {currency.upper()} transaction_log-START')
+        log.info(f"resupply {currency.upper()} transaction_log-START")
 
         if instrument_name:
             await self.save_transaction_log_by_instrument(
@@ -314,15 +296,15 @@ class ModifyOrderDb(SendApiRequest):
         else:
 
             column_list = (
-                'instrument_name',
-                'timestamp',
+                "instrument_name",
+                "timestamp",
             )
             from_transaction_log = await get_query(
-                transaction_log_trading, currency, 'all', 'all', column_list
+                transaction_log_trading, currency, "all", "all", column_list
             )
 
             from_transaction_log_instrument = [
-                o['instrument_name'] for o in from_transaction_log
+                o["instrument_name"] for o in from_transaction_log
             ]
 
             for instrument_name in from_transaction_log_instrument:
@@ -330,24 +312,22 @@ class ModifyOrderDb(SendApiRequest):
                     currency, transaction_log_trading, instrument_name, count
                 )
 
-        log.info(f'resupply {currency.upper()} transaction_log-DONE')
+        log.info(f"resupply {currency.upper()} transaction_log-DONE")
 
-    async def if_cancel_is_true(
-        self, order_db_table: str, order: dict
-    ) -> None:
+    async def if_cancel_is_true(self, order_db_table: str, order: dict) -> None:
         """ """
 
-        if order['cancel_allowed']:
+        if order["cancel_allowed"]:
 
             # get parameter orders
-            await self.cancel_by_order_id(order_db_table, order['cancel_id'])
+            await self.cancel_by_order_id(order_db_table, order["cancel_id"])
 
     async def cancel_all_orders(self) -> None:
         """ """
 
         await self.get_cancel_order_all()
 
-        await deleting_row('orders_all_json')
+        await deleting_row("orders_all_json")
 
     async def if_order_is_true(
         self,
@@ -356,11 +336,11 @@ class ModifyOrderDb(SendApiRequest):
     ) -> None:
         """ """
 
-        if order['order_allowed']:
+        if order["order_allowed"]:
 
             # get parameter orders
             try:
-                params = order['order_parameters']
+                params = order["order_parameters"]
             except:
                 params = order
 
@@ -369,9 +349,7 @@ class ModifyOrderDb(SendApiRequest):
             )
 
             if label_and_side_consistent:
-                send_limit_result = await self.private_data.send_limit_order(
-                    params
-                )
+                send_limit_result = await self.private_data.send_limit_order(params)
 
                 return send_limit_result
                 # await asyncio.sleep(10)
@@ -384,10 +362,8 @@ class ModifyOrderDb(SendApiRequest):
         self, currency: str, archive_db_table, order_db_table, count: int = 5
     ) -> None:
         """ """
-        trades_from_exchange = (
-            await self.private_data.get_user_trades_by_currency(
-                currency, count
-            )
+        trades_from_exchange = await self.private_data.get_user_trades_by_currency(
+            currency, count
         )
 
         if trades_from_exchange:
@@ -395,18 +371,16 @@ class ModifyOrderDb(SendApiRequest):
             trades_from_exchange_without_futures_combo = [
                 o
                 for o in trades_from_exchange
-                if f'{currency}-FS' not in o['instrument_name']
+                if f"{currency}-FS" not in o["instrument_name"]
             ]
 
             if trades_from_exchange_without_futures_combo:
 
                 for trade in trades_from_exchange_without_futures_combo:
 
-                    log.error(f'trades_from_exchange {trade}')
+                    log.error(f"trades_from_exchange {trade}")
 
-                    await saving_traded_orders(
-                        trade, archive_db_table, order_db_table
-                    )
+                    await saving_traded_orders(trade, archive_db_table, order_db_table)
 
     async def update_trades_from_exchange_based_on_latest_timestamp(
         self,
@@ -429,21 +403,19 @@ class ModifyOrderDb(SendApiRequest):
 
         if trades_from_exchange:
 
-            column_trade: str = 'instrument_name', 'timestamp', 'trade_id'
+            column_trade: str = "instrument_name", "timestamp", "trade_id"
 
             my_trades_instrument_name_archive: list = await get_query(
-                archive_db_table, instrument_name, 'all', 'all', column_trade
+                archive_db_table, instrument_name, "all", "all", column_trade
             )
 
             trades_from_exchange_without_futures_combo = [
-                o
-                for o in trades_from_exchange
-                if f'-FS-' not in o['instrument_name']
+                o for o in trades_from_exchange if f"-FS-" not in o["instrument_name"]
             ]
 
             await telegram_bot_sendtext(
-                f'size_futures_not_reconciled-{instrument_name}',
-                'general_error',
+                f"size_futures_not_reconciled-{instrument_name}",
+                "general_error",
             )
             for trade in trades_from_exchange_without_futures_combo:
 
@@ -451,7 +423,7 @@ class ModifyOrderDb(SendApiRequest):
 
                     from_exchange_timestamp = max(
                         [
-                            o['timestamp']
+                            o["timestamp"]
                             for o in trades_from_exchange_without_futures_combo
                         ]
                     )
@@ -459,33 +431,29 @@ class ModifyOrderDb(SendApiRequest):
                     trade_timestamp = [
                         o
                         for o in trades_from_exchange_without_futures_combo
-                        if o['timestamp'] == from_exchange_timestamp
+                        if o["timestamp"] == from_exchange_timestamp
                     ]
 
                     trade = trade_timestamp[0]
 
-                    log.error(f'{trade}')
+                    log.error(f"{trade}")
 
-                    await saving_traded_orders(
-                        trade, archive_db_table, order_db_table
-                    )
+                    await saving_traded_orders(trade, archive_db_table, order_db_table)
 
-                    await saving_traded_orders(
-                        trade, trade_db_table, order_db_table
-                    )
+                    await saving_traded_orders(trade, trade_db_table, order_db_table)
                 else:
 
-                    trade_trd_id = trade['trade_id']
+                    trade_trd_id = trade["trade_id"]
 
                     trade_trd_id_not_in_archive = [
                         o
                         for o in my_trades_instrument_name_archive
-                        if trade_trd_id in o['trade_id']
+                        if trade_trd_id in o["trade_id"]
                     ]
 
                     if not trade_trd_id_not_in_archive:
 
-                        log.debug(f'{trade_trd_id}')
+                        log.debug(f"{trade_trd_id}")
 
                         await saving_traded_orders(
                             trade, archive_db_table, order_db_table
@@ -503,32 +471,32 @@ class ModifyOrderDb(SendApiRequest):
             1 TP limit order
         """
 
-        main_side = params['side']
-        instrument = params['instrument_name']
-        main_label = params['label_numbered']
-        closed_label = params['label_closed_numbered']
-        size = params['size']
-        main_prc = params['entry_price']
-        sl_prc = params['cut_loss_usd']
-        tp_prc = params['take_profit_usd']
+        main_side = params["side"]
+        instrument = params["instrument_name"]
+        main_label = params["label_numbered"]
+        closed_label = params["label_closed_numbered"]
+        size = params["size"]
+        main_prc = params["entry_price"]
+        sl_prc = params["cut_loss_usd"]
+        tp_prc = params["take_profit_usd"]
 
         order_result = await self.send_order(
             main_side, instrument, size, main_label, main_prc
         )
 
-        order_result_id = order_result['result']['order']['order_id']
+        order_result_id = order_result["result"]["order"]["order_id"]
 
-        if 'error' in order_result:
+        if "error" in order_result:
             await self.get_cancel_order_byOrderId(order_result_id)
-            await telegram_bot_sendtext('combo order failed')
+            await telegram_bot_sendtext("combo order failed")
 
         else:
-            if main_side == 'buy':
-                closed_side = 'sell'
+            if main_side == "buy":
+                closed_side = "sell"
                 trigger_prc = tp_prc - 1
 
-            if main_side == 'sell':
-                closed_side = 'buy'
+            if main_side == "sell":
+                closed_side = "buy"
                 trigger_prc = tp_prc + 1
 
             order_result = await self.send_order(
@@ -537,15 +505,15 @@ class ModifyOrderDb(SendApiRequest):
                 size,
                 closed_label,
                 None,
-                'stop_market',
+                "stop_market",
                 sl_prc,
             )
 
             log.info(order_result)
 
-            if 'error' in order_result:
+            if "error" in order_result:
                 await self.get_cancel_order_byOrderId(order_result_id)
-                await telegram_bot_sendtext('combo order failed')
+                await telegram_bot_sendtext("combo order failed")
 
             order_result = await self.send_order(
                 closed_side,
@@ -553,14 +521,14 @@ class ModifyOrderDb(SendApiRequest):
                 size,
                 closed_label,
                 tp_prc,
-                'take_limit',
+                "take_limit",
                 trigger_prc,
             )
             log.info(order_result)
 
-            if 'error' in order_result:
+            if "error" in order_result:
                 await self.get_cancel_order_byOrderId(order_result_id)
-                await telegram_bot_sendtext('combo order failed')
+                await telegram_bot_sendtext("combo order failed")
 
     async def update_user_changes(
         self,
@@ -571,15 +539,15 @@ class ModifyOrderDb(SendApiRequest):
         archive_db_table,
     ) -> None:
 
-        trades = data_orders['trades']
+        trades = data_orders["trades"]
 
-        orders = data_orders['orders']
+        orders = data_orders["orders"]
 
-        instrument_name = data_orders['instrument_name']
+        instrument_name = data_orders["instrument_name"]
 
-        log.critical(f'update_user_changes {instrument_name} -START')
+        log.critical(f"update_user_changes {instrument_name} -START")
 
-        log.info(f' {data_orders}')
+        log.info(f" {data_orders}")
 
         if orders:
 
@@ -587,9 +555,9 @@ class ModifyOrderDb(SendApiRequest):
 
                 for trade in trades:
 
-                    log.info(f'{trade}')
+                    log.info(f"{trade}")
 
-                    if f'f{currency.upper()}-FS-' not in instrument_name:
+                    if f"f{currency.upper()}-FS-" not in instrument_name:
 
                         await saving_traded_orders(
                             trade, archive_db_table, order_db_table
@@ -597,40 +565,36 @@ class ModifyOrderDb(SendApiRequest):
 
             else:
 
-                if 'oto_order_ids' in (orders[0]):
+                if "oto_order_ids" in (orders[0]):
 
-                    len_oto_order_ids = len(orders[0]['oto_order_ids'])
+                    len_oto_order_ids = len(orders[0]["oto_order_ids"])
 
                     transaction_main = [
-                        o for o in orders if 'OTO' not in o['order_id']
+                        o for o in orders if "OTO" not in o["order_id"]
                     ][0]
-                    log.debug(f'transaction_main {transaction_main}')
+                    log.debug(f"transaction_main {transaction_main}")
 
                     if len_oto_order_ids == 1:
                         pass
 
-                    transaction_main_oto = transaction_main['oto_order_ids'][0]
-                    log.warning(f'transaction_main_oto {transaction_main_oto}')
+                    transaction_main_oto = transaction_main["oto_order_ids"][0]
+                    log.warning(f"transaction_main_oto {transaction_main_oto}")
 
-                    kind = 'future'
-                    type = 'trigger_all'
+                    kind = "future"
+                    type = "trigger_all"
 
-                    open_orders_from_exchange = (
-                        await self.private_data.get_open_orders(kind, type)
+                    open_orders_from_exchange = await self.private_data.get_open_orders(
+                        kind, type
                     )
-                    log.debug(
-                        f'open_orders_from_exchange {open_orders_from_exchange}'
-                    )
+                    log.debug(f"open_orders_from_exchange {open_orders_from_exchange}")
 
                     transaction_secondary = [
                         o
                         for o in open_orders_from_exchange
-                        if transaction_main_oto in o['order_id']
+                        if transaction_main_oto in o["order_id"]
                     ]
 
-                    log.warning(
-                        f'transaction_secondary {transaction_secondary}'
-                    )
+                    log.warning(f"transaction_secondary {transaction_secondary}")
 
                     if transaction_secondary:
 
@@ -638,21 +602,19 @@ class ModifyOrderDb(SendApiRequest):
 
                         # no label
                         if (
-                            transaction_main['label'] == ''
-                            and 'open' in transaction_main['order_state']
+                            transaction_main["label"] == ""
+                            and "open" in transaction_main["order_state"]
                         ):
 
                             order_attributes = labelling_unlabelled_order_oto(
                                 transaction_main, transaction_secondary
                             )
 
-                            log.debug(f'order_attributes {order_attributes}')
-                            await insert_tables(
-                                order_db_table, transaction_main
-                            )
+                            log.debug(f"order_attributes {order_attributes}")
+                            await insert_tables(order_db_table, transaction_main)
 
                             await self.cancel_by_order_id(
-                                order_db_table, transaction_main['order_id']
+                                order_db_table, transaction_main["order_id"]
                             )
 
                             await self.if_order_is_true(
@@ -661,17 +623,15 @@ class ModifyOrderDb(SendApiRequest):
                             )
 
                         else:
-                            await insert_tables(
-                                order_db_table, transaction_main
-                            )
+                            await insert_tables(order_db_table, transaction_main)
 
                 else:
 
                     for order in orders:
 
-                        if 'OTO' not in order['order_id']:
+                        if "OTO" not in order["order_id"]:
 
-                            log.warning(f'order {order}')
+                            log.warning(f"order {order}")
 
                             await self.saving_order(
                                 non_checked_strategies,
@@ -682,9 +642,9 @@ class ModifyOrderDb(SendApiRequest):
 
         await self.resupply_sub_accountdb(currency)
 
-        await update_db_pkl('positions', data_orders, currency)
+        await update_db_pkl("positions", data_orders, currency)
 
-        log.info(f'update_user_changes-END')
+        log.info(f"update_user_changes-END")
 
     async def update_user_changes_non_ws(
         self,
@@ -695,25 +655,23 @@ class ModifyOrderDb(SendApiRequest):
         transaction_log_trading,
     ) -> None:
 
-        trades = data_orders['trades']
+        trades = data_orders["trades"]
 
-        order = data_orders['order']
+        order = data_orders["order"]
 
-        instrument_name = order['instrument_name']
+        instrument_name = order["instrument_name"]
 
         currency = extract_currency_from_text(instrument_name)
-        log.critical('C')
+        log.critical("C")
         await self.resupply_sub_accountdb(currency)
 
         if trades:
 
             for trade in trades:
 
-                if f'{currency.upper()}-FS-' not in instrument_name:
+                if f"{currency.upper()}-FS-" not in instrument_name:
 
-                    await saving_traded_orders(
-                        trade, archive_db_table, order_db_table
-                    )
+                    await saving_traded_orders(trade, archive_db_table, order_db_table)
 
         else:
 
@@ -725,26 +683,26 @@ class ModifyOrderDb(SendApiRequest):
             currency, transaction_log_trading, archive_db_table
         )
 
-        await update_db_pkl('positions', data_orders, currency)
+        await update_db_pkl("positions", data_orders, currency)
 
     async def saving_order(
         self, non_checked_strategies, instrument_name, order, order_db_table
     ) -> None:
 
-        label = order['label']
+        label = order["label"]
 
-        order_id = order['order_id']
-        order_state = order['order_state']
+        order_id = order["order_id"]
+        order_state = order["order_state"]
 
         # no label
-        if label == '':
-            if 'open' in order_state or 'untriggered' in order_state:
+        if label == "":
+            if "open" in order_state or "untriggered" in order_state:
 
                 order_attributes = labelling_unlabelled_order(order)
 
                 await insert_tables(order_db_table, order)
 
-                if 'OTO' not in order['order_id']:
+                if "OTO" not in order["order_id"]:
                     await self.cancel_by_order_id(order_db_table, order_id)
 
                 await self.if_order_is_true(
@@ -764,11 +722,9 @@ class ModifyOrderDb(SendApiRequest):
             # check if transaction has label. Provide one if not any
             if not label_and_side_consistent:
 
-                if order_state != 'cancelled' or order_state != 'filled':
+                if order_state != "cancelled" or order_state != "filled":
 
-                    log.warning(
-                        f' not label_and_side_consistent {order} {order_state}'
-                    )
+                    log.warning(f" not label_and_side_consistent {order} {order_state}")
 
                     await insert_tables(order_db_table, order)
 
@@ -782,61 +738,57 @@ async def cancel_the_cancellables(
     open_orders_sqlite: list = None,
 ) -> None:
 
-    log.critical(f' cancel_the_cancellables')
+    log.critical(f" cancel_the_cancellables")
 
-    where_filter = f'order_id'
+    where_filter = f"order_id"
 
-    column_list = 'label', where_filter
+    column_list = "label", where_filter
 
     if open_orders_sqlite is None:
         open_orders_sqlite: list = await get_query(
-            'orders_all_json', currency.upper(), 'all', 'all', column_list
+            "orders_all_json", currency.upper(), "all", "all", column_list
         )
 
     if open_orders_sqlite:
 
         for strategy in cancellable_strategies:
             open_orders_cancellables = [
-                o for o in open_orders_sqlite if strategy in o['label']
+                o for o in open_orders_sqlite if strategy in o["label"]
             ]
 
             if open_orders_cancellables:
                 open_orders_cancellables_id = [
-                    o['order_id'] for o in open_orders_cancellables
+                    o["order_id"] for o in open_orders_cancellables
                 ]
 
                 for order_id in open_orders_cancellables_id:
 
                     await cancel_by_order_id(order_db_table, order_id)
 
-    log.critical('D')
+    log.critical("D")
     # await self.resupply_sub_accountdb(currency.upper())
 
 
 async def cancel_by_order_id(order_db_table: str, open_order_id: str) -> None:
 
-    where_filter = f'order_id'
+    where_filter = f"order_id"
 
     await deleting_row(
         order_db_table,
-        'databases/trading.sqlite3',
+        "databases/trading.sqlite3",
         where_filter,
-        '=',
+        "=",
         open_order_id,
     )
 
     result = await get_cancel_order_byOrderId(open_order_id)
 
     try:
-        if (result['error']['message']) == 'not_open_order':
-            log.critical(
-                f'CANCEL non-existing order_id {result} {open_order_id}'
-            )
+        if (result["error"]["message"]) == "not_open_order":
+            log.critical(f"CANCEL non-existing order_id {result} {open_order_id}")
 
     except:
 
-        log.critical(
-            f"""CANCEL_by_order_id {result["result"]} {open_order_id}"""
-        )
+        log.critical(f"""CANCEL_by_order_id {result["result"]} {open_order_id}""")
 
         return result

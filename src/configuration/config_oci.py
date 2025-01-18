@@ -15,8 +15,8 @@ def get_oci_key(keyOCID) -> list:
 
     # Decode the secret from base64 and print
     keybase64 = secretcontents.data.secret_bundle_content.content
-    keybase64bytes = keybase64.encode('ascii')
+    keybase64bytes = keybase64.encode("ascii")
     keybytes = base64.b64decode(keybase64bytes)
-    key = keybytes.decode('ascii')
+    key = keybytes.decode("ascii")
 
     return key

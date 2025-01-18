@@ -15,19 +15,19 @@ from MP import MpFunctions
 
 from db_management import sqlite_management
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 app = dash.Dash(__name__)
 
 
 async def querying_all(
-    table: list, database: str = 'databases/trading.sqlite3'
+    table: list, database: str = "databases/trading.sqlite3"
 ) -> dict:
     """ """
     from utilities import string_modification as str_mod
 
     result = await sqlite_management.querying_table(table, database)
-    return str_mod.parsing_sqlite_json_output([o['data'] for o in result])
+    return str_mod.parsing_sqlite_json_output([o["data"] for o in result])
 
 
 def transform_result_to_data_frame(data: object):
@@ -38,27 +38,27 @@ def transform_result_to_data_frame(data: object):
     # Column name standardization
     df = df.rename(
         columns={
-            'tick': 'datetime',
-            'open': 'Open',
-            'high': 'High',
-            'low': 'Low',
-            'close': 'Close',
-            'volume': 'volume',
-            'cost': 'cost',
+            "tick": "datetime",
+            "open": "Open",
+            "high": "High",
+            "low": "Low",
+            "close": "Close",
+            "volume": "volume",
+            "cost": "cost",
         }
     )
 
     # transform unix date to utc
-    df['datetime'] = pd.to_datetime(df['datetime'], unit='ms')
+    df["datetime"] = pd.to_datetime(df["datetime"], unit="ms")
 
-    df = df.loc[:, ['datetime', 'Open', 'High', 'Low', 'Close', 'volume']]
-    df = df.set_index(df['datetime'], drop=True, inplace=False)
+    df = df.loc[:, ["datetime", "Open", "High", "Low", "Close", "volume"]]
+    df = df.set_index(df["datetime"], drop=True, inplace=False)
 
-    df['Open'] = df['Open'].round(decimals=2)
-    df['High'] = df['High'].round(decimals=2)
-    df['Low'] = df['Low'].round(decimals=2)
-    df['Close'] = df['Close'].round(decimals=2)
-    df['volume'] = df['volume'].round(decimals=2)
+    df["Open"] = df["Open"].round(decimals=2)
+    df["High"] = df["High"].round(decimals=2)
+    df["Low"] = df["Low"].round(decimals=2)
+    df["Close"] = df["Close"].round(decimals=2)
+    df["volume"] = df["volume"].round(decimals=2)
 
     return df
 
@@ -68,12 +68,10 @@ def get_ticksize(data, freq=30):
     numlen = int(len(data) / 2)
     # sample size for calculating ticksize = 50% of most recent data
     tztail = data.tail(numlen).copy()
-    tztail['tz'] = tztail.Close.rolling(
-        freq
-    ).std()  # std. dev of 30 period rolling
+    tztail["tz"] = tztail.Close.rolling(freq).std()  # std. dev of 30 period rolling
     tztail = tztail.dropna()
     ticksize = np.ceil(
-        tztail['tz'].mean() * 0.25
+        tztail["tz"].mean() * 0.25
     )  # 1/4 th of mean std. dev is our ticksize
 
     if ticksize < 0.2:
@@ -91,21 +89,21 @@ def get_data(url):
     data = response.json()
     df = pd.DataFrame(data)
     df = df.apply(pd.to_numeric)
-    df[0] = pd.to_datetime(df[0], unit='ms')
+    df[0] = pd.to_datetime(df[0], unit="ms")
     df = df[[0, 1, 2, 3, 4, 5]]
-    df.columns = ['datetime', 'Open', 'High', 'Low', 'Close', 'volume']
-    df = df.set_index('datetime', inplace=False, drop=False)
+    df.columns = ["datetime", "Open", "High", "Low", "Close", "volume"]
+    df = df.set_index("datetime", inplace=False, drop=False)
     return df
 
 
-url_30m = 'https://www.binance.com/api/v1/klines?symbol=ETHBUSD&interval=30m'  # 10 days history 30 min ohlcv
+url_30m = "https://www.binance.com/api/v1/klines?symbol=ETHBUSD&interval=30m"  # 10 days history 30 min ohlcv
 
 loop = asyncio.get_event_loop()
-df = loop.run_until_complete(querying_all('ohlc30_eth_perp_json'))
+df = loop.run_until_complete(querying_all("ohlc30_eth_perp_json"))
 df = transform_result_to_data_frame(df)
 log.warning(df)
 
-df.to_csv('ethusd30m.csv', index=False)
+df.to_csv("ethusd30m.csv", index=False)
 
 # params
 context_days = len(
@@ -113,9 +111,11 @@ context_days = len(
 )  # Number of days used for context
 freq = 2  # for 1 min bar use 30 min frequency for each TPO, here we fetch default 30 min bars server
 avglen = context_days - 2  # num days to calculate average values
-mode = 'tpo'  # for volume --> 'vol'
+mode = "tpo"  # for volume --> 'vol'
 trading_hr = 24  # Default for BTC USD or Forex
-day_back = 0  # -1 While testing sometimes maybe you don't want current days data then use -1
+day_back = (
+    0  # -1 While testing sometimes maybe you don't want current days data then use -1
+)
 # ticksz = 28 # If you want to use manual tick size then uncomment this. Really small number means convoluted alphabets (TPO)
 ticksz = (
     get_ticksize(df.copy(), freq=freq)
@@ -123,9 +123,9 @@ ticksz = (
 textsize = 10
 
 if day_back != 0:
-    symbol = 'Historical Mode'
+    symbol = "Historical Mode"
 else:
-    symbol = 'ETH-USD Live'
+    symbol = "ETH-USD Live"
 
 dfnflist = [group[1] for group in df.groupby(df.index.date)]  #
 # log.error (dfnflist)
@@ -134,16 +134,16 @@ dates = []
 for d in range(0, len(dfnflist)):
     dates.append(dfnflist[d].index[0])
 
-date_time_close = dt.datetime.today().strftime('%Y-%m-%d') + ' ' + '23:59:59'
+date_time_close = dt.datetime.today().strftime("%Y-%m-%d") + " " + "23:59:59"
 append_dt = pd.Timestamp(date_time_close)
 dates.append(append_dt)
 date_mark = {
     str(h): {
-        'label': str(h),
-        'style': {
-            'color': 'blue',
-            'fontsize': '4',
-            'text-orientation': 'upright',
+        "label": str(h),
+        "style": {
+            "color": "blue",
+            "fontsize": "4",
+            "text-orientation": "upright",
         },
     }
     for h in range(0, len(dates))
@@ -162,26 +162,26 @@ mplist = mp.get_context()
 app.layout = html.Div(
     html.Div(
         [
-            dcc.Location(id='url', refresh=False),
-            dcc.Link('Twitter', href='https://twitter.com/beinghorizontal'),
+            dcc.Location(id="url", refresh=False),
+            dcc.Link("Twitter", href="https://twitter.com/beinghorizontal"),
             html.Br(),
             dcc.Link(
-                'python source code',
-                href='http://www.github.com/beinghorizontal',
+                "python source code",
+                href="http://www.github.com/beinghorizontal",
             ),
-            html.H4('@beinghorizontal'),
-            dcc.Graph(id='beinghorizontal'),
+            html.H4("@beinghorizontal"),
+            dcc.Graph(id="beinghorizontal"),
             dcc.Interval(
-                id='interval-component',
+                id="interval-component",
                 interval=5
                 * 1000,  # Reduce the time if you want frequent updates 5000 = 5 sec
                 n_intervals=0,
             ),
             html.P(
                 [
-                    html.Label('Time Period'),
+                    html.Label("Time Period"),
                     dcc.RangeSlider(
-                        id='slider',
+                        id="slider",
                         pushable=1,
                         marks=date_mark,
                         min=0,
@@ -191,10 +191,10 @@ app.layout = html.Div(
                     ),
                 ],
                 style={
-                    'width': '80%',
-                    'fontSize': '14px',
-                    'padding-left': '100px',
-                    'display': 'inline-block',
+                    "width": "80%",
+                    "fontSize": "14px",
+                    "padding-left": "100px",
+                    "display": "inline-block",
                 },
             ),
         ]
@@ -203,34 +203,34 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output(component_id='beinghorizontal', component_property='figure'),
-    [Input('interval-component', 'n_intervals'), Input('slider', 'value')],
+    Output(component_id="beinghorizontal", component_property="figure"),
+    [Input("interval-component", "n_intervals"), Input("slider", "value")],
 )
 def update_graph(n, value):
     listmp_hist = mplist[0]
     distribution_hist = mplist[1]
 
-    url_1m = 'https://www.binance.com/api/v1/klines?symbol=BTCBUSD&interval=1m'
+    url_1m = "https://www.binance.com/api/v1/klines?symbol=BTCBUSD&interval=1m"
 
     loop = asyncio.get_event_loop()
-    df = loop.run_until_complete(querying_all('ohlc1_eth_perp_json'))
+    df = loop.run_until_complete(querying_all("ohlc1_eth_perp_json"))
     df_live1 = transform_result_to_data_frame(df)
 
     # df_live1 = get_data(url_1m)  # this line fetches new data for current day
     df_live1 = df_live1.dropna()
 
-    dflive30 = df_live1.resample('30min').agg(
+    dflive30 = df_live1.resample("30min").agg(
         {
-            'datetime': 'last',
-            'Open': 'first',
-            'High': 'max',
-            'Low': 'min',
-            'Close': 'last',
-            'volume': 'sum',
+            "datetime": "last",
+            "Open": "first",
+            "High": "max",
+            "Low": "min",
+            "Close": "last",
+            "volume": "sum",
         }
     )
     df2 = pd.concat([df, dflive30])
-    df2 = df2.drop_duplicates('datetime')
+    df2 = df2.drop_duplicates("datetime")
 
     ticksz_live = get_ticksize(dflive30.copy(), freq=2)
     mplive = MpFunctions(
@@ -272,10 +272,10 @@ def update_graph(n, value):
         data=[
             go.Candlestick(
                 x=df3.index,
-                open=df3['Open'],
-                high=df3['High'],
-                low=df3['Low'],
-                close=df3['Close'],
+                open=df3["Open"],
+                high=df3["High"],
+                low=df3["Low"],
+                close=df3["Close"],
                 showlegend=True,
                 name=symbol,
                 opacity=0.3,
@@ -292,37 +292,35 @@ def update_graph(n, value):
         df1 = DFList[i].copy()
         df_mp = listmp[i]
         irank = ranking.iloc[i]  # select single row from ranking df
-        df_mp['i_date'] = df1['datetime'][0]
+        df_mp["i_date"] = df1["datetime"][0]
         # # @todo: background color for text
-        df_mp['color'] = np.where(
+        df_mp["color"] = np.where(
             np.logical_and(
-                df_mp['close'] > irank.vallist, df_mp['close'] < irank.vahlist
+                df_mp["close"] > irank.vallist, df_mp["close"] < irank.vahlist
             ),
-            'green',
-            'white',
+            "green",
+            "white",
         )
 
-        df_mp = df_mp.set_index('i_date', inplace=False)
+        df_mp = df_mp.set_index("i_date", inplace=False)
 
         # print(df_mp.index)
         fig.add_trace(
             go.Scattergl(
                 x=df_mp.index,
                 y=df_mp.close,
-                mode='text',
+                mode="text",
                 text=df_mp.alphabets,
                 showlegend=False,
-                textposition='top right',
-                textfont=dict(
-                    family='verdana', size=textsize, color=df_mp.color
-                ),
+                textposition="top right",
+                textfont=dict(family="verdana", size=textsize, color=df_mp.color),
             )
         )
 
         if power1[i] < 0:
-            my_rgb = 'rgba({power}, 3, 252, 0.5)'.format(power=abs(165))
+            my_rgb = "rgba({power}, 3, 252, 0.5)".format(power=abs(165))
         else:
-            my_rgb = 'rgba(23, {power}, 3, 0.5)'.format(power=abs(252))
+            my_rgb = "rgba(23, {power}, 3, 0.5)".format(power=abs(252))
 
         brk_f_list_maj = []
         f = 0
@@ -330,17 +328,15 @@ def update_graph(n, value):
             brk_f_list_min = []
             for index, rows in breakdown.iterrows():
                 if rows[f] != 0:
-                    brk_f_list_min.append(
-                        index + str(': ') + str(rows[f]) + '<br />'
-                    )
+                    brk_f_list_min.append(index + str(": ") + str(rows[f]) + "<br />")
             brk_f_list_maj.append(brk_f_list_min)
 
-        breakdown_values = ''  # for bubble callouts
+        breakdown_values = ""  # for bubble callouts
         for st in brk_f_list_maj[i]:
             breakdown_values += st
         commentary_text = (
-            '<br />Insights:<br />High: {}<br />Low: {}<br />Day_Range: {}<br />VAH:  {}<br /> POC:  {}<br /> VAL:  {}<br /> Balance Target:  '
-            '{}<br /> Day Type:  {}<br />strength: {}%<br /><br />strength BreakDown:  {}<br />{}<br />{}'.format(
+            "<br />Insights:<br />High: {}<br />Low: {}<br />Day_Range: {}<br />VAH:  {}<br /> POC:  {}<br /> VAL:  {}<br /> Balance Target:  "
+            "{}<br /> Day Type:  {}<br />strength: {}%<br /><br />strength BreakDown:  {}<br />{}<br />{}".format(
                 dh_list[i],
                 dl_list[i],
                 round(dh_list[i] - dl_list[i], 2),
@@ -350,8 +346,8 @@ def update_graph(n, value):
                 irank.btlist,
                 irank.daytype,
                 irank.power,
-                '',
-                '-------------------',
+                "",
+                "-------------------",
                 breakdown_values,
             )
         )
@@ -359,12 +355,12 @@ def update_graph(n, value):
         fig.add_trace(
             go.Scattergl(
                 x=[irank.date],
-                y=[df3['High'].max() - (ticksz)],
-                mode='markers',
+                y=[df3["High"].max() - (ticksz)],
+                mode="markers",
                 marker=dict(
                     color=my_rgb,
                     size=0.90 * power[i],
-                    line=dict(color='rgb(17, 17, 17)', width=2),
+                    line=dict(color="rgb(17, 17, 17)", width=2),
                 ),
                 # marker_symbol='square',
                 hovertext=commentary_text,
@@ -378,59 +374,59 @@ def update_graph(n, value):
             if lvn > irank.vallist and lvn < irank.vahlist:
                 fig.add_shape(
                     # Line Horizontal
-                    type='line',
+                    type="line",
                     x0=df_mp.index[0],
                     y0=lvn,
                     x1=df_mp.index[0] + dt.timedelta(hours=1),
                     y1=lvn,
                     line=dict(
-                        color='darksalmon',
+                        color="darksalmon",
                         width=2,
-                        dash='dashdot',
+                        dash="dashdot",
                     ),
                 )
 
         fig.add_shape(
-            type='line',
+            type="line",
             x0=df_mp.index[0],
             y0=dl_list[i],
             x1=df_mp.index[0],
             y1=dh_list[i],
             line=dict(
-                color='gray',
+                color="gray",
                 width=1,
-                dash='dashdot',
+                dash="dashdot",
             ),
         )
 
     fig.layout.xaxis.type = (
-        'category'  # This line will omit annoying weekends on the plotly graph
+        "category"  # This line will omit annoying weekends on the plotly graph
     )
 
-    ltp = df1.iloc[-1]['Close']
+    ltp = df1.iloc[-1]["Close"]
     if ltp >= irank.poclist:
-        ltp_color = 'green'
+        ltp_color = "green"
     else:
-        ltp_color = 'red'
+        ltp_color = "red"
 
     fig.add_trace(
         go.Bar(
             x=df3.index,
-            y=df3['volume'],
-            marker=dict(color='magenta'),
-            yaxis='y3',
+            y=df3["volume"],
+            marker=dict(color="magenta"),
+            yaxis="y3",
             name=str(commentary_text),
         )
     )
 
     fig.add_trace(
         go.Scattergl(
-            x=[df3.iloc[-1]['datetime']],
-            y=[df3.iloc[-1]['Close']],
-            mode='text',
-            name='last traded price',
-            text=[str(df3.iloc[-1]['Close'])],
-            textposition='bottom center',
+            x=[df3.iloc[-1]["datetime"]],
+            y=[df3.iloc[-1]["Close"]],
+            mode="text",
+            name="last traded price",
+            text=[str(df3.iloc[-1]["Close"])],
+            textposition="bottom center",
             textfont=dict(size=18, color=ltp_color),
             showlegend=False,
         )
@@ -440,53 +436,53 @@ def update_graph(n, value):
         dticksv = 30
     else:
         dticksv = len(dates)
-    y3min = df3['volume'].min()
-    y3max = df3['volume'].max() * 10
-    ymin = df3['Low'].min()
-    ymax = df3['High'].max() + (4 * ticksz)
+    y3min = df3["volume"].min()
+    y3max = df3["volume"].max() * 10
+    ymin = df3["Low"].min()
+    ymax = df3["High"].max() + (4 * ticksz)
 
     # Adjust height & width according to your monitor size & orientation.
     fig.update_layout(
-        paper_bgcolor='black',
-        plot_bgcolor='black',
+        paper_bgcolor="black",
+        plot_bgcolor="black",
         height=900,
         width=1990,
         xaxis=dict(
             showline=True,
-            color='white',
-            type='category',
-            title_text='Time',
+            color="white",
+            type="category",
+            title_text="Time",
             tickangle=45,
             dtick=dticksv,
-            title_font=dict(size=18, color='white'),
+            title_font=dict(size=18, color="white"),
         ),
         yaxis=dict(
             showline=True,
-            color='white',
+            color="white",
             range=[ymin, ymax],
             showgrid=False,
-            title_text='BTC/USD',
+            title_text="BTC/USD",
         ),
         yaxis2=dict(showgrid=False),
         yaxis3=dict(
             range=[y3min, y3max],
-            overlaying='y',
-            side='right',
-            color='black',
+            overlaying="y",
+            side="right",
+            color="black",
             showgrid=False,
         ),
-        legend=dict(font=dict(color='White', size=14)),
+        legend=dict(font=dict(color="White", size=14)),
     )
 
-    fig.update_layout(yaxis_tickformat='d')
-    fig['layout']['xaxis']['rangeslider']['visible'] = False
-    fig['layout']['xaxis']['tickformat'] = '%H:%M:%S'
+    fig.update_layout(yaxis_tickformat="d")
+    fig["layout"]["xaxis"]["rangeslider"]["visible"] = False
+    fig["layout"]["xaxis"]["tickformat"] = "%H:%M:%S"
 
     # plot(fig, auto_open=True) # For debugging
     return fig
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run_server(
-        port=8000, host='127.0.0.1', debug=True
+        port=8000, host="127.0.0.1", debug=True
     )  # debug=False if executing from ipython(vscode/Pycharm/Spyder)

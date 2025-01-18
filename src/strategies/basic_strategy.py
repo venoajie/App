@@ -20,7 +20,7 @@ def positions_and_orders(current_size: int, current_orders_size: int) -> int:
 
 def ensure_sign_consistency(side) -> float:
     """ """
-    return -1 if side == 'sell' else 1
+    return -1 if side == "sell" else 1
 
 
 def proforma_size(
@@ -53,7 +53,7 @@ def are_size_and_order_appropriate(
 
     ordering_is_ok = False
 
-    if purpose == 'add_position':
+    if purpose == "add_position":
 
         if max_position < 0:
             ordering_is_ok = (proforma) > (max_position)
@@ -61,7 +61,7 @@ def are_size_and_order_appropriate(
         if max_position > 0:
             ordering_is_ok = (proforma) < (max_position)
 
-    if purpose == 'reduce_position':
+    if purpose == "reduce_position":
 
         if current_size_or_open_position < 0:
             ordering_is_ok = proforma > current_size_or_open_position
@@ -70,9 +70,9 @@ def are_size_and_order_appropriate(
             ordering_is_ok = proforma < current_size_or_open_position
 
     log.debug(
-        f'ordering_is_ok  {ordering_is_ok} current_size_or_open_position \
+        f"ordering_is_ok  {ordering_is_ok} current_size_or_open_position \
         {current_size_or_open_position} proforma  {proforma} max_position  \
-            {max_position} current_orders_size  {current_orders_size} next_orders_size  {next_orders_size} '
+            {max_position} current_orders_size  {current_orders_size} next_orders_size  {next_orders_size} "
     )
 
     return ordering_is_ok
@@ -83,9 +83,7 @@ def check_if_next_closing_size_will_not_exceed_the_original(
 ) -> bool:
     """ """
 
-    basic_size_higher_than_next_closing_size = abs(basic_size) >= abs(
-        next_size
-    )
+    basic_size_higher_than_next_closing_size = abs(basic_size) >= abs(next_size)
     basic_size_higher_than_net_size = abs(basic_size) >= abs(net_size)
     basic_size_plus_next_size = (next_size) + (basic_size)
 
@@ -93,14 +91,10 @@ def check_if_next_closing_size_will_not_exceed_the_original(
         pass
 
     if basic_size > 0:
-        basic_size_sign_diff_than_next_size = (
-            basic_size_plus_next_size < basic_size
-        )
+        basic_size_sign_diff_than_next_size = basic_size_plus_next_size < basic_size
 
     if basic_size < 0:
-        basic_size_sign_diff_than_next_size = (
-            basic_size_plus_next_size > basic_size
-        )
+        basic_size_sign_diff_than_next_size = basic_size_plus_next_size > basic_size
 
     # log.debug (f"basic_size_higher_than_next_closing_size {basic_size_higher_than_next_closing_size} basic_size_higher_than_net_size {basic_size_higher_than_net_size} basic_size_plus_next_size {basic_size_plus_next_size} basic_size_sign_diff_than_next_size {basic_size_sign_diff_than_next_size}")
 
@@ -125,14 +119,14 @@ def size_rounding(
     """ """
 
     min_trade_amount = [
-        o['min_trade_amount']
+        o["min_trade_amount"]
         for o in futures_instruments
-        if o['instrument_name'] == instrument_name
+        if o["instrument_name"] == instrument_name
     ][0]
 
     rounded_size = round(proposed_size / min_trade_amount) * min_trade_amount
 
-    return max(min_trade_amount, rounded_size)   # size is never 0
+    return max(min_trade_amount, rounded_size)  # size is never 0
 
 
 def delta(last_price: float, prev_price: float) -> float:
@@ -150,34 +144,30 @@ def get_label(status: str, label_main_or_label_transactions: str) -> str:
     provide transaction label
     """
 
-    if status == 'open':
+    if status == "open":
 
         from configuration import label_numbering
 
         # get open label
-        label = label_numbering.labelling(
-            'open', label_main_or_label_transactions
-        )
+        label = label_numbering.labelling("open", label_main_or_label_transactions)
 
     else:
 
         # parsing label id
-        label_id: int = parsing_label(label_main_or_label_transactions)['int']
+        label_id: int = parsing_label(label_main_or_label_transactions)["int"]
 
         # parsing label strategy
-        label_main: str = parsing_label(label_main_or_label_transactions)[
-            'main'
-        ]
+        label_main: str = parsing_label(label_main_or_label_transactions)["main"]
 
-        if status == 'contra':
+        if status == "contra":
 
-            if 'closed' in label_main_or_label_transactions:
+            if "closed" in label_main_or_label_transactions:
                 label = f"""{label_main}-open-{label_id}"""
 
-            if 'open' in label_main_or_label_transactions:
+            if "open" in label_main_or_label_transactions:
                 label = f"""{label_main}-closed-{label_id}"""
 
-        if status == 'closed':
+        if status == "closed":
 
             # combine id + label strategy
             label: str = f"""{label_main}-closed-{label_id}"""
@@ -194,10 +184,10 @@ def compute_profit_usd(
     """
     get difference between now and transaction time
     """
-    if side == 'buy':
+    if side == "buy":
         delta = currrent_price - transaction_price
 
-    if side == 'sell':
+    if side == "sell":
         delta = transaction_price - currrent_price
 
     profit = delta / transaction_price * abs(size)
@@ -224,18 +214,14 @@ def is_transaction_price_minus_below_threshold(
     last_transaction_price: float, current_price: float, pct_threshold: float
 ) -> bool:
 
-    return (
-        price_minus_pct(last_transaction_price, pct_threshold) >= current_price
-    )
+    return price_minus_pct(last_transaction_price, pct_threshold) >= current_price
 
 
 def is_transaction_price_plus_above_threshold(
     last_transaction_price: float, current_price: float, pct_threshold: float
 ) -> bool:
 
-    return (
-        price_plus_pct(last_transaction_price, pct_threshold) < current_price
-    )
+    return price_plus_pct(last_transaction_price, pct_threshold) < current_price
 
 
 def profit_usd_has_exceed_target(
@@ -268,9 +254,7 @@ def delta_time(server_time, time_stamp) -> int:
     return server_time - time_stamp
 
 
-def is_minimum_waiting_time_has_passed(
-    server_time, time_stamp, time_threshold
-) -> bool:
+def is_minimum_waiting_time_has_passed(server_time, time_stamp, time_threshold) -> bool:
     """
     check whether delta time has exceed time threhold
     """
@@ -287,7 +271,7 @@ def get_max_time_stamp(result_strategy_label) -> int:
     return (
         []
         if result_strategy_label == []
-        else max([o['timestamp'] for o in result_strategy_label])
+        else max([o["timestamp"] for o in result_strategy_label])
     )
 
 
@@ -297,20 +281,16 @@ def get_order_id_max_time_stamp(result_strategy_label) -> int:
         0
         if get_max_time_stamp(result_strategy_label) == []
         else [
-            o['order_id']
+            o["order_id"]
             for o in result_strategy_label
-            if o['timestamp'] == get_max_time_stamp(result_strategy_label)
+            if o["timestamp"] == get_max_time_stamp(result_strategy_label)
         ][0]
     )
 
 
 def get_transactions_len(result_strategy_label) -> int:
     """ """
-    return (
-        0
-        if result_strategy_label == []
-        else len([o for o in result_strategy_label])
-    )
+    return 0 if result_strategy_label == [] else len([o for o in result_strategy_label])
 
 
 def get_transactions_sum(result_strategy_label) -> int:
@@ -320,7 +300,7 @@ def get_transactions_sum(result_strategy_label) -> int:
     return (
         0
         if result_strategy_label == []
-        else sum([o['amount'] for o in result_strategy_label])
+        else sum([o["amount"] for o in result_strategy_label])
     )
 
 
@@ -328,42 +308,42 @@ def get_transaction_side(transaction: dict) -> str:
     """ """
 
     try:
-        return transaction['direction']
+        return transaction["direction"]
 
     except:
-        return transaction['side']
+        return transaction["side"]
 
 
 def get_transaction_size(transaction: dict) -> int:
     """ """
-    return transaction['amount']
+    return transaction["amount"]
 
 
 def get_transaction_instrument(transaction: dict) -> int:
     """ """
-    return transaction['instrument_name']
+    return transaction["instrument_name"]
 
 
 def get_transaction_label(transaction: dict) -> str:
     """ """
-    return transaction['label']
+    return transaction["label"]
 
 
 def get_transaction_price(transaction: dict) -> float:
     """ """
-    return transaction['price']
+    return transaction["price"]
 
 
 def get_label_integer(label: dict) -> bool:
     """ """
 
-    return parsing_label(label)['int']
+    return parsing_label(label)["int"]
 
 
 def get_order_label(data_from_db: list) -> list:
     """ """
 
-    return [o['label'] for o in data_from_db]
+    return [o["label"] for o in data_from_db]
 
 
 def get_label_super_main(result: list, strategy_label: str) -> list:
@@ -372,15 +352,15 @@ def get_label_super_main(result: list, strategy_label: str) -> list:
     return [
         o
         for o in result
-        if parsing_label(strategy_label)['super_main']
-        == parsing_label(o['label'])['super_main']
+        if parsing_label(strategy_label)["super_main"]
+        == parsing_label(o["label"])["super_main"]
     ]
 
 
 def combine_vars_to_get_future_spread_label(timestamp: int) -> str:
     """ """
 
-    return f'futureSpread-open-{timestamp}'
+    return f"futureSpread-open-{timestamp}"
 
 
 def check_if_id_has_used_before(
@@ -394,7 +374,7 @@ def check_if_id_has_used_before(
     - one label could be processed couple of time (especially when closing the transactions)
     """
 
-    id = f'{id_checked}'
+    id = f"{id_checked}"
     # log.error (f"id {id}")
     if combined_result != []:
         result_order_id = [o[id] for o in combined_result]
@@ -402,9 +382,7 @@ def check_if_id_has_used_before(
     label_is_exist: list = (
         False
         if (combined_result == [] or result_order_id == [])
-        else False
-        if transaction_id not in result_order_id
-        else True
+        else False if transaction_id not in result_order_id else True
     )
 
     return label_is_exist
@@ -416,11 +394,11 @@ def provide_side_to_close_transaction(transaction: dict) -> str:
     # determine side
     transaction_side = get_transaction_side(transaction)
 
-    if transaction_side == 'sell':
-        side = 'buy'
+    if transaction_side == "sell":
+        side = "buy"
 
-    if transaction_side == 'buy':
-        side = 'sell'
+    if transaction_side == "buy":
+        side = "sell"
 
     return side
 
@@ -432,18 +410,13 @@ def sum_order_under_closed_label_int(
 
     if closed_orders_label_strategy:
         order_under_closed_label_int = [
-            o
-            for o in closed_orders_label_strategy
-            if label_integer_open in o['label']
+            o for o in closed_orders_label_strategy if label_integer_open in o["label"]
         ]
 
     return (
         0
-        if (
-            closed_orders_label_strategy == []
-            or order_under_closed_label_int == []
-        )
-        else sum([o['amount'] for o in order_under_closed_label_int])
+        if (closed_orders_label_strategy == [] or order_under_closed_label_int == [])
+        else sum([o["amount"] for o in order_under_closed_label_int])
     )
 
 
@@ -464,7 +437,7 @@ def is_label_and_side_consistent(non_checked_strategies, params) -> bool:
     # log.error (f"params {params}")
     label = get_transaction_label(params)
 
-    is_consistent = True if 'closed' in label else False
+    is_consistent = True if "closed" in label else False
     # log.warning(f"params {params}")
 
     if bool([o for o in non_checked_strategies if (o in label)]):
@@ -472,26 +445,22 @@ def is_label_and_side_consistent(non_checked_strategies, params) -> bool:
 
     else:
 
-        if 'open' in label:
+        if "open" in label:
 
             side = get_transaction_side(params)
 
-            if side == 'sell':
+            if side == "sell":
 
                 is_consistent = (
                     True
-                    if (
-                        'Short' in label
-                        or 'hedging' in label
-                        or 'custom' in label
-                    )
+                    if ("Short" in label or "hedging" in label or "custom" in label)
                     else False
                 )
 
-                log.warning(f'is_consistent {is_consistent}')
+                log.warning(f"is_consistent {is_consistent}")
 
-            if side == 'buy':
-                is_consistent = True if 'Long' in label else False
+            if side == "buy":
+                is_consistent = True if "Long" in label else False
 
     return is_consistent
 
@@ -500,16 +469,14 @@ def get_take_profit_pct(transaction: dict, strategy_config: dict) -> float:
     """ """
 
     try:
-        tp_pct: float = transaction['profit_target_pct_transaction']
+        tp_pct: float = transaction["profit_target_pct_transaction"]
     except:
-        tp_pct: float = strategy_config['take_profit_pct']
+        tp_pct: float = strategy_config["take_profit_pct"]
 
     return tp_pct
 
 
-def reading_from_db(
-    end_point, instrument: str = None, status: str = None
-) -> list:
+def reading_from_db(end_point, instrument: str = None, status: str = None) -> list:
     """ """
     from utilities import pickling, system_tools
 
@@ -521,11 +488,7 @@ def reading_from_db(
 def get_non_label_from_transaction(transactions) -> list:
     """ """
 
-    return (
-        []
-        if transactions == []
-        else [o for o in transactions if o['label'] == '']
-    )
+    return [] if transactions == [] else [o for o in transactions if o["label"] == ""]
 
 
 def check_db_consistencies(
@@ -538,9 +501,7 @@ def check_db_consistencies(
     """ """
 
     no_non_label_from_from_sqlite_open = (
-        False
-        if get_non_label_from_transaction(order_from_sqlite_open) != []
-        else True
+        False if get_non_label_from_transaction(order_from_sqlite_open) != [] else True
     )
 
     len_from_sqlite_open = len(order_from_sqlite_open)
@@ -550,7 +511,7 @@ def check_db_consistencies(
     sum_my_trades_sqlite = (
         0
         if trades_from_sqlite == []
-        else sum([o['amount'] for o in trades_from_sqlite])
+        else sum([o["amount"] for o in trades_from_sqlite])
     )
 
     size_from_position: int = (
@@ -558,15 +519,15 @@ def check_db_consistencies(
         if positions_from_sub_account == []
         else sum(
             [
-                o['size']
+                o["size"]
                 for o in positions_from_sub_account
-                if o['instrument_name'] == instrument_name
+                if o["instrument_name"] == instrument_name
             ]
         )
     )
 
     log.error(
-        f'size_is_consistent {sum_my_trades_sqlite == size_from_position} sum_my_trades_sqlite {sum_my_trades_sqlite} size_from_positions {size_from_position} '
+        f"size_is_consistent {sum_my_trades_sqlite == size_from_position} sum_my_trades_sqlite {sum_my_trades_sqlite} size_from_positions {size_from_position} "
     )
     return dict(
         trade_size_is_consistent=sum_my_trades_sqlite == size_from_position,
@@ -574,9 +535,11 @@ def check_db_consistencies(
             len_open_orders_from_sub_accounts == len_from_sqlite_open
             and no_non_label_from_from_sqlite_open
         ),
-        no_non_label_from_from_sqlite_open=False
-        if get_non_label_from_transaction(order_from_sqlite_open) != []
-        else True,
+        no_non_label_from_from_sqlite_open=(
+            False
+            if get_non_label_from_transaction(order_from_sqlite_open) != []
+            else True
+        ),
     )
 
 
@@ -585,7 +548,6 @@ def get_basic_closing_paramaters(
     closed_orders_label_strategy: list,
     closed_label_status: str = None,
 ) -> dict:
-
     """ """
 
     transaction: dict = convert_list_to_dict(selected_transaction)
@@ -595,11 +557,11 @@ def get_basic_closing_paramaters(
 
     # determine side
     side = provide_side_to_close_transaction(transaction)
-    params.update({'side': side})
+    params.update({"side": side})
 
     basic_size = get_transaction_size(transaction)
 
-    label_transaction = transaction['label']
+    label_transaction = transaction["label"]
     label_integer_open = get_label_integer(label_transaction)
 
     sum_order_under_closed_label = sum_order_under_closed_label_int(
@@ -616,23 +578,23 @@ def get_basic_closing_paramaters(
     )
 
     log.debug(
-        f'sum_order_under_closed_label {sum_order_under_closed_label} label_integer_open {label_integer_open}'
+        f"sum_order_under_closed_label {sum_order_under_closed_label} label_integer_open {label_integer_open}"
     )
 
     # size=exactly amount of transaction size
-    params.update({'size': size if closing_size_ok else 0})
+    params.update({"size": size if closing_size_ok else 0})
 
     if closed_label_status is None:
 
-        label_closed: str = get_label('closed', label_transaction)
+        label_closed: str = get_label("closed", label_transaction)
 
     else:
 
         label_closed: str = get_label(closed_label_status, label_transaction)
 
-    params.update({'label': label_closed})
+    params.update({"label": label_closed})
 
-    params.update({'instrument_name': transaction['instrument_name']})
+    params.update({"instrument_name": transaction["instrument_name"]})
 
     return params
 
@@ -653,24 +615,24 @@ def get_basic_closing_paramaters_combo_pair(
     params = {}
 
     # default type: limit
-    params.update({'type': 'limit'})
+    params.update({"type": "limit"})
 
     # determine side
-    side = 'buy'
-    params.update({'side': side})
-    basic_size = abs(max([o['amount'] for o in selected_transactions]))
+    side = "buy"
+    params.update({"side": side})
+    basic_size = abs(max([o["amount"] for o in selected_transactions]))
 
-    label_integer_open = [o['label'] for o in selected_transactions][0]
-    log.warning(f'label_integer_open {label_integer_open}')
+    label_integer_open = [o["label"] for o in selected_transactions][0]
+    log.warning(f"label_integer_open {label_integer_open}")
 
-    instrument_name = [o['combo_id'] for o in selected_transactions][0]
+    instrument_name = [o["combo_id"] for o in selected_transactions][0]
 
-    params.update({'size': basic_size})
+    params.update({"size": basic_size})
 
-    label_closed: str = get_label('closed', label_integer_open)
-    params.update({'label': label_closed})
+    label_closed: str = get_label("closed", label_integer_open)
+    params.update({"label": label_closed})
 
-    params.update({'instrument_name': instrument_name})
+    params.update({"instrument_name": instrument_name})
 
     return params
 
@@ -732,22 +694,22 @@ class BasicStrategy(ManageStrategy):
         params = {}
 
         # default type: limit
-        params.update({'type': 'limit'})
+        params.update({"type": "limit"})
 
         strategy_config: dict = self.strategy_parameters
 
-        side: str = strategy_config['side']
+        side: str = strategy_config["side"]
 
-        params.update({'side': side})
+        params.update({"side": side})
 
-        if side == 'sell':
-            params.update({'entry_price': ask_price})
+        if side == "sell":
+            params.update({"entry_price": ask_price})
 
-        if side == 'buy':
-            params.update({'entry_price': bid_price})
+        if side == "buy":
+            params.update({"entry_price": bid_price})
 
-        label_open: str = get_label('open', self.strategy_label)
-        params.update({'label': label_open})
+        label_open: str = get_label("open", self.strategy_label)
+        params.update({"label": label_open})
 
         return params
 

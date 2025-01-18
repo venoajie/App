@@ -10,7 +10,6 @@ async def saving_transaction_log(
     transaction_log,
     first_tick_fr_sqlite,
 ) -> None:
-
     """
     Saving result from Deribit transaction log API request
     and distributed them into each db: trading and non-trading.
@@ -21,17 +20,17 @@ async def saving_transaction_log(
 
         for transaction in transaction_log:
 
-            timestamp = transaction['timestamp']
+            timestamp = transaction["timestamp"]
 
             # remove unnecessary element (kalau dihapus, error pada saat insert)
-            modified_dict = remove_dict_elements(transaction, 'info')
+            modified_dict = remove_dict_elements(transaction, "info")
 
             # get Transaction type
-            type_log = modified_dict['type']
+            type_log = modified_dict["type"]
 
             # type: trading
             if (
-                'trade' in type_log or 'delivery' in type_log
+                "trade" in type_log or "delivery" in type_log
             ) and timestamp > first_tick_fr_sqlite:
 
                 # save to trading db
@@ -41,5 +40,5 @@ async def saving_transaction_log(
             else:
 
                 # save to non-trading db
-                table = f'transaction_log_json'
+                table = f"transaction_log_json"
                 await insert_tables(table, transaction)

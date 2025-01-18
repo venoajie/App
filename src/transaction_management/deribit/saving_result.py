@@ -33,9 +33,8 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def saving_ws_data(queue):
-
     """ """
-    log.critical('Saving result')
+    log.critical("Saving result")
     # registering strategy config file
 
     try:
@@ -48,49 +47,45 @@ async def saving_ws_data(queue):
 
             message: str = await queue.get()
 
-            message_channel: str = message['channel']
+            message_channel: str = message["channel"]
 
-            data: dict = message['data']
+            data: dict = message["data"]
 
-            currency: str = message['currency']
+            currency: str = message["currency"]
 
             currency_lower: str = currency.lower()
 
-            WHERE_FILTER_TICK: str = 'tick'
+            WHERE_FILTER_TICK: str = "tick"
 
-            TABLE_OHLC1: str = f'ohlc{resolution}_{currency_lower}_perp_json'
+            TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
 
             instrument_ticker = (message_channel)[19:]
-            if message_channel == f'incremental_ticker.{instrument_ticker}':
+            if message_channel == f"incremental_ticker.{instrument_ticker}":
 
-                my_path_ticker = provide_path_for_file(
-                    'ticker', instrument_ticker
-                )
+                my_path_ticker = provide_path_for_file("ticker", instrument_ticker)
 
                 distribute_ticker_result_as_per_data_type(
                     my_path_ticker,
                     data,
                 )
 
-                if 'PERPETUAL' in data['instrument_name']:
+                if "PERPETUAL" in data["instrument_name"]:
 
                     await inserting_open_interest(
                         currency, WHERE_FILTER_TICK, TABLE_OHLC1, data
                     )
 
-            DATABASE: str = 'databases/trading.sqlite3'
+            DATABASE: str = "databases/trading.sqlite3"
 
-            if 'chart.trades' in message_channel:
+            if "chart.trades" in message_channel:
 
                 chart_trades_buffer.append(data)
 
                 if len(chart_trades_buffer) > 3:
 
-                    instrument_ticker = ((message_channel)[13:]).partition(
-                        '.'
-                    )[0]
+                    instrument_ticker = ((message_channel)[13:]).partition(".")[0]
 
-                    if 'PERPETUAL' in instrument_ticker:
+                    if "PERPETUAL" in instrument_ticker:
 
                         for data in chart_trades_buffer:
                             await ohlc_result_per_time_frame(
@@ -103,15 +98,15 @@ async def saving_ws_data(queue):
 
                         chart_trades_buffer = []
 
-            if message_channel == f'user.portfolio.{currency_lower}':
+            if message_channel == f"user.portfolio.{currency_lower}":
 
-                await update_db_pkl('portfolio', data, currency_lower)
+                await update_db_pkl("portfolio", data, currency_lower)
 
     except Exception as error:
 
         parse_error_message(error)
 
-        await telegram_bot_sendtext(f'saving result {error}', 'general_error')
+        await telegram_bot_sendtext(f"saving result {error}", "general_error")
 
 
 def distribute_ticker_result_as_per_data_type(
@@ -120,7 +115,7 @@ def distribute_ticker_result_as_per_data_type(
 ) -> None:
     """ """
 
-    if data_orders['type'] == 'snapshot':
+    if data_orders["type"] == "snapshot":
         replace_data(my_path_ticker, data_orders)
 
     else:

@@ -34,7 +34,7 @@ def combining_ticker_data(instruments_name):
     result = []
     for instrument_name in instruments_name:
 
-        result_instrument = reading_from_pkl_data('ticker', instrument_name)
+        result_instrument = reading_from_pkl_data("ticker", instrument_name)
 
         if result_instrument:
             result_instrument = result_instrument[0]
@@ -62,7 +62,7 @@ def update_cached_ticker(
     """
 
     instrument_ticker: list = [
-        o for o in ticker if instrument_name in o['instrument_name']
+        o for o in ticker if instrument_name in o["instrument_name"]
     ]
 
     if instrument_ticker:
@@ -70,39 +70,36 @@ def update_cached_ticker(
         for item in data_orders:
 
             if (
-                'stats' not in item
-                and 'instrument_name' not in item
-                and 'type' not in item
+                "stats" not in item
+                and "instrument_name" not in item
+                and "type" not in item
             ):
-                [o for o in ticker if instrument_name in o['instrument_name']][
-                    0
-                ][item] = data_orders[item]
+                [o for o in ticker if instrument_name in o["instrument_name"]][0][
+                    item
+                ] = data_orders[item]
 
-            if 'stats' in item:
+            if "stats" in item:
 
                 data_orders_stat = data_orders[item]
 
                 for item in data_orders_stat:
-                    [
-                        o
-                        for o in ticker
-                        if instrument_name in o['instrument_name']
-                    ][0]['stats'][item] = data_orders_stat[item]
+                    [o for o in ticker if instrument_name in o["instrument_name"]][0][
+                        "stats"
+                    ][item] = data_orders_stat[item]
 
     else:
         from loguru import logger as log
 
-        log.warning(f' {ticker}')
-        log.debug(f' {instrument_name}')
+        log.warning(f" {ticker}")
+        log.debug(f" {instrument_name}")
 
-        log.critical(f'instrument_ticker before {instrument_ticker}')
+        log.critical(f"instrument_ticker before {instrument_ticker}")
         # combining_order_data(currencies)
-        log.debug(f'instrument_ticker after []-not ok {instrument_ticker}')
+        log.debug(f"instrument_ticker after []-not ok {instrument_ticker}")
 
 
 # Using the LRUCache decorator function with a maximum cache size of 3
 async def combining_order_data(private_data: object, currencies: list) -> list:
-
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
     https://medium.com/@jodielovesmaths/memoization-in-python-using-cache-36b676cb21ef
@@ -123,7 +120,7 @@ async def combining_order_data(private_data: object, currencies: list) -> list:
 
         sub_accounts = await private_data.get_subaccounts_details(currency)
 
-        my_path_sub_account = provide_path_for_file('sub_accounts', currency)
+        my_path_sub_account = provide_path_for_file("sub_accounts", currency)
 
         replace_data(my_path_sub_account, sub_accounts)
 
@@ -131,7 +128,7 @@ async def combining_order_data(private_data: object, currencies: list) -> list:
 
             sub_account = sub_accounts[0]
 
-            sub_account_orders = sub_account['open_orders']
+            sub_account_orders = sub_account["open_orders"]
 
             if sub_account_orders:
 
@@ -165,18 +162,18 @@ async def update_cached_orders_(queue_orders_all, queue_orders, queue: dict):
 
                 # message_channel: str = message["channel"]
 
-                data_orders: dict = message['data']
+                data_orders: dict = message["data"]
 
-                log.warning(f' user.changes.any data {data_orders}')
+                log.warning(f" user.changes.any data {data_orders}")
                 # if "user.changes.any" in message_channel:
 
                 # print(f"data_orders {data_orders}")
 
                 if data_orders:
 
-                    orders = data_orders['orders']
+                    orders = data_orders["orders"]
 
-                    trades = data_orders['trades']
+                    trades = data_orders["trades"]
 
                     if orders:
 
@@ -184,12 +181,10 @@ async def update_cached_orders_(queue_orders_all, queue_orders, queue: dict):
 
                             for trade in trades:
 
-                                order_id = trade['order_id']
+                                order_id = trade["order_id"]
 
                                 selected_order = [
-                                    o
-                                    for o in orders_all
-                                    if order_id in o['order_id']
+                                    o for o in orders_all if order_id in o["order_id"]
                                 ]
 
                                 if selected_order:
@@ -198,32 +193,28 @@ async def update_cached_orders_(queue_orders_all, queue_orders, queue: dict):
 
                         if orders:
 
-                            log.debug(
-                                f' orders_currency_all before {len(orders_all)}'
-                            )
+                            log.debug(f" orders_currency_all before {len(orders_all)}")
 
                             for order in orders:
 
-                                print(f'cached order {order}')
+                                print(f"cached order {order}")
 
-                                order_state = order['order_state']
+                                order_state = order["order_state"]
 
                                 if (
-                                    order_state == 'cancelled'
-                                    or order_state == 'filled'
+                                    order_state == "cancelled"
+                                    or order_state == "filled"
                                 ):
 
-                                    order_id = order['order_id']
+                                    order_id = order["order_id"]
 
                                     selected_order = [
                                         o
                                         for o in orders_all
-                                        if order_id in o['order_id']
+                                        if order_id in o["order_id"]
                                     ]
 
-                                    print(
-                                        f'caching selected_order {selected_order}'
-                                    )
+                                    print(f"caching selected_order {selected_order}")
 
                                     if selected_order:
 
@@ -233,9 +224,7 @@ async def update_cached_orders_(queue_orders_all, queue_orders, queue: dict):
 
                                     orders_all.append(order)
 
-                            log.error(
-                                f' orders_currency_all after {len(orders_all)}'
-                            )
+                            log.error(f" orders_currency_all after {len(orders_all)}")
 
                         # print(f"orders_all {orders_all}")
                     await queue.put(orders_all)
@@ -263,9 +252,9 @@ async def update_cached_orders(queue_orders_all, queue_orders):
 
         if queue_orders:
 
-            orders = queue_orders['orders']
+            orders = queue_orders["orders"]
 
-            trades = queue_orders['trades']
+            trades = queue_orders["trades"]
 
             if orders:
 
@@ -273,10 +262,10 @@ async def update_cached_orders(queue_orders_all, queue_orders):
 
                     for trade in trades:
 
-                        order_id = trade['order_id']
+                        order_id = trade["order_id"]
 
                         selected_order = [
-                            o for o in orders_all if order_id in o['order_id']
+                            o for o in orders_all if order_id in o["order_id"]
                         ]
 
                         if selected_order:
@@ -287,24 +276,19 @@ async def update_cached_orders(queue_orders_all, queue_orders):
 
                     for order in orders:
 
-                        print(f'cached order {order}')
+                        print(f"cached order {order}")
 
-                        order_state = order['order_state']
+                        order_state = order["order_state"]
 
-                        if (
-                            order_state == 'cancelled'
-                            or order_state == 'filled'
-                        ):
+                        if order_state == "cancelled" or order_state == "filled":
 
-                            order_id = order['order_id']
+                            order_id = order["order_id"]
 
                             selected_order = [
-                                o
-                                for o in orders_all
-                                if order_id in o['order_id']
+                                o for o in orders_all if order_id in o["order_id"]
                             ]
 
-                            print(f'caching selected_order {selected_order}')
+                            print(f"caching selected_order {selected_order}")
 
                             if selected_order:
 

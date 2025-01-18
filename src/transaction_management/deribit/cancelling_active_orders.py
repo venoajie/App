@@ -55,36 +55,33 @@ async def cancelling_orders(
     config_app: list,
     queue,
 ):
-
     """ """
-    log.critical('Cancelling_active_orders')
+    log.critical("Cancelling_active_orders")
 
     try:
 
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # get tradable strategies
-        tradable_config_app = config_app['tradable']
+        tradable_config_app = config_app["tradable"]
 
         # get tradable currencies
         # currencies_spot= ([o["spot"] for o in tradable_config_app]) [0]
-        currencies = ([o['spot'] for o in tradable_config_app])[0]
+        currencies = ([o["spot"] for o in tradable_config_app])[0]
 
         # currencies= random.sample(currencies_spot,len(currencies_spot))
 
-        strategy_attributes = config_app['strategies']
+        strategy_attributes = config_app["strategies"]
 
         strategy_attributes_active = [
-            o for o in strategy_attributes if o['is_active'] == True
+            o for o in strategy_attributes if o["is_active"] == True
         ]
 
-        active_strategies = [
-            o['strategy_label'] for o in strategy_attributes_active
-        ]
+        active_strategies = [o["strategy_label"] for o in strategy_attributes_active]
 
-        relevant_tables = config_app['relevant_tables'][0]
+        relevant_tables = config_app["relevant_tables"][0]
 
-        order_db_table = relevant_tables['orders_table']
+        order_db_table = relevant_tables["orders_table"]
 
         settlement_periods = get_settlement_period(strategy_attributes)
 
@@ -93,14 +90,12 @@ async def cancelling_orders(
             settlement_periods,
         )
 
-        instrument_attributes_futures_all = futures_instruments[
-            'active_futures'
-        ]
+        instrument_attributes_futures_all = futures_instruments["active_futures"]
 
-        instruments_name = futures_instruments['instruments_name']
+        instruments_name = futures_instruments["instruments_name"]
 
         # filling currencies attributes
-        my_path_cur = provide_path_for_file('currencies')
+        my_path_cur = provide_path_for_file("currencies")
         replace_data(my_path_cur, currencies)
 
         resolutions = [60, 15, 5]
@@ -119,26 +114,23 @@ async def cancelling_orders(
             queue.task_done
             # message: str = queue.get()
 
-            message_channel: str = message['channel']
+            message_channel: str = message["channel"]
             # log.debug(f"message_channel {message_channel}")
 
-            data_orders: dict = message['data']
+            data_orders: dict = message["data"]
 
-            orders_all: dict = message['orders_all']
+            orders_all: dict = message["orders_all"]
 
-            currency: str = message['currency']
+            currency: str = message["currency"]
 
             currency_lower: str = currency
 
             currency_upper: str = currency.upper()
 
-            instrument_name_perpetual = f'{currency_upper}-PERPETUAL'
+            instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
             instrument_name_future = (message_channel)[19:]
-            if (
-                message_channel
-                == f'incremental_ticker.{instrument_name_future}'
-            ):
+            if message_channel == f"incremental_ticker.{instrument_name_future}":
 
                 update_cached_ticker(
                     instrument_name_future,
@@ -155,23 +147,21 @@ async def cancelling_orders(
                 if not chart_trade:
 
                     # get portfolio data
-                    portfolio = reading_from_pkl_data('portfolio', currency)[0]
+                    portfolio = reading_from_pkl_data("portfolio", currency)[0]
 
-                    equity: float = portfolio['equity']
+                    equity: float = portfolio["equity"]
 
                     ticker_perpetual_instrument_name = [
                         o
                         for o in ticker_all
-                        if instrument_name_perpetual in o['instrument_name']
+                        if instrument_name_perpetual in o["instrument_name"]
                     ][0]
 
                     index_price = get_index(
                         data_orders, ticker_perpetual_instrument_name
                     )
 
-                    sub_account = reading_from_pkl_data(
-                        'sub_accounts', currency
-                    )
+                    sub_account = reading_from_pkl_data("sub_accounts", currency)
 
                     sub_account = sub_account[0]
 
@@ -182,7 +172,7 @@ async def cancelling_orders(
                     if sub_account:
 
                         query_trades = (
-                            f'SELECT * FROM  v_{currency_lower}_trading_active'
+                            f"SELECT * FROM  v_{currency_lower}_trading_active"
                         )
 
                         my_trades_currency_all_transactions: list = (
@@ -195,9 +185,9 @@ async def cancelling_orders(
                             else [
                                 o
                                 for o in my_trades_currency_all_transactions
-                                if o['instrument_name']
+                                if o["instrument_name"]
                                 in [
-                                    o['instrument_name']
+                                    o["instrument_name"]
                                     for o in instrument_attributes_futures_all
                                 ]
                             ]
@@ -209,17 +199,16 @@ async def cancelling_orders(
                             else [
                                 o
                                 for o in orders_all
-                                if currency_upper in o['instrument_name']
+                                if currency_upper in o["instrument_name"]
                             ]
                         )
 
-                        position = [o for o in sub_account['positions']]
+                        position = [o for o in sub_account["positions"]]
                         # log.debug (f"position {position}")
                         position_without_combo = [
                             o
                             for o in position
-                            if f'{currency_upper}-FS'
-                            not in o['instrument_name']
+                            if f"{currency_upper}-FS" not in o["instrument_name"]
                         ]
 
                         server_time = get_now_unix_time()
@@ -237,7 +226,7 @@ async def cancelling_orders(
                             my_trades_currency: list = [
                                 o
                                 for o in my_trades_currency_all
-                                if o['label'] is not None
+                                if o["label"] is not None
                             ]
 
                             notional: float = compute_notional_value(
@@ -249,13 +238,13 @@ async def cancelling_orders(
                                 strategy_params = [
                                     o
                                     for o in strategy_attributes
-                                    if o['strategy_label'] == strategy
+                                    if o["strategy_label"] == strategy
                                 ][0]
 
                                 my_trades_currency_strategy = [
                                     o
                                     for o in my_trades_currency
-                                    if strategy in (o['label'])
+                                    if strategy in (o["label"])
                                 ]
 
                                 orders_currency_strategy = (
@@ -264,16 +253,16 @@ async def cancelling_orders(
                                     else [
                                         o
                                         for o in orders_currency
-                                        if strategy in (o['label'])
+                                        if strategy in (o["label"])
                                     ]
                                 )
 
-                                if 'futureSpread' in strategy:
+                                if "futureSpread" in strategy:
 
                                     strategy_params = [
                                         o
                                         for o in strategy_attributes
-                                        if o['strategy_label'] == strategy
+                                        if o["strategy_label"] == strategy
                                     ][0]
 
                                     combo_auto = ComboAuto(
@@ -288,21 +277,21 @@ async def cancelling_orders(
 
                                     if orders_currency_strategy:
                                         for order in orders_currency_strategy:
-                                            cancel_allowed: dict = await combo_auto.is_cancelling_orders_allowed(
-                                                order,
-                                                server_time,
+                                            cancel_allowed: dict = (
+                                                await combo_auto.is_cancelling_orders_allowed(
+                                                    order,
+                                                    server_time,
+                                                )
                                             )
 
-                                            if cancel_allowed[
-                                                'cancel_allowed'
-                                            ]:
+                                            if cancel_allowed["cancel_allowed"]:
                                                 await modify_order_and_db.if_cancel_is_true(
                                                     order_db_table,
                                                     cancel_allowed,
                                                 )
 
                                 if (
-                                    'hedgingSpot' in strategy
+                                    "hedgingSpot" in strategy
                                     and size_perpetuals_reconciled
                                 ):
 
@@ -321,15 +310,15 @@ async def cancelling_orders(
                                     if orders_currency_strategy:
 
                                         for order in orders_currency_strategy:
-                                            cancel_allowed: dict = await hedging.is_cancelling_orders_allowed(
-                                                order,
-                                                orders_currency_strategy,
-                                                server_time,
+                                            cancel_allowed: dict = (
+                                                await hedging.is_cancelling_orders_allowed(
+                                                    order,
+                                                    orders_currency_strategy,
+                                                    server_time,
+                                                )
                                             )
 
-                                            if cancel_allowed[
-                                                'cancel_allowed'
-                                            ]:
+                                            if cancel_allowed["cancel_allowed"]:
                                                 await modify_order_and_db.if_cancel_is_true(
                                                     order_db_table,
                                                     cancel_allowed,
@@ -340,7 +329,7 @@ async def cancelling_orders(
         parse_error_message(error)
 
         await telegram_bot_sendtext(
-            f'cancelling active orders - {error}', 'general_error'
+            f"cancelling active orders - {error}", "general_error"
         )
 
 
@@ -348,7 +337,7 @@ def get_settlement_period(strategy_attributes) -> list:
 
     return remove_redundant_elements(
         remove_double_brackets_in_list(
-            [o['settlement_period'] for o in strategy_attributes]
+            [o["settlement_period"] for o in strategy_attributes]
         )
     )
 
@@ -360,11 +349,11 @@ async def chart_trade_in_msg(
 ):
     """ """
 
-    if 'chart.trades' in message_channel:
-        tick_from_exchange = data_orders['tick']
+    if "chart.trades" in message_channel:
+        tick_from_exchange = data_orders["tick"]
 
         tick_from_cache = max(
-            [o['max_tick'] for o in candles_data if o['resolution'] == 5]
+            [o["max_tick"] for o in candles_data if o["resolution"] == 5]
         )
 
         if tick_from_exchange <= tick_from_cache:
@@ -372,7 +361,7 @@ async def chart_trade_in_msg(
 
         else:
 
-            log.warning('update ohlc')
+            log.warning("update ohlc")
 
     else:
 
@@ -394,13 +383,13 @@ def compute_notional_value(index_price: float, equity: float) -> float:
 def get_index(data_orders: dict, ticker: dict) -> float:
 
     try:
-        index_price = data_orders['index_price']
+        index_price = data_orders["index_price"]
 
     except:
 
-        index_price = ticker['index_price']
+        index_price = ticker["index_price"]
 
         if index_price == []:
-            index_price = ticker['estimated_delivery_price']
+            index_price = ticker["estimated_delivery_price"]
 
     return index_price

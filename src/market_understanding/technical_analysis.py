@@ -41,7 +41,7 @@ async def cleaned_up_ohlc(price: str, table: str, window: int = 100) -> list:
 
     # pick value only
     ohlc = [o[price] for o in ohlc_all]
-    tick = [o['tick'] for o in ohlc_all]
+    tick = [o["tick"] for o in ohlc_all]
 
     ohlc.reverse()
     tick.reverse()
@@ -64,12 +64,7 @@ async def get_ema(ohlc, ratio: float = 0.9) -> dict:
     """
 
     return round(
-        sum(
-            [
-                ratio * ohlc[-x - 1] * ((1 - ratio) ** x)
-                for x in range(len(ohlc))
-            ]
-        ),
+        sum([ratio * ohlc[-x - 1] * ((1 - ratio) ** x) for x in range(len(ohlc))]),
         2,
     )
 
@@ -83,39 +78,35 @@ async def get_vwap(ohlc_all, vwap_period) -> dict:
     import numpy as np
     import pandas as pd
 
-    df = pd.DataFrame(ohlc_all, columns=['close', 'volume'])
+    df = pd.DataFrame(ohlc_all, columns=["close", "volume"])
 
     return (
-        df['volume']
+        df["volume"]
         .rolling(window=vwap_period)
-        .apply(lambda x: np.dot(x, df['close']) / x.sum(), raw=False)
+        .apply(lambda x: np.dot(x, df["close"]) / x.sum(), raw=False)
     )
 
 
 async def last_tick_fr_sqlite(last_tick_query_ohlc1) -> int:
     """ """
     try:
-        last_tick1_fr_sqlite = await executing_query_with_return(
-            last_tick_query_ohlc1
-        )
+        last_tick1_fr_sqlite = await executing_query_with_return(last_tick_query_ohlc1)
 
     except Exception as error:
         await raise_error_message(
             error,
-            'Capture market data - failed to fetch last_tick_fr_sqlite',
+            "Capture market data - failed to fetch last_tick_fr_sqlite",
         )
 
-    if 'market_analytics_json' in last_tick_query_ohlc1:
+    if "market_analytics_json" in last_tick_query_ohlc1:
         return last_tick1_fr_sqlite
-    return last_tick1_fr_sqlite[0]['MAX (tick)']
+    return last_tick1_fr_sqlite[0]["MAX (tick)"]
 
 
 def get_last_tick_from_prev_TA(TA_result_data) -> int:
     """ """
 
-    return (
-        0 if TA_result_data == [] else max([o['tick'] for o in TA_result_data])
-    )
+    return 0 if TA_result_data == [] else max([o["tick"] for o in TA_result_data])
 
 
 def is_ohlc_fluctuation_exceed_threshold(
@@ -143,76 +134,65 @@ async def get_market_condition(
     """ """
     currency_lower = extract_currency_from_text(instrument).lower()
     currency_upper = extract_currency_from_text(instrument).upper()
-    table_60 = f'ohlc60_{currency_lower}_perp_json'
-    table_1 = f'ohlc1_{currency_lower}_perp_json'
-    ohlc_60 = await cleaned_up_ohlc('close', table_60, 2)
+    table_60 = f"ohlc60_{currency_lower}_perp_json"
+    table_1 = f"ohlc1_{currency_lower}_perp_json"
+    ohlc_60 = await cleaned_up_ohlc("close", table_60, 2)
 
     result = {}
-    ohlc_1_high_9 = await cleaned_up_ohlc('high', table_1, 10)
-    current_tick = ohlc_1_high_9['tick']
+    ohlc_1_high_9 = await cleaned_up_ohlc("high", table_1, 10)
+    current_tick = ohlc_1_high_9["tick"]
 
     if current_tick != None:
 
-        ohlc_1_low_9 = await cleaned_up_ohlc('low', table_1, 10)
-        ohlc_1_close_9 = await cleaned_up_ohlc('close', table_1, 10)
-        ohlc_1_open_3 = await cleaned_up_ohlc('open', table_1, 4)
+        ohlc_1_low_9 = await cleaned_up_ohlc("low", table_1, 10)
+        ohlc_1_close_9 = await cleaned_up_ohlc("close", table_1, 10)
+        ohlc_1_open_3 = await cleaned_up_ohlc("open", table_1, 4)
 
-        last_price = ohlc_1_high_9['last_price']
-        ohlc_open_price = ohlc_1_open_3['ohlc_price']
+        last_price = ohlc_1_high_9["last_price"]
+        ohlc_open_price = ohlc_1_open_3["ohlc_price"]
 
-        ohlc_fluctuation_exceed_threshold = (
-            is_ohlc_fluctuation_exceed_threshold(
-                ohlc_1_open_3['ohlc'], last_price, fluctuation_threshold
-            )
+        ohlc_fluctuation_exceed_threshold = is_ohlc_fluctuation_exceed_threshold(
+            ohlc_1_open_3["ohlc"], last_price, fluctuation_threshold
         )
 
-        result.update({f'instrument': instrument})
+        result.update({f"instrument": instrument})
 
-        result.update({'tick': current_tick})
+        result.update({"tick": current_tick})
 
         result.update(
-            {
-                f'1m_fluctuation_exceed_threshold': ohlc_fluctuation_exceed_threshold
-            }
+            {f"1m_fluctuation_exceed_threshold": ohlc_fluctuation_exceed_threshold}
         )
 
-        result.update(
-            {f'1m_current_higher_open': last_price > ohlc_open_price}
-        )
+        result.update({f"1m_current_higher_open": last_price > ohlc_open_price})
 
-        TA_result = await querying_table('market_analytics_json')
+        TA_result = await querying_table("market_analytics_json")
 
         TA_result_data = [
-            o
-            for o in TA_result['list_data_only']
-            if currency_upper in o['instrument']
+            o for o in TA_result["list_data_only"] if currency_upper in o["instrument"]
         ]
 
         last_tick_from_prev_TA = get_last_tick_from_prev_TA(TA_result_data)
 
-        if (
-            last_tick_from_prev_TA == 0
-            or current_tick > last_tick_from_prev_TA
-        ):
+        if last_tick_from_prev_TA == 0 or current_tick > last_tick_from_prev_TA:
 
-            ema_high_9 = await get_ema(ohlc_1_high_9['ohlc'], ratio)
+            ema_high_9 = await get_ema(ohlc_1_high_9["ohlc"], ratio)
             #    log.error(f'ema_high_9 {ema_high_9}')
 
-            ema_low_9 = await get_ema(ohlc_1_low_9['ohlc'], ratio)
+            ema_low_9 = await get_ema(ohlc_1_low_9["ohlc"], ratio)
 
-            ohlc_close_20 = await cleaned_up_ohlc('close', table_1, 21)
+            ohlc_close_20 = await cleaned_up_ohlc("close", table_1, 21)
 
-            ema_close_9 = await get_ema(ohlc_1_close_9['ohlc'], ratio)
-            ema_close_20 = await get_ema(ohlc_close_20['ohlc'], ratio)
+            ema_close_9 = await get_ema(ohlc_1_close_9["ohlc"], ratio)
+            ema_close_20 = await get_ema(ohlc_close_20["ohlc"], ratio)
 
-            result.update({'1m_ema_close_20': ema_close_20})
-            result.update({'1m_ema_close_9': ema_close_9})
-            result.update({'1m_ema_high_9': ema_high_9})
-            result.update({'1m_ema_low_9': ema_low_9})
+            result.update({"1m_ema_close_20": ema_close_20})
+            result.update({"1m_ema_close_9": ema_close_9})
+            result.update({"1m_ema_high_9": ema_high_9})
+            result.update({"1m_ema_low_9": ema_low_9})
 
-            result.update({'60_open': ohlc_60['ohlc'][0]})
-            result.update({'60_last_price': ohlc_60['last_price']})
-            result.update({'last_price': last_price})
+            result.update({"60_open": ohlc_60["ohlc"][0]})
+            result.update({"60_last_price": ohlc_60["last_price"]})
+            result.update({"last_price": last_price})
 
             return result
 
@@ -228,13 +208,10 @@ async def insert_market_condition_result(
         instrument_name, limit, ratio, fluctuation_threshold
     )
 
-    await insert_tables('market_analytics_json', result)
+    await insert_tables("market_analytics_json", result)
 
 
-def ewma_vectorized(
-    np, data, alpha, offset=None, dtype=None, order='C', out=None
-):
-
+def ewma_vectorized(np, data, alpha, offset=None, dtype=None, order="C", out=None):
     """
 
     https://stackoverflow.com/questions/42869495/numpy-version-of-exponential-weighted-moving-average-equivalent-to-pandas-ewm
@@ -331,9 +308,8 @@ def numpy_ewma_vectorized(np, data, window):
 
 
 def ewma_vectorized_2d(
-    np, data, alpha, axis=None, offset=None, dtype=None, order='C', out=None
+    np, data, alpha, axis=None, offset=None, dtype=None, order="C", out=None
 ):
-
     """
     Calculates the exponential moving average over a given axis.
     :param data: Input data, must be 1D or 2D array.
@@ -381,9 +357,7 @@ def ewma_vectorized_2d(
         # use 1D version
         if isinstance(offset, np.ndarray):
             offset = offset[0]
-        return ewma_vectorized(
-            data, alpha, offset, dtype=dtype, order=order, out=out
-        )
+        return ewma_vectorized(data, alpha, offset, dtype=dtype, order=order, out=out)
 
     assert -data.ndim <= axis < data.ndim
 
@@ -435,7 +409,7 @@ def ewma_vectorized_2d(
 
 
 def ewma_vectorized_safe(
-    np, data, alpha, row_size=None, dtype=None, order='C', out=None
+    np, data, alpha, row_size=None, dtype=None, order="C", out=None
 ):
     """
     Reshapes data before calculating EWMA, then iterates once over the rows
@@ -469,11 +443,7 @@ def ewma_vectorized_safe(
     else:
         dtype = np.dtype(dtype)
 
-    row_size = (
-        int(row_size)
-        if row_size is not None
-        else get_max_row_size(alpha, dtype)
-    )
+    row_size = int(row_size) if row_size is not None else get_max_row_size(alpha, dtype)
 
     if data.size <= row_size:
         # The normal function can handle this input, use that
@@ -508,7 +478,7 @@ def ewma_vectorized_safe(
         axis=1,
         offset=0,
         dtype=dtype,
-        order='C',
+        order="C",
         out=out_main_view,
     )
 
@@ -520,9 +490,7 @@ def ewma_vectorized_safe(
     offsets[0] = first_offset
     # iteratively calculate offset for each row
     for i in range(1, out_main_view.shape[0]):
-        offsets[i] = (
-            offsets[i - 1] * last_scaling_factor + out_main_view[i - 1, -1]
-        )
+        offsets[i] = offsets[i - 1] * last_scaling_factor + out_main_view[i - 1, -1]
 
     # add the offsets to the result
     out_main_view += offsets[:, np.newaxis] * scaling_factors[np.newaxis, :]
@@ -534,7 +502,7 @@ def ewma_vectorized_safe(
             alpha,
             offset=out_main_view[-1, -1],
             dtype=dtype,
-            order='C',
+            order="C",
             out=out[-trailing_n:],
         )
     return out

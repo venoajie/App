@@ -23,7 +23,7 @@ from tpo_helper2 import (
 )
 
 # read file and set datetime index
-dfhist = pd.read_csv(r'C:\Users\alex1\Dropbox\scripts\tpo_v2\history.txt')
+dfhist = pd.read_csv(r"C:\Users\alex1\Dropbox\scripts\tpo_v2\history.txt")
 dfhist.iloc[:, 2:] = dfhist.iloc[:, 2:].apply(pd.to_numeric)
 
 
@@ -34,10 +34,8 @@ def datetime(data):
     Returns dataframe with datetime index
     """
     dfhist = data.copy()
-    dfhist['datetime2'] = pd.to_datetime(
-        dfhist['datetime'], format='%Y%m%d %H:%M:%S'
-    )
-    dfhist = dfhist.set_index(dfhist['datetime2'], drop=True, inplace=False)
+    dfhist["datetime2"] = pd.to_datetime(dfhist["datetime"], format="%Y%m%d %H:%M:%S")
+    dfhist = dfhist.set_index(dfhist["datetime2"], drop=True, inplace=False)
     return dfhist
 
 
@@ -47,12 +45,12 @@ dfhist = datetime(dfhist)
 freq = 30
 avglen = 10  # num days mean to get values
 days_to_display = 10  # Number of last n days you want on the screen to display
-mode = 'tpo'  # for volume --> 'vol'
+mode = "tpo"  # for volume --> 'vol'
 # dynamic parameters based on data & mean values for volume and Rotational Factor (RF)
 ticksz = get_ticksize(dfhist, freq=freq)
 symbol = dfhist.symbol[0]
 mean_val = get_mean(dfhist, avglen=avglen, freq=freq)
-trading_hr = mean_val['session_hr']
+trading_hr = mean_val["session_hr"]
 
 # !!! get rotational factor again for 30 min resampled data
 dfhist = get_rf(dfhist.copy())
@@ -60,16 +58,16 @@ dfhist = get_rf(dfhist.copy())
 dfresample = (
     dfhist.copy()
 )  # create seperate resampled data frame and preserve old 1 min file
-dfresample = dfresample.resample(str(freq) + 'min').agg(
+dfresample = dfresample.resample(str(freq) + "min").agg(
     {
-        'symbol': 'last',
-        'datetime': 'last',
-        'Open': 'first',
-        'High': 'max',
-        'Low': 'min',
-        'Close': 'last',
-        'Volume': 'sum',
-        'rf': 'sum',
+        "symbol": "last",
+        "datetime": "last",
+        "Open": "first",
+        "High": "max",
+        "Low": "min",
+        "Close": "last",
+        "Volume": "sum",
+        "rf": "sum",
     }
 )
 dfresample = dfresample.dropna()
@@ -112,11 +110,11 @@ ib_low_list = context_ibdf[0].ibl
 fig = go.Figure(
     data=[
         go.Candlestick(
-            x=dfresample['datetime'],
-            open=dfresample['Open'],
-            high=dfresample['High'],
-            low=dfresample['Low'],
-            close=dfresample['Close'],
+            x=dfresample["datetime"],
+            open=dfresample["Open"],
+            high=dfresample["High"],
+            low=dfresample["Low"],
+            close=dfresample["Close"],
             showlegend=True,
             name=symbol,
             opacity=0.3,
@@ -132,47 +130,45 @@ for i in range(len(dfmp_list)):  # test the loop with i=1
     df_mp = dfmp_list[i]
     irank = ranking.iloc[i]  # select single row from ranking df
     # df_mp['i_date'] = df1['datetime'][0]
-    df_mp['i_date'] = irank.date
+    df_mp["i_date"] = irank.date
     # # @todo: background color for text
-    df_mp['color'] = np.where(
-        np.logical_and(
-            df_mp['close'] > irank.vallist, df_mp['close'] < irank.vahlist
-        ),
-        'green',
-        'white',
+    df_mp["color"] = np.where(
+        np.logical_and(df_mp["close"] > irank.vallist, df_mp["close"] < irank.vahlist),
+        "green",
+        "white",
     )
 
-    df_mp = df_mp.set_index('i_date', inplace=False)
+    df_mp = df_mp.set_index("i_date", inplace=False)
 
     fig.add_trace(
         go.Scattergl(
             x=df_mp.index,
             y=df_mp.close,
-            mode='text',
+            mode="text",
             name=str(df_mp.index[0]),
             text=df_mp.alphabets,
             showlegend=False,
-            textposition='top right',
-            textfont=dict(family='verdana', size=6, color=df_mp.color),
+            textposition="top right",
+            textfont=dict(family="verdana", size=6, color=df_mp.color),
         )
     )
 
     # power1 = int(irank['power1']) # non normalized strength
     # power = int(irank['power'])
     if power1[i] < 0:
-        my_rgb = 'rgba({power}, 3, 252, 0.5)'.format(power=abs(165))
+        my_rgb = "rgba({power}, 3, 252, 0.5)".format(power=abs(165))
     else:
-        my_rgb = 'rgba(23, {power}, 3, 0.5)'.format(power=abs(252))
+        my_rgb = "rgba(23, {power}, 3, 0.5)".format(power=abs(252))
 
     brk_f_list_maj = []
     f = 0
     for f in range(len(breakdown.columns)):
         brk_f_list_min = []
         for index, rows in breakdown.iterrows():
-            brk_f_list_min.append(index + str(': ') + str(rows[f]) + '<br />')
+            brk_f_list_min.append(index + str(": ") + str(rows[f]) + "<br />")
         brk_f_list_maj.append(brk_f_list_min)
 
-    breakdown_values = ''  # for bubbles
+    breakdown_values = ""  # for bubbles
     for st in brk_f_list_maj[i]:
         breakdown_values += st
 
@@ -182,10 +178,10 @@ for i in range(len(dfmp_list)):  # test the loop with i=1
     for g in range(len(ibbreakdown.columns)):
         ibrk_f_list_min = []
         for index, rows in ibbreakdown.iterrows():
-            ibrk_f_list_min.append(index + str(': ') + str(rows[g]) + '<br />')
+            ibrk_f_list_min.append(index + str(": ") + str(rows[g]) + "<br />")
         ibrk_f_list_maj.append(ibrk_f_list_min)
 
-    ibreakdown_values = ''  # for squares
+    ibreakdown_values = ""  # for squares
     for ist in ibrk_f_list_maj[i]:
         ibreakdown_values += ist
     # irank.power1
@@ -194,24 +190,24 @@ for i in range(len(dfmp_list)):  # test the loop with i=1
         go.Scattergl(
             # x=[df1.iloc[4]['datetime']],
             x=[irank.date],
-            y=[dfresample['High'].max()],
-            mode='markers',
+            y=[dfresample["High"].max()],
+            mode="markers",
             marker=dict(
                 color=my_rgb,
                 size=0.90 * power[i],
-                line=dict(color='rgb(17, 17, 17)', width=2),
+                line=dict(color="rgb(17, 17, 17)", width=2),
             ),
             # marker_symbol='square',
             hovertext=[
-                '<br />Insights:<br />VAH:  {}<br /> POC:  {}<br /> VAL:  {}<br /> Balance Target:  {}<br /> Day Type:  {}<br />strength: {}<br />BreakDown:  {}<br />{}<br />{}'.format(
+                "<br />Insights:<br />VAH:  {}<br /> POC:  {}<br /> VAL:  {}<br /> Balance Target:  {}<br /> Day Type:  {}<br />strength: {}<br />BreakDown:  {}<br />{}<br />{}".format(
                     irank.vahlist,
                     irank.poclist,
                     irank.vallist,
                     irank.btlist,
                     irank.daytype,
                     irank.power,
-                    '',
-                    '-------------------',
+                    "",
+                    "-------------------",
                     breakdown_values,
                 )
             ],
@@ -220,35 +216,35 @@ for i in range(len(dfmp_list)):  # test the loop with i=1
     )
     # !!! we will use this for hover text at bottom for developing day
     if ibpower1[i] < 0:
-        ib_rgb = 'rgba(165, 3, 252, 0.5)'
+        ib_rgb = "rgba(165, 3, 252, 0.5)"
     else:
-        ib_rgb = 'rgba(23, 252, 3, 0.5)'
+        ib_rgb = "rgba(23, 252, 3, 0.5)"
 
     fig.add_trace(
         go.Scattergl(
             # x=[df1.iloc[4]['datetime']],
             x=[irank.date],
-            y=[dfresample['Low'].min()],
-            mode='markers',
+            y=[dfresample["Low"].min()],
+            mode="markers",
             marker=dict(
                 color=ib_rgb,
                 size=0.40 * ibpower[i],
-                line=dict(color='rgb(17, 17, 17)', width=2),
+                line=dict(color="rgb(17, 17, 17)", width=2),
             ),
-            marker_symbol='square',
+            marker_symbol="square",
             hovertext=[
-                '<br />Insights:<br />Vol_mean:  {}<br /> Vol_Daily:  {}<br /> RF_mean:  {}<br /> RF_daily:  {}<br /> IBvol_mean:  {}<br /> IBvol_day:  {}<br /> IB_RFmean:  {}<br /> IB_RFday:  {}<br />strength: {}<br />BreakDown:  {}<br />{}<br />{}'.format(
-                    mean_val['volume_mean'],
+                "<br />Insights:<br />Vol_mean:  {}<br /> Vol_Daily:  {}<br /> RF_mean:  {}<br /> RF_daily:  {}<br /> IBvol_mean:  {}<br /> IBvol_day:  {}<br /> IB_RFmean:  {}<br /> IB_RFday:  {}<br />strength: {}<br />BreakDown:  {}<br />{}<br />{}".format(
+                    mean_val["volume_mean"],
                     irank.volumed,
-                    mean_val['rf_mean'],
+                    mean_val["rf_mean"],
                     irank.rfd,
-                    mean_val['volib_mean'],
+                    mean_val["volib_mean"],
                     irank.ibvol,
-                    mean_val['ibrf_mean'],
+                    mean_val["ibrf_mean"],
                     irank.ibrf,
                     ibpower[i],
-                    '',
-                    '......................',
+                    "",
+                    "......................",
                     ibreakdown_values,
                 )
             ],
@@ -265,96 +261,96 @@ for i in range(len(dfmp_list)):  # test the loop with i=1
 
             fig.add_shape(
                 # Line Horizontal
-                type='line',
-                x0=df1.iloc[0]['datetime'],
+                type="line",
+                x0=df1.iloc[0]["datetime"],
                 y0=lvn,
-                x1=df1.iloc[5]['datetime'],
+                x1=df1.iloc[5]["datetime"],
                 y1=lvn,
                 line=dict(
-                    color='darksalmon',
+                    color="darksalmon",
                     width=2,
-                    dash='dashdot',
+                    dash="dashdot",
                 ),
             )
 
     fig.add_shape(
         # Line Horizontal
-        type='line',
-        x0=df1.iloc[0]['datetime'],
+        type="line",
+        x0=df1.iloc[0]["datetime"],
         y0=ib_low_list[i],
-        x1=df1.iloc[0]['datetime'],
+        x1=df1.iloc[0]["datetime"],
         y1=ib_high_list[i],
         line=dict(
-            color='cyan',
+            color="cyan",
             width=3,
         ),
     )
     # day high and low
     fig.add_shape(
         # Line Horizontal
-        type='line',
-        x0=df1.iloc[0]['datetime'],
+        type="line",
+        x0=df1.iloc[0]["datetime"],
         y0=dl_list[i],
-        x1=df1.iloc[0]['datetime'],
+        x1=df1.iloc[0]["datetime"],
         y1=dh_list[i],
         line=dict(
-            color='gray',
+            color="gray",
             width=1,
-            dash='dashdot',
+            dash="dashdot",
         ),
     )
 
 
-ltp = dfresample.iloc[-1]['Close']
+ltp = dfresample.iloc[-1]["Close"]
 if ltp >= irank.poclist:
-    ltp_color = 'green'
+    ltp_color = "green"
 else:
-    ltp_color = 'red'
+    ltp_color = "red"
 
 fig.add_trace(
     go.Scatter(
-        x=[df1.iloc[-1]['datetime']],
-        y=[df1.iloc[-1]['Close']],
-        mode='text',
-        name='last traded price',
-        text=['last ' + str(df1.iloc[-1]['Close'])],
-        textposition='bottom right',
+        x=[df1.iloc[-1]["datetime"]],
+        y=[df1.iloc[-1]["Close"]],
+        mode="text",
+        name="last traded price",
+        text=["last " + str(df1.iloc[-1]["Close"])],
+        textposition="bottom right",
         textfont=dict(size=11, color=ltp_color),
         showlegend=False,
     )
 )
 
-fig.layout.xaxis.color = 'white'
-fig.layout.yaxis.color = 'white'
+fig.layout.xaxis.color = "white"
+fig.layout.yaxis.color = "white"
 fig.layout.autosize = True
-fig['layout']['height'] = 650
+fig["layout"]["height"] = 650
 # fig.layout.hovermode = 'x'
 
 fig.update_xaxes(
-    title_text='Time',
-    title_font=dict(size=18, color='white'),
+    title_text="Time",
+    title_font=dict(size=18, color="white"),
     tickangle=45,
-    tickfont=dict(size=8, color='white'),
+    tickfont=dict(size=8, color="white"),
     showgrid=False,
     dtick=len(dfmp_list),
 )
 
 fig.update_yaxes(
     title_text=symbol,
-    title_font=dict(size=18, color='white'),
-    tickfont=dict(size=12, color='white'),
+    title_font=dict(size=18, color="white"),
+    tickfont=dict(size=12, color="white"),
     showgrid=False,
 )
 fig.layout.update(
-    template='plotly_dark',
-    title='@' + abc()[1],
+    template="plotly_dark",
+    title="@" + abc()[1],
     autosize=True,
-    xaxis=dict(showline=True, color='white'),
-    yaxis=dict(showline=True, color='white', autorange=True, fixedrange=False),
+    xaxis=dict(showline=True, color="white"),
+    yaxis=dict(showline=True, color="white", autorange=True, fixedrange=False),
 )
 
-fig['layout']['xaxis']['rangeslider']['visible'] = False
-fig['layout']['xaxis']['tickformat'] = '%H:%M:%S'
+fig["layout"]["xaxis"]["rangeslider"]["visible"] = False
+fig["layout"]["xaxis"]["tickformat"] = "%H:%M:%S"
 
 # fig.write_html('tpo.html')  # uncomment to save as html
 

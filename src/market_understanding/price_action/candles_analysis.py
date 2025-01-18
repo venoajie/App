@@ -22,12 +22,12 @@ def analysis_based_on_length(np: object, data_per_resolution: int):
 
     candles_arrays = data_per_resolution  # [0]
 
-    candle_type = candles_arrays[-1, :, 0]   # (last_column_third_row)
-    wicks_up = candles_arrays[-1, :, 1]   # (last_column_third_row)
-    wicks_down = candles_arrays[-1, :, 2]   # (last_column_third_row)
-    body_size = candles_arrays[-1, :, 3]   # (last_column_third_row)
-    body_length = candles_arrays[-1, :, 4]   # (last_column_third_row)
-    is_long_body = candles_arrays[-1, :, 5]   # (last_column_third_row)
+    candle_type = candles_arrays[-1, :, 0]  # (last_column_third_row)
+    wicks_up = candles_arrays[-1, :, 1]  # (last_column_third_row)
+    wicks_down = candles_arrays[-1, :, 2]  # (last_column_third_row)
+    body_size = candles_arrays[-1, :, 3]  # (last_column_third_row)
+    body_length = candles_arrays[-1, :, 4]  # (last_column_third_row)
+    is_long_body = candles_arrays[-1, :, 5]  # (last_column_third_row)
     avg_body_length = np.average(body_length)
     body_length_exceed_average = body_length > avg_body_length
     # print(candles_arrays)
@@ -79,15 +79,12 @@ def ohlc_to_candlestick(conversion_array):
 
     candlestick_data[4] = round(round(height, 5), 2)
 
-    candlestick_data[5] = (
-        round(round(body_size / height, 5), 2) > 70 / 100
-    ) * 1
+    candlestick_data[5] = (round(round(body_size / height, 5), 2) > 70 / 100) * 1
 
     return candlestick_data
 
 
 def my_generator_candle(np: object, data: object, lookback: int) -> list:
-
     """_summary_
         https://github.com/MikePapinski/DeepLearning/blob/master/PredictCandlestick/CandleSTick%20patterns%20prediction/JupyterResearch_0.1.ipynb
         https://mikepapinski.github.io/deep%20learning/machine%20learning/python/forex/2018/12/15/Predict-Candlestick-patterns-with-Keras-and-Forex-data.md.html
@@ -103,12 +100,12 @@ def my_generator_candle(np: object, data: object, lookback: int) -> list:
 
     parameters = len(
         [
-            'candle_type',
-            'wicks_up',
-            'wicks_down',
-            'body_size',
-            'length',
-            'is_long_body',
+            "candle_type",
+            "wicks_up",
+            "wicks_down",
+            "body_size",
+            "length",
+            "is_long_body",
         ]
     )
 
@@ -127,7 +124,7 @@ def my_generator_candle(np: object, data: object, lookback: int) -> list:
 
         temp_list2 = np.asarray(temp_list)
         templist3 = [temp_list2]
-        templist4 = np.asarray(templist3, dtype='f4')
+        templist4 = np.asarray(templist3, dtype="f4")
         #        log.info (f"templist4  {templist4}")
         #        log.warning (f"arr  1 {arr}")
         arr = np.append(arr, templist4, axis=0)
@@ -147,21 +144,21 @@ def combining_candles_data(
     """ """
 
     dtype = [
-        ('open', 'f4'),
-        ('high', 'f4'),
-        ('low', 'f4'),
-        ('close', 'f4'),
+        ("open", "f4"),
+        ("high", "f4"),
+        ("low", "f4"),
+        ("close", "f4"),
     ]
 
     result = []
     for currency in currencies:
-        instrument_name = f'{currency}-PERPETUAL'
+        instrument_name = f"{currency}-PERPETUAL"
 
         for resolution in resolutions:
 
             ohlc = get_ohlc_data(instrument_name, qty_candles, resolution)
 
-            ohlc_without_ticks = remove_list_elements(ohlc, 'tick')
+            ohlc_without_ticks = remove_list_elements(ohlc, "tick")
 
             np_users_data = np.array(ohlc_without_ticks)
 
@@ -169,15 +166,11 @@ def combining_candles_data(
                 [tuple(user.values()) for user in np_users_data], dtype=dtype
             )
 
-            three_dim_sequence = my_generator_candle(
-                np, np_data[1:], dim_sequence
-            )
+            three_dim_sequence = my_generator_candle(np, np_data[1:], dim_sequence)
 
-            candles_analysis_result = analysis_based_on_length(
-                np, three_dim_sequence
-            )
+            candles_analysis_result = analysis_based_on_length(np, three_dim_sequence)
 
-            max_tick = max([o['tick'] for o in ohlc])
+            max_tick = max([o["tick"] for o in ohlc])
 
             result.append(
                 dict(
@@ -196,33 +189,27 @@ def combining_candles_data(
 def get_market_condition(np: object, candles_data: list, currency_upper: str):
     """ """
     candles_data_instrument = [
-        o for o in candles_data if currency_upper in o['instrument_name']
+        o for o in candles_data if currency_upper in o["instrument_name"]
     ]
     # log.warning (candles_data_instrument)
 
     candle_60 = [
-        o['candles_analysis']
-        for o in candles_data_instrument
-        if o['resolution'] == 60
+        o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 60
     ]
-    candle_60_type = np.sum([o['candle_type'] for o in candle_60])
-    candle_60_is_long = np.sum([o['is_long_body'] for o in candle_60])
+    candle_60_type = np.sum([o["candle_type"] for o in candle_60])
+    candle_60_is_long = np.sum([o["is_long_body"] for o in candle_60])
 
     candle_5 = [
-        o['candles_analysis']
-        for o in candles_data_instrument
-        if o['resolution'] == 5
+        o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 5
     ]
-    candle_5_type = np.sum([o['candle_type'] for o in candle_5])
-    candle_5_is_long = np.sum([o['is_long_body'] for o in candle_5])
+    candle_5_type = np.sum([o["candle_type"] for o in candle_5])
+    candle_5_is_long = np.sum([o["is_long_body"] for o in candle_5])
 
     candle_15 = [
-        o['candles_analysis']
-        for o in candles_data_instrument
-        if o['resolution'] == 15
+        o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 15
     ]
-    candle_15_type = np.sum([o['candle_type'] for o in candle_15])
-    candle_15_is_long = np.sum([o['is_long_body'] for o in candle_15])
+    candle_15_type = np.sum([o["candle_type"] for o in candle_15])
+    candle_15_is_long = np.sum([o["is_long_body"] for o in candle_15])
 
     # log.warning (candle_60)
     # log.debug (candle_5)

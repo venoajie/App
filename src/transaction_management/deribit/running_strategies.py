@@ -70,7 +70,7 @@ def get_config(file_name: str) -> list:
 
     try:
         if os.path.exists(config_path):
-            with open(config_path, 'rb') as handle:
+            with open(config_path, "rb") as handle:
                 read = tomli.load(handle)
                 return read
     except:
@@ -87,11 +87,10 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def executing_strategies(sub_account_id, queue, queue_cached_orders):
-
     """ """
 
     # registering strategy config file
-    file_toml = 'config_strategies.toml'
+    file_toml = "config_strategies.toml"
 
     try:
 
@@ -103,48 +102,46 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # get tradable strategies
-        tradable_config_app = config_app['tradable']
+        tradable_config_app = config_app["tradable"]
 
         # get tradable currencies
         # currencies_spot= ([o["spot"] for o in tradable_config_app]) [0]
-        currencies = ([o['spot'] for o in tradable_config_app])[0]
+        currencies = ([o["spot"] for o in tradable_config_app])[0]
 
         # currencies= random.sample(currencies_spot,len(currencies_spot))
 
-        strategy_attributes = config_app['strategies']
+        strategy_attributes = config_app["strategies"]
 
         strategy_attributes_active = [
-            o for o in strategy_attributes if o['is_active'] == True
+            o for o in strategy_attributes if o["is_active"] == True
         ]
 
-        active_strategies = [
-            o['strategy_label'] for o in strategy_attributes_active
-        ]
+        active_strategies = [o["strategy_label"] for o in strategy_attributes_active]
 
         # get strategies that have not short/long attributes in the label
         non_checked_strategies = [
-            o['strategy_label']
+            o["strategy_label"]
             for o in strategy_attributes_active
-            if o['non_checked_for_size_label_consistency'] == True
+            if o["non_checked_for_size_label_consistency"] == True
         ]
 
         cancellable_strategies = [
-            o['strategy_label']
+            o["strategy_label"]
             for o in strategy_attributes_active
-            if o['cancellable'] == True
+            if o["cancellable"] == True
         ]
 
         contribute_to_hedging_strategies = [
-            o['strategy_label']
+            o["strategy_label"]
             for o in strategy_attributes_active
-            if o['contribute_to_hedging'] == True
+            if o["contribute_to_hedging"] == True
         ]
 
-        relevant_tables = config_app['relevant_tables'][0]
+        relevant_tables = config_app["relevant_tables"][0]
 
-        trade_db_table = relevant_tables['my_trades_table']
+        trade_db_table = relevant_tables["my_trades_table"]
 
-        order_db_table = relevant_tables['orders_table']
+        order_db_table = relevant_tables["orders_table"]
 
         settlement_periods = get_settlement_period(strategy_attributes)
 
@@ -153,17 +150,13 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
             settlement_periods,
         )
 
-        instrument_attributes_futures_all = futures_instruments[
-            'active_futures'
-        ]
+        instrument_attributes_futures_all = futures_instruments["active_futures"]
 
-        instrument_attributes_combo_all = futures_instruments['active_combo']
+        instrument_attributes_combo_all = futures_instruments["active_combo"]
 
-        instruments_name = futures_instruments['instruments_name']
+        instruments_name = futures_instruments["instruments_name"]
 
-        min_expiration_timestamp = futures_instruments[
-            'min_expiration_timestamp'
-        ]
+        min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]
 
         resolutions = [60, 15, 5]
         qty_candles = 5
@@ -185,26 +178,23 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                 queue.task_done
                 # message: str = queue.get()
 
-                message_channel: str = message['channel']
+                message_channel: str = message["channel"]
                 # log.debug(f"message_channel {message_channel}")
 
-                data_orders: dict = message['data']
+                data_orders: dict = message["data"]
 
-                orders_all: dict = message['orders_all']
+                orders_all: dict = message["orders_all"]
 
-                currency: str = message['currency']
+                currency: str = message["currency"]
 
                 currency_lower: str = currency
 
                 currency_upper: str = currency.upper()
 
-                instrument_name_perpetual = f'{currency_upper}-PERPETUAL'
+                instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                 instrument_name_future = (message_channel)[19:]
-                if (
-                    message_channel
-                    == f'incremental_ticker.{instrument_name_future}'
-                ):
+                if message_channel == f"incremental_ticker.{instrument_name_future}":
 
                     update_cached_ticker(
                         instrument_name_future,
@@ -212,9 +202,7 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                         data_orders,
                     )
 
-                    archive_db_table: str = (
-                        f'my_trades_all_{currency_lower}_json'
-                    )
+                    archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
                     chart_trade = await chart_trade_in_msg(
                         message_channel,
@@ -224,33 +212,26 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
 
                     if not chart_trade:
 
-                        archive_db_table = (
-                            f'my_trades_all_{currency_lower}_json'
-                        )
+                        archive_db_table = f"my_trades_all_{currency_lower}_json"
 
                         # get portfolio data
-                        portfolio = reading_from_pkl_data(
-                            'portfolio', currency
-                        )[0]
+                        portfolio = reading_from_pkl_data("portfolio", currency)[0]
 
-                        equity: float = portfolio['equity'] * (
-                            50 / 100 if 'BTC' in currency_upper else 1
+                        equity: float = portfolio["equity"] * (
+                            50 / 100 if "BTC" in currency_upper else 1
                         )
 
                         ticker_perpetual_instrument_name = [
                             o
                             for o in ticker_all
-                            if instrument_name_perpetual
-                            in o['instrument_name']
+                            if instrument_name_perpetual in o["instrument_name"]
                         ][0]
 
                         index_price = get_index(
                             data_orders, ticker_perpetual_instrument_name
                         )
 
-                        sub_account = reading_from_pkl_data(
-                            'sub_accounts', currency
-                        )
+                        sub_account = reading_from_pkl_data("sub_accounts", currency)
 
                         sub_account = sub_account[0]
 
@@ -264,7 +245,9 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
 
                         if sub_account:
 
-                            query_trades = f'SELECT * FROM  v_{currency_lower}_trading_active'
+                            query_trades = (
+                                f"SELECT * FROM  v_{currency_lower}_trading_active"
+                            )
 
                             my_trades_currency_all_transactions: list = (
                                 await executing_query_with_return(query_trades)
@@ -276,9 +259,9 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                 else [
                                     o
                                     for o in my_trades_currency_all_transactions
-                                    if o['instrument_name']
+                                    if o["instrument_name"]
                                     in [
-                                        o['instrument_name']
+                                        o["instrument_name"]
                                         for o in instrument_attributes_futures_all
                                     ]
                                 ]
@@ -290,7 +273,7 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                 else [
                                     o
                                     for o in orders_all
-                                    if currency_upper in o['instrument_name']
+                                    if currency_upper in o["instrument_name"]
                                 ]
                             )
 
@@ -298,13 +281,12 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
 
                             # if orders_currency:
 
-                            position = [o for o in sub_account['positions']]
+                            position = [o for o in sub_account["positions"]]
                             # log.debug (f"position {position}")
                             position_without_combo = [
                                 o
                                 for o in position
-                                if f'{currency_upper}-FS'
-                                not in o['instrument_name']
+                                if f"{currency_upper}-FS" not in o["instrument_name"]
                             ]
 
                             server_time = get_now_unix_time()
@@ -318,20 +300,20 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                             )
 
                             if not size_perpetuals_reconciled:
-                                kill_process('general_tasks')
+                                kill_process("general_tasks")
 
                             if index_price is not None and equity > 0:
 
                                 my_trades_currency: list = [
                                     o
                                     for o in my_trades_currency_all
-                                    if o['label'] is not None
+                                    if o["label"] is not None
                                 ]
 
                                 my_trades_currency_contribute_to_hedging = [
                                     o
                                     for o in my_trades_currency
-                                    if (parsing_label(o['label'])['main'])
+                                    if (parsing_label(o["label"])["main"])
                                     in contribute_to_hedging_strategies
                                 ]
                                 my_trades_currency_contribute_to_hedging_sum = (
@@ -339,21 +321,18 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                     if not my_trades_currency_contribute_to_hedging
                                     else sum(
                                         [
-                                            o['amount']
+                                            o["amount"]
                                             for o in my_trades_currency_contribute_to_hedging
                                         ]
                                     )
                                 )
 
                                 my_trades = remove_redundant_elements(
-                                    [
-                                        o['instrument_name']
-                                        for o in my_trades_currency
-                                    ]
+                                    [o["instrument_name"] for o in my_trades_currency]
                                 )
                                 my_labels = remove_redundant_elements(
                                     [
-                                        parsing_label(o['label'])['main']
+                                        parsing_label(o["label"])["main"]
                                         for o in my_trades_currency
                                     ]
                                 )
@@ -363,13 +342,9 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
 
                                 THRESHOLD_DELTA_TIME_SECONDS = 120
 
-                                THRESHOLD_MARKET_CONDITIONS_COMBO = (
-                                    0.1 * ONE_PCT
-                                )
+                                THRESHOLD_MARKET_CONDITIONS_COMBO = 0.1 * ONE_PCT
 
-                                INSTRUMENT_EXPIRATION_THRESHOLD = (
-                                    60 * 8
-                                )   # 8 hours
+                                INSTRUMENT_EXPIRATION_THRESHOLD = 60 * 8  # 8 hours
 
                                 ONE_SECOND = 1000
 
@@ -384,13 +359,13 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                     strategy_params = [
                                         o
                                         for o in strategy_attributes
-                                        if o['strategy_label'] == strategy
+                                        if o["strategy_label"] == strategy
                                     ][0]
 
                                     my_trades_currency_strategy = [
                                         o
                                         for o in my_trades_currency
-                                        if strategy in (o['label'])
+                                        if strategy in (o["label"])
                                     ]
 
                                     orders_currency_strategy = (
@@ -399,38 +374,36 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                         else [
                                             o
                                             for o in orders_currency
-                                            if strategy in (o['label'])
+                                            if strategy in (o["label"])
                                         ]
                                     )
 
                                     log.info(
-                                        f'orders_currency_all {len(orders_currency)}'
+                                        f"orders_currency_all {len(orders_currency)}"
                                     )
                                     log.info(
-                                        f'orders_currency_strategy {len(orders_currency_strategy)}'
+                                        f"orders_currency_strategy {len(orders_currency_strategy)}"
                                     )
 
                                     # log.info (f"orders_currency_strategy {orders_currency_strategy}")
                                     # log.critical (f"len_orders_all {len_orders_all}")
 
-                                    if 'futureSpread' in strategy:
+                                    if "futureSpread" in strategy:
 
-                                        log.warning(
-                                            f'strategy {strategy}-START'
-                                        )
+                                        log.warning(f"strategy {strategy}-START")
                                         # log.warning (f"strategy {strategy_params}-START")
 
-                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = strategy_params[
-                                            'waiting_minute_before_relabelling'
-                                        ]
+                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = (
+                                            strategy_params[
+                                                "waiting_minute_before_relabelling"
+                                            ]
+                                        )
 
                                         AVERAGE_MOVEMENT: float = 0.15 / 100
 
-                                        monthly_target_profit = (
-                                            strategy_params[
-                                                'monthly_profit_pct'
-                                            ]
-                                        )
+                                        monthly_target_profit = strategy_params[
+                                            "monthly_profit_pct"
+                                        ]
 
                                         max_order_currency = 2
 
@@ -439,7 +412,7 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                 [
                                                     o
                                                     for o in instruments_name
-                                                    if '-FS-' not in o
+                                                    if "-FS-" not in o
                                                     and currency_upper in o
                                                 ]
                                             ),
@@ -457,7 +430,7 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                         )
 
                                         my_trades_currency_strategy_labels: list = [
-                                            o['label']
+                                            o["label"]
                                             for o in my_trades_currency_strategy
                                         ]
 
@@ -467,9 +440,11 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                         ) in instrument_attributes_combo_all:
 
                                             try:
-                                                instrument_name_combo = instrument_attributes_combo[
-                                                    'instrument_name'
-                                                ]
+                                                instrument_name_combo = (
+                                                    instrument_attributes_combo[
+                                                        "instrument_name"
+                                                    ]
+                                                )
 
                                                 size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
                                                     position_without_combo,
@@ -478,21 +453,18 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                 )
 
                                                 if not size_future_reconciled:
-                                                    kill_process(
-                                                        'general_tasks'
-                                                    )
+                                                    kill_process("general_tasks")
 
                                             except:
                                                 instrument_name_combo = None
 
                                             if (
-                                                instrument_name_combo
-                                                is not None
+                                                instrument_name_combo is not None
                                                 and currency_upper
                                                 in instrument_name_combo
                                             ):
 
-                                                instrument_name_future = f'{currency_upper}-{instrument_name_combo[7:][:7]}'
+                                                instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
 
                                                 size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
                                                     position_without_combo,
@@ -501,22 +473,20 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                 )
 
                                                 if not size_future_reconciled:
-                                                    kill_process(
-                                                        'general_tasks'
-                                                    )
+                                                    kill_process("general_tasks")
 
                                                 ticker_combo = [
                                                     o
                                                     for o in ticker_all
                                                     if instrument_name_combo
-                                                    in o['instrument_name']
+                                                    in o["instrument_name"]
                                                 ]
 
                                                 ticker_future = [
                                                     o
                                                     for o in ticker_all
                                                     if instrument_name_future
-                                                    in o['instrument_name']
+                                                    in o["instrument_name"]
                                                 ]
 
                                                 if (
@@ -526,31 +496,27 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                 ):
                                                     # and not reduce_only \
 
-                                                    ticker_combo = (
-                                                        ticker_combo[0]
-                                                    )
+                                                    ticker_combo = ticker_combo[0]
 
-                                                    ticker_future = (
-                                                        ticker_future[0]
-                                                    )
+                                                    ticker_future = ticker_future[0]
 
-                                                    send_order: dict = await combo_auto.is_send_open_order_allowed_auto_combo(
-                                                        ticker_future,
-                                                        ticker_combo,
-                                                        notional,
-                                                        instrument_name_combo,
-                                                        instrument_attributes_futures_all,
-                                                        instrument_attributes_combo,
-                                                        monthly_target_profit,
-                                                        AVERAGE_MOVEMENT,
-                                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
+                                                    send_order: dict = (
+                                                        await combo_auto.is_send_open_order_allowed_auto_combo(
+                                                            ticker_future,
+                                                            ticker_combo,
+                                                            notional,
+                                                            instrument_name_combo,
+                                                            instrument_attributes_futures_all,
+                                                            instrument_attributes_combo,
+                                                            monthly_target_profit,
+                                                            AVERAGE_MOVEMENT,
+                                                            BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
+                                                        )
                                                     )
 
                                                     if (
                                                         False
-                                                        and send_order[
-                                                            'order_allowed'
-                                                        ]
+                                                        and send_order["order_allowed"]
                                                     ):
 
                                                         await processing_orders(
@@ -566,12 +532,10 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                         max(
                                                             [
                                                                 o[
-                                                                    'expiration_timestamp'
+                                                                    "expiration_timestamp"
                                                                 ]
                                                                 for o in instrument_attributes_futures_all
-                                                                if o[
-                                                                    'instrument_name'
-                                                                ]
+                                                                if o["instrument_name"]
                                                                 == instrument_name_future
                                                             ]
                                                         )
@@ -592,23 +556,23 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                         and size_future_reconciled
                                                     ):
 
-                                                        send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
-                                                            ticker_future,
-                                                            instrument_attributes_futures_all,
-                                                            notional,
-                                                            monthly_target_profit,
-                                                            AVERAGE_MOVEMENT,
-                                                            BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
-                                                            min(
-                                                                1,
-                                                                max_order_currency,
-                                                            ),
-                                                            market_condition,
+                                                        send_order: dict = (
+                                                            await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
+                                                                ticker_future,
+                                                                instrument_attributes_futures_all,
+                                                                notional,
+                                                                monthly_target_profit,
+                                                                AVERAGE_MOVEMENT,
+                                                                BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
+                                                                min(
+                                                                    1,
+                                                                    max_order_currency,
+                                                                ),
+                                                                market_condition,
+                                                            )
                                                         )
 
-                                                        if send_order[
-                                                            'order_allowed'
-                                                        ]:
+                                                        if send_order["order_allowed"]:
 
                                                             await processing_orders(
                                                                 modify_order_and_db,
@@ -624,23 +588,22 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                             my_trades_currency_strategy_labels
                                         )
 
-                                        filter = 'label'
+                                        filter = "label"
 
                                         #! closing active trades
                                         for label in labels:
 
-                                            label_integer: int = (
-                                                get_label_integer(label)
+                                            label_integer: int = get_label_integer(
+                                                label
                                             )
                                             selected_transaction = [
                                                 o
                                                 for o in my_trades_currency_strategy
-                                                if str(label_integer)
-                                                in o['label']
+                                                if str(label_integer) in o["label"]
                                             ]
 
                                             selected_transaction_amount = [
-                                                o['amount']
+                                                o["amount"]
                                                 for o in selected_transaction
                                             ]
                                             sum_selected_transaction = sum(
@@ -651,38 +614,29 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                             )
 
                                             #! closing combo auto trading
-                                            if (
-                                                'Auto' in label
-                                                and len_orders_all < 50
-                                            ):
+                                            if "Auto" in label and len_orders_all < 50:
 
                                                 # log.critical (f"sum_selected_transaction {sum_selected_transaction}")
                                                 # log.info (f"selected_transaction {selected_transaction}")
 
-                                                if (
-                                                    sum_selected_transaction
-                                                    == 0
-                                                ):
+                                                if sum_selected_transaction == 0:
 
                                                     abnormal_transaction = [
                                                         o
                                                         for o in selected_transaction
-                                                        if 'closed'
-                                                        in o['label']
+                                                        if "closed" in o["label"]
                                                     ]
 
-                                                    if (
-                                                        not abnormal_transaction
-                                                    ):
-                                                        send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto(
-                                                            label,
-                                                            instrument_attributes_combo_all,
-                                                            THRESHOLD_MARKET_CONDITIONS_COMBO,
+                                                    if not abnormal_transaction:
+                                                        send_order: dict = (
+                                                            await combo_auto.is_send_exit_order_allowed_combo_auto(
+                                                                label,
+                                                                instrument_attributes_combo_all,
+                                                                THRESHOLD_MARKET_CONDITIONS_COMBO,
+                                                            )
                                                         )
 
-                                                        if send_order[
-                                                            'order_allowed'
-                                                        ]:
+                                                        if send_order["order_allowed"]:
 
                                                             await processing_orders(
                                                                 modify_order_and_db,
@@ -695,25 +649,25 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
 
                                                     else:
                                                         log.critical(
-                                                            f'abnormal_transaction {abnormal_transaction}'
+                                                            f"abnormal_transaction {abnormal_transaction}"
                                                         )
 
                                                         break
                                                 else:
 
-                                                    new_label = f'futureSpread-open-{label_integer}'
+                                                    new_label = f"futureSpread-open-{label_integer}"
 
                                                     await update_status_data(
                                                         archive_db_table,
-                                                        'label',
+                                                        "label",
                                                         filter,
                                                         label,
                                                         new_label,
-                                                        '=',
+                                                        "=",
                                                     )
 
                                                     log.debug(
-                                                        'renaming combo Auto done'
+                                                        "renaming combo Auto done"
                                                     )
 
                                                     await modify_order_and_db.cancel_the_cancellables(
@@ -726,23 +680,20 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                             #! renaming combo auto trading
                                             else:
 
-                                                if (
-                                                    sum_selected_transaction
-                                                    == 0
-                                                ):
-                                                    if 'open' in label:
-                                                        new_label = f'futureSpreadAuto-open-{label_integer}'
+                                                if sum_selected_transaction == 0:
+                                                    if "open" in label:
+                                                        new_label = f"futureSpreadAuto-open-{label_integer}"
 
-                                                    if 'closed' in label:
-                                                        new_label = f'futureSpreadAuto-closed-{label_integer}'
+                                                    if "closed" in label:
+                                                        new_label = f"futureSpreadAuto-closed-{label_integer}"
 
                                                     await update_status_data(
                                                         archive_db_table,
-                                                        'label',
+                                                        "label",
                                                         filter,
                                                         label,
                                                         new_label,
-                                                        '=',
+                                                        "=",
                                                     )
                                                     break
 
@@ -750,10 +701,8 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                 else:
 
                                                     if (
-                                                        len_selected_transaction
-                                                        == 1
-                                                        and 'closed'
-                                                        not in label
+                                                        len_selected_transaction == 1
+                                                        and "closed" not in label
                                                     ):
 
                                                         send_order = []
@@ -766,16 +715,20 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
 
                                                                 waiting_minute_before_ordering = (
                                                                     strategy_params[
-                                                                        'waiting_minute_before_cancel'
+                                                                        "waiting_minute_before_cancel"
                                                                     ]
                                                                     * ONE_MINUTE
                                                                 )
 
-                                                                timestamp: int = transaction[
-                                                                    'timestamp'
-                                                                ]
+                                                                timestamp: int = (
+                                                                    transaction[
+                                                                        "timestamp"
+                                                                    ]
+                                                                )
 
-                                                                waiting_time_for_selected_transaction: bool = (
+                                                                waiting_time_for_selected_transaction: (
+                                                                    bool
+                                                                ) = (
                                                                     check_if_minimum_waiting_time_has_passed(
                                                                         waiting_minute_before_ordering,
                                                                         timestamp,
@@ -785,7 +738,7 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                 )
 
                                                                 instrument_name = transaction[
-                                                                    'instrument_name'
+                                                                    "instrument_name"
                                                                 ]
 
                                                                 ticker_transaction = [
@@ -793,7 +746,7 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                     for o in ticker_all
                                                                     if instrument_name
                                                                     in o[
-                                                                        'instrument_name'
+                                                                        "instrument_name"
                                                                     ]
                                                                 ]
 
@@ -808,19 +761,21 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                         * 5
                                                                     )
 
-                                                                    send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                        ticker_transaction[
-                                                                            0
-                                                                        ],
-                                                                        instrument_attributes_futures_all,
-                                                                        TP_THRESHOLD,
-                                                                        transaction,
-                                                                        waiting_time_for_selected_transaction,
-                                                                        random_instruments_name,
+                                                                    send_order: dict = (
+                                                                        await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                                            ticker_transaction[
+                                                                                0
+                                                                            ],
+                                                                            instrument_attributes_futures_all,
+                                                                            TP_THRESHOLD,
+                                                                            transaction,
+                                                                            waiting_time_for_selected_transaction,
+                                                                            random_instruments_name,
+                                                                        )
                                                                     )
 
                                                                     if send_order[
-                                                                        'order_allowed'
+                                                                        "order_allowed"
                                                                     ]:
 
                                                                         await processing_orders(
@@ -828,38 +783,35 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                             send_order,
                                                                         )
 
-                                                                        not_order = False
+                                                                        not_order = (
+                                                                            False
+                                                                        )
 
                                                                         break
 
-                                        log.warning(
-                                            f'strategy {strategy}-DONE'
-                                        )
+                                        log.warning(f"strategy {strategy}-DONE")
 
                                     if (
-                                        'hedgingSpot' in strategy
+                                        "hedgingSpot" in strategy
                                         and size_perpetuals_reconciled
                                     ):
 
-                                        log.warning(
-                                            f'strategy {strategy}-START'
-                                        )
+                                        log.warning(f"strategy {strategy}-START")
 
                                         instrument_attributes_futures_for_hedging = [
                                             o
                                             for o in futures_instruments[
-                                                'active_futures'
+                                                "active_futures"
                                             ]
-                                            if o['settlement_period']
-                                            != 'month'
-                                            and o['kind'] == 'future'
+                                            if o["settlement_period"] != "month"
+                                            and o["kind"] == "future"
                                         ]
 
                                         strong_bearish = market_condition[
-                                            'strong_bearish'
+                                            "strong_bearish"
                                         ]
 
-                                        bearish = market_condition['bearish']
+                                        bearish = market_condition["bearish"]
 
                                         max_position: int = notional * -1
 
@@ -873,7 +825,7 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                         )
 
                                         instrument_name = instrument_ticker[
-                                            'instrument_name'
+                                            "instrument_name"
                                         ]
 
                                         size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
@@ -883,7 +835,7 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                         )
 
                                         if not size_future_reconciled:
-                                            kill_process('general_tasks')
+                                            kill_process("general_tasks")
 
                                         hedging = HedgingSpot(
                                             strategy,
@@ -900,11 +852,9 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                             instrument_time_left = (
                                                 max(
                                                     [
-                                                        o[
-                                                            'expiration_timestamp'
-                                                        ]
+                                                        o["expiration_timestamp"]
                                                         for o in instrument_attributes_futures_all
-                                                        if o['instrument_name']
+                                                        if o["instrument_name"]
                                                         == instrument_name
                                                     ]
                                                 )
@@ -922,23 +872,23 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                 and len_orders_all < 50
                                             ):
 
-                                                best_ask_prc: float = (
-                                                    instrument_ticker[
-                                                        'best_ask_price'
-                                                    ]
+                                                best_ask_prc: float = instrument_ticker[
+                                                    "best_ask_price"
+                                                ]
+
+                                                send_order: dict = (
+                                                    await hedging.is_send_open_order_allowed(
+                                                        non_checked_strategies,
+                                                        instrument_name,
+                                                        instrument_attributes_futures_for_hedging,
+                                                        orders_currency_strategy,
+                                                        best_ask_prc,
+                                                        archive_db_table,
+                                                        trade_db_table,
+                                                    )
                                                 )
 
-                                                send_order: dict = await hedging.is_send_open_order_allowed(
-                                                    non_checked_strategies,
-                                                    instrument_name,
-                                                    instrument_attributes_futures_for_hedging,
-                                                    orders_currency_strategy,
-                                                    best_ask_prc,
-                                                    archive_db_table,
-                                                    trade_db_table,
-                                                )
-
-                                                if send_order['order_allowed']:
+                                                if send_order["order_allowed"]:
 
                                                     await processing_orders(
                                                         modify_order_and_db,
@@ -950,30 +900,26 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                     break
 
                                                 status_transaction = [
-                                                    'open',
-                                                    'closed',
+                                                    "open",
+                                                    "closed",
                                                 ]
 
                                                 if len_orders_all < 50:
 
                                                     # log.error (f"{orders_currency_strategy} ")
 
-                                                    for (
-                                                        status
-                                                    ) in status_transaction:
+                                                    for status in status_transaction:
 
                                                         my_trades_currency_strategy_status = [
                                                             o
                                                             for o in my_trades_currency_strategy
-                                                            if status
-                                                            in (o['label'])
+                                                            if status in (o["label"])
                                                         ]
 
                                                         orders_currency_strategy_label_contra_status = [
                                                             o
                                                             for o in orders_currency_strategy
-                                                            if status
-                                                            not in o['label']
+                                                            if status not in o["label"]
                                                         ]
 
                                                         # log.error (f"{status} ")
@@ -982,9 +928,7 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
 
                                                             transaction_instrument_name = remove_redundant_elements(
                                                                 [
-                                                                    o[
-                                                                        'instrument_name'
-                                                                    ]
+                                                                    o["instrument_name"]
                                                                     for o in my_trades_currency_strategy_status
                                                                 ]
                                                             )
@@ -993,12 +937,14 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                 instrument_name
                                                             ) in transaction_instrument_name:
 
-                                                                instrument_ticker: list = [
+                                                                instrument_ticker: (
+                                                                    list
+                                                                ) = [
                                                                     o
                                                                     for o in ticker_all
                                                                     if instrument_name
                                                                     in o[
-                                                                        'instrument_name'
+                                                                        "instrument_name"
                                                                     ]
                                                                 ]
 
@@ -1009,29 +955,28 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                     ]
 
                                                                     get_prices_in_label_transaction_main = [
-                                                                        o[
-                                                                            'price'
-                                                                        ]
+                                                                        o["price"]
                                                                         for o in my_trades_currency_strategy_status
                                                                         if instrument_name
                                                                         in o[
-                                                                            'instrument_name'
+                                                                            "instrument_name"
                                                                         ]
                                                                     ]
 
                                                                     log.error(
-                                                                        f'my_trades_currency_contribute_to_hedging_sum {my_trades_currency_contribute_to_hedging_sum}'
+                                                                        f"my_trades_currency_contribute_to_hedging_sum {my_trades_currency_contribute_to_hedging_sum}"
                                                                     )
 
                                                                     if (
-                                                                        status
-                                                                        == 'open'
+                                                                        status == "open"
                                                                         and my_trades_currency_contribute_to_hedging_sum
                                                                         <= 0
                                                                     ):
 
-                                                                        best_bid_prc: float = instrument_ticker[
-                                                                            'best_bid_price'
+                                                                        best_bid_prc: (
+                                                                            float
+                                                                        ) = instrument_ticker[
+                                                                            "best_bid_price"
                                                                         ]
 
                                                                         closest_price = get_closest_value(
@@ -1043,12 +988,14 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                             o
                                                                             for o in my_trades_currency_strategy_status
                                                                             if o[
-                                                                                'price'
+                                                                                "price"
                                                                             ]
                                                                             == closest_price
                                                                         ]
 
-                                                                        send_closing_order: dict = await hedging.is_send_exit_order_allowed(
+                                                                        send_closing_order: (
+                                                                            dict
+                                                                        ) = await hedging.is_send_exit_order_allowed(
                                                                             orders_currency_strategy_label_contra_status,
                                                                             best_bid_prc,
                                                                             nearest_transaction_to_index,
@@ -1056,7 +1003,7 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                         )
 
                                                                         if send_order[
-                                                                            'order_allowed'
+                                                                            "order_allowed"
                                                                         ]:
 
                                                                             await processing_orders(
@@ -1064,17 +1011,21 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                                 modify_order_and_db,
                                                                             )
 
-                                                                            not_order = False
+                                                                            not_order = (
+                                                                                False
+                                                                            )
 
                                                                             break
 
                                                                     if (
                                                                         status
-                                                                        == 'closed'
+                                                                        == "closed"
                                                                     ):
 
-                                                                        best_ask_prc: float = instrument_ticker[
-                                                                            'best_ask_price'
+                                                                        best_ask_prc: (
+                                                                            float
+                                                                        ) = instrument_ticker[
+                                                                            "best_ask_price"
                                                                         ]
 
                                                                         closest_price = get_closest_value(
@@ -1086,12 +1037,14 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                             o
                                                                             for o in my_trades_currency_strategy_status
                                                                             if o[
-                                                                                'price'
+                                                                                "price"
                                                                             ]
                                                                             == closest_price
                                                                         ]
 
-                                                                        send_closing_order: dict = await hedging.send_contra_order_for_orphaned_closed_transctions(
+                                                                        send_closing_order: (
+                                                                            dict
+                                                                        ) = await hedging.send_contra_order_for_orphaned_closed_transctions(
                                                                             orders_currency_strategy_label_contra_status,
                                                                             best_ask_prc,
                                                                             nearest_transaction_to_index,
@@ -1099,7 +1052,7 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                         )
 
                                                                         if send_order[
-                                                                            'order_allowed'
+                                                                            "order_allowed"
                                                                         ]:
 
                                                                             await processing_orders(
@@ -1107,26 +1060,26 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                                 send_closing_order,
                                                                             )
 
-                                                                            not_order = False
+                                                                            not_order = (
+                                                                                False
+                                                                            )
 
                                                                             break
 
-                                        log.warning(
-                                            f'strategy {strategy}-DONE'
-                                        )
+                                        log.warning(f"strategy {strategy}-DONE")
 
     except Exception as error:
 
         parse_error_message(error)
 
-        await telegram_bot_sendtext(error, 'general_error')
+        await telegram_bot_sendtext(error, "general_error")
 
 
 def get_settlement_period(strategy_attributes) -> list:
 
     return remove_redundant_elements(
         remove_double_brackets_in_list(
-            [o['settlement_period'] for o in strategy_attributes]
+            [o["settlement_period"] for o in strategy_attributes]
         )
     )
 
@@ -1138,11 +1091,11 @@ async def chart_trade_in_msg(
 ):
     """ """
 
-    if 'chart.trades' in message_channel:
-        tick_from_exchange = data_orders['tick']
+    if "chart.trades" in message_channel:
+        tick_from_exchange = data_orders["tick"]
 
         tick_from_cache = max(
-            [o['max_tick'] for o in candles_data if o['resolution'] == 5]
+            [o["max_tick"] for o in candles_data if o["resolution"] == 5]
         )
 
         if tick_from_exchange <= tick_from_cache:
@@ -1150,7 +1103,7 @@ async def chart_trade_in_msg(
 
         else:
 
-            log.warning('update ohlc')
+            log.warning("update ohlc")
             # await sleep_and_restart()
 
     else:
@@ -1173,13 +1126,13 @@ def compute_notional_value(index_price: float, equity: float) -> float:
 def get_index(data_orders: dict, ticker: dict) -> float:
 
     try:
-        index_price = data_orders['index_price']
+        index_price = data_orders["index_price"]
 
     except:
 
-        index_price = ticker['index_price']
+        index_price = ticker["index_price"]
 
         if index_price == []:
-            index_price = ticker['estimated_delivery_price']
+            index_price = ticker["estimated_delivery_price"]
 
     return index_price

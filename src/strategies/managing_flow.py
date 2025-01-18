@@ -21,9 +21,7 @@ ONE_PCT: float = 1 / 100
 NONE_DATA: None = [0, None, []]
 
 
-async def telegram_bot_sendtext(
-    bot_message, purpose: str = 'general_error'
-) -> None:
+async def telegram_bot_sendtext(bot_message, purpose: str = "general_error") -> None:
     return await deribit_get.telegram_bot_sendtext(bot_message, purpose)
 
 
@@ -41,37 +39,33 @@ async def opening_transactions(
     """ """
 
     try:
-        log.critical(f'OPENING TRANSACTIONS')
+        log.critical(f"OPENING TRANSACTIONS")
 
-        my_trades_open_sqlite: dict = await self.querying_all(
-            'my_trades_all_json'
-        )
+        my_trades_open_sqlite: dict = await self.querying_all("my_trades_all_json")
         # log.error (my_trades_open_all)
 
-        ticker: list = basic_strategy.reading_from_db('ticker', instrument)
+        ticker: list = basic_strategy.reading_from_db("ticker", instrument)
 
         if ticker != []:
 
             # get bid and ask price
-            best_bid_prc: float = ticker[0]['best_bid_price']
-            best_ask_prc: float = ticker[0]['best_ask_price']
+            best_bid_prc: float = ticker[0]["best_bid_price"]
+            best_ask_prc: float = ticker[0]["best_ask_price"]
 
             # index price
-            index_price: float = ticker[0]['index_price']
+            index_price: float = ticker[0]["index_price"]
 
             # obtain spot equity
-            equity: float = portfolio[0]['equity']
+            equity: float = portfolio[0]["equity"]
 
             # compute notional value
-            notional: float = await self.compute_notional_value(
-                index_price, equity
-            )
+            notional: float = await self.compute_notional_value(index_price, equity)
 
             # execute each strategy
             for strategy_attr in strategies:
-                strategy_label = strategy_attr['strategy']
+                strategy_label = strategy_attr["strategy"]
 
-                log.critical(f' {strategy_label}')
+                log.critical(f" {strategy_label}")
 
                 net_sum_strategy = await self.get_net_sum_strategy_super_main(
                     my_trades_open_sqlite, strategy_label
@@ -80,10 +74,10 @@ async def opening_transactions(
                     my_trades_open_sqlite, strategy_label
                 )
                 log.debug(
-                    f'net_sum_strategy   {net_sum_strategy} net_sum_strategy_main   {net_sum_strategy_main}'
+                    f"net_sum_strategy   {net_sum_strategy} net_sum_strategy_main   {net_sum_strategy_main}"
                 )
 
-                if 'hedgingSpot' in strategy_attr['strategy']:
+                if "hedgingSpot" in strategy_attr["strategy"]:
 
                     THRESHOLD_TIME = 30
 
@@ -98,12 +92,14 @@ async def opening_transactions(
                     await self.if_order_is_true(send_order, instrument)
                     await self.if_cancel_is_true(send_order)
 
-                if 'marketMaker' in strategy_attr['strategy']:
+                if "marketMaker" in strategy_attr["strategy"]:
 
                     market_maker = MM.MarketMaker(strategy_label)
 
-                    send_order: dict = await market_maker.is_send_and_cancel_open_order_allowed(
-                        notional, best_ask_prc, best_bid_prc, server_time
+                    send_order: dict = (
+                        await market_maker.is_send_and_cancel_open_order_allowed(
+                            notional, best_ask_prc, best_bid_prc, server_time
+                        )
                     )
 
                     await self.if_order_is_true(send_order, instrument)

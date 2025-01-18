@@ -70,9 +70,7 @@ def remove_redundant_elements(data: list) -> list:
     if isinstance(data, list) and data != []:
         try:
             # Ref 1
-            result = list(
-                {frozenset(item.items()): item for item in data}.values()
-            )
+            result = list({frozenset(item.items()): item for item in data}.values())
 
         except:
             # Ref 2
@@ -152,25 +150,25 @@ def extract_currency_from_text(words: str) -> str:
     incremental_ticker.BTC-4OCT24
     """
 
-    if '.' in words:
-        filter1 = (words.partition('.')[2]).lower()
+    if "." in words:
+        filter1 = (words.partition(".")[2]).lower()
 
-        if '.' in filter1:
-            filter1 = (filter1.partition('.')[2]).lower()
+        if "." in filter1:
+            filter1 = (filter1.partition(".")[2]).lower()
 
-            if 'chart.trades' in words:
-                filter1 = (words.partition('.')[2]).lower()
+            if "chart.trades" in words:
+                filter1 = (words.partition(".")[2]).lower()
 
-            if '.' in filter1:
-                filter1 = (filter1.partition('.')[2]).lower()
+            if "." in filter1:
+                filter1 = (filter1.partition(".")[2]).lower()
 
-                if '.' in filter1:
-                    filter1 = (filter1.partition('.')[0]).lower()
+                if "." in filter1:
+                    filter1 = (filter1.partition(".")[0]).lower()
 
     else:
-        filter1 = (words.partition('.')[0]).lower()
+        filter1 = (words.partition(".")[0]).lower()
 
-    return (filter1.partition('-')[0]).lower()
+    return (filter1.partition("-")[0]).lower()
 
 
 def remove_apostrophes_from_json(json_load: list) -> int:
@@ -192,9 +190,9 @@ def parsing_sqlite_json_output(json_load: list) -> int:
     try:
 
         result_json = [
-            i.replace(':false', ':False')
-            .replace(':true', ':True')
-            .replace(':null', ':None')
+            i.replace(":false", ":False")
+            .replace(":true", ":True")
+            .replace(":null", ":None")
             for i in json_load
         ]
         # print (f'result_json {[ast.literal_eval(str(i)) for i in result_json]}')
@@ -205,7 +203,7 @@ def parsing_sqlite_json_output(json_load: list) -> int:
 
 
 def get_strings_before_character(
-    label: str, character: str = '-', character_place: int = [0, 2]
+    label: str, character: str = "-", character_place: int = [0, 2]
 ) -> str:
     """
 
@@ -229,7 +227,7 @@ def get_strings_before_character(
     if isinstance(character_place, list):
         splitted1 = label.split(character)[character_place[0]]
         splitted2 = label.split(character)[character_place[1]]
-        splitted = f'{splitted1}-{splitted2}'
+        splitted = f"{splitted1}-{splitted2}"
     else:
         splitted = label.split(character)[character_place]
 
@@ -243,22 +241,18 @@ def extract_integers_from_text(words: list) -> int:
 
     words_to_str = str(
         words
-    )   # ensuring if integer used as argument, will be returned as itself
+    )  # ensuring if integer used as argument, will be returned as itself
 
-    return int(''.join([o for o in words_to_str if o.isdigit()]))
+    return int("".join([o for o in words_to_str if o.isdigit()]))
 
 
-def extract_integers_aggregation_from_text(
-    identifier, aggregator, words: list
-) -> int:
+def extract_integers_aggregation_from_text(identifier, aggregator, words: list) -> int:
     """
     identifier: id: trade/order/etc
     aggregator: min, max, len
     """
 
-    return aggregator(
-        [extract_integers_from_text(o[f'{identifier}']) for o in words]
-    )
+    return aggregator([extract_integers_from_text(o[f"{identifier}"]) for o in words])
 
 
 def parsing_label(label: str, integer: int = None) -> dict:
@@ -288,14 +282,14 @@ def parsing_label(label: str, integer: int = None) -> dict:
     """
     try:
         try:
-            get_integer = get_strings_before_character(label, '-', 2)
+            get_integer = get_strings_before_character(label, "-", 2)
         except:
-            get_integer = get_strings_before_character(label, '-', 1)
+            get_integer = get_strings_before_character(label, "-", 1)
     except:
         get_integer = None
 
     try:
-        status = get_strings_before_character(label, '-', [0, 1])
+        status = get_strings_before_character(label, "-", [0, 1])
     except:
         status = None
 
@@ -305,66 +299,64 @@ def parsing_label(label: str, integer: int = None) -> dict:
         net = None
 
     try:
-        main = get_strings_before_character(label, '-', 0)
+        main = get_strings_before_character(label, "-", 0)
     except:
         main = None
 
     try:
-        side = ['Short', 'Long']
-        super_main = [main.replace(o, '') for o in side if o in main]
+        side = ["Short", "Long"]
+        super_main = [main.replace(o, "") for o in side if o in main]
     except:
         super_main = None
 
     try:
-        closed_to_open = f'{main}-open-{get_integer}'
+        closed_to_open = f"{main}-open-{get_integer}"
 
     except:
         closed_to_open = None
 
     try:
-        if 'Short' in main:
-            flip = main.replace('Short', 'Long')
+        if "Short" in main:
+            flip = main.replace("Short", "Long")
 
-        if 'Long' in main:
-            flip = main.replace('Long', 'Short')
-        flipping_closed = f'{flip}-open-{integer}'
+        if "Long" in main:
+            flip = main.replace("Long", "Short")
+        flipping_closed = f"{flip}-open-{integer}"
     except:
         flipping_closed = None
 
     return {
         # "super_main":  bool([o not in main for o in side]),
-        'super_main': (
+        "super_main": (
             None
             if super_main == None
-            else (
-                main if all([o not in main for o in side]) else super_main[0]
-            )
+            else (main if all([o not in main for o in side]) else super_main[0])
         ),
-        'main': main,
-        'int': get_integer,
-        'transaction_status': status,
-        'transaction_net': net,
-        'flipping_closed': flipping_closed,
-        'closed_to_open': closed_to_open,
+        "main": main,
+        "int": get_integer,
+        "transaction_status": status,
+        "transaction_net": net,
+        "flipping_closed": flipping_closed,
+        "closed_to_open": closed_to_open,
     }
 
 
 def transform_nested_dict_to_list(list_example) -> dict:
     """ """
-    len_tick = len(list_example['volume'])
+    len_tick = len(list_example["volume"])
 
     my_list = []
 
     for k in range(len_tick):
 
         dict_result = dict(
-            volume=list_example['volume'][k],
-            tick=list_example['ticks'][k],
-            open=list_example['open'][k],
-            low=list_example['low'][k],
-            high=list_example['high'][k],
-            cost=list_example['cost'][k],
-            close=list_example['close'][k],
+            volume=list_example["volume"][k],
+            tick=list_example["ticks"][k],
+            open=list_example["open"][k],
+            low=list_example["low"][k],
+            high=list_example["high"][k],
+            cost=list_example["cost"][k],
+            close=list_example["close"][k],
         )
 
         my_list.append(dict_result)
@@ -374,7 +366,7 @@ def transform_nested_dict_to_list(list_example) -> dict:
 
 def transform_nested_dict_to_list_ohlc(list_example) -> dict:
     """ """
-    len_tick = len(list_example['open'])
+    len_tick = len(list_example["open"])
 
     my_list = []
 
@@ -382,12 +374,12 @@ def transform_nested_dict_to_list_ohlc(list_example) -> dict:
 
         dict_result = dict(
             # volume=list_example["volume"][k],
-            tick=list_example['ticks'][k],
-            open=list_example['open'][k],
-            high=list_example['high'][k],
-            low=list_example['low'][k],
+            tick=list_example["ticks"][k],
+            open=list_example["open"][k],
+            high=list_example["high"][k],
+            low=list_example["low"][k],
             # cost=list_example["cost"][k],
-            close=list_example['close'][k],
+            close=list_example["close"][k],
         )
 
         my_list.append(dict_result)
@@ -396,7 +388,7 @@ def transform_nested_dict_to_list_ohlc(list_example) -> dict:
 
 
 def filtering_list_with_missing_key(
-    list_examples: list, missing_key: str = 'label'
+    list_examples: list, missing_key: str = "label"
 ) -> dict:
     """
     https://stackoverflow.com/questions/34710571/can-i-use-a-list-comprehension-on-a-list-of-dictionaries-if-a-key-is-missing
@@ -406,7 +398,7 @@ def filtering_list_with_missing_key(
 
 
 def sorting_list(
-    listing: list, item_reference: str = 'price', is_reversed: bool = True
+    listing: list, item_reference: str = "price", is_reversed: bool = True
 ) -> list:
     """
     https://sparkbyexamples.com/python/sort-list-of-dictionaries-by-value-in-python/
@@ -423,9 +415,7 @@ def sorting_list(
     """
     import operator
 
-    return sorted(
-        listing, key=operator.itemgetter(item_reference), reverse=is_reversed
-    )
+    return sorted(listing, key=operator.itemgetter(item_reference), reverse=is_reversed)
 
 
 def hashing(
@@ -438,10 +428,10 @@ def hashing(
     import hmac
     from urllib.parse import urlencode
 
-    payload = {'apiKey': client_id, 'timestamp': timestamp}
+    payload = {"apiKey": client_id, "timestamp": timestamp}
 
     return hmac.new(
-        apiSecret.encode('utf-8'),
-        urlencode(payload).encode('utf-8'),
+        apiSecret.encode("utf-8"),
+        urlencode(payload).encode("utf-8"),
         hashlib.sha256,
     ).hexdigest()

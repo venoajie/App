@@ -25,9 +25,9 @@ def ohlc_end_point(
     end_timestamp: int,
 ) -> str:
 
-    url = f'https://deribit.com/api/v2/public/get_tradingview_chart_data?'
+    url = f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
 
-    return f'{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}'
+    return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
 
 
 async def recording_multiple_time_frames(
@@ -53,14 +53,14 @@ async def recording_multiple_time_frames(
             )
 
             with httpx.Client() as client:
-                ohlc_request = client.get(
-                    end_point, follow_redirects=True
-                ).json()['result']
+                ohlc_request = client.get(end_point, follow_redirects=True).json()[
+                    "result"
+                ]
 
             result = [
                 o
                 for o in transform_nested_dict_to_list(ohlc_request)
-                if o['tick'] > start_timestamp
+                if o["tick"] > start_timestamp
             ][0]
 
             await insert_tables(table_ohlc, result)
@@ -68,27 +68,21 @@ async def recording_multiple_time_frames(
     except Exception as error:
         await async_raise_error_message(
             error,
-            'Capture market data - failed to fetch last open_interest',
+            "Capture market data - failed to fetch last open_interest",
         )
 
 
 async def last_open_interest_tick_fr_sqlite(last_tick_query_ohlc1) -> float:
     """ """
     try:
-        last_open_interest = await executing_query_with_return(
-            last_tick_query_ohlc1
-        )
+        last_open_interest = await executing_query_with_return(last_tick_query_ohlc1)
 
     except Exception as error:
         await async_raise_error_message(
             error,
-            'Capture market data - failed to fetch last open_interest',
+            "Capture market data - failed to fetch last open_interest",
         )
-    return (
-        0
-        if last_open_interest == 0
-        else last_open_interest[0]['open_interest']
-    )
+    return 0 if last_open_interest == 0 else last_open_interest[0]["open_interest"]
 
 
 async def last_tick_fr_sqlite(last_tick_query_ohlc1) -> int:
@@ -99,9 +93,9 @@ async def last_tick_fr_sqlite(last_tick_query_ohlc1) -> int:
     except Exception as error:
         await async_raise_error_message(
             error,
-            'Capture market data - failed to fetch last_tick_fr_sqlite',
+            "Capture market data - failed to fetch last_tick_fr_sqlite",
         )
-    return last_tick1[0]['MAX (tick)']
+    return last_tick1[0]["MAX (tick)"]
 
 
 async def replace_previous_ohlc_using_fix_data(
@@ -123,27 +117,27 @@ async def replace_previous_ohlc_using_fix_data(
         )
 
         with httpx.Client(follow_redirects=True) as client:
-            ohlc_request = client.get(ohlc_endPoint).json()['result']
+            ohlc_request = client.get(ohlc_endPoint).json()["result"]
 
         result = [
             o
             for o in transform_nested_dict_to_list(ohlc_request)
-            if o['tick'] == last_tick1_fr_sqlite
+            if o["tick"] == last_tick1_fr_sqlite
         ][0]
 
         await update_status_data(
             TABLE_OHLC1,
-            'data',
+            "data",
             last_tick1_fr_sqlite,
             WHERE_FILTER_TICK,
             result,
-            'is',
+            "is",
         )
 
     except Exception as error:
         await async_raise_error_message(
             error,
-            'Capture market data - failed to fetch last_tick_fr_sqlite',
+            "Capture market data - failed to fetch last_tick_fr_sqlite",
         )
 
 
@@ -152,18 +146,16 @@ async def ohlc_result_per_time_frame(
     resolution,
     data_orders,
     TABLE_OHLC1: str,
-    WHERE_FILTER_TICK: str = 'tick',
+    WHERE_FILTER_TICK: str = "tick",
 ) -> None:
 
     last_tick_query_ohlc1: str = querying_arithmetic_operator(
-        WHERE_FILTER_TICK, 'MAX', TABLE_OHLC1
+        WHERE_FILTER_TICK, "MAX", TABLE_OHLC1
     )
 
-    last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(
-        last_tick_query_ohlc1
-    )
+    last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
 
-    last_tick_fr_data_orders: int = data_orders['tick']
+    last_tick_fr_data_orders: int = data_orders["tick"]
 
     # refilling current ohlc table with updated data
     refilling_current_ohlc_table_with_updated_streaming_data = (
@@ -178,11 +170,11 @@ async def ohlc_result_per_time_frame(
 
         await update_status_data(
             TABLE_OHLC1,
-            'data',
+            "data",
             last_tick1_fr_sqlite,
             WHERE_FILTER_TICK,
             data_orders,
-            'is',
+            "is",
         )
 
     if insert_new_ohlc_and_replace_previous_ohlc_using_fix_data:
@@ -199,9 +191,7 @@ async def ohlc_result_per_time_frame(
         )
 
 
-def currency_inline_with_database_address(
-    currency: str, database_address: str
-) -> bool:
+def currency_inline_with_database_address(currency: str, database_address: str) -> bool:
 
     return currency.lower() in str(database_address)
 
@@ -214,27 +204,25 @@ async def inserting_open_interest(
 
         if (
             currency_inline_with_database_address(currency, TABLE_OHLC1)
-            and 'open_interest' in data_orders
+            and "open_interest" in data_orders
         ):
 
-            open_interest = data_orders['open_interest']
+            open_interest = data_orders["open_interest"]
 
             last_tick_query_ohlc1: str = querying_arithmetic_operator(
-                'tick', 'MAX', TABLE_OHLC1
+                "tick", "MAX", TABLE_OHLC1
             )
 
-            last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(
-                last_tick_query_ohlc1
-            )
+            last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
 
             await update_status_data(
                 TABLE_OHLC1,
-                'open_interest',
+                "open_interest",
                 last_tick1_fr_sqlite,
                 WHERE_FILTER_TICK,
                 open_interest,
-                'is',
+                "is",
             )
 
     except Exception as error:
-        print(f'error allocating ohlc {error}')
+        print(f"error allocating ohlc {error}")

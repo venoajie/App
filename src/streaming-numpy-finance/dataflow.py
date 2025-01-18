@@ -13,6 +13,7 @@ For example:
 {'time': 1713277219000.0, 'min': 416.8399963378906, 'max': 417.2900085449219,
 'first_price': 417.2900085449219, 'last_price': 416.8399963378906, 'volume': 18399.0})
 """
+
 import base64
 import json
 from datetime import datetime, timedelta, timezone
@@ -32,9 +33,10 @@ from bytewax.operators.window import EventClockConfig, TumblingWindow
 from ticker_pb2 import Ticker
 
 ## input
-ticker_list = ['AMZN', 'MSFT']
+ticker_list = ["AMZN", "MSFT"]
 # we can also use BTC-USD outside of stock exchange opening hours
 # ticker_list = ['BTC-USD']
+
 
 # Function deserializing Protobuf messages
 def deserialize(message):
@@ -51,11 +53,11 @@ def deserialize(message):
 
 # Function yielding deserialized data from YahooFinance
 async def _ws_agen(worker_tickers):
-    url = 'wss://streamer.finance.yahoo.com/'
+    url = "wss://streamer.finance.yahoo.com/"
     # Establish connection to Yahoo Finance with WebSockets
     async with websockets.connect(url) as websocket:
         # Subscribe to tickers
-        msg = json.dumps({'subscribe': worker_tickers})
+        msg = json.dumps({"subscribe": worker_tickers})
         await websocket.send(msg)
         await websocket.recv()
 
@@ -111,7 +113,7 @@ class YahooSource(FixedPartitionedSource):
         """
         List all partitions the worker has access to.
         """
-        return ['single-part']
+        return ["single-part"]
 
     def build_part(self, step_id, for_key, _resume_state):
         """
@@ -122,8 +124,8 @@ class YahooSource(FixedPartitionedSource):
 
 
 # Creating dataflow and input
-flow = Dataflow('yahoofinance')
-inp = op.input('input', flow, YahooSource(ticker_list))
+flow = Dataflow("yahoofinance")
+inp = op.input("input", flow, YahooSource(ticker_list))
 # ('AMZN', id: "AMZN"
 # price: 184.585
 # time: 1713276945000
@@ -160,9 +162,7 @@ def get_event_time(ticker):
     """
     Retrieve event's datetime from the input (Must be UTC)
     """
-    return datetime.utcfromtimestamp(ticker.time / 1000).replace(
-        tzinfo=timezone.utc
-    )
+    return datetime.utcfromtimestamp(ticker.time / 1000).replace(tzinfo=timezone.utc)
 
 
 # Configure the `fold_window` operator to use the event time
@@ -177,9 +177,9 @@ align_to = align_to - timedelta(
 )
 window_config = TumblingWindow(length=timedelta(seconds=60), align_to=align_to)
 window = win.fold_window(
-    '1_min', inp, clock_config, window_config, build_array, acc_values
+    "1_min", inp, clock_config, window_config, build_array, acc_values
 )
-op.inspect('inspect', window)
+op.inspect("inspect", window)
 
 
 def calculate_features(ticker__data):
@@ -195,21 +195,21 @@ def calculate_features(ticker__data):
         ticker,
         data[0],  # metadata
         {
-            'time': win_data[-1][0],
-            'min': np.amin(win_data[:, 1]),
-            'max': np.amax(win_data[:, 1]),
-            'first_price': win_data[:, 1][-1],
-            'last_price': win_data[:, 1][0],
-            'volume': win_data[:, 2][0] - win_data[:, 2][-1],
+            "time": win_data[-1][0],
+            "min": np.amin(win_data[:, 1]),
+            "max": np.amax(win_data[:, 1]),
+            "first_price": win_data[:, 1][-1],
+            "last_price": win_data[:, 1][0],
+            "volume": win_data[:, 2][0] - win_data[:, 2][-1],
         },
     )
 
 
-features = op.map('features', window, calculate_features)
+features = op.map("features", window, calculate_features)
 print(features)
 
 # Output
-op.output('out', features, StdOutSink())
+op.output("out", features, StdOutSink())
 # ('MSFT', WindowMetadata(open_time: 2024-04-16 14:20:00 UTC, close_time: 2024-04-16 14:21:00 UTC),
 # {'time': 1713277219000.0, 'min': 416.8399963378906, 'max': 417.2900085449219,
 # 'first_price': 417.2900085449219, 'last_price': 416.8399963378906, 'volume': 18399.0})

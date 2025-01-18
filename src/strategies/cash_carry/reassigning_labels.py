@@ -31,29 +31,25 @@ def waiting_time_has_expired(
     ONE_MINUTE = ONE_SECOND * 60
 
     waiting_minute_before_cancel = (
-        strategy_params['waiting_minute_before_relabelling'] * ONE_MINUTE
+        strategy_params["waiting_minute_before_relabelling"] * ONE_MINUTE
     )
 
     # log.debug (f"waiting_minute_before_cancel {waiting_minute_before_cancel}")
 
-    timestamp_perpetual: int = perpetual_trade['timestamp']
+    timestamp_perpetual: int = perpetual_trade["timestamp"]
 
-    waiting_time_for_perpetual_order: bool = (
-        check_if_minimum_waiting_time_has_passed(
-            waiting_minute_before_cancel,
-            timestamp_perpetual,
-            server_time,
-        )
+    waiting_time_for_perpetual_order: bool = check_if_minimum_waiting_time_has_passed(
+        waiting_minute_before_cancel,
+        timestamp_perpetual,
+        server_time,
     )
 
-    timestamp_future: int = future_trade['timestamp']
+    timestamp_future: int = future_trade["timestamp"]
 
-    waiting_time_for_future_order: bool = (
-        check_if_minimum_waiting_time_has_passed(
-            waiting_minute_before_cancel,
-            timestamp_future,
-            server_time,
-        )
+    waiting_time_for_future_order: bool = check_if_minimum_waiting_time_has_passed(
+        waiting_minute_before_cancel,
+        timestamp_future,
+        server_time,
     )
 
     return waiting_time_for_perpetual_order and waiting_time_for_future_order
@@ -68,15 +64,15 @@ def my_trades_currency_strategy_with_no_blanks(
     my_trades_currency_active_with_no_blanks = (
         []
         if my_trades_currency == []
-        else [o for o in my_trades_currency if o['label'] is not None]
+        else [o for o in my_trades_currency if o["label"] is not None]
     )
 
     my_trades_currency_strategy = [
         o
         for o in my_trades_currency_active_with_no_blanks
-        if strategy in o['label']
-        and 'closed' not in o['label']
-        and 'Auto' not in o['label']
+        if strategy in o["label"]
+        and "closed" not in o["label"]
+        and "Auto" not in o["label"]
     ]
     return my_trades_currency_strategy
 
@@ -94,7 +90,7 @@ def get_redundant_ids(
     if my_trades_currency_strategy:
 
         instrument_names = remove_redundant_elements(
-            [o['instrument_name'] for o in my_trades_currency_strategy]
+            [o["instrument_name"] for o in my_trades_currency_strategy]
         )
 
         if instrument_names:
@@ -104,22 +100,22 @@ def get_redundant_ids(
                 my_trade_instrument_name = [
                     o
                     for o in my_trades_currency_strategy
-                    if instrument_name in o['instrument_name']
+                    if instrument_name in o["instrument_name"]
                 ]
 
                 if my_trade_instrument_name:
 
                     my_trades_label = remove_redundant_elements(
-                        [(o['label']) for o in my_trade_instrument_name]
+                        [(o["label"]) for o in my_trade_instrument_name]
                     )
 
                     result = []
                     for label in my_trades_label:
                         len_label = len(
                             [
-                                o['label']
+                                o["label"]
                                 for o in my_trades_currency_strategy
-                                if label in o['label']
+                                if label in o["label"]
                             ]
                         )
                         if len_label > 1:
@@ -141,7 +137,7 @@ def get_single_transaction(
     if my_trades_currency_strategy:
 
         my_trades_label = remove_redundant_elements(
-            [(o['label']) for o in my_trades_currency_strategy]
+            [(o["label"]) for o in my_trades_currency_strategy]
         )
 
         result = []
@@ -150,19 +146,15 @@ def get_single_transaction(
             label_integer = get_label_integer(label)
 
             transaction_under_label_integer = [
-                o
-                for o in my_trades_currency_strategy
-                if label_integer in o['label']
+                o for o in my_trades_currency_strategy if label_integer in o["label"]
             ]
 
             # additional filter
             sum_transaction_under_label_integer = sum(
-                [o['amount'] for o in transaction_under_label_integer]
+                [o["amount"] for o in transaction_under_label_integer]
             )
 
-            transaction_under_label_integer_len = len(
-                transaction_under_label_integer
-            )
+            transaction_under_label_integer_len = len(transaction_under_label_integer)
             # log.info (f" {transaction_under_label_integer} sum_transaction_under_label_integer {sum_transaction_under_label_integer} transaction_under_label_integer_len {transaction_under_label_integer_len}")
             if transaction_under_label_integer_len == 1:
 
@@ -181,12 +173,10 @@ async def updating_db_with_new_label(
     """ """
 
     await update_status_data(
-        archive_db_table, 'label', filter, trade_id, new_label, '='
+        archive_db_table, "label", filter, trade_id, new_label, "="
     )
 
-    await update_status_data(
-        trade_db_table, 'label', filter, trade_id, new_label, '='
-    )
+    await update_status_data(trade_db_table, "label", filter, trade_id, new_label, "=")
 
 
 async def relabelling_double_ids(
@@ -198,7 +188,7 @@ async def relabelling_double_ids(
 
     from strategies.basic_strategy import get_label
 
-    strategy = 'futureSpread'
+    strategy = "futureSpread"
 
     relabelling = False
 
@@ -209,7 +199,7 @@ async def relabelling_double_ids(
     if my_trades_currency_strategy:
 
         instrument_names = remove_redundant_elements(
-            [o['instrument_name'] for o in my_trades_currency_strategy]
+            [o["instrument_name"] for o in my_trades_currency_strategy]
         )
 
         if instrument_names:
@@ -219,7 +209,7 @@ async def relabelling_double_ids(
                 my_trade_instrument_name = [
                     o
                     for o in my_trades_currency_strategy
-                    if instrument_name in o['instrument_name']
+                    if instrument_name in o["instrument_name"]
                 ]
 
                 redundant_ids = get_redundant_ids(
@@ -229,26 +219,26 @@ async def relabelling_double_ids(
 
                 if redundant_ids:
 
-                    log.error(f'redundant_ids {redundant_ids}')
+                    log.error(f"redundant_ids {redundant_ids}")
 
                     for label in redundant_ids:
-                        log.error(f'label {label}')
+                        log.error(f"label {label}")
 
                         trade_ids = [
-                            o['trade_id']
+                            o["trade_id"]
                             for o in my_trade_instrument_name
-                            if label in o['label']
+                            if label in o["label"]
                         ]
 
                         if trade_ids:
 
                             for trade_id in trade_ids:
 
-                                log.warning(f'trade_id {trade_id}')
+                                log.warning(f"trade_id {trade_id}")
 
-                                filter = 'trade_id'
+                                filter = "trade_id"
 
-                                new_label: str = get_label('open', strategy)
+                                new_label: str = get_label("open", strategy)
 
                                 await updating_db_with_new_label(
                                     trade_db_table,
@@ -274,7 +264,7 @@ async def pairing_single_label(
 
     paired_success = False
 
-    strategy = 'futureSpread'
+    strategy = "futureSpread"
 
     single_label_transaction = get_single_transaction(
         my_trades_currency_active, strategy
@@ -285,46 +275,46 @@ async def pairing_single_label(
     if single_label_transaction:
 
         my_trades_amount = remove_redundant_elements(
-            [abs(o['amount']) for o in single_label_transaction]
+            [abs(o["amount"]) for o in single_label_transaction]
         )
 
         strategy_params = strategy_params = [
-            o for o in strategy_attributes if o['strategy_label'] == strategy
+            o for o in strategy_attributes if o["strategy_label"] == strategy
         ][0]
 
-        log.error(f'my_trades_amount {my_trades_amount}')
+        log.error(f"my_trades_amount {my_trades_amount}")
 
         for amount in my_trades_amount:
 
-            log.error(f'amount {amount}')
+            log.error(f"amount {amount}")
 
             my_trades_with_the_same_amount = [
-                o
-                for o in single_label_transaction
-                if amount == abs(o['amount'])
+                o for o in single_label_transaction if amount == abs(o["amount"])
             ]
 
             my_trades_with_the_same_amount_label_perpetual = [
                 o
                 for o in my_trades_with_the_same_amount
-                if 'PERPETUAL' in o['instrument_name']
+                if "PERPETUAL" in o["instrument_name"]
             ]
 
             my_trades_with_the_same_amount_label_non_perpetual = [
                 o
                 for o in my_trades_with_the_same_amount
-                if 'PERPETUAL' not in o['instrument_name']
+                if "PERPETUAL" not in o["instrument_name"]
             ]
 
-            my_trades_with_the_same_amount_label_non_perpetual_instrument_name = remove_redundant_elements(
-                [
-                    o['instrument_name']
-                    for o in my_trades_with_the_same_amount_label_non_perpetual
-                ]
+            my_trades_with_the_same_amount_label_non_perpetual_instrument_name = (
+                remove_redundant_elements(
+                    [
+                        o["instrument_name"]
+                        for o in my_trades_with_the_same_amount_label_non_perpetual
+                    ]
+                )
             )
 
             log.error(
-                f'my_trades_with_the_same_amount_label_non_perpetual_instrument_name {my_trades_with_the_same_amount_label_non_perpetual_instrument_name}'
+                f"my_trades_with_the_same_amount_label_non_perpetual_instrument_name {my_trades_with_the_same_amount_label_non_perpetual_instrument_name}"
             )
 
             for (
@@ -334,39 +324,35 @@ async def pairing_single_label(
                 my_trades_with_the_same_amount_label_future = [
                     o
                     for o in my_trades_with_the_same_amount_label_non_perpetual
-                    if instrument_name_future in o['instrument_name']
+                    if instrument_name_future in o["instrument_name"]
                 ]
 
                 my_trades_future_sorted = sorting_list(
-                    my_trades_with_the_same_amount_label_future, 'price', True
+                    my_trades_with_the_same_amount_label_future, "price", True
                 )
 
                 if my_trades_future_sorted:
 
                     future_trade = my_trades_future_sorted[0]
-                    price_future = future_trade['price']
+                    price_future = future_trade["price"]
 
                     my_trades_perpetual_with_lower_price = [
                         o
                         for o in my_trades_with_the_same_amount_label_perpetual
-                        if o['price'] < price_future and o['amount'] > 0
+                        if o["price"] < price_future and o["amount"] > 0
                     ]
 
                     my_trades_perpetual_with_lower_price_sorted = sorting_list(
-                        my_trades_perpetual_with_lower_price, 'price', False
+                        my_trades_perpetual_with_lower_price, "price", False
                     )
 
-                    log.error(
-                        f'my_trades_future_sorted {my_trades_future_sorted}'
-                    )
+                    log.error(f"my_trades_future_sorted {my_trades_future_sorted}")
 
                     if my_trades_perpetual_with_lower_price_sorted:
 
                         # log.debug (f"my_trades_perpetual_with_lower_price_sorted {my_trades_perpetual_with_lower_price_sorted}")
 
-                        perpetual_trade = (
-                            my_trades_perpetual_with_lower_price_sorted[0]
-                        )
+                        perpetual_trade = my_trades_perpetual_with_lower_price_sorted[0]
 
                         log.warning(future_trade)
                         log.debug(perpetual_trade)
@@ -380,29 +366,26 @@ async def pairing_single_label(
 
                         if waiting_time_expired:
 
-                            side_perpetual = perpetual_trade['side']
-                            side_future = future_trade['side']
+                            side_perpetual = perpetual_trade["side"]
+                            side_future = future_trade["side"]
 
-                            filter = 'trade_id'
+                            filter = "trade_id"
                             trade_id = perpetual_trade[filter]
-                            new_label = future_trade['label']
+                            new_label = future_trade["label"]
 
                             # market contango
                             if my_trades_perpetual_with_lower_price_sorted:
 
                                 # market contango
-                                if (
-                                    side_future == 'sell'
-                                    and side_perpetual == 'buy'
-                                ):
+                                if side_future == "sell" and side_perpetual == "buy":
 
                                     await update_status_data(
                                         archive_db_table,
-                                        'label',
+                                        "label",
                                         filter,
                                         trade_id,
                                         new_label,
-                                        '=',
+                                        "=",
                                     )
 
                                     log.warning(future_trade)

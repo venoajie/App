@@ -35,6 +35,7 @@ def ttl_cache(ttl_seconds=5):
 
     def ttl_cache_deco(func):
         """Returns a function with time-to-live (TTL) caching capabilities."""
+
         # Function with caching capability and dummy argument
         @lru_cache(maxsize=None)
         def cached_dummy_func(*args, ttl_dummy, **kwargs):
@@ -54,7 +55,7 @@ def ttl_cache(ttl_seconds=5):
 
 @ttl_cache(ttl_seconds=5)
 def get_content():
-    return 'AAAAAAAAAAAAA'
+    return "AAAAAAAAAAAAA"
 
 
 print(get_content())
@@ -76,10 +77,10 @@ def get_platform() -> str:
     """
 
     platforms: dict = {
-        'linux1': 'linux',
-        'linux2': 'linux',
-        'darwin': 'OS X',
-        'win32': 'win',
+        "linux1": "linux",
+        "linux2": "linux",
+        "darwin": "OS X",
+        "win32": "win",
     }
 
     if sys.platform not in platforms:
@@ -109,117 +110,109 @@ def provide_path_for_file(
     current_os = get_platform()
 
     # Set root equal to  current folder
-    root: str = Path('.')
+    root: str = Path(".")
 
     exchange = None
 
     if bool(
-        [
-            o
-            for o in ['portfolio', 'positions', 'sub_accounts']
-            if (o in end_point)
-        ]
+        [o for o in ["portfolio", "positions", "sub_accounts"] if (o in end_point)]
     ):
-        exchange: str = 'deribit'
-        sub_folder: str = f'databases/exchanges/{exchange}/portfolio'
+        exchange: str = "deribit"
+        sub_folder: str = f"databases/exchanges/{exchange}/portfolio"
 
-    if bool(
-        [o for o in ['orders', 'myTrades', 'my_trades'] if (o in end_point)]
-    ):
-        exchange: str = 'deribit'
-        sub_folder: str = f'databases/exchanges/{exchange}/transactions'
+    if bool([o for o in ["orders", "myTrades", "my_trades"] if (o in end_point)]):
+        exchange: str = "deribit"
+        sub_folder: str = f"databases/exchanges/{exchange}/transactions"
 
     if bool(
         [
             o
             for o in [
-                'ordBook',
-                'index',
-                'instruments',
-                'currencies',
-                'ohlc',
-                'futures_analysis',
-                'ticker-all',
-                'ticker_all',
-                'ticker',
+                "ordBook",
+                "index",
+                "instruments",
+                "currencies",
+                "ohlc",
+                "futures_analysis",
+                "ticker-all",
+                "ticker_all",
+                "ticker",
             ]
             if (o in end_point)
         ]
     ):
-        sub_folder = 'databases/market'
-        exchange = 'deribit'
+        sub_folder = "databases/market"
+        exchange = "deribit"
 
     if bool(
         [
             o
             for o in [
-                'openInterestHistorical',
-                'openInterestHistorical',
-                'openInterestAggregated',
+                "openInterestHistorical",
+                "openInterestHistorical",
+                "openInterestAggregated",
             ]
             if (o in end_point)
         ]
     ):
-        sub_folder = 'databases/market'
-        exchange = 'general'
+        sub_folder = "databases/market"
+        exchange = "general"
 
     if marker != None:
-        file_name = f'{marker.lower()}-{end_point}'
+        file_name = f"{marker.lower()}-{end_point}"
 
         if status != None:
-            file_name = f'{file_name}-{status}'
+            file_name = f"{file_name}-{status}"
 
         if method != None:
-            file_name = f'{file_name}-{method}'
+            file_name = f"{file_name}-{method}"
 
     else:
-        file_name = f'{end_point}'
+        file_name = f"{end_point}"
 
-    if '.env' in end_point:
-        sub_folder = 'configuration'
+    if ".env" in end_point:
+        sub_folder = "configuration"
 
-    if 'config_strategies.toml' in end_point:
-        sub_folder = 'strategies'
+    if "config_strategies.toml" in end_point:
+        sub_folder = "strategies"
 
-    if 'api_url_end_point.toml' in end_point:
-        sub_folder = 'transaction_management/binance'
+    if "api_url_end_point.toml" in end_point:
+        sub_folder = "transaction_management/binance"
 
     # to accomodate pytest env
-    if 'test.env' in end_point:
-        sub_folder = 'src/configuration'
-        end_point = '.env'
+    if "test.env" in end_point:
+        sub_folder = "src/configuration"
+        end_point = ".env"
 
-    config_file = '.env' in file_name or '.toml' in file_name
+    config_file = ".env" in file_name or ".toml" in file_name
 
-    file_name = (f'{end_point}') if config_file else (f'{file_name}.pkl')
+    file_name = (f"{end_point}") if config_file else (f"{file_name}.pkl")
 
     # Combine root + folders
     my_path_linux: str = (
         root / sub_folder if exchange == None else root / sub_folder / exchange
     )
     my_path_win: str = (
-        root / 'src' / sub_folder
+        root / "src" / sub_folder
         if exchange == None
-        else root / 'src' / sub_folder / exchange
+        else root / "src" / sub_folder / exchange
     )
 
-    if 'portfolio' in sub_folder or 'transactions' in sub_folder:
+    if "portfolio" in sub_folder or "transactions" in sub_folder:
         my_path_linux: str = (
             root / sub_folder if exchange == None else root / sub_folder
         )
         my_path_win: str = (
-            root / 'src' / sub_folder
-            if exchange == None
-            else root / 'src' / sub_folder
+            root / "src" / sub_folder if exchange == None else root / "src" / sub_folder
         )
 
     # Create target Directory if it doesn't exist in linux
-    if not os.path.exists(my_path_linux) and current_os == 'linux':
+    if not os.path.exists(my_path_linux) and current_os == "linux":
         os.makedirs(my_path_linux)
 
     return (
         (my_path_linux / file_name)
-        if get_platform() == 'linux'
+        if get_platform() == "linux"
         else (my_path_win / file_name)
     )
 
@@ -241,7 +234,7 @@ def is_current_file_running(script: str) -> bool:
 
     for q in psutil.process_iter():
 
-        if q.name().startswith('python') or q.name().startswith('py'):
+        if q.name().startswith("python") or q.name().startswith("py"):
             if (
                 len(q.cmdline()) > 1
                 and script in q.cmdline()[1]
@@ -259,9 +252,7 @@ def reading_from_db_pickle(
     """ """
     from utilities import pickling
 
-    return pickling.read_data(
-        provide_path_for_file(end_point, instrument, status)
-    )
+    return pickling.read_data(provide_path_for_file(end_point, instrument, status))
 
 
 def sleep_and_restart_program(idle: float = None) -> None:
@@ -279,10 +270,10 @@ def sleep_and_restart_program(idle: float = None) -> None:
     """
 
     if idle != None:
-        print(f' sleep for {idle} seconds')
+        print(f" sleep for {idle} seconds")
         sleep(idle)
 
-    print(f'restart')
+    print(f"restart")
     python = sys.executable
     os.execl(python, python, *sys.argv)
 
@@ -302,10 +293,10 @@ async def sleep_and_restart(idle: float = None) -> None:
     """
 
     if idle != None:
-        print(f' sleep for {idle} seconds')
+        print(f" sleep for {idle} seconds")
         await asyncio.sleep(idle)
 
-    print(f'restart')
+    print(f"restart")
     python = sys.executable
     os.execl(python, python, *sys.argv)
 
@@ -317,7 +308,7 @@ def exception_handler(func):
             return func(*args, **kwargs)
         except Exception as e:
             # Handle the exception
-            print(f'An exception occurred: {str(e)}')
+            print(f"An exception occurred: {str(e)}")
             # Optionally, perform additional error handling or logging
             # Reraise the exception if needed
 
@@ -341,23 +332,21 @@ def parse_error_message(error: str, message: str = None) -> str:
 
     from loguru import logger as log
 
-    info = f'{error} \n \n {traceback.format_exc()}'
+    info = f"{error} \n \n {traceback.format_exc()}"
 
     if message != None:
-        info = f'{message} \n \n {error} \n \n {traceback.format_exc()}'
+        info = f"{message} \n \n {error} \n \n {traceback.format_exc()}"
 
     log.add(
-        'error.log', backtrace=True, diagnose=True
+        "error.log", backtrace=True, diagnose=True
     )  # Caution, may leak sensitive data in prod
 
-    log.critical(f'{info}')
+    log.critical(f"{info}")
 
     return info
 
 
-def raise_error_message(
-    error: str, idle: float = None, message: str = None
-) -> None:
+def raise_error_message(error: str, idle: float = None, message: str = None) -> None:
     """
 
     Capture & emit error message
@@ -381,7 +370,7 @@ def raise_error_message(
         sys.exit(1)
 
     if idle == None:
-        info = f'{error}'
+        info = f"{error}"
 
     if idle != None:
         sleep_and_restart_program(idle)
@@ -474,7 +463,7 @@ def ipdb_sys_excepthook():
         """
         System excepthook that includes an ipdb breakpoint.
         """
-        if hasattr(sys, 'ps1') or not sys.stderr.isatty():
+        if hasattr(sys, "ps1") or not sys.stderr.isatty():
             # we are in interactive mode or we don't have a tty-like
             # device, so we call the default hook
             sys.__excepthook__(type, value, tb)
@@ -506,9 +495,7 @@ def kill_process(process_name):
     try:
 
         # iterating through each instance of the process
-        for line in os.popen(
-            'ps ax | grep ' + process_name + ' | grep -v grep'
-        ):
+        for line in os.popen("ps ax | grep " + process_name + " | grep -v grep"):
             fields = line.split()
 
             # extracting Process ID from the output
@@ -516,24 +503,23 @@ def kill_process(process_name):
 
             # terminating process
             os.kill(int(pid), signal.SIGKILL)
-        print('Process Successfully terminated')
+        print("Process Successfully terminated")
 
     except:
-        print('Error Encountered while running script')
+        print("Error Encountered while running script")
 
 
 def main():
-    print('Everything is going swimmingly')
-    raise NotImplementedError('Oh no what happened?')
+    print("Everything is going swimmingly")
+    raise NotImplementedError("Oh no what happened?")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ipdb_sys_excepthook()
     main()
 
 
 class SignalHandler:
-
     """
     https://medium.com/@cziegler_99189/gracefully-shutting-down-async-multiprocesses-in-python-2223be384510
     """
@@ -547,8 +533,8 @@ class SignalHandler:
 
     def exit_gracefully(self, signum, frame):
 
-        print(f'signum {signum} frame {frame}')
-        print('Exiting gracefully')
+        print(f"signum {signum} frame {frame}")
+        print("Exiting gracefully")
 
         self.KEEP_PROCESSING = False
 

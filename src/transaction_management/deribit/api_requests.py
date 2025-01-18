@@ -34,22 +34,20 @@ async def private_connection(
     sub_account: str,
     endpoint: str,
     params: str,
-    connection_url: str = 'https://www.deribit.com/api/v2/',
+    connection_url: str = "https://www.deribit.com/api/v2/",
 ) -> None:
 
     id = id_numbering.id(endpoint, endpoint)
 
     payload: Dict = {
-        'jsonrpc': '2.0',
-        'id': id,
-        'method': f'{endpoint}',
-        'params': params,
+        "jsonrpc": "2.0",
+        "id": id,
+        "method": f"{endpoint}",
+        "params": params,
     }
 
-    client_id: str = parse_dotenv(sub_account)['client_id']
-    client_secret: str = config_oci.get_oci_key(
-        parse_dotenv(sub_account)['key_ocid']
-    )
+    client_id: str = parse_dotenv(sub_account)["client_id"]
+    client_secret: str = config_oci.get_oci_key(parse_dotenv(sub_account)["key_ocid"])
 
     async with aiohttp.ClientSession() as session:
         async with session.post(
@@ -68,7 +66,7 @@ async def private_connection(
 
 async def public_connection(
     endpoint: str,
-    connection_url: str = 'https://www.deribit.com/api/v2/',
+    connection_url: str = "https://www.deribit.com/api/v2/",
 ) -> None:
 
     async with aiohttp.ClientSession() as session:
@@ -82,7 +80,7 @@ async def public_connection(
 
 async def get_currencies() -> list:
     # Set endpoint
-    endpoint: str = f'public/get_currencies?'
+    endpoint: str = f"public/get_currencies?"
 
     return await public_connection(endpoint=endpoint)
 
@@ -92,7 +90,7 @@ async def get_server_time() -> int:
     Returning server time
     """
     # Set endpoint
-    endpoint: str = 'public/get_time?'
+    endpoint: str = "public/get_time?"
 
     # Get result
     result = await public_connection(endpoint=endpoint)
@@ -102,7 +100,7 @@ async def get_server_time() -> int:
 
 async def get_instruments(currency) -> list:
     # Set endpoint
-    endpoint: str = f'public/get_instruments?currency={currency.upper()}'
+    endpoint: str = f"public/get_instruments?currency={currency.upper()}"
 
     return await public_connection(endpoint=endpoint)
 
@@ -112,10 +110,12 @@ def get_tickers(instrument_name: str) -> list:
 
     import httpx
 
-    end_point = f'https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}'
+    end_point = (
+        f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}"
+    )
 
     with httpx.Client() as client:
-        result = client.get(end_point, follow_redirects=True).json()['result']
+        result = client.get(end_point, follow_redirects=True).json()["result"]
 
     return result
 
@@ -125,10 +125,12 @@ async def async_get_tickers(instrument_name: str) -> list:
 
     import httpx
 
-    end_point = f'https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}'
+    end_point = (
+        f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}"
+    )
 
     async with httpx.AsyncClient() as client:
-        result = client.get(end_point, follow_redirects=True).json()['result']
+        result = client.get(end_point, follow_redirects=True).json()["result"]
 
     return result
 
@@ -140,9 +142,9 @@ def ohlc_end_point(
     end_timestamp: int,
 ) -> str:
 
-    url = f'https://deribit.com/api/v2/public/get_tradingview_chart_data?'
+    url = f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
 
-    return f'{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}'
+    return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
 
 
 def get_ohlc_data(instrument_name: str, qty_candles: int, resolution: list):
@@ -176,9 +178,7 @@ def get_ohlc_data(instrument_name: str, qty_candles: int, resolution: list):
     )
 
     with httpx.Client() as client:
-        ohlc_request = client.get(end_point, follow_redirects=True).json()[
-            'result'
-        ]
+        ohlc_request = client.get(end_point, follow_redirects=True).json()["result"]
 
     return transform_nested_dict_to_list_ohlc(ohlc_request)
 
@@ -196,12 +196,12 @@ class SendApiRequest:
         amount,
         label: str = None,
         price: float = None,
-        type: str = 'limit',
+        type: str = "limit",
         otoco_config: list = None,
         linked_order_type: str = None,
         trigger_price: float = None,
-        trigger: str = 'last_price',
-        time_in_force: str = 'fill_or_kill',
+        trigger: str = "last_price",
+        time_in_force: str = "fill_or_kill",
         reduce_only: bool = False,
         post_only: bool = True,
         reject_post_only: bool = False,
@@ -209,40 +209,40 @@ class SendApiRequest:
 
         params = {}
 
-        params.update({'instrument_name': instrument})
-        params.update({'amount': amount})
-        params.update({'label': label})
-        params.update({'instrument_name': instrument})
-        params.update({'type': type})
+        params.update({"instrument_name": instrument})
+        params.update({"amount": amount})
+        params.update({"label": label})
+        params.update({"instrument_name": instrument})
+        params.update({"type": type})
 
         if trigger_price is not None:
 
-            params.update({'trigger': trigger})
-            params.update({'trigger_price': trigger_price})
-            params.update({'reduce_only': reduce_only})
+            params.update({"trigger": trigger})
+            params.update({"trigger_price": trigger_price})
+            params.update({"reduce_only": reduce_only})
 
-        if 'market' not in type:
-            params.update({'price': price})
-            params.update({'post_only': post_only})
-            params.update({'reject_post_only': reject_post_only})
+        if "market" not in type:
+            params.update({"price": price})
+            params.update({"post_only": post_only})
+            params.update({"reject_post_only": reject_post_only})
 
         if otoco_config:
-            params.update({'otoco_config': otoco_config})
+            params.update({"otoco_config": otoco_config})
             if linked_order_type is not None:
-                params.update({'linked_order_type': linked_order_type})
+                params.update({"linked_order_type": linked_order_type})
             else:
-                params.update({'linked_order_type': 'one_triggers_other'})
-            params.update({'trigger_fill_condition': 'incremental'})
+                params.update({"linked_order_type": "one_triggers_other"})
+            params.update({"trigger_fill_condition": "incremental"})
 
-            log.debug(f'params otoco_config {params}')
+            log.debug(f"params otoco_config {params}")
 
         result = None
 
-        if side == 'buy':
-            endpoint: str = 'private/buy'
+        if side == "buy":
+            endpoint: str = "private/buy"
 
-        if side == 'sell':
-            endpoint: str = 'private/sell'
+        if side == "sell":
+            endpoint: str = "private/sell"
 
         if side is not None:
             result = await private_connection(
@@ -255,9 +255,9 @@ class SendApiRequest:
     async def get_open_orders(self, kind: str, type: str) -> list:
 
         # Set endpoint
-        endpoint: str = 'private/get_open_orders'
+        endpoint: str = "private/get_open_orders"
 
-        params = {'kind': kind, 'type': type}
+        params = {"kind": kind, "type": type}
 
         result_open_order = await private_connection(
             self.sub_account_id,
@@ -265,27 +265,27 @@ class SendApiRequest:
             params=params,
         )
 
-        return result_open_order['result']
+        return result_open_order["result"]
 
     async def send_limit_order(self, params) -> None:
         """ """
 
         # basic params
-        log.info(f'params {params}')
-        side = params['side']
-        instrument = params['instrument_name']
-        label_numbered = params['label']
-        size = params['size']
-        type = params['type']
-        limit_prc = params['entry_price']
+        log.info(f"params {params}")
+        side = params["side"]
+        instrument = params["instrument_name"]
+        label_numbered = params["label"]
+        size = params["size"]
+        type = params["type"]
+        limit_prc = params["entry_price"]
 
         try:
-            otoco_config = params['otoco_config']
+            otoco_config = params["otoco_config"]
         except:
             otoco_config = None
 
         try:
-            linked_order_type = params['linked_order_type']
+            linked_order_type = params["linked_order_type"]
 
         except:
             linked_order_type = None
@@ -294,7 +294,7 @@ class SendApiRequest:
 
         if side != None:
 
-            if type == 'limit':   # limit has various state
+            if type == "limit":  # limit has various state
 
                 order_result = await self.send_order(
                     side,
@@ -308,8 +308,8 @@ class SendApiRequest:
 
             else:
 
-                trigger_price = params['trigger_price']
-                trigger = params['trigger']
+                trigger_price = params["trigger_price"]
+                trigger = params["trigger"]
 
                 order_result = await self.send_order(
                     side,
@@ -324,24 +324,24 @@ class SendApiRequest:
                     trigger,
                 )
 
-        log.warning(f'order_result {order_result}')
+        log.warning(f"order_result {order_result}")
 
         if order_result != None and (
-            'error' in order_result or 'message' in order_result
+            "error" in order_result or "message" in order_result
         ):
 
-            error = order_result['error']
-            message = error['message']
+            error = order_result["error"]
+            message = error["message"]
 
             try:
-                data = error['data']
+                data = error["data"]
             except:
                 data = message
 
             await telegram_bot_sendtext(
-                f'message: {message}, \
+                f"message: {message}, \
                                          data: {data}, \
-                                         (params: {params}'
+                                         (params: {params}"
             )
 
         return order_result
@@ -349,9 +349,9 @@ class SendApiRequest:
     async def get_subaccounts_details(self, currency: str) -> list:
 
         # Set endpoint
-        endpoint: str = 'private/get_subaccounts_details'
+        endpoint: str = "private/get_subaccounts_details"
 
-        params = {'currency': currency, 'with_open_orders': True}
+        params = {"currency": currency, "with_open_orders": True}
 
         result_sub_account = await private_connection(
             self.sub_account_id,
@@ -359,35 +359,35 @@ class SendApiRequest:
             params=params,
         )
 
-        return result_sub_account['result']
+        return result_sub_account["result"]
 
     async def get_user_trades_by_currency(self, currency, count: int = 1000):
 
         # Set endpoint
-        endpoint: str = f'private/get_user_trades_by_currency'
+        endpoint: str = f"private/get_user_trades_by_currency"
 
-        params = {'currency': currency.upper(), 'kind': 'any', 'count': count}
+        params = {"currency": currency.upper(), "kind": "any", "count": count}
 
         user_trades = await private_connection(
             self.sub_account_id, endpoint=endpoint, params=params
         )
 
-        return [] if user_trades == [] else user_trades['result']['trades']
+        return [] if user_trades == [] else user_trades["result"]["trades"]
 
     async def get_user_trades_by_instrument_and_time(
         self, instrument_name, start_timestamp, count: int = 1000
     ) -> list:
 
         # Set endpoint
-        endpoint: str = f'private/get_user_trades_by_instrument_and_time'
+        endpoint: str = f"private/get_user_trades_by_instrument_and_time"
 
         now_unix = get_now_unix()
 
         params = {
-            'count': count,
-            'end_timestamp': now_unix,
-            'instrument_name': instrument_name,
-            'start_timestamp': start_timestamp,
+            "count": count,
+            "end_timestamp": now_unix,
+            "instrument_name": instrument_name,
+            "start_timestamp": start_timestamp,
         }
 
         user_trades = await private_connection(
@@ -395,14 +395,14 @@ class SendApiRequest:
         )
 
         # log.warning(f"""user_trades {len(user_trades["result"]["trades"])} {[o["trade_id"] for o in user_trades["result"]["trades"]]}""")
-        return [] if user_trades == [] else user_trades['result']['trades']
+        return [] if user_trades == [] else user_trades["result"]["trades"]
 
     async def get_cancel_order_all(self):
 
         # Set endpoint
-        endpoint: str = 'private/cancel_all'
+        endpoint: str = "private/cancel_all"
 
-        params = {'detailed': False}
+        params = {"detailed": False}
 
         result = await private_connection(
             self.sub_account_id,
@@ -422,12 +422,12 @@ class SendApiRequest:
         now_unix = get_now_unix()
 
         # Set endpoint
-        endpoint: str = f'private/get_transaction_log'
+        endpoint: str = f"private/get_transaction_log"
         params = {
-            'count': count,
-            'currency': currency.upper(),
-            'end_timestamp': now_unix,
-            'start_timestamp': start_timestamp,
+            "count": count,
+            "currency": currency.upper(),
+            "end_timestamp": now_unix,
+            "start_timestamp": start_timestamp,
         }
 
         result_transaction_log_to_result = await private_connection(
@@ -437,23 +437,23 @@ class SendApiRequest:
         )
 
         try:
-            result = result_transaction_log_to_result['result']
+            result = result_transaction_log_to_result["result"]
 
-            return [] if not result else result['logs']
+            return [] if not result else result["logs"]
 
         except:
 
-            error = result_transaction_log_to_result['error']
-            message = error['message']
+            error = result_transaction_log_to_result["error"]
+            message = error["message"]
             await telegram_bot_sendtext(
-                f'transaction_log message: {message}, (params: {params})'
+                f"transaction_log message: {message}, (params: {params})"
             )
 
     async def get_cancel_order_byOrderId(self, order_id: str) -> None:
         # Set endpoint
-        endpoint: str = 'private/cancel'
+        endpoint: str = "private/cancel"
 
-        params = {'order_id': order_id}
+        params = {"order_id": order_id}
 
         result = await private_connection(
             self.sub_account_id, endpoint=endpoint, params=params
@@ -462,9 +462,9 @@ class SendApiRequest:
 
     async def get_subaccounts(self) -> list:
         # Set endpoint
-        endpoint: str = 'private/get_subaccounts'
+        endpoint: str = "private/get_subaccounts"
 
-        params = {'with_portfolio': True}
+        params = {"with_portfolio": True}
 
         result_sub_account = await private_connection(
             self.sub_account_id,
@@ -472,27 +472,25 @@ class SendApiRequest:
             params=params,
         )
 
-        return result_sub_account['result']
+        return result_sub_account["result"]
 
 
 def get_api_end_point(endpoint, parameters: dict = None) -> dict:
 
-    private_endpoint = f'private/{endpoint}'
+    private_endpoint = f"private/{endpoint}"
 
     params = {}
-    params.update({'jsonrpc': '2.0'})
-    params.update({'method': private_endpoint})
-    if endpoint == 'get_subaccounts':
-        params.update({'params': {'with_portfolio': True}})
+    params.update({"jsonrpc": "2.0"})
+    params.update({"method": private_endpoint})
+    if endpoint == "get_subaccounts":
+        params.update({"params": {"with_portfolio": True}})
 
-    if endpoint == 'get_open_orders':
-        end_point_params = dict(
-            kind=parameters['kind'], type=parameters['type']
-        )
+    if endpoint == "get_open_orders":
+        end_point_params = dict(kind=parameters["kind"], type=parameters["type"])
 
-        params.update({'params': end_point_params})
+        params.update({"params": end_point_params})
 
-    log.debug(f'params {params}')
+    log.debug(f"params {params}")
     return params
 
 
@@ -503,13 +501,11 @@ async def get_end_point_result(endpoint, parameters: dict = None) -> list:
     return result_endpoint  # ["result"]
 
 
-async def get_cancel_order_byOrderId(
-    private_connection, order_id: str
-) -> None:
+async def get_cancel_order_byOrderId(private_connection, order_id: str) -> None:
     # Set endpoint
-    endpoint: str = 'private/cancel'
+    endpoint: str = "private/cancel"
 
-    params = {'order_id': order_id}
+    params = {"order_id": order_id}
 
     result = await private_connection(endpoint=endpoint, params=params)
     return result

@@ -35,37 +35,31 @@ class DirectionalTrading(BasicStrategy):
     ) -> dict:
         """ """
         open_orders_label_strategy: dict = (
-            await self.get_basic_params().get_orders_attributes('open')
+            await self.get_basic_params().get_orders_attributes("open")
         )
 
-        len_orders: int = open_orders_label_strategy['transactions_len']
-        my_trades: dict = (
-            await self.get_basic_params().get_my_trades_attributes()
-        )
-        len_my_trades: int = my_trades['transactions_len']
-        max_tstamp_my_trades: int = my_trades['max_time_stamp']
+        len_orders: int = open_orders_label_strategy["transactions_len"]
+        my_trades: dict = await self.get_basic_params().get_my_trades_attributes()
+        len_my_trades: int = my_trades["transactions_len"]
+        max_tstamp_my_trades: int = my_trades["max_time_stamp"]
         ratio = await self.get_basic_params().get_side_ratio()
 
-        print(f' ratio {ratio}')
+        print(f" ratio {ratio}")
 
         params: dict = self.get_basic_params().get_basic_opening_paramaters(
             notional, ask_price, bid_price
         )
 
-        time_interval: float = params['interval_time_between_order_in_ms']
+        time_interval: float = params["interval_time_between_order_in_ms"]
 
         order_allowed: bool = False
         cancel_allowed: bool = False
 
         if len_orders != [] and len_orders > 0:
-            max_tstamp_orders: int = open_orders_label_strategy[
-                'max_time_stamp'
-            ]
+            max_tstamp_orders: int = open_orders_label_strategy["max_time_stamp"]
 
-            minimum_waiting_time_has_passed: bool = (
-                is_minimum_waiting_time_has_passed(
-                    server_time, max_tstamp_orders, time_interval
-                )
+            minimum_waiting_time_has_passed: bool = is_minimum_waiting_time_has_passed(
+                server_time, max_tstamp_orders, time_interval
             )
             if minimum_waiting_time_has_passed:
                 cancel_allowed: bool = True
@@ -75,28 +69,22 @@ class DirectionalTrading(BasicStrategy):
                 order_allowed: bool = True
 
         else:
-            if params['side'] == 'buy':
-                time_balancer = ratio['long_short_ratio']
-            if params['side'] == 'sell':
-                time_balancer = ratio['short_long_ratio']
+            if params["side"] == "buy":
+                time_balancer = ratio["long_short_ratio"]
+            if params["side"] == "sell":
+                time_balancer = ratio["short_long_ratio"]
 
             len_my_trades = 1 if time_balancer == 1 else len_my_trades
 
-            time_interval_qty: float = (
-                time_interval * len_my_trades * time_balancer
-            )
+            time_interval_qty: float = time_interval * len_my_trades * time_balancer
             print(
-                f'time_interval_qty {time_interval_qty} len_orders {len_orders} time_balancer {time_balancer}'
+                f"time_interval_qty {time_interval_qty} len_orders {len_orders} time_balancer {time_balancer}"
             )
-            minimum_waiting_time_has_passed: bool = (
-                is_minimum_waiting_time_has_passed(
-                    server_time, max_tstamp_my_trades, time_interval_qty
-                )
+            minimum_waiting_time_has_passed: bool = is_minimum_waiting_time_has_passed(
+                server_time, max_tstamp_my_trades, time_interval_qty
             )
 
-            print(
-                f'minimum_waiting_time_has_passed {minimum_waiting_time_has_passed} '
-            )
+            print(f"minimum_waiting_time_has_passed {minimum_waiting_time_has_passed} ")
             if minimum_waiting_time_has_passed and len_orders == []:
                 order_allowed: bool = True
 
@@ -104,7 +92,7 @@ class DirectionalTrading(BasicStrategy):
             order_allowed=order_allowed,
             order_parameters=[] if order_allowed == False else params,
             cancel_allowed=cancel_allowed,
-            cancel_id=open_orders_label_strategy['order_id_max_time_stamp'],
+            cancel_id=open_orders_label_strategy["order_id_max_time_stamp"],
         )
 
     async def is_send_exit_order_allowed(

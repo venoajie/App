@@ -31,8 +31,7 @@ def get_label_main(result: list, strategy_label: str) -> list:
     return [
         o
         for o in result
-        if parsing_label(strategy_label)['main']
-        == parsing_label(o['label'])['main']
+        if parsing_label(strategy_label)["main"] == parsing_label(o["label"])["main"]
     ]
 
 
@@ -40,68 +39,64 @@ async def get_unrecorded_trade_id(instrument_name: str) -> dict:
 
     currency = extract_currency_from_text(instrument_name)
 
-    column_list: str = 'data', 'trade_id'
+    column_list: str = "data", "trade_id"
 
     from_sqlite_open = await get_query(
-        'my_trades_all_json', instrument_name, 'all', 'all', column_list
+        "my_trades_all_json", instrument_name, "all", "all", column_list
     )
 
     from_sqlite_closed = await get_query(
-        'my_trades_closed_json', instrument_name, 'all', 'all', column_list
+        "my_trades_closed_json", instrument_name, "all", "all", column_list
     )
 
     # column_list: str="order_id", "trade_id","label","amount","id","data",
     from_sqlite_all = await get_query(
-        f'my_trades_all_{currency.lower()}_json',
+        f"my_trades_all_{currency.lower()}_json",
         instrument_name,
-        'all',
-        'all',
+        "all",
+        "all",
         column_list,
         # 40,
         # "id"
     )
 
-    from_sqlite_closed_trade_id = [o['trade_id'] for o in from_sqlite_closed]
+    from_sqlite_closed_trade_id = [o["trade_id"] for o in from_sqlite_closed]
 
-    from_sqlite_open_trade_id = [o['trade_id'] for o in from_sqlite_open]
+    from_sqlite_open_trade_id = [o["trade_id"] for o in from_sqlite_open]
 
-    from_exchange_trade_id = [o['trade_id'] for o in from_sqlite_all]
+    from_exchange_trade_id = [o["trade_id"] for o in from_sqlite_all]
 
-    combined_trade_closed_open = (
-        from_sqlite_open_trade_id + from_sqlite_closed_trade_id
-    )
+    combined_trade_closed_open = from_sqlite_open_trade_id + from_sqlite_closed_trade_id
 
     unrecorded_trade_id = get_unique_elements(
         from_exchange_trade_id, combined_trade_closed_open
     )
 
-    log.debug(f'unrecorded_trade_id {unrecorded_trade_id}')
+    log.debug(f"unrecorded_trade_id {unrecorded_trade_id}")
 
     return (
         []
         if not from_sqlite_all
         else [
-            o['data']
-            for o in from_sqlite_all
-            if o['trade_id'] in unrecorded_trade_id
+            o["data"] for o in from_sqlite_all if o["trade_id"] in unrecorded_trade_id
         ]
     )
 
 
 def get_custom_label(transaction: list) -> str:
 
-    side = transaction['direction']
-    side_label = 'Short' if side == 'sell' else 'Long'
+    side = transaction["direction"]
+    side_label = "Short" if side == "sell" else "Long"
 
     try:
-        last_update = transaction['timestamp']
+        last_update = transaction["timestamp"]
     except:
         try:
-            last_update = transaction['last_update_timestamp']
+            last_update = transaction["last_update_timestamp"]
         except:
-            last_update = transaction['creation_timestamp']
+            last_update = transaction["creation_timestamp"]
 
-    return f'custom{side_label.title()}-open-{last_update}'
+    return f"custom{side_label.title()}-open-{last_update}"
 
 
 async def refill_db(
@@ -111,55 +106,55 @@ async def refill_db(
 ) -> list:
 
     my_trades_currency_active_with_blanks = [
-        o for o in my_trades_currency_active if o['label'] is None
+        o for o in my_trades_currency_active if o["label"] is None
     ]
 
     log.debug(
-        f'my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}'
+        f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}"
     )
 
     if my_trades_currency_active_with_blanks:
         column_trade: str = (
-            'id',
-            'instrument_name',
-            'data',
-            'label',
-            'trade_id',
+            "id",
+            "instrument_name",
+            "data",
+            "label",
+            "trade_id",
         )
 
         my_trades_currency_archive: list = await get_query(
-            archive_db_table, instrument_name, 'all', 'all', column_trade
+            archive_db_table, instrument_name, "all", "all", column_trade
         )
 
         my_trades_currency_active_with_blanks = [
-            o for o in my_trades_currency_archive if o['label'] is None
+            o for o in my_trades_currency_archive if o["label"] is None
         ]
 
         my_trades_archive_instrument_id = [
-            o['trade_id'] for o in my_trades_currency_active_with_blanks
+            o["trade_id"] for o in my_trades_currency_active_with_blanks
         ]
 
         if my_trades_archive_instrument_id:
             for id in my_trades_archive_instrument_id:
                 transaction = parsing_sqlite_json_output(
                     [
-                        o['data']
+                        o["data"]
                         for o in my_trades_currency_active_with_blanks
-                        if id == o['trade_id']
+                        if id == o["trade_id"]
                     ]
                 )[0]
 
                 label_open: str = get_custom_label(transaction)
-                transaction.update({'label': label_open})
+                transaction.update({"label": label_open})
                 log.debug(transaction)
 
-                where_filter = 'trade_id'
+                where_filter = "trade_id"
 
                 await deleting_row(
                     archive_db_table,
-                    'databases/trading.sqlite3',
+                    "databases/trading.sqlite3",
                     where_filter,
-                    '=',
+                    "=",
                     id,
                 )
 
@@ -171,7 +166,6 @@ def get_unrecorded_trade_transactions(
     my_trades_instrument_name: list,
     from_transaction_log_instrument: list,
 ) -> dict:
-
     """_summary_
     direction: "from_trans_log_to_my_trade" -> transaction log more update
     direction: "from_my_trade_to_trans_log" -> my_trade more update
@@ -180,15 +174,15 @@ def get_unrecorded_trade_transactions(
         _type_: _description_
     """
 
-    if direction == 'from_trans_log_to_my_trade':
+    if direction == "from_trans_log_to_my_trade":
 
         from_transaction_log_instrument_trade_id = sorted(
-            [o['trade_id'] for o in from_transaction_log_instrument]
+            [o["trade_id"] for o in from_transaction_log_instrument]
         )
 
         if my_trades_instrument_name:
             my_trades_instrument_name_trade_id = sorted(
-                [o['trade_id'] for o in my_trades_instrument_name]
+                [o["trade_id"] for o in my_trades_instrument_name]
             )
 
             if my_trades_instrument_name_trade_id:
@@ -199,21 +193,19 @@ def get_unrecorded_trade_transactions(
         else:
             unrecorded_trade_id = from_transaction_log_instrument_trade_id
 
-        log.debug(
-            f'unrecorded_trade_from_transaction_log {unrecorded_trade_id}'
-        )
+        log.debug(f"unrecorded_trade_from_transaction_log {unrecorded_trade_id}")
 
         return unrecorded_trade_id
 
-    if direction == 'from_my_trade_to_trans_log':
+    if direction == "from_my_trade_to_trans_log":
 
         from_transaction_log_instrument_trade_id = sorted(
-            [o['trade_id'] for o in from_transaction_log_instrument]
+            [o["trade_id"] for o in from_transaction_log_instrument]
         )
 
         if my_trades_instrument_name:
             my_trades_instrument_name_trade_id = [
-                o['trade_id'] for o in my_trades_instrument_name
+                o["trade_id"] for o in my_trades_instrument_name
             ]
 
             if my_trades_instrument_name_trade_id:
@@ -225,32 +217,25 @@ def get_unrecorded_trade_transactions(
         else:
             unrecorded_trade_id = []
 
-        log.debug(
-            f'unrecorded_trade_from_transaction_log {unrecorded_trade_id}'
-        )
+        log.debug(f"unrecorded_trade_from_transaction_log {unrecorded_trade_id}")
 
         return unrecorded_trade_id
 
-    if direction == 'delivered':
+    if direction == "delivered":
 
         delivered_from_transaction_log_instrument = [
-            o
-            for o in from_transaction_log_instrument
-            if o['type'] == 'delivery'
+            o for o in from_transaction_log_instrument if o["type"] == "delivery"
         ]
 
         from_transaction_log_instrument_trade_id = sorted(
             remove_redundant_elements(
-                [
-                    o['timestamp']
-                    for o in delivered_from_transaction_log_instrument
-                ]
+                [o["timestamp"] for o in delivered_from_transaction_log_instrument]
             )
         )
 
         if my_trades_instrument_name:
             my_trades_instrument_name_trade_id = sorted(
-                [o['timestamp'] for o in my_trades_instrument_name]
+                [o["timestamp"] for o in my_trades_instrument_name]
             )
 
             if my_trades_instrument_name_trade_id:
@@ -262,7 +247,7 @@ def get_unrecorded_trade_transactions(
             unrecorded_time_stamp = from_transaction_log_instrument_trade_id
 
         log.debug(
-            f'unrecorded_time_stamp {unrecorded_time_stamp} {delivered_from_transaction_log_instrument}'
+            f"unrecorded_time_stamp {unrecorded_time_stamp} {delivered_from_transaction_log_instrument}"
         )
 
         return [] if not unrecorded_time_stamp else max(unrecorded_time_stamp)
@@ -270,31 +255,25 @@ def get_unrecorded_trade_transactions(
 
 def get_transactions_with_closed_label(transactions_all: list) -> list:
     """ """
-    transactions_with_labels = [
-        o for o in transactions_all if o['label'] is not None
-    ]
+    transactions_with_labels = [o for o in transactions_all if o["label"] is not None]
 
     # log.error(f"transactions_with_labels {transactions_with_labels}")
 
     return (
         []
         if not transactions_with_labels
-        else [o for o in transactions_with_labels if 'closed' in o['label']]
+        else [o for o in transactions_with_labels if "closed" in o["label"]]
     )
 
 
-def transactions_under_label_int(
-    label_integer: int, transactions_all: list
-) -> str:
+def transactions_under_label_int(label_integer: int, transactions_all: list) -> str:
     """ """
 
-    transactions = [
-        o for o in transactions_all if str(label_integer) in o['label']
-    ]
+    transactions = [o for o in transactions_all if str(label_integer) in o["label"]]
 
     return dict(
         closed_transactions=transactions,
-        summing_closed_transaction=sum([o['amount'] for o in transactions]),
+        summing_closed_transaction=sum([o["amount"] for o in transactions]),
     )
 
 
@@ -304,7 +283,7 @@ def get_closed_open_transactions_under_same_label_int(
     """ """
     label_integer = get_label_integer(label)
 
-    return [o for o in transactions_all if str(label_integer) in o['label']]
+    return [o for o in transactions_all if str(label_integer) in o["label"]]
 
 
 async def closing_orphan_order(
@@ -317,19 +296,15 @@ async def closing_orphan_order(
     """ """
 
     closed_transaction_size = abs(
-        [
-            o['amount']
-            for o in transactions_under_label_main
-            if label in o['label']
-        ][0]
+        [o["amount"] for o in transactions_under_label_main if label in o["label"]][0]
     )
 
-    log.info(f' closed_transaction_size label {closed_transaction_size}')
+    log.info(f" closed_transaction_size label {closed_transaction_size}")
 
     open_label_with_same_size_as_closed_label_int = [
         o
         for o in transactions_under_label_main
-        if 'open' in o['label'] and closed_transaction_size == abs(o['amount'])
+        if "open" in o["label"] and closed_transaction_size == abs(o["amount"])
     ]
 
     # log.warning(F"open_label_with_same_size_as_closed_label {open_label_with_same_size_as_closed_label_int}")
@@ -339,27 +314,27 @@ async def closing_orphan_order(
         open_label_with_the_same_label_int = [
             o
             for o in open_label_with_same_size_as_closed_label_int
-            if label_integer in o['label']
+            if label_integer in o["label"]
         ]
 
-        log.warning(f'label_integer {label_integer}')
+        log.warning(f"label_integer {label_integer}")
 
         if False and open_label_with_the_same_label_int:
             log.error(
-                f'open_label_with_the_same_label_int {open_label_with_the_same_label_int}'
+                f"open_label_with_the_same_label_int {open_label_with_the_same_label_int}"
             )
 
             trade_id = closed_transaction[where_filter]
 
             # insert closed transaction to db for closed transaction
-            await insert_tables('my_trades_closed_json', closed_transaction)
+            await insert_tables("my_trades_closed_json", closed_transaction)
 
             # delete respective transaction form active db
             await deleting_row(
                 trade_table,
-                'databases/trading.sqlite3',
+                "databases/trading.sqlite3",
                 where_filter,
-                '=',
+                "=",
                 trade_id,
             )
 
@@ -371,9 +346,7 @@ async def updating_status_closed_transactions(
     trade_id = closed_transaction[where_filter]
     # trade_tabel = f"my_trades_all_{currency.lower()}.json"
 
-    await update_status_data(
-        trade_table, 'is_open', where_filter, trade_id, 0, '='
-    )
+    await update_status_data(trade_table, "is_open", where_filter, trade_id, 0, "=")
 
 
 async def closing_one_to_one(
@@ -398,40 +371,39 @@ async def closing_one_to_many_single_open_order(
     trade_table: str,
 ) -> None:
 
-    open_label_size = abs(open_label['amount'])
-    log.warning(f'open_label_size {open_label_size}')
+    open_label_size = abs(open_label["amount"])
+    log.warning(f"open_label_size {open_label_size}")
 
     closed_label_with_same_size_as_open_label = [
         o
         for o in transaction_closed_under_the_same_label_int
-        if 'closed' in o['label'] and abs(o['amount']) == open_label_size
+        if "closed" in o["label"] and abs(o["amount"]) == open_label_size
     ]
 
     log.warning(
-        f'closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}'
+        f"closed_label_with_same_size_as_open_label{closed_label_with_same_size_as_open_label}"
     )
 
     if closed_label_with_same_size_as_open_label:
 
         closed_label_with_same_size_as_open_label_int = str(
             extract_integers_aggregation_from_text(
-                'trade_id', min, closed_label_with_same_size_as_open_label
+                "trade_id", min, closed_label_with_same_size_as_open_label
             )
         )
         log.warning(
-            f'closed_label_with_same_size_as_open_label_int {closed_label_with_same_size_as_open_label_int}'
+            f"closed_label_with_same_size_as_open_label_int {closed_label_with_same_size_as_open_label_int}"
         )
 
         closed_label_ready_to_close = (
             [
                 o
                 for o in closed_label_with_same_size_as_open_label
-                if closed_label_with_same_size_as_open_label_int
-                in o['trade_id']
+                if closed_label_with_same_size_as_open_label_int in o["trade_id"]
             ]
         )[0]
 
-        log.debug(f'closed_label_ready_to_close{closed_label_ready_to_close}')
+        log.debug(f"closed_label_ready_to_close{closed_label_ready_to_close}")
 
         # closed one of closing order
         await updating_status_closed_transactions(
@@ -451,7 +423,7 @@ async def closing_one_to_many(
     len_open_label_size = len(open_label)
 
     if len_open_label_size == 1:
-        log.info(f'len_open_label_size 1 {len_open_label_size}')
+        log.info(f"len_open_label_size 1 {len_open_label_size}")
 
         await closing_one_to_many_single_open_order(
             currency,
@@ -463,7 +435,7 @@ async def closing_one_to_many(
 
     else:
         for transaction in open_label:
-            log.warning(f'len_open_label_size > 1 {len_open_label_size}')
+            log.warning(f"len_open_label_size > 1 {len_open_label_size}")
 
             await closing_one_to_many_single_open_order(
                 currency,
@@ -487,53 +459,49 @@ async def clean_up_closed_transactions(
 
     # log.critical(f" {"clean_up_closed_transactions".upper()} {instrument_name} START")
 
-    where_filter = f'trade_id'
+    where_filter = f"trade_id"
 
     try:
 
         if transaction_all is None:
             column_list: str = (
-                'instrument_name',
-                'label',
-                'amount',
+                "instrument_name",
+                "label",
+                "amount",
                 where_filter,
-                'is_open',
+                "is_open",
             )
 
             # querying tables
             transaction_all: list = await get_query(
                 trade_table,
                 currency,
-                'all',
-                'all',
+                "all",
+                "all",
                 column_list,
             )
 
-            transaction_all: list = [
-                o for o in transaction_all if o['is_open'] == 1
-            ]
+            transaction_all: list = [o for o in transaction_all if o["is_open"] == 1]
 
         else:
 
             if transaction_all:
 
                 transaction_all: list = [
-                    o
-                    for o in transaction_all
-                    if currency in o['instrument_name']
+                    o for o in transaction_all if currency in o["instrument_name"]
                 ]
 
         # filtered transactions with closing labels
         if transaction_all:
 
-            transaction_with_closed_labels = (
-                get_transactions_with_closed_label(transaction_all)
+            transaction_with_closed_labels = get_transactions_with_closed_label(
+                transaction_all
             )
 
             if transaction_with_closed_labels:
 
                 labels_only = remove_redundant_elements(
-                    [o['label'] for o in transaction_with_closed_labels]
+                    [o["label"] for o in transaction_with_closed_labels]
                 )
 
                 for label in labels_only:
@@ -549,11 +517,11 @@ async def clean_up_closed_transactions(
                     )
 
                     size_to_close = closed_transactions_all[
-                        'summing_closed_transaction'
+                        "summing_closed_transaction"
                     ]
 
                     transaction_closed_under_the_same_label_int = (
-                        closed_transactions_all['closed_transactions']
+                        closed_transactions_all["closed_transactions"]
                     )
 
                     # log.error(f"closed_transactions_all {closed_transactions_all}")
@@ -561,22 +529,20 @@ async def clean_up_closed_transactions(
                     if size_to_close == 0:
 
                         instrument_name_under_the_same_label_int = [
-                            o['instrument_name']
+                            o["instrument_name"]
                             for o in transaction_closed_under_the_same_label_int
                         ]
 
-                        for (
-                            instrument_name
-                        ) in instrument_name_under_the_same_label_int:
+                        for instrument_name in instrument_name_under_the_same_label_int:
 
                             instrument_transactions = [
                                 o
                                 for o in transaction_closed_under_the_same_label_int
-                                if instrument_name in o['instrument_name']
+                                if instrument_name in o["instrument_name"]
                             ]
 
                             sum_instrument_transactions = sum(
-                                [o['amount'] for o in instrument_transactions]
+                                [o["amount"] for o in instrument_transactions]
                             )
 
                             if sum_instrument_transactions == 0:
@@ -593,23 +559,22 @@ async def clean_up_closed_transactions(
                         open_label = [
                             o
                             for o in transaction_closed_under_the_same_label_int
-                            if 'open' in o['label']
+                            if "open" in o["label"]
                         ]
 
                         transactions = []
                         for open_transaction in open_label:
 
-                            open_transaction_size = open_transaction['amount']
-                            open_transaction_instrument_name = (
-                                open_transaction['instrument_name']
-                            )
+                            open_transaction_size = open_transaction["amount"]
+                            open_transaction_instrument_name = open_transaction[
+                                "instrument_name"
+                            ]
 
                             closed_transaction_with_same_size_as_open_label = [
                                 o
                                 for o in transaction_closed_under_the_same_label_int
-                                if 'closed' in o['label']
-                                and abs(o['amount'])
-                                == abs(open_transaction_size)
+                                if "closed" in o["label"]
+                                and abs(o["amount"]) == abs(open_transaction_size)
                             ]
 
                             if closed_transaction_with_same_size_as_open_label:
@@ -618,11 +583,11 @@ async def clean_up_closed_transactions(
                                     closed_transaction
                                 ) in closed_transaction_with_same_size_as_open_label:
 
-                                    closed_transaction_size = (
-                                        closed_transaction['amount']
-                                    )
+                                    closed_transaction_size = closed_transaction[
+                                        "amount"
+                                    ]
                                     closed_transaction_instrument_name = (
-                                        closed_transaction['instrument_name']
+                                        closed_transaction["instrument_name"]
                                     )
 
                                     if (
@@ -636,14 +601,12 @@ async def clean_up_closed_transactions(
                                         transactions.append(open_transaction)
                                         transactions.append(closed_transaction)
 
-                                        log.critical(
-                                            f'transactions {transactions}'
-                                        )
+                                        log.critical(f"transactions {transactions}")
                                         log.warning(
-                                            f'closed_transaction_instrument_name {closed_transaction_instrument_name}'
+                                            f"closed_transaction_instrument_name {closed_transaction_instrument_name}"
                                         )
                                         log.error(
-                                            f'open_transaction_instrument_name {open_transaction_instrument_name}'
+                                            f"open_transaction_instrument_name {open_transaction_instrument_name}"
                                         )
 
                                         await closing_one_to_one(

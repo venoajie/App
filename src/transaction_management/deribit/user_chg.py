@@ -19,13 +19,10 @@ from transaction_management.deribit.orders_management import saving_orders
 from utilities.system_tools import parse_error_message
 
 
-async def saving_and_relabelling_orders(
-    sub_account_id, config_app: list, queue: Queue
-):
-
+async def saving_and_relabelling_orders(sub_account_id, config_app: list, queue: Queue):
     """ """
 
-    log.critical('saving_and_relabelling_orders START')
+    log.critical("saving_and_relabelling_orders START")
 
     try:
         private_data: str = SendApiRequest(sub_account_id)
@@ -34,42 +31,42 @@ async def saving_and_relabelling_orders(
 
         # currencies= random.sample(currencies_spot,len(currencies_spot))
 
-        strategy_attributes = config_app['strategies']
+        strategy_attributes = config_app["strategies"]
 
         strategy_attributes_active = [
-            o for o in strategy_attributes if o['is_active'] == True
+            o for o in strategy_attributes if o["is_active"] == True
         ]
 
         # get strategies that have not short/long attributes in the label
         non_checked_strategies = [
-            o['strategy_label']
+            o["strategy_label"]
             for o in strategy_attributes_active
-            if o['non_checked_for_size_label_consistency'] == True
+            if o["non_checked_for_size_label_consistency"] == True
         ]
 
         cancellable_strategies = [
-            o['strategy_label']
+            o["strategy_label"]
             for o in strategy_attributes_active
-            if o['cancellable'] == True
+            if o["cancellable"] == True
         ]
 
-        relevant_tables = config_app['relevant_tables'][0]
+        relevant_tables = config_app["relevant_tables"][0]
 
-        order_db_table = relevant_tables['orders_table']
+        order_db_table = relevant_tables["orders_table"]
 
         while True:
 
             message: str = await queue.get()
 
-            message_channel: str = message['channel']
+            message_channel: str = message["channel"]
 
-            data_orders: dict = message['data']
+            data_orders: dict = message["data"]
 
-            currency: str = message['currency']
+            currency: str = message["currency"]
 
             currency_lower: str = currency.lower()
 
-            if 'user.changes.any' in message_channel:
+            if "user.changes.any" in message_channel:
 
                 await saving_orders(
                     modify_order_and_db,
@@ -87,10 +84,10 @@ async def saving_and_relabelling_orders(
 
         parse_error_message(error)
 
-        await telegram_bot_sendtext(error, 'general_error')
+        await telegram_bot_sendtext(error, "general_error")
 
     except Exception as error:
 
         parse_error_message(error)
 
-        await telegram_bot_sendtext(error, 'general_error')
+        await telegram_bot_sendtext(error, "general_error")

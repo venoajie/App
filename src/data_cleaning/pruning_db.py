@@ -17,60 +17,52 @@ async def count_and_delete_ohlc_rows(database, table) -> None:
     try:
         rows_threshold = max_rows(table)
 
-        if 'supporting_items_json' in table or 'account_summary_json' in table:
-            where_filter = f'id'
+        if "supporting_items_json" in table or "account_summary_json" in table:
+            where_filter = f"id"
 
         else:
-            where_filter = f'tick'
+            where_filter = f"tick"
 
-        count_rows_query = querying_arithmetic_operator(
-            where_filter, 'COUNT', table
-        )
+        count_rows_query = querying_arithmetic_operator(where_filter, "COUNT", table)
 
         rows = await executing_query_with_return(count_rows_query)
 
         rows = (
-            rows[0]['COUNT (tick)']
-            if where_filter == 'tick'
-            else rows[0]['COUNT (id)']
+            rows[0]["COUNT (tick)"] if where_filter == "tick" else rows[0]["COUNT (id)"]
         )
 
         if rows > rows_threshold:
 
-            first_tick_query = querying_arithmetic_operator(
-                where_filter, 'MIN', table
-            )
+            first_tick_query = querying_arithmetic_operator(where_filter, "MIN", table)
 
-            first_tick_fr_sqlite = await executing_query_with_return(
-                first_tick_query
-            )
+            first_tick_fr_sqlite = await executing_query_with_return(first_tick_query)
 
-            if where_filter == 'tick':
-                first_tick = first_tick_fr_sqlite[0]['MIN (tick)']
+            if where_filter == "tick":
+                first_tick = first_tick_fr_sqlite[0]["MIN (tick)"]
 
-            if where_filter == 'id':
-                first_tick = first_tick_fr_sqlite[0]['MIN (id)']
+            if where_filter == "id":
+                first_tick = first_tick_fr_sqlite[0]["MIN (id)"]
 
-            await deleting_row(table, database, where_filter, '=', first_tick)
+            await deleting_row(table, database, where_filter, "=", first_tick)
 
     except Exception as error:
-        await telegram_bot_sendtext(f'error {error}')
+        await telegram_bot_sendtext(f"error {error}")
 
 
 def max_rows(table) -> int:
     """ """
-    if 'market_analytics_json' in table:
+    if "market_analytics_json" in table:
         threshold = 10
-    if 'ohlc' in table:
+    if "ohlc" in table:
         threshold = 10000
-    if 'supporting_items_json' in table:
+    if "supporting_items_json" in table:
         threshold = 200
-    if 'account_summary_json' in table:
-        downloading_times = 2   # every 30 seconds
+    if "account_summary_json" in table:
+        downloading_times = 2  # every 30 seconds
         currencies = 2
         instruments = 8
         threshold = (
             downloading_times * currencies * instruments
-        ) * 120   # roughly = 2 hours
+        ) * 120  # roughly = 2 hours
 
     return threshold
