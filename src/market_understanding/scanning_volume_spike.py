@@ -61,16 +61,16 @@ async def scanning_volume():
                             ]
                     )
                     
-                    log.error ([
-                            o
-                            for o in cached_data
-                            if int(o["Pings"]) == int(single_data["Pings"])
-                            and single_data["Coin"] in o["Coin"]
-                            ])
-                    log.warning (f"data_has_exist_before {data_has_exist_before}")
-                    log.info (f"data_has_exist_before == [] {data_has_exist_before == []}")
-                    log.debug (f"single_data {single_data}")
-                    log.warning (f"cached_data {cached_data}")
+                    #log.error ([
+                    #        o
+                    #        for o in cached_data
+                    #        if int(o["Pings"]) == int(single_data["Pings"])
+                    #        and single_data["Coin"] in o["Coin"]
+                    #        ])
+                    #log.warning (f"data_has_exist_before {data_has_exist_before}")
+                    #log.info (f"data_has_exist_before == [] {data_has_exist_before == []}")
+                    #log.debug (f"single_data {single_data}")
+                    #log.warning (f"cached_data {cached_data}")
 
                     if data_has_exist_before == []:
                         cached_data.append(single_data)
@@ -79,10 +79,10 @@ async def scanning_volume():
                             f"""{single_data}""", 
                             "general_error"
                         )
-                    log.debug (f"cached_data {cached_data}")
+                    #log.debug (f"cached_data {cached_data}")
 
         random_sleep_time = max(sample([5, 10, 15, 20, 30], 1))
         
-        log.critical (random_sleep_time)
+        #log.critical (random_sleep_time)
 
         await asyncio.sleep((random_sleep_time))
