@@ -77,7 +77,7 @@ async def scanning_volume():
                             f"data_has_exist_before - {data_has_exist_before}", "general_error"
                         )
                         await telegram_bot_sendtext(
-                            f"data - {single_data}", "general_error"
+                            f"single_data - {single_data}", "general_error"
                         )
 
         random_sleep_time = max(sample([5, 10, 15, 20, 30], 1))
