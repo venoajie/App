@@ -61,13 +61,17 @@ async def scanning_volume():
                         ]
                     )
 
-                    log.debug(f"data_has_exist_before {data_has_exist_before}")
-
                     if not data_has_exist_before:
                         cached_data.append(single_data)
 
                         await telegram_bot_sendtext(
-                            f"""single_data - {single_data} data_has_exist_before {data_has_exist_before} """, "general_error"
+                            f"""single_data - {single_data} data_has_exist_before {data_has_exist_before} single_data["Pings"] {single_data["Pings"]} single_data["Coin"] {single_data["Coin"]} cached ping {[
+                            o ["Pings"]
+                            for o in cached_data
+                        ]} cached Coin {[
+                            o ["Coin"]
+                            for o in cached_data
+                        ]}""", "general_error"
                         )
 
                         await telegram_bot_sendtext(
