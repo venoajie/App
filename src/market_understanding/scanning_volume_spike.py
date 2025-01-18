@@ -41,12 +41,14 @@ async def scanning_volume():
             response_json = json.loads(response.text)["resu"]
 
             rows = [str(i).split("|") for i in response_json[:-1]]
+            
+            cached_data = []
 
             if rows:
 
                 data_all = [dict(zip(headers, l)) for l in rows]
 
-                cached_data = []
+                
 
                 for single_data in data_all:
 
