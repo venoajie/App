@@ -18,7 +18,7 @@ headers = [
     "Recent Total Vol BTC",
     "Recent Vol %",
     "Recent Net Vol",
-    "Datetime (UTC)",
+    "Datetime",#  (UTC)
 ]
 
 starttime = time.time()
@@ -58,7 +58,8 @@ async def scanning_volume():
                         else [
                             o
                             for o in cached_data
-                            if o["Datetime (UTC)"] == single_data["Datetime (UTC)"]
+                            if o["Datetime"] == single_data["Datetime"]
+                            and o["Coin"] == single_data["Coin"]
                         ]
                     )
 
