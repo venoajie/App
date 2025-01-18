@@ -82,5 +82,7 @@ async def scanning_volume():
                     log.debug (f"cached_data {cached_data}")
 
         random_sleep_time = max(sample([5, 10, 15, 20, 30], 1))
+        
+        log.critical (random_sleep_time)
 
         await asyncio.sleep((random_sleep_time))
