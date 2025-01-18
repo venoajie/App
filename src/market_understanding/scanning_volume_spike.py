@@ -57,17 +57,18 @@ async def scanning_volume():
                             o
                             for o in cached_data
                             if int(o["Pings"]) == int(single_data["Pings"])
-                            and single_data["Coin"] in o["Coin"]                         ]
+                            #and single_data["Coin"] in o["Coin"]
+                            ]
                     )
 
                     if not data_has_exist_before:
                         cached_data.append(single_data)
 
                         await telegram_bot_sendtext(
-                            f"""single_data - {single_data} data_has_exist_before {data_has_exist_before} single_data["Pings"] {single_data["Pings"]} single_data["Coin"] {single_data["Coin"]} cached ping {[
+                            f"""single_data - {single_data} data_has_exist_before {data_has_exist_before} single_data["Pings"] {single_data["Pings"]} single_data["Coin"] {single_data["Coin"]} cached ping {int([
                             o ["Pings"]
                             for o in cached_data
-                        ]} cached Coin {[
+                        ])} cached Coin {[
                             o ["Coin"]
                             for o in cached_data
                         ]}""", "general_error"
