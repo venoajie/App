@@ -144,7 +144,7 @@ async def main():
             
             #pass
                             
-        await asyncio.sleep(idle_time)
+        #await asyncio.sleep(idle_time)
             
         # parsing config file
         config_app = get_config(file_toml)

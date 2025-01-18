@@ -45,19 +45,22 @@ async def scanning_volume():
             if rows:
 
                 data_all = [dict(zip(headers, l)) for l in rows]
-                
+
                 cached_data = []
 
                 for single_data in data_all:
 
                     log.warning(f"single_data {single_data}")
 
-                    data_has_exist_before = ([] if cached_data == []
-                            else [
+                    data_has_exist_before = (
+                        []
+                        if cached_data == []
+                        else [
                             o
                             for o in cached_data
                             if o["datetime"] == single_data["datetime"]
-                        ])
+                        ]
+                    )
 
                     log.debug(f"data_has_exist_before {data_has_exist_before}")
 
@@ -66,7 +69,9 @@ async def scanning_volume():
 
                         log.debug(f"single_data {single_data}")
 
-                        await telegram_bot_sendtext(f"data - {single_data}", "general_error")
+                        await telegram_bot_sendtext(
+                            f"data - {single_data}", "general_error"
+                        )
 
         random_sleep_time = max(sample([5, 10, 15, 20, 30], 1))
 
