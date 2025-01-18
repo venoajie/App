@@ -429,6 +429,7 @@ async def future_spreads(
 
                                                         await processing_orders(
                                                             modify_order_and_db,
+                                                            config_app,
                                                             send_order,
                                                         )
 
@@ -487,6 +488,7 @@ async def future_spreads(
 
                                                         await processing_orders(
                                                             modify_order_and_db,
+                                                            config_app,
                                                             send_order,
                                                         )
 
@@ -586,6 +588,7 @@ async def future_spreads(
 
                                                                     await processing_orders(
                                                                         modify_order_and_db,
+                                                                        config_app,
                                                                         send_order,
                                                                     )
 

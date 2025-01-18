@@ -3,37 +3,19 @@
 
 # built ins
 import asyncio
-import os
-
-import tomli
-import uvloop
 
 # installed
 from loguru import logger as log
-
+import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.string_modification import extract_currency_from_text
-from utilities.system_tools import parse_error_message, provide_path_for_file
-
-
-def get_config(file_name: str) -> list:
-    """ """
-
-    config_path = provide_path_for_file(file_name)
-
-    try:
-        if os.path.exists(config_path):
-            with open(config_path, "rb") as handle:
-                read = tomli.load(handle)
-                return read
-    except:
-        return []
 
 
 async def processing_orders(
-    modify_order_and_db,
+    modify_order_and_db: object,
+    config_app: list,
     order_analysis_result: dict,
 ) -> None:
     """ """
@@ -43,12 +25,6 @@ async def processing_orders(
         if order_analysis_result["order_allowed"]:
 
             log.error(f"send_order {order_analysis_result}")
-
-            # registering strategy config file
-            file_toml: str = "config_strategies.toml"
-
-            # parsing config file
-            config_app = get_config(file_toml)
 
             strategy_attributes = config_app["strategies"]
 

@@ -429,6 +429,7 @@ async def hedging_spot(
 
                                                 await processing_orders(
                                                     modify_order_and_db,
+                                                    config_app,
                                                     send_order,
                                                 )
 
@@ -541,6 +542,7 @@ async def hedging_spot(
 
                                                                         await processing_orders(
                                                                             send_closing_order,
+                                                                            config_app,
                                                                             modify_order_and_db,
                                                                         )
 
@@ -585,6 +587,7 @@ async def hedging_spot(
 
                                                                         await processing_orders(
                                                                             modify_order_and_db,
+                                                                            config_app,
                                                                             send_closing_order,
                                                                         )
 
