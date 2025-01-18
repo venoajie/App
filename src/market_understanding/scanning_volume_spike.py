@@ -50,8 +50,6 @@ async def scanning_volume():
 
                 for single_data in data_all:
 
-                    log.warning(f"single_data {single_data}")
-
                     data_has_exist_before = (
                         []
                         if cached_data == []
@@ -68,10 +66,12 @@ async def scanning_volume():
                     if not data_has_exist_before:
                         cached_data.append(single_data)
 
-                        log.debug(f"single_data {single_data}")
+                        await telegram_bot_sendtext(
+                            f"""single_data - {single_data} data_has_exist_before {data_has_exist_before} """, "general_error"
+                        )
 
                         await telegram_bot_sendtext(
-                            f"single_data - {single_data}", "general_error"
+                            f"cached_data - {cached_data}", "general_error"
                         )
 
         random_sleep_time = max(sample([5, 10, 15, 20, 30], 1))
