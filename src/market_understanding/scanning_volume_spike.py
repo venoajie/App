@@ -58,7 +58,7 @@ async def scanning_volume():
                         else [
                             o
                             for o in cached_data
-                            if o["Datetime"] == single_data["Datetime"]
+                            if o["Pings"] == single_data["Pings"]
                             and o["Coin"] == single_data["Coin"]
                         ]
                     )
@@ -70,6 +70,10 @@ async def scanning_volume():
 
                         log.debug(f"single_data {single_data}")
 
+                        await telegram_bot_sendtext(
+                            f"""single_data["Pings"] - {single_data["Pings"]} single_data["Coin"] {single_data["Coin"]}""", "general_error"
+                        )
+                        
                         await telegram_bot_sendtext(
                             f"cached_data - {cached_data}", "general_error"
                         )
