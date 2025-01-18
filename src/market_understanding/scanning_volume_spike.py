@@ -56,9 +56,8 @@ async def scanning_volume():
                         else [
                             o
                             for o in cached_data
-                            if o["Pings"] == single_data["Pings"]
-                            and o["Coin"] == single_data["Coin"]
-                        ]
+                            if int(o["Pings"]) == int(single_data["Pings"])
+                            and single_data["Coin"] in o["Coin"]                         ]
                     )
 
                     if not data_has_exist_before:
