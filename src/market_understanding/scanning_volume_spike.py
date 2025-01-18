@@ -28,12 +28,13 @@ async def scanning_volume():
     """
 
     https://stackoverflow.com/questions/66686458/how-to-scrape-an-updating-html-table-using-selenium
+    https://medium.com/@fyattani/caching-in-python-261564d64a4e
 
     """
 
     print("Scanning volume")
     
-    cached_data = deque(maxlen=20)
+    cached_data = []
 
     while True:
         async with httpx.AsyncClient(headers={"Connection": "keep-alive"}) as client:
@@ -74,19 +75,11 @@ async def scanning_volume():
 
                     if data_has_exist_before == []:
                         cached_data.append(single_data)
-                        cached_data.appendleft(single_data) # Add the new data to the left (most recently used)
 
                         await telegram_bot_sendtext(
                             f"""{single_data}""", 
                             "general_error"
                         )
-                        
-                    else:
-                        #cached_data.append(single_data)
-                        cached_data.remove(single_data) # Move the accessed element to the right (recently used)
-
-                    if len(cached_data) >= cached_data.maxlen:
-                        cached_data.pop() # Remove the least recently used element from the cache
                     #log.debug (f"cached_data {cached_data}")
 
         random_sleep_time = max(sample([5, 10, 15, 20, 30], 1))
