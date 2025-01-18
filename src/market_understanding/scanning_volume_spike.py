@@ -57,26 +57,29 @@ async def scanning_volume():
                             o
                             for o in cached_data
                             if int(o["Pings"]) == int(single_data["Pings"])
-                            #and single_data["Coin"] in o["Coin"]
+                            and single_data["Coin"] in o["Coin"]
                             ]
                     )
+                    
+                    log.error ([
+                            o
+                            for o in cached_data
+                            if int(o["Pings"]) == int(single_data["Pings"])
+                            and single_data["Coin"] in o["Coin"]
+                            ])
+                    log.warning (f"data_has_exist_before {data_has_exist_before}")
+                    log.info (f"data_has_exist_before == [] {data_has_exist_before == []}")
+                    log.debug (f"single_data {single_data}")
+                    log.warning (f"cached_data {cached_data}")
 
                     if data_has_exist_before == []:
                         cached_data.append(single_data)
 
                         await telegram_bot_sendtext(
-                            f"""single_data - {single_data} data_has_exist_before {data_has_exist_before} single_data["Pings"] {single_data["Pings"]} single_data["Coin"] {single_data["Coin"]} cached ping {([
-                            o ["Pings"]
-                            for o in cached_data
-                        ])} cached Coin {[
-                            o ["Coin"]
-                            for o in cached_data
-                        ]}""", "general_error"
+                            f"""{single_data}""", 
+                            "general_error"
                         )
-
-                        await telegram_bot_sendtext(
-                            f"cached_data - {cached_data}", "general_error"
-                        )
+                    log.debug (f"cached_data {cached_data}")
 
         random_sleep_time = max(sample([5, 10, 15, 20, 30], 1))
 
