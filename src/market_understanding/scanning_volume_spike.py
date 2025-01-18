@@ -70,6 +70,13 @@ async def scanning_volume():
                         log.debug(f"single_data {single_data}")
 
                         await telegram_bot_sendtext(
+                            f"cached_data - {cached_data}", "general_error"
+                        )
+                        
+                        await telegram_bot_sendtext(
+                            f"data_has_exist_before - {data_has_exist_before}", "general_error"
+                        )
+                        await telegram_bot_sendtext(
                             f"data - {single_data}", "general_error"
                         )
 
