@@ -61,7 +61,7 @@ async def scanning_volume():
                             ]
                     )
 
-                    if not data_has_exist_before:
+                    if data_has_exist_before == []:
                         cached_data.append(single_data)
 
                         await telegram_bot_sendtext(
