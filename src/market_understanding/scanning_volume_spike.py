@@ -42,33 +42,31 @@ async def scanning_volume():
 
             rows = [str(i).split("|") for i in response_json[:-1]]
 
-            result = []
             if rows:
 
                 data_all = [dict(zip(headers, l)) for l in rows]
+                
+                cached_data = []
 
                 for single_data in data_all:
 
                     log.warning(f"single_data {single_data}")
 
-                    if not result:
-                        data = [
+                    data_has_exist_before = ([] if cached_data == []
+                            else [
                             o
-                            for o in result
+                            for o in cached_data
                             if o["datetime"] == single_data["datetime"]
-                        ]
+                        ])
 
-                    else:
-                        data = data_all
+                    log.debug(f"data_has_exist_before {data_has_exist_before}")
 
-                    log.debug(f"data {data}")
+                    if not data_has_exist_before:
+                        cached_data.append(single_data)
 
-                    if not data:
-                        result.append(single_data)
+                        log.debug(f"single_data {single_data}")
 
-                        log.debug(f"result {result}")
-
-                        await telegram_bot_sendtext(f"data - {data}", "general_error")
+                        await telegram_bot_sendtext(f"data - {single_data}", "general_error")
 
         random_sleep_time = max(sample([5, 10, 15, 20, 30], 1))
 
