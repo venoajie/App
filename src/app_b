@@ -2,65 +2,54 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-from datetime import datetime, timedelta, timezone
+import json
 import os
-from secrets import randbelow
 import random
+from datetime import datetime, timedelta, timezone
+from secrets import randbelow
 
-# installed
-from dataclassy import dataclass, fields
-import json, orjson
-from loguru import logger as log
+import bytewax.operators.window as win
+import orjson
 import tomli
 import websockets
-
 from bytewax import operators as op
-import bytewax.operators.window as win
-
 from bytewax.connectors.stdio import StdOutSink
 from bytewax.dataflow import Dataflow
-from bytewax.inputs import FixedPartitionedSource, StatefulSourcePartition, batch_async
+from bytewax.inputs import (FixedPartitionedSource, StatefulSourcePartition,
+                            batch_async)
 from bytewax.operators.window import EventClockConfig, TumblingWindow
+# installed
+from dataclassy import dataclass, fields
+from loguru import logger as log
 
-from configuration import id_numbering, config
+from configuration import config, id_numbering
 from configuration.label_numbering import get_now_unix_time
 from data_cleaning.reconciling_db import (
-    reconciling_orders,
-    is_size_sub_account_and_my_trades_reconciled)
-from db_management.sqlite_management import (
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-    executing_query_with_return,
-    querying_table,
-    update_status_data)
-from strategies.basic_strategy import (
-    get_label_integer,)
-from strategies.hedging_spot import (
-    HedgingSpot,
-    get_market_condition_hedging)
-from strategies.cash_carry.combo_auto import(
-    ComboAuto,
-    check_if_minimum_waiting_time_has_passed)
+    is_size_sub_account_and_my_trades_reconciled, reconciling_orders)
+from db_management.sqlite_management import \
+    executing_query_based_on_currency_or_instrument_and_strategy as get_query
+from db_management.sqlite_management import (executing_query_with_return,
+                                             querying_table,
+                                             update_status_data)
+from strategies.basic_strategy import get_label_integer
+from strategies.cash_carry.combo_auto import (
+    ComboAuto, check_if_minimum_waiting_time_has_passed)
+from strategies.hedging_spot import HedgingSpot, get_market_condition_hedging
 from transaction_management.deribit.api_requests import get_tickers
-from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,)
-from transaction_management.deribit.telegram_bot import (
-    telegram_bot_sendtext,)
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,)
-from utilities.pickling import (
-    replace_data,
-    read_data,)
+from transaction_management.deribit.get_instrument_summary import \
+    get_futures_instruments
+from transaction_management.deribit.managing_deribit import ModifyOrderDb
+from transaction_management.deribit.telegram_bot import telegram_bot_sendtext
 from utilities.number_modification import get_closest_value
-from utilities.string_modification import (
-    extract_currency_from_text,
-    parsing_label,
-    remove_double_brackets_in_list,
-    remove_redundant_elements)
-from utilities.system_tools import (
-    async_raise_error_message,
-    provide_path_for_file,
-    raise_error_message,
-    sleep_and_restart,)
+from utilities.pickling import read_data, replace_data
+from utilities.string_modification import (extract_currency_from_text,
+                                           parsing_label,
+                                           remove_double_brackets_in_list,
+                                           remove_redundant_elements)
+from utilities.system_tools import (async_raise_error_message,
+                                    provide_path_for_file, raise_error_message,
+                                    sleep_and_restart)
+
 
 # Using the LRUCache decorator function with a maximum cache size of 3
 def cached_ticker_data(currencies):

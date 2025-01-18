@@ -38,14 +38,15 @@ Created on Dec 17 06:36:20 2024
 @author: dhaneor
 """
 import asyncio
-import aiohttp
 import logging
 import random
-from time import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from threading import Lock
-from typing import List, Dict, Any, Tuple
+from time import time
+from typing import Any, Dict, List, Tuple
+
+import aiohttp
 
 LOG_LEVEL = logging.INFO
 
@@ -58,8 +59,8 @@ MAX_RETRIES = 5  # number of retries before giving up
 # These are the default values that can also be overridden when initializing
 # the BinanceClient class.
 
-BASE_URL = "https://api.binance.com"
-API_ENDPOINT = "/api/v3/klines"
+BASE_URL = 'https://api.binance.com'
+API_ENDPOINT = '/api/v3/klines'
 
 KLINES_LIMIT = 1000  # how may klines to request in one API call
 BASE_DELAY = MAX_WORKERS / 25  # base delay for rate limiting (in seconds)
@@ -69,7 +70,9 @@ HARD_LIMIT = RATE_LIMIT_BARRIER - 50  # limit hard above this threshhold
 SOFT_LIMIT = RATE_LIMIT_BARRIER * 0.6  # start limiting above this threshhold
 
 RAW_REQUEST_LIMIT = 6100  # requests per 5 minutes (see above)
-LONG_DELAY_THRESHHOLD = RAW_REQUEST_LIMIT * 0.9  # add even more delay above ...
+LONG_DELAY_THRESHHOLD = (
+    RAW_REQUEST_LIMIT * 0.9
+)  # add even more delay above ...
 
 SIMULATE_429_ERRORS = False  # activate this to test the RateLimitManager
 
@@ -81,7 +84,7 @@ if __name__ == '__main__':
     ch.setLevel(LOG_LEVEL)
 
     formatter = logging.Formatter(
-        "%(asctime)s - %(name)s.%(funcName)s.%(lineno)d  - [%(levelname)s]: %(message)s"
+        '%(asctime)s - %(name)s.%(funcName)s.%(lineno)d  - [%(levelname)s]: %(message)s'
     )
     ch.setFormatter(formatter)
 
@@ -115,7 +118,7 @@ class RateLimitManager:
 
 
 class CircuitBreaker:
-    "Circuit Breaker class."
+    """Circuit Breaker class."""
 
     def __init__(self, max_failures=5, reset_time=300):
         self.failures = 0
@@ -146,7 +149,8 @@ class CircuitBreaker:
 
 @dataclass
 class RateLimiter:
-    """Rate limiter class """
+    """Rate limiter class"""
+
     weight_1m: int = 0
     weight_total: int = 0
     last_update: float = time()
@@ -165,7 +169,10 @@ class RateLimiter:
         self.last_update = time()
 
     def should_throttle(self) -> bool:
-        return self.weight_1m > SOFT_LIMIT or self.weight_total > LONG_DELAY_THRESHHOLD
+        return (
+            self.weight_1m > SOFT_LIMIT
+            or self.weight_total > LONG_DELAY_THRESHHOLD
+        )
 
     def chill_out_bro(self) -> tuple[float, int]:
         # calculate the delay we need to prevent 'too many requests'
@@ -176,8 +183,9 @@ class RateLimiter:
         short_delay = 0.0
 
         if self.weight_1m >= SOFT_LIMIT:
-            short_delay = base_delay \
-                + (seconds_left ** 2 / (RATE_LIMIT_BARRIER - (self.weight_1m - 1)))
+            short_delay = base_delay + (
+                seconds_left**2 / (RATE_LIMIT_BARRIER - (self.weight_1m - 1))
+            )
 
         # wait for the next minute before proceeding when we approach
         # the API limit of 1200 used weight per one minute
@@ -192,13 +200,13 @@ class RateLimiter:
         add_delay = 0.0
 
         if self.weight_total > LONG_DELAY_THRESHHOLD:
-            logger.info(f"increased total weight: {self.weight_total}")
+            logger.info(f'increased total weight: {self.weight_total}')
             add_delay = (self.weight_total - LONG_DELAY_THRESHHOLD) / 50
 
         # add even more delay when we have used up more than 95%
         # of the weight per 5 minutes
         if self.weight_total > RAW_REQUEST_LIMIT * 0.95:
-            logger.warning("approaching 5m limit ... increasing delay")
+            logger.warning('approaching 5m limit ... increasing delay')
             base_delay = 10
 
         self.throttle_counter += 1  # just for logging purposes
@@ -217,7 +225,7 @@ class BinanceClient:
         self,
         max_workers: int | None = None,
         max_retries: int | None = None,
-        timeout: int = 10
+        timeout: int = 10,
     ) -> None:
         self.max_workers = max_workers or MAX_WORKERS
         self.max_retries = max_retries or MAX_RETRIES
@@ -230,7 +238,7 @@ class BinanceClient:
 
     async def sync_server_time(self):
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"{BASE_URL}/api/v3/time") as response:
+            async with session.get(f'{BASE_URL}/api/v3/time') as response:
                 server_time = (await response.json())['serverTime'] / 1000
                 self.rate_limiter.time_offset = server_time - time()
 
@@ -239,21 +247,21 @@ class BinanceClient:
     ) -> List[Tuple[int, int]]:
         chunk_size = 1000  # Maximum number of candles per request
         interval_ms = {
-            "1m": 60000,
-            "3m": 180000,
-            "5m": 300000,
-            "15m": 900000,
-            "30m": 1800000,
-            "1h": 3600000,
-            "2h": 7200000,
-            "4h": 14400000,
-            "6h": 21600000,
-            "8h": 28800000,
-            "12h": 43200000,
-            "1d": 86400000,
-            "3d": 259200000,
-            "1w": 604800000,
-            "1M": 2592000000,
+            '1m': 60000,
+            '3m': 180000,
+            '5m': 300000,
+            '15m': 900000,
+            '30m': 1800000,
+            '1h': 3600000,
+            '2h': 7200000,
+            '4h': 14400000,
+            '6h': 21600000,
+            '8h': 28800000,
+            '12h': 43200000,
+            '1d': 86400000,
+            '3d': 259200000,
+            '1w': 604800000,
+            '1M': 2592000000,
         }
 
         step = chunk_size * interval_ms[interval]
@@ -278,11 +286,11 @@ class BinanceClient:
     ) -> List[List[Any]]:
 
         params = {
-            "symbol": symbol,
-            "interval": interval,
-            "startTime": start,
-            "endTime": end,
-            "limit": KLINES_LIMIT,
+            'symbol': symbol,
+            'interval': interval,
+            'startTime': start,
+            'endTime': end,
+            'limit': KLINES_LIMIT,
         }
 
         for attempt in range(self.max_retries):
@@ -290,20 +298,26 @@ class BinanceClient:
                 async with self.semaphore:
                     # check with the Rate Limit Manager if we need to wait
                     # because we exceeded the API rate limit or got banned
-                    if wait_time := self.rate_limit_manager.get_wait_time() > 0:
+                    if (
+                        wait_time := self.rate_limit_manager.get_wait_time()
+                        > 0
+                    ):
                         logger.warning(
-                            "[%s] Rate limit in effect. Waiting for %s seconds.",
-                            worker_id, round(wait_time)
-                            )
+                            '[%s] Rate limit in effect. Waiting for %s seconds.',
+                            worker_id,
+                            round(wait_time),
+                        )
                         await asyncio.sleep(wait_time)
 
                     # check with the CircuitBreaker if we need to wait because
                     # too many erros occured
                     if self.circuit_breaker.is_open():
                         logger.warning(
-                            "Circuit breaker is open. Waiting before retrying..."
-                            )
-                        await asyncio.sleep(self.circuit_breaker.seconds_to_reset())
+                            'Circuit breaker is open. Waiting before retrying...'
+                        )
+                        await asyncio.sleep(
+                            self.circuit_breaker.seconds_to_reset()
+                        )
 
                     # check with the RateLimiter if we need to throttle
                     # our rate of requests and wait to avoid hitting the
@@ -312,19 +326,23 @@ class BinanceClient:
                     if self.rate_limiter.should_throttle():
                         delay, count = self.rate_limiter.chill_out_bro()
                         logger.info(
-                            "[%s] throttling %s: %s",
-                            worker_id, count, round(delay, 2)
-                            )
+                            '[%s] throttling %s: %s',
+                            worker_id,
+                            count,
+                            round(delay, 2),
+                        )
                         await asyncio.sleep(delay)
 
                     # send the downlaod request to the API
                     async with session.get(
-                        f"{BASE_URL}{API_ENDPOINT}",
+                        f'{BASE_URL}{API_ENDPOINT}',
                         params=params,
                     ) as response:
                         self.rate_limiter.update(
-                            int(response.headers.get("x-mbx-used-weight-1m", 0)),
-                            int(response.headers.get("x-mbx-used-weight", 0)),
+                            int(
+                                response.headers.get('x-mbx-used-weight-1m', 0)
+                            ),
+                            int(response.headers.get('x-mbx-used-weight', 0)),
                         )
 
                         # simulates 429 errors (too many requests) if the
@@ -334,7 +352,7 @@ class BinanceClient:
 
                         # handle a 429 error (too many requests)
                         if response.status == 429:
-                            logger.warning("[%s] Hit a 429 error!" % worker_id)
+                            logger.warning('[%s] Hit a 429 error!' % worker_id)
 
                             # get the seconds to wait for a retry from
                             # the headers of the response, or set it to
@@ -343,57 +361,75 @@ class BinanceClient:
                                 retry_after = 10
                             else:
                                 retry_after = int(
-                                    response.headers.get("Retry-After", 60)
-                                    )
+                                    response.headers.get('Retry-After', 60)
+                                )
 
                             self.rate_limit_manager.set_rate_limit(retry_after)
                             return await self._fetch_ohlcv_chunk(
-                                session, worker_id, symbol, interval, start, end
-                                )
+                                session,
+                                worker_id,
+                                symbol,
+                                interval,
+                                start,
+                                end,
+                            )
 
                         # handle a 418 error (= banned)
                         if response.status == 418:
-                            retry_after = int(response.headers.get("Retry-After", 120))
+                            retry_after = int(
+                                response.headers.get('Retry-After', 120)
+                            )
                             logger.error(
-                                "[%s] We are BANNED for %s seconds"
+                                '[%s] We are BANNED for %s seconds'
                                 % (worker_id, retry_after)
-                                )
+                            )
                             self.rate_limit_manager.set_ban(retry_after)
                             return await self._fetch_ohlcv_chunk(
-                                session, worker_id, symbol, interval, start, end
-                                )
+                                session,
+                                worker_id,
+                                symbol,
+                                interval,
+                                start,
+                                end,
+                            )
 
                         response.raise_for_status()
 
                         logger.info(
-                            "[%s] Request successful. Weight: %s-%s",
+                            '[%s] Request successful. Weight: %s-%s',
                             worker_id,
                             self.rate_limiter.weight_1m,
-                            self.rate_limiter.weight_total
-                            )
+                            self.rate_limiter.weight_total,
+                        )
 
                         return await response.json()
 
             except asyncio.TimeoutError:
-                logger.warning("[%s] Request timed out. Retrying..." % worker_id)
+                logger.warning(
+                    '[%s] Request timed out. Retrying...' % worker_id
+                )
                 self.circuit_breaker.record_failure()
                 if attempt == self.max_retries - 1:
                     raise
 
             except (aiohttp.ClientResponseError, Exception) as e:
                 logger.error(
-                    "[%s] Error: %s for %s. Retrying in %s seconds...",
-                    worker_id, e, symbol, f"{wait_time:.2f}"
-                    )
+                    '[%s] Error: %s for %s. Retrying in %s seconds...',
+                    worker_id,
+                    e,
+                    symbol,
+                    f'{wait_time:.2f}',
+                )
                 self.circuit_breaker.record_failure()
                 if attempt == self.max_retries - 1:
                     raise
-                wait_time = (2 ** attempt) + random.uniform(0, 1)
+                wait_time = (2**attempt) + random.uniform(0, 1)
                 await asyncio.sleep(wait_time)
 
         logger.warning(
-            "no result for %s after retrying %s times" % (symbol, self.max_retries)
-            )
+            'no result for %s after retrying %s times'
+            % (symbol, self.max_retries)
+        )
         return []
 
     async def get_ohlcv(
@@ -431,7 +467,12 @@ class BinanceClient:
         async with aiohttp.ClientSession(timeout=self.timeout) as session:
             tasks = [
                 self._fetch_ohlcv_chunk(
-                    session, f"{symbol}_{i}", symbol, interval, chunk_start, chunk_end
+                    session,
+                    f'{symbol}_{i}',
+                    symbol,
+                    interval,
+                    chunk_start,
+                    chunk_end,
                 )
                 for i, (chunk_start, chunk_end) in enumerate(chunks)
             ]
@@ -441,7 +482,7 @@ class BinanceClient:
         filtered_results = []
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                logger.error(f"Error in chunk {i} for {symbol}: {result}")
+                logger.error(f'Error in chunk {i} for {symbol}: {result}')
             else:
                 filtered_results.extend(result)
 
@@ -480,7 +521,9 @@ class BinanceClient:
             list containing [timestamp, open, high, low, close, volume, ...]
             in that order.
         """
-        tasks = [self.get_ohlcv(symbol, interval, start, end) for symbol in symbols]
+        tasks = [
+            self.get_ohlcv(symbol, interval, start, end) for symbol in symbols
+        ]
         results = await asyncio.gather(*tasks)
         return dict(zip(symbols, results))
 
@@ -488,8 +531,8 @@ class BinanceClient:
 # Usage
 async def main():
     client = BinanceClient()
-    symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "XLMUSDT"]
-    interval = "15m"
+    symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'XLMUSDT']
+    interval = '15m'
     start = int(time() * 1000) - 5 * 365 * 24 * 60 * 60 * 1000  # 5 years ago
     end = int(time() * 1000)
 
@@ -499,11 +542,11 @@ async def main():
 
     et = int((time() - st) * 1000)
     no_of_klines = sum(len(v) for v in data.values())
-    print(f"got {no_of_klines} klines in {et}ms")
+    print(f'got {no_of_klines} klines in {et}ms')
 
     for symbol, ohlcv in data.items():
-        print(f"{symbol}: {len(ohlcv)} candles downloaded")
+        print(f'{symbol}: {len(ohlcv)} candles downloaded')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     asyncio.run(main())

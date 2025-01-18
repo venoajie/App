@@ -7,7 +7,10 @@ import asyncio
 from dataclassy import dataclass
 
 # user defined formula
-from strategies.basic_strategy import BasicStrategy, is_minimum_waiting_time_has_passed
+from strategies.basic_strategy import (
+    BasicStrategy,
+    is_minimum_waiting_time_has_passed,
+)
 
 
 @dataclass(unsafe_hash=True, slots=True)
@@ -30,8 +33,10 @@ class MarketMaker(BasicStrategy):
         cancel_allowed: bool = False
 
         if len_orders != [] and len_orders > 0:
-            minimum_waiting_time_has_passed: bool = is_minimum_waiting_time_has_passed(
-                server_time, max_tstamp_orders, time_interval
+            minimum_waiting_time_has_passed: bool = (
+                is_minimum_waiting_time_has_passed(
+                    server_time, max_tstamp_orders, time_interval
+                )
             )
             if minimum_waiting_time_has_passed:
                 cancel_allowed: bool = True
@@ -53,22 +58,22 @@ class MarketMaker(BasicStrategy):
 
         order_allowed: bool = False
 
-        bullish = market_condition["rising_price"]
-        bearish = market_condition["falling_price"]
-        ranging = market_condition["neutral_price"]
+        bullish = market_condition['rising_price']
+        bearish = market_condition['falling_price']
+        ranging = market_condition['neutral_price']
 
         if len_orders == [] or len_orders == 0:
 
-            if side == "buy":
+            if side == 'buy':
                 if bullish:
                     order_allowed: bool = True
-            if side == "sell":
+            if side == 'sell':
                 if bearish:
                     order_allowed: bool = True
             if ranging:
                 order_allowed: bool = True
         print(
-            f"side {side} bullish {bullish} bearish {bearish} order_allowed {order_allowed} "
+            f'side {side} bullish {bullish} bearish {bearish} order_allowed {order_allowed} '
         )
 
         return order_allowed
@@ -91,35 +96,37 @@ class MarketMaker(BasicStrategy):
         open_orders_label_strategy: (
             dict
         ) = await self.get_basic_params().transaction_attributes(
-            "orders_all_json", "open"
+            'orders_all_json', 'open'
         )
 
-        len_orders: int = open_orders_label_strategy["transactions_len"]
+        len_orders: int = open_orders_label_strategy['transactions_len']
 
         params: dict = self.get_basic_params().get_basic_opening_parameters(
             ask_price, bid_price, notional
         )
 
-        profit_target_pct_transaction = market_condition["profit_target_pct"]
+        profit_target_pct_transaction = market_condition['profit_target_pct']
 
         qty_order_and_interval_time: dict = order_and_interval(
             notional, take_profit_pct_daily, profit_target_pct_transaction
         )
 
-        params.update({"size": qty_order_and_interval_time["qty_per_order"]})
-        params.update({"profit_target_pct_transaction": profit_target_pct_transaction})
+        params.update({'size': qty_order_and_interval_time['qty_per_order']})
+        params.update(
+            {'profit_target_pct_transaction': profit_target_pct_transaction}
+        )
         # print(
         #    f"profit_target_pct_transaction   {profit_target_pct_transaction} qty_order_and_interval_time   {qty_order_and_interval_time}"
         # )
         params.update(
             {
-                "interval_time_between_order_in_ms": qty_order_and_interval_time[
-                    "interval_time_between_order_in_ms"
+                'interval_time_between_order_in_ms': qty_order_and_interval_time[
+                    'interval_time_between_order_in_ms'
                 ]
             }
         )
-        time_interval: float = params["interval_time_between_order_in_ms"]
-        max_tstamp_orders: int = open_orders_label_strategy["max_time_stamp"]
+        time_interval: float = params['interval_time_between_order_in_ms']
+        max_tstamp_orders: int = open_orders_label_strategy['max_time_stamp']
 
         # is cancel order allowed?
         cancel_allowed: bool = await self.is_cancel_order_allowed(
@@ -127,37 +134,50 @@ class MarketMaker(BasicStrategy):
         )
 
         # resizing qty
-        side = params["side"]
+        side = params['side']
 
-        if side == "buy":
+        if side == 'buy':
             params.update(
-                {"take_profit": bid_price + (profit_target_pct_transaction * bid_price)}
+                {
+                    'take_profit': bid_price
+                    + (profit_target_pct_transaction * bid_price)
+                }
             )
 
-            if size_from_positions < 0 and market_condition["rising_price"]:
-                params.update({"size": max(abs(size_from_positions), int(notional))})
+            if size_from_positions < 0 and market_condition['rising_price']:
+                params.update(
+                    {'size': max(abs(size_from_positions), int(notional))}
+                )
 
-        if side == "sell":
+        if side == 'sell':
 
             params.update(
-                {"take_profit": ask_price - (profit_target_pct_transaction * ask_price)}
+                {
+                    'take_profit': ask_price
+                    - (profit_target_pct_transaction * ask_price)
+                }
             )
 
-            if size_from_positions > 0 and market_condition["falling_price"]:
-                params.update({"size": max(abs(size_from_positions), int(notional))})
+            if size_from_positions > 0 and market_condition['falling_price']:
+                params.update(
+                    {'size': max(abs(size_from_positions), int(notional))}
+                )
         # print(f"MM params {params} ")
 
         # is open order allowed?
-        if params["everything_is_consistent"]:
+        if params['everything_is_consistent']:
             order_allowed: bool = await self.is_send_order_allowed(
-                size_from_positions, len_orders, params["side"], market_condition
+                size_from_positions,
+                len_orders,
+                params['side'],
+                market_condition,
             )
 
         return dict(
             order_allowed=order_allowed,
             order_parameters=[] if order_allowed == False else params,
             cancel_allowed=cancel_allowed,
-            cancel_id=open_orders_label_strategy["order_id_max_time_stamp"],
+            cancel_id=open_orders_label_strategy['order_id_max_time_stamp'],
         )
 
     async def is_send_exit_order_allowed(

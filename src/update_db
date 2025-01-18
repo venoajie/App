@@ -8,10 +8,9 @@ import asyncio
 from loguru import logger as log
 
 # user defined formula
-from db_management.sqlite_management import (
-    update_status_data,)
-from utilities.system_tools import (
-    async_raise_error_message,)
+from db_management.sqlite_management import update_status_data
+from utilities.system_tools import async_raise_error_message
+
 
 async def updating_db_with_new_label(
     trade_db_table: str,

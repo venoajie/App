@@ -5,47 +5,40 @@ import asyncio
 import os
 
 import httpx
-from loguru import logger as log
 import tomli
+from loguru import logger as log
 
 from configuration.label_numbering import get_now_unix_time
 from data_cleaning.managing_closed_transactions import (
-    clean_up_closed_transactions,
-    get_unrecorded_trade_transactions,)
+    clean_up_closed_transactions, get_unrecorded_trade_transactions)
 from data_cleaning.managing_delivered_transactions import (
-    is_instrument_name_has_delivered,
-    updating_delivered_instruments)
-from data_cleaning.reconciling_db import(is_my_trades_and_sub_account_size_reconciled_each_other)
+    is_instrument_name_has_delivered, updating_delivered_instruments)
 from data_cleaning.pruning_db import count_and_delete_ohlc_rows
-from db_management.sqlite_management import (
-    back_up_db_sqlite,
-    executing_query_with_return,
-    insert_tables, 
-    querying_arithmetic_operator,)
-from market_understanding.technical_analysis import (insert_market_condition_result)
-from messaging.telegram_bot import (telegram_bot_sendtext,)
-from transaction_management.deribit.api_requests import (
-    get_currencies,
-    get_instruments,)
-from transaction_management.deribit.get_instrument_summary import (get_futures_instruments,)
-from transaction_management.deribit.managing_deribit import (ModifyOrderDb,)
-from utilities.pickling import (
-    read_data,
-    replace_data,)
-from utilities.string_modification import (
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-    transform_nested_dict_to_list,)
-from utilities.system_tools import (
-    async_raise_error_message,
-    kill_process,
-    provide_path_for_file,
-    raise_error_message,)
-from websocket_management.allocating_ohlc import (
-    ohlc_end_point, 
-    ohlc_result_per_time_frame,
-    last_tick_fr_sqlite,)
-    
+from data_cleaning.reconciling_db import \
+    is_my_trades_and_sub_account_size_reconciled_each_other
+from db_management.sqlite_management import (back_up_db_sqlite,
+                                             executing_query_with_return,
+                                             insert_tables,
+                                             querying_arithmetic_operator)
+from market_understanding.technical_analysis import \
+    insert_market_condition_result
+from messaging.telegram_bot import telegram_bot_sendtext
+from transaction_management.deribit.api_requests import (get_currencies,
+                                                         get_instruments)
+from transaction_management.deribit.get_instrument_summary import \
+    get_futures_instruments
+from transaction_management.deribit.managing_deribit import ModifyOrderDb
+from utilities.pickling import read_data, replace_data
+from utilities.string_modification import (remove_double_brackets_in_list,
+                                           remove_redundant_elements,
+                                           transform_nested_dict_to_list)
+from utilities.system_tools import (async_raise_error_message, kill_process,
+                                    provide_path_for_file, raise_error_message)
+from websocket_management.allocating_ohlc import (last_tick_fr_sqlite,
+                                                  ohlc_end_point,
+                                                  ohlc_result_per_time_frame)
+
+
 def get_config(file_name: str) -> list:
     """ """
     config_path = provide_path_for_file (file_name)
@@ -60,8 +53,9 @@ def get_config(file_name: str) -> list:
 
 def check_cpu_usage(threshold):
     
-    import psutil
     import smtplib
+
+    import psutil
 
     cpu_usage = psutil.cpu_percent()
     if cpu_usage > threshold:

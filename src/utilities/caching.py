@@ -4,23 +4,15 @@ import asyncio
 
 from loguru import logger as log
 
-from transaction_management.deribit.api_requests import (get_tickers,)
-from utilities.pickling import (read_data,)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file)
+from transaction_management.deribit.api_requests import get_tickers
+from utilities.pickling import read_data
+from utilities.system_tools import parse_error_message, provide_path_for_file
 
 
-def reading_from_pkl_data(
-    end_point, 
-    currency,
-    status: str = None
-    ) -> dict:
+def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
     """ """
 
-    path: str = provide_path_for_file (end_point,
-                                      currency,
-                                      status)
+    path: str = provide_path_for_file(end_point, currency, status)
     return read_data(path)
 
 
@@ -38,21 +30,18 @@ def combining_ticker_data(instruments_name):
     Returns:
         _type_: _description_
     """
-    
-    result=[]
+
+    result = []
     for instrument_name in instruments_name:
-                        
-        result_instrument= reading_from_pkl_data(
-                "ticker",
-                instrument_name
-                )
+
+        result_instrument = reading_from_pkl_data('ticker', instrument_name)
 
         if result_instrument:
             result_instrument = result_instrument[0]
 
         else:
-            result_instrument = get_tickers (instrument_name)
-        result.append (result_instrument)
+            result_instrument = get_tickers(instrument_name)
+        result.append(result_instrument)
 
     return result
 
@@ -61,7 +50,7 @@ def update_cached_ticker(
     instrument_name: str,
     ticker: list,
     data_orders: dict,
-    )-> None:
+) -> None:
     """_summary_
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
 
@@ -71,42 +60,49 @@ def update_cached_ticker(
     Returns:
         _type_: _description_
     """
-    
-        
-    instrument_ticker: list = [o for o in ticker if instrument_name in o["instrument_name"]]
-    
+
+    instrument_ticker: list = [
+        o for o in ticker if instrument_name in o['instrument_name']
+    ]
+
     if instrument_ticker:
-        
+
         for item in data_orders:
 
-            if "stats" not in item and "instrument_name" not in item and "type" not in item:
-                [o for o in ticker 
-                 if instrument_name in o["instrument_name"]][0][item] = data_orders[item]
+            if (
+                'stats' not in item
+                and 'instrument_name' not in item
+                and 'type' not in item
+            ):
+                [o for o in ticker if instrument_name in o['instrument_name']][
+                    0
+                ][item] = data_orders[item]
 
-            if "stats"  in item:
-                
+            if 'stats' in item:
+
                 data_orders_stat = data_orders[item]
-                
+
                 for item in data_orders_stat:
-                    [o for o in ticker 
-                     if instrument_name in o["instrument_name"]][0]["stats"][item] = data_orders_stat[item]
-    
+                    [
+                        o
+                        for o in ticker
+                        if instrument_name in o['instrument_name']
+                    ][0]['stats'][item] = data_orders_stat[item]
+
     else:
         from loguru import logger as log
-    
-        log.warning (f" {ticker}")
-        log.debug(f" {instrument_name}")
-        
-        log.critical (f"instrument_ticker before {instrument_ticker}")
-        #combining_order_data(currencies)
-        log.debug (f"instrument_ticker after []-not ok {instrument_ticker}")
-    
+
+        log.warning(f' {ticker}')
+        log.debug(f' {instrument_name}')
+
+        log.critical(f'instrument_ticker before {instrument_ticker}')
+        # combining_order_data(currencies)
+        log.debug(f'instrument_ticker after []-not ok {instrument_ticker}')
+
+
 # Using the LRUCache decorator function with a maximum cache size of 3
-async def combining_order_data(
-    private_data: object,
-    currencies: list
-    )-> list:
-    
+async def combining_order_data(private_data: object, currencies: list) -> list:
+
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
     https://medium.com/@jodielovesmaths/memoization-in-python-using-cache-36b676cb21ef
@@ -119,42 +115,34 @@ async def combining_order_data(
     Returns:
         _type_: _description_
     """
-    
+
     from utilities.pickling import replace_data
-    
-    result=[]
+
+    result = []
     for currency in currencies:
-        
-        sub_accounts = await private_data.get_subaccounts_details (currency)
-        
-        my_path_sub_account = provide_path_for_file(
-            "sub_accounts",
-            currency
-            )
-        
-        replace_data(
-            my_path_sub_account, 
-            sub_accounts
-            )
-                
+
+        sub_accounts = await private_data.get_subaccounts_details(currency)
+
+        my_path_sub_account = provide_path_for_file('sub_accounts', currency)
+
+        replace_data(my_path_sub_account, sub_accounts)
+
         if sub_accounts:
 
             sub_account = sub_accounts[0]
-        
-            sub_account_orders = sub_account["open_orders"]
-            
+
+            sub_account_orders = sub_account['open_orders']
+
             if sub_account_orders:
-                
+
                 for order in sub_account_orders:
-                    
-                    result.append (order)
+
+                    result.append(order)
 
     return result
 
-async def update_cached_orders_(
-    queue_orders_all,
-    queue_orders,
-    queue: dict):
+
+async def update_cached_orders_(queue_orders_all, queue_orders, queue: dict):
     """_summary_
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
 
@@ -164,90 +152,101 @@ async def update_cached_orders_(
     Returns:
         _type_: _description_
     """
-    
+
     try:
-        #print(f"orders_all {queue_orders_all}")
+        # print(f"orders_all {queue_orders_all}")
         while not queue_orders.empty():
-            
+
             orders_all = queue_orders_all
-            
+
             if not queue_orders.empty():
-                      
-                message= await queue_orders.get()
-                
-                #message_channel: str = message["channel"]
-                
-                data_orders: dict = message["data"]   
-                      
-                log.warning (f" user.changes.any data {data_orders}")
-                #if "user.changes.any" in message_channel:
-                    
-                    #print(f"data_orders {data_orders}")
-                
+
+                message = await queue_orders.get()
+
+                # message_channel: str = message["channel"]
+
+                data_orders: dict = message['data']
+
+                log.warning(f' user.changes.any data {data_orders}')
+                # if "user.changes.any" in message_channel:
+
+                # print(f"data_orders {data_orders}")
+
                 if data_orders:
-                    
-                    orders = data_orders["orders"]
-                    
-                    trades = data_orders["trades"]
-                    
+
+                    orders = data_orders['orders']
+
+                    trades = data_orders['trades']
+
                     if orders:
-                        
-                        if trades :
-                            
+
+                        if trades:
+
                             for trade in trades:
 
-                                order_id = trade["order_id"]
-                                
-                                selected_order = [o for o in orders_all 
-                                                if order_id in o["order_id"]]
-                                
+                                order_id = trade['order_id']
+
+                                selected_order = [
+                                    o
+                                    for o in orders_all
+                                    if order_id in o['order_id']
+                                ]
+
                                 if selected_order:
-                                                        
+
                                     orders_all.remove(selected_order[0])
-                                
+
                         if orders:
-                        
-                            log.debug (f" orders_currency_all before {len(orders_all)}")
-                            
+
+                            log.debug(
+                                f' orders_currency_all before {len(orders_all)}'
+                            )
+
                             for order in orders:
-                                
-                                print(f"cached order {order}")
-                                
-                                order_state= order["order_state"]    
-                                
-                                if order_state == "cancelled" or order_state == "filled":
-                                
-                                    order_id = order["order_id"]
-                                    
-                                    selected_order = [o for o in orders_all 
-                                                    if order_id in o["order_id"]]
-                                    
-                                    print(f"caching selected_order {selected_order}")
-                                    
+
+                                print(f'cached order {order}')
+
+                                order_state = order['order_state']
+
+                                if (
+                                    order_state == 'cancelled'
+                                    or order_state == 'filled'
+                                ):
+
+                                    order_id = order['order_id']
+
+                                    selected_order = [
+                                        o
+                                        for o in orders_all
+                                        if order_id in o['order_id']
+                                    ]
+
+                                    print(
+                                        f'caching selected_order {selected_order}'
+                                    )
+
                                     if selected_order:
-                                                            
+
                                         orders_all.remove(selected_order[0])
-                                    
+
                                 else:
-                                
+
                                     orders_all.append(order)
-                            
-                            log.error (f" orders_currency_all after {len(orders_all)}")                        
-                                
-                        #print(f"orders_all {orders_all}")
+
+                            log.error(
+                                f' orders_currency_all after {len(orders_all)}'
+                            )
+
+                        # print(f"orders_all {orders_all}")
                     await queue.put(orders_all)
                     await queue.task_done()
-                        
-                
 
     except Exception as error:
-        
+
         parse_error_message(error)
 
 
-async def update_cached_orders(
-    queue_orders_all,
-    queue_orders):
+async def update_cached_orders(queue_orders_all, queue_orders):
     """_summary_
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
 
@@ -257,58 +256,64 @@ async def update_cached_orders(
     Returns:
         _type_: _description_
     """
-    
+
     try:
-        
+
         orders_all = queue_orders_all
-        
+
         if queue_orders:
-            
-            orders = queue_orders["orders"]
-            
-            trades = queue_orders["trades"]
-            
+
+            orders = queue_orders['orders']
+
+            trades = queue_orders['trades']
+
             if orders:
-                
-                if trades :
-                    
+
+                if trades:
+
                     for trade in trades:
 
-                        order_id = trade["order_id"]
-                        
-                        selected_order = [o for o in orders_all 
-                                          if order_id in o["order_id"]]
-                        
+                        order_id = trade['order_id']
+
+                        selected_order = [
+                            o for o in orders_all if order_id in o['order_id']
+                        ]
+
                         if selected_order:
-                                                
+
                             orders_all.remove(selected_order[0])
-                        
+
                 if orders:
-                
+
                     for order in orders:
-                        
-                        print(f"cached order {order}")
-                        
-                        order_state= order["order_state"]    
-                        
-                        if order_state == "cancelled" or order_state == "filled":
-                        
-                            order_id = order["order_id"]
-                            
-                            selected_order = [o for o in orders_all 
-                                            if order_id in o["order_id"]]
-                            
-                            print(f"caching selected_order {selected_order}")
-                            
+
+                        print(f'cached order {order}')
+
+                        order_state = order['order_state']
+
+                        if (
+                            order_state == 'cancelled'
+                            or order_state == 'filled'
+                        ):
+
+                            order_id = order['order_id']
+
+                            selected_order = [
+                                o
+                                for o in orders_all
+                                if order_id in o['order_id']
+                            ]
+
+                            print(f'caching selected_order {selected_order}')
+
                             if selected_order:
-                                                    
+
                                 orders_all.remove(selected_order[0])
-                            
+
                         else:
-                        
+
                             orders_all.append(order)
-                        
 
     except Exception as error:
-        
+
         parse_error_message(error)

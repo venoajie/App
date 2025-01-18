@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import os, sys
-from time import sleep
 import asyncio
-import signal
-
 import datetime
+import os
+import signal
+import sys
 from functools import lru_cache, wraps
+from time import sleep
 
 # https://python.plainenglish.io/five-python-wrappers-that-can-reduce-your-code-by-half-af775feb1d5
+
 
 def get_ttl_hash(seconds=5):
     """Calculate hash value for TTL caching.
@@ -25,12 +26,13 @@ def get_ttl_hash(seconds=5):
 
 def ttl_cache(ttl_seconds=5):
     """A decorator for TTL cache functionality.
-    
+
     https://kioku-space.com/en/python-ttl-cache-with-toggle/
 
     Args:
         ttl_seconds (int, optional): Expiration time in seconds. Defaults to 3600.
     """
+
     def ttl_cache_deco(func):
         """Returns a function with time-to-live (TTL) caching capabilities."""
         # Function with caching capability and dummy argument
@@ -44,6 +46,7 @@ def ttl_cache(ttl_seconds=5):
         def ttl_cached_func(*args, **kwargs):
             hash = get_ttl_hash(ttl_seconds)
             return cached_dummy_func(*args, ttl_dummy=hash, **kwargs)
+
         return ttl_cached_func
 
     return ttl_cache_deco
@@ -51,9 +54,11 @@ def ttl_cache(ttl_seconds=5):
 
 @ttl_cache(ttl_seconds=5)
 def get_content():
-    return "AAAAAAAAAAAAA"
+    return 'AAAAAAAAAAAAA'
 
-print (get_content ())
+
+print(get_content())
+
 
 def get_platform() -> str:
     """
@@ -71,10 +76,10 @@ def get_platform() -> str:
     """
 
     platforms: dict = {
-        "linux1": "linux",
-        "linux2": "linux",
-        "darwin": "OS X",
-        "win32": "win",
+        'linux1': 'linux',
+        'linux2': 'linux',
+        'darwin': 'OS X',
+        'win32': 'win',
     }
 
     if sys.platform not in platforms:
@@ -104,112 +109,119 @@ def provide_path_for_file(
     current_os = get_platform()
 
     # Set root equal to  current folder
-    root: str = Path(".")
+    root: str = Path('.')
 
     exchange = None
 
     if bool(
-        [o for o in ["portfolio", "positions", "sub_accounts"] if (o in end_point)]
+        [
+            o
+            for o in ['portfolio', 'positions', 'sub_accounts']
+            if (o in end_point)
+        ]
     ):
-        exchange: str = "deribit"
-        sub_folder: str = f"databases/exchanges/{exchange}/portfolio"
+        exchange: str = 'deribit'
+        sub_folder: str = f'databases/exchanges/{exchange}/portfolio'
 
-    if bool([o for o in ["orders", "myTrades", "my_trades"] if (o in end_point)]):
-        exchange: str = "deribit"
-        sub_folder: str = f"databases/exchanges/{exchange}/transactions"
+    if bool(
+        [o for o in ['orders', 'myTrades', 'my_trades'] if (o in end_point)]
+    ):
+        exchange: str = 'deribit'
+        sub_folder: str = f'databases/exchanges/{exchange}/transactions'
 
     if bool(
         [
             o
             for o in [
-                "ordBook",
-                "index",
-                "instruments",
-                "currencies",
-                "ohlc",
-                "futures_analysis",
-                "ticker-all",
-                "ticker_all",
-                "ticker",
+                'ordBook',
+                'index',
+                'instruments',
+                'currencies',
+                'ohlc',
+                'futures_analysis',
+                'ticker-all',
+                'ticker_all',
+                'ticker',
             ]
             if (o in end_point)
         ]
     ):
-        sub_folder = "databases/market"
-        exchange = "deribit"
+        sub_folder = 'databases/market'
+        exchange = 'deribit'
 
     if bool(
         [
             o
             for o in [
-                "openInterestHistorical",
-                "openInterestHistorical",
-                "openInterestAggregated",
+                'openInterestHistorical',
+                'openInterestHistorical',
+                'openInterestAggregated',
             ]
             if (o in end_point)
         ]
     ):
-        sub_folder = "databases/market"
-        exchange = "general"
+        sub_folder = 'databases/market'
+        exchange = 'general'
 
     if marker != None:
-        file_name = f"{marker.lower()}-{end_point}"
+        file_name = f'{marker.lower()}-{end_point}'
 
         if status != None:
-            file_name = f"{file_name}-{status}"
+            file_name = f'{file_name}-{status}'
 
         if method != None:
-            file_name = f"{file_name}-{method}"
+            file_name = f'{file_name}-{method}'
 
     else:
-        file_name = f"{end_point}"
+        file_name = f'{end_point}'
 
-    if ".env" in end_point:
-        sub_folder = "configuration"
+    if '.env' in end_point:
+        sub_folder = 'configuration'
 
-    if "config_strategies.toml" in end_point:
-        sub_folder = "strategies"
+    if 'config_strategies.toml' in end_point:
+        sub_folder = 'strategies'
 
-    if "api_url_end_point.toml" in end_point:
-        sub_folder = "transaction_management/binance"
+    if 'api_url_end_point.toml' in end_point:
+        sub_folder = 'transaction_management/binance'
 
     # to accomodate pytest env
-    if "test.env" in end_point:
-        sub_folder = "src/configuration"
-        end_point = ".env"
+    if 'test.env' in end_point:
+        sub_folder = 'src/configuration'
+        end_point = '.env'
 
-    config_file= ".env"  in file_name or ".toml" in file_name
+    config_file = '.env' in file_name or '.toml' in file_name
 
-    file_name =  (f"{end_point}") if config_file else (f"{file_name}.pkl") 
+    file_name = (f'{end_point}') if config_file else (f'{file_name}.pkl')
 
     # Combine root + folders
     my_path_linux: str = (
         root / sub_folder if exchange == None else root / sub_folder / exchange
     )
     my_path_win: str = (
-        root / "src" / sub_folder
+        root / 'src' / sub_folder
         if exchange == None
-        else root / "src" / sub_folder / exchange
+        else root / 'src' / sub_folder / exchange
     )
 
-    if "portfolio" in sub_folder or "transactions" in sub_folder:
+    if 'portfolio' in sub_folder or 'transactions' in sub_folder:
         my_path_linux: str = (
             root / sub_folder if exchange == None else root / sub_folder
         )
         my_path_win: str = (
-            root / "src" / sub_folder if exchange == None else root / "src" / sub_folder
+            root / 'src' / sub_folder
+            if exchange == None
+            else root / 'src' / sub_folder
         )
 
     # Create target Directory if it doesn't exist in linux
-    if not os.path.exists(my_path_linux) and current_os == "linux":
+    if not os.path.exists(my_path_linux) and current_os == 'linux':
         os.makedirs(my_path_linux)
 
     return (
         (my_path_linux / file_name)
-        if get_platform() == "linux"
+        if get_platform() == 'linux'
         else (my_path_win / file_name)
     )
-
 
 
 def is_current_file_running(script: str) -> bool:
@@ -229,7 +241,7 @@ def is_current_file_running(script: str) -> bool:
 
     for q in psutil.process_iter():
 
-        if q.name().startswith("python") or q.name().startswith("py"):
+        if q.name().startswith('python') or q.name().startswith('py'):
             if (
                 len(q.cmdline()) > 1
                 and script in q.cmdline()[1]
@@ -247,7 +259,9 @@ def reading_from_db_pickle(
     """ """
     from utilities import pickling
 
-    return pickling.read_data(provide_path_for_file(end_point, instrument, status))
+    return pickling.read_data(
+        provide_path_for_file(end_point, instrument, status)
+    )
 
 
 def sleep_and_restart_program(idle: float = None) -> None:
@@ -265,10 +279,10 @@ def sleep_and_restart_program(idle: float = None) -> None:
     """
 
     if idle != None:
-        print(f" sleep for {idle} seconds")
+        print(f' sleep for {idle} seconds')
         sleep(idle)
 
-    print(f"restart")
+    print(f'restart')
     python = sys.executable
     os.execl(python, python, *sys.argv)
 
@@ -288,10 +302,10 @@ async def sleep_and_restart(idle: float = None) -> None:
     """
 
     if idle != None:
-        print(f" sleep for {idle} seconds")
+        print(f' sleep for {idle} seconds')
         await asyncio.sleep(idle)
 
-    print(f"restart")
+    print(f'restart')
     python = sys.executable
     os.execl(python, python, *sys.argv)
 
@@ -303,16 +317,14 @@ def exception_handler(func):
             return func(*args, **kwargs)
         except Exception as e:
             # Handle the exception
-            print(f"An exception occurred: {str(e)}")
+            print(f'An exception occurred: {str(e)}')
             # Optionally, perform additional error handling or logging
             # Reraise the exception if needed
 
     return wrapper
 
 
-def parse_error_message(
-    error: str, 
-    message: str = None) -> str:
+def parse_error_message(error: str, message: str = None) -> str:
     """
 
     Capture & emit error message
@@ -325,30 +337,27 @@ def parse_error_message(
 
     """
 
-    from loguru import logger as log
-
     import traceback
 
-    info = f"{error} \n \n {traceback.format_exc()}"
+    from loguru import logger as log
+
+    info = f'{error} \n \n {traceback.format_exc()}'
 
     if message != None:
-        info = f"{message} \n \n {error} \n \n {traceback.format_exc()}"
+        info = f'{message} \n \n {error} \n \n {traceback.format_exc()}'
 
     log.add(
-        "error.log", 
-        backtrace=True, 
-        diagnose=True
+        'error.log', backtrace=True, diagnose=True
     )  # Caution, may leak sensitive data in prod
 
-   
-    log.critical (f"{info}")
-    
+    log.critical(f'{info}')
+
     return info
 
+
 def raise_error_message(
-    error: str, 
-    idle: float = None, 
-    message: str = None) -> None:
+    error: str, idle: float = None, message: str = None
+) -> None:
     """
 
     Capture & emit error message
@@ -366,14 +375,13 @@ def raise_error_message(
 
     """
 
-    info = parse_error_message(error, 
-                               message)
-   
+    info = parse_error_message(error, message)
+
     if error == True:  # to respond 'def is_current_file_running'  result
         sys.exit(1)
 
     if idle == None:
-        info = f"{error}"
+        info = f'{error}'
 
     if idle != None:
         sleep_and_restart_program(idle)
@@ -385,9 +393,8 @@ def raise_error_message(
 
 
 async def async_raise_error_message(
-    error: str, 
-    idle: float = None,
-    message: str = None) -> None:
+    error: str, idle: float = None, message: str = None
+) -> None:
     """
 
     Capture & emit error message
@@ -405,9 +412,8 @@ async def async_raise_error_message(
 
     """
 
-    info = parse_error_message(error, 
-                               message)
-    
+    info = parse_error_message(error, message)
+
     if error == True:  # to respond 'def is_current_file_running'  result
         sys.exit(1)
 
@@ -418,6 +424,7 @@ async def async_raise_error_message(
         sys.exit()
 
     return info
+
 
 def check_file_attributes(filepath: str) -> None:
     """
@@ -446,26 +453,28 @@ def check_file_attributes(filepath: str) -> None:
     """
     return os.stat(filepath)
 
+
 def ipdb_sys_excepthook():
     """
-https://oscar-savolainen.medium.com/my-favourite-python-snippets-794d5653af38
-When called this function will set up the system exception hook.
-    This hook throws one into an ipdb breakpoint if and where a system
-    exception occurs in one's run.
+    https://oscar-savolainen.medium.com/my-favourite-python-snippets-794d5653af38
+    When called this function will set up the system exception hook.
+        This hook throws one into an ipdb breakpoint if and where a system
+        exception occurs in one's run.
 
-    Example usage:
-    >>> ipdb_sys_excepthook()
+        Example usage:
+        >>> ipdb_sys_excepthook()
     """
 
-    import traceback, ipdb
     import sys
+    import traceback
 
+    import ipdb
 
     def info(type, value, tb):
         """
         System excepthook that includes an ipdb breakpoint.
         """
-        if hasattr(sys, "ps1") or not sys.stderr.isatty():
+        if hasattr(sys, 'ps1') or not sys.stderr.isatty():
             # we are in interactive mode or we don't have a tty-like
             # device, so we call the default hook
             sys.__excepthook__(type, value, tb)
@@ -479,6 +488,7 @@ When called this function will set up the system exception hook.
 
     sys.excepthook = info
 
+
 def kill_process(process_name):
     """_summary_
 
@@ -487,78 +497,64 @@ def kill_process(process_name):
 
     Returns:
         _type_: _description_
-        
+
         https://www.geeksforgeeks.org/kill-a-process-by-name-using-python/
     """
-    
+
     import signal
-     
+
     try:
-         
+
         # iterating through each instance of the process
-        for line in os.popen("ps ax | grep " + process_name + " | grep -v grep"): 
+        for line in os.popen(
+            'ps ax | grep ' + process_name + ' | grep -v grep'
+        ):
             fields = line.split()
-             
+
             # extracting Process ID from the output
-            pid = fields[0] 
-             
-            # terminating process 
-            os.kill(int(pid), signal.SIGKILL) 
-        print("Process Successfully terminated")
-         
+            pid = fields[0]
+
+            # terminating process
+            os.kill(int(pid), signal.SIGKILL)
+        print('Process Successfully terminated')
+
     except:
-        print("Error Encountered while running script")
+        print('Error Encountered while running script')
+
 
 def main():
-  print("Everything is going swimmingly")
-  raise NotImplementedError("Oh no what happened?")
+    print('Everything is going swimmingly')
+    raise NotImplementedError('Oh no what happened?')
 
-if __name__ == "__main__":
-  ipdb_sys_excepthook()
-  main()
-  
-  
+
+if __name__ == '__main__':
+    ipdb_sys_excepthook()
+    main()
+
+
 class SignalHandler:
-    
+
     """
     https://medium.com/@cziegler_99189/gracefully-shutting-down-async-multiprocesses-in-python-2223be384510
     """
-    
-    KEEP_PROCESSING = True
-    
-    def __init__(self):
-        signal.signal(
-            signal.SIGINT, 
-            self.exit_gracefully
-            )
-        
-        signal.signal(
-            signal.SIGTERM,
-            self.exit_gracefully
-            )
 
-    def exit_gracefully(
-        self, 
-        signum, 
-        frame
-        ):
-        
-        print(f"signum {signum} frame {frame}")
-        print("Exiting gracefully")
-        
+    KEEP_PROCESSING = True
+
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+    def exit_gracefully(self, signum, frame):
+
+        print(f'signum {signum} frame {frame}')
+        print('Exiting gracefully')
+
         self.KEEP_PROCESSING = False
 
 
-def handle_ctrl_c(
-    )->None:
+def handle_ctrl_c() -> None:
     """
     https://stackoverflow.com/questions/67866293/how-to-subscribe-to-multiple-websocket-streams-using-muiltiprocessing
     """
-    signal.signal(
-        signal.SIGINT,
-        sys.exit(0)
-        )
-    
-    
-    
-                  
+    signal.signal(signal.SIGINT, sys.exit(0))

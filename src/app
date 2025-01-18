@@ -4,12 +4,9 @@
 # built ins
 import asyncio
 import os
-import sys
 import signal
+import sys
 
-# installed
-from loguru import logger as log
-import tomli
 #import signal
 #from multiprocessing import Manager
 #from multiprocessing.queues import Queue
@@ -17,39 +14,38 @@ import tomli
 #from aiomultiprocess import Pool
 import tomli
 import uvloop
+# installed
+from loguru import logger as log
+
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
+from configuration.label_numbering import get_now_unix_time
 from data_cleaning.app_data_cleaning import reconciling_size
 from market_understanding.scanning_volume_spike import scanning_volume
-from messaging.telegram_bot import (telegram_bot_sendtext,)
+from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.app_future_spreads import future_spreads
 from strategies.app_hedging_spot import hedging_spot
 from strategies.relabelling_trading_result import relabelling_trades
-from transaction_management.deribit.api_requests import (SendApiRequest)
-from transaction_management.deribit.cancelling_active_orders import cancelling_orders
-from transaction_management.deribit.avoiding_double_ids import avoiding_double_ids
-from transaction_management.deribit.data_producer import (StreamAccountData,)
-from transaction_management.deribit.running_strategies import executing_strategies
-from transaction_management.deribit.user_chg import saving_and_relabelling_orders
+from transaction_management.deribit.api_requests import SendApiRequest
+from transaction_management.deribit.avoiding_double_ids import \
+    avoiding_double_ids
+from transaction_management.deribit.cancelling_active_orders import \
+    cancelling_orders
+from transaction_management.deribit.data_producer import StreamAccountData
+from transaction_management.deribit.running_strategies import \
+    executing_strategies
 from transaction_management.deribit.saving_result import saving_ws_data
+from transaction_management.deribit.user_chg import \
+    saving_and_relabelling_orders
+from utilities.caching import combining_order_data
+from utilities.caching import combining_ticker_data as cached_ticker
+from utilities.caching import update_cached_orders, update_cached_ticker
+from utilities.system_tools import (SignalHandler, async_raise_error_message,
+                                    parse_error_message, provide_path_for_file,
+                                    raise_error_message)
 
-from utilities.caching import (
-    combining_ticker_data as cached_ticker,
-    update_cached_orders,
-    combining_order_data,
-    update_cached_ticker)
-from utilities.system_tools import (
-    async_raise_error_message,
-    parse_error_message,
-    SignalHandler)
 
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,
-    raise_error_message,)
-
-        
 def handle_ctrl_c(
     signum, 
     stack_frame
@@ -138,8 +134,18 @@ async def main():
     # registering strategy config file    
     file_toml = "config_strategies.toml"
     
-    try:
+    #server_time_fixed = get_now_unix_time()  
     
+    try:
+
+        #time_elapsed = (server_time - server_time_fixed)/1000
+        
+        #if time_elapsed > 15 * 60 :
+            
+            #pass
+                            
+        await asyncio.sleep(idle_time)
+            
         # parsing config file
         config_app = get_config(file_toml)
 

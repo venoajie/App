@@ -39,7 +39,10 @@ def max_loss_allowed(capital: float, pct_loss: float = 1 / 100 * 0.5) -> float:
 
 
 def pos_sizing(
-    cut_loss_price: float, entry_price: float, capital: float, pct_loss: float = 1 / 10
+    cut_loss_price: float,
+    entry_price: float,
+    capital: float,
+    pct_loss: float = 1 / 10,
 ) -> float:
     """
     Compute position sizing for each order send
@@ -80,19 +83,26 @@ def compute_my_trade_based_on_side(my_trades_open: list) -> float:
     total_long = (
         0
         if my_trades_open == []
-        else sum([o["amount"] for o in my_trades_open if o["direction"] == "buy"])
+        else sum(
+            [o['amount'] for o in my_trades_open if o['direction'] == 'buy']
+        )
     )
 
     total_short = (
         0
         if my_trades_open == []
-        else sum([o["amount"] for o in my_trades_open if o["direction"] == "sell"]) * -1
+        else sum(
+            [o['amount'] for o in my_trades_open if o['direction'] == 'sell']
+        )
+        * -1
     )
 
-    return {"total_long": total_long, "total_short": total_short}
+    return {'total_long': total_long, 'total_short': total_short}
 
 
-def compute_delta(notional: float, total_long_qty: int, total_short_qty: int) -> float:
+def compute_delta(
+    notional: float, total_long_qty: int, total_short_qty: int
+) -> float:
     """
     Compute delta for current position
     Args:
@@ -124,7 +134,9 @@ def compute_leverage(
     return (total_long_qty + abs(total_short_qty)) / notional
 
 
-def compute_position_leverage_and_delta(notional: float, my_trades_open: list) -> list:
+def compute_position_leverage_and_delta(
+    notional: float, my_trades_open: list
+) -> list:
     """
     Combining result of the computation:
     - Delta for current position
@@ -141,11 +153,13 @@ def compute_position_leverage_and_delta(notional: float, my_trades_open: list) -
 
     """
     trade_based_on_side = compute_my_trade_based_on_side(my_trades_open)
-    total_long_qty = trade_based_on_side["total_long"]
-    total_short_qty = trade_based_on_side["total_short"]
+    total_long_qty = trade_based_on_side['total_long']
+    total_short_qty = trade_based_on_side['total_short']
     return {
-        "delta": compute_delta(notional, total_long_qty, total_short_qty),
-        "leverage": compute_leverage(notional, total_long_qty, total_short_qty),
+        'delta': compute_delta(notional, total_long_qty, total_short_qty),
+        'leverage': compute_leverage(
+            notional, total_long_qty, total_short_qty
+        ),
     }
 
 
@@ -160,30 +174,33 @@ def turnOver_times(
     daily = (
         pct_daily_profit_target / ordered_side
         if pct_profit_per_transaction == 0
-        else (pct_daily_profit_target / pct_profit_per_transaction) / ordered_side
+        else (pct_daily_profit_target / pct_profit_per_transaction)
+        / ordered_side
     )
 
     return {
-        "daily": daily,
-        "hourly": daily / 24,
+        'daily': daily,
+        'hourly': daily / 24,
     }
 
 
 def hourly_sizing(
-    notional: float, pct_daily_profit_target: float, pct_profit_per_transaction: float
+    notional: float,
+    pct_daily_profit_target: float,
+    pct_profit_per_transaction: float,
 ) -> float:
     """ """
     SECONDS_IN_ONE_HOUR = 3600
 
     hourly_target_turn_over = turnOver_times(
         pct_daily_profit_target, pct_profit_per_transaction
-    )["hourly"]
+    )['hourly']
 
     qty_orders_per_hour = hourly_target_turn_over * notional
 
     return {
-        "quantity_per_hour": max(1, int(qty_orders_per_hour)),
-        "interval_time_before_reorder": (qty_orders_per_hour / notional)
+        'quantity_per_hour': max(1, int(qty_orders_per_hour)),
+        'interval_time_before_reorder': (qty_orders_per_hour / notional)
         * SECONDS_IN_ONE_HOUR,
     }
 
@@ -214,7 +231,7 @@ def qty_order_and_interval_time(
     )
     # print(f"{hourly_qty}")
 
-    minute_delay_before_reorder = hourly_qty["interval_time_before_reorder"]
+    minute_delay_before_reorder = hourly_qty['interval_time_before_reorder']
 
     return dict(
         interval_time_between_order=minute_delay_before_reorder,
@@ -222,6 +239,6 @@ def qty_order_and_interval_time(
             minute_delay_before_reorder
         ),
         qty_per_order=quantities_per_order(
-            hourly_qty["quantity_per_hour"], SIXTY_MINUTES
+            hourly_qty['quantity_per_hour'], SIXTY_MINUTES
         ),
     )

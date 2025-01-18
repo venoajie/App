@@ -5,10 +5,12 @@
 
 # built ins
 import asyncio
+
 import pandas as pd
+
+from db_management.sqlite_management import \
+    executing_query_based_on_currency_or_instrument_and_strategy as get_query
 from utilities.string_modification import extract_integers_from_text
-from db_management.sqlite_management import (
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query)
 
 
 async def get_db_trade():

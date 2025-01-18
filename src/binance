@@ -3,39 +3,27 @@
 
 # built ins
 import asyncio
-from datetime import datetime, timedelta, timezone
-import os
-
-# installed
-from dataclassy import dataclass, fields
+import hashlib
+import hmac
 import json
-from loguru import logger as log
+import os
+import time
+from datetime import datetime, timedelta, timezone
+from urllib.parse import urlencode
+
 import orjson
 import tomli
 import websockets
-import asyncio
-import websockets
-import json
-
-import time
-import hashlib
-import hmac
-from urllib.parse import urlencode
-
-from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb)
+# installed
+from dataclassy import dataclass, fields
+from loguru import logger as log
 
 # user defined formula
-from configuration import id_numbering, config#, config_oci
-
-from utilities.system_tools import (
-    provide_path_for_file,
-    async_raise_error_message,
-    raise_error_message,)
-
-
-from utilities.string_modification import (
-    hashing,)
+from configuration import config, id_numbering  # , config_oci
+from transaction_management.deribit.managing_deribit import ModifyOrderDb
+from utilities.string_modification import hashing
+from utilities.system_tools import (async_raise_error_message,
+                                    provide_path_for_file, raise_error_message)
 
 
 def parse_dotenv (sub_account) -> dict:

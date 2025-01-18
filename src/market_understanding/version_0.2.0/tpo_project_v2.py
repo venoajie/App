@@ -7,26 +7,26 @@ Updated on Mon Sep 15 15:34:11 2020
 twitter.com/beinghorizontal
 
 beta version
-
 """
 
-import pandas as pd
-import plotly.graph_objects as go
+from datetime import timedelta
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 from tpo_helper2 import (
-    get_ticksize,
     abc,
-    get_mean,
-    get_rf,
     get_context,
     get_dayrank,
     get_ibrank,
+    get_mean,
+    get_rf,
+    get_ticksize,
 )
-import numpy as np
-from datetime import timedelta
 
 app = dash.Dash(__name__)
 
@@ -36,10 +36,10 @@ refresh_int = 20  # refresh interval in seconds for live updates
 freq = 30
 avglen = 10  # num days mean to get values
 days_to_display = 10  # Number of last n days you want on the screen to display
-mode = "tpo"  # for volume --> 'vol'
+mode = 'tpo'  # for volume --> 'vol'
 
 dfhist = pd.read_csv(
-    "history.txt"
+    'history.txt'
 )  # 1 min historical data in symbol,datetime,open,high,low,close,volume
 
 # Check the sample file. Match the format exactly else code will not run.
@@ -54,15 +54,19 @@ symbol = dfhist.symbol[0]
 
 def datetime(data):
     dfhist = data.copy()
-    dfhist["datetime2"] = pd.to_datetime(dfhist["datetime"], format="%Y%m%d %H:%M:%S")
-    dfhist = dfhist.set_index(dfhist["datetime2"], drop=True, inplace=False)
+    dfhist['datetime2'] = pd.to_datetime(
+        dfhist['datetime'], format='%Y%m%d %H:%M:%S'
+    )
+    dfhist = dfhist.set_index(dfhist['datetime2'], drop=True, inplace=False)
     return dfhist
 
 
 # set index as pandas datetime
 dfhist = datetime(dfhist)
-mean_val = get_mean(dfhist, avglen=avglen, freq=freq)  # Get mean values for comparison
-trading_hr = mean_val["session_hr"]
+mean_val = get_mean(
+    dfhist, avglen=avglen, freq=freq
+)  # Get mean values for comparison
+trading_hr = mean_val['session_hr']
 # !!! get rotational factor
 dfhist = get_rf(dfhist.copy())
 
@@ -71,16 +75,16 @@ dfresample = (
     dfhist.copy()
 )  # create seperate resampled data frame and preserve old 1 min file
 
-dfresample = dfresample.resample(str(freq) + "min").agg(
+dfresample = dfresample.resample(str(freq) + 'min').agg(
     {
-        "symbol": "last",
-        "datetime": "first",
-        "Open": "first",
-        "High": "max",
-        "Low": "min",
-        "Close": "last",
-        "Volume": "sum",
-        "rf": "sum",
+        'symbol': 'last',
+        'datetime': 'first',
+        'Open': 'first',
+        'High': 'max',
+        'Low': 'min',
+        'Close': 'last',
+        'Volume': 'sum',
+        'rf': 'sum',
     }
 )
 dfresample = dfresample.dropna()
@@ -91,7 +95,11 @@ sday1 = dt1 - timedelta(days_to_display)
 dfresample = dfresample[(dfresample.index.date > sday1.date())]
 # to save memory do all the calculations for context outside the loop
 dfcontext = get_context(
-    dfresample.copy(), freq=freq, ticksize=ticksz, style=mode, session_hr=trading_hr
+    dfresample.copy(),
+    freq=freq,
+    ticksize=ticksz,
+    style=mode,
+    session_hr=trading_hr,
 )
 
 # warning: do not chnage the settings below. There are HTML tags get triggered for live updates. Took me a while to figure out
@@ -100,20 +108,20 @@ dfcontext = get_context(
 app.layout = html.Div(
     html.Div(
         [
-            dcc.Location(id="url", refresh=False),
+            dcc.Location(id='url', refresh=False),
             dcc.Link(
-                "For questions, ping me on Twitter",
-                href="https://twitter.com/beinghorizontal",
+                'For questions, ping me on Twitter',
+                href='https://twitter.com/beinghorizontal',
             ),
             html.Br(),
             dcc.Link(
-                "FAQ and python source code",
-                href="http://www.github.com/beinghorizontal/tpo_project",
+                'FAQ and python source code',
+                href='http://www.github.com/beinghorizontal/tpo_project',
             ),
-            html.H4("@beinghorizontal"),
-            dcc.Graph(id="beinghorizontal"),
+            html.H4('@beinghorizontal'),
+            dcc.Graph(id='beinghorizontal'),
             dcc.Interval(
-                id="interval-component",
+                id='interval-component',
                 interval=refresh_int * 1000,  # in milliseconds
                 n_intervals=0,
             ),
@@ -126,8 +134,8 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output(component_id="beinghorizontal", component_property="figure"),
-    [Input("interval-component", "n_intervals")],
+    Output(component_id='beinghorizontal', component_property='figure'),
+    [Input('interval-component', 'n_intervals')],
 )
 def update_graph(n, df=dfresample.copy(), dfcontext=dfcontext):
     """
@@ -139,32 +147,38 @@ def update_graph(n, df=dfresample.copy(), dfcontext=dfcontext):
     df_distribution = dfcontext[1]
     distribution_hist = df_distribution.copy()
 
-    dflive = pd.read_csv("live.txt")
+    dflive = pd.read_csv('live.txt')
     dflive.iloc[:, 2:] = dflive.iloc[:, 2:].apply(pd.to_numeric)
     dflive = datetime(dflive)
     dflive = get_rf(dflive.copy())
-    dflive = dflive.resample(str(freq) + "min").agg(
+    dflive = dflive.resample(str(freq) + 'min').agg(
         {
-            "symbol": "last",
-            "datetime": "last",
-            "Open": "first",
-            "High": "max",
-            "Low": "min",
-            "Close": "last",
-            "Volume": "sum",
-            "rf": "sum",
+            'symbol': 'last',
+            'datetime': 'last',
+            'Open': 'first',
+            'High': 'max',
+            'Low': 'min',
+            'Close': 'last',
+            'Volume': 'sum',
+            'rf': 'sum',
         }
     )
     dflive = dflive.dropna()
 
     dfcontext_live = get_context(
-        dflive.copy(), freq=freq, ticksize=ticksz, style=mode, session_hr=trading_hr
+        dflive.copy(),
+        freq=freq,
+        ticksize=ticksz,
+        style=mode,
+        session_hr=trading_hr,
     )
     dfmp_live = dfcontext_live[
         0
     ]  # it will be in list format so take [0] slice for current day MP data frame
     df_distribution_live = dfcontext_live[1]
-    df_distribution_concat = pd.concat([distribution_hist, df_distribution_live])
+    df_distribution_concat = pd.concat(
+        [distribution_hist, df_distribution_live]
+    )
     df_distribution_concat = df_distribution_concat.reset_index(
         inplace=False, drop=True
     )
@@ -191,17 +205,17 @@ def update_graph(n, df=dfresample.copy(), dfcontext=dfcontext):
     ib_low_list = context_ibdf[0].ibl
     dfmp_list = dfmp_list + dfmp_live
     df_merge = pd.concat([df, dflive])
-    df_merge2 = df_merge.drop_duplicates("datetime")
+    df_merge2 = df_merge.drop_duplicates('datetime')
     df = df_merge2.copy()
 
     fig = go.Figure(
         data=[
             go.Candlestick(
-                x=df["datetime"],
-                open=df["Open"],
-                high=df["High"],
-                low=df["Low"],
-                close=df["Close"],
+                x=df['datetime'],
+                open=df['Open'],
+                high=df['High'],
+                low=df['Low'],
+                close=df['Close'],
                 showlegend=True,
                 name=symbol,
                 opacity=0.3,
@@ -224,44 +238,46 @@ def update_graph(n, df=dfresample.copy(), dfcontext=dfcontext):
         df_mp = dfmp_list[i]
         irank = ranking.iloc[i]
         # df_mp['i_date'] = df1['datetime'][0]
-        df_mp["i_date"] = irank.date
+        df_mp['i_date'] = irank.date
         # # @todo: background color for text
-        df_mp["color"] = np.where(
+        df_mp['color'] = np.where(
             np.logical_and(
-                df_mp["close"] > irank.vallist, df_mp["close"] < irank.vahlist
+                df_mp['close'] > irank.vallist, df_mp['close'] < irank.vahlist
             ),
-            "green",
-            "white",
+            'green',
+            'white',
         )
 
-        df_mp = df_mp.set_index("i_date", inplace=False)
+        df_mp = df_mp.set_index('i_date', inplace=False)
 
         fig.add_trace(
             go.Scattergl(
                 x=df_mp.index,
                 y=df_mp.close,
-                mode="text",
+                mode='text',
                 name=str(df_mp.index[0]),
                 text=df_mp.alphabets,
                 showlegend=False,
-                textposition="top right",
-                textfont=dict(family="verdana", size=6, color=df_mp.color),
+                textposition='top right',
+                textfont=dict(family='verdana', size=6, color=df_mp.color),
             )
         )
         if power1[i] < 0:
-            my_rgb = "rgba({power}, 3, 252, 0.5)".format(power=abs(165))
+            my_rgb = 'rgba({power}, 3, 252, 0.5)'.format(power=abs(165))
         else:
-            my_rgb = "rgba(23, {power}, 3, 0.5)".format(power=abs(252))
+            my_rgb = 'rgba(23, {power}, 3, 0.5)'.format(power=abs(252))
 
         brk_f_list_maj = []
         f = 0
         for f in range(len(breakdown.columns)):
             brk_f_list_min = []
             for index, rows in breakdown.iterrows():
-                brk_f_list_min.append(index + str(": ") + str(rows[f]) + "<br />")
+                brk_f_list_min.append(
+                    index + str(': ') + str(rows[f]) + '<br />'
+                )
             brk_f_list_maj.append(brk_f_list_min)
 
-        breakdown_values = ""  # for bubbles
+        breakdown_values = ''  # for bubbles
         for st in brk_f_list_maj[i]:
             breakdown_values += st
 
@@ -271,10 +287,12 @@ def update_graph(n, df=dfresample.copy(), dfcontext=dfcontext):
         for g in range(len(ibbreakdown.columns)):
             ibrk_f_list_min = []
             for index, rows in ibbreakdown.iterrows():
-                ibrk_f_list_min.append(index + str(": ") + str(rows[g]) + "<br />")
+                ibrk_f_list_min.append(
+                    index + str(': ') + str(rows[g]) + '<br />'
+                )
             ibrk_f_list_maj.append(ibrk_f_list_min)
 
-        ibreakdown_values = ""  # for squares
+        ibreakdown_values = ''  # for squares
         for ist in ibrk_f_list_maj[i]:
             ibreakdown_values += ist
         # irank.power1
@@ -283,24 +301,24 @@ def update_graph(n, df=dfresample.copy(), dfcontext=dfcontext):
         fig.add_trace(
             go.Scattergl(
                 x=[irank.date],
-                y=[dfresample["High"].max()],
-                mode="markers",
+                y=[dfresample['High'].max()],
+                mode='markers',
                 marker=dict(
                     color=my_rgb,
                     size=0.90 * power[i],
-                    line=dict(color="rgb(17, 17, 17)", width=2),
+                    line=dict(color='rgb(17, 17, 17)', width=2),
                 ),
                 # marker_symbol='square',
                 hovertext=[
-                    "<br />Insights:<br />VAH:  {}<br /> POC:  {}<br /> VAL:  {}<br /> Balance Target:  {}<br /> Day Type:  {}<br />strength: {}<br />BreakDown:  {}<br />{}<br />{}".format(
+                    '<br />Insights:<br />VAH:  {}<br /> POC:  {}<br /> VAL:  {}<br /> Balance Target:  {}<br /> Day Type:  {}<br />strength: {}<br />BreakDown:  {}<br />{}<br />{}'.format(
                         irank.vahlist,
                         irank.poclist,
                         irank.vallist,
                         irank.btlist,
                         irank.daytype,
                         irank.power,
-                        "",
-                        "-------------------",
+                        '',
+                        '-------------------',
                         breakdown_values,
                     )
                 ],
@@ -310,34 +328,34 @@ def update_graph(n, df=dfresample.copy(), dfcontext=dfcontext):
 
         # !!! we will use this for hover text at bottom for developing day
         if ibpower1[i] < 0:
-            ib_rgb = "rgba(165, 3, 252, 0.5)"
+            ib_rgb = 'rgba(165, 3, 252, 0.5)'
         else:
-            ib_rgb = "rgba(23, 252, 3, 0.5)"
+            ib_rgb = 'rgba(23, 252, 3, 0.5)'
 
         fig.add_trace(
             go.Scattergl(
                 x=[irank.date],
-                y=[dfresample["Low"].min()],
-                mode="markers",
+                y=[dfresample['Low'].min()],
+                mode='markers',
                 marker=dict(
                     color=ib_rgb,
                     size=0.40 * ibpower[i],
-                    line=dict(color="rgb(17, 17, 17)", width=2),
+                    line=dict(color='rgb(17, 17, 17)', width=2),
                 ),
-                marker_symbol="square",
+                marker_symbol='square',
                 hovertext=[
-                    "<br />Insights:<br />Vol_mean:  {}<br /> Vol_Daily:  {}<br /> RF_mean:  {}<br /> RF_daily:  {}<br /> IBvol_mean:  {}<br /> IBvol_day:  {}<br /> IB_RFmean:  {}<br /> IB_RFday:  {}<br />strength: {}<br />BreakDown:  {}<br />{}<br />{}".format(
-                        mean_val["volume_mean"],
+                    '<br />Insights:<br />Vol_mean:  {}<br /> Vol_Daily:  {}<br /> RF_mean:  {}<br /> RF_daily:  {}<br /> IBvol_mean:  {}<br /> IBvol_day:  {}<br /> IB_RFmean:  {}<br /> IB_RFday:  {}<br />strength: {}<br />BreakDown:  {}<br />{}<br />{}'.format(
+                        mean_val['volume_mean'],
                         irank.volumed,
-                        mean_val["rf_mean"],
+                        mean_val['rf_mean'],
                         irank.rfd,
-                        mean_val["volib_mean"],
+                        mean_val['volib_mean'],
                         irank.ibvol,
-                        mean_val["ibrf_mean"],
+                        mean_val['ibrf_mean'],
                         irank.ibrf,
                         ibpower[i],
-                        "",
-                        "......................",
+                        '',
+                        '......................',
                         ibreakdown_values,
                     )
                 ],
@@ -350,95 +368,97 @@ def update_graph(n, df=dfresample.copy(), dfcontext=dfcontext):
         for lvn in lvns:
             if lvn > irank.vallist and lvn < irank.vahlist:
                 fig.add_shape(
-                    type="line",
-                    x0=df1.iloc[0]["datetime"],
+                    type='line',
+                    x0=df1.iloc[0]['datetime'],
                     y0=lvn,
-                    x1=df1.iloc[5]["datetime"],
+                    x1=df1.iloc[5]['datetime'],
                     y1=lvn,
                     line=dict(
-                        color="darksalmon",
+                        color='darksalmon',
                         width=2,
-                        dash="dashdot",
+                        dash='dashdot',
                     ),
                 )
     # ib high and low
     fig.add_shape(
-        type="line",
-        x0=df.iloc[0]["datetime"],
+        type='line',
+        x0=df.iloc[0]['datetime'],
         y0=ib_low_list[i],
-        x1=df.iloc[0]["datetime"],
+        x1=df.iloc[0]['datetime'],
         y1=ib_high_list[i],
         line=dict(
-            color="cyan",
+            color='cyan',
             width=3,
         ),
     )
     # day high and low
     fig.add_shape(
-        type="line",
-        x0=df.iloc[0]["datetime"],
+        type='line',
+        x0=df.iloc[0]['datetime'],
         y0=dl_list[i],
-        x1=df.iloc[0]["datetime"],
+        x1=df.iloc[0]['datetime'],
         y1=dh_list[i],
         line=dict(
-            color="gray",
+            color='gray',
             width=1,
-            dash="dashdot",
+            dash='dashdot',
         ),
     )
     # ltp marker
-    ltp = df1.iloc[-1]["Close"]
+    ltp = df1.iloc[-1]['Close']
     if ltp >= irank.poclist:
-        ltp_color = "green"
+        ltp_color = 'green'
     else:
-        ltp_color = "red"
+        ltp_color = 'red'
 
     fig.add_trace(
         go.Scattergl(
-            x=[df.iloc[-1]["datetime"]],
-            y=[df.iloc[-1]["Close"]],
-            mode="text",
-            name="last traded price",
-            text=["last " + str(df1.iloc[-1]["Close"])],
-            textposition="bottom right",
+            x=[df.iloc[-1]['datetime']],
+            y=[df.iloc[-1]['Close']],
+            mode='text',
+            name='last traded price',
+            text=['last ' + str(df1.iloc[-1]['Close'])],
+            textposition='bottom right',
             textfont=dict(size=12, color=ltp_color),
             showlegend=False,
         )
     )
 
-    fig.layout.xaxis.color = "white"
-    fig.layout.yaxis.color = "white"
+    fig.layout.xaxis.color = 'white'
+    fig.layout.yaxis.color = 'white'
     fig.layout.autosize = True
-    fig["layout"]["height"] = 900
-    fig["layout"]["width"] = 1900
+    fig['layout']['height'] = 900
+    fig['layout']['width'] = 1900
     # fig.layout.hovermode = 'x'  # UNcomment this if you want to see insights for both squares and bubbles
 
     fig.update_xaxes(
-        title_text="Time",
-        title_font=dict(size=18, color="white"),
+        title_text='Time',
+        title_font=dict(size=18, color='white'),
         tickangle=45,
-        tickfont=dict(size=8, color="white"),
+        tickfont=dict(size=8, color='white'),
         showgrid=False,
         dtick=len(dfmp_list),
     )
 
     fig.update_yaxes(
         title_text=symbol,
-        title_font=dict(size=18, color="white"),
-        tickfont=dict(size=12, color="white"),
+        title_font=dict(size=18, color='white'),
+        tickfont=dict(size=12, color='white'),
         showgrid=False,
     )
     fig.layout.update(
-        template="plotly_dark",
-        title="@" + abc()[1],
+        template='plotly_dark',
+        title='@' + abc()[1],
         autosize=True,
-        xaxis=dict(showline=True, color="white"),
-        yaxis=dict(showline=True, color="white", autorange=True, fixedrange=False),
+        xaxis=dict(showline=True, color='white'),
+        yaxis=dict(
+            showline=True, color='white', autorange=True, fixedrange=False
+        ),
     )
 
-    fig["layout"]["xaxis"]["rangeslider"]["visible"] = False
-    fig["layout"]["xaxis"]["tickformat"] = "%H:%M:%S"
-    fig.update_layout(yaxis_tickformat="d")
+    fig['layout']['xaxis']['rangeslider']['visible'] = False
+    fig['layout']['xaxis']['tickformat'] = '%H:%M:%S'
+    fig.update_layout(yaxis_tickformat='d')
 
     return fig
 
@@ -447,7 +467,7 @@ def update_graph(n, df=dfresample.copy(), dfcontext=dfcontext):
 # plot(fig, auto_open=True)
 
 # ------------------------------------------------------------------------------
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run_server(
         debug=True
     )  # To run the code from ipython based IDEs such as spyder, pycharm <debug=False>
