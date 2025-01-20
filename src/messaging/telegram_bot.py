@@ -15,6 +15,8 @@ async def private_connection(
 
     async with httpx.AsyncClient() as session:
 
+        print(f"endpoint {connection_url + endpoint}")
+
         respons = await session.get(connection_url + endpoint)
 
         return respons.json()
@@ -65,5 +67,5 @@ async def telegram_bot_sendtext(
         + ("&parse_mode=HTML&text=")
         + str(bot_message)
     )
-
+    
     return await private_connection(endpoint=endpoint, connection_url=connection_url)

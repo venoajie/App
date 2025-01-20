@@ -21,6 +21,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # user defined formula
 from configuration import config, config_oci, id_numbering
+from configuration.label_numbering import get_now_unix_time
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import (
     SendApiRequest,
@@ -210,7 +211,10 @@ class StreamAccountData(ModifyOrderDb):
                                 operation="subscribe",
                                 ws_channel=ws,
                             )
+                            
 
+                    latest_timestamp = get_now_unix_time()
+                    
                     while True:
 
                         # Receive WebSocket messages
@@ -261,6 +265,7 @@ class StreamAccountData(ModifyOrderDb):
 
                                 # queing result
 
+                                log.warning(f" message {message}")
                                 message_params: dict = message["params"]
 
                                 data = message_params["data"]
@@ -280,6 +285,7 @@ class StreamAccountData(ModifyOrderDb):
                                     channel=message_channel,
                                     orders_all=orders_all,
                                     currency=currency.lower(),
+                                    latest_timestamp=latest_timestamp,
                                 )
 
                                 # queue.put(result)

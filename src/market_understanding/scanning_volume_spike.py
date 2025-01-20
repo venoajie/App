@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
-import json
+import orjson
 import asyncio
 import httpx
 from random import sample
@@ -9,14 +9,14 @@ from random import sample
 from messaging.telegram_bot import telegram_bot_sendtext
 
 headers = [
-    "Coin",
-    "Pings",
-    "Net Vol BTC",
-    "Net Vol %",
-    "Recent Total Vol BTC",
-    "Recent Vol %",
-    "Recent Net Vol",
-    "Datetime",#  (UTC)
+    "coin",
+    "pings",
+    "net_vol_btc",
+    "net_vol_pct",
+    "recent_total_vol_btc",
+    "recent_vol_pct",
+    "recent_net_vol",
+    "datetime",#  (UTC)
 ]
 
 starttime = time.time()
@@ -38,10 +38,16 @@ async def scanning_volume():
         async with httpx.AsyncClient(headers={"Connection": "keep-alive"}) as client:
 
             response = await client.get("https://agile-cliffs-23967.herokuapp.com/ok")
+            
+            print(f"response {response}")
 
-            response_json = json.loads(response.text)["resu"]
+            response_json = orjson.loads(response.text)["resu"]
+            
+            print (f"response_ json {response_json}")
 
-            rows = [str(i).split("|") for i in response_json[:-1]]
+            #rows = [str(i).split("|") for i in response_json[:-1]]
+            rows = [str((i.replace('%', ''))).split("|") for i in response_json[:-1]]
+            print (f"rows  {rows}")
     
             if rows:
 
@@ -55,8 +61,8 @@ async def scanning_volume():
                         else [
                             o
                             for o in cached_data
-                            if int(o["Pings"]) == int(single_data["Pings"])
-                            and single_data["Coin"] in o["Coin"]
+                            if int(o["pings"]) == int(single_data["pings"])
+                            and single_data["coin"] in o["coin"]
                             ]
                     )
 
