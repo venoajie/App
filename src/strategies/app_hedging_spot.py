@@ -246,7 +246,7 @@ async def hedging_spot(
                             ]
 
 
-                            server_time = data_orders["latest_timestamp"]
+                            server_time = message["latest_timestamp"]
                             
                             log.error (f"latest_timestamp {server_time}")
 

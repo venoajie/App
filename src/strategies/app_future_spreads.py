@@ -223,7 +223,7 @@ async def future_spreads(
                                 if f"{currency_upper}-FS" not in o["instrument_name"]
                             ]
                             
-                            server_time = data_orders["latest_timestamp"]
+                            server_time = message["latest_timestamp"]
                             
                             log.error (f"latest_timestamp {server_time}")
 
