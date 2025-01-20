@@ -222,8 +222,13 @@ async def future_spreads(
                                 for o in position
                                 if f"{currency_upper}-FS" not in o["instrument_name"]
                             ]
+                            
+                            server_time = data_orders["latest_timestamp"]
+                            
+                            log.error (f"latest_timestamp {server_time}")
 
                             server_time = get_now_unix_time()
+                            log.warning (f"latest_timestamp {server_time}")
 
                             size_perpetuals_reconciled = (
                                 is_size_sub_account_and_my_trades_reconciled(

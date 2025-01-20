@@ -291,8 +291,6 @@ class StreamAccountData(ModifyOrderDb):
                                     latest_timestamp=latest_timestamp,
                                 )
                                 
-                                log.warning (latest_timestamp)
-
                                 # queue.put(result)
                                 try:
                                     if result:
