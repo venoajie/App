@@ -281,7 +281,7 @@ class StreamAccountData(ModifyOrderDb):
 
                                 if "incremental_ticker." in message_channel:
 
-                                    log.warning(f" message {message}")
+                                    latest_timestamp = data["timestamp"]
 
                                 result = dict(
                                     data=data,
@@ -290,6 +290,8 @@ class StreamAccountData(ModifyOrderDb):
                                     currency=currency.lower(),
                                     latest_timestamp=latest_timestamp,
                                 )
+                                
+                                log.warning (latest_timestamp)
 
                                 # queue.put(result)
                                 try:
