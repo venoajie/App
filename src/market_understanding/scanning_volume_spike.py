@@ -21,7 +21,6 @@ headers = [
 
 starttime = time.time()
 
-
 async def scanning_volume():
     """
 
@@ -38,12 +37,9 @@ async def scanning_volume():
         async with httpx.AsyncClient(headers={"Connection": "keep-alive"}) as client:
 
             response = await client.get("https://agile-cliffs-23967.herokuapp.com/ok")
-            
-            print(f"response {response}")
 
             response_json = orjson.loads(response.text)["resu"]
 
-            #rows = [str(i).split("|") for i in response_json[:-1]]
             rows = [str((i.replace('%', ''))).split("|") for i in response_json[:-1]]
     
             if rows:
@@ -51,8 +47,10 @@ async def scanning_volume():
                 data_all = [dict(zip(headers, l)) for l in rows]
 
                 for single_data in data_all:
-
-                    data_has_exist_before = (
+                    
+                    if single_data["pings"] !=0:
+                        
+                        data_has_exist_before = (
                         []
                         if cached_data == []
                         else [
@@ -63,8 +61,21 @@ async def scanning_volume():
                             ]
                     )
 
+                    else:
+                        
+                        data_has_exist_before = (
+                        []
+                        if cached_data == []
+                        else [
+                            o
+                            for o in cached_data
+                            if (o["pings"]) == (single_data["pings"])
+                            and single_data["coin"] in o["coin"]
+                            ]
+                    )
+
                     if data_has_exist_before == []:
-                        single_data.update({"counter": int(response_json[1])})
+                        single_data.update({"counter_id": int(response_json[1])})
                         cached_data.append(single_data)
 
                         await telegram_bot_sendtext(
