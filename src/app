@@ -160,8 +160,6 @@ async def main():
                 
         producer_task = asyncio.create_task(stream.ws_manager(queue)) 
         
-        random_sleep_time = max(sample([5, 10, 15, 20, 30], 
-                                       1))
         await asyncio.sleep(0.0005)
         
         await asyncio.gather(
@@ -204,7 +202,7 @@ async def main():
                 config_app,
                 idle_time),
             
-            scanning_volume(random_sleep_time)
+            scanning_volume()
             
             )
 
