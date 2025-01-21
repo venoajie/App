@@ -82,10 +82,14 @@ async def scanning_volume(idle_time):
                             f"""{single_data}""", 
                             "general_error"
                         )
+                        
 
+        from loguru import logger as log
+        
         random_sleep_time = max(sample([5, 10, 15, 20, 30], 
                                        1))
         
-        print(idle_time)
+        log.critical(f"random_sleep_time {random_sleep_time}")
+        log.warning(f"idle_time {idle_time}")
 
         await asyncio.sleep((random_sleep_time))
