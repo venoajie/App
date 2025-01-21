@@ -12,7 +12,6 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from configuration.label_numbering import get_now_unix_time
 from data_cleaning.reconciling_db import (
     is_size_sub_account_and_my_trades_reconciled,
 )
@@ -211,7 +210,8 @@ async def cancelling_orders(
                             if f"{currency_upper}-FS" not in o["instrument_name"]
                         ]
 
-                        server_time = get_now_unix_time()
+                        server_time = message["latest_timestamp"]
+                            
 
                         size_perpetuals_reconciled = (
                             is_size_sub_account_and_my_trades_reconciled(

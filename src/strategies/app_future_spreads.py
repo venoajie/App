@@ -12,7 +12,6 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from configuration.label_numbering import get_now_unix_time
 from data_cleaning.reconciling_db import (
     is_size_sub_account_and_my_trades_reconciled,
 )
@@ -225,11 +224,6 @@ async def future_spreads(
                             
                             server_time = message["latest_timestamp"]
                             
-                            log.error (f"latest_timestamp {server_time}")
-
-                            server_time = get_now_unix_time()
-                            log.warning (f"latest_timestamp {server_time}")
-
                             size_perpetuals_reconciled = (
                                 is_size_sub_account_and_my_trades_reconciled(
                                     position_without_combo,
