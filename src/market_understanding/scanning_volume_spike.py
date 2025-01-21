@@ -42,12 +42,9 @@ async def scanning_volume():
             print(f"response {response}")
 
             response_json = orjson.loads(response.text)["resu"]
-            
-            print (f"response_ json {response_json}")
 
             #rows = [str(i).split("|") for i in response_json[:-1]]
             rows = [str((i.replace('%', ''))).split("|") for i in response_json[:-1]]
-            print (f"rows  {rows}")
     
             if rows:
 
