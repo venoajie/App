@@ -67,6 +67,7 @@ async def scanning_volume():
                     )
 
                     if data_has_exist_before == []:
+                        single_data.update({"counter": int(response_json[1])})
                         cached_data.append(single_data)
 
                         await telegram_bot_sendtext(
