@@ -5,6 +5,7 @@ import orjson
 import asyncio
 import httpx
 from random import sample
+from loguru import logger as log
 
 from messaging.telegram_bot import telegram_bot_sendtext
 
@@ -84,12 +85,10 @@ async def scanning_volume(idle_time):
                         )
                         
 
-        from loguru import logger as log
         
-        random_sleep_time = max(sample([5, 10, 15, 20, 30], 
-                                       1))
-        
-        log.critical(f"random_sleep_time {random_sleep_time}")
         log.warning(f"idle_time {idle_time}")
+        random_sleep_time = max(sample([5, 10, 15, 20, 30], 
+                                       1))        
+        log.critical(f"random_sleep_time {random_sleep_time}")
 
         await asyncio.sleep((random_sleep_time))
