@@ -21,7 +21,7 @@ headers = [
 
 starttime = time.time()
 
-async def scanning_volume():
+async def scanning_volume(idle_time):
     """
 
     https://stackoverflow.com/questions/66686458/how-to-scrape-an-updating-html-table-using-selenium
@@ -85,5 +85,7 @@ async def scanning_volume():
 
         random_sleep_time = max(sample([5, 10, 15, 20, 30], 
                                        1))
+        
+        print(idle_time)
 
         await asyncio.sleep((random_sleep_time))
