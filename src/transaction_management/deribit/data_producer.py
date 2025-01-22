@@ -127,11 +127,9 @@ class StreamAccountData(ModifyOrderDb):
                 # get ALL traded currencies in deribit
                 get_currencies_all = await get_currencies()
 
-                currencies = [o["currency"] for o in get_currencies_all["result"]]
+                all_exc_currencies = [o["currency"] for o in get_currencies_all["result"]]
 
-                for currency in currencies:
-
-                    await self.modify_order_and_db.resupply_sub_accountdb(currency)
+                for currency in all_exc_currencies:
 
                     instruments = await get_instruments(currency)
 
@@ -141,7 +139,7 @@ class StreamAccountData(ModifyOrderDb):
 
                 my_path_cur = provide_path_for_file("currencies")
 
-                replace_data(my_path_cur, currencies)
+                replace_data(my_path_cur, all_exc_currencies)
 
                 # parsing config file
                 config_app = get_config(file_toml)
@@ -192,6 +190,8 @@ class StreamAccountData(ModifyOrderDb):
                             f"user.changes.any.{currency_upper}.raw",
                             f"chart.trades.{instrument_perpetual}.{resolution}",
                         ]
+                        
+                        await self.modify_order_and_db.resupply_sub_accountdb(currency)
 
                         for ws in ws_channel_currency:
 
@@ -211,8 +211,7 @@ class StreamAccountData(ModifyOrderDb):
                                 operation="subscribe",
                                 ws_channel=ws,
                             )
-                            
-
+                    
                     latest_timestamp = get_now_unix_time()
                     
                     while True:

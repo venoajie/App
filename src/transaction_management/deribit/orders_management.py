@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from loguru import logger as log
+#from loguru import logger as log
 
 # user defined formula
 from db_management.sqlite_management import deleting_row, insert_tables
@@ -210,7 +210,7 @@ async def saving_oto_order(
     len_oto_order_ids = len(orders[0]["oto_order_ids"])
 
     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
-    log.debug (f"transaction_main {transaction_main}")
+    #log.debug (f"transaction_main {transaction_main}")
 
     if len_oto_order_ids == 1:
         pass
@@ -228,7 +228,7 @@ async def saving_oto_order(
         o for o in open_orders_from_exchange if transaction_main_oto in o["order_id"]
     ]
 
-    log.warning (f"transaction_secondary {transaction_secondary}")
+    #log.warning (f"transaction_secondary {transaction_secondary}")
 
     if transaction_secondary:
 
@@ -246,7 +246,7 @@ async def saving_oto_order(
                 transaction_main, transaction_secondary
             )
 
-            log.debug (f"order_attributes {order_attributes}")
+            #log.debug (f"order_attributes {order_attributes}")
 
             await modify_order_and_db.cancel_by_order_id(
                 order_db_table, transaction_main["order_id"]
@@ -296,7 +296,7 @@ async def saving_orders(
             
             if "oto_order_ids" in (orders[0]):
                 
-                log.warning(orders)
+                #log.warning(orders)
 
                 await saving_oto_order(
                     modify_order_and_db,
@@ -312,7 +312,7 @@ async def saving_orders(
 
                     if "OTO" not in order["order_id"]:
 
-                        log.debug (f"order {order}")
+                        #log.debug (f"order {order}")
 
                         label = order["label"]
 

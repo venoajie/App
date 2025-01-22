@@ -53,21 +53,37 @@ async def saving_and_relabelling_orders(sub_account_id, config_app: list, queue:
         relevant_tables = config_app["relevant_tables"][0]
 
         order_db_table = relevant_tables["orders_table"]
+        
+        current_open_orders = []
+        
+        checking_time = 0
+        
+        no_transaction = True
+        
+        log.critical(queue)
 
-        while True:
+        while not queue.empty():
 
             message: str = await queue.get()
 
             message_channel: str = message["channel"]
 
             data_orders: dict = message["data"]
+            
+            orders_from_data_producers = message["orders_all"]
+            
+            server_time = message["latest_timestamp"]
+            
+            CHECKING_TIME_THRESHOLD = 1000
 
+            delta_time = server_time - checking_time
+            
             currency: str = message["currency"]
 
             currency_lower: str = currency.lower()
             
-            log.critical (message_channel)
-
+            log.critical (message_channel)        
+            
             if "user.changes.any" in message_channel:
                 
                 log.critical (message)
@@ -84,6 +100,28 @@ async def saving_and_relabelling_orders(sub_account_id, config_app: list, queue:
 
                 await modify_order_and_db.resupply_sub_accountdb(currency)
 
+            if delta_time > CHECKING_TIME_THRESHOLD:
+                
+                if len(orders_from_data_producers) != len(current_open_orders):
+                    
+                    delta_time = server_time
+                    
+                    for order in orders_from_data_producers:
+                        order_in_current_open_orders = [o for o in current_open_orders]
+                        
+                        no_transaction = False
+                    
+                    if current_open_orders:
+                        
+                        for order in current_open_orders:
+                            order_in_orders_from_data_producers = [o for o in orders_from_data_producers]
+                            no_transaction = False
+                
+                else:
+                    delta_time = server_time
+            
+            queue.task_done()
+            
     except Exception as error:
 
         parse_error_message(error)
