@@ -60,7 +60,7 @@ async def saving_and_relabelling_orders(sub_account_id, config_app: list, queue:
         
         no_transaction = True
 
-        while not queue.empty():
+        while no_transaction:
 
             message: str = await queue.get()
 
