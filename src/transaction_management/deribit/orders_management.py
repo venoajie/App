@@ -293,6 +293,8 @@ async def saving_orders(
             )
 
         else:
+            
+            log.warning(orders)
 
             if "oto_order_ids" in (orders[0]):
 
@@ -305,6 +307,8 @@ async def saving_orders(
                 )
 
             else:
+                
+                log.error(orders)
 
                 for order in orders:
 

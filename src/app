@@ -165,15 +165,15 @@ async def main():
         await asyncio.gather(
             producer_task, 
             
-            hedging_spot(
-                sub_account_id,
-                config_app,
-                queue),
+            #hedging_spot(
+            #    sub_account_id,
+            #    config_app,
+            #    queue),
         
-            future_spreads(
-                sub_account_id,
-                config_app,
-                queue),
+            #future_spreads(
+            #    sub_account_id,
+            #    config_app,
+            #    queue),
             
             cancelling_orders(
                 sub_account_id,
