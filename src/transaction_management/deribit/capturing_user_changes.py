@@ -60,67 +60,69 @@ async def saving_and_relabelling_orders(sub_account_id, config_app: list, queue:
         
         no_transaction = True
         
-        log.critical(queue)
-
-        while not queue.empty():
-
-            message: str = await queue.get()
-
-            message_channel: str = message["channel"]
-
-            data_orders: dict = message["data"]
+        while True:
             
-            orders_from_data_producers = message["orders_all"]
+            log.critical(queue)
             
-            server_time = message["latest_timestamp"]
-            
-            CHECKING_TIME_THRESHOLD = 1000
+            while not queue.empty():
 
-            delta_time = server_time - checking_time
-            
-            currency: str = message["currency"]
+                message: str = await queue.get()
 
-            currency_lower: str = currency.lower()
-            
-            log.critical (message_channel)        
-            
-            if "user.changes.any" in message_channel:
+                message_channel: str = message["channel"]
+
+                data_orders: dict = message["data"]
                 
-                log.critical (message)
-
-                await saving_orders(
-                    modify_order_and_db,
-                    private_data,
-                    cancellable_strategies,
-                    non_checked_strategies,
-                    data_orders,
-                    order_db_table,
-                    currency_lower,
-                )
-
-                await modify_order_and_db.resupply_sub_accountdb(currency)
-
-            if delta_time > CHECKING_TIME_THRESHOLD:
+                orders_from_data_producers = message["orders_all"]
                 
-                if len(orders_from_data_producers) != len(current_open_orders):
+                server_time = message["latest_timestamp"]
+                
+                CHECKING_TIME_THRESHOLD = 1000
+
+                delta_time = server_time - checking_time
+                
+                currency: str = message["currency"]
+
+                currency_lower: str = currency.lower()
+                
+                log.critical (message_channel)        
+                
+                if "user.changes.any" in message_channel:
                     
-                    delta_time = server_time
+                    log.critical (message)
+
+                    await saving_orders(
+                        modify_order_and_db,
+                        private_data,
+                        cancellable_strategies,
+                        non_checked_strategies,
+                        data_orders,
+                        order_db_table,
+                        currency_lower,
+                    )
+
+                    await modify_order_and_db.resupply_sub_accountdb(currency)
+
+                if delta_time > CHECKING_TIME_THRESHOLD:
                     
-                    for order in orders_from_data_producers:
-                        order_in_current_open_orders = [o for o in current_open_orders]
+                    if len(orders_from_data_producers) != len(current_open_orders):
                         
-                        no_transaction = False
-                    
-                    if current_open_orders:
+                        delta_time = server_time
                         
-                        for order in current_open_orders:
-                            order_in_orders_from_data_producers = [o for o in orders_from_data_producers]
+                        for order in orders_from_data_producers:
+                            order_in_current_open_orders = [o for o in current_open_orders]
+                            
                             no_transaction = False
+                        
+                        if current_open_orders:
+                            
+                            for order in current_open_orders:
+                                order_in_orders_from_data_producers = [o for o in orders_from_data_producers]
+                                no_transaction = False
+                    
+                    else:
+                        delta_time = server_time
                 
-                else:
-                    delta_time = server_time
-            
-            queue.task_done()
+                queue.task_done()
             
     except Exception as error:
 
