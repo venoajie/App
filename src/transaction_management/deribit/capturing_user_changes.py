@@ -54,12 +54,12 @@ async def saving_and_relabelling_orders(sub_account_id, config_app: list, queue:
 
         order_db_table = relevant_tables["orders_table"]
         
-        current_open_orders = []
-        
         checking_time = 0
         
         no_transaction = True
 
+        current_open_orders = []
+        
         while no_transaction:
 
             message: str = await queue.get()
