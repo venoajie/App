@@ -294,9 +294,9 @@ async def saving_orders(
 
         else:
             
-            log.warning(orders)
-
             if "oto_order_ids" in (orders[0]):
+                
+                log.warning(orders)
 
                 await saving_oto_order(
                     modify_order_and_db,
@@ -307,14 +307,12 @@ async def saving_orders(
                 )
 
             else:
-                
-                log.error(orders)
-
+             
                 for order in orders:
 
                     if "OTO" not in order["order_id"]:
 
-                        # log.warning (f"order {order}")
+                        log.debug (f"order {order}")
 
                         label = order["label"]
 

@@ -65,6 +65,8 @@ async def saving_and_relabelling_orders(sub_account_id, config_app: list, queue:
             currency: str = message["currency"]
 
             currency_lower: str = currency.lower()
+            
+            log.critical (message_channel)
 
             if "user.changes.any" in message_channel:
                 
