@@ -153,12 +153,13 @@ async def main():
         idle_time = 1
 
         queue = asyncio.Queue(maxsize=10)
+        queue_user_changes = asyncio.Queue(maxsize=10)
         queue_cached_orders = asyncio.Queue()
         queue_orders = asyncio.Queue()
         
         stream = StreamAccountData(sub_account_id)
                 
-        producer_task = asyncio.create_task(stream.ws_manager(queue)) 
+        producer_task = asyncio.create_task(stream.ws_manager(queue, queue_user_changes)) 
         
         await asyncio.sleep(0.0005)
         
@@ -193,7 +194,7 @@ async def main():
             relabelling_trades(
                 sub_account_id,
                 config_app,
-                queue),
+                queue_user_changes),
             
             saving_ws_data(queue),
             

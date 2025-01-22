@@ -110,7 +110,7 @@ class StreamAccountData(ModifyOrderDb):
             parse_dotenv(self.sub_account_id)["key_ocid"]
         )
 
-    async def ws_manager(self, queue: object) -> None:
+    async def ws_manager(self, queue: object, queue_user_changes) -> None:
 
         async with websockets.connect(
             self.ws_connection_url,
@@ -277,6 +277,8 @@ class StreamAccountData(ModifyOrderDb):
                                 if "user.changes.any" in message_channel:
                                     
                                     log.critical (message_channel)
+                                    
+                                    await queue.put(queue_user_changes)
 
                                     await update_cached_orders(orders_all, data)
 
