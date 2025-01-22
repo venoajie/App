@@ -110,7 +110,7 @@ class StreamAccountData(ModifyOrderDb):
             parse_dotenv(self.sub_account_id)["key_ocid"]
         )
 
-    async def ws_manager(self, queue: object, queue_user_changes) -> None:
+    async def ws_manager(self, queue_all: object, queue_user_changes) -> None:
 
         async with websockets.connect(
             self.ws_connection_url,
@@ -278,9 +278,10 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     log.critical (message_channel)
                                     
-                                    await queue.put(queue_user_changes)
+                                    await queue_user_changes.put(orders_all)
 
                                     await update_cached_orders(orders_all, data)
+                                    await queue_user_changes.task_done()
 
                                 if "incremental_ticker." in message_channel:
 
@@ -297,11 +298,11 @@ class StreamAccountData(ModifyOrderDb):
                                 # queue.put(result)
                                 try:
                                     if result:
-                                        await queue.put(result)
+                                        await queue_all.put(result)
                                     else:
                                         break
 
-                                    await queue.task_done()
+                                    await queue_all.task_done()
 
                                 except:
                                     pass

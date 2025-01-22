@@ -110,7 +110,6 @@ async def cancelling_orders(
         while True:
 
             message: str = await queue.get()
-            queue.task_done
             # message: str = queue.get()
 
             message_channel: str = message["channel"]
@@ -323,6 +322,7 @@ async def cancelling_orders(
                                                     order_db_table,
                                                     cancel_allowed,
                                                 )
+            queue.task_done
 
     except Exception as error:
 
