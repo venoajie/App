@@ -119,7 +119,7 @@ async def saving_and_relabelling_orders(sub_account_id, config_app: list, queue:
                     delta_time = server_time
             
                 
-                await queue.task_done()
+                #await queue.task_done()
             
     except Exception as error:
 
