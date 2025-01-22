@@ -76,6 +76,8 @@ async def scanning_volume():
                     )
 
                     if data_has_exist_before == []:
+                        
+                        print (response_json)
                         single_data.update({"counter_id": int(response_json[1])})
                         cached_data.append(single_data)
 
