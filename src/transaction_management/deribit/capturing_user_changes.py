@@ -119,7 +119,7 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
 
                 await modify_order_and_db.resupply_sub_accountdb(currency)
 
-            if delta_time > CHECKING_TIME_THRESHOLD:
+            if False and delta_time > CHECKING_TIME_THRESHOLD:
                 
                 if len(orders_from_data_producers) != len(current_open_orders):
                     
