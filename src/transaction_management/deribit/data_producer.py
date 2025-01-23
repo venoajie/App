@@ -294,20 +294,8 @@ class StreamAccountData(ModifyOrderDb):
                                 )
                                 
                                 # queue.put(result)
-                                try:
-                                    if result:
-                                        await queue.put(result)
-                                    else:
-                                        break
-
-                                    await queue.task_done()
-
-                                except:
-                                    pass
-
-                                else:
-                                    await queue.join()
-
+                                await queue.put(result)
+                                
             except Exception as error:
 
                 parse_error_message(error)

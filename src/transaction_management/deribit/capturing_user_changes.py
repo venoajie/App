@@ -119,7 +119,7 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                     delta_time = server_time
             
                 
-                #await queue.task_done()
+            await queue.task_done()
             
     except Exception as error:
 
