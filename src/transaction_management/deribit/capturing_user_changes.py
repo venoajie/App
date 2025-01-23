@@ -138,7 +138,7 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                     )
                 
                 
-                await queue.task_done()
+                queue.task_done()
             
     except Exception as error:
 
