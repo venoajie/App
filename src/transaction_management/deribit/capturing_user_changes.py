@@ -105,18 +105,6 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                 
                 log.critical (message_channel)        
                 
-                log.critical (message)
-
-                await saving_orders(
-                    modify_order_and_db,
-                    private_data,
-                    cancellable_strategies,
-                    non_checked_strategies,
-                    data_orders,
-                    order_db_table,
-                    currency_lower,
-                )
-
                 await modify_order_and_db.resupply_sub_accountdb(currency)
 
                 if False and delta_time > CHECKING_TIME_THRESHOLD:
@@ -138,6 +126,16 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                     
                     else:
                         delta_time = server_time
+
+                    await saving_orders(
+                        modify_order_and_db,
+                        private_data,
+                        cancellable_strategies,
+                        non_checked_strategies,
+                        data_orders,
+                        order_db_table,
+                        currency_lower,
+                    )
                 
                 
                 await queue.task_done()

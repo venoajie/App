@@ -163,6 +163,13 @@ class StreamAccountData(ModifyOrderDb):
                 strategy_attributes = config_app["strategies"]
 
                 private_data: str = SendApiRequest(self.sub_account_id)
+                
+                cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
+                    if o["cancellable"]==True]
+                
+                relevant_tables = config_app["relevant_tables"][0]
+                
+                order_db_table= relevant_tables["orders_table"]
 
                 while True:
 
@@ -176,7 +183,7 @@ class StreamAccountData(ModifyOrderDb):
                     self.loop.create_task(self.ws_refresh_auth())
                     
                     resolution = 1
-
+                    
                     for currency in currencies:
 
                         currency_upper = currency.upper()
@@ -188,6 +195,11 @@ class StreamAccountData(ModifyOrderDb):
                             f"user.changes.any.{currency_upper}.raw",
                             f"chart.trades.{instrument_perpetual}.{resolution}",
                         ]
+                        
+                        await self.modify_order_and_db.cancel_the_cancellables(
+                            order_db_table,
+                            currency,
+                            cancellable_strategies)
                         
                         await self.modify_order_and_db.resupply_sub_accountdb(currency)
 
