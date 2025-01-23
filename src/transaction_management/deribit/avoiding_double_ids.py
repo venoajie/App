@@ -47,7 +47,7 @@ async def avoiding_double_ids(
             queue.task_done
             # message: str = queue.get()
 
-            orders_all: dict = message["orders_all"]
+            cleaned_orders: dict = message["cleaned_orders"]
 
             currency: str = message["currency"]
 
@@ -55,8 +55,8 @@ async def avoiding_double_ids(
 
             orders_currency = (
                 []
-                if not orders_all
-                else [o for o in orders_all if currency_upper in o["instrument_name"]]
+                if not cleaned_orders
+                else [o for o in cleaned_orders if currency_upper in o["instrument_name"]]
             )
 
             for strategy in active_strategies:

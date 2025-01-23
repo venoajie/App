@@ -70,7 +70,8 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
             
             current_order_from_exchange = message["current_order"]
             
-            log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange)")
+            log.debug (f"message {message} ")
+            log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange) {len(current_order_from_exchange)}")
             
             if len(current_order_from_exchange) > 0:
                 for order in current_order_from_exchange:

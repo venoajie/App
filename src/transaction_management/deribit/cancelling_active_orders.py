@@ -117,7 +117,7 @@ async def cancelling_orders(
 
             data_orders: dict = message["data"]
 
-            orders_all: dict = message["orders_all"]
+            cleaned_orders: dict = message["cleaned_orders"]
 
             currency: str = message["currency"]
 
@@ -193,10 +193,10 @@ async def cancelling_orders(
 
                         orders_currency = (
                             []
-                            if not orders_all
+                            if not cleaned_orders
                             else [
                                 o
-                                for o in orders_all
+                                for o in cleaned_orders
                                 if currency_upper in o["instrument_name"]
                             ]
                         )
@@ -277,7 +277,7 @@ async def cancelling_orders(
                                     if orders_currency_strategy:
                                         for order in orders_currency_strategy:
                                             cancel_allowed: dict = (
-                                                await combo_auto.is_cancelling_orders_allowed(
+                                                await combo_auto.is_cancelling_cleaned_ordersowed(
                                                     order,
                                                     server_time,
                                                 )
@@ -310,7 +310,7 @@ async def cancelling_orders(
 
                                         for order in orders_currency_strategy:
                                             cancel_allowed: dict = (
-                                                await hedging.is_cancelling_orders_allowed(
+                                                await hedging.is_cancelling_cleaned_ordersowed(
                                                     order,
                                                     orders_currency_strategy,
                                                     server_time,
