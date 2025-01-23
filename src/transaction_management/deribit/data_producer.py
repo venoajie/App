@@ -295,6 +295,8 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     log.critical (message_channel)
                                     
+                                    await update_cached_orders(cleaned_orders, data)                                    
+                                    
                                     log.warning (f"data {data}")
                                     orders = data["orders"]
                                     
@@ -306,8 +308,6 @@ class StreamAccountData(ModifyOrderDb):
                                             
                                             log.warning (f"order {order}")
 
-                                            await update_cached_orders(cleaned_orders, order)
-                                            
                                             current_order.append(order)
 
                                 if "incremental_ticker." in message_channel:
