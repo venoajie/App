@@ -294,10 +294,14 @@ class StreamAccountData(ModifyOrderDb):
                                 if "user.changes.any" in message_channel:
                                     
                                     log.critical (message_channel)
-
-                                    await update_cached_orders(cleaned_orders, data)
                                     
-                                    current_order.append(data)
+                                    orders = data["orders"]
+                                    
+                                    for order in orders:
+
+                                        await update_cached_orders(cleaned_orders, order)
+                                        
+                                        current_order.append(order)
 
                                 if "incremental_ticker." in message_channel:
 
