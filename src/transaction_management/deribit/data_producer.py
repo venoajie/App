@@ -174,6 +174,8 @@ class StreamAccountData(ModifyOrderDb):
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
+                    
+                    resolution = 1
 
                     for currency in currencies:
 
@@ -212,8 +214,6 @@ class StreamAccountData(ModifyOrderDb):
                     # prepare some placeholders
                     
                     latest_timestamp = get_now_unix_time()
-
-                    resolution = 1
 
                     cleaned_orders = await combining_order_data(private_data, currencies)
                     
