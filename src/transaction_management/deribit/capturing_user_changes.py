@@ -70,9 +70,11 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
             
             current_order_from_exchange = message["current_order"]
             
+            log.critical (message_channel)        
+            
             log.debug (f"message {message} ")
             log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange) {len(current_order_from_exchange)}")
-            
+                
             if current_order_from_exchange:
                     
                 if len(current_order_from_exchange) > 0:
@@ -84,7 +86,7 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                         
                         else:
                             
-                            is_order_in_cached_current_open_orders = [o for o in cached_current_open_orders if order in o]
+                            is_order_in_cached_current_open_orders = [o for o in cached_current_open_orders if order["order_id"] in o["order_id"]]
                             log.error (f"is_order_in_cached_current_open_orders {is_order_in_cached_current_open_orders} ")
                             if not is_order_in_cached_current_open_orders:
                                 pass
@@ -102,8 +104,6 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                 currency: str = message["currency"]
 
                 currency_lower: str = currency.lower()
-                
-                log.critical (message_channel)        
                 
                 await modify_order_and_db.resupply_sub_accountdb(currency)
 
