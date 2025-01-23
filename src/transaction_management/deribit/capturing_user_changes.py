@@ -72,8 +72,8 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
             
             log.critical (message_channel)        
             
-            log.debug (f"message {message} ")
-            log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange) {len(current_order_from_exchange)}")
+            #log.debug (f"message {message} ")
+            #log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange) {len(current_order_from_exchange)}")
                 
             if current_order_from_exchange:
                     
@@ -89,11 +89,9 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                             is_order_in_cached_current_open_orders = [o for o in cached_current_open_orders if order["order_id"] in o["order_id"]]
                             log.error (f"is_order_in_cached_current_open_orders {is_order_in_cached_current_open_orders} ")
                             if not is_order_in_cached_current_open_orders:
-                                pass
+                                
+                                cached_current_open_orders.append(order)
                         
-                        cached_current_open_orders.append(order)
-                        
-                        pass
                 
                 server_time = message["latest_timestamp"]
                 
