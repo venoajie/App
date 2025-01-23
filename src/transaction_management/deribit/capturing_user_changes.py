@@ -13,21 +13,21 @@ from loguru import logger as log
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.api_requests import SendApiRequest
-from transaction_management.deribit.managing_deribit import ModifyOrderDb
+#from transaction_management.deribit.api_requests import SendApiRequest
+#from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from transaction_management.deribit.orders_management import saving_orders
 from utilities.system_tools import parse_error_message
 
 
-async def saving_and_relabelling_orders(sub_account_id, config_app: list, queue: Queue):
+async def saving_and_relabelling_orders(private_data, modify_order_and_db, config_app: list, queue: Queue):
     """ """
 
     log.critical("saving_and_relabelling_orders START")
 
     try:
-        private_data: str = SendApiRequest(sub_account_id)
+        #private_data: str = SendApiRequest(sub_account_id)
 
-        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
+        #modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # currencies= random.sample(currencies_spot,len(currencies_spot))
 

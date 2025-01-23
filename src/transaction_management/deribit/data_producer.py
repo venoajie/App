@@ -164,7 +164,7 @@ class StreamAccountData(ModifyOrderDb):
 
                 private_data: str = SendApiRequest(self.sub_account_id)
 
-                orders_all = await combining_order_data(private_data, currencies)
+                cleaned_orders = await combining_order_data(private_data, currencies)
 
                 while True:
 
@@ -279,7 +279,7 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     log.critical (message_channel)
 
-                                    await update_cached_orders(orders_all, data)
+                                    await update_cached_orders(cleaned_orders, data)
 
                                 if "incremental_ticker." in message_channel:
 
@@ -288,7 +288,7 @@ class StreamAccountData(ModifyOrderDb):
                                 result = dict(
                                     data=data,
                                     channel=message_channel,
-                                    orders_all=orders_all,
+                                    cleaned_orders=cleaned_orders,
                                     currency=currency.lower(),
                                     latest_timestamp=latest_timestamp,
                                 )

@@ -27,7 +27,7 @@ from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
 from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,
+#    ModifyOrderDb,
     currency_inline_with_database_address,
 )
 from utilities.pickling import read_data, replace_data
@@ -48,7 +48,7 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def relabelling_trades(
-    sub_account_id,
+    modify_order_and_db,
     config_app: list,
     queue,
 ):
@@ -58,7 +58,7 @@ async def relabelling_trades(
 
     try:
 
-        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
+        #modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]

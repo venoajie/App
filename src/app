@@ -34,6 +34,7 @@ from transaction_management.deribit.avoiding_double_ids import \
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
 from transaction_management.deribit.data_producer import StreamAccountData
+from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from transaction_management.deribit.running_strategies import \
     executing_strategies
 from transaction_management.deribit.saving_result import saving_ws_data
@@ -136,8 +137,14 @@ async def main():
     file_toml = "config_strategies.toml"
     
     #server_time_fixed = get_now_unix_time()  
+
+    idle_time = 1
     
     try:
+
+        private_data: str = SendApiRequest(sub_account_id)
+
+        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         #time_elapsed = (server_time - server_time_fixed)/1000
         
@@ -149,8 +156,6 @@ async def main():
             
         # parsing config file
         config_app = get_config(file_toml)
-
-        idle_time = 1
 
         queue = asyncio.Queue(maxsize=10)
         queue_cached_orders = asyncio.Queue()
@@ -166,39 +171,40 @@ async def main():
             producer_task, 
             
             #hedging_spot(
-            #    sub_account_id,
+            #    modify_order_and_db,
             #    config_app,
             #    queue),
         
             #future_spreads(
-            #    sub_account_id,
+            #    modify_order_and_db,
             #    config_app,
             #    queue),
             
             cancelling_orders(
-                sub_account_id,
+                modify_order_and_db,
                 config_app,
                 queue),
             
             avoiding_double_ids(
-                sub_account_id,
+                modify_order_and_db,
                 config_app,
                 queue),
             
             saving_and_relabelling_orders(
-                sub_account_id,
+                private_data,
+                modify_order_and_db,
                 config_app,
                 queue),
             
             relabelling_trades(
-                sub_account_id,
+                modify_order_and_db,
                 config_app,
                 queue),
             
             saving_ws_data(queue),
             
             reconciling_size(
-                sub_account_id,
+                modify_order_and_db,
                 config_app,
                 idle_time),
             

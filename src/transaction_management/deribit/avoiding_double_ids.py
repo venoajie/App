@@ -12,13 +12,13 @@ from loguru import logger as log
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.managing_deribit import ModifyOrderDb
+#from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from utilities.string_modification import remove_redundant_elements
 from utilities.system_tools import parse_error_message
 
 
 async def avoiding_double_ids(
-    sub_account_id,
+    modify_order_and_db,
     config_app: list,
     queue,
 ):
@@ -26,7 +26,7 @@ async def avoiding_double_ids(
     log.critical("Avoiding double ids START")
 
     try:
-        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
+        #modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         strategy_attributes = config_app["strategies"]
 

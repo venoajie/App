@@ -30,7 +30,7 @@ from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
 from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,
+#    ModifyOrderDb,
     currency_inline_with_database_address,
 )
 from transaction_management.deribit.processing_orders import processing_orders
@@ -54,7 +54,7 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def future_spreads(
-    sub_account_id,
+    modify_order_and_db,
     config_app: list,
     queue,
 ):
@@ -65,7 +65,7 @@ async def future_spreads(
 
     try:
 
-        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
+        #modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]

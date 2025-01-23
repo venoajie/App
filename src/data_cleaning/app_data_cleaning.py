@@ -26,7 +26,7 @@ from transaction_management.deribit.api_requests import (
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-from transaction_management.deribit.managing_deribit import ModifyOrderDb
+#from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
@@ -98,7 +98,7 @@ async def update_instruments(idle_time):
 
 
 async def reconciling_size(
-    sub_account_id: str, config_app: list, idle_time: int
+    modify_order_and_db: object, config_app: list, idle_time: int
 ) -> None:
 
     try:
@@ -111,7 +111,7 @@ async def reconciling_size(
         # get tradable currencies
         currencies = [o["spot"] for o in tradable_config_app][0]
 
-        modify_order_and_db = ModifyOrderDb(sub_account_id)
+        #modify_order_and_db = ModifyOrderDb(sub_account_id)
 
         strategy_attributes = config_app["strategies"]
 
