@@ -73,37 +73,37 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
             log.debug (f"message {message} ")
             log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange) {len(current_order_from_exchange)}")
             
-            if len(current_order_from_exchange) > 0:
-                for order in current_order_from_exchange:
-                    log.warning (f"order {order} not cached_current_open_orders {not cached_current_open_orders}")
+            if current_order_from_exchange:
                     
-                    if not cached_current_open_orders:
-                        pass
-                    
-                    else:
+                if len(current_order_from_exchange) > 0:
+                    for order in current_order_from_exchange:
+                        log.warning (f"order {order} not cached_current_open_orders {not cached_current_open_orders}")
                         
-                        is_order_in_cached_current_open_orders = [o for o in cached_current_open_orders if order in o]
-                        log.error (f"is_order_in_cached_current_open_orders {is_order_in_cached_current_open_orders} ")
-                        if not is_order_in_cached_current_open_orders:
+                        if not cached_current_open_orders:
                             pass
-                    
-                    cached_current_open_orders.append(order)
-                    
-                    pass
-            
-            server_time = message["latest_timestamp"]
-            
-            CHECKING_TIME_THRESHOLD = 1000
+                        
+                        else:
+                            
+                            is_order_in_cached_current_open_orders = [o for o in cached_current_open_orders if order in o]
+                            log.error (f"is_order_in_cached_current_open_orders {is_order_in_cached_current_open_orders} ")
+                            if not is_order_in_cached_current_open_orders:
+                                pass
+                        
+                        cached_current_open_orders.append(order)
+                        
+                        pass
+                
+                server_time = message["latest_timestamp"]
+                
+                CHECKING_TIME_THRESHOLD = 1000
 
-            delta_time = server_time - checking_time
-            
-            currency: str = message["currency"]
+                delta_time = server_time - checking_time
+                
+                currency: str = message["currency"]
 
-            currency_lower: str = currency.lower()
-            
-            log.critical (message_channel)        
-            
-            if "user.changes.any" in message_channel:
+                currency_lower: str = currency.lower()
+                
+                log.critical (message_channel)        
                 
                 log.critical (message)
 
@@ -119,28 +119,28 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
 
                 await modify_order_and_db.resupply_sub_accountdb(currency)
 
-            if False and delta_time > CHECKING_TIME_THRESHOLD:
-                
-                if len(orders_from_data_producers) != len(current_open_orders):
+                if False and delta_time > CHECKING_TIME_THRESHOLD:
                     
-                    delta_time = server_time
-                    
-                    for order in orders_from_data_producers:
-                        order_in_current_open_orders = [o for o in current_open_orders]
+                    if len(orders_from_data_producers) != len(current_open_orders):
                         
-                        no_transaction = False
-                    
-                    if current_open_orders:
+                        delta_time = server_time
                         
-                        for order in current_open_orders:
-                            order_in_orders_from_data_producers = [o for o in orders_from_data_producers]
+                        for order in orders_from_data_producers:
+                            order_in_current_open_orders = [o for o in current_open_orders]
+                            
                             no_transaction = False
+                        
+                        if current_open_orders:
+                            
+                            for order in current_open_orders:
+                                order_in_orders_from_data_producers = [o for o in orders_from_data_producers]
+                                no_transaction = False
+                    
+                    else:
+                        delta_time = server_time
                 
-                else:
-                    delta_time = server_time
-            
                 
-            await queue.task_done()
+                await queue.task_done()
             
     except Exception as error:
 
