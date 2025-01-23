@@ -295,13 +295,20 @@ class StreamAccountData(ModifyOrderDb):
                                     
                                     log.critical (message_channel)
                                     
+                                    log.warning (f"data {data}")
                                     orders = data["orders"]
                                     
-                                    for order in orders:
-
-                                        await update_cached_orders(cleaned_orders, order)
+                                    log.debug (f"orders {orders}")
+                                    
+                                    if orders:
                                         
-                                        current_order.append(order)
+                                        for order in orders:
+                                            
+                                            log.warning (f"order {order}")
+
+                                            await update_cached_orders(cleaned_orders, order)
+                                            
+                                            current_order.append(order)
 
                                 if "incremental_ticker." in message_channel:
 
