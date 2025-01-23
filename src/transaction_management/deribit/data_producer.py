@@ -164,8 +164,6 @@ class StreamAccountData(ModifyOrderDb):
 
                 private_data: str = SendApiRequest(self.sub_account_id)
 
-                cleaned_orders = await combining_order_data(private_data, currencies)
-
                 while True:
 
                     # Authenticate WebSocket Connection
@@ -176,8 +174,6 @@ class StreamAccountData(ModifyOrderDb):
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
-
-                    resolution = 1
 
                     for currency in currencies:
 
@@ -213,7 +209,15 @@ class StreamAccountData(ModifyOrderDb):
                             )
                     
 
+                    # prepare some placeholders
+                    
                     latest_timestamp = get_now_unix_time()
+
+                    resolution = 1
+
+                    cleaned_orders = await combining_order_data(private_data, currencies)
+                    
+                    current_order = deque(maxlen=10)
                     
                     while True:
 
@@ -280,6 +284,8 @@ class StreamAccountData(ModifyOrderDb):
                                     log.critical (message_channel)
 
                                     await update_cached_orders(cleaned_orders, data)
+                                    
+                                    current_order.append(data)
 
                                 if "incremental_ticker." in message_channel:
 
@@ -289,6 +295,7 @@ class StreamAccountData(ModifyOrderDb):
                                     data=data,
                                     channel=message_channel,
                                     cleaned_orders=cleaned_orders,
+                                    current_order=current_order,
                                     currency=currency.lower(),
                                     latest_timestamp=latest_timestamp,
                                 )

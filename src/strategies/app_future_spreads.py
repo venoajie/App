@@ -122,7 +122,7 @@ async def future_spreads(
 
                 data_orders: dict = message["data"]
 
-                orders_all: dict = message["orders_all"]
+                cleaned_orders: dict = message["cleaned_orders"]
 
                 currency: str = message["currency"]
 
@@ -204,15 +204,15 @@ async def future_spreads(
 
                             orders_currency = (
                                 []
-                                if not orders_all
+                                if not cleaned_orders
                                 else [
                                     o
-                                    for o in orders_all
+                                    for o in cleaned_orders
                                     if currency_upper in o["instrument_name"]
                                 ]
                             )
 
-                            len_orders_all = len(orders_currency)
+                            len_cleaned_orders = len(orders_currency)
 
                             position = [o for o in sub_account["positions"]]
                             # log.debug (f"position {position}")
@@ -390,7 +390,7 @@ async def future_spreads(
                                             ]
 
                                             if (
-                                                len_orders_all < 50
+                                                len_cleaned_orders < 50
                                                 and ticker_future
                                                 and ticker_combo
                                             ):
@@ -464,7 +464,7 @@ async def future_spreads(
                                         )
 
                                         #! closing combo auto trading
-                                        if "Auto" in label and len_orders_all < 50:
+                                        if "Auto" in label and len_cleaned_orders < 50:
 
                                             if sum_selected_transaction == 0:
 
@@ -560,7 +560,7 @@ async def future_spreads(
 
                                                             if (
                                                                 ticker_transaction
-                                                                and len_orders_all < 50
+                                                                and len_cleaned_orders < 50
                                                             ):
 
                                                                 TP_THRESHOLD = (

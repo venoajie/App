@@ -4,7 +4,7 @@
 # built ins
 import asyncio
 from multiprocessing.queues import Queue
-
+from collections import deque
 import uvloop
 
 # installed
@@ -58,7 +58,7 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
         
         no_transaction = True
 
-        current_open_orders = []
+        cached_current_open_orders = deque(maxlen=10)
         
         while no_transaction:
 
@@ -68,7 +68,27 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
 
             data_orders: dict = message["data"]
             
-            orders_from_data_producers = message["orders_all"]
+            current_order_from_exchange = message["current_order"]
+            
+            log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange)")
+            
+            if len(current_order_from_exchange) > 0:
+                for order in current_order_from_exchange:
+                    log.warning (f"order {order} not cached_current_open_orders {not cached_current_open_orders}")
+                    
+                    if not cached_current_open_orders:
+                        pass
+                    
+                    else:
+                        
+                        is_order_in_cached_current_open_orders = [o for o in cached_current_open_orders if order in o]
+                        log.error (f"is_order_in_cached_current_open_orders {is_order_in_cached_current_open_orders} ")
+                        if not is_order_in_cached_current_open_orders:
+                            pass
+                    
+                    cached_current_open_orders.append(order)
+                    
+                    pass
             
             server_time = message["latest_timestamp"]
             

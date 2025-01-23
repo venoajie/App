@@ -80,6 +80,8 @@ async def insert_tables(table_name: str, params: list | dict | str):
         async with aiosqlite.connect(
             "databases/trading.sqlite3", isolation_level=None
         ) as db:
+            
+            await db.execute("BEGIN TRANSACTION")
 
             await db.execute("pragma journal_mode=wal;")
 
@@ -138,6 +140,8 @@ async def querying_table(
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
+            await db.execute("BEGIN TRANSACTION")
+
             await db.execute("pragma journal_mode=wal;")
 
             db = (
@@ -185,6 +189,8 @@ async def deleting_row(
 
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
+
+            await db.execute("BEGIN TRANSACTION")
 
             await db.execute("pragma journal_mode=wal;")
 
@@ -252,6 +258,8 @@ async def deleting_row(
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
+            await db.execute("BEGIN TRANSACTION")
+
             await db.execute("pragma journal_mode=wal;")
 
             if filter == None:
@@ -277,6 +285,8 @@ async def add_additional_column(
         query_table = f"ALTER TABLE {table} ADD {column_name} {dataType}"
 
         async with aiosqlite.connect(database, isolation_level=None) as db:
+
+            await db.execute("BEGIN TRANSACTION")
 
             await db.execute("pragma journal_mode=wal;")
 
@@ -349,6 +359,8 @@ async def update_status_data(
         async with aiosqlite.connect(
             "databases/trading.sqlite3", isolation_level=None
         ) as db:
+
+            await db.execute("BEGIN TRANSACTION")
 
             await db.execute("pragma journal_mode=wal;")
 
@@ -584,6 +596,8 @@ async def executing_query_with_return(
 
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
+
+            await db.execute("BEGIN TRANSACTION")
 
             await db.execute("pragma journal_mode=wal;")
 

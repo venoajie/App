@@ -140,7 +140,7 @@ async def hedging_spot(
 
                 data_orders: dict = message["data"]
 
-                orders_all: dict = message["orders_all"]
+                cleaned_orders: dict = message["cleaned_orders"]
 
                 currency: str = message["currency"]
 
@@ -224,15 +224,15 @@ async def hedging_spot(
 
                             orders_currency = (
                                 []
-                                if not orders_all
+                                if not cleaned_orders
                                 else [
                                     o
-                                    for o in orders_all
+                                    for o in cleaned_orders
                                     if currency_upper in o["instrument_name"]
                                 ]
                             )
 
-                            len_orders_all = len(orders_currency)
+                            len_cleaned_orders = len(orders_currency)
 
                             # if orders_currency:
 
@@ -406,7 +406,7 @@ async def hedging_spot(
                                         # something was wrong because perpetuals were actively traded. cancell  orders
                                         if (
                                             instrument_time_left_exceed_threshold
-                                            and len_orders_all < 50
+                                            and len_cleaned_orders < 50
                                         ):
 
                                             best_ask_prc: float = instrument_ticker[
@@ -442,7 +442,7 @@ async def hedging_spot(
                                                 "closed",
                                             ]
 
-                                            if len_orders_all < 50:
+                                            if len_cleaned_orders < 50:
 
                                                 # log.error (f"{orders_currency_strategy} ")
 
