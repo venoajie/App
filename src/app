@@ -195,11 +195,6 @@ async def main():
                 config_app,
                 queue),
 
-            cancelling_orders(
-                private_data,
-                modify_order_and_db,
-                config_app,
-                queue),
             
             #scanning_volume()
                     
@@ -215,7 +210,12 @@ async def main():
                 queue),
     
             
-            #saving_ws_data(queue),
+
+            cancelling_orders(
+                private_data,
+                modify_order_and_db,
+                config_app,
+                queue),            #saving_ws_data(queue),
             )  
 
 
