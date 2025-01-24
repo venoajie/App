@@ -101,6 +101,7 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                 for order_to_be_processed in cached_current_open_orders:
                     log.critical (f"order_to_be_processed {order_to_be_processed} ")
                     cached_current_open_orders.remove(order_to_be_processed)
+                    log.info (f"cached_current_open_orders process {cached_current_open_orders} ")
                     
                 server_time = message["latest_timestamp"]
                 
