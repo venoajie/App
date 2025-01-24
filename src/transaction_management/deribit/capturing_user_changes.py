@@ -87,7 +87,13 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
             #log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange) {len(current_order_from_exchange)}")
                 
             """
-            log.debug (f"message {message} ")
+
+            message_channel: str = message["channel"]
+                        
+            if "user.changes.any" in message_channel:
+                
+                log.warning (message)
+            
             queue.task_done()
             
             if False:

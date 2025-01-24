@@ -291,7 +291,6 @@ class StreamAccountData(ModifyOrderDb):
                                     message_channel
                                 )
 
-                                log.critical (f"message {message} ")
 
                                 await queue.put(message)
                                 
