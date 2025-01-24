@@ -217,8 +217,6 @@ async def main():
             
             saving_ws_data(queue),
             )  
-        
-
 
 
         await queue.join()

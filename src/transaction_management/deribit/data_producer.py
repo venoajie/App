@@ -221,15 +221,6 @@ class StreamAccountData(ModifyOrderDb):
                                 ws_channel=ws,
                             )
                     
-
-                    # prepare some placeholders
-                    
-                    latest_timestamp = get_now_unix_time()
-
-                    cleaned_orders = await combining_order_data(private_data, currencies)
-                    
-                    current_order = deque(maxlen=10)
-                    
                     while True:
 
                         # Receive WebSocket messages
@@ -280,6 +271,12 @@ class StreamAccountData(ModifyOrderDb):
 
                                 message_params: dict = message["params"]
                                 #log.warning (f"message_params {message_params}")
+                                
+                                message_channel: str = message_params["channel"]
+
+                                if "user.changes.any" in message_channel:     
+                                    
+                                    log.warning (f"message_params {message_params}")
 
                                 # queing result
                                 await queue.put(message_params)
