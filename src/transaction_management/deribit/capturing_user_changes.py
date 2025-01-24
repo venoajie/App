@@ -41,12 +41,16 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
         order_db_table: str = relevant_tables["orders_table"]
                 
         while True:
+            
+            from loguru import logger as log
 
             message_params: str = await queue.get()
             
             data: list = message_params["data"]
 
             message_channel: str = message_params["channel"]
+            
+            log.critical (f"message_channel {message_channel}")    
 
             if "user.changes.any" in message_channel:   
                 
