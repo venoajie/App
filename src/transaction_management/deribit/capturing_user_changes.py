@@ -53,6 +53,8 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
             #message_channel: str = message_params["channel"]
             
             log.critical (f"len_msg {message_params}")    
+            
+            queue.task_done()
 
             if False and "user.changes.any" in message_channel:   
                 
