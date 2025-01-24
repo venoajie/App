@@ -109,8 +109,9 @@ async def cancelling_orders(
 
         cached_orders: list = await combining_order_data(private_data, currencies)
         
-        while True:
-
+        print (f"queue.empty() cancelling {queue.empty()}")
+                
+        while not queue.empty():
             message_params: str = await queue.get()
             # message: str = queue.get()
             log.debug(f"len_msg {message_params}")

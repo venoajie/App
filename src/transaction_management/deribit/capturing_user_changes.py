@@ -40,7 +40,7 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
 
         order_db_table: str = relevant_tables["orders_table"]
         
-        print (f"queue.empty() {queue.empty()}")
+        print (f"queue.empty() capturing {queue.empty()}")
                 
         while not queue.empty():
             
