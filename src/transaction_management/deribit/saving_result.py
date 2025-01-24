@@ -16,6 +16,7 @@ from transaction_management.deribit.managing_deribit import (
     currency_inline_with_database_address,
 )
 from utilities.pickling import read_data, replace_data
+from utilities.string_modification import extract_currency_from_text
 from utilities.system_tools import parse_error_message, provide_path_for_file
 from websocket_management.allocating_ohlc import (
     inserting_open_interest,
@@ -44,17 +45,19 @@ async def saving_ws_data(queue):
         chart_trades_buffer = []
 
         while True:
+            
+            message_params: str = await queue.get()
 
-            message: str = await queue.get()
+            message_channel: str = message_params["channel"]
 
-            message_channel: str = message["channel"]
+            data: dict = message_params["data"]
 
-            data: dict = message["data"]
-
-            currency: str = message["currency"]
-
-            currency_lower: str = currency.lower()
-
+            currency: str = extract_currency_from_text(
+                message_channel
+            )
+            
+            currency_lower = currency.lower
+            
             WHERE_FILTER_TICK: str = "tick"
 
             TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
