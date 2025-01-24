@@ -278,58 +278,11 @@ class StreamAccountData(ModifyOrderDb):
 
                             if message["method"] != "heartbeat":
 
-                                # queing result
-
                                 message_params: dict = message["params"]
+                                log.warning (f"message_params {message_params}")
 
-                                #data = message_params["data"]
-
-                                #message_channel: str = message_params["channel"]
-
-                                #currency: str = extract_currency_from_text(
-                                #    message_channel
-                                #)
-
-
+                                # queing result
                                 await queue.put(message_params)
-                                
-                                if False and "user.changes.any" in message_channel:
-                                    
-                                    log.critical (message_channel)
-                                    
-                                    await update_cached_orders(cleaned_orders, data)                                    
-                                    
-                                    log.warning (f"data {data}")
-                                    orders = data["orders"]
-                                    
-                                    log.debug (f"orders {orders}")
-                                    
-                                    if orders:
-                                        
-                                        for order in orders:
-                                            
-                                            log.warning (f"order {order}")
-
-                                            current_order.append(order)
-
-                                #if "incremental_ticker." in message_channel:
-
-                                #    latest_timestamp = data["timestamp"]
-
-                                """
-                                result = dict(
-                                    data=data,
-                                    channel=message_channel,
-                                    cleaned_orders=cleaned_orders,
-                                    current_order=current_order,
-                                    currency=currency.lower(),
-                                    latest_timestamp=latest_timestamp,
-                                )
-                                """
-                                
-                                # queue.put(result)
-                                #current_order = []
-                                
                                 
             except Exception as error:
 
