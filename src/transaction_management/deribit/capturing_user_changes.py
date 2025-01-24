@@ -71,7 +71,7 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
         
         while no_transaction:
 
-            message: str = await queue.get()
+            message_params: str = await queue.get()
             
             """
 
@@ -88,11 +88,11 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                 
             """
 
-            message_channel: str = message["channel"]
+            message_channel: str = message_params["channel"]
                         
             if "user.changes.any" in message_channel:
                 
-                log.warning (message)
+                log.warning (message_params)
             
             queue.task_done()
             

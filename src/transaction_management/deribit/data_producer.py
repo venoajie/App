@@ -292,7 +292,7 @@ class StreamAccountData(ModifyOrderDb):
                                 )
 
 
-                                await queue.put(message)
+                                await queue.put(message_params)
                                 
                                 if "user.changes.any" in message_channel:
                                     
