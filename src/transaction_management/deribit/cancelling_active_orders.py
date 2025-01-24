@@ -30,13 +30,18 @@ from transaction_management.deribit.managing_deribit import (
 #    ModifyOrderDb,
     currency_inline_with_database_address,
 )
-from utilities.caching import combining_ticker_data as cached_ticker
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    combining_order_data, 
+    update_cached_orders)
 from utilities.caching import update_cached_ticker
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
+    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
+
 from utilities.system_tools import parse_error_message, provide_path_for_file
 
 
@@ -50,26 +55,21 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def cancelling_orders(
-    modify_order_and_db,
+    private_data: object,
+    modify_order_and_db: object,
     config_app: list,
-    queue,
+    queue: object,
 ):
     """ """
-    log.critical("Cancelling_active_orders")
 
     try:
-
-        #modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
 
-        # get tradable currencies
-        # currencies_spot= ([o["spot"] for o in tradable_config_app]) [0]
-        currencies = ([o["spot"] for o in tradable_config_app])[0]
-
-        # currencies= random.sample(currencies_spot,len(currencies_spot))
-
+        # get TRADABLE currencies
+        currencies: list = [o["spot"] for o in tradable_config_app][0]
+        
         strategy_attributes = config_app["strategies"]
 
         strategy_attributes_active = [
@@ -107,27 +107,34 @@ async def cancelling_orders(
 
         ticker_all = cached_ticker(instruments_name)
 
+        cached_orders: list = await combining_order_data(private_data, currencies)
+        
         while True:
 
-            message: str = await queue.get()
+            message_params: str = await queue.get()
             # message: str = queue.get()
 
-            message_channel: str = message["channel"]
+            message_channel: str = message_params["channel"]
             # log.debug(f"message_channel {message_channel}")
 
-            data_orders: dict = message["data"]
-
-            cleaned_orders: dict = message["cleaned_orders"]
-
-            currency: str = message["currency"]
-
-            currency_lower: str = currency
+            data_orders: dict = message_params["data"]
+            
+            currency: str = extract_currency_from_text(
+                    message_channel
+                )
 
             currency_upper: str = currency.upper()
 
+            currency_lower: str = currency
+
+            if "user.changes.any" in message_channel:
+                
+                await update_cached_orders(cached_orders, data_orders)                                    
+                      
             instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
             instrument_name_future = (message_channel)[19:]
+
             if message_channel == f"incremental_ticker.{instrument_name_future}":
 
                 update_cached_ticker(
@@ -141,6 +148,8 @@ async def cancelling_orders(
                     data_orders,
                     cached_candles_data,
                 )
+                
+                server_time = data_orders["timestamp"]
 
                 if not chart_trade:
 
@@ -193,10 +202,10 @@ async def cancelling_orders(
 
                         orders_currency = (
                             []
-                            if not cleaned_orders
+                            if not cached_orders
                             else [
                                 o
-                                for o in cleaned_orders
+                                for o in cached_orders
                                 if currency_upper in o["instrument_name"]
                             ]
                         )
@@ -208,20 +217,16 @@ async def cancelling_orders(
                             for o in position
                             if f"{currency_upper}-FS" not in o["instrument_name"]
                         ]
-
-                        server_time = message["latest_timestamp"]
-                            
-
-                        size_perpetuals_reconciled = (
-                            is_size_sub_account_and_my_trades_reconciled(
-                                position_without_combo,
-                                my_trades_currency_all,
-                                instrument_name_perpetual,
-                            )
-                        )
-
+        
                         if index_price is not None and equity > 0:
-
+        
+                            size_perpetuals_reconciled = (
+                                is_size_sub_account_and_my_trades_reconciled(
+                                    position_without_combo,
+                                    my_trades_currency_all,
+                                    instrument_name_perpetual,
+                                )
+                            )
                             my_trades_currency: list = [
                                 o
                                 for o in my_trades_currency_all

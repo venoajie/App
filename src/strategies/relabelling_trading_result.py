@@ -3,7 +3,6 @@
 
 # built ins
 import asyncio
-import os
 
 import uvloop
 
@@ -27,7 +26,6 @@ from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
 from transaction_management.deribit.managing_deribit import (
-#    ModifyOrderDb,
     currency_inline_with_database_address,
 )
 from utilities.pickling import read_data, replace_data
@@ -48,26 +46,19 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def relabelling_trades(
-    modify_order_and_db,
+    modify_order_and_db: object,
     config_app: list,
-    queue,
+    queue: list,
 ):
     """ """
 
-    log.critical("Relabelling_trades")
-
     try:
-
-        #modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
 
         # get tradable currencies
-        # currencies_spot= ([o["spot"] for o in tradable_config_app]) [0]
         currencies = ([o["spot"] for o in tradable_config_app])[0]
-
-        # currencies= random.sample(currencies_spot,len(currencies_spot))
 
         strategy_attributes = config_app["strategies"]
 

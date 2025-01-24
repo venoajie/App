@@ -39,7 +39,6 @@ from transaction_management.deribit.managing_deribit import (
 from utilities.caching import combining_order_data, update_cached_orders
 from utilities.pickling import replace_data
 from utilities.string_modification import (
-    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
