@@ -121,6 +121,7 @@ def distribute_ticker_result_as_per_data_type(
         replace_data(my_path_ticker, data_orders)
 
     else:
+        log.debug (f"my_path_ticker {my_path_ticker}")
         ticker_change: list = read_data(my_path_ticker)
         
         log.debug (f"ticker_change {ticker_change}")
