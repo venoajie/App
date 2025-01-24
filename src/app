@@ -214,7 +214,6 @@ async def main():
                 modify_order_and_db,
                 config_app,
                 queue),
-
             
             saving_ws_data(queue),
             )  

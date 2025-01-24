@@ -50,12 +50,10 @@ async def saving_ws_data(queue: object):
             currency: str = extract_currency_from_text(
                 message_channel
             )
-            
-            currency_lower: str = currency.lower
-            
+                        
             WHERE_FILTER_TICK: str = "tick"
 
-            TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
+            TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
 
             instrument_ticker: str = (message_channel)[19:]
             if message_channel == f"incremental_ticker.{instrument_ticker}":
@@ -98,7 +96,7 @@ async def saving_ws_data(queue: object):
 
             if "user.portfolio" in message_channel:
 
-                await update_db_pkl("portfolio", data, currency_lower)
+                await update_db_pkl("portfolio", data, currency)
 
     except Exception as error:
 
