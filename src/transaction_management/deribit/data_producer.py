@@ -291,6 +291,10 @@ class StreamAccountData(ModifyOrderDb):
                                     message_channel
                                 )
 
+                                log.critical (f"message {message} ")
+
+                                await queue.put(message)
+                                
                                 if "user.changes.any" in message_channel:
                                     
                                     log.critical (message_channel)
@@ -314,6 +318,7 @@ class StreamAccountData(ModifyOrderDb):
 
                                     latest_timestamp = data["timestamp"]
 
+                                """
                                 result = dict(
                                     data=data,
                                     channel=message_channel,
@@ -322,11 +327,11 @@ class StreamAccountData(ModifyOrderDb):
                                     currency=currency.lower(),
                                     latest_timestamp=latest_timestamp,
                                 )
+                                """
                                 
                                 # queue.put(result)
                                 current_order = []
-
-                                await queue.put(result)
+                                
                                 
             except Exception as error:
 

@@ -167,9 +167,7 @@ async def main():
         
         await asyncio.sleep(0.0005)
         
-        await asyncio.gather(
-            producer_task, 
-            
+        """
             #hedging_spot(
             #    modify_order_and_db,
             #    config_app,
@@ -179,7 +177,6 @@ async def main():
             #    modify_order_and_db,
             #    config_app,
             #    queue),
-            
             cancelling_orders(
                 modify_order_and_db,
                 config_app,
@@ -189,27 +186,32 @@ async def main():
                 modify_order_and_db,
                 config_app,
                 queue),
-            
-            saving_and_relabelling_orders(
-                private_data,
-                modify_order_and_db,
-                config_app,
-                queue),
-            
+
             relabelling_trades(
                 modify_order_and_db,
                 config_app,
                 queue),
-            
-            saving_ws_data(queue),
             
             reconciling_size(
                 modify_order_and_db,
                 config_app,
                 idle_time),
             
+
+            saving_ws_data(queue),
             #scanning_volume()
+                    
+            """
             
+        await asyncio.gather(
+            producer_task, 
+            
+            saving_and_relabelling_orders(
+                private_data,
+                modify_order_and_db,
+                config_app,
+                queue),
+    
             )
 
         await queue.join()
