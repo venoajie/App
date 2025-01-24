@@ -215,7 +215,7 @@ async def main():
                 queue),
     
             
-            saving_ws_data(queue),
+            #saving_ws_data(queue),
             )  
 
 
