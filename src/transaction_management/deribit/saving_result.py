@@ -62,14 +62,14 @@ async def saving_ws_data(queue: object):
             instrument_ticker: str = (message_channel)[19:]
             if message_channel == f"incremental_ticker.{instrument_ticker}":
 
-                my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
+                #my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
                 
-                log.info (f"my_path_ticker {instrument_ticker} {my_path_ticker}")
+                #log.info (f"my_path_ticker {instrument_ticker} {my_path_ticker}")
 
-                distribute_ticker_result_as_per_data_type(
-                    my_path_ticker,
-                    data,
-                )
+                #distribute_ticker_result_as_per_data_type(
+                #    my_path_ticker,
+                #    data,
+                #)
 
                 if "PERPETUAL" in data["instrument_name"]:
 
