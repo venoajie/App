@@ -157,7 +157,7 @@ async def main():
         # parsing config file
         config_app = get_config(file_toml)
 
-        queue = asyncio.Queue(maxsize=10)
+        queue = asyncio.Queue(maxsize=100)
         queue_cached_orders = asyncio.Queue()
         queue_orders = asyncio.Queue()
         
