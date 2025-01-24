@@ -65,7 +65,7 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
         
         no_transaction = True
 
-        cached_current_open_orders = deque(maxlen=10)
+        cached_current_open_orders = []
 
         starting_orders_from_exchange = await combining_order_data(private_data, currencies)
         
@@ -100,8 +100,7 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
             if cached_current_open_orders:
                 for order_to_be_processed in cached_current_open_orders:
                     log.critical (f"order_to_be_processed {order_to_be_processed} ")
-                    
-                cached_current_open_orders = []
+                    cached_current_open_orders.remove(order_to_be_processed)
                     
                 server_time = message["latest_timestamp"]
                 
