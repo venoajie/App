@@ -85,10 +85,8 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
             #log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange) {len(current_order_from_exchange)}")
             if starting_orders_from_exchange:
                 
-                if len(current_order_from_exchange) > 0:
-                    
-                    for order in current_order_from_exchange:
-                        cached_current_open_orders.append(order)
+                for order in starting_orders_from_exchange:
+                    cached_current_open_orders.append(order)
                     
             if current_order_from_exchange:
                 
