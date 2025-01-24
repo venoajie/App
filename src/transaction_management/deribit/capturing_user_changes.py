@@ -113,8 +113,6 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
 
                 currency_lower: str = currency.lower()
                 
-                await modify_order_and_db.resupply_sub_accountdb(currency)
-
                 if False and delta_time > CHECKING_TIME_THRESHOLD:
                     
                     if len(orders_from_data_producers) != len(current_open_orders):
@@ -146,7 +144,7 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                     )
                 
                 
-                queue.task_done()
+            queue.task_done()
                         
             log.info (f"cached_current_open_orders after {cached_current_open_orders}")    
             
