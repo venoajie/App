@@ -83,7 +83,6 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
             
             #log.debug (f"message {message} ")
             #log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange) {len(current_order_from_exchange)}")
-            log.info (f"cached_current_open_orders before {cached_current_open_orders}")    
             if starting_orders_from_exchange:
                 
                 if len(current_order_from_exchange) > 0:
@@ -91,30 +90,18 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                     for order in current_order_from_exchange:
                         cached_current_open_orders.append(order)
                     
-                
             if current_order_from_exchange:
-                    
-                if len(current_order_from_exchange) > 0:
-                    
-                    for order in current_order_from_exchange:
-                        log.warning (f"order {order} not cached_current_open_orders {not cached_current_open_orders}")
-                        
-                        if not cached_current_open_orders:
-                            pass
-                        
-                        else:
-                            
-                            is_order_in_cached_current_open_orders = [o for o in cached_current_open_orders if order["order_id"] in o["order_id"]]
-                            log.error (f"is_order_in_cached_current_open_orders {is_order_in_cached_current_open_orders} ")
-                            if not is_order_in_cached_current_open_orders:
-                                
-                                cached_current_open_orders.append(order)
-                                
-                                for order_to_be_processed in cached_current_open_orders:
-                                    log.critical (f"order_to_be_processed {order_to_be_processed} ")
-                                    
-                                    cached_current_open_orders.popleft()
                 
+                for order in current_order_from_exchange:
+                    cached_current_open_orders.append(order)
+                            
+            log.info (f"cached_current_open_orders before {cached_current_open_orders}")    
+                        
+            if cached_current_open_orders:
+                for order_to_be_processed in cached_current_open_orders:
+                    log.critical (f"order_to_be_processed {order_to_be_processed} ")
+                    cached_current_open_orders.popleft()
+                    
                 server_time = message["latest_timestamp"]
                 
                 CHECKING_TIME_THRESHOLD = 1000
