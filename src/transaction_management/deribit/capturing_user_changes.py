@@ -16,6 +16,7 @@ from messaging.telegram_bot import telegram_bot_sendtext
 #from transaction_management.deribit.api_requests import SendApiRequest
 #from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from transaction_management.deribit.orders_management import saving_orders
+from utilities.caching import combining_order_data
 from utilities.system_tools import parse_error_message
 
 
@@ -50,6 +51,12 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
             if o["cancellable"] == True
         ]
 
+        # get tradable strategies
+        tradable_config_app = config_app["tradable"]
+
+        # get TRADABLE currencies
+        currencies = [o["spot"] for o in tradable_config_app][0]
+        
         relevant_tables = config_app["relevant_tables"][0]
 
         order_db_table = relevant_tables["orders_table"]
@@ -59,6 +66,8 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
         no_transaction = True
 
         cached_current_open_orders = deque(maxlen=10)
+
+        starting_orders_from_exchange = await combining_order_data(private_data, currencies)
         
         while no_transaction:
 
@@ -74,10 +83,19 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
             
             #log.debug (f"message {message} ")
             #log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange) {len(current_order_from_exchange)}")
+            log.info (f"cached_current_open_orders before {cached_current_open_orders}")    
+            if starting_orders_from_exchange:
+                
+                if len(current_order_from_exchange) > 0:
+                    
+                    for order in current_order_from_exchange:
+                        cached_current_open_orders.append(order)
+                    
                 
             if current_order_from_exchange:
                     
                 if len(current_order_from_exchange) > 0:
+                    
                     for order in current_order_from_exchange:
                         log.warning (f"order {order} not cached_current_open_orders {not cached_current_open_orders}")
                         
@@ -91,7 +109,11 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                             if not is_order_in_cached_current_open_orders:
                                 
                                 cached_current_open_orders.append(order)
-                        
+                                
+                                for order_to_be_processed in cached_current_open_orders:
+                                    log.critical (f"order_to_be_processed {order_to_be_processed} ")
+                                    
+                                    cached_current_open_orders.popleft()
                 
                 server_time = message["latest_timestamp"]
                 
@@ -137,6 +159,8 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                 
                 
                 queue.task_done()
+                        
+            log.info (f"cached_current_open_orders after {cached_current_open_orders}")    
             
     except Exception as error:
 
