@@ -324,6 +324,8 @@ class StreamAccountData(ModifyOrderDb):
                                 )
                                 
                                 # queue.put(result)
+                                current_order = []
+
                                 await queue.put(result)
                                 
             except Exception as error:

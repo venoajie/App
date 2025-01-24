@@ -81,27 +81,8 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
             
             log.critical (message_channel)        
             
-            #log.debug (f"message {message} ")
+            log.debug (f"current_order {current_order_from_exchange} ")
             #log.debug (f"current_order_from_exchange {current_order_from_exchange} len(current_order_from_exchange) {len(current_order_from_exchange)}")
-            if starting_orders_from_exchange:
-                
-                for order in starting_orders_from_exchange:
-                    cached_current_open_orders.append(order)
-                    
-            if current_order_from_exchange:
-                
-                for order in current_order_from_exchange:
-                    cached_current_open_orders.append(order)
-                            
-            log.info (f"cached_current_open_orders before {cached_current_open_orders}")    
-                        
-            if cached_current_open_orders:
-                for order_to_be_processed in cached_current_open_orders:
-                    log.critical (f"order_to_be_processed {order_to_be_processed} ")
-                    cached_current_open_orders.remove(order_to_be_processed)
-                    #log.info (f"cached_current_open_orders process {cached_current_open_orders} ")
-                    
-            log.info (f"cached_current_open_orders after {cached_current_open_orders}")    
                 
             queue.task_done()
             
