@@ -198,7 +198,7 @@ async def main():
                 idle_time),
             
 
-            saving_ws_data(queue),
+            
             #scanning_volume()
                     
             """
@@ -212,7 +212,11 @@ async def main():
                 config_app,
                 queue),
     
-            )
+            )  
+        
+        saving_ws_data(queue),
+
+
 
         await queue.join()
         

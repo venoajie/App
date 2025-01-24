@@ -6,9 +6,6 @@ import asyncio
 
 import uvloop
 
-# installed
-from loguru import logger as log
-
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import telegram_bot_sendtext
@@ -26,23 +23,21 @@ from websocket_management.allocating_ohlc import (
 
 async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
-    my_path_portfolio = provide_path_for_file(path, currency)
+    my_path_portfolio: str = provide_path_for_file(path, currency)
 
     if currency_inline_with_database_address(currency, my_path_portfolio):
 
         replace_data(my_path_portfolio, data_orders)
 
 
-async def saving_ws_data(queue):
+async def saving_ws_data(queue: object):
     """ """
-    log.critical("Saving result")
-    # registering strategy config file
 
     try:
 
-        resolution = 1
+        resolution: int = 1
 
-        chart_trades_buffer = []
+        chart_trades_buffer: list = []
 
         while True:
             
@@ -56,16 +51,16 @@ async def saving_ws_data(queue):
                 message_channel
             )
             
-            currency_lower = currency.lower
+            currency_lower: str = currency.lower
             
             WHERE_FILTER_TICK: str = "tick"
 
             TABLE_OHLC1: str = f"ohlc{resolution}_{currency_lower}_perp_json"
 
-            instrument_ticker = (message_channel)[19:]
+            instrument_ticker: str = (message_channel)[19:]
             if message_channel == f"incremental_ticker.{instrument_ticker}":
 
-                my_path_ticker = provide_path_for_file("ticker", instrument_ticker)
+                my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
 
                 distribute_ticker_result_as_per_data_type(
                     my_path_ticker,
@@ -86,7 +81,7 @@ async def saving_ws_data(queue):
 
                 if len(chart_trades_buffer) > 3:
 
-                    instrument_ticker = ((message_channel)[13:]).partition(".")[0]
+                    instrument_ticker: str = ((message_channel)[13:]).partition(".")[0]
 
                     if "PERPETUAL" in instrument_ticker:
 
@@ -101,7 +96,7 @@ async def saving_ws_data(queue):
 
                         chart_trades_buffer = []
 
-            if message_channel == f"user.portfolio.{currency_lower}":
+            if "user.portfolio" in message_channel:
 
                 await update_db_pkl("portfolio", data, currency_lower)
 
