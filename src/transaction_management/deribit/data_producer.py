@@ -283,18 +283,18 @@ class StreamAccountData(ModifyOrderDb):
 
                                 message_params: dict = message["params"]
 
-                                data = message_params["data"]
+                                #data = message_params["data"]
 
-                                message_channel: str = message_params["channel"]
+                                #message_channel: str = message_params["channel"]
 
-                                currency: str = extract_currency_from_text(
-                                    message_channel
-                                )
+                                #currency: str = extract_currency_from_text(
+                                #    message_channel
+                                #)
 
 
                                 await queue.put(message_params)
                                 
-                                if "user.changes.any" in message_channel:
+                                if False and "user.changes.any" in message_channel:
                                     
                                     log.critical (message_channel)
                                     
@@ -313,9 +313,9 @@ class StreamAccountData(ModifyOrderDb):
 
                                             current_order.append(order)
 
-                                if "incremental_ticker." in message_channel:
+                                #if "incremental_ticker." in message_channel:
 
-                                    latest_timestamp = data["timestamp"]
+                                #    latest_timestamp = data["timestamp"]
 
                                 """
                                 result = dict(
@@ -329,7 +329,7 @@ class StreamAccountData(ModifyOrderDb):
                                 """
                                 
                                 # queue.put(result)
-                                current_order = []
+                                #current_order = []
                                 
                                 
             except Exception as error:

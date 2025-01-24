@@ -17,8 +17,8 @@ from messaging.telegram_bot import telegram_bot_sendtext
 #from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from transaction_management.deribit.orders_management import saving_orders
 from utilities.caching import combining_order_data
-from utilities.system_tools import parse_error_message
-
+from utilities.system_tools import (
+    extract_currency_from_text, parse_error_message)
 
 async def saving_and_relabelling_orders(private_data, modify_order_and_db, config_app: list, queue: Queue):
     """ """
@@ -88,11 +88,29 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                 
             """
 
+
+
+            data = message_params["data"]
+
             message_channel: str = message_params["channel"]
-                        
-            if "user.changes.any" in message_channel:
-                
-                log.warning (message_params)
+
+            currency: str = extract_currency_from_text(
+                message_channel
+            )
+            
+            currency_lower = currency.lower()
+            
+            if "user.changes.any" in message_channel:                
+            
+                await saving_orders(
+                    modify_order_and_db,
+                    private_data,
+                    cancellable_strategies,
+                    non_checked_strategies,
+                    data,
+                    order_db_table,
+                    currency_lower,
+                )
             
             queue.task_done()
             
