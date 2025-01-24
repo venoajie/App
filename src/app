@@ -3,6 +3,7 @@
 
 # built ins
 import asyncio
+from asyncio import Queue
 import os
 import signal
 import sys
@@ -157,9 +158,9 @@ async def main():
         # parsing config file
         config_app = get_config(file_toml)
 
-        queue = asyncio.Queue(maxsize=100)
-        queue_cached_orders = asyncio.Queue()
-        queue_orders = asyncio.Queue()
+        queue = Queue(maxsize=100)
+        queue_cached_orders = Queue()
+        queue_orders = Queue()
         
         stream = StreamAccountData(sub_account_id)
                 

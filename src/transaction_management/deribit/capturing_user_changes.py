@@ -39,20 +39,22 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
         relevant_tables: dict = config_app["relevant_tables"][0]
 
         order_db_table: str = relevant_tables["orders_table"]
+        
+        print (f"queue.empty() {queue.empty()}")
                 
-        while True:
+        while not queue.empty():
             
             from loguru import logger as log
 
             message_params: str = await queue.get()
             
-            data: list = message_params["data"]
+            #data: list = message_params["data"]
 
-            message_channel: str = message_params["channel"]
+            #message_channel: str = message_params["channel"]
             
-            log.critical (f"message_channel {message_channel}")    
+            log.critical (f"len_msg {message_params}")    
 
-            if "user.changes.any" in message_channel:   
+            if False and "user.changes.any" in message_channel:   
                 
                 log.warning (f"message_params {message_params}")             
             
