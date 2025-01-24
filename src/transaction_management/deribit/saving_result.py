@@ -41,11 +41,15 @@ async def saving_ws_data(queue: object):
 
         while True:
             
+            from loguru import logger as log
+            
             message_params: str = await queue.get()
 
             message_channel: str = message_params["channel"]
 
             data: dict = message_params["data"]
+            
+            log.info (f"data {data}")
 
             currency: str = extract_currency_from_text(
                 message_channel
