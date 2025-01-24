@@ -6,6 +6,8 @@ import asyncio
 
 import uvloop
 
+from loguru import logger as log
+            
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import telegram_bot_sendtext
@@ -40,8 +42,6 @@ async def saving_ws_data(queue: object):
         chart_trades_buffer: list = []
 
         while True:
-            
-            from loguru import logger as log
             
             message_params: str = await queue.get()
 
@@ -122,10 +122,14 @@ def distribute_ticker_result_as_per_data_type(
 
     else:
         ticker_change: list = read_data(my_path_ticker)
+        
+        log.debug (f"ticker_change {ticker_change}")
 
         if ticker_change != []:
 
             for item in data_orders:
+                
+                log.debug (f"item {item}")
 
                 ticker_change[0][item] = data_orders[item]
 
