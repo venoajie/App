@@ -279,7 +279,7 @@ class StreamAccountData(ModifyOrderDb):
                             if message["method"] != "heartbeat":
 
                                 message_params: dict = message["params"]
-                                log.warning (f"message_params {message_params}")
+                                #log.warning (f"message_params {message_params}")
 
                                 # queing result
                                 await queue.put(message_params)

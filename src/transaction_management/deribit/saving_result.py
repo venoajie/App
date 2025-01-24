@@ -49,8 +49,6 @@ async def saving_ws_data(queue: object):
 
             data: dict = message_params["data"]
             
-            log.info (f"data {data}")
-
             currency: str = extract_currency_from_text(
                 message_channel
             )
