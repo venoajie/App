@@ -7,15 +7,12 @@ import httpx
 # user defined formula
 from configuration import config
 
-
 async def private_connection(
     endpoint: str,
     connection_url: str = "https://api.telegram.org/bot",
 ) -> None:
 
     async with httpx.AsyncClient() as session:
-
-        print(f"endpoint {connection_url + endpoint}")
 
         respons = await session.get(connection_url + endpoint)
 
