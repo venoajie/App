@@ -99,8 +99,13 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                 for order_to_be_processed in cached_current_open_orders:
                     log.critical (f"order_to_be_processed {order_to_be_processed} ")
                     cached_current_open_orders.remove(order_to_be_processed)
-                    log.info (f"cached_current_open_orders process {cached_current_open_orders} ")
+                    #log.info (f"cached_current_open_orders process {cached_current_open_orders} ")
                     
+            log.info (f"cached_current_open_orders after {cached_current_open_orders}")    
+                
+            queue.task_done()
+            
+            if False:
                 server_time = message["latest_timestamp"]
                 
                 CHECKING_TIME_THRESHOLD = 1000
@@ -141,10 +146,7 @@ async def saving_and_relabelling_orders(private_data, modify_order_and_db, confi
                         currency_lower,
                     )
                 
-                
-            queue.task_done()
                         
-            log.info (f"cached_current_open_orders after {cached_current_open_orders}")    
             
     except Exception as error:
 
