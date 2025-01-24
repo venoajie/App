@@ -223,7 +223,7 @@ class StreamAccountData(ModifyOrderDb):
                             
                             
                     
-                    no = 0
+                    len_msg = 0
                     while True:
 
                         # Receive WebSocket messages
@@ -282,7 +282,7 @@ class StreamAccountData(ModifyOrderDb):
                                     log.warning (f"message_params {message_params}")
 
                                 # queing result
-                                len_msg = len(message_params)+no
+                                len_msg = len(message_params)+len_msg
                                 log.warning (f"len_msg {len_msg}")
                                 await queue.put(len_msg)
                                 #await queue.put(message_params)
