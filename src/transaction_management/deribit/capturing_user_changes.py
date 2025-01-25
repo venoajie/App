@@ -45,8 +45,14 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
         while await has_order.acquire():
             
             from loguru import logger as log
-
-            message_params: str = await queue.get_nowait()
+            try:
+                message_params = queue.get_nowait()
+            except asyncio.QueueEmpty:
+                await asyncio.sleep(0.5)
+                continue
+                    # check for stop
+            if message_params is None:
+                break
             
             #data: list = message_params["data"]
 
