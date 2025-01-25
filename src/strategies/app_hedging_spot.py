@@ -133,7 +133,7 @@ async def hedging_spot(
         
         cached_orders: list = await combining_order_data(private_data, currencies)
         
-        server_time_zero = 0
+        server_time = 0
 
         while await has_order.acquire():
         
@@ -174,7 +174,7 @@ async def hedging_spot(
                             data_orders,
                         )
 
-                        server_time = data_orders["timestamp"] + server_time_zero if server_time_zero == 0 else data_orders["timestamp"]
+                        server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
     
                     chart_trade = await chart_trade_in_msg(
                         message_channel,

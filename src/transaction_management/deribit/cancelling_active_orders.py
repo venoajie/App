@@ -158,7 +158,7 @@ async def cancelling_orders(
                 )
                 
 
-                if not chart_trade:
+                if not chart_trade and server_time != 0:
 
                     # get portfolio data
                     portfolio = reading_from_pkl_data("portfolio", currency)[0]
