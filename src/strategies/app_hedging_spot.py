@@ -151,6 +151,8 @@ async def hedging_spot(
 
                     if "user.changes.any" in message_channel:
                         
+                        log.error (f"data_orders user.changes.any {data_orders}")
+                        
                         await update_cached_orders(cached_orders, data_orders)                                    
 
                     currency: str = extract_currency_from_text(
@@ -247,6 +249,8 @@ async def hedging_spot(
                                 )
 
                                 len_cleaned_orders = len(orders_currency)
+                                
+                                log.warning (f"cached_orders {cached_orders}")
 
                                 # if orders_currency:
 
