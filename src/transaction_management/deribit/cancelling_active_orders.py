@@ -220,6 +220,8 @@ async def cancelling_orders(
                                     if currency_upper in o["instrument_name"]
                                 ]
                             )
+                            
+                            log.warning(f"orders_currency {orders_currency}")
 
                             position = [o for o in sub_account["positions"]]
                             # log.debug (f"position {position}")
