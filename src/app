@@ -166,7 +166,7 @@ async def main():
         
         stream = StreamAccountData(sub_account_id)
                 
-        producer_task = asyncio.create_task(stream.ws_manager(queue,has_order)) 
+        producer_task = asyncio.create_task(stream.ws_manager(queue,queue_orders,has_order)) 
         
         await asyncio.sleep(0.0005)
         
@@ -210,7 +210,7 @@ async def main():
                 private_data,
                 modify_order_and_db,
                 config_app,
-                queue,
+                queue_orders,
                 has_order),
     
 

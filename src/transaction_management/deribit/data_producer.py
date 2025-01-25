@@ -109,7 +109,7 @@ class StreamAccountData(ModifyOrderDb):
             parse_dotenv(self.sub_account_id)["key_ocid"]
         )
 
-    async def ws_manager(self, queue: object,has_order) -> None:
+    async def ws_manager(self, queue: object,queue2: object, has_order) -> None:
 
         async with websockets.connect(
             self.ws_connection_url,
@@ -286,6 +286,7 @@ class StreamAccountData(ModifyOrderDb):
                                 log.critical (f"len_msg {len_msg}")
                                 log.critical (f"message_channel {message_channel}")
                                 await queue.put(len_msg)
+                                await queue2.put(len_msg)
                                 has_order.release() 
                                 #await queue.put(message_params)
                                 
