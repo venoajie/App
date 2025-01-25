@@ -51,10 +51,10 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
 
                 message_channel: str = message_params["channel"]
                 
-                log.warning (f"len_msg {message_params}")    
+                #log.warning (f"len_msg {message_params}")    
                 #log.warning (f"message_channel {message_channel}")    
                 
-                log.warning (f"message_params {message_params}")             
+                #log.warning (f"message_params {message_params}")             
             
                 currency: str = extract_currency_from_text(
                     message_channel

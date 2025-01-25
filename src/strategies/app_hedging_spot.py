@@ -338,7 +338,7 @@ async def hedging_spot(
                                         )
 
                                         log.info(
-                                            f"orders_currency_strategy {len(orders_currency_strategy)}"
+                                            f"orders_currency_strategy {len(orders_currency_strategy)}  {currency}"
                                         )
 
                                         log.warning(f"strategy {strategy}-START")
