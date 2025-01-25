@@ -109,7 +109,13 @@ class StreamAccountData(ModifyOrderDb):
             parse_dotenv(self.sub_account_id)["key_ocid"]
         )
 
-    async def ws_manager(self, queue_cancelling: object,queue_capturing_user_changes: object, queue_avoiding_double,has_order) -> None:
+    async def ws_manager(
+        self, 
+        queue_cancelling: object,
+        queue_capturing_user_changes: object, 
+        queue_avoiding_double: object,
+        queue_hedging: object,
+        has_order: object) -> None:
 
         async with websockets.connect(
             self.ws_connection_url,
@@ -221,9 +227,6 @@ class StreamAccountData(ModifyOrderDb):
                                 ws_channel=ws,
                             )
                             
-                            
-                    
-                    len_msg = 0
                     while True:
 
                         # Receive WebSocket messages
@@ -282,8 +285,8 @@ class StreamAccountData(ModifyOrderDb):
                                     log.warning (f"message_params {message_params}")
                                     await queue_capturing_user_changes.put(message_params)
                                     await queue_avoiding_double.put(message_params)
-                                    
                                                                         
+                                await queue_hedging.put(message_params)
                                 await queue_cancelling.put(message_params)
                                 has_order.release() 
                                 

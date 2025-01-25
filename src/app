@@ -159,23 +159,25 @@ async def main():
         config_app = get_config(file_toml)
 
         queue = Queue(maxsize=100)
-        queue_capturing_user_changes, queue_cancelling, queue_avoiding_double = Queue(), Queue(), Queue()
+        queue_capturing_user_changes, queue_cancelling, queue_avoiding_double, queue_hedging = Queue(), Queue(), Queue()
         queue_orders = Queue()
         
         has_order = asyncio.Semaphore(value=1) 
         
         stream = StreamAccountData(sub_account_id)
                 
-        producer_task = asyncio.create_task(stream.ws_manager(queue_cancelling,queue_capturing_user_changes,queue_avoiding_double,has_order)) 
+        producer_task = asyncio.create_task(
+            stream.ws_manager(
+                queue_cancelling,
+                queue_capturing_user_changes,
+                queue_avoiding_double,
+                queue_hedging,
+                has_order)
+            ) 
         
         await asyncio.sleep(0.0005)
         
         """
-            #hedging_spot(
-            #    modify_order_and_db,
-            #    config_app,
-            #    queue),
-        
             #future_spreads(
             #    modify_order_and_db,
             #    config_app,
@@ -202,6 +204,11 @@ async def main():
                 queue_capturing_user_changes,
                 has_order),
     
+            hedging_spot(
+                private_data,
+                modify_order_and_db,
+                config_app,
+                queue_hedging),
         
             avoiding_double_ids(
                 private_data,

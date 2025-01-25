@@ -32,11 +32,15 @@ from transaction_management.deribit.managing_deribit import (
     currency_inline_with_database_address,
 )
 from transaction_management.deribit.processing_orders import processing_orders
-from utilities.caching import combining_ticker_data as cached_ticker
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    combining_order_data, 
+    update_cached_orders)
 from utilities.caching import update_cached_ticker
 from utilities.number_modification import get_closest_value
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
+    extract_currency_from_text,
     parsing_label,
     remove_double_brackets_in_list,
     remove_redundant_elements,
@@ -58,9 +62,10 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def hedging_spot(
-    modify_order_and_db,
+    private_data: object,
+    modify_order_and_db: object,
     config_app: list,
-    queue,
+    queue: object,
 ):
     """ """
 
@@ -125,6 +130,8 @@ async def hedging_spot(
         )
 
         ticker_all = cached_ticker(instruments_name)
+        
+        cached_orders: list = await combining_order_data(private_data, currencies)
 
         while True:
 
@@ -132,22 +139,23 @@ async def hedging_spot(
 
             while not_order:
 
-                message: str = await queue.get()
-                queue.task_done
-
-                message_channel: str = message["channel"]
+                message_params = queue.get_nowait()
+                message_channel: str = message_params["channel"]
                 # log.debug(f"message_channel {message_channel}")
 
-                data_orders: dict = message["data"]
+                data_orders: dict = message_params["data"]
 
-                cleaned_orders: dict = message["cleaned_orders"]
+                if "user.changes.any" in message_channel:
+                    
+                    await update_cached_orders(cached_orders, data_orders)                                    
 
-                currency: str = message["currency"]
-
-                currency_lower: str = currency
+                currency: str = extract_currency_from_text(
+                        message_channel
+                    )
 
                 currency_upper: str = currency.upper()
 
+                currency_lower: str = currency
                 instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                 instrument_name_future = (message_channel)[19:]
@@ -224,10 +232,10 @@ async def hedging_spot(
 
                             orders_currency = (
                                 []
-                                if not cleaned_orders
+                                if not cached_orders
                                 else [
                                     o
-                                    for o in cleaned_orders
+                                    for o in cached_orders
                                     if currency_upper in o["instrument_name"]
                                 ]
                             )
@@ -245,7 +253,7 @@ async def hedging_spot(
                             ]
 
 
-                            server_time = message["latest_timestamp"]
+                            server_time = data_orders["latest_timestamp"]
                             
                             size_perpetuals_reconciled = (
                                 is_size_sub_account_and_my_trades_reconciled(
@@ -385,9 +393,9 @@ async def hedging_spot(
 
                                     if not size_future_reconciled:
 
+                                        queue.task_done
+                                        
                                         not_order = False
-
-                                        kill_process("general_tasks")
 
                                         break
 
@@ -433,6 +441,8 @@ async def hedging_spot(
                                                     send_order,
                                                 )
 
+                                                queue.task_done
+                                                
                                                 not_order = False
 
                                                 break
@@ -546,6 +556,8 @@ async def hedging_spot(
                                                                             modify_order_and_db,
                                                                         )
 
+                                                                        queue.task_done
+                                                                        
                                                                         not_order = (
                                                                             False
                                                                         )
@@ -591,11 +603,16 @@ async def hedging_spot(
                                                                             send_closing_order,
                                                                         )
 
+                                                                        queue.task_done
+                                                                        
                                                                         not_order = (
                                                                             False
                                                                         )
 
                                                                         break
+
+                queue.task_done
+
                 not_order = False
 
     except Exception as error:
