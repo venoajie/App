@@ -53,8 +53,6 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
                     # check for stop
             if message_params is None:
                 break
-            message_params: str = await queue.get_nowait()
-            
             #data: list = message_params["data"]
 
             #message_channel: str = message_params["channel"]
