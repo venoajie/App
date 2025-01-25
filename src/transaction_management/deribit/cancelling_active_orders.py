@@ -116,9 +116,9 @@ async def cancelling_orders(
         
             message_params: str = await queue.get()
             # message: str = queue.get()
-            message_channel: str = message_params["channel"]
+            #message_channel: str = message_params["channel"]
             log.debug(f"len_msg {message_params}")
-            log.debug(f"message_channel {message_channel}")
+            #log.debug(f"message_channel {message_channel}")
             
             """
             # log.debug(f"message_channel {message_channel}")
