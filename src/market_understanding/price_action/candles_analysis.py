@@ -229,8 +229,8 @@ def get_market_condition(np: object, candles_data: list, currency_upper: str):
     strong_bullish, strong_bearish = False, False
 
     if candle_5_long_body_any:
-        weak_bullish = candle_5_type > 0
-        weak_bearish = candle_5_type < 0
+        weak_bullish = True if candle_5_type > 0 else False
+        weak_bearish = True if  candle_5_type < 0 else False
 
     if candle_60_long_body_any and candle_15_long_body_any:
         bullish = weak_bullish and candle_15_type > 0
