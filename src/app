@@ -208,7 +208,8 @@ async def main():
                 private_data,
                 modify_order_and_db,
                 config_app,
-                queue_hedging),
+                queue_hedging,
+                has_order),
         
             avoiding_double_ids(
                 private_data,
