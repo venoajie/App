@@ -118,7 +118,7 @@ async def cancelling_orders(
             try:
                 message_params = queue.get_nowait()
             except asyncio.QueueEmpty:
-                message_params = queue.get_nowait()
+                continue
                     # check for stop
             if message_params is None:
                 break
