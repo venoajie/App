@@ -42,7 +42,7 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
         
         print (f"queue.empty() capturing {queue.empty()}")
                 
-        while not queue.empty():
+        while True:
             
             from loguru import logger as log
 
