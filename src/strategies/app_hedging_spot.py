@@ -178,7 +178,9 @@ async def hedging_spot(
                             data_orders,
                             cached_candles_data,
                         )
-
+                        
+                        server_time = data_orders["timestamp"]
+                                
                         if not chart_trade:
 
                             archive_db_table = f"my_trades_all_{currency_lower}_json"
@@ -256,9 +258,6 @@ async def hedging_spot(
                                     if f"{currency_upper}-FS" not in o["instrument_name"]
                                 ]
 
-
-                                server_time = data_orders["latest_timestamp"]
-                                
                                 size_perpetuals_reconciled = (
                                     is_size_sub_account_and_my_trades_reconciled(
                                         position_without_combo,
