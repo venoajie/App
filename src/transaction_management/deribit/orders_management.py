@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#from loguru import logger as log
+from loguru import logger as log
 
 # user defined formula
 from db_management.sqlite_management import deleting_row, insert_tables
@@ -274,6 +274,8 @@ async def saving_orders(
     trades = data["trades"]
 
     orders = data["orders"]
+    
+    log.error (f"orders {orders}")
 
     if orders:
 
@@ -319,7 +321,7 @@ async def saving_orders(
                         order_id = order["order_id"]
                         order_state = order["order_state"]
 
-                        # log.error (f"order_state {order_state}")
+                        log.error (f"order_state {order_state}")
 
                         # no label
                         if label == "":
@@ -338,6 +340,8 @@ async def saving_orders(
                             label_and_side_consistent = is_label_and_side_consistent(
                                 non_checked_strategies, order
                             )
+                            
+                            log.error (f"label_and_side_consistent {label_and_side_consistent}")
 
                             if label_and_side_consistent and label:
 
