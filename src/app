@@ -159,7 +159,7 @@ async def main():
         config_app = get_config(file_toml)
 
         queue = Queue(maxsize=100)
-        queue_capturing_user_changes, queue_cancelling, queue_avoiding_double, queue_hedging = Queue(), Queue(), Queue(), Queue()
+        queue_capturing_user_changes, queue_cancelling, queue_avoiding_double, queue_hedging, queue_general = Queue(), Queue(), Queue(), Queue(), Queue()
         queue_orders = Queue()
         
         has_order = asyncio.Semaphore(value=1) 
@@ -168,6 +168,7 @@ async def main():
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(
+                queue_general,
                 queue_cancelling,
                 queue_capturing_user_changes,
                 queue_avoiding_double,
@@ -182,11 +183,6 @@ async def main():
             #    modify_order_and_db,
             #    config_app,
             #    queue),
-            
-            reconciling_size(
-                modify_order_and_db,
-                config_app,
-                idle_time),
             
 
                             
@@ -211,6 +207,11 @@ async def main():
                 queue_hedging,
                 has_order),
         
+            reconciling_size(
+                modify_order_and_db,
+                config_app,
+                idle_time),
+            
             avoiding_double_ids(
                 private_data,
                 modify_order_and_db,
@@ -227,7 +228,8 @@ async def main():
                 config_app,
                 queue_cancelling,
                 has_order),    
-    #saving_ws_data(queue),
+            
+            saving_ws_data(queue_general),
             )  
 
 

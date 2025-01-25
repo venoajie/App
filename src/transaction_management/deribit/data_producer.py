@@ -111,6 +111,7 @@ class StreamAccountData(ModifyOrderDb):
 
     async def ws_manager(
         self, 
+        queue_general: object,
         queue_cancelling: object,
         queue_capturing_user_changes: object, 
         queue_avoiding_double: object,
@@ -288,6 +289,8 @@ class StreamAccountData(ModifyOrderDb):
                                                                         
                                 await queue_hedging.put(message_params)
                                 await queue_cancelling.put(message_params)
+                                await queue_general.put(message_params)
+                                
                                 has_order.release() 
                                 
             except Exception as error:

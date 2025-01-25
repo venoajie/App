@@ -26,7 +26,7 @@ from transaction_management.deribit.api_requests import (
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-#from transaction_management.deribit.managing_deribit import ModifyOrderDb
+
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
@@ -34,7 +34,6 @@ from utilities.string_modification import (
 )
 from utilities.system_tools import (
     async_raise_error_message,
-    kill_process,
     provide_path_for_file,
 )
 
@@ -103,8 +102,6 @@ async def reconciling_size(
 
     try:
 
-        log.critical(f"Data cleaning")
-
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
 
@@ -120,8 +117,6 @@ async def reconciling_size(
         trade_db_table = relevant_tables["my_trades_table"]
 
         order_db_table = relevant_tables["orders_table"]
-
-        server_time_fixed = get_now_unix_time()
 
         while True:
 
@@ -141,20 +136,6 @@ async def reconciling_size(
 
                     query_trades = f"SELECT * FROM  v_{currency_lower}_trading"
                     query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log"
-
-                    # query_orders = f"SELECT * FROM  v_{currency_lower}_orders"
-
-                    # orders_currency = await executing_query_with_return (query_orders)
-
-                    # reconciliation_direction = ["from_sub_account_to_order_db","from_order_db_to_sub_account"]
-                    # for  direction in reconciliation_direction:
-                    #    await reconciling_orders(
-                    #        modify_order_and_db,
-                    #        sub_account,
-                    #        orders_currency,
-                    #        direction,
-                    #        order_db_table
-                    #    )
 
                     my_trades_currency_all_transactions: list = (
                         await executing_query_with_return(query_trades)
@@ -336,32 +317,6 @@ async def reconciling_size(
                     await clean_up_closed_transactions(
                         currency, archive_db_table, my_trades_currency_active
                     )
-
-                    # relabelling = await relabelling_double_ids(
-                    #    trade_db_table,
-                    #    archive_db_table,
-                    #    my_trades_currency_active_free_blanks,
-                    #    )
-
-                    if False:  # and relabelling:
-
-                        log.error(f"relabelling {relabelling}")
-
-                        cancellable_strategies = [
-                            o["strategy_label"]
-                            for o in strategy_attributes
-                            if o["cancellable"] == True
-                        ]
-
-                        await modify_order_and_db.cancel_the_cancellables(
-                            order_db_table, currency, cancellable_strategies
-                        )
-
-            time_elapsed = (server_time - server_time_fixed) / 1000
-
-            if time_elapsed > 15 * 60:
-
-                kill_process("general_tasks")
 
             await asyncio.sleep(idle_time)
 

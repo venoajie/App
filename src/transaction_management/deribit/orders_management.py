@@ -275,7 +275,7 @@ async def saving_orders(
 
     orders = data["orders"]
     
-    log.error (f"orders {orders}")
+    #log.error (f"orders {orders}")
 
     if orders:
 
@@ -321,7 +321,7 @@ async def saving_orders(
                         order_id = order["order_id"]
                         order_state = order["order_state"]
 
-                        log.error (f"order_state {order_state}")
+                        #log.error (f"order_state {order_state}")
 
                         # no label
                         if label == "":
@@ -341,7 +341,7 @@ async def saving_orders(
                                 non_checked_strategies, order
                             )
                             
-                            log.error (f"label_and_side_consistent {label_and_side_consistent} {label}")
+                            #log.error (f"label_and_side_consistent {label_and_side_consistent} {label}")
 
                             if label_and_side_consistent and label:
 
