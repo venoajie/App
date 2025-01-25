@@ -48,8 +48,7 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
             try:
                 message_params = queue.get_nowait()
             except asyncio.QueueEmpty:
-                await asyncio.sleep(0.5)
-                continue
+                message_params = queue.get_nowait()
                     # check for stop
             if message_params is None:
                 break
