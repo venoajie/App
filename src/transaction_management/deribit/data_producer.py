@@ -116,6 +116,7 @@ class StreamAccountData(ModifyOrderDb):
         queue_capturing_user_changes: object, 
         queue_avoiding_double: object,
         queue_hedging: object,
+        queue_combo: object,
         has_order: object) -> None:
 
         async with websockets.connect(
@@ -284,11 +285,13 @@ class StreamAccountData(ModifyOrderDb):
                     
                                 await queue_hedging.put(message_params)
                                 has_order.release() 
+                                await queue_combo.put(message_params)
+                                has_order.release() 
                                 await queue_cancelling.put(message_params)
                                 has_order.release() 
-                                await queue_general.put(message_params)
-                                
-                                has_order.release() 
+                                await queue_general.put(message_params)                                
+                                has_order.release()
+                                 
                                 if "user.changes.any" in message_channel:     
                                     
                                     log.warning (f"message_params {message_params}")

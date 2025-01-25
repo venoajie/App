@@ -34,15 +34,18 @@ from transaction_management.deribit.managing_deribit import (
     currency_inline_with_database_address,
 )
 from transaction_management.deribit.processing_orders import processing_orders
-from utilities.caching import combining_ticker_data as cached_ticker
-from utilities.caching import update_cached_ticker
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    combining_order_data, 
+    update_cached_orders,
+    update_cached_ticker)
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
+    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
 from utilities.system_tools import parse_error_message, provide_path_for_file
-
 
 async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
@@ -54,18 +57,17 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def future_spreads(
-    modify_order_and_db,
+    private_data: object,
+    modify_order_and_db: object,
     config_app: list,
-    queue,
+    queue: object,
+    has_order: object
 ):
     """ """
 
     strategy = "futureSpread"
-    log.critical(f"starting {strategy}")
 
     try:
-
-        #modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
@@ -107,47 +109,62 @@ async def future_spreads(
 
         ticker_all = cached_ticker(instruments_name)
 
-        while True:
+        ticker_all = cached_ticker(instruments_name)
+        
+        cached_orders: list = await combining_order_data(private_data, currencies)
+        
+        server_time = 0
 
-            not_order = True
 
-            while not_order:
+        while await has_order.acquire():
+        
+            try:
+                    
+                not_order = True
 
-                message: str = await queue.get()
-                queue.task_done
-                # message: str = queue.get()
+                while not_order:
 
-                message_channel: str = message["channel"]
-                # log.debug(f"message_channel {message_channel}")
+                    message_params = queue.get_nowait()
 
-                data_orders: dict = message["data"]
+                    message_channel: str = message_params["channel"]
+                    log.critical(f"message_channel {message_channel}")
 
-                cleaned_orders: dict = message["cleaned_orders"]
+                    data_orders: dict = message_params["data"]
 
-                currency: str = message["currency"]
+                    if "user.changes.any" in message_channel:
+                        
+                        log.error (f"data_orders user.changes.any {data_orders}")
+                        
+                        await update_cached_orders(cached_orders, data_orders)                                    
 
-                currency_lower: str = currency
+                    currency: str = extract_currency_from_text(
+                            message_channel
+                        )
 
-                currency_upper: str = currency.upper()
+                    currency_upper: str = currency.upper()
 
-                instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
+                    currency_lower: str = currency
+                    
+                    instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                instrument_name_future = (message_channel)[19:]
-                if message_channel == f"incremental_ticker.{instrument_name_future}":
+                    instrument_name_future = (message_channel)[19:]
+                    if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                    update_cached_ticker(
-                        instrument_name_future,
-                        ticker_all,
-                        data_orders,
-                    )
+                        update_cached_ticker(
+                            instrument_name_future,
+                            ticker_all,
+                            data_orders,
+                        )
+
+                        server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
 
                     chart_trade = await chart_trade_in_msg(
                         message_channel,
                         data_orders,
                         cached_candles_data,
                     )
-
-                    if not chart_trade:
+                    
+                    if not chart_trade and server_time != 0:
 
                         archive_db_table = f"my_trades_all_{currency_lower}_json"
 
@@ -204,10 +221,10 @@ async def future_spreads(
 
                             orders_currency = (
                                 []
-                                if not cleaned_orders
+                                if not cached_orders
                                 else [
                                     o
-                                    for o in cleaned_orders
+                                    for o in cached_orders
                                     if currency_upper in o["instrument_name"]
                                 ]
                             )
@@ -221,9 +238,7 @@ async def future_spreads(
                                 for o in position
                                 if f"{currency_upper}-FS" not in o["instrument_name"]
                             ]
-                            
-                            server_time = message["latest_timestamp"]
-                            
+                                                        
                             size_perpetuals_reconciled = (
                                 is_size_sub_account_and_my_trades_reconciled(
                                     position_without_combo,
@@ -431,6 +446,8 @@ async def future_spreads(
                                                             config_app,
                                                             send_order,
                                                         )
+                                                        
+                                                        queue.task_done
 
                                                         not_order = False
 
@@ -491,6 +508,8 @@ async def future_spreads(
                                                             send_order,
                                                         )
 
+                                                        queue.task_done
+                                                        
                                                         not_order = False
 
                                                         break
@@ -591,12 +610,22 @@ async def future_spreads(
                                                                         send_order,
                                                                     )
 
+                                                                    queue.task_done
+                                                                    
                                                                     not_order = False
 
                                                                     break
 
+                queue.task_done
+
                 not_order = False
 
+            except asyncio.QueueEmpty:
+                continue
+                    # check for stop
+            if message_params is None:
+                break
+            
     except Exception as error:
 
         await telegram_bot_sendtext(f"app future spreads - {error}", "general_error")

@@ -182,8 +182,6 @@ async def hedging_spot(
                         cached_candles_data,
                     )
                     
-                            
-
                     archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
                     if not chart_trade and server_time != 0:
