@@ -46,7 +46,7 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
             
             from loguru import logger as log
 
-            message_params: str = await queue.get()
+            message_params: str = await queue.get_nowait()
             
             #data: list = message_params["data"]
 
