@@ -48,7 +48,6 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 async def relabelling_trades(
     modify_order_and_db: object,
     config_app: list,
-    queue: list,
 ):
     """ """
 

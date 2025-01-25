@@ -64,9 +64,7 @@ async def avoiding_double_ids(
 
             currency_upper: str = currency.upper()
 
-            if "user.changes.any" in message_channel:
-                
-                await update_cached_orders(cached_orders, data)                                    
+            await update_cached_orders(cached_orders, data)                                    
                                     
             orders_currency: list = (
                 []
