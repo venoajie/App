@@ -218,9 +218,9 @@ async def main():
                 config_app,
                 queue_avoiding_double),
 
-            relabelling_trades(
-                modify_order_and_db,
-                config_app),
+            #relabelling_trades(
+            #    modify_order_and_db,
+            #    config_app),
     
             cancelling_orders(
                 private_data,

@@ -85,8 +85,6 @@ async def insert_tables(table_name: str, params: list | dict | str):
 
             if "json" in table_name:
                 
-                log.warning(f"insert_tables params {table_name} {params}")
-
                 # input was in list format. Insert them to db one by one
                 if isinstance(params, list):
                     for param in params:
