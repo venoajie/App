@@ -285,7 +285,7 @@ class StreamAccountData(ModifyOrderDb):
                                 len_msg = len(message_params)+len_msg-1
                                 log.warning (f"len_msg {len_msg}")
                                 await queue.put(len_msg)
-                                has_order.release() 
+                                await has_order.release() 
                                 #await queue.put(message_params)
                                 
             except Exception as error:

@@ -112,7 +112,7 @@ async def cancelling_orders(
         
         print (f"queue.empty() cancelling {queue.empty()}")
 
-        while has_order.acquire():
+        while await has_order.acquire():
         
             message_params: str = await queue.get()
             # message: str = queue.get()
