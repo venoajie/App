@@ -76,6 +76,8 @@ async def insert_tables(table_name: str, params: list | dict | str):
 
     """
     try:
+        
+        log.warning(f"insert_tables params {table_name} {params}")
 
         async with aiosqlite.connect(
             "databases/trading.sqlite3", isolation_level=None

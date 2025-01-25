@@ -341,7 +341,7 @@ async def saving_orders(
                                 non_checked_strategies, order
                             )
                             
-                            log.error (f"label_and_side_consistent {label_and_side_consistent}")
+                            log.error (f"label_and_side_consistent {label_and_side_consistent} {label}")
 
                             if label_and_side_consistent and label:
 
