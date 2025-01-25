@@ -159,7 +159,7 @@ async def main():
         config_app = get_config(file_toml)
 
         queue = Queue(maxsize=100)
-        queue_capturing_user_changes, queue_cancelling, queue_avoiding_double, queue_hedging = Queue(), Queue(), Queue()
+        queue_capturing_user_changes, queue_cancelling, queue_avoiding_double, queue_hedging = Queue(), Queue(), Queue(), Queue()
         queue_orders = Queue()
         
         has_order = asyncio.Semaphore(value=1) 
