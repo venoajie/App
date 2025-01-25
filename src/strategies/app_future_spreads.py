@@ -616,12 +616,9 @@ async def future_spreads(
                                                                     break
 
                 queue.task_done
-
-                not_order = False
                 
                 await asyncio.sleep(.1)
                 
-                break
 
             except asyncio.QueueEmpty:
                 
