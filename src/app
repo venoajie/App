@@ -162,7 +162,7 @@ async def main():
         queue_cached_orders = Queue()
         queue_orders = Queue()
         
-        has_order = asyncio.Semaphore(value=0) 
+        has_order = asyncio.Semaphore(1) 
         
         stream = StreamAccountData(sub_account_id)
                 
