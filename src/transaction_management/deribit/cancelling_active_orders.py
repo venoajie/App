@@ -357,8 +357,8 @@ async def cancelling_orders(
                                                     break
 
 
-                queue.task_done
-                await asyncio.sleep(idle_time)
+                    queue.task_done
+                    await asyncio.sleep(idle_time)
 
             except asyncio.QueueEmpty:
                 continue
