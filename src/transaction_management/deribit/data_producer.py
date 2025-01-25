@@ -282,7 +282,7 @@ class StreamAccountData(ModifyOrderDb):
                                     log.warning (f"message_params {message_params}")
 
                                 # queing result
-                                len_msg = len(message_params)+len_msg
+                                len_msg = len(message_params)+len_msg-1
                                 log.warning (f"len_msg {len_msg}")
                                 await queue.put(len_msg)
                                 #await queue.put(message_params)
