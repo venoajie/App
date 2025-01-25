@@ -46,7 +46,6 @@ from utilities.string_modification import (
     remove_redundant_elements,
 )
 from utilities.system_tools import (
-    kill_process,
     parse_error_message,
     provide_path_for_file,
 )

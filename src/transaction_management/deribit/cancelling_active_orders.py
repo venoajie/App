@@ -325,6 +325,8 @@ async def cancelling_orders(
                                                         server_time,
                                                     )
                                                 )
+                                                
+                                                log.error (f"cancel_allowed {cancel_allowed} {order} server_time {server_time}")
 
                                                 if cancel_allowed["cancel_allowed"]:
                                                     await modify_order_and_db.if_cancel_is_true(
