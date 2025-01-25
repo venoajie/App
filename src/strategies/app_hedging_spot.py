@@ -145,7 +145,7 @@ async def hedging_spot(
                     message_params = queue.get_nowait()
 
                     message_channel: str = message_params["channel"]
-                    # log.debug(f"message_channel {message_channel}")
+                    log.critical(f"message_channel {message_channel}")
 
                     data_orders: dict = message_params["data"]
 
