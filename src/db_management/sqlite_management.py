@@ -85,7 +85,7 @@ async def insert_tables(table_name: str, params: list | dict | str):
             
             #await db.execute("BEGIN TRANSACTION")
 
-            await db.execute("pragma journal_mode=wal;")
+            #await db.execute("pragma journal_mode=wal;")
 
             if "json" in table_name:
                 
