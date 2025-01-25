@@ -283,7 +283,8 @@ class StreamAccountData(ModifyOrderDb):
 
                                 # queing result
                                 len_msg = len(message_params)+len_msg-1
-                                log.warning (f"len_msg {len_msg}")
+                                log.critical (f"len_msg {len_msg}")
+                                log.critical (f"message_channel {message_channel}")
                                 await queue.put(len_msg)
                                 has_order.release() 
                                 #await queue.put(message_params)
