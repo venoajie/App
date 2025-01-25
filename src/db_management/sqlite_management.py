@@ -264,7 +264,7 @@ async def deleting_row(
 
 #            await db.execute("BEGIN TRANSACTION")
 
-#            await db.execute("pragma journal_mode=wal;")
+            await db.execute("pragma journal_mode=wal;")
 
             if filter == None:
                 await db.execute(query_table_filter_none)
