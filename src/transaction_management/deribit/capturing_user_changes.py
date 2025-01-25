@@ -13,7 +13,7 @@ from transaction_management.deribit.orders_management import saving_orders
 from utilities.string_modification import extract_currency_from_text
 from utilities.system_tools import parse_error_message
 
-async def saving_and_relabelling_orders(private_data: object, modify_order_and_db: object, config_app: list, queue: object):
+async def saving_and_relabelling_orders(private_data: object, modify_order_and_db: object, config_app: list, queue: object,has_order):
     """ """
     try:
 
@@ -41,8 +41,8 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
         order_db_table: str = relevant_tables["orders_table"]
         
         print (f"queue.empty() capturing {queue.empty()}")
-                
-        while True:
+        
+        while has_order.acquire():
             
             from loguru import logger as log
 

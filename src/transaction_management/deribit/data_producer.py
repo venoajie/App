@@ -109,7 +109,7 @@ class StreamAccountData(ModifyOrderDb):
             parse_dotenv(self.sub_account_id)["key_ocid"]
         )
 
-    async def ws_manager(self, queue: object) -> None:
+    async def ws_manager(self, queue: object,has_order) -> None:
 
         async with websockets.connect(
             self.ws_connection_url,
@@ -285,6 +285,7 @@ class StreamAccountData(ModifyOrderDb):
                                 len_msg = len(message_params)+len_msg-1
                                 log.warning (f"len_msg {len_msg}")
                                 await queue.put(len_msg)
+                                has_order.release() 
                                 #await queue.put(message_params)
                                 
             except Exception as error:

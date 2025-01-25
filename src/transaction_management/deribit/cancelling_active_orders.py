@@ -59,6 +59,7 @@ async def cancelling_orders(
     modify_order_and_db: object,
     config_app: list,
     queue: object,
+    has_order
 ):
     """ """
 
@@ -110,9 +111,9 @@ async def cancelling_orders(
         cached_orders: list = await combining_order_data(private_data, currencies)
         
         print (f"queue.empty() cancelling {queue.empty()}")
-                
-        while  True:
 
+        while has_order.acquire():
+        
             message_params: str = await queue.get()
             # message: str = queue.get()
             log.debug(f"len_msg {message_params}")
