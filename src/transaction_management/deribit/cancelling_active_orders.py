@@ -59,7 +59,8 @@ async def cancelling_orders(
     modify_order_and_db: object,
     config_app: list,
     queue: object,
-    has_order
+    has_order: object,
+    idle_time: int = 1
 ):
     """ """
 
@@ -357,6 +358,7 @@ async def cancelling_orders(
 
 
                 queue.task_done
+                await asyncio.sleep(idle_time)
 
             except asyncio.QueueEmpty:
                 continue
