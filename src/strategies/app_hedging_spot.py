@@ -151,7 +151,7 @@ async def hedging_spot(
 
                     if "user.changes.any" in message_channel:
                         
-                        log.error (f"data_orders user.changes.any {data_orders}")
+                        #log.error (f"data_orders user.changes.any {data_orders}")
                         
                         await update_cached_orders(cached_orders, data_orders)                                    
 
@@ -250,7 +250,7 @@ async def hedging_spot(
 
                                 len_cleaned_orders = len(orders_currency)
                                 
-                                log.info (f"cached_orders {cached_orders}")
+                         #       log.info (f"cached_orders {cached_orders}")
 
                                 # if orders_currency:
 
@@ -277,8 +277,8 @@ async def hedging_spot(
                                     break
 
                                 if index_price is not None and equity > 0:
-
                                     my_trades_currency: list = [
+
                                         o
                                         for o in my_trades_currency_all
                                         if o["label"] is not None

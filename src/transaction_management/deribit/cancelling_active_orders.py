@@ -131,7 +131,7 @@ async def cancelling_orders(
 
                 if "user.changes.any" in message_channel:
                     
-                    log.debug (data_orders)
+                    #log.debug (data_orders)
                     
                     await update_cached_orders(cached_orders, data_orders)                                    
                         
