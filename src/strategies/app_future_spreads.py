@@ -366,6 +366,9 @@ async def future_spreads(
                                         ):
 
                                             instrument_name_future = f"{currency_upper}-{instrument_name_combo[7:][:7]}"
+                                            
+                                            log.debug(f"instrument_name_future {instrument_name_future}")
+                                            log.warning(f"instrument_attributes_futures_all {instrument_attributes_futures_all}")
 
                                             instrument_time_left = (
                                                 max(
