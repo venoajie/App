@@ -620,7 +620,10 @@ async def future_spreads(
                 not_order = False
 
             except asyncio.QueueEmpty:
-                continue
+                
+                log.critical(f"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                await asyncio.sleep(.1)
+                break
                     # check for stop
             if message_params is None:
                 break

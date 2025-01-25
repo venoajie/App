@@ -627,7 +627,9 @@ async def hedging_spot(
                 not_order = False
 
             except asyncio.QueueEmpty:
-                continue
+                log.critical(f"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                await asyncio.sleep(.1)
+                break
                     # check for stop
             if message_params is None:
                 break
