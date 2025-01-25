@@ -112,7 +112,6 @@ async def cancelling_orders(
 
         while await has_order.acquire():
         
-
             try:
                 message_params = queue.get_nowait()
 
@@ -131,6 +130,8 @@ async def cancelling_orders(
                 currency_lower: str = currency
 
                 if "user.changes.any" in message_channel:
+                    
+                    log.debug (data_orders)
                     
                     await update_cached_orders(cached_orders, data_orders)                                    
                         
