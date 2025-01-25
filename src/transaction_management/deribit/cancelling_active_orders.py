@@ -109,6 +109,8 @@ async def cancelling_orders(
         ticker_all = cached_ticker(instruments_name)
 
         cached_orders: list = await combining_order_data(private_data, currencies)
+        
+        server_time == 0
 
         while await has_order.acquire():
         
@@ -147,101 +149,126 @@ async def cancelling_orders(
                         data_orders,
                     )
 
-                    chart_trade = await chart_trade_in_msg(
-                        message_channel,
-                        data_orders,
-                        cached_candles_data,
+                    server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
+
+                chart_trade = await chart_trade_in_msg(
+                    message_channel,
+                    data_orders,
+                    cached_candles_data,
+                )
+                
+
+                if not chart_trade:
+
+                    # get portfolio data
+                    portfolio = reading_from_pkl_data("portfolio", currency)[0]
+
+                    equity: float = portfolio["equity"]
+
+                    ticker_perpetual_instrument_name = [
+                        o
+                        for o in ticker_all
+                        if instrument_name_perpetual in o["instrument_name"]
+                    ][0]
+
+                    index_price = get_index(
+                        data_orders, ticker_perpetual_instrument_name
                     )
-                    
-                    server_time = data_orders["timestamp"]
 
-                    if not chart_trade:
+                    sub_account = reading_from_pkl_data("sub_accounts", currency)
 
-                        # get portfolio data
-                        portfolio = reading_from_pkl_data("portfolio", currency)[0]
+                    sub_account = sub_account[0]
 
-                        equity: float = portfolio["equity"]
+                    market_condition = get_market_condition(
+                        np, cached_candles_data, currency_upper
+                    )
 
-                        ticker_perpetual_instrument_name = [
-                            o
-                            for o in ticker_all
-                            if instrument_name_perpetual in o["instrument_name"]
-                        ][0]
+                    if sub_account:
 
-                        index_price = get_index(
-                            data_orders, ticker_perpetual_instrument_name
+                        query_trades = (
+                            f"SELECT * FROM  v_{currency_lower}_trading_active"
                         )
 
-                        sub_account = reading_from_pkl_data("sub_accounts", currency)
-
-                        sub_account = sub_account[0]
-
-                        market_condition = get_market_condition(
-                            np, cached_candles_data, currency_upper
+                        my_trades_currency_all_transactions: list = (
+                            await executing_query_with_return(query_trades)
                         )
 
-                        if sub_account:
-
-                            query_trades = (
-                                f"SELECT * FROM  v_{currency_lower}_trading_active"
-                            )
-
-                            my_trades_currency_all_transactions: list = (
-                                await executing_query_with_return(query_trades)
-                            )
-
-                            my_trades_currency_all: list = (
-                                []
-                                if my_trades_currency_all_transactions == 0
-                                else [
-                                    o
-                                    for o in my_trades_currency_all_transactions
-                                    if o["instrument_name"]
-                                    in [
-                                        o["instrument_name"]
-                                        for o in instrument_attributes_futures_all
-                                    ]
-                                ]
-                            )
-
-                            orders_currency = (
-                                []
-                                if not cached_orders
-                                else [
-                                    o
-                                    for o in cached_orders
-                                    if currency_upper in o["instrument_name"]
-                                ]
-                            )
-
-                            position = [o for o in sub_account["positions"]]
-                            # log.debug (f"position {position}")
-                            position_without_combo = [
+                        my_trades_currency_all: list = (
+                            []
+                            if my_trades_currency_all_transactions == 0
+                            else [
                                 o
-                                for o in position
-                                if f"{currency_upper}-FS" not in o["instrument_name"]
+                                for o in my_trades_currency_all_transactions
+                                if o["instrument_name"]
+                                in [
+                                    o["instrument_name"]
+                                    for o in instrument_attributes_futures_all
+                                ]
                             ]
-            
-                            if index_price is not None and equity > 0:
-            
-                                size_perpetuals_reconciled = (
-                                    is_size_sub_account_and_my_trades_reconciled(
-                                        position_without_combo,
-                                        my_trades_currency_all,
-                                        instrument_name_perpetual,
-                                    )
+                        )
+
+                        orders_currency = (
+                            []
+                            if not cached_orders
+                            else [
+                                o
+                                for o in cached_orders
+                                if currency_upper in o["instrument_name"]
+                            ]
+                        )
+
+                        position = [o for o in sub_account["positions"]]
+                        # log.debug (f"position {position}")
+                        position_without_combo = [
+                            o
+                            for o in position
+                            if f"{currency_upper}-FS" not in o["instrument_name"]
+                        ]
+        
+                        if index_price is not None and equity > 0:
+        
+                            size_perpetuals_reconciled = (
+                                is_size_sub_account_and_my_trades_reconciled(
+                                    position_without_combo,
+                                    my_trades_currency_all,
+                                    instrument_name_perpetual,
                                 )
-                                my_trades_currency: list = [
+                            )
+                            my_trades_currency: list = [
+                                o
+                                for o in my_trades_currency_all
+                                if o["label"] is not None
+                            ]
+
+                            notional: float = compute_notional_value(
+                                index_price, equity
+                            )
+
+                            for strategy in active_strategies:
+
+                                strategy_params = [
                                     o
-                                    for o in my_trades_currency_all
-                                    if o["label"] is not None
+                                    for o in strategy_attributes
+                                    if o["strategy_label"] == strategy
+                                ][0]
+
+                                my_trades_currency_strategy = [
+                                    o
+                                    for o in my_trades_currency
+                                    if strategy in (o["label"])
                                 ]
 
-                                notional: float = compute_notional_value(
-                                    index_price, equity
+                                orders_currency_strategy = (
+                                    []
+                                    if not orders_currency
+                                    else [
+                                        o
+                                        for o in orders_currency
+                                        if strategy in (o["label"])
+                                    ]
                                 )
 
-                                for strategy in active_strategies:
+                                if "futureSpread" in strategy:
 
                                     strategy_params = [
                                         o
@@ -249,90 +276,68 @@ async def cancelling_orders(
                                         if o["strategy_label"] == strategy
                                     ][0]
 
-                                    my_trades_currency_strategy = [
-                                        o
-                                        for o in my_trades_currency
-                                        if strategy in (o["label"])
-                                    ]
-
-                                    orders_currency_strategy = (
-                                        []
-                                        if not orders_currency
-                                        else [
-                                            o
-                                            for o in orders_currency
-                                            if strategy in (o["label"])
-                                        ]
+                                    combo_auto = ComboAuto(
+                                        strategy,
+                                        strategy_params,
+                                        orders_currency_strategy,
+                                        server_time,
+                                        market_condition,
+                                        my_trades_currency_strategy,
+                                        ticker_perpetual_instrument_name,
                                     )
 
-                                    if "futureSpread" in strategy:
+                                    if orders_currency_strategy:
+                                        for order in orders_currency_strategy:
+                                            cancel_allowed: dict = (
+                                                await combo_auto.is_cancelling_orders_allowed(
+                                                    order,
+                                                    server_time,
+                                                )
+                                            )
 
-                                        strategy_params = [
-                                            o
-                                            for o in strategy_attributes
-                                            if o["strategy_label"] == strategy
-                                        ][0]
-
-                                        combo_auto = ComboAuto(
-                                            strategy,
-                                            strategy_params,
-                                            orders_currency_strategy,
-                                            server_time,
-                                            market_condition,
-                                            my_trades_currency_strategy,
-                                            ticker_perpetual_instrument_name,
-                                        )
-
-                                        if orders_currency_strategy:
-                                            for order in orders_currency_strategy:
-                                                cancel_allowed: dict = (
-                                                    await combo_auto.is_cancelling_orders_allowed(
-                                                        order,
-                                                        server_time,
-                                                    )
+                                            if cancel_allowed["cancel_allowed"]:
+                                                await modify_order_and_db.if_cancel_is_true(
+                                                    order_db_table,
+                                                    cancel_allowed,
                                                 )
 
-                                                if cancel_allowed["cancel_allowed"]:
-                                                    await modify_order_and_db.if_cancel_is_true(
-                                                        order_db_table,
-                                                        cancel_allowed,
-                                                    )
+                                if (
+                                    "hedgingSpot" in strategy
+                                    and size_perpetuals_reconciled
+                                ):
 
-                                    if (
-                                        "hedgingSpot" in strategy
-                                        and size_perpetuals_reconciled
-                                    ):
+                                    max_position: int = notional * -1
 
-                                        max_position: int = notional * -1
+                                    hedging = HedgingSpot(
+                                        strategy,
+                                        strategy_params,
+                                        max_position,
+                                        my_trades_currency_strategy,
+                                        market_condition,
+                                        index_price,
+                                        my_trades_currency_all,
+                                    )
 
-                                        hedging = HedgingSpot(
-                                            strategy,
-                                            strategy_params,
-                                            max_position,
-                                            my_trades_currency_strategy,
-                                            market_condition,
-                                            index_price,
-                                            my_trades_currency_all,
-                                        )
+                                    if orders_currency_strategy:
 
-                                        if orders_currency_strategy:
-
-                                            for order in orders_currency_strategy:
-                                                cancel_allowed: dict = (
-                                                    await hedging.is_cancelling_orders_allowed(
-                                                        order,
-                                                        orders_currency_strategy,
-                                                        server_time,
-                                                    )
+                                        for order in orders_currency_strategy:
+                                            cancel_allowed: dict = (
+                                                await hedging.is_cancelling_orders_allowed(
+                                                    order,
+                                                    orders_currency_strategy,
+                                                    server_time,
                                                 )
-                                                
-                                                log.error (f"cancel_allowed {cancel_allowed} {order} server_time {server_time}")
+                                            )
+                                            
+                                            log.error (f"cancel_allowed {cancel_allowed} {order} server_time {server_time}")
 
-                                                if cancel_allowed["cancel_allowed"]:
-                                                    await modify_order_and_db.if_cancel_is_true(
-                                                        order_db_table,
-                                                        cancel_allowed,
-                                                    )
+                                            if cancel_allowed["cancel_allowed"]:
+                                                await modify_order_and_db.if_cancel_is_true(
+                                                    order_db_table,
+                                                    cancel_allowed,
+                                                )
+
+                queue.task_done
 
             except asyncio.QueueEmpty:
                 continue
@@ -340,8 +345,6 @@ async def cancelling_orders(
             if message_params is None:
                 break
 
-
-            queue.task_done
 
     except Exception as error:
 
