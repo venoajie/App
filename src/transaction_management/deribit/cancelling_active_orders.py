@@ -110,7 +110,7 @@ async def cancelling_orders(
 
         cached_orders: list = await combining_order_data(private_data, currencies)
         
-        server_time == 0
+        server_time = 0
 
         while await has_order.acquire():
         
