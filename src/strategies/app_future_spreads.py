@@ -115,7 +115,6 @@ async def future_spreads(
         
         server_time = 0
 
-
         while await has_order.acquire():
         
             try:
@@ -366,8 +365,6 @@ async def future_spreads(
                                         ):
 
                                             instrument_name_future = (f"{currency_upper}-{instrument_name_combo[7:][:7]}").strip("_")
-                                            
-                                            log.debug(f"instrument_name_future {instrument_name_future}")
                                             
                                             instrument_time_left = (
                                                 max(
