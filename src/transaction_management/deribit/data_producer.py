@@ -109,7 +109,7 @@ class StreamAccountData(ModifyOrderDb):
             parse_dotenv(self.sub_account_id)["key_ocid"]
         )
 
-    async def ws_manager(self, queue: object,queue2: object, has_order) -> None:
+    async def ws_manager(self, queue_cancelling: object,queue_capturing_user_changes: object, has_order) -> None:
 
         async with websockets.connect(
             self.ws_connection_url,
@@ -280,13 +280,16 @@ class StreamAccountData(ModifyOrderDb):
                                 if "user.changes.any" in message_channel:     
                                     
                                     log.warning (f"message_params {message_params}")
+                                    await queue_capturing_user_changes(message_params)
+                                    has_order.release() 
+                                    await queue_cancelling(message_params)
+                                    has_order.release() 
+                                    
 
                                 # queing result
                                 len_msg = len(message_params)+len_msg-1
                                 log.critical (f"len_msg {len_msg}")
                                 log.critical (f"message_channel {message_channel}")
-                                await queue.put(len_msg)
-                                await queue2.put(len_msg)
                                 has_order.release() 
                                 #await queue.put(message_params)
                                 
