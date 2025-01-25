@@ -285,9 +285,10 @@ class StreamAccountData(ModifyOrderDb):
                                 if "user.changes.any" in message_channel:     
                                     
                                     log.warning (f"message_params {message_params}")
-                                    await queue_capturing_user_changes.put(len_msg)
-                                    await queue_cancelling.put(len_msg)
+                                    await queue_capturing_user_changes.put(message_params)
                                     
+                                    
+                                await queue_cancelling.put(message_params)
                                 has_order.release() 
                                 #await queue.put(message_params)
                                 

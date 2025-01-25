@@ -40,29 +40,19 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
 
         order_db_table: str = relevant_tables["orders_table"]
         
-        print (f"queue.empty() capturing {queue.empty()}")
-        
         while await has_order.acquire():
             
             from loguru import logger as log
+            
             try:
                 message_params = queue.get_nowait()
-            except asyncio.QueueEmpty:
-                await asyncio.sleep(0.5)
-                continue
-                    # check for stop
-            if message_params is None:
-                break
-            #data: list = message_params["data"]
 
-            #message_channel: str = message_params["channel"]
-            
-            log.warning (f"len_msg {message_params}")    
-            #log.warning (f"message_channel {message_channel}")    
-            
-            queue.task_done()
+                data: list = message_params["data"]
 
-            if False and "user.changes.any" in message_channel:   
+                message_channel: str = message_params["channel"]
+                
+                log.warning (f"len_msg {message_params}")    
+                #log.warning (f"message_channel {message_channel}")    
                 
                 log.warning (f"message_params {message_params}")             
             
@@ -82,7 +72,16 @@ async def saving_and_relabelling_orders(private_data: object, modify_order_and_d
                     currency_lower,
                 )
                 
-                queue.task_done()
+            
+            except asyncio.QueueEmpty:
+                await asyncio.sleep(0.5)
+                continue
+                    # check for stop
+            if message_params is None:
+                break
+            
+            
+            queue.task_done()
             
     except Exception as error:
 

@@ -122,12 +122,9 @@ async def cancelling_orders(
                     # check for stop
             if message_params is None:
                 break
-            # message: str = queue.get()
-            #message_channel: str = message_params["channel"]
-            log.debug(f"len_msg {message_params}")
+            message: str = queue.get()
+            message_channel: str = message_params["channel"]
             #log.debug(f"message_channel {message_channel}")
-            
-            """
             # log.debug(f"message_channel {message_channel}")
 
             data_orders: dict = message_params["data"]
@@ -340,7 +337,6 @@ async def cancelling_orders(
                                                     order_db_table,
                                                     cancel_allowed,
                                                 )
-            """
 
             queue.task_done
 
