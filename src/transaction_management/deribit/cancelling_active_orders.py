@@ -114,7 +114,15 @@ async def cancelling_orders(
 
         while await has_order.acquire():
         
-            message_params: str = queue.get_nowait()
+
+            try:
+                message_params = queue.get_nowait()
+            except asyncio.QueueEmpty:
+                await asyncio.sleep(0.5)
+                continue
+                    # check for stop
+            if message_params is None:
+                break
             # message: str = queue.get()
             #message_channel: str = message_params["channel"]
             log.debug(f"len_msg {message_params}")
