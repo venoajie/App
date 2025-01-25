@@ -83,7 +83,7 @@ async def insert_tables(table_name: str, params: list | dict | str):
             "databases/trading.sqlite3", isolation_level=None
         ) as db:
             
-            await db.execute("BEGIN TRANSACTION")
+            #await db.execute("BEGIN TRANSACTION")
 
             await db.execute("pragma journal_mode=wal;")
 
