@@ -207,7 +207,7 @@ async def relabelling_trades(
                                     if o["cancellable"] == True
                                 ]
 
-                                await modify_order_and_db.cancel_the_cancellables(
+                                await modify_order_and_db.cancel_the_cancellables_(
                                     order_db_table,
                                     currency,
                                     cancellable_strategies,
@@ -260,7 +260,7 @@ async def relabelling_trades(
 
                                         log.debug("renaming combo Auto done")
 
-                                        await modify_order_and_db.cancel_the_cancellables(
+                                        await modify_order_and_db.cancel_the_cancellables_(
                                             order_db_table,
                                             currency,
                                             cancellable_strategies,
