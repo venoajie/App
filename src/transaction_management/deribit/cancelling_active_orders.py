@@ -319,7 +319,7 @@ async def cancelling_orders(
 
                                             for order in orders_currency_strategy:
                                                 cancel_allowed: dict = (
-                                                    await hedging.is_cancelling_cleaned_ordersowed(
+                                                    await hedging.is_cancelling_orders_allowed(
                                                         order,
                                                         orders_currency_strategy,
                                                         server_time,
