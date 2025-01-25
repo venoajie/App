@@ -222,7 +222,7 @@ async def cancelling_orders(
                                 ]
                             )
                             
-                            log.warning(f"orders_currency {orders_currency}")
+                            log.warning(f"orders_currency {len(orders_currency)}")
 
                             position = [o for o in sub_account["positions"]]
                             # log.debug (f"position {position}")

@@ -253,7 +253,7 @@ async def hedging_spot(
 
                             len_cleaned_orders = len(orders_currency)
                             
-                            log.info (f"orders_currency {orders_currency}")
+                            log.info (f"len orders_currency {len_cleaned_orders}")
 
                             # if orders_currency:
 
