@@ -162,7 +162,7 @@ async def main():
         queue_general, queue_cancelling, queue_capturing_user_changes = Queue(), Queue(), Queue()
         queue_avoiding_double, queue_hedging, queue_combo  = Queue(), Queue(), Queue()
         
-        has_order = asyncio.Semaphore(value=1) 
+        has_order = asyncio.Semaphore(value=2) 
         
         stream = StreamAccountData(sub_account_id)
                 
