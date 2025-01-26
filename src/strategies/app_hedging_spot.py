@@ -167,7 +167,7 @@ async def hedging_spot(
                         message["server_time"],
                     )
                     
-                    log.critical(f"{message["sequence"]}")
+                    #log.critical(f"{message["sequence"]}")
 
                     # if "user.changes.any" in message_channel:
 

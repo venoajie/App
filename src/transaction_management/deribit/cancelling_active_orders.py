@@ -154,7 +154,7 @@ async def cancelling_orders(
                         message["server_time"],
                     )
                     
-                    log.critical(f"{message["sequence"]}")
+                    #log.critical(f"{message["sequence"]}")
 
                     currency: str = message["currency"]
 
