@@ -203,6 +203,13 @@ async def main():
                 queue_hedging,
                 semaphore),
        
+            future_spreads(
+                private_data,
+                modify_order_and_db,
+                config_app,
+                queue_combo,
+                semaphore),
+       
             reconciling_size(
                 modify_order_and_db,
                 config_app,
