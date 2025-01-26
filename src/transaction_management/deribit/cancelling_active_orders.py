@@ -71,8 +71,16 @@ async def cancelling_orders(
 
         # get TRADABLE currencies
         currencies: list = [o["spot"] for o in tradable_config_app][0]
-        
+
         strategy_attributes = config_app["strategies"]
+
+        cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
+            if o["cancellable"]==True]
+        
+        await modify_order_and_db.cancel_the_cancellables(
+            order_db_table,
+            currency,
+            cancellable_strategies)
 
         strategy_attributes_active = [
             o for o in strategy_attributes if o["is_active"] == True

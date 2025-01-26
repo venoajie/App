@@ -626,7 +626,6 @@ async def hedging_spot(
                 
                 await asyncio.sleep(.1)
                 
-
             except asyncio.QueueEmpty:
 
                 await asyncio.sleep(.1)
