@@ -36,7 +36,12 @@ from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,
 )
-from utilities.caching import combining_order_data, update_cached_orders
+
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    combining_order_data, 
+    update_cached_orders,
+    update_cached_ticker)
 from utilities.pickling import replace_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
@@ -111,6 +116,7 @@ class StreamAccountData(ModifyOrderDb):
 
     async def ws_manager(
         self, 
+        private_data: object,
         queue_general: object,
         queue_cancelling: object,
         queue_capturing_user_changes: object, 
@@ -213,6 +219,12 @@ class StreamAccountData(ModifyOrderDb):
                                 ws_channel=ws,
                             )
                             
+                    ticker_all = cached_ticker(instruments_name)
+
+                    ticker_all = cached_ticker(instruments_name)
+                    
+                    cached_orders: list = await combining_order_data(private_data, currencies)
+        
                     while True:
 
                         # Receive WebSocket messages
@@ -263,14 +275,10 @@ class StreamAccountData(ModifyOrderDb):
 
                                 message_params: dict = message["params"]
                                 #log.warning (f"message_params {message_params}")
+                                data: dict = message_params["data"]
                                 
                                 message_channel: str = message_params["channel"]
                                 log.info (f"message_channel {message_channel}")
-                    
-                                await queue_hedging.put(message_params)
-                                #has_order.release() 
-                                await queue_combo.put(message_params)
-                                #has_order.release() 
                                 await queue_cancelling.put(message_params)
                                 #has_order.release() 
                                 await queue_general.put(message_params)                                
@@ -279,10 +287,30 @@ class StreamAccountData(ModifyOrderDb):
                                 if "user.changes.any" in message_channel:     
                                     
                                     log.warning (f"message_params {message_params}")
+                                    await update_cached_orders(cached_orders, data)
                                     await queue_capturing_user_changes.put(message_params)
                                     #has_order.release() 
                                     await queue_avoiding_double.put(message_params)
                                     #has_order.release() 
+                                    
+                                data_to_dispatch: dict = dict(message_params=message_params,
+                                                              cached_orders=cached_orders
+                                                              )
+                    
+                                await queue_hedging.put(data_to_dispatch)
+                                #has_order.release() 
+                                await queue_combo.put(data_to_dispatch)
+                                #has_order.release() 
+
+                                instrument_name_future = (message_channel)[19:]
+                                if message_channel == f"incremental_ticker.{instrument_name_future}":
+
+                                    update_cached_ticker(
+                                        instrument_name_future,
+                                        ticker_all,
+                                        data,
+                                    )
+                                    
                                 has_order.release()
                                                     
                                 

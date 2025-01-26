@@ -168,6 +168,7 @@ async def main():
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(
+                private_data,
                 queue_general,
                 queue_cancelling,
                 queue_capturing_user_changes,

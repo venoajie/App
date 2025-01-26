@@ -111,7 +111,7 @@ async def future_spreads(
 
         ticker_all = cached_ticker(instruments_name)
         
-        cached_orders: list = await combining_order_data(private_data, currencies)
+        #cached_orders: list = await combining_order_data(private_data, currencies)
         
         server_time = 0
 
@@ -123,18 +123,23 @@ async def future_spreads(
 
                 while not_order:
 
-                    message_params = queue.get_nowait()
+                    message = queue.get_nowait()
+                    
+                    message_params = message["message_params"]
 
+                    cached_orders = message["cached_orders"]
+                    
                     message_channel: str = message_params["channel"]
+                    
                     log.critical(f"message_channel {message_channel}")
 
                     data_orders: dict = message_params["data"]
 
-                    if "user.changes.any" in message_channel:
+                    #if "user.changes.any" in message_channel:
                         
-                        log.error (f"data_orders user.changes.any {data_orders}")
+                    #    log.error (f"data_orders user.changes.any {data_orders}")
                         
-                        await update_cached_orders(cached_orders, data_orders)                                    
+                    #    await update_cached_orders(cached_orders, data_orders)                                    
 
                     currency: str = extract_currency_from_text(
                             message_channel
