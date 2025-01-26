@@ -626,9 +626,6 @@ async def hedging_spot(
 
                                                                         break
                     
-                queue.task_done
-
-                
                 await asyncio.sleep(.1)
                 
 
@@ -639,6 +636,7 @@ async def hedging_spot(
                     # check for stop
                     
             finally:
+                queue.task_done
                 semaphore.release() 
                     
             if message_params is None:

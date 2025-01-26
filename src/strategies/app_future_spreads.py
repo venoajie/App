@@ -615,7 +615,7 @@ async def future_spreads(
 
                                                                     break
 
-                queue.task_done
+                
                 
                 await asyncio.sleep(.1)
                 
@@ -627,6 +627,7 @@ async def future_spreads(
                     # check for stop
             
             finally:
+                queue.task_done
                 semaphore.release() 
                     
             if message_params is None:
