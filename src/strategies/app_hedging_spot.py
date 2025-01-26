@@ -148,21 +148,16 @@ async def hedging_spot(
                 while not_order:
 
                     message = queue.get_nowait()
-                    
-                    message_params = message["message_params"]
+                                                            
+                    message_params =  message["message_params"]
 
-                    cached_orders = message["cached_orders"]
-                    
-                    server_time = message["server_time"]
-                    
-                    ticker_all = message["ticker_all"]
-                    
-                    chart_trade = message["chart_trade"]
+                    message_channel, data_orders =  message["channel"], message_params["data"]
 
-                    message_channel: str = message_params["channel"]
+                    cached_orders, ticker_all = message["cached_orders"], message["ticker_all"]
+                    
+                    chart_trade, server_time = message["chart_trade"], message["server_time"]
+
                     log.critical(f"message_channel {message_channel}")
-
-                    data_orders: dict = message_params["data"]
 
                     #if "user.changes.any" in message_channel:
                         

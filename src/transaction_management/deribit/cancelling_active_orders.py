@@ -136,18 +136,15 @@ async def cancelling_orders(
 
 
                     message = queue.get_nowait()
-                    
-                    message_params = message["message_params"]
+                                        
+                    message_params =  message["message_params"]
 
-                    cached_orders = message["cached_orders"]
+                    message_channel, data_orders =  message["channel"], message_params["data"]
+
+                    cached_orders, ticker_all = message["cached_orders"], message["ticker_all"]
                     
-                    server_time = message["server_time"]
-                    
-                    ticker_all = message["ticker_all"]
-                    
-                    chart_trade = message["chart_trade"]
-                    
-                    message_channel: str = message_params["channel"]
+                    chart_trade, server_time = message["chart_trade"], message["server_time"]
+
                     log.critical(f"message_channel {message_channel}")
 
                     currency: str = extract_currency_from_text(
@@ -198,7 +195,7 @@ async def cancelling_orders(
                         ][0]
 
                         index_price = get_index(
-                            data, ticker_perpetual_instrument_name
+                            data_orders, ticker_perpetual_instrument_name
                         )
 
                         sub_account = reading_from_pkl_data("sub_accounts", currency)
