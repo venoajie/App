@@ -632,11 +632,11 @@ async def hedging_spot(
 
                                                                         break
 
-                await asyncio.sleep(0.1)
+                #await asyncio.sleep(0.1)
 
             except asyncio.QueueEmpty:
 
-                await asyncio.sleep(0.1)
+                #await asyncio.sleep(0.1)
                 continue
                 # check for stop
 
