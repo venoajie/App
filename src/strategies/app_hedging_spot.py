@@ -151,7 +151,7 @@ async def hedging_spot(
                                                             
                     message_params =  message["message_params"]
 
-                    message_channel, data_orders =  message["channel"], message_params["data"]
+                    message_channel, data_orders =  message_params["channel"], message_params["data"]
 
                     cached_orders, ticker_all = message["cached_orders"], message["ticker_all"]
                     
