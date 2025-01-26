@@ -283,7 +283,7 @@ class StreamAccountData(ModifyOrderDb):
                                     #has_order.release() 
                                     await queue_avoiding_double.put(message_params)
                                     #has_order.release() 
-                                #has_order.release()
+                                has_order.release()
                                                     
                                 
             except Exception as error:
