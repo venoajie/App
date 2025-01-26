@@ -81,10 +81,11 @@ async def cancelling_orders(
         
         order_db_table= relevant_tables["orders_table"]
 
-        await modify_order_and_db.cancel_the_cancellables(
-            order_db_table,
-            currency,
-            cancellable_strategies)
+        for currency in currencies:
+            await modify_order_and_db.cancel_the_cancellables(
+                order_db_table,
+                currency,
+                cancellable_strategies)
 
         strategy_attributes_active = [
             o for o in strategy_attributes if o["is_active"] == True
