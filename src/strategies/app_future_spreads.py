@@ -103,9 +103,9 @@ async def future_spreads(
         qty_candles = 5
         dim_sequence = 3
 
-        cached_candles_data = combining_candles_data(
-            np, currencies, qty_candles, resolutions, dim_sequence
-        )
+        #cached_candles_data = combining_candles_data(
+        #    np, currencies, qty_candles, resolutions, dim_sequence
+        #)
 
         ticker_all = cached_ticker(instruments_name)
 
@@ -198,9 +198,7 @@ async def future_spreads(
 
                         # sub_account_orders = sub_account["open_orders"]
 
-                        market_condition = get_market_condition(
-                            np, cached_candles_data, currency_upper
-                        )
+                        market_condition = message["market_condition"]
 
                         log.warning(market_condition)
 

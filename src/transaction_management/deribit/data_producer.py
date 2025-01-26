@@ -326,9 +326,15 @@ class StreamAccountData(ModifyOrderDb):
                                     data,
                                     cached_candles_data,
                                 )
+                                        
+                                market_condition = get_market_condition(
+                                    np, cached_candles_data, currency_upper
+                                )
+
                                 data_to_dispatch: dict = dict(message_params=message_params,
                                                               cached_orders=cached_orders,
                                                               chart_trade=chart_trade,
+                                                              market_condition=market_condition,
                                                               server_time=server_time,
                                                               ticker_all=ticker_all
                                                               )

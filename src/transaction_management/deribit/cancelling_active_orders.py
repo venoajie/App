@@ -112,19 +112,19 @@ async def cancelling_orders(
         my_path_cur = provide_path_for_file("currencies")
         replace_data(my_path_cur, currencies)
 
-        resolutions = [60, 15, 5]
-        qty_candles = 5
-        dim_sequence = 3
+        #resolutions = [60, 15, 5]
+        #qty_candles = 5
+        #dim_sequence = 3
 
-        cached_candles_data = combining_candles_data(
-            np, currencies, qty_candles, resolutions, dim_sequence
-        )
+        #cached_candles_data = combining_candles_data(
+        #    np, currencies, qty_candles, resolutions, dim_sequence
+        #)
 
-        ticker_all = cached_ticker(instruments_name)
+        #ticker_all = cached_ticker(instruments_name)
 
-        cached_orders: list = await combining_order_data(private_data, currencies)
+        #cached_orders: list = await combining_order_data(private_data, currencies)
         
-        server_time = 0
+        #server_time = 0
 
         while await has_order.acquire():
         
@@ -134,14 +134,22 @@ async def cancelling_orders(
                 
                 while not_cancel:
 
-                    message_params = queue.get_nowait()
 
-                    message_channel: str = message_params["channel"]
-                    log.warning(f"message_channel {message_channel}")
-                    # log.debug(f"message_channel {message_channel}")
-
-                    data_orders: dict = message_params["data"]
+                    message = queue.get_nowait()
                     
+                    message_params = message["message_params"]
+
+                    cached_orders = message["cached_orders"]
+                    
+                    server_time = message["server_time"]
+                    
+                    ticker_all = message["ticker_all"]
+                    
+                    chart_trade = message["chart_trade"]
+                    
+                    message_channel: str = message_params["channel"]
+                    log.critical(f"message_channel {message_channel}")
+
                     currency: str = extract_currency_from_text(
                             message_channel
                         )
@@ -150,31 +158,31 @@ async def cancelling_orders(
 
                     currency_lower: str = currency
 
-                    if "user.changes.any" in message_channel:
+                    #if "user.changes.any" in message_channel:
                         
                         #log.debug (data_orders)
                         
-                        await update_cached_orders(cached_orders, data_orders)                                    
+                    #    await update_cached_orders(cached_orders, data_orders)                                    
                             
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                     instrument_name_future = (message_channel)[19:]
 
-                    if message_channel == f"incremental_ticker.{instrument_name_future}":
+                    #if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                        update_cached_ticker(
-                            instrument_name_future,
-                            ticker_all,
-                            data_orders,
-                        )
+                    #    update_cached_ticker(
+                    #        instrument_name_future,
+                    #        ticker_all,
+                    #        data_orders,
+                    #    )
 
-                        server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
+                    #    server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
 
-                    chart_trade = await chart_trade_in_msg(
-                        message_channel,
-                        data_orders,
-                        cached_candles_data,
-                    )
+                    #hart_trade = await chart_trade_in_msg(
+                    #    message_channel,
+                     #   data_orders,
+                      #  cached_candles_data,
+                    #)
                     
                     if not chart_trade and server_time != 0:
 
@@ -190,16 +198,14 @@ async def cancelling_orders(
                         ][0]
 
                         index_price = get_index(
-                            data_orders, ticker_perpetual_instrument_name
+                            data, ticker_perpetual_instrument_name
                         )
 
                         sub_account = reading_from_pkl_data("sub_accounts", currency)
 
                         sub_account = sub_account[0]
 
-                        market_condition = get_market_condition(
-                            np, cached_candles_data, currency_upper
-                        )
+                        market_condition = message["market_condition"]
 
                         if sub_account:
 
