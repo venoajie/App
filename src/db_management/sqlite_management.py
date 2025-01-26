@@ -76,15 +76,15 @@ async def insert_tables(table_name: str, params: list | dict | str):
 
     """
     try:
-        
+
         async with aiosqlite.connect(
             "databases/trading.sqlite3", isolation_level=None
         ) as db:
-            
+
             await db.execute("pragma journal_mode=wal;")
 
             if "json" in table_name:
-                
+
                 # input was in list format. Insert them to db one by one
                 if isinstance(params, list):
                     for param in params:

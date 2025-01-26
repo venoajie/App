@@ -17,10 +17,11 @@ headers = [
     "recent_total_vol_btc",
     "recent_vol_pct",
     "recent_net_vol",
-    "datetime",#  (UTC)
+    "datetime",  #  (UTC)
 ]
 
 starttime = time.time()
+
 
 async def scanning_volume():
     """
@@ -31,7 +32,7 @@ async def scanning_volume():
     """
 
     print("Scanning volume")
-    
+
     cached_data = []
 
     while True:
@@ -41,53 +42,50 @@ async def scanning_volume():
 
             response_json = orjson.loads(response.text)["resu"]
 
-            rows = [str((i.replace('%', ''))).split("|") for i in response_json[:-1]]
-    
+            rows = [str((i.replace("%", ""))).split("|") for i in response_json[:-1]]
+
             if rows:
 
                 data_all = [dict(zip(headers, l)) for l in rows]
 
                 for single_data in data_all:
-                    
-                    if single_data["pings"] !=0:
-                        
+
+                    if single_data["pings"] != 0:
+
                         data_has_exist_before = (
-                        []
-                        if cached_data == []
-                        else [
-                            o
-                            for o in cached_data
-                            if int(o["pings"]) == int(single_data["pings"])
-                            and single_data["coin"] in o["coin"]
+                            []
+                            if cached_data == []
+                            else [
+                                o
+                                for o in cached_data
+                                if int(o["pings"]) == int(single_data["pings"])
+                                and single_data["coin"] in o["coin"]
                             ]
-                    )
+                        )
 
                     else:
-                        
+
                         data_has_exist_before = (
-                        []
-                        if cached_data == []
-                        else [
-                            o
-                            for o in cached_data
-                            if (o["pings"]) == (single_data["pings"])
-                            and single_data["coin"] in o["coin"]
+                            []
+                            if cached_data == []
+                            else [
+                                o
+                                for o in cached_data
+                                if (o["pings"]) == (single_data["pings"])
+                                and single_data["coin"] in o["coin"]
                             ]
-                    )
+                        )
 
                     if data_has_exist_before == []:
-                        
-                        print (response_json)
+
+                        print(response_json)
                         single_data.update({"counter_id": int(response_json[1])})
                         cached_data.append(single_data)
 
                         await telegram_bot_sendtext(
-                            f"""{single_data}""", 
-                            "general_error"
+                            f"""{single_data}""", "general_error"
                         )
-                        
-        
-        random_sleep_time = max(sample([5, 10, 15, 20, 30], 
-                                       1))        
+
+        random_sleep_time = max(sample([5, 10, 15, 20, 30], 1))
 
         await asyncio.sleep((random_sleep_time))

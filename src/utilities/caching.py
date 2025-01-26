@@ -164,7 +164,7 @@ async def update_cached_orders_(queue_orders_all, queue_orders, queue: dict):
 
                 data_orders: dict = message["data"]
 
-                #log.warning(f" user.changes.any data {data_orders}")
+                # log.warning(f" user.changes.any data {data_orders}")
                 # if "user.changes.any" in message_channel:
 
                 # print(f"data_orders {data_orders}")
@@ -193,11 +193,11 @@ async def update_cached_orders_(queue_orders_all, queue_orders, queue: dict):
 
                         if orders:
 
-                            #log.debug(f" orders_currency_all before {len(orders_all)}")
+                            # log.debug(f" orders_currency_all before {len(orders_all)}")
 
                             for order in orders:
 
-                                #print(f"cached order {order}")
+                                # print(f"cached order {order}")
 
                                 order_state = order["order_state"]
 
@@ -276,7 +276,7 @@ async def update_cached_orders(queue_orders_all, queue_orders):
 
                     for order in orders:
 
-                        #print(f"cached order {order}")
+                        # print(f"cached order {order}")
 
                         order_state = order["order_state"]
 
@@ -288,7 +288,7 @@ async def update_cached_orders(queue_orders_all, queue_orders):
                                 o for o in orders_all if order_id in o["order_id"]
                             ]
 
-                            #print(f"caching selected_order {selected_order}")
+                            # print(f"caching selected_order {selected_order}")
 
                             if selected_order:
 

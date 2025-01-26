@@ -12,12 +12,13 @@ from loguru import logger as log
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import telegram_bot_sendtext
-#from transaction_management.deribit.managing_deribit import ModifyOrderDb
+
+# from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from utilities.caching import combining_order_data, update_cached_orders
 from utilities.string_modification import (
     extract_currency_from_text,
-    remove_redundant_elements
-    )
+    remove_redundant_elements,
+)
 from utilities.system_tools import parse_error_message
 
 
@@ -36,7 +37,9 @@ async def avoiding_double_ids(
             o for o in strategy_attributes if o["is_active"] == True
         ]
 
-        active_strategies: list = [o["strategy_label"] for o in strategy_attributes_active]
+        active_strategies: list = [
+            o["strategy_label"] for o in strategy_attributes_active
+        ]
 
         relevant_tables = config_app["relevant_tables"][0]
 
@@ -47,7 +50,7 @@ async def avoiding_double_ids(
 
         # get TRADABLE currencies
         currencies: list = [o["spot"] for o in tradable_config_app][0]
-        
+
         cached_orders: list = await combining_order_data(private_data, currencies)
 
         while True:
@@ -58,18 +61,18 @@ async def avoiding_double_ids(
 
             message_channel: str = message_params["channel"]
 
-            currency: str = extract_currency_from_text(
-                    message_channel
-                )
+            currency: str = extract_currency_from_text(message_channel)
 
             currency_upper: str = currency.upper()
 
-            await update_cached_orders(cached_orders, data)                                    
-                                    
+            await update_cached_orders(cached_orders, data)
+
             orders_currency: list = (
                 []
                 if not cached_orders
-                else [o for o in cached_orders if currency_upper in o["instrument_name"]]
+                else [
+                    o for o in cached_orders if currency_upper in o["instrument_name"]
+                ]
             )
 
             for strategy in active_strategies:
@@ -102,7 +105,7 @@ async def avoiding_double_ids(
                                 await modify_order_and_db.cancel_by_order_id(
                                     order_db_table, order["order_id"]
                                 )
-                                
+
             queue.task_done
 
     except Exception as error:

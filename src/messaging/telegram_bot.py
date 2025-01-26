@@ -7,6 +7,7 @@ import httpx
 # user defined formula
 from configuration import config
 
+
 async def private_connection(
     endpoint: str,
     connection_url: str = "https://api.telegram.org/bot",
@@ -64,5 +65,5 @@ async def telegram_bot_sendtext(
         + ("&parse_mode=HTML&text=")
         + str(bot_message)
     )
-    
+
     return await private_connection(endpoint=endpoint, connection_url=connection_url)

@@ -210,7 +210,7 @@ async def saving_oto_order(
     len_oto_order_ids = len(orders[0]["oto_order_ids"])
 
     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
-    #log.debug (f"transaction_main {transaction_main}")
+    # log.debug (f"transaction_main {transaction_main}")
 
     if len_oto_order_ids == 1:
         pass
@@ -228,7 +228,7 @@ async def saving_oto_order(
         o for o in open_orders_from_exchange if transaction_main_oto in o["order_id"]
     ]
 
-    #log.warning (f"transaction_secondary {transaction_secondary}")
+    # log.warning (f"transaction_secondary {transaction_secondary}")
 
     if transaction_secondary:
 
@@ -246,7 +246,7 @@ async def saving_oto_order(
                 transaction_main, transaction_secondary
             )
 
-            #log.debug (f"order_attributes {order_attributes}")
+            # log.debug (f"order_attributes {order_attributes}")
 
             await modify_order_and_db.cancel_by_order_id(
                 order_db_table, transaction_main["order_id"]
@@ -274,8 +274,8 @@ async def saving_orders(
     trades = data["trades"]
 
     orders = data["orders"]
-    
-    #log.error (f"orders {orders}")
+
+    # log.error (f"orders {orders}")
 
     if orders:
 
@@ -295,10 +295,10 @@ async def saving_orders(
             )
 
         else:
-            
+
             if "oto_order_ids" in (orders[0]):
-                
-                #log.warning(orders)
+
+                # log.warning(orders)
 
                 await saving_oto_order(
                     modify_order_and_db,
@@ -309,19 +309,19 @@ async def saving_orders(
                 )
 
             else:
-             
+
                 for order in orders:
 
                     if "OTO" not in order["order_id"]:
 
-                        #log.debug (f"order {order}")
+                        # log.debug (f"order {order}")
 
                         label = order["label"]
 
                         order_id = order["order_id"]
                         order_state = order["order_state"]
 
-                        #log.error (f"order_state {order_state}")
+                        # log.error (f"order_state {order_state}")
 
                         # no label
                         if label == "":
@@ -340,8 +340,8 @@ async def saving_orders(
                             label_and_side_consistent = is_label_and_side_consistent(
                                 non_checked_strategies, order
                             )
-                            
-                            #log.error (f"label_and_side_consistent {label_and_side_consistent} {label}")
+
+                            # log.error (f"label_and_side_consistent {label_and_side_consistent} {label}")
 
                             if label_and_side_consistent and label:
 

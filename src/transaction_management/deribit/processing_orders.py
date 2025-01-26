@@ -7,6 +7,7 @@ import asyncio
 # installed
 from loguru import logger as log
 import uvloop
+
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import telegram_bot_sendtext
@@ -14,6 +15,7 @@ from utilities.string_modification import extract_currency_from_text
 from utilities.system_tools import (
     parse_error_message,
 )
+
 
 async def processing_orders(
     modify_order_and_db: object,
@@ -26,7 +28,7 @@ async def processing_orders(
 
         if order_analysis_result["order_allowed"]:
 
-            #log.error(f"send_order {order_analysis_result}")
+            # log.error(f"send_order {order_analysis_result}")
 
             strategy_attributes = config_app["strategies"]
 

@@ -45,9 +45,10 @@ from transaction_management.deribit.managing_deribit import (
 
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
-    combining_order_data, 
+    combining_order_data,
     update_cached_orders,
-    update_cached_ticker)
+    update_cached_ticker,
+)
 from utilities.pickling import replace_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
@@ -121,15 +122,16 @@ class StreamAccountData(ModifyOrderDb):
         )
 
     async def ws_manager(
-        self, 
+        self,
         private_data: object,
         queue_general: object,
         queue_cancelling: object,
-        queue_capturing_user_changes: object, 
+        queue_capturing_user_changes: object,
         queue_avoiding_double: object,
         queue_hedging: object,
         queue_combo: object,
-        has_order: object) -> None:
+        has_order: object,
+    ) -> None:
 
         async with websockets.connect(
             self.ws_connection_url,
@@ -146,7 +148,9 @@ class StreamAccountData(ModifyOrderDb):
                 # get ALL traded currencies in deribit
                 get_currencies_all = await get_currencies()
 
-                all_exc_currencies = [o["currency"] for o in get_currencies_all["result"]]
+                all_exc_currencies = [
+                    o["currency"] for o in get_currencies_all["result"]
+                ]
 
                 for currency in all_exc_currencies:
 
@@ -191,9 +195,9 @@ class StreamAccountData(ModifyOrderDb):
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
-                    
+
                     resolution = 1
-                    
+
                     for currency in currencies:
 
                         currency_upper = currency.upper()
@@ -205,7 +209,7 @@ class StreamAccountData(ModifyOrderDb):
                             f"user.changes.any.{currency_upper}.raw",
                             f"chart.trades.{instrument_perpetual}.{resolution}",
                         ]
-                        
+
                         for ws in ws_channel_currency:
 
                             # asyncio.create_task(
@@ -224,15 +228,17 @@ class StreamAccountData(ModifyOrderDb):
                                 operation="subscribe",
                                 ws_channel=ws,
                             )
-                            
+
                     ticker_all = cached_ticker(instruments_name)
 
                     ticker_all = cached_ticker(instruments_name)
-                    
-                    cached_orders: list = await combining_order_data(private_data, currencies)
-                    
+
+                    cached_orders: list = await combining_order_data(
+                        private_data, currencies
+                    )
+
                     server_time = 0
-                    
+
                     resolutions = [60, 15, 5]
                     qty_candles = 5
                     dim_sequence = 3
@@ -240,7 +246,7 @@ class StreamAccountData(ModifyOrderDb):
                     cached_candles_data = combining_candles_data(
                         np, currencies, qty_candles, resolutions, dim_sequence
                     )
-                    
+
                     sequence = 0
                     while True:
 
@@ -291,67 +297,76 @@ class StreamAccountData(ModifyOrderDb):
                             if message["method"] != "heartbeat":
 
                                 message_params: dict = message["params"]
-#                                log.warning (f"message_params {message_params}")
+                                #                                log.warning (f"message_params {message_params}")
                                 data: dict = message_params["data"]
-                                
+
                                 message_channel: str = message_params["channel"]
-                                
-                                sequence = sequence + len (message_params)-1
-                                log.info (f"message_channel {message_channel} {sequence}")
-                                #has_order.release() 
-                                await queue_general.put(message_params)                                
-                                #has_order.release()
-                                 
-                                if "user.changes.any" in message_channel:     
-                                    
-                                    log.warning (f"message_params {message_params}")
+
+                                sequence = sequence + len(message_params) - 1
+                                log.info(
+                                    f"message_channel {message_channel} {sequence}"
+                                )
+                                # has_order.release()
+                                await queue_general.put(message_params)
+                                # has_order.release()
+
+                                if "user.changes.any" in message_channel:
+
+                                    log.warning(f"message_params {message_params}")
                                     await update_cached_orders(cached_orders, data)
-                                    await queue_capturing_user_changes.put(message_params)
-                                    #has_order.release() 
+                                    await queue_capturing_user_changes.put(
+                                        message_params
+                                    )
+                                    # has_order.release()
                                     await queue_avoiding_double.put(message_params)
-                                    #has_order.release() 
-                                    
+                                    # has_order.release()
 
                                 instrument_name_future = (message_channel)[19:]
-                                if message_channel == f"incremental_ticker.{instrument_name_future}":
+                                if (
+                                    message_channel
+                                    == f"incremental_ticker.{instrument_name_future}"
+                                ):
 
                                     update_cached_ticker(
                                         instrument_name_future,
                                         ticker_all,
                                         data,
                                     )
-                                    
-                                    server_time = data["timestamp"] + server_time if server_time == 0 else data["timestamp"]
-                    
-                                
+
+                                    server_time = (
+                                        data["timestamp"] + server_time
+                                        if server_time == 0
+                                        else data["timestamp"]
+                                    )
+
                                 chart_trade = await chart_trade_in_msg(
                                     message_channel,
                                     data,
                                     cached_candles_data,
                                 )
-                                        
+
                                 market_condition = get_market_condition(
                                     np, cached_candles_data, currency_upper
                                 )
 
-                                data_to_dispatch: dict = dict(message_params=message_params,
-                                                              cached_orders=cached_orders,
-                                                              chart_trade=chart_trade,
-                                                              market_condition=market_condition,
-                                                              server_time=server_time,
-                                                              ticker_all=ticker_all,
-                                                              sequence=sequence
-                                                              )
+                                data_to_dispatch: dict = dict(
+                                    message_params=message_params,
+                                    cached_orders=cached_orders,
+                                    chart_trade=chart_trade,
+                                    market_condition=market_condition,
+                                    server_time=server_time,
+                                    ticker_all=ticker_all,
+                                    sequence=sequence,
+                                )
                                 await queue_cancelling.put(data_to_dispatch)
-                    
+
                                 await queue_hedging.put(data_to_dispatch)
-                                #has_order.release() 
+                                # has_order.release()
                                 await queue_combo.put(data_to_dispatch)
-                                #has_order.release() 
-                                    
+                                # has_order.release()
+
                                 has_order.release()
-                                                    
-                                
+
             except Exception as error:
 
                 parse_error_message(error)
@@ -511,4 +526,3 @@ async def chart_trade_in_msg(
     else:
 
         return False
-

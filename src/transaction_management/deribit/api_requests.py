@@ -324,7 +324,7 @@ class SendApiRequest:
                     trigger,
                 )
 
-        #log.warning(f"order_result {order_result}")
+        # log.warning(f"order_result {order_result}")
 
         if order_result != None and (
             "error" in order_result or "message" in order_result

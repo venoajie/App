@@ -382,7 +382,9 @@ def check_if_id_has_used_before(
     label_is_exist: list = (
         False
         if (combined_result == [] or result_order_id == [])
-        else False if transaction_id not in result_order_id else True
+        else False
+        if transaction_id not in result_order_id
+        else True
     )
 
     return label_is_exist
