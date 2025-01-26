@@ -27,13 +27,14 @@ from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
 from transaction_management.deribit.managing_deribit import (
-#    ModifyOrderDb,
+    #    ModifyOrderDb,
     currency_inline_with_database_address,
 )
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
-    combining_order_data, 
-    update_cached_orders)
+    combining_order_data,
+    update_cached_orders,
+)
 from utilities.caching import update_cached_ticker
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
@@ -60,7 +61,7 @@ async def cancelling_orders(
     config_app: list,
     queue: object,
     has_order: object,
-    idle_time: int = 1
+    idle_time: int = 1,
 ):
     """ """
 
@@ -74,18 +75,18 @@ async def cancelling_orders(
 
         strategy_attributes = config_app["strategies"]
 
-        cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
-            if o["cancellable"]==True]
-                
+        cancellable_strategies = [
+            o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
+        ]
+
         relevant_tables = config_app["relevant_tables"][0]
-        
-        order_db_table= relevant_tables["orders_table"]
+
+        order_db_table = relevant_tables["orders_table"]
 
         for currency in currencies:
             await modify_order_and_db.cancel_the_cancellables(
-                order_db_table,
-                currency,
-                cancellable_strategies)
+                order_db_table, currency, cancellable_strategies
+            )
 
         strategy_attributes_active = [
             o for o in strategy_attributes if o["is_active"] == True
@@ -112,60 +113,66 @@ async def cancelling_orders(
         my_path_cur = provide_path_for_file("currencies")
         replace_data(my_path_cur, currencies)
 
-        #resolutions = [60, 15, 5]
-        #qty_candles = 5
-        #dim_sequence = 3
+        # resolutions = [60, 15, 5]
+        # qty_candles = 5
+        # dim_sequence = 3
 
-        #cached_candles_data = combining_candles_data(
+        # cached_candles_data = combining_candles_data(
         #    np, currencies, qty_candles, resolutions, dim_sequence
-        #)
+        # )
 
-        #ticker_all = cached_ticker(instruments_name)
+        # ticker_all = cached_ticker(instruments_name)
 
-        #cached_orders: list = await combining_order_data(private_data, currencies)
-        
-        #server_time = 0
+        # cached_orders: list = await combining_order_data(private_data, currencies)
+
+        # server_time = 0
 
         while await has_order.acquire():
-        
+
             try:
-                
+
                 not_cancel = True
-                
+
                 while not_cancel:
 
-
                     message = queue.get_nowait()
-                                        
-                    message_params =  message["message_params"]
 
-                    message_channel, data_orders =  message_params["channel"], message_params["data"]
+                    message_params = message["message_params"]
 
-                    cached_orders, ticker_all = message["cached_orders"], message["ticker_all"]
+                    message_channel, data_orders = (
+                        message_params["channel"],
+                        message_params["data"],
+                    )
+
+                    cached_orders, ticker_all = (
+                        message["cached_orders"],
+                        message["ticker_all"],
+                    )
+
+                    chart_trade, server_time = (
+                        message["chart_trade"],
+                        message["server_time"],
+                    )
                     
-                    chart_trade, server_time = message["chart_trade"], message["server_time"]
-
                     log.critical(f"message_channel {message_channel} {message["sequence"]}")
 
-                    currency: str = extract_currency_from_text(
-                            message_channel
-                        )
+                    currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper: str = currency.upper()
 
                     currency_lower: str = currency
 
-                    #if "user.changes.any" in message_channel:
-                        
-                        #log.debug (data_orders)
-                        
-                    #    await update_cached_orders(cached_orders, data_orders)                                    
-                            
+                    # if "user.changes.any" in message_channel:
+
+                    # log.debug (data_orders)
+
+                    #    await update_cached_orders(cached_orders, data_orders)
+
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                     instrument_name_future = (message_channel)[19:]
 
-                    #if message_channel == f"incremental_ticker.{instrument_name_future}":
+                    # if message_channel == f"incremental_ticker.{instrument_name_future}":
 
                     #    update_cached_ticker(
                     #        instrument_name_future,
@@ -175,12 +182,12 @@ async def cancelling_orders(
 
                     #    server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
 
-                    #hart_trade = await chart_trade_in_msg(
+                    # hart_trade = await chart_trade_in_msg(
                     #    message_channel,
-                     #   data_orders,
-                      #  cached_candles_data,
-                    #)
-                    
+                    #   data_orders,
+                    #  cached_candles_data,
+                    # )
+
                     if not chart_trade and server_time != 0:
 
                         # get portfolio data
@@ -237,7 +244,7 @@ async def cancelling_orders(
                                     if currency_upper in o["instrument_name"]
                                 ]
                             )
-                            
+
                             log.warning(f"orders_currency {len(orders_currency)}")
 
                             position = [o for o in sub_account["positions"]]
@@ -247,9 +254,9 @@ async def cancelling_orders(
                                 for o in position
                                 if f"{currency_upper}-FS" not in o["instrument_name"]
                             ]
-            
+
                             if index_price is not None and equity > 0:
-            
+
                                 size_perpetuals_reconciled = (
                                     is_size_sub_account_and_my_trades_reconciled(
                                         position_without_combo,
@@ -311,11 +318,9 @@ async def cancelling_orders(
 
                                         if orders_currency_strategy:
                                             for order in orders_currency_strategy:
-                                                cancel_allowed: dict = (
-                                                    await combo_auto.is_cancelling_orders_allowed(
-                                                        order,
-                                                        server_time,
-                                                    )
+                                                cancel_allowed: dict = await combo_auto.is_cancelling_orders_allowed(
+                                                    order,
+                                                    server_time,
                                                 )
 
                                                 if cancel_allowed["cancel_allowed"]:
@@ -323,11 +328,11 @@ async def cancelling_orders(
                                                         order_db_table,
                                                         cancel_allowed,
                                                     )
-                                                    
+
                                                     queue.task_done
-                                                    
+
                                                     not_cancel = False
-                                                    
+
                                                     break
 
                                     if (
@@ -350,38 +355,36 @@ async def cancelling_orders(
                                         if orders_currency_strategy:
 
                                             for order in orders_currency_strategy:
-                                                cancel_allowed: dict = (
-                                                    await hedging.is_cancelling_orders_allowed(
-                                                        order,
-                                                        orders_currency_strategy,
-                                                        server_time,
-                                                    )
+                                                cancel_allowed: dict = await hedging.is_cancelling_orders_allowed(
+                                                    order,
+                                                    orders_currency_strategy,
+                                                    server_time,
                                                 )
-                                                
-                                                log.error (f"cancel_allowed {cancel_allowed} {order} server_time {server_time}")
+
+                                                log.error(
+                                                    f"cancel_allowed {cancel_allowed} {order} server_time {server_time}"
+                                                )
 
                                                 if cancel_allowed["cancel_allowed"]:
                                                     await modify_order_and_db.if_cancel_is_true(
                                                         order_db_table,
                                                         cancel_allowed,
                                                     )
-                                                                                                        
-                                                    queue.task_done
-                                                    
-                                                    not_cancel = False
-                                                    
-                                                    break
 
+                                                    queue.task_done
+
+                                                    not_cancel = False
+
+                                                    break
 
                     queue.task_done
                     await asyncio.sleep(idle_time)
 
             except asyncio.QueueEmpty:
                 continue
-                    # check for stop
+                # check for stop
             if message_params is None:
                 break
-
 
     except Exception as error:
 

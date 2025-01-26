@@ -28,14 +28,15 @@ from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
 from transaction_management.deribit.managing_deribit import (
-#    ModifyOrderDb,
+    #    ModifyOrderDb,
     currency_inline_with_database_address,
 )
 from transaction_management.deribit.processing_orders import processing_orders
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
-    combining_order_data, 
-    update_cached_orders)
+    combining_order_data,
+    update_cached_orders,
+)
 from utilities.caching import update_cached_ticker
 from utilities.number_modification import get_closest_value
 from utilities.pickling import read_data, replace_data
@@ -65,7 +66,7 @@ async def hedging_spot(
     modify_order_and_db: object,
     config_app: list,
     queue: object,
-    semaphore: object
+    semaphore: object,
 ):
     """ """
 
@@ -74,7 +75,7 @@ async def hedging_spot(
 
     try:
 
-#        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
+        #        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
@@ -119,28 +120,28 @@ async def hedging_spot(
 
         instrument_attributes_futures_all = futures_instruments["active_futures"]
 
-        #instruments_name = futures_instruments["instruments_name"]
+        # instruments_name = futures_instruments["instruments_name"]
 
-        #resolutions = [60, 15, 5]
+        # resolutions = [60, 15, 5]
         ##qty_candles = 5
-        #dim_sequence = 3
+        # dim_sequence = 3
 
-        #ached_candles_data = combining_candles_data(
+        # ached_candles_data = combining_candles_data(
         #    np, currencies, qty_candles, resolutions, dim_sequence
-        #)
+        # )
 
-        #ticker_all = cached_ticker(instruments_name)
-        
-        #cached_orders: list = await combining_order_data(private_data, currencies)
-        
+        # ticker_all = cached_ticker(instruments_name)
+
+        # cached_orders: list = await combining_order_data(private_data, currencies)
+
         server_time = 0
-        
-        sem= await semaphore.acquire()
-        
+
+        sem = await semaphore.acquire()
+
         log.debug(f"semaphore.acquire() {sem}")
 
         while await semaphore.acquire():
-        
+
             try:
 
                 not_order = True
@@ -148,34 +149,41 @@ async def hedging_spot(
                 while not_order:
 
                     message = queue.get_nowait()
-                                                            
-                    message_params =  message["message_params"]
 
-                    message_channel, data_orders =  message_params["channel"], message_params["data"]
+                    message_params = message["message_params"]
 
-                    cached_orders, ticker_all = message["cached_orders"], message["ticker_all"]
+                    message_channel, data_orders = (
+                        message_params["channel"],
+                        message_params["data"],
+                    )
+
+                    cached_orders, ticker_all = (
+                        message["cached_orders"],
+                        message["ticker_all"],
+                    )
+
+                    chart_trade, server_time = (
+                        message["chart_trade"],
+                        message["server_time"],
+                    )
                     
-                    chart_trade, server_time = message["chart_trade"], message["server_time"]
-
                     log.critical(f"message_channel {message_channel} {message["sequence"]}")
 
-                    #if "user.changes.any" in message_channel:
-                        
-                    #    log.error (f"data_orders user.changes.any {data_orders}")
-                        
-                    #    await update_cached_orders(cached_orders, data_orders)                                    
+                    # if "user.changes.any" in message_channel:
 
-                    currency: str = extract_currency_from_text(
-                            message_channel
-                        )
+                    #    log.error (f"data_orders user.changes.any {data_orders}")
+
+                    #    await update_cached_orders(cached_orders, data_orders)
+
+                    currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper: str = currency.upper()
 
                     currency_lower: str = currency
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                    #instrument_name_future = (message_channel)[19:]
-                    #if message_channel == f"incremental_ticker.{instrument_name_future}":
+                    # instrument_name_future = (message_channel)[19:]
+                    # if message_channel == f"incremental_ticker.{instrument_name_future}":
 
                     #    update_cached_ticker(
                     #        instrument_name_future,
@@ -184,13 +192,13 @@ async def hedging_spot(
                     #    )
 
                     #    server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
-    
-                    #chart_trade = await chart_trade_in_msg(
+
+                    # chart_trade = await chart_trade_in_msg(
                     #    message_channel,
                     #    data_orders,
                     #    cached_candles_data,
-                    #)
-                    
+                    # )
+
                     archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
                     if not chart_trade and server_time != 0:
@@ -257,8 +265,8 @@ async def hedging_spot(
                             )
 
                             len_cleaned_orders = len(orders_currency)
-                            
-                            log.info (f"len orders_currency {len_cleaned_orders}")
+
+                            log.info(f"len orders_currency {len_cleaned_orders}")
 
                             # if orders_currency:
 
@@ -286,7 +294,6 @@ async def hedging_spot(
 
                             if index_price is not None and equity > 0:
                                 my_trades_currency: list = [
-
                                     o
                                     for o in my_trades_currency_all
                                     if o["label"] is not None
@@ -352,9 +359,7 @@ async def hedging_spot(
                                     log.info(
                                         f"orders_currency_strategy {len(orders_currency_strategy)}  {currency}"
                                     )
-                                    log.info(
-                                        f" {(orders_currency_strategy)} "
-                                    )
+                                    log.info(f" {(orders_currency_strategy)} ")
 
                                     log.warning(f"strategy {strategy}-START")
 
@@ -412,7 +417,7 @@ async def hedging_spot(
                                     if not size_future_reconciled:
 
                                         queue.task_done
-                                        
+
                                         not_order = False
 
                                         break
@@ -439,16 +444,14 @@ async def hedging_spot(
                                                 "best_ask_price"
                                             ]
 
-                                            send_order: dict = (
-                                                await hedging.is_send_open_order_allowed(
-                                                    non_checked_strategies,
-                                                    instrument_name,
-                                                    instrument_attributes_futures_for_hedging,
-                                                    orders_currency_strategy,
-                                                    best_ask_prc,
-                                                    archive_db_table,
-                                                    trade_db_table,
-                                                )
+                                            send_order: dict = await hedging.is_send_open_order_allowed(
+                                                non_checked_strategies,
+                                                instrument_name,
+                                                instrument_attributes_futures_for_hedging,
+                                                orders_currency_strategy,
+                                                best_ask_prc,
+                                                archive_db_table,
+                                                trade_db_table,
                                             )
 
                                             if send_order["order_allowed"]:
@@ -460,7 +463,7 @@ async def hedging_spot(
                                                 )
 
                                                 queue.task_done
-                                                
+
                                                 not_order = False
 
                                                 break
@@ -575,7 +578,7 @@ async def hedging_spot(
                                                                         )
 
                                                                         queue.task_done
-                                                                        
+
                                                                         not_order = (
                                                                             False
                                                                         )
@@ -622,26 +625,25 @@ async def hedging_spot(
                                                                         )
 
                                                                         queue.task_done
-                                                                        
+
                                                                         not_order = (
                                                                             False
                                                                         )
 
                                                                         break
-                    
-                await asyncio.sleep(.1)
-                
+
+                await asyncio.sleep(0.1)
 
             except asyncio.QueueEmpty:
 
-                await asyncio.sleep(.1)
+                await asyncio.sleep(0.1)
                 continue
-                    # check for stop
-                    
+                # check for stop
+
             finally:
                 queue.task_done
-                semaphore.release() 
-                    
+                semaphore.release()
+
             if message_params is None:
                 break
 

@@ -30,22 +30,26 @@ from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
 from transaction_management.deribit.managing_deribit import (
-#    ModifyOrderDb,
     currency_inline_with_database_address,
 )
 from transaction_management.deribit.processing_orders import processing_orders
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
-    combining_order_data, 
+    combining_order_data,
     update_cached_orders,
-    update_cached_ticker)
+    update_cached_ticker,
+)
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
     extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
-from utilities.system_tools import parse_error_message, provide_path_for_file
+from utilities.system_tools import (
+    parse_error_message, 
+    provide_path_for_file
+    )
+
 
 async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
@@ -61,7 +65,7 @@ async def future_spreads(
     modify_order_and_db: object,
     config_app: list,
     queue: object,
-    semaphore: object
+    semaphore: object,
 ):
     """ """
 
@@ -103,57 +107,63 @@ async def future_spreads(
         qty_candles = 5
         dim_sequence = 3
 
-        #cached_candles_data = combining_candles_data(
+        # cached_candles_data = combining_candles_data(
         #    np, currencies, qty_candles, resolutions, dim_sequence
-        #)
+        # )
 
         ticker_all = cached_ticker(instruments_name)
 
         ticker_all = cached_ticker(instruments_name)
-        
-        #cached_orders: list = await combining_order_data(private_data, currencies)
-        
+
+        # cached_orders: list = await combining_order_data(private_data, currencies)
+
         server_time = 0
 
         while await semaphore.acquire():
-        
+
             try:
-                    
+
                 not_order = True
 
                 while not_order:
 
                     message = queue.get_nowait()
-                                        
-                    message_params =  message["message_params"]
 
-                    message_channel, data_orders =  message_params["channel"], message_params["data"]
+                    message_params = message["message_params"]
 
-                    cached_orders, ticker_all = message["cached_orders"], message["ticker_all"]
-                    
-                    chart_trade, server_time = message["chart_trade"], message["server_time"]
+                    message_channel, data_orders = (
+                        message_params["channel"],
+                        message_params["data"],
+                    )
+
+                    cached_orders, ticker_all = (
+                        message["cached_orders"],
+                        message["ticker_all"],
+                    )
+
+                    chart_trade, server_time = (
+                        message["chart_trade"],
+                        message["server_time"],
+                    )
 
                     log.critical(f"message_channel {message_channel} {message["sequence"]}")
 
+                    # if "user.changes.any" in message_channel:
 
-                    #if "user.changes.any" in message_channel:
-                        
                     #    log.error (f"data_orders user.changes.any {data_orders}")
-                        
-                    #    await update_cached_orders(cached_orders, data_orders)                                    
 
-                    currency: str = extract_currency_from_text(
-                            message_channel
-                        )
+                    #    await update_cached_orders(cached_orders, data_orders)
+
+                    currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper: str = currency.upper()
 
                     currency_lower: str = currency
-                    
+
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                    #instrument_name_future = (message_channel)[19:]
-                    #if message_channel == f"incremental_ticker.{instrument_name_future}":
+                    # instrument_name_future = (message_channel)[19:]
+                    # if message_channel == f"incremental_ticker.{instrument_name_future}":
 
                     #    update_cached_ticker(
                     #        instrument_name_future,
@@ -163,12 +173,12 @@ async def future_spreads(
 
                     #    server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
 
-                    #chart_trade = await chart_trade_in_msg(
+                    # chart_trade = await chart_trade_in_msg(
                     #    message_channel,
                     #    data_orders,
                     #    cached_candles_data,
-                    #)
-                    
+                    # )
+
                     if not chart_trade and server_time != 0:
 
                         archive_db_table = f"my_trades_all_{currency_lower}_json"
@@ -241,7 +251,7 @@ async def future_spreads(
                                 for o in position
                                 if f"{currency_upper}-FS" not in o["instrument_name"]
                             ]
-                                                        
+
                             size_perpetuals_reconciled = (
                                 is_size_sub_account_and_my_trades_reconciled(
                                     position_without_combo,
@@ -368,8 +378,10 @@ async def future_spreads(
                                             and currency_upper in instrument_name_combo
                                         ):
 
-                                            instrument_name_future = (f"{currency_upper}-{instrument_name_combo[7:][:7]}").strip("_")
-                                            
+                                            instrument_name_future = (
+                                                f"{currency_upper}-{instrument_name_combo[7:][:7]}"
+                                            ).strip("_")
+
                                             instrument_time_left = (
                                                 max(
                                                     [
@@ -426,20 +438,18 @@ async def future_spreads(
                                                     and size_future_reconciled
                                                 ):
 
-                                                    send_order: dict = (
-                                                        await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
-                                                            ticker_future,
-                                                            instrument_attributes_futures_all,
-                                                            notional,
-                                                            monthly_target_profit,
-                                                            AVERAGE_MOVEMENT,
-                                                            BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
-                                                            min(
-                                                                1,
-                                                                max_order_currency,
-                                                            ),
-                                                            market_condition,
-                                                        )
+                                                    send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
+                                                        ticker_future,
+                                                        instrument_attributes_futures_all,
+                                                        notional,
+                                                        monthly_target_profit,
+                                                        AVERAGE_MOVEMENT,
+                                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
+                                                        min(
+                                                            1,
+                                                            max_order_currency,
+                                                        ),
+                                                        market_condition,
                                                     )
 
                                                     if send_order["order_allowed"]:
@@ -449,7 +459,7 @@ async def future_spreads(
                                                             config_app,
                                                             send_order,
                                                         )
-                                                        
+
                                                         queue.task_done
 
                                                         not_order = False
@@ -495,12 +505,10 @@ async def future_spreads(
                                                 ]
 
                                                 if not abnormal_transaction:
-                                                    send_order: dict = (
-                                                        await combo_auto.is_send_exit_order_allowed_combo_auto(
-                                                            label,
-                                                            instrument_attributes_combo_all,
-                                                            THRESHOLD_MARKET_CONDITIONS_COMBO,
-                                                        )
+                                                    send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto(
+                                                        label,
+                                                        instrument_attributes_combo_all,
+                                                        THRESHOLD_MARKET_CONDITIONS_COMBO,
                                                     )
 
                                                     if send_order["order_allowed"]:
@@ -512,7 +520,7 @@ async def future_spreads(
                                                         )
 
                                                         queue.task_done
-                                                        
+
                                                         not_order = False
 
                                                         break
@@ -582,7 +590,8 @@ async def future_spreads(
 
                                                             if (
                                                                 ticker_transaction
-                                                                and len_cleaned_orders < 50
+                                                                and len_cleaned_orders
+                                                                < 50
                                                             ):
 
                                                                 TP_THRESHOLD = (
@@ -590,17 +599,15 @@ async def future_spreads(
                                                                     * 5
                                                                 )
 
-                                                                send_order: dict = (
-                                                                    await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                        ticker_transaction[
-                                                                            0
-                                                                        ],
-                                                                        instrument_attributes_futures_all,
-                                                                        TP_THRESHOLD,
-                                                                        transaction,
-                                                                        waiting_time_for_selected_transaction,
-                                                                        random_instruments_name,
-                                                                    )
+                                                                send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                                    ticker_transaction[
+                                                                        0
+                                                                    ],
+                                                                    instrument_attributes_futures_all,
+                                                                    TP_THRESHOLD,
+                                                                    transaction,
+                                                                    waiting_time_for_selected_transaction,
+                                                                    random_instruments_name,
                                                                 )
 
                                                                 if send_order[
@@ -614,29 +621,26 @@ async def future_spreads(
                                                                     )
 
                                                                     queue.task_done
-                                                                    
+
                                                                     not_order = False
 
                                                                     break
 
-                
-                
-                await asyncio.sleep(.1)
-                
-            except asyncio.QueueEmpty:
-                
+                await asyncio.sleep(0.1)
 
-                await asyncio.sleep(.1)
+            except asyncio.QueueEmpty:
+
+                await asyncio.sleep(0.1)
                 continue
-                    # check for stop
-            
+                # check for stop
+
             finally:
                 queue.task_done
-                semaphore.release() 
-                    
+                semaphore.release()
+
             if message_params is None:
                 break
-            
+
     except Exception as error:
 
         await telegram_bot_sendtext(f"app future spreads - {error}", "general_error")
