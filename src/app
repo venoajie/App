@@ -158,7 +158,7 @@ async def main():
         # parsing config file
         config_app = get_config(file_toml)
 
-        queue = Queue(maxsize=100)
+        queue = Queue(maxsize=1)
         queue_general, queue_cancelling, queue_capturing_user_changes = Queue(), Queue(), Queue()
         queue_avoiding_double, queue_hedging, queue_combo  = Queue(), Queue(), Queue()
         
