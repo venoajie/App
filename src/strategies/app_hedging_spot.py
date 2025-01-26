@@ -644,7 +644,7 @@ async def hedging_spot(
                 queue.task_done
                 semaphore.release()
 
-            if message_params is None:
+            if message is None:
                 break
 
     except Exception as error:

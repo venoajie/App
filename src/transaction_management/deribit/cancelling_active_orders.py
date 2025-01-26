@@ -382,7 +382,7 @@ async def cancelling_orders(
             except asyncio.QueueEmpty:
                 continue
                 # check for stop
-            if message_params is None:
+            if message is None:
                 break
 
     except Exception as error:
