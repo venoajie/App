@@ -268,21 +268,22 @@ class StreamAccountData(ModifyOrderDb):
                                 log.info (f"message_channel {message_channel}")
                     
                                 await queue_hedging.put(message_params)
-                                has_order.release() 
+                                #has_order.release() 
                                 await queue_combo.put(message_params)
-                                has_order.release() 
+                                #has_order.release() 
                                 await queue_cancelling.put(message_params)
-                                has_order.release() 
+                                #has_order.release() 
                                 await queue_general.put(message_params)                                
-                                has_order.release()
+                                #has_order.release()
                                  
                                 if "user.changes.any" in message_channel:     
                                     
                                     log.warning (f"message_params {message_params}")
                                     await queue_capturing_user_changes.put(message_params)
-                                    has_order.release() 
+                                    #has_order.release() 
                                     await queue_avoiding_double.put(message_params)
-                                    has_order.release() 
+                                    #has_order.release() 
+                                has_order.release()
                                                     
                                 
             except Exception as error:
