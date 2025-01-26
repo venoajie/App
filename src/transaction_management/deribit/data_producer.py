@@ -240,6 +240,8 @@ class StreamAccountData(ModifyOrderDb):
                     cached_candles_data = combining_candles_data(
                         np, currencies, qty_candles, resolutions, dim_sequence
                     )
+                    
+                    sequence = 0
                     while True:
 
                         # Receive WebSocket messages
@@ -293,7 +295,9 @@ class StreamAccountData(ModifyOrderDb):
                                 data: dict = message_params["data"]
                                 
                                 message_channel: str = message_params["channel"]
-                                log.info (f"message_channel {message_channel}")
+                                
+                                sequence = sequence + len (message_channel)
+                                log.info (f"message_channel {message_channel} {sequence}")
                                 #has_order.release() 
                                 await queue_general.put(message_params)                                
                                 #has_order.release()
@@ -335,7 +339,8 @@ class StreamAccountData(ModifyOrderDb):
                                                               chart_trade=chart_trade,
                                                               market_condition=market_condition,
                                                               server_time=server_time,
-                                                              ticker_all=ticker_all
+                                                              ticker_all=ticker_all,
+                                                              sequence=sequence
                                                               )
                                 await queue_cancelling.put(data_to_dispatch)
                     

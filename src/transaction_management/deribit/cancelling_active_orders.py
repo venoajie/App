@@ -145,7 +145,7 @@ async def cancelling_orders(
                     
                     chart_trade, server_time = message["chart_trade"], message["server_time"]
 
-                    log.critical(f"message_channel {message_channel}")
+                    log.critical(f"message_channel {message_channel} {message["sequence"]}")
 
                     currency: str = extract_currency_from_text(
                             message_channel
