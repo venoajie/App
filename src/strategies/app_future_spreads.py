@@ -625,6 +625,10 @@ async def future_spreads(
                 await asyncio.sleep(.1)
                 continue
                     # check for stop
+            
+            finally:
+                semaphore.release() 
+                    
             if message_params is None:
                 break
             

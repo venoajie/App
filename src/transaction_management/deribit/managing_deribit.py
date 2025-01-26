@@ -136,7 +136,7 @@ class ModifyOrderDb(SendApiRequest):
         open_orders_sqlite: list = None,
     ) -> None:
 
-        log.critical(f" cancel_the_cancellables")
+        log.critical(f" cancel_the_cancellables {currency}")
 
         where_filter = f"order_id"
 
@@ -163,7 +163,6 @@ class ModifyOrderDb(SendApiRequest):
 
                         await self.cancel_by_order_id(order_db_table, order_id)
 
-        log.critical("D")
         await self.resupply_sub_accountdb(currency.upper())
 
     async def get_sub_account(self, currency) -> list:
