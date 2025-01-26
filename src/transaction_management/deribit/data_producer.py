@@ -51,6 +51,7 @@ from utilities.caching import (
 )
 from utilities.pickling import replace_data
 from utilities.string_modification import (
+    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -348,9 +349,12 @@ class StreamAccountData(ModifyOrderDb):
                                 market_condition = get_market_condition(
                                     np, cached_candles_data, currency_upper
                                 )
+                                
+                                currency: str = extract_currency_from_text(message_channel)
 
                                 data_to_dispatch: dict = dict(
-                                    message_params=message_params,
+                                    #message_params=message_params,
+                                    currency=currency,
                                     cached_orders=cached_orders,
                                     chart_trade=chart_trade,
                                     market_condition=market_condition,

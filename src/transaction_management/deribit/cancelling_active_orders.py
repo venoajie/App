@@ -137,12 +137,12 @@ async def cancelling_orders(
 
                     message = queue.get_nowait()
 
-                    message_params = message["message_params"]
+                    #message_params = message["message_params"]
 
-                    message_channel, data_orders = (
-                        message_params["channel"],
-                        message_params["data"],
-                    )
+                    #message_channel = (
+                    #    message_params["channel"],
+                        #message_params["data"],
+                    #)
 
                     cached_orders, ticker_all = (
                         message["cached_orders"],
@@ -154,9 +154,9 @@ async def cancelling_orders(
                         message["server_time"],
                     )
                     
-                    log.critical(f"message_channel {message_channel} {message["sequence"]}")
+                    log.critical(f"{message["sequence"]}")
 
-                    currency: str = extract_currency_from_text(message_channel)
+                    currency: str = message["currency"]
 
                     currency_upper: str = currency.upper()
 
@@ -170,7 +170,7 @@ async def cancelling_orders(
 
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                    instrument_name_future = (message_channel)[19:]
+                    #instrument_name_future = (message_channel)[19:]
 
                     # if message_channel == f"incremental_ticker.{instrument_name_future}":
 
@@ -201,8 +201,7 @@ async def cancelling_orders(
                             if instrument_name_perpetual in o["instrument_name"]
                         ][0]
 
-                        index_price = get_index(
-                            data_orders, ticker_perpetual_instrument_name
+                        index_price = get_index(ticker_perpetual_instrument_name
                         )
 
                         sub_account = reading_from_pkl_data("sub_accounts", currency)
@@ -442,16 +441,17 @@ def compute_notional_value(index_price: float, equity: float) -> float:
     return index_price * equity
 
 
-def get_index(data_orders: dict, ticker: dict) -> float:
+def get_index(ticker: dict) -> float:
 
     try:
-        index_price = data_orders["index_price"]
-
-    except:
 
         index_price = ticker["index_price"]
 
-        if index_price == []:
-            index_price = ticker["estimated_delivery_price"]
+    except:
+
+        index_price = []
+
+    if index_price == []:
+        index_price = ticker["estimated_delivery_price"]
 
     return index_price
