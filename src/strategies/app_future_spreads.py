@@ -132,6 +132,7 @@ async def future_spreads(
                     server_time = message["server_time"]
                     
                     ticker_all = message["ticker_all"]
+                    chart_trade = message["chart_trade"]
                     
                     message_channel: str = message_params["channel"]
                     
@@ -166,11 +167,11 @@ async def future_spreads(
 
                     #    server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
 
-                    chart_trade = await chart_trade_in_msg(
-                        message_channel,
-                        data_orders,
-                        cached_candles_data,
-                    )
+                    #chart_trade = await chart_trade_in_msg(
+                    #    message_channel,
+                    #    data_orders,
+                    #    cached_candles_data,
+                    #)
                     
                     if not chart_trade and server_time != 0:
 

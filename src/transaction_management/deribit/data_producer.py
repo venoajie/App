@@ -8,6 +8,7 @@ import os
 from collections import deque
 from datetime import datetime, timedelta, timezone
 
+import numpy as np
 import orjson
 import tomli
 import uvloop
@@ -22,6 +23,11 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 # user defined formula
 from configuration import config, config_oci, id_numbering
 from configuration.label_numbering import get_now_unix_time
+
+from market_understanding.price_action.candles_analysis import (
+    combining_candles_data,
+    get_market_condition,
+)
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import (
     SendApiRequest,
@@ -226,7 +232,14 @@ class StreamAccountData(ModifyOrderDb):
                     cached_orders: list = await combining_order_data(private_data, currencies)
                     
                     server_time = 0
-        
+                    
+                    resolutions = [60, 15, 5]
+                    qty_candles = 5
+                    dim_sequence = 3
+
+                    cached_candles_data = combining_candles_data(
+                        np, currencies, qty_candles, resolutions, dim_sequence
+                    )
                     while True:
 
                         # Receive WebSocket messages
@@ -306,8 +319,16 @@ class StreamAccountData(ModifyOrderDb):
                                     )
                                     
                                     server_time = data["timestamp"] + server_time if server_time == 0 else data["timestamp"]
+                    
+                                
+                                chart_trade = await chart_trade_in_msg(
+                                    message_channel,
+                                    data,
+                                    cached_candles_data,
+                                )
                                 data_to_dispatch: dict = dict(message_params=message_params,
                                                               cached_orders=cached_orders,
+                                                              chart_trade=chart_trade,
                                                               server_time=server_time,
                                                               ticker_all=ticker_all
                                                               )
@@ -452,3 +473,31 @@ class StreamAccountData(ModifyOrderDb):
             msg.update(extra_params)
 
             await self.websocket_client.send(json.dumps(msg))
+
+
+async def chart_trade_in_msg(
+    message_channel,
+    data_orders,
+    candles_data,
+):
+    """ """
+
+    if "chart.trades" in message_channel:
+        tick_from_exchange = data_orders["tick"]
+
+        tick_from_cache = max(
+            [o["max_tick"] for o in candles_data if o["resolution"] == 5]
+        )
+
+        if tick_from_exchange <= tick_from_cache:
+            return True
+
+        else:
+
+            log.warning("update ohlc")
+            # await sleep_and_restart()
+
+    else:
+
+        return False
+
