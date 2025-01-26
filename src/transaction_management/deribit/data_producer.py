@@ -224,6 +224,8 @@ class StreamAccountData(ModifyOrderDb):
                     ticker_all = cached_ticker(instruments_name)
                     
                     cached_orders: list = await combining_order_data(private_data, currencies)
+                    
+                    server_time = 0
         
                     while True:
 
@@ -293,14 +295,6 @@ class StreamAccountData(ModifyOrderDb):
                                     await queue_avoiding_double.put(message_params)
                                     #has_order.release() 
                                     
-                                data_to_dispatch: dict = dict(message_params=message_params,
-                                                              cached_orders=cached_orders
-                                                              )
-                    
-                                await queue_hedging.put(data_to_dispatch)
-                                #has_order.release() 
-                                await queue_combo.put(data_to_dispatch)
-                                #has_order.release() 
 
                                 instrument_name_future = (message_channel)[19:]
                                 if message_channel == f"incremental_ticker.{instrument_name_future}":
@@ -310,6 +304,18 @@ class StreamAccountData(ModifyOrderDb):
                                         ticker_all,
                                         data,
                                     )
+                                    
+                                    server_time = data["timestamp"] + server_time if server_time == 0 else data["timestamp"]
+                                data_to_dispatch: dict = dict(message_params=message_params,
+                                                              cached_orders=cached_orders,
+                                                              server_time=server_time,
+                                                              ticker_all=ticker_all
+                                                              )
+                    
+                                await queue_hedging.put(data_to_dispatch)
+                                #has_order.release() 
+                                await queue_combo.put(data_to_dispatch)
+                                #has_order.release() 
                                     
                                 has_order.release()
                                                     

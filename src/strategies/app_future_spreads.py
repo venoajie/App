@@ -129,6 +129,10 @@ async def future_spreads(
 
                     cached_orders = message["cached_orders"]
                     
+                    server_time = message["server_time"]
+                    
+                    ticker_all = message["ticker_all"]
+                    
                     message_channel: str = message_params["channel"]
                     
                     log.critical(f"message_channel {message_channel}")
@@ -151,16 +155,16 @@ async def future_spreads(
                     
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                    instrument_name_future = (message_channel)[19:]
-                    if message_channel == f"incremental_ticker.{instrument_name_future}":
+                    #instrument_name_future = (message_channel)[19:]
+                    #if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                        update_cached_ticker(
-                            instrument_name_future,
-                            ticker_all,
-                            data_orders,
-                        )
+                    #    update_cached_ticker(
+                    #        instrument_name_future,
+                    #        ticker_all,
+                    #        data_orders,
+                    #    )
 
-                        server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
+                    #    server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
 
                     chart_trade = await chart_trade_in_msg(
                         message_channel,
