@@ -291,12 +291,12 @@ class StreamAccountData(ModifyOrderDb):
                             if message["method"] != "heartbeat":
 
                                 message_params: dict = message["params"]
-                                #log.warning (f"message_params {message_params}")
+                                log.warning (f"message_params {message_params}")
                                 data: dict = message_params["data"]
                                 
                                 message_channel: str = message_params["channel"]
                                 
-                                sequence = sequence + len (message_channel)
+                                sequence = sequence + len (message_params)
                                 log.info (f"message_channel {message_channel} {sequence}")
                                 #has_order.release() 
                                 await queue_general.put(message_params)                                
