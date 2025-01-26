@@ -162,7 +162,7 @@ async def main():
         queue_general, queue_cancelling, queue_capturing_user_changes = Queue(), Queue(), Queue()
         queue_avoiding_double, queue_hedging, queue_combo  = Queue(), Queue(), Queue()
         
-        has_order = asyncio.Semaphore(value=2) 
+        semaphore = asyncio.Semaphore(value=2) 
         
         stream = StreamAccountData(sub_account_id)
                 
@@ -174,7 +174,7 @@ async def main():
                 queue_avoiding_double,
                 queue_hedging,
                 queue_combo,
-                has_order)
+                semaphore)
             ) 
         
         await asyncio.sleep(0.0005)
@@ -193,21 +193,21 @@ async def main():
                 modify_order_and_db,
                 config_app,
                 queue_capturing_user_changes,
-                has_order),
+                semaphore),
     
             hedging_spot(
                 private_data,
                 modify_order_and_db,
                 config_app,
                 queue_hedging,
-                has_order),
+                semaphore),
             
             future_spreads(
                 private_data,
                 modify_order_and_db,
                 config_app,
                 queue_combo,
-                has_order),
+                semaphore),
             
 
             reconciling_size(
@@ -230,7 +230,7 @@ async def main():
                 modify_order_and_db,
                 config_app,
                 queue_cancelling,
-                has_order),    
+                semaphore),    
             
             saving_ws_data(queue_general),
             )  

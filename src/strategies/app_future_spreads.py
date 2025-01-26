@@ -61,7 +61,7 @@ async def future_spreads(
     modify_order_and_db: object,
     config_app: list,
     queue: object,
-    has_order: object
+    semaphore: object
 ):
     """ """
 
@@ -115,7 +115,7 @@ async def future_spreads(
         
         server_time = 0
 
-        while await has_order.acquire():
+        async with semaphore:
         
             try:
                     
@@ -623,10 +623,6 @@ async def future_spreads(
                 
 
                 await asyncio.sleep(.1)
-                continue
-                    # check for stop
-            if message_params is None:
-                break
             
     except Exception as error:
 
