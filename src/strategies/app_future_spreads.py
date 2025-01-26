@@ -115,7 +115,7 @@ async def future_spreads(
         
         server_time = 0
 
-        async with semaphore:
+        while await semaphore.acquire():
         
             try:
                     
@@ -623,6 +623,10 @@ async def future_spreads(
                 
 
                 await asyncio.sleep(.1)
+                continue
+                    # check for stop
+            if message_params is None:
+                break
             
     except Exception as error:
 

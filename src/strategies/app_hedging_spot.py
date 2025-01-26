@@ -134,8 +134,12 @@ async def hedging_spot(
         cached_orders: list = await combining_order_data(private_data, currencies)
         
         server_time = 0
+        
+        sem= await semaphore.acquire()
+        
+        log.debug(f"semaphore.acquire() {sem}")
 
-        async with semaphore:
+        while await semaphore.acquire():
         
             try:
 
@@ -623,12 +627,18 @@ async def hedging_spot(
                                                                         break
                     
                 queue.task_done
+
                 
                 await asyncio.sleep(.1)
                 
+
             except asyncio.QueueEmpty:
 
                 await asyncio.sleep(.1)
+                continue
+                    # check for stop
+            if message_params is None:
+                break
 
     except Exception as error:
 
