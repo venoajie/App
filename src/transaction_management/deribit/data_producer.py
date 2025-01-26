@@ -168,7 +168,7 @@ class StreamAccountData(ModifyOrderDb):
                 instruments_name = futures_instruments["instruments_name"]
 
                 strategy_attributes = config_app["strategies"]
-                
+
                 while True:
 
                     # Authenticate WebSocket Connection

@@ -76,7 +76,11 @@ async def cancelling_orders(
 
         cancellable_strategies =   [o["strategy_label"] for o in strategy_attributes \
             if o["cancellable"]==True]
+                
+        relevant_tables = config_app["relevant_tables"][0]
         
+        order_db_table= relevant_tables["orders_table"]
+
         await modify_order_and_db.cancel_the_cancellables(
             order_db_table,
             currency,
