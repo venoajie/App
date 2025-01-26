@@ -196,12 +196,12 @@ async def main():
                 queue_capturing_user_changes,
                 semaphore),
     
-            hedging_spot(
-                private_data,
-                modify_order_and_db,
-                config_app,
-                queue_hedging,
-                semaphore),
+            #hedging_spot(
+            #    private_data,
+            #    modify_order_and_db,
+            #    config_app,
+            #    queue_hedging,
+            #    semaphore),
        
             future_spreads(
                 private_data,
