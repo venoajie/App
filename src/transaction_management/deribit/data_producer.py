@@ -316,7 +316,6 @@ class StreamAccountData(ModifyOrderDb):
                                     f"message_channel {message_channel} {sequence}"
                                 )
                                 # has_order.release()
-                                await queue_redis.put(message_params)
                                 await queue_general.put(message_params)
                                 # has_order.release()
 
@@ -373,6 +372,7 @@ class StreamAccountData(ModifyOrderDb):
                                     ticker_all=ticker_all,
                                     sequence=sequence,
                                 )
+                                await queue_redis.put(data_to_dispatch)
                                 await queue_cancelling.put(data_to_dispatch)
 
                                 await queue_hedging.put(data_to_dispatch)
