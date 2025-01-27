@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 
 import numpy as np
 import orjson
+import redis
 import tomli
 import uvloop
 import websockets
@@ -131,6 +132,7 @@ class StreamAccountData(ModifyOrderDb):
         queue_avoiding_double: object,
         queue_hedging: object,
         queue_combo: object,
+        queue_redis: object,
         has_order: object,
     ) -> None:
 
@@ -145,6 +147,12 @@ class StreamAccountData(ModifyOrderDb):
             file_toml = "config_strategies.toml"
 
             try:
+
+                rds: object = redis.Redis(
+                    host="localhost",
+                    port=6379,
+                    decode_responses=True,
+                )
 
                 # get ALL traded currencies in deribit
                 get_currencies_all = await get_currencies()
@@ -308,6 +316,7 @@ class StreamAccountData(ModifyOrderDb):
                                     f"message_channel {message_channel} {sequence}"
                                 )
                                 # has_order.release()
+                                await queue_general.put(queue_redis)
                                 await queue_general.put(message_params)
                                 # has_order.release()
 
@@ -349,18 +358,20 @@ class StreamAccountData(ModifyOrderDb):
                                 market_condition = get_market_condition(
                                     np, cached_candles_data, currency_upper
                                 )
-                                
-                                currency: str = extract_currency_from_text(message_channel)
+
+                                currency: str = extract_currency_from_text(
+                                    message_channel
+                                )
 
                                 data_to_dispatch: dict = dict(
-                                    #message_params=message_params,
+                                    # message_params=message_params,
                                     currency=currency,
                                     cached_orders=cached_orders,
                                     chart_trade=chart_trade,
                                     market_condition=market_condition,
                                     server_time=server_time,
                                     ticker_all=ticker_all,
-                                  #  sequence=sequence,
+                                    #  sequence=sequence,
                                 )
                                 await queue_cancelling.put(data_to_dispatch)
 

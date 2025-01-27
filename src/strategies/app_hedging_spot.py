@@ -150,12 +150,12 @@ async def hedging_spot(
 
                     message = queue.get_nowait()
 
-                    #message_params = message["message_params"]
+                    # message_params = message["message_params"]
 
-                    #message_channel = (
+                    # message_channel = (
                     #    message_params["channel"],
-                        #message_params["data"],
-                    #)
+                    # message_params["data"],
+                    # )
 
                     cached_orders, ticker_all = (
                         message["cached_orders"],
@@ -166,15 +166,14 @@ async def hedging_spot(
                         message["chart_trade"],
                         message["server_time"],
                     )
-                    
-                    #log.critical(f"{message["sequence"]}")
+
+                    # log.critical(f"{message["sequence"]}")
 
                     # if "user.changes.any" in message_channel:
 
                     #    log.error (f"data_orders user.changes.any {data_orders}")
 
                     #    await update_cached_orders(cached_orders, data_orders)
-
 
                     currency: str = message["currency"]
 
@@ -217,8 +216,7 @@ async def hedging_spot(
                             if instrument_name_perpetual in o["instrument_name"]
                         ][0]
 
-                        index_price = get_index(ticker_perpetual_instrument_name
-                        )
+                        index_price = get_index(ticker_perpetual_instrument_name)
 
                         sub_account = reading_from_pkl_data("sub_accounts", currency)
 
@@ -632,11 +630,11 @@ async def hedging_spot(
 
                                                                         break
 
-                #await asyncio.sleep(0.1)
+                # await asyncio.sleep(0.1)
 
             except asyncio.QueueEmpty:
 
-                #await asyncio.sleep(0.1)
+                # await asyncio.sleep(0.1)
                 continue
                 # check for stop
 

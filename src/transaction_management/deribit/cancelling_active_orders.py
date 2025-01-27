@@ -137,12 +137,12 @@ async def cancelling_orders(
 
                     message = queue.get_nowait()
 
-                    #message_params = message["message_params"]
+                    # message_params = message["message_params"]
 
-                    #message_channel = (
+                    # message_channel = (
                     #    message_params["channel"],
-                        #message_params["data"],
-                    #)
+                    # message_params["data"],
+                    # )
 
                     cached_orders, ticker_all = (
                         message["cached_orders"],
@@ -153,8 +153,8 @@ async def cancelling_orders(
                         message["chart_trade"],
                         message["server_time"],
                     )
-                    
-                    #log.critical(f"{message["sequence"]}")
+
+                    # log.critical(f"{message["sequence"]}")
 
                     currency: str = message["currency"]
 
@@ -170,7 +170,7 @@ async def cancelling_orders(
 
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                    #instrument_name_future = (message_channel)[19:]
+                    # instrument_name_future = (message_channel)[19:]
 
                     # if message_channel == f"incremental_ticker.{instrument_name_future}":
 
@@ -201,8 +201,7 @@ async def cancelling_orders(
                             if instrument_name_perpetual in o["instrument_name"]
                         ][0]
 
-                        index_price = get_index(ticker_perpetual_instrument_name
-                        )
+                        index_price = get_index(ticker_perpetual_instrument_name)
 
                         sub_account = reading_from_pkl_data("sub_accounts", currency)
 
@@ -377,7 +376,7 @@ async def cancelling_orders(
                                                     break
 
                     queue.task_done
-                    #await asyncio.sleep(idle_time)
+                    # await asyncio.sleep(idle_time)
 
             except asyncio.QueueEmpty:
                 continue

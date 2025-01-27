@@ -45,10 +45,7 @@ from utilities.string_modification import (
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
-from utilities.system_tools import (
-    parse_error_message, 
-    provide_path_for_file
-    )
+from utilities.system_tools import parse_error_message, provide_path_for_file
 
 
 async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
@@ -129,12 +126,12 @@ async def future_spreads(
 
                     message = queue.get_nowait()
 
-                    #message_params = message["message_params"]
+                    # message_params = message["message_params"]
 
-                    #message_channel, data_orders = (
+                    # message_channel, data_orders = (
                     #    message_params["channel"],
                     #    message_params["data"],
-                    #)
+                    # )
 
                     cached_orders, ticker_all = (
                         message["cached_orders"],
@@ -146,14 +143,13 @@ async def future_spreads(
                         message["server_time"],
                     )
 
-                    #log.critical(f"{message["sequence"]}")
+                    # log.critical(f"{message["sequence"]}")
 
                     # if "user.changes.any" in message_channel:
 
                     #    log.error (f"data_orders user.changes.any {data_orders}")
 
                     #    await update_cached_orders(cached_orders, data_orders)
-
 
                     currency: str = message["currency"]
 
@@ -195,8 +191,7 @@ async def future_spreads(
                             if instrument_name_perpetual in o["instrument_name"]
                         ][0]
 
-                        index_price = get_index(ticker_perpetual_instrument_name
-                        )
+                        index_price = get_index(ticker_perpetual_instrument_name)
 
                         sub_account = reading_from_pkl_data("sub_accounts", currency)
 
@@ -626,11 +621,11 @@ async def future_spreads(
 
                                                                     break
 
-                #await asyncio.sleep(0.1)
+                # await asyncio.sleep(0.1)
 
             except asyncio.QueueEmpty:
 
-                #await asyncio.sleep(0.1)
+                # await asyncio.sleep(0.1)
                 continue
                 # check for stop
 
@@ -694,7 +689,6 @@ def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
 def compute_notional_value(index_price: float, equity: float) -> float:
     """ """
     return index_price * equity
-
 
 
 def get_index(ticker: dict) -> float:
