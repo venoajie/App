@@ -220,6 +220,10 @@ async def main():
                 queue_redis,
                 semaphore)
             ) 
+        saving_task = asyncio.create_task(
+            saving_ws_data(queue_general,
+                           queue_redis)
+            ) 
         
         await asyncio.sleep(0.0005)
         
@@ -231,12 +235,12 @@ async def main():
             
         await asyncio.gather(
             producer_task, 
+
+            saving_task,
             
             main_redis(queue_redis,semaphore),    
             
-            
-                        )  
-
+            )  
 
         await queue.join()
         

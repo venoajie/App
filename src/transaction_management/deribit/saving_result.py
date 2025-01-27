@@ -32,7 +32,10 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
         replace_data(my_path_portfolio, data_orders)
 
 
-async def saving_ws_data(queue: object):
+async def saving_ws_data(
+    queue: object, 
+    queue_redis: object,
+    )->None:
     """ """
 
     try:
@@ -48,6 +51,8 @@ async def saving_ws_data(queue: object):
             message_channel: str = message_params["channel"]
 
             data: dict = message_params["data"]
+            
+            await queue_redis.put(data)
 
             currency: str = extract_currency_from_text(message_channel)
 
