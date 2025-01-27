@@ -5,12 +5,9 @@
 import asyncio
 import json
 import os
-from collections import deque
 from datetime import datetime, timedelta, timezone
 
-import numpy as np
 import orjson
-import redis
 import tomli
 import uvloop
 import websockets
@@ -23,15 +20,8 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # user defined formula
 from configuration import config, config_oci, id_numbering
-from configuration.label_numbering import get_now_unix_time
-
-from market_understanding.price_action.candles_analysis import (
-    combining_candles_data,
-    get_market_condition,
-)
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import (
-    SendApiRequest,
     get_currencies,
     get_end_point_result,
     get_instruments,
@@ -43,16 +33,8 @@ from transaction_management.deribit.managing_deribit import (
     ModifyOrderDb,
     currency_inline_with_database_address,
 )
-
-from utilities.caching import (
-    combining_ticker_data as cached_ticker,
-    combining_order_data,
-    update_cached_orders,
-    update_cached_ticker,
-)
 from utilities.pickling import replace_data
 from utilities.string_modification import (
-    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -125,14 +107,7 @@ class StreamAccountData(ModifyOrderDb):
 
     async def ws_manager(
         self,
-        private_data: object,
         queue_general: object,
-        queue_cancelling: object,
-        queue_capturing_user_changes: object,
-        queue_avoiding_double: object,
-        queue_hedging: object,
-        queue_combo: object,
-        queue_redis: object,
         has_order: object,
     ) -> None:
 
@@ -147,12 +122,6 @@ class StreamAccountData(ModifyOrderDb):
             file_toml = "config_strategies.toml"
 
             try:
-
-                rds: object = redis.Redis(
-                    host="localhost",
-                    port=6379,
-                    decode_responses=True,
-                )
 
                 # get ALL traded currencies in deribit
                 get_currencies_all = await get_currencies()
@@ -238,25 +207,6 @@ class StreamAccountData(ModifyOrderDb):
                                 ws_channel=ws,
                             )
 
-                    ticker_all = cached_ticker(instruments_name)
-
-                    ticker_all = cached_ticker(instruments_name)
-
-                    cached_orders: list = await combining_order_data(
-                        private_data, currencies
-                    )
-
-                    server_time = 0
-
-                    resolutions = [60, 15, 5]
-                    qty_candles = 5
-                    dim_sequence = 3
-
-                    cached_candles_data = combining_candles_data(
-                        np, currencies, qty_candles, resolutions, dim_sequence
-                    )
-
-                    sequence = 0
                     while True:
 
                         # Receive WebSocket messages
@@ -307,77 +257,9 @@ class StreamAccountData(ModifyOrderDb):
 
                                 message_params: dict = message["params"]
                                 #                                log.warning (f"message_params {message_params}")
-                                data: dict = message_params["data"]
-
-                                message_channel: str = message_params["channel"]
-
-                                sequence = sequence + len(message_params) - 1
-                                log.info(
-                                    f"message_channel {message_channel} {sequence}"
-                                )
-                                # has_order.release()
                                 await queue_general.put(message_params)
                                 # has_order.release()
-
-                                if "user.changes.any" in message_channel:
-
-                                    log.warning(f"message_params {message_params}")
-                                    await update_cached_orders(cached_orders, data)
-                                    await queue_capturing_user_changes.put(
-                                        message_params
-                                    )
-                                    # has_order.release()
-                                    await queue_avoiding_double.put(message_params)
-                                    # has_order.release()
-
-                                instrument_name_future = (message_channel)[19:]
-                                if (
-                                    message_channel
-                                    == f"incremental_ticker.{instrument_name_future}"
-                                ):
-
-                                    update_cached_ticker(
-                                        instrument_name_future,
-                                        ticker_all,
-                                        data,
-                                    )
-
-                                    server_time = (
-                                        data["timestamp"] + server_time
-                                        if server_time == 0
-                                        else data["timestamp"]
-                                    )
-
-                                chart_trade = await chart_trade_in_msg(
-                                    message_channel,
-                                    data,
-                                    cached_candles_data,
-                                )
-
-                                market_condition = get_market_condition(
-                                    np, cached_candles_data, currency_upper
-                                )
-
-                                currency: str = extract_currency_from_text(
-                                    message_channel
-                                )
-
-                                data_to_dispatch: dict = dict(
-                                    # message_params=message_params,
-                                    currency=currency,
-                                    cached_orders=cached_orders,
-                                    chart_trade=chart_trade,
-                                    market_condition=market_condition,
-                                    server_time=server_time,
-                                    ticker_all=ticker_all,
-                                    sequence=sequence,
-                                )
-                                await queue_redis.put(data_to_dispatch)
-                                await queue_cancelling.put(data_to_dispatch)
-
-                                await queue_hedging.put(data_to_dispatch)
-                                # has_order.release()
-                                await queue_combo.put(data_to_dispatch)
+                                
                                 # has_order.release()
 
                                 has_order.release()
@@ -514,30 +396,3 @@ class StreamAccountData(ModifyOrderDb):
             msg.update(extra_params)
 
             await self.websocket_client.send(json.dumps(msg))
-
-
-async def chart_trade_in_msg(
-    message_channel,
-    data_orders,
-    candles_data,
-):
-    """ """
-
-    if "chart.trades" in message_channel:
-        tick_from_exchange = data_orders["tick"]
-
-        tick_from_cache = max(
-            [o["max_tick"] for o in candles_data if o["resolution"] == 5]
-        )
-
-        if tick_from_exchange <= tick_from_cache:
-            return True
-
-        else:
-
-            log.warning("update ohlc")
-            # await sleep_and_restart()
-
-    else:
-
-        return False

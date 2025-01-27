@@ -52,10 +52,15 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def saving_ws_data(
-    private_data,
-    config_app,
-    queue: object, 
-    queue_redis: object,
+        private_data: object,
+        queue_general: object,
+        queue_cancelling: object,
+        queue_capturing_user_changes: object,
+        queue_avoiding_double: object,
+        queue_hedging: object,
+        queue_combo: object,
+        queue_redis: object,
+        has_order: object,
     )->None:
     """ """
 
@@ -166,6 +171,17 @@ async def saving_ws_data(
                 sequence=sequence,
             )
             
+
+            await queue_redis.put(sequence)
+            await queue_cancelling.put(data_to_dispatch)
+
+            await queue_hedging.put(data_to_dispatch)
+            # has_order.release()
+            await queue_combo.put(data_to_dispatch)
+            #
+            await queue_general.put(message_params)
+            has_order.release()
+            
             if message_channel == f"incremental_ticker.{instrument_ticker}":
 
                 # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
@@ -214,6 +230,14 @@ async def saving_ws_data(
 
                 log.warning(f"message_params {message_params}")
                 await update_cached_orders(cached_orders, data)
+
+                await queue_capturing_user_changes.put(
+                    message_params
+                )
+                # has_order.release()
+                await queue_avoiding_double.put(message_params)
+                # has_order.release()
+
 
     except Exception as error:
 
