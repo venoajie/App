@@ -210,7 +210,7 @@ async def main():
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(
-                queue_general
+                queue_general,
                 semaphore)
             ) 
         saving_task = asyncio.create_task(
