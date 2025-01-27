@@ -6,7 +6,7 @@ import json
 import logging
 import redis.asyncio as redis
 import orjson
-from redis import asyncio as aioredis
+
 
 CHANNEL_NAME = "notification"
 
@@ -20,8 +20,8 @@ async def send_message(user_id: int, message: str):
 
 
 async def handle_notification():
-    client = await aioredis.from_url("redis://localhost")
-    pubsub = client.pubsub()
+    r = redis.Redis()
+    pubsub = r.get_message()
     await pubsub.subscribe(CHANNEL_NAME)
     while True:
         try:
@@ -33,16 +33,7 @@ async def handle_notification():
                     await send_message(payload["user_id"], payload["message"])
         except (asyncio.TimeoutError, orjson.decoder.JSONDecodeError) as e:
             logging.error(e)
-            
-async def subscribe(channel):
-    redis = await aioredis.from_url("redis://localhost")
-    
-    #channel = await redis.subscribe(channel)
-    async for message in channel[0].iter():
-        # process message
-        print(message)
 
-#asyncio.run(subscribe("my-channel")) 
 
 if __name__ == "__main__":
-    asyncio.run(subscribe(["notification"]))
+    asyncio.run(handle_notification())
