@@ -53,6 +53,7 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 async def saving_ws_data(
         private_data: object,
+        config_app,
         queue_general: object,
         queue_cancelling: object,
         queue_capturing_user_changes: object,
@@ -103,7 +104,7 @@ async def saving_ws_data(
         sequence = 0
         while True:
 
-            message_params: str = await queue.get()
+            message_params: str = await queue_general.get()
             
             log.warning (f"message_params {message_params}")
             data: dict = message_params["data"]
