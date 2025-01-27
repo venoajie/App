@@ -149,7 +149,7 @@ def send_notification(
     r.publish(CHANNEL_NAME, json.dumps({"user_id": user_id, "message": message}))
 
 
-async def main_redis(queue_redis):
+async def main_redis(queue_redis,semaphore):
     
     while True:
         try:
@@ -165,7 +165,7 @@ async def main_redis(queue_redis):
 
         finally:
             queue_redis.task_done
-#            semaphore.release()
+            semaphore.release()
 
         if message is None:
             break
@@ -231,7 +231,7 @@ async def main():
         await asyncio.gather(
             producer_task, 
             
-            main_redis(queue_redis),    
+            main_redis(queue_redis,semaphore),    
             
             
                         )  
