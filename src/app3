@@ -9,6 +9,9 @@ import signal
 import sys
 from random import sample
 
+import json
+import redis
+
 #import signal
 #from multiprocessing import Manager
 #from multiprocessing.queues import Queue
@@ -130,6 +133,28 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
+CHANNEL_NAME = "notification"
+r = redis.Redis()
+
+
+def send_notification(
+    user_id: int, 
+    message: str):
+    """
+    Send a notification to a user.
+    note: this maybe located in services.py
+    """
+    ...
+    
+    r.publish(CHANNEL_NAME, json.dumps({"user_id": user_id, "message": message}))
+
+
+async def main_redis(queue_redis):
+    message = queue_redis.get_nowait()
+    # imagine this in view / API endpoint or signals
+    send_notification(42, queue_redis)
+
+
 async def main():
     
     sub_account_id = "deribit-148510"
@@ -190,12 +215,7 @@ async def main():
         await asyncio.gather(
             producer_task, 
             
-            cancelling_orders(
-                private_data,
-                modify_order_and_db,
-                config_app,
-                queue_cancelling,
-                semaphore),    
+            main_redis(queue_redis),    
             
             
                         )  

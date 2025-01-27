@@ -70,7 +70,8 @@ websockets==13.1
 yarl==1.17.0
     # via aiohttp
 
- redis[hiredis]    
+ redis[hiredis]>=5.2.1    
+ aioredis>=2.0.1
  cffi==1.17.1
  circuitbreaker==2.0.0
  cryptography==43.0.3

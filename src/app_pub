@@ -15,12 +15,14 @@ def send_notification(
     note: this maybe located in services.py
     """
     ...
+    
     r.publish(CHANNEL_NAME, json.dumps({"user_id": user_id, "message": message}))
 
 
-def main():
+def main(queue_redis):
+    message = queue_redis.get_nowait()
     # imagine this in view / API endpoint or signals
-    send_notification(42, "Your order is on its way!")
+    send_notification(42, queue_redis)
 
 
 if __name__ == "__main__":
