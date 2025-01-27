@@ -133,9 +133,13 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
+from redis import ConnectionPool
+
 CHANNEL_NAME = "notification"
 r = redis.Redis()
 
+redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
+client = redis.Redis(connection_pool=redis_pool)
 
 def send_notification(
     user_id: int, 
@@ -146,7 +150,7 @@ def send_notification(
     """
     ...
     
-    r.publish(CHANNEL_NAME, json.dumps({"user_id": user_id, "message": message}))
+    client.publish(CHANNEL_NAME, json.dumps({"user_id": user_id, "message": message}))
 
 
 async def main_redis(queue_redis,semaphore):
