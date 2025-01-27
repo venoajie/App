@@ -10,29 +10,6 @@ import aioredis
 
 CHANNEL_NAME = "notification"
 
-logging.basicConfig(level=logging.DEBUG)
-
-
-async def send_message(user_id: int, message: str):
-    # write real code here
-    logging.debug(f"Sending message to user {user_id}: {message}")
-    await asyncio.sleep(0.2)
-
-
-async def handle_notification():
-    client = await aioredis.from_url("redis://localhost")
-    pubsub = client.pubsub()
-    await pubsub.subscribe(CHANNEL_NAME)
-    while True:
-        try:
-            async with async_timeout.timeout(1):
-                message = await pubsub.get_message()
-                if message and message["type"] == "message":
-                    payload = orjson.loads(message["data"])
-                    # TODO: do validation on payload
-                    await send_message(payload["user_id"], payload["message"])
-        except (asyncio.TimeoutError, orjson.decoder.JSONDecodeError) as e:
-            logging.error(e)
             
 async def subscribe(channel):
     redis = await aioredis.from_url("redis://localhost")
