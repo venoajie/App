@@ -4,17 +4,14 @@
 # built ins
 import asyncio
 import json
-import os
 from datetime import datetime, timedelta, timezone
 
 import orjson
-import tomli
 import uvloop
 import websockets
 
 # installed
 from dataclassy import dataclass, fields
-from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -29,10 +26,6 @@ from transaction_management.deribit.api_requests import (
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-from transaction_management.deribit.managing_deribit import (
-    ModifyOrderDb,
-    currency_inline_with_database_address,
-)
 from utilities.pickling import replace_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
@@ -45,28 +38,6 @@ def parse_dotenv(sub_account) -> dict:
     return config.main_dotenv(sub_account)
 
 
-def get_config(file_name: str) -> list:
-    """ """
-    config_path = provide_path_for_file(file_name)
-
-    try:
-        if os.path.exists(config_path):
-            with open(config_path, "rb") as handle:
-                read = tomli.load(handle)
-                return read
-    except:
-        return []
-
-
-async def update_db_pkl(path, data_orders, currency) -> None:
-
-    my_path_portfolio = provide_path_for_file(path, currency)
-
-    if currency_inline_with_database_address(currency, my_path_portfolio):
-
-        replace_data(my_path_portfolio, data_orders)
-
-
 def get_settlement_period(strategy_attributes) -> list:
 
     return remove_redundant_elements(
@@ -77,7 +48,7 @@ def get_settlement_period(strategy_attributes) -> list:
 
 
 @dataclass(unsafe_hash=True, slots=True)
-class StreamAccountData(ModifyOrderDb):
+class StreamAccountData():
     """
 
     +----------------------------------------------------------------------------------------------+
@@ -89,7 +60,6 @@ class StreamAccountData(ModifyOrderDb):
     sub_account_id: str
     client_id: str = fields
     client_secret: str = fields
-    modify_order_and_db: object = fields
     # Async Event Loop
     loop = asyncio.get_event_loop()
     ws_connection_url: str = "wss://www.deribit.com/ws/api/v2"
@@ -99,7 +69,6 @@ class StreamAccountData(ModifyOrderDb):
     refresh_token_expiry_time: int = None
 
     def __post_init__(self):
-        self.modify_order_and_db: str = ModifyOrderDb(self.sub_account_id)
         self.client_id: str = parse_dotenv(self.sub_account_id)["client_id"]
         self.client_secret: str = config_oci.get_oci_key(
             parse_dotenv(self.sub_account_id)["key_ocid"]
@@ -107,6 +76,7 @@ class StreamAccountData(ModifyOrderDb):
 
     async def ws_manager(
         self,
+        config_app: list,
         queue_general: object,
         has_order: object,
     ) -> None:
@@ -117,9 +87,6 @@ class StreamAccountData(ModifyOrderDb):
             compression=None,
             close_timeout=60,
         ) as self.websocket_client:
-
-            # registering strategy config file
-            file_toml = "config_strategies.toml"
 
             try:
 
@@ -141,9 +108,6 @@ class StreamAccountData(ModifyOrderDb):
                 my_path_cur = provide_path_for_file("currencies")
 
                 replace_data(my_path_cur, all_exc_currencies)
-
-                # parsing config file
-                config_app = get_config(file_toml)
 
                 # get tradable strategies
                 tradable_config_app = config_app["tradable"]
@@ -217,12 +181,12 @@ class StreamAccountData(ModifyOrderDb):
                             if message["id"] == 9929:
 
                                 if self.refresh_token is None:
-                                    log.info(
+                                    print(
                                         "Successfully authenticated WebSocket Connection"
                                     )
 
                                 else:
-                                    log.info(
+                                    print(
                                         "Successfully refreshed the authentication of the WebSocket Connection"
                                     )
 
@@ -256,11 +220,8 @@ class StreamAccountData(ModifyOrderDb):
                             if message["method"] != "heartbeat":
 
                                 message_params: dict = message["params"]
-                                #                                log.warning (f"message_params {message_params}")
+
                                 await queue_general.put(message_params)
-                                # has_order.release()
-                                
-                                # has_order.release()
 
                                 has_order.release()
 
