@@ -162,15 +162,13 @@ async def main():
         queue_general, queue_cancelling, queue_capturing_user_changes = Queue(), Queue(), Queue()
         queue_avoiding_double, queue_hedging, queue_combo  = Queue(), Queue(), Queue()
         queue_redis=Queue()
-        semaphore = asyncio.Semaphore(value=2) 
         
         stream = StreamAccountData(sub_account_id)
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(
                 config_app,
-                queue_general,
-                semaphore)
+                queue_general)
             ) 
         
         saving_task = asyncio.create_task(
@@ -182,8 +180,7 @@ async def main():
                 queue_avoiding_double,
                 queue_hedging,
                 queue_combo,
-                queue_redis,
-                semaphore)
+                queue_redis)
             ) 
         
         await asyncio.sleep(0.0005)
@@ -203,15 +200,13 @@ async def main():
                 private_data,
                 modify_order_and_db,
                 config_app,
-                queue_capturing_user_changes,
-                semaphore),
+                queue_capturing_user_changes),
     
             hedging_spot(
                 private_data,
                 modify_order_and_db,
                 config_app,
-                queue_hedging,
-                semaphore),
+                queue_hedging),
        
             #future_spreads(
             #    private_data,
@@ -239,8 +234,7 @@ async def main():
                 private_data,
                 modify_order_and_db,
                 config_app,
-                queue_cancelling,
-                semaphore),    
+                queue_cancelling),    
             
                         )  
 

@@ -62,7 +62,6 @@ async def saving_ws_data(
     queue_hedging: object,
     queue_combo: object,
     queue_redis: object,
-    has_order: object,
 ) -> None:
     """ """
 
@@ -168,7 +167,6 @@ async def saving_ws_data(
             await queue_combo.put(data_to_dispatch)
             #
             await queue_general.put(message_params)
-            has_order.release()
 
             if message_channel == f"incremental_ticker.{instrument_ticker}":
 

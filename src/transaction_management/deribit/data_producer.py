@@ -78,7 +78,6 @@ class StreamAccountData:
         self,
         config_app: list,
         queue_general: object,
-        has_order: object,
     ) -> None:
 
         async with websockets.connect(
@@ -223,13 +222,14 @@ class StreamAccountData:
 
                                 await queue_general.put(message_params)
 
-                                has_order.release()
-
             except Exception as error:
 
                 parse_error_message(error)
 
-                await telegram_bot_sendtext(f"data producer - {error}", "general_error")
+                await telegram_bot_sendtext(
+                    f"data producer - {error}", 
+                    "general_error",
+                    )
 
     async def establish_heartbeat(self) -> None:
         """
@@ -250,7 +250,10 @@ class StreamAccountData:
 
             parse_error_message(error)
 
-            await telegram_bot_sendtext(f"data producer - {error}", "general_error")
+            await telegram_bot_sendtext(
+                f"data producer - {error}",
+                "general_error",
+                )
 
     async def heartbeat_response(self) -> None:
         """
@@ -270,7 +273,10 @@ class StreamAccountData:
 
             parse_error_message(error)
 
-            await telegram_bot_sendtext(f"data producer - {error}", "general_error")
+            await telegram_bot_sendtext(
+                f"data producer - {error}",
+                "general_error",
+                )
 
     async def ws_auth(self) -> None:
         """
@@ -295,7 +301,10 @@ class StreamAccountData:
 
             parse_error_message(error)
 
-            await telegram_bot_sendtext(f"data producer - {error}", "general_error")
+            await telegram_bot_sendtext(
+                f"data producer - {error}", 
+                "general_error",
+                )
 
     async def ws_refresh_auth(self) -> None:
         """
@@ -303,8 +312,11 @@ class StreamAccountData:
         the WebSocket Connection's authentication.
         """
         while True:
+            
             now_utc = datetime.now(timezone.utc)
+            
             if self.refresh_token_expiry_time is not None:
+            
                 if now_utc > self.refresh_token_expiry_time:
 
                     msg: dict = {
@@ -332,7 +344,10 @@ class StreamAccountData:
 
         await asyncio.sleep(sleep_time)
 
-        id = id_numbering.id(operation, ws_channel)
+        id = id_numbering.id(
+            operation, 
+            ws_channel
+            )
 
         msg: dict = {
             "jsonrpc": "2.0",
@@ -352,7 +367,10 @@ class StreamAccountData:
 
         if "rest_api" in source:
 
-            extra_params: dict = await get_end_point_result(operation, ws_channel)
+            extra_params: dict = await get_end_point_result(
+                operation, 
+                ws_channel,
+                )
 
             msg.update(extra_params)
 
