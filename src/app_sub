@@ -8,7 +8,7 @@ import redis.asyncio as redis
 import orjson
 
 
-CHANNEL_NAME = "notification"
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -19,10 +19,10 @@ async def send_message(user_id: int, message: str):
     await asyncio.sleep(0.2)
 
 
-async def handle_notification():
+async def handle_notification(CHANNEL_NAME):
     r = redis.Redis()
-    pubsub = r.get_message()
-    await pubsub.subscribe(CHANNEL_NAME)
+    pubsub = r.pubsub()
+    await pubsub.psubscribe(CHANNEL_NAME)
     while True:
         try:
             async with async_timeout.timeout(1):
@@ -31,9 +31,11 @@ async def handle_notification():
                     payload = orjson.loads(message["data"])
                     # TODO: do validation on payload
                     await send_message(payload["user_id"], payload["message"])
+                message = await pubsub.get_message()
         except (asyncio.TimeoutError, orjson.decoder.JSONDecodeError) as e:
             logging.error(e)
 
 
 if __name__ == "__main__":
-    asyncio.run(handle_notification())
+    CHANNEL_NAME = "notification"
+    asyncio.run(handle_notification(CHANNEL_NAME))
