@@ -42,6 +42,7 @@ from utilities.caching import (
     update_cached_ticker,
 )
 
+
 async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
     my_path_portfolio: str = provide_path_for_file(path, currency)
@@ -52,17 +53,17 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def saving_ws_data(
-        private_data: object,
-        config_app,
-        queue_general: object,
-        queue_cancelling: object,
-        queue_capturing_user_changes: object,
-        queue_avoiding_double: object,
-        queue_hedging: object,
-        queue_combo: object,
-        queue_redis: object,
-        has_order: object,
-    )->None:
+    private_data: object,
+    config_app,
+    queue_general: object,
+    queue_cancelling: object,
+    queue_capturing_user_changes: object,
+    queue_avoiding_double: object,
+    queue_hedging: object,
+    queue_combo: object,
+    queue_redis: object,
+    has_order: object,
+) -> None:
     """ """
 
     try:
@@ -73,7 +74,7 @@ async def saving_ws_data(
         # get TRADABLE currencies
         currencies = [o["spot"] for o in tradable_config_app][0]
         resolution: int = 1
-        
+
         strategy_attributes = config_app["strategies"]
 
         settlement_periods = get_settlement_period(strategy_attributes)
@@ -87,9 +88,7 @@ async def saving_ws_data(
 
         ticker_all = cached_ticker(instruments_name)
 
-        cached_orders: list = await combining_order_data(
-            private_data, currencies
-        )
+        cached_orders: list = await combining_order_data(private_data, currencies)
 
         server_time = 0
 
@@ -110,13 +109,11 @@ async def saving_ws_data(
             message_channel: str = message_params["channel"]
 
             sequence = sequence + len(message_params) - 1
-            log.info(
-                f"message_channel {message_channel} {sequence}"
-            )
+            log.info(f"message_channel {message_channel} {sequence}")
 
             currency: str = extract_currency_from_text(message_channel)
-            
-            currency_upper =  currency.upper()
+
+            currency_upper = currency.upper()
 
             WHERE_FILTER_TICK: str = "tick"
 
@@ -125,10 +122,7 @@ async def saving_ws_data(
             instrument_ticker: str = (message_channel)[19:]
 
             instrument_name_future = (message_channel)[19:]
-            if (
-                message_channel
-                == f"incremental_ticker.{instrument_name_future}"
-            ):
+            if message_channel == f"incremental_ticker.{instrument_name_future}":
 
                 update_cached_ticker(
                     instrument_name_future,
@@ -144,19 +138,16 @@ async def saving_ws_data(
 
             if "PERPETUAL" in currency_upper:
                 market_condition = get_market_condition(
-                np, market_condition, currency_upper
-            )
+                    np, market_condition, currency_upper
+                )
 
-            currency: str = extract_currency_from_text(
-                message_channel
-            )
+            currency: str = extract_currency_from_text(message_channel)
 
             chart_trade = await chart_trade_in_msg(
                 message_channel,
                 data,
                 market_condition,
             )
-            
 
             data_to_dispatch: dict = dict(
                 # message_params=message_params,
@@ -178,7 +169,7 @@ async def saving_ws_data(
             #
             await queue_general.put(message_params)
             has_order.release()
-            
+
             if message_channel == f"incremental_ticker.{instrument_ticker}":
 
                 # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
@@ -228,13 +219,10 @@ async def saving_ws_data(
                 log.warning(f"message_params {message_params}")
                 await update_cached_orders(cached_orders, data)
 
-                await queue_capturing_user_changes.put(
-                    message_params
-                )
+                await queue_capturing_user_changes.put(message_params)
                 # has_order.release()
                 await queue_avoiding_double.put(message_params)
                 # has_order.release()
-
 
     except Exception as error:
 
@@ -294,8 +282,8 @@ async def chart_trade_in_msg(
     else:
 
         return False
-    
-    
+
+
 def get_settlement_period(strategy_attributes) -> list:
 
     return remove_redundant_elements(
@@ -303,4 +291,3 @@ def get_settlement_period(strategy_attributes) -> list:
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
-

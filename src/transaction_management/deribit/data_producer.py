@@ -48,7 +48,7 @@ def get_settlement_period(strategy_attributes) -> list:
 
 
 @dataclass(unsafe_hash=True, slots=True)
-class StreamAccountData():
+class StreamAccountData:
     """
 
     +----------------------------------------------------------------------------------------------+

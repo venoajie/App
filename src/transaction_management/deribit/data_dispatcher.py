@@ -118,6 +118,7 @@ def redis_connect() -> redis.client.Redis:
     except redis.ConnectionError as error:
         parse_error_message(error)
 
+
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
@@ -251,6 +252,7 @@ def distribute_ticker_result_as_per_data_type(
                 ticker_change[0][item] = data_orders[item]
 
                 replace_data(my_path_ticker, ticker_change)
+
 
 pipeline = redis_connect().pipeline()
 pubsub = redis_connect().pubsub()

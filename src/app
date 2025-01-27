@@ -168,7 +168,14 @@ async def main():
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(
-                private_data,
+                config_app,
+                queue_general,
+                semaphore)
+            ) 
+        
+        saving_task = asyncio.create_task(
+            saving_ws_data(private_data,
+                           config_app,
                 queue_general,
                 queue_cancelling,
                 queue_capturing_user_changes,
@@ -189,7 +196,9 @@ async def main():
             
         await asyncio.gather(
             producer_task, 
-            
+        
+            saving_task,
+                
             saving_and_relabelling_orders(
                 private_data,
                 modify_order_and_db,
@@ -233,8 +242,7 @@ async def main():
                 queue_cancelling,
                 semaphore),    
             
-            saving_ws_data(queue_general),
-            )  
+                        )  
 
 
         await queue.join()
