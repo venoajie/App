@@ -105,8 +105,6 @@ async def saving_ws_data(
         while True:
 
             message_params: str = await queue_general.get()
-            
-            log.warning (f"message_params {message_params}")
             data: dict = message_params["data"]
 
             message_channel: str = message_params["channel"]
@@ -172,9 +170,6 @@ async def saving_ws_data(
             )
 
             await queue_redis.put(data_to_dispatch)
-            
-
-            await queue_redis.put(sequence)
             await queue_cancelling.put(data_to_dispatch)
 
             await queue_hedging.put(data_to_dispatch)
