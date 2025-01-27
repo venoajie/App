@@ -156,6 +156,7 @@ async def main_redis(queue_redis,semaphore):
         while True:
 
             message_params: str = await queue_redis.get()
+            log.error (message_params)
             send_notification(42, message_params)
 
     except Exception as error:
