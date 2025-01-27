@@ -105,19 +105,18 @@ def redis_connect() -> redis.client.Redis:
             db=0,
             socket_timeout=5,
         )
-        
-        redis_pool = ConnectionPool(host='localhost', port=6379, db=0)
+
+        redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
         client = redis.Redis(connection_pool=redis_pool)
-        #pipeline = client.pipeline()
-        
-        #pubsub = client.pubsub()
-        
+        # pipeline = client.pipeline()
+
+        # pubsub = client.pubsub()
+
         ping = client.ping()
         if ping is True:
             return client
     except redis.ConnectionError as error:
         parse_error_message(error)
-        
 
 
 pipeline = redis_connect().pipeline()
@@ -125,6 +124,6 @@ pubsub = redis_connect().pubsub()
 
 
 def dispatch_to_redis(queue_redis) -> None:
-    
+
     while True:
         message = queue_redis.get_nowait()

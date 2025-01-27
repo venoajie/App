@@ -7,7 +7,9 @@ CHANNEL_NAME = "notification"
 r = redis.Redis()
 
 
-def send_notification(user_id: int, message: str):
+def send_notification(
+    user_id: int, 
+    message: str):
     """
     Send a notification to a user.
     note: this maybe located in services.py
