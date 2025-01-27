@@ -37,7 +37,7 @@ async def handle_notification():
 async def subscribe(channel):
     redis = await aioredis.from_url("redis://localhost")
     
-    channel = await redis.subscribe(channel)
+    #channel = await redis.subscribe(channel)
     async for message in channel[0].iter():
         # process message
         print(message)

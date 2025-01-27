@@ -152,6 +152,9 @@ def send_notification(
     
     client.publish(CHANNEL_NAME, json.dumps({"user_id": user_id, "message": message}))
 
+    pubsub = client.pubsub()
+    pubsub.psubscribe('test-*')
+
 async def main_redis(queue_redis,semaphore):
     
     try:
