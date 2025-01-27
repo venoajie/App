@@ -97,7 +97,7 @@ async def saving_ws_data(
         qty_candles = 5
         dim_sequence = 3
 
-        cached_candles_data = combining_candles_data(
+        market_condition = combining_candles_data(
             np, currencies, qty_candles, resolutions, dim_sequence
         )
 
@@ -115,8 +115,6 @@ async def saving_ws_data(
             log.info(
                 f"message_channel {message_channel} {sequence}"
             )
-
-            await queue_redis.put(data)
 
             currency: str = extract_currency_from_text(message_channel)
             
@@ -146,20 +144,21 @@ async def saving_ws_data(
                     else data["timestamp"]
                 )
 
-            chart_trade = await chart_trade_in_msg(
-                message_channel,
-                data,
-                cached_candles_data,
-            )
-            
             if "PERPETUAL" in currency_upper:
                 market_condition = get_market_condition(
-                np, cached_candles_data, currency_upper
+                np, market_condition, currency_upper
             )
 
             currency: str = extract_currency_from_text(
                 message_channel
             )
+
+            chart_trade = await chart_trade_in_msg(
+                message_channel,
+                data,
+                market_condition,
+            )
+            
 
             data_to_dispatch: dict = dict(
                 # message_params=message_params,
@@ -171,6 +170,8 @@ async def saving_ws_data(
                 ticker_all=ticker_all,
                 sequence=sequence,
             )
+
+            await queue_redis.put(data_to_dispatch)
             
 
             await queue_redis.put(sequence)
