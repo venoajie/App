@@ -6,22 +6,41 @@ import asyncio
 
 import uvloop
 
+import numpy as np
 from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
+
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,
+)
+from market_understanding.price_action.candles_analysis import (
+    combining_candles_data,
+    get_market_condition,
+)
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.managing_deribit import (
     currency_inline_with_database_address,
 )
 from utilities.pickling import read_data, replace_data
-from utilities.string_modification import extract_currency_from_text
 from utilities.system_tools import parse_error_message, provide_path_for_file
 from websocket_management.allocating_ohlc import (
     inserting_open_interest,
     ohlc_result_per_time_frame,
 )
 
+from utilities.string_modification import (
+    extract_currency_from_text,
+    remove_double_brackets_in_list,
+    remove_redundant_elements,
+)
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    combining_order_data,
+    update_cached_orders,
+    update_cached_ticker,
+)
 
 async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
@@ -33,6 +52,8 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def saving_ws_data(
+    private_data,
+    config_app,
     queue: object, 
     queue_redis: object,
     )->None:
@@ -40,27 +61,111 @@ async def saving_ws_data(
 
     try:
 
+        # get tradable strategies
+        tradable_config_app = config_app["tradable"]
+
+        # get TRADABLE currencies
+        currencies = [o["spot"] for o in tradable_config_app][0]
         resolution: int = 1
+        
+        strategy_attributes = config_app["strategies"]
+
+        settlement_periods = get_settlement_period(strategy_attributes)
+
+        futures_instruments = await get_futures_instruments(
+            currencies, settlement_periods
+        )
+        instruments_name = futures_instruments["instruments_name"]
 
         chart_trades_buffer: list = []
 
+        ticker_all = cached_ticker(instruments_name)
+
+        cached_orders: list = await combining_order_data(
+            private_data, currencies
+        )
+
+        server_time = 0
+
+        resolutions = [60, 15, 5]
+        qty_candles = 5
+        dim_sequence = 3
+
+        cached_candles_data = combining_candles_data(
+            np, currencies, qty_candles, resolutions, dim_sequence
+        )
+
+        sequence = 0
         while True:
 
             message_params: str = await queue.get()
+            
+            log.warning (f"message_params {message_params}")
+            data: dict = message_params["data"]
 
             message_channel: str = message_params["channel"]
 
-            data: dict = message_params["data"]
-            
+            sequence = sequence + len(message_params) - 1
+            log.info(
+                f"message_channel {message_channel} {sequence}"
+            )
+
             await queue_redis.put(data)
 
             currency: str = extract_currency_from_text(message_channel)
+            
+            currency_upper =  currency.upper()
 
             WHERE_FILTER_TICK: str = "tick"
 
             TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
 
             instrument_ticker: str = (message_channel)[19:]
+
+            instrument_name_future = (message_channel)[19:]
+            if (
+                message_channel
+                == f"incremental_ticker.{instrument_name_future}"
+            ):
+
+                update_cached_ticker(
+                    instrument_name_future,
+                    ticker_all,
+                    data,
+                )
+
+                server_time = (
+                    data["timestamp"] + server_time
+                    if server_time == 0
+                    else data["timestamp"]
+                )
+
+            chart_trade = await chart_trade_in_msg(
+                message_channel,
+                data,
+                cached_candles_data,
+            )
+            
+            if "PERPETUAL" in currency_upper:
+                market_condition = get_market_condition(
+                np, cached_candles_data, currency_upper
+            )
+
+            currency: str = extract_currency_from_text(
+                message_channel
+            )
+
+            data_to_dispatch: dict = dict(
+                # message_params=message_params,
+                currency=currency,
+                cached_orders=cached_orders,
+                chart_trade=chart_trade,
+                market_condition=market_condition,
+                server_time=server_time,
+                ticker_all=ticker_all,
+                sequence=sequence,
+            )
+            
             if message_channel == f"incremental_ticker.{instrument_ticker}":
 
                 # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
@@ -105,6 +210,11 @@ async def saving_ws_data(
 
                 await update_db_pkl("portfolio", data, currency)
 
+            if "user.changes.any" in message_channel:
+
+                log.warning(f"message_params {message_params}")
+                await update_cached_orders(cached_orders, data)
+
     except Exception as error:
 
         parse_error_message(error)
@@ -136,3 +246,40 @@ def distribute_ticker_result_as_per_data_type(
                 ticker_change[0][item] = data_orders[item]
 
                 replace_data(my_path_ticker, ticker_change)
+
+
+async def chart_trade_in_msg(
+    message_channel,
+    data_orders,
+    candles_data,
+):
+    """ """
+
+    if "chart.trades" in message_channel:
+        tick_from_exchange = data_orders["tick"]
+
+        tick_from_cache = max(
+            [o["max_tick"] for o in candles_data if o["resolution"] == 5]
+        )
+
+        if tick_from_exchange <= tick_from_cache:
+            return True
+
+        else:
+
+            log.warning("update ohlc")
+            # await sleep_and_restart()
+
+    else:
+
+        return False
+    
+    
+def get_settlement_period(strategy_attributes) -> list:
+
+    return remove_redundant_elements(
+        remove_double_brackets_in_list(
+            [o["settlement_period"] for o in strategy_attributes]
+        )
+    )
+

@@ -221,7 +221,9 @@ async def main():
                 semaphore)
             ) 
         saving_task = asyncio.create_task(
-            saving_ws_data(queue_general,
+            saving_ws_data(private_data,
+                           config_app,
+                           queue_general,
                            queue_redis)
             ) 
         
