@@ -22,7 +22,7 @@ async def send_message(user_id: int, message: str):
 async def handle_notification(CHANNEL_NAME):
     r = redis.Redis()
     pubsub = r.pubsub()
-    await pubsub.psubscribe(CHANNEL_NAME)
+    await pubsub.subscribe(CHANNEL_NAME)
     while True:
         try:
             async with async_timeout.timeout(1):
