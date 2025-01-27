@@ -151,24 +151,87 @@ def send_notification(
 
 async def main_redis(queue_redis,semaphore):
     
-    while True:
-        try:
-            message = queue_redis.get_nowait()
-            # imagine this in view / API endpoint or signals
-            send_notification(42, queue_redis)
+    try:
 
-        except asyncio.QueueEmpty:
+        while True:
 
-            # await asyncio.sleep(0.1)
-            continue
-            # check for stop
+            message_params: str = await queue_redis.get()
+            send_notification(42, message_params)
 
-        finally:
-            queue_redis.task_done
-            semaphore.release()
+    except Exception as error:
 
-        if message is None:
-            break
+        parse_error_message(error)
+
+        await telegram_bot_sendtext(f"saving result {error}", "general_error")
+        
+
+
+    try:
+
+        while True:
+
+            message_params: str = await queue_redis.get()
+
+            message_channel: str = message_params["channel"]
+
+            data: dict = message_params["data"]
+
+            currency: str = extract_currency_from_text(message_channel)
+
+            WHERE_FILTER_TICK: str = "tick"
+
+            TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
+
+            instrument_ticker: str = (message_channel)[19:]
+            if message_channel == f"incremental_ticker.{instrument_ticker}":
+
+                # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
+
+                # log.info (f"my_path_ticker {instrument_ticker} {my_path_ticker}")
+
+                # distribute_ticker_result_as_per_data_type(
+                #    my_path_ticker,
+                #    data,
+                # )
+
+                if "PERPETUAL" in data["instrument_name"]:
+
+                    await inserting_open_interest(
+                        currency, WHERE_FILTER_TICK, TABLE_OHLC1, data
+                    )
+
+            DATABASE: str = "databases/trading.sqlite3"
+
+            if "chart.trades" in message_channel:
+
+                chart_trades_buffer.append(data)
+
+                if len(chart_trades_buffer) > 3:
+
+                    instrument_ticker: str = ((message_channel)[13:]).partition(".")[0]
+
+                    if "PERPETUAL" in instrument_ticker:
+
+                        for data in chart_trades_buffer:
+                            await ohlc_result_per_time_frame(
+                                instrument_ticker,
+                                resolution,
+                                data,
+                                TABLE_OHLC1,
+                                WHERE_FILTER_TICK,
+                            )
+
+                        chart_trades_buffer = []
+
+            if "user.portfolio" in message_channel:
+
+                await update_db_pkl("portfolio", data, currency)
+
+    except Exception as error:
+
+        parse_error_message(error)
+
+        await telegram_bot_sendtext(f"saving result {error}", "general_error")
 
 
 async def main():
