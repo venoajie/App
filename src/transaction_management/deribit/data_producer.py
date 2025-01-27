@@ -316,7 +316,7 @@ class StreamAccountData(ModifyOrderDb):
                                     f"message_channel {message_channel} {sequence}"
                                 )
                                 # has_order.release()
-                                await queue_general.put(queue_redis)
+                                await queue_redis.put(message_params)
                                 await queue_general.put(message_params)
                                 # has_order.release()
 
