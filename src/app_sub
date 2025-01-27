@@ -45,4 +45,4 @@ async def subscribe(channel):
 #asyncio.run(subscribe("my-channel")) 
 
 if __name__ == "__main__":
-    asyncio.run(subscribe("notification"))
+    asyncio.run(subscribe(["notification"]))
