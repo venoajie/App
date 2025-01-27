@@ -83,3 +83,4 @@ yarl==1.17.0
  six==1.16.0
  uvloop>=0.21.0
  numpy>1.22.0
+ setuptools
