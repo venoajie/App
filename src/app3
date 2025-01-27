@@ -155,7 +155,7 @@ def send_notification(
     pubsub = client.pubsub()
     pubsub.psubscribe('test-*')
 
-async def main_redis(queue_redis,semaphore):
+async def main_redis(queue_redis,):
     
     try:
 
