@@ -152,9 +152,23 @@ def send_notification(
 async def main_redis(queue_redis):
     
     while True:
-        message = queue_redis.get_nowait()
-        # imagine this in view / API endpoint or signals
-        send_notification(42, queue_redis)
+        try:
+            message = queue_redis.get_nowait()
+            # imagine this in view / API endpoint or signals
+            send_notification(42, queue_redis)
+
+        except asyncio.QueueEmpty:
+
+            # await asyncio.sleep(0.1)
+            continue
+            # check for stop
+
+        finally:
+            queue_redis.task_done
+#            semaphore.release()
+
+        if message is None:
+            break
 
 
 async def main():
