@@ -152,7 +152,6 @@ def send_notification(
     
     client.publish(CHANNEL_NAME, json.dumps({"user_id": user_id, "message": message}))
 
-
 async def main_redis(queue_redis,semaphore):
     
     try:
@@ -163,12 +162,6 @@ async def main_redis(queue_redis,semaphore):
             log.error (message_params["sequence"])
             send_notification(42, message_params["sequence"])
 
-    except Exception as error:
-
-        parse_error_message(error)
-
-        await telegram_bot_sendtext(f"saving result {error}", "general_error")
-        
     except Exception as error:
 
         parse_error_message(error)

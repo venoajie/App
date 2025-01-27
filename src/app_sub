@@ -5,7 +5,7 @@ import async_timeout
 import json
 import logging
 import redis.asyncio as redis
-
+import orjson
 CHANNEL_NAME = "notification"
 
 logging.basicConfig(level=logging.DEBUG)
@@ -26,10 +26,10 @@ async def handle_notification():
             async with async_timeout.timeout(1):
                 message = await pubsub.get_message()
                 if message and message["type"] == "message":
-                    payload = json.loads(message["data"])
+                    payload = orjson.loads(message["data"])
                     # TODO: do validation on payload
                     await send_message(payload["user_id"], payload["message"])
-        except (asyncio.TimeoutError, json.decoder.JSONDecodeError) as e:
+        except (asyncio.TimeoutError, orjson.decoder.JSONDecodeError) as e:
             logging.error(e)
 
 
