@@ -371,7 +371,7 @@ class StreamAccountData(ModifyOrderDb):
                                     market_condition=market_condition,
                                     server_time=server_time,
                                     ticker_all=ticker_all,
-                                    #  sequence=sequence,
+                                    sequence=sequence,
                                 )
                                 await queue_cancelling.put(data_to_dispatch)
 
