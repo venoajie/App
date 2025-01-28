@@ -55,7 +55,7 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 async def saving_ws_data(
     private_data: object,
     modify_order_and_db: object,
-    client_redis,
+    
     config_app,
     queue_general: object,
     queue_cancelling: object,
