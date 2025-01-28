@@ -9,7 +9,7 @@ import signal
 import sys
 from random import sample
 
-import json
+import json,orjson
 import redis
 
 #import signal
