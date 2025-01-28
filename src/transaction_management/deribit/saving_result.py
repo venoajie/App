@@ -62,12 +62,6 @@ async def saving_ws_data(
     client_redis: object,
     config_app,
     queue_general: object,
-    queue_cancelling: object,
-    queue_capturing_user_changes: object,
-    queue_avoiding_double: object,
-    queue_hedging: object,
-    queue_combo: object,
-    queue_redis: object,
 ) -> None:
     """ """
 
@@ -130,8 +124,6 @@ async def saving_ws_data(
 
         sequence = 0
 
-        CHANNEL_NAME = "notification"
-
         redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
         client_redis = redis.Redis(connection_pool=redis_pool)
 
@@ -165,17 +157,24 @@ async def saving_ws_data(
 
                 CHANNEL_NAME = "user_changes"
 
-                log.warning(f"message_params {message_params}")
+                data_to_dispatch: dict = dict(
+                    data=data,
+                    currency=currency,
+                )
+
+                log.warning(f"data_to_dispatch {data_to_dispatch}")
+                
+                await send_notification(
+                    client_redis, 
+                    CHANNEL_NAME,
+                    "2",
+                    data_to_dispatch,
+                    )
 
                 await update_cached_orders(
                     cached_orders,
                     data,
                     )
-
-                data_to_dispatch: dict = dict(
-                    data=data,
-                    currency=currency,
-                )
 
                 await saving_orders(
                     modify_order_and_db,
@@ -187,12 +186,6 @@ async def saving_ws_data(
                     currency,
                 )
 
-                await send_notification(
-                    client_redis, 
-                    CHANNEL_NAME,
-                    "2",
-                    data_to_dispatch,
-                    )
 
             instrument_name_future = (message_channel)[19:]
             if message_channel == f"incremental_ticker.{instrument_name_future}":
@@ -273,6 +266,8 @@ async def saving_ws_data(
                     ticker_all=ticker_all,
                 )
 
+
+                CHANNEL_NAME = "notification"
                 await send_notification(
                     client_redis, CHANNEL_NAME, "2", data_to_dispatch
                 )

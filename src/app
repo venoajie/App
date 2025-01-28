@@ -10,11 +10,6 @@ import sys
 from random import sample
 
 # installed
-#import signal
-#from multiprocessing import Manager
-#from multiprocessing.queues import Queue
-#from multiprocessing import cpu_count
-#from aiomultiprocess import Pool
 import tomli
 import uvloop
 from loguru import logger as log
@@ -64,63 +59,6 @@ def handle_ctrl_c(
                   
 signal_handler = SignalHandler()
 
-async def main2():
-    
-    """
-        https://blog.finxter.com/python-multiprocessing-pool-ultimate-guide/
-
-    """
-    
-    sub_account_id = "deribit-148510"
-    
-    try:
-        
-        queue: Queue = Manager().Queue()
-        
-        #processes = max(1,int (cpu_count() / 4) - 1)
-        
-        #maxtasksperchild=1
-        
-        stream = StreamAccountData(sub_account_id)
-       
-        producer_task = asyncio.create_task(stream.ws_manager(queue)) 
-        
-#        async with Pool(maxtasksperchild=2) as pool:
-        async with Pool() as pool:
-
-            while signal_handler.KEEP_PROCESSING:
-       
-                executing_strategies_tasks = [
-                    asyncio.create_task(pool.apply(
-                        executing_strategies, 
-                        args=(sub_account_id,
-                              queue
-                              )
-                        ))
-                    ]
-       
-                await asyncio.gather(
-                    *executing_strategies_tasks,
-       
-                    )
-                
-                await asyncio.sleep(0.0005)
-
-                await producer_task
-                
-                pool.close()
-                
-                await pool.join()
-            
-    except Exception as error:
-        log.critical (error)
-        
-        await async_raise_error_message(
-            error,
-            "WebSocket connection - failed to distribute_incremental_ticker_result_as_per_data_type",
-        )
-        
-
 
 def get_config(file_name: str) -> list:
     """ """
@@ -142,10 +80,6 @@ async def main():
     # registering strategy config file    
     file_toml = "config_strategies.toml"
     
-    #server_time_fixed = get_now_unix_time()  
-
-    idle_time = 1
-    
     try:
 
         private_data: str = SendApiRequest(sub_account_id)
@@ -158,43 +92,28 @@ async def main():
         client_redis = redis.Redis(connection_pool=redis_pool)
 
         client_redis = redis.Redis()
-        
-        #time_elapsed = (server_time - server_time_fixed)/1000
-        
-        #if time_elapsed > 15 * 60 :
-            
-            #pass
-                            
-        #await asyncio.sleep(idle_time)
             
         # parsing config file
         config_app = get_config(file_toml)
 
         queue = Queue(maxsize=1)
-        queue_general, queue_cancelling, queue_capturing_user_changes = Queue(), Queue(), Queue()
-        queue_avoiding_double, queue_hedging, queue_combo  = Queue(), Queue(), Queue()
-        queue_redis=Queue()
         
         stream = StreamingAccountData(sub_account_id)
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(
                 config_app,
-                queue_general)
+                queue)
             ) 
         
         saving_task = asyncio.create_task(
-            saving_ws_data(private_data,
-                           modify_order_and_db,
-                           client_redis,
-                           config_app,
-                queue_general,
-                queue_cancelling,
-                queue_capturing_user_changes,
-                queue_avoiding_double,
-                queue_hedging,
-                queue_combo,
-                queue_redis)
+            saving_ws_data(
+                private_data,
+                modify_order_and_db,
+                client_redis,
+                config_app,
+                queue,
+                )
             ) 
         
         await asyncio.sleep(0.0005)
@@ -254,12 +173,9 @@ async def main():
                 client_redis,
                 config_app,),
     
-    
                         )  
 
-
         await queue.join()
-        
 
     except Exception as error:
         
@@ -269,9 +185,7 @@ async def main():
             "general_error"
             )
 
-
 if __name__ == "__main__":
-    
     
     try:
         signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
