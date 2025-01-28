@@ -145,7 +145,8 @@ async def handle_notification(
     while True:
         try:
             message = await pubsub.get_message()
-            #log.critical (message)
+            log.warning (CHANNEL_NAME)
+            log.critical (message)
             if message["type"] == "message":
                 payload = orjson.loads(message["data"])
 
@@ -228,6 +229,7 @@ async def main():
             producer_task, 
 
             saving_task,
+            
             handle_notification(
                 client_redis,
                 CHANNEL_NAME)
