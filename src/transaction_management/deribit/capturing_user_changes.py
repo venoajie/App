@@ -3,7 +3,7 @@
 # built ins
 import asyncio
 import uvloop
-
+import orjson
 # installed
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -17,9 +17,8 @@ from utilities.system_tools import parse_error_message
 async def saving_and_relabelling_orders(
     private_data: object,
     modify_order_and_db: object,
+    client_redis: object,
     config_app: list,
-    queue: object,
-    has_order,
 ):
     """ """
     try:
@@ -47,46 +46,58 @@ async def saving_and_relabelling_orders(
 
         order_db_table: str = relevant_tables["orders_table"]
 
-        while await has_order.acquire():
+        not_cancel = True
 
-            from loguru import logger as log
-
+        pubsub = client_redis.pubsub()
+        
+        CHANNEL_NAME = "notification"
+        
+        await pubsub.subscribe(CHANNEL_NAME)                      
+        
+        while not_cancel:
+  
             try:
-                message_params = queue.get_nowait()
+                
+                message = await pubsub.get_message()
+                
+                if message and message["type"] == "message":
+            
+                    message = orjson.loads(message["data"])["message"]
+                        
+                    message_params = (message["message_params"])
+                    
+                    data: list = message_params["data"]
 
-                data: list = message_params["data"]
+                    message_channel: str = message_params["channel"]
 
-                message_channel: str = message_params["channel"]
+                    # log.warning (f"len_msg {message_params}")
+                    # log.warning (f"message_channel {message_channel}")
 
-                # log.warning (f"len_msg {message_params}")
-                # log.warning (f"message_channel {message_channel}")
+                    # log.warning (f"message_params {message_params}")
 
-                # log.warning (f"message_params {message_params}")
+                    currency: str = extract_currency_from_text(message_channel)
 
-                currency: str = extract_currency_from_text(message_channel)
+                    currency_lower: str = currency.lower()
 
-                currency_lower: str = currency.lower()
+                    await saving_orders(
+                        modify_order_and_db,
+                        private_data,
+                        cancellable_strategies,
+                        non_checked_strategies,
+                        data,
+                        order_db_table,
+                        currency_lower,
+                        False
+                    )
 
-                await saving_orders(
-                    modify_order_and_db,
-                    private_data,
-                    cancellable_strategies,
-                    non_checked_strategies,
-                    data,
-                    order_db_table,
-                    currency_lower,
-                    False
-                )
-
-            except asyncio.QueueEmpty:
-                await asyncio.sleep(0.5)
+            except Exception as error:
+                parse_error_message (error)
                 continue
-                # check for stop
-            if message_params is None:
-                break
+                
+            finally:
+                await asyncio.sleep(.001) 
 
-            queue.task_done()
-
+            
     except Exception as error:
 
         parse_error_message(error)
