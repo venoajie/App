@@ -137,8 +137,8 @@ def get_config(file_name: str) -> list:
 async def handle_notification(
     client_redis,
     CHANNEL_NAME):
-    #r = redis.Redis()
-    pubsub = client_redis.pubsub()     
+    r = redis.Redis()
+    pubsub = r.pubsub()     
     await pubsub.subscribe(CHANNEL_NAME)
     while True:
         try:
@@ -227,8 +227,8 @@ async def main():
 
             saving_task,
             handle_notification(
-    client_redis,
-    CHANNEL_NAME)
+                client_redis,
+                CHANNEL_NAME)
             #main_redis(queue_redis),    
             
             )  
