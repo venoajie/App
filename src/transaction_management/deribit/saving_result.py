@@ -155,7 +155,11 @@ async def saving_ws_data(
 
             if "user.portfolio" in message_channel:
 
-                await update_db_pkl("portfolio", data, currency)
+                await update_db_pkl(
+                    "portfolio", 
+                    data, 
+                    currency,
+                    )
 
             if "user.changes.any" in message_channel:
 
@@ -163,14 +167,17 @@ async def saving_ws_data(
 
                 log.warning(f"message_params {message_params}")
 
-                await update_cached_orders(cached_orders, data)
+                await update_cached_orders(
+                    cached_orders,
+                    data,
+                    )
 
                 await saving_orders(
                     modify_order_and_db,
                     private_data,
                     cancellable_strategies,
                     non_checked_strategies,
-                    data,
+                    message_params,
                     order_db_table,
                     currency,
                 )
