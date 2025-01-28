@@ -145,7 +145,7 @@ async def cancelling_orders(
             
                     #payload = orjson.loads(message["data"])
                     
-                    message = orjson.loads(message["data"])
+                    message = orjson.loads(message["message"])
                     message_params = (message["message_params"])
 
                     message_channel,data = (
