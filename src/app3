@@ -230,10 +230,6 @@ async def main():
 
             saving_task,
             
-            handle_notification(
-                client_redis,
-                CHANNEL_NAME),
-          
             cancelling_orders(
                 private_data,
                 modify_order_and_db,
