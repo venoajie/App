@@ -173,7 +173,7 @@ async def saving_ws_data(
 
                 market_condition = get_market_condition(
                     np, market_condition, currency_upper
-                )
+                ).tolist()
 
                 await inserting_open_interest(
                     currency, WHERE_FILTER_TICK, TABLE_OHLC1, data
