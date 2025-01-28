@@ -133,11 +133,13 @@ async def cancelling_orders(
 
         while True:
             
-            message = await pubsub.get_message()
-
             try:
 
+                message = await pubsub.get_message()
+
                 not_cancel = True
+                
+                log.warning (f"{CHANNEL_NAME}, {message}")
 
                 while not_cancel and message["type"] == "message":
                 
