@@ -129,9 +129,9 @@ async def cancelling_orders(
         CHANNEL_NAME = "notification"
 
         pubsub = client_redis.pubsub()     
-        await pubsub.subscribe(CHANNEL_NAME)
-
         while True:
+            await pubsub.subscribe(CHANNEL_NAME)
+
             
             try:
 
