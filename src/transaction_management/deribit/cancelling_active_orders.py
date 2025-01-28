@@ -128,11 +128,11 @@ async def cancelling_orders(
         
         CHANNEL_NAME = "notification"
 
-        pubsub = client_redis.pubsub()     
+        pubsub = client_redis.pubsub()
+        
+        await pubsub.subscribe(CHANNEL_NAME)
         
         while True:
-    
-            await pubsub.subscribe(CHANNEL_NAME)
             
             try:
                 not_cancel = True
@@ -141,10 +141,10 @@ async def cancelling_orders(
                     
                     message = await pubsub.get_message()
                     
-                    if message["type"] == "message":
-
-                        log.error (f"{CHANNEL_NAME}, {message}")
+                    log.error (f"{CHANNEL_NAME}, {message}")
                 
+                    if message and message["type"] == "message":
+                    
                         payload = orjson.loads(message["data"])
 
                         log.warning (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
