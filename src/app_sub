@@ -24,6 +24,8 @@ async def handle_notification(CHANNEL_NAME):
 
                 log.warning (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
                 
+        except:
+            continue
         finally:
             await asyncio.sleep(.001) 
 
