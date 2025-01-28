@@ -200,13 +200,6 @@ async def main():
         """
                             
             #scanning_volume()
-                    
-            """
-            
-        await asyncio.gather(
-            producer_task, 
-        
-            saving_task,
                 
             saving_and_relabelling_orders(
                 private_data,
@@ -220,13 +213,6 @@ async def main():
                 config_app,
                 queue_hedging),
        
-            #future_spreads(
-            #    private_data,
-            #    modify_order_and_db,
-            #    config_app,
-            #    queue_combo,
-            #    semaphore),
-       
             reconciling_size(
                 modify_order_and_db,
                 config_app,
@@ -237,7 +223,21 @@ async def main():
                 modify_order_and_db,
                 config_app,
                 queue_avoiding_double),
-
+    
+            """
+            
+        await asyncio.gather(
+            producer_task, 
+        
+            saving_task,
+                
+            #future_spreads(
+            #    private_data,
+            #    modify_order_and_db,
+            #    config_app,
+            #    queue_combo,
+            #    semaphore),
+       
             #relabelling_trades(
             #    modify_order_and_db,
             #    config_app),
