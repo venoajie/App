@@ -137,9 +137,12 @@ def get_config(file_name: str) -> list:
 async def handle_notification(client_redis,
                               CHANNEL_NAME):
 
-    pubsub = client_redis.pubsub()     
+    pubsub = client_redis.pubsub()   
+      
     await pubsub.subscribe(CHANNEL_NAME)
+    
     while True:
+    
         try:
             message = await pubsub.get_message()
 
@@ -226,16 +229,17 @@ async def main():
             producer_task, 
 
             saving_task,
+            
             handle_notification(
                 client_redis,
                 CHANNEL_NAME),
-            
-
+          
             cancelling_orders(
                 private_data,
                 modify_order_and_db,
-                config_app,
-                client_redis),    
+                client_redis,
+                config_app
+                ),    
         #main_redis(queue_redis),    
             
             )  
