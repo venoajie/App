@@ -55,7 +55,7 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 async def saving_ws_data(
     private_data: object,
     modify_order_and_db: object,
-    client_redis: object,
+    client_redis,
     config_app,
     queue_general: object,
     queue_cancelling: object,
@@ -130,7 +130,7 @@ async def saving_ws_data(
         r = redis.Redis()
 
         redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
-        client_redis = redis.Redis(connection_pool=redis_pool)
+        client = redis.Redis(connection_pool=redis_pool)
 
         while True:
 
@@ -232,7 +232,7 @@ async def saving_ws_data(
             )
             
             await send_notification(
-                client_redis,
+                client,
                 CHANNEL_NAME,
                 "2",
                 sequence)
@@ -261,7 +261,7 @@ async def saving_ws_data(
                     data,
                     order_db_table,
                     currency,
-                    True
+                    
                 )
                 await queue_capturing_user_changes.put(message_params)
                 # has_order.release()
