@@ -65,7 +65,7 @@ async def saving_and_relabelling_orders(
 
                     message = orjson.loads(message["data"])["message"]
 
-                    print (f"message {message}")
+                    print (f"""orjson.loads(message["data"])"" {orjson.loads(message["data"])}""")
                     currency: str = message["currency"]
 
                     currency_lower: str = currency
