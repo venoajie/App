@@ -157,6 +157,8 @@ async def main():
         redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
         client_redis = redis.Redis(connection_pool=redis_pool)
 
+        client_redis = redis.Redis()
+        
         #time_elapsed = (server_time - server_time_fixed)/1000
         
         #if time_elapsed > 15 * 60 :
