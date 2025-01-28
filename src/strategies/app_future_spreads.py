@@ -89,7 +89,7 @@ async def future_spreads(
 
         pubsub: object = client_redis.pubsub()
 
-        CHANNEL_NAME: str = "user_changes"
+        CHANNEL_NAME: str = "notification"
         
         not_cancel = True
 
