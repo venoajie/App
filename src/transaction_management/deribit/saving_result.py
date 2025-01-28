@@ -127,10 +127,9 @@ async def saving_ws_data(
         sequence = 0
  
         CHANNEL_NAME = "notification"
-        r = redis.Redis()
 
         redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
-        client = redis.Redis(connection_pool=redis_pool)
+        client_redis = redis.Redis(connection_pool=redis_pool)
 
         while True:
 
@@ -232,7 +231,7 @@ async def saving_ws_data(
             )
             
             await send_notification(
-                client,
+                client_redis,
                 CHANNEL_NAME,
                 "2",
                 sequence)
