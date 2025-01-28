@@ -172,17 +172,22 @@ async def saving_ws_data(
                     data,
                     )
 
+                data_to_dispatch: dict = dict(
+                    data=data,
+                    currency=currency,
+                )
+
                 await saving_orders(
                     modify_order_and_db,
                     private_data,
                     cancellable_strategies,
                     non_checked_strategies,
-                    message_params,
+                    data,
                     order_db_table,
                     currency,
                 )
 
-                await send_notification(client_redis, CHANNEL_NAME, "2", data)
+                await send_notification(client_redis, CHANNEL_NAME, "2", data_to_dispatch)
 
             instrument_name_future = (message_channel)[19:]
             if message_channel == f"incremental_ticker.{instrument_name_future}":

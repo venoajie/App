@@ -65,21 +65,16 @@ async def saving_and_relabelling_orders(
 
                     message = orjson.loads(message["data"])["message"]
 
-                    message_params = message["message_params"]
+                    currency: str = message["currency"]
 
-                    data: list = message_params["data"]
+                    currency_lower: str = currency
 
-                    message_channel: str = message_params["channel"]
+                    data: list = message["data"]
 
                     # log.warning (f"len_msg {message_params}")
                     # log.warning (f"message_channel {message_channel}")
 
                     # log.warning (f"message_params {message_params}")
-
-                    currency: str = extract_currency_from_text(message_channel)
-
-                    currency_lower: str = currency.lower()
-
                     await saving_orders(
                         modify_order_and_db,
                         private_data,
