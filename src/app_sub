@@ -24,7 +24,7 @@ async def handle_notification(CHANNEL_NAME):
                     payload = orjson.loads(message["data"])
                     # TODO: do validation on payload
                     log.warning (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
-                    sleep(.00001) 
+                    await asyncio.sleep(.00001) 
         except Exception as e:
             logging.error(e)
 
