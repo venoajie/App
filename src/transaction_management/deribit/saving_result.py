@@ -171,19 +171,19 @@ async def saving_ws_data(
 
             if "PERPETUAL" in instrument_name_future:
 
-                #market_condition = get_market_condition(
-                #    np, market_condition, currency_upper
-                #)
+                market_condition = get_market_condition(
+                    np, market_condition, currency_upper
+                )
 
                 await inserting_open_interest(
                     currency, WHERE_FILTER_TICK, TABLE_OHLC1, data
                 )
 
-            #chart_trade = await chart_trade_in_msg(
-            #    message_channel,
-            #    data,
-            #    market_condition,
-            #)
+            chart_trade = await chart_trade_in_msg(
+                message_channel,
+                data,
+                market_condition,
+            )
 
 
                 # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
@@ -219,11 +219,13 @@ async def saving_ws_data(
 
                         chart_trades_buffer = []
 
+            log.error (f"market_condition {market_condition}")
+            log.warning (f"chart_trade {chart_trade}")
             data_to_dispatch: dict = dict(
                 message_params=message_params,
                 currency=currency,
                 cached_orders=cached_orders,
-#                chart_trade=chart_trade,
+                chart_trade=chart_trade,
                 market_condition=market_condition,
                 server_time=server_time,
                 ticker_all=ticker_all,
