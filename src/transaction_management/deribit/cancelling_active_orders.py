@@ -144,6 +144,7 @@ async def cancelling_orders(
                     #payload = orjson.loads(message["data"])
                     
                     message_params = orjson.loads(message["data"])
+                    log.debug (message_params)
 
                     message_channel = (
                         message_params["channel"],
@@ -170,7 +171,6 @@ async def cancelling_orders(
 
                     # if "user.changes.any" in message_channel:
 
-                    log.debug (message_params)
 
                     #    await update_cached_orders(cached_orders, data_orders)
 
