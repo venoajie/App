@@ -37,7 +37,7 @@ from transaction_management.deribit.avoiding_double_ids import \
     avoiding_double_ids
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
-from transaction_management.deribit.data_producer import StreamAccountData
+from transaction_management.deribit.data_producer import StreamingAccountData
 from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from transaction_management.deribit.running_strategies import \
     executing_strategies
@@ -150,7 +150,7 @@ def send_notification(
     """
     ...
     
-    client.publish(CHANNEL_NAME, json.dumps({"user_id": user_id, "message": message}))
+    client.publish(CHANNEL_NAME, orjson.dumps({"user_id": user_id, "message": message}))
 
     pubsub = client.pubsub()
     pubsub.psubscribe('test-*')
@@ -205,7 +205,7 @@ async def main():
         queue_avoiding_double, queue_hedging, queue_combo  = Queue(), Queue(), Queue()
         queue_redis=Queue()
         
-        stream = StreamAccountData(sub_account_id)
+        stream = StreamingAccountData(sub_account_id)
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(
@@ -237,7 +237,7 @@ async def main():
 
             saving_task,
             
-            main_redis(queue_redis),    
+            #main_redis(queue_redis),    
             
             )  
 

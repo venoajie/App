@@ -34,7 +34,7 @@ from transaction_management.deribit.avoiding_double_ids import \
     avoiding_double_ids
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
-from transaction_management.deribit.data_producer import StreamAccountData
+from transaction_management.deribit.data_producer import StreamingAccountData
 from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from transaction_management.deribit.running_strategies import \
     executing_strategies
@@ -163,7 +163,7 @@ async def main():
         queue_avoiding_double, queue_hedging, queue_combo  = Queue(), Queue(), Queue()
         queue_redis=Queue()
         
-        stream = StreamAccountData(sub_account_id)
+        stream = StreamingAccountData(sub_account_id)
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(

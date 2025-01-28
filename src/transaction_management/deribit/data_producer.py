@@ -34,11 +34,11 @@ from utilities.string_modification import (
 from utilities.system_tools import parse_error_message, provide_path_for_file
 
 
-def parse_dotenv(sub_account) -> dict:
+def parse_dotenv(sub_account: str) -> dict:
     return config.main_dotenv(sub_account)
 
 
-def get_settlement_period(strategy_attributes) -> list:
+def get_settlement_period(strategy_attributes: list) -> list:
 
     return remove_redundant_elements(
         remove_double_brackets_in_list(
@@ -48,7 +48,7 @@ def get_settlement_period(strategy_attributes) -> list:
 
 
 @dataclass(unsafe_hash=True, slots=True)
-class StreamAccountData:
+class StreamingAccountData:
     """
 
     +----------------------------------------------------------------------------------------------+
@@ -102,7 +102,10 @@ class StreamAccountData:
 
                     my_path_instruments = provide_path_for_file("instruments", currency)
 
-                    replace_data(my_path_instruments, instruments)
+                    replace_data(
+                        my_path_instruments,
+                        instruments,
+                    )
 
                 my_path_cur = provide_path_for_file("currencies")
 
@@ -123,8 +126,6 @@ class StreamAccountData:
                 )
 
                 instruments_name = futures_instruments["instruments_name"]
-
-                strategy_attributes = config_app["strategies"]
 
                 while True:
 
@@ -199,7 +200,7 @@ class StreamAccountData:
                                         message["result"]["expires_in"] - 240
                                     )
 
-                                now_utc = datetime.now(timezone.utc)
+                                now_utc: int = datetime.now(timezone.utc)
 
                                 self.refresh_token_expiry_time = now_utc + timedelta(
                                     seconds=expires_in
@@ -220,6 +221,7 @@ class StreamAccountData:
 
                                 message_params: dict = message["params"]
 
+                                # queing message to dispatcher
                                 await queue_general.put(message_params)
 
             except Exception as error:
@@ -227,9 +229,9 @@ class StreamAccountData:
                 parse_error_message(error)
 
                 await telegram_bot_sendtext(
-                    f"data producer - {error}", 
+                    f"data producer - {error}",
                     "general_error",
-                    )
+                )
 
     async def establish_heartbeat(self) -> None:
         """
@@ -253,7 +255,7 @@ class StreamAccountData:
             await telegram_bot_sendtext(
                 f"data producer - {error}",
                 "general_error",
-                )
+            )
 
     async def heartbeat_response(self) -> None:
         """
@@ -276,7 +278,7 @@ class StreamAccountData:
             await telegram_bot_sendtext(
                 f"data producer - {error}",
                 "general_error",
-                )
+            )
 
     async def ws_auth(self) -> None:
         """
@@ -302,9 +304,9 @@ class StreamAccountData:
             parse_error_message(error)
 
             await telegram_bot_sendtext(
-                f"data producer - {error}", 
+                f"data producer - {error}",
                 "general_error",
-                )
+            )
 
     async def ws_refresh_auth(self) -> None:
         """
@@ -312,11 +314,11 @@ class StreamAccountData:
         the WebSocket Connection's authentication.
         """
         while True:
-            
+
             now_utc = datetime.now(timezone.utc)
-            
+
             if self.refresh_token_expiry_time is not None:
-            
+
                 if now_utc > self.refresh_token_expiry_time:
 
                     msg: dict = {
@@ -344,10 +346,7 @@ class StreamAccountData:
 
         await asyncio.sleep(sleep_time)
 
-        id = id_numbering.id(
-            operation, 
-            ws_channel
-            )
+        id = id_numbering.id(operation, ws_channel)
 
         msg: dict = {
             "jsonrpc": "2.0",
@@ -368,9 +367,9 @@ class StreamAccountData:
         if "rest_api" in source:
 
             extra_params: dict = await get_end_point_result(
-                operation, 
+                operation,
                 ws_channel,
-                )
+            )
 
             msg.update(extra_params)
 

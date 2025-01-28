@@ -8,21 +8,20 @@ import uvloop
 
 import numpy as np
 from loguru import logger as log
+import redis
+import orjson
+from redis import ConnectionPool
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition,
 )
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.managing_deribit import (
-    currency_inline_with_database_address,
-)
+from transaction_management.deribit.get_instrument_summary import get_futures_instruments
+from transaction_management.deribit.managing_deribit import currency_inline_with_database_address
 from utilities.pickling import read_data, replace_data
 from utilities.system_tools import parse_error_message, provide_path_for_file
 from websocket_management.allocating_ohlc import (
@@ -72,6 +71,7 @@ async def saving_ws_data(
 
         # get TRADABLE currencies
         currencies = [o["spot"] for o in tradable_config_app][0]
+ 
         resolution: int = 1
 
         strategy_attributes = config_app["strategies"]
@@ -100,15 +100,22 @@ async def saving_ws_data(
         )
 
         sequence = 0
+ 
+        CHANNEL_NAME = "notification"
+        r = redis.Redis()
+
+        redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
+        client = redis.Redis(connection_pool=redis_pool)
+
         while True:
 
             message_params: str = await queue_general.get()
+ 
             data: dict = message_params["data"]
 
             message_channel: str = message_params["channel"]
 
             sequence = sequence + len(message_params) - 1
-            log.info(f"message_channel {message_channel} {sequence}")
 
             currency: str = extract_currency_from_text(message_channel)
 
@@ -135,12 +142,15 @@ async def saving_ws_data(
                     else data["timestamp"]
                 )
 
-            if "PERPETUAL" in currency_upper:
+            if "PERPETUAL" in data["instrument_name"]:
+
                 market_condition = get_market_condition(
                     np, market_condition, currency_upper
                 )
 
-            currency: str = extract_currency_from_text(message_channel)
+                await inserting_open_interest(
+                    currency, WHERE_FILTER_TICK, TABLE_OHLC1, data
+                )
 
             chart_trade = await chart_trade_in_msg(
                 message_channel,
@@ -148,27 +158,6 @@ async def saving_ws_data(
                 market_condition,
             )
 
-            data_to_dispatch: dict = dict(
-                # message_params=message_params,
-                currency=currency,
-                cached_orders=cached_orders,
-                chart_trade=chart_trade,
-                market_condition=market_condition,
-                server_time=server_time,
-                ticker_all=ticker_all,
-                sequence=sequence,
-            )
-
-            await queue_redis.put(data_to_dispatch)
-            await queue_cancelling.put(data_to_dispatch)
-
-            await queue_hedging.put(data_to_dispatch)
-            # has_order.release()
-            await queue_combo.put(data_to_dispatch)
-            #
-            await queue_general.put(message_params)
-
-            if message_channel == f"incremental_ticker.{instrument_ticker}":
 
                 # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
 
@@ -179,11 +168,6 @@ async def saving_ws_data(
                 #    data,
                 # )
 
-                if "PERPETUAL" in data["instrument_name"]:
-
-                    await inserting_open_interest(
-                        currency, WHERE_FILTER_TICK, TABLE_OHLC1, data
-                    )
 
             DATABASE: str = "databases/trading.sqlite3"
 
@@ -207,6 +191,30 @@ async def saving_ws_data(
                             )
 
                         chart_trades_buffer = []
+
+            data_to_dispatch: dict = dict(
+                # message_params=message_params,
+                currency=currency,
+                cached_orders=cached_orders,
+                chart_trade=chart_trade,
+                market_condition=market_condition,
+                server_time=server_time,
+                ticker_all=ticker_all,
+                sequence=sequence,
+            )
+            
+            await send_notification(
+                client,
+                CHANNEL_NAME,
+                "2",
+                data_to_dispatch)
+
+            await queue_redis.put(data_to_dispatch)
+            await queue_cancelling.put(data_to_dispatch)
+
+            await queue_hedging.put(data_to_dispatch)
+            # has_order.release()
+            await queue_combo.put(data_to_dispatch)
 
             if "user.portfolio" in message_channel:
 
@@ -289,3 +297,25 @@ def get_settlement_period(strategy_attributes) -> list:
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
+
+
+
+async def send_notification(
+    client: object,
+    CHANNEL_NAME,
+    user_id: int, 
+    message: str):
+    """
+    Send a notification to a user.
+    note: this maybe located in services.py
+    """
+    ...
+    
+    client.publish(
+        CHANNEL_NAME,
+        orjson.dumps(
+            {"user_id": user_id,
+             "message": message
+             }
+            )
+        )
