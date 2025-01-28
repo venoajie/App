@@ -154,7 +154,7 @@ async def cancelling_orders(
                      message_params["data"],
                      )
 
-                    log.debug (message_channel)
+                    log.debug (message["sequence"])
 
                     cached_orders, ticker_all = (
                         message["cached_orders"],
@@ -386,8 +386,8 @@ async def cancelling_orders(
                 parse_error_message (error)
                 continue
                 
-            finally:
-                await asyncio.sleep(.001) 
+            #finally:
+            #    await asyncio.sleep(.001) 
 
             
     except Exception as error:

@@ -139,10 +139,6 @@ async def saving_ws_data(
 
             message_channel: str = message_params["channel"]
 
-            sequence = sequence + len(message_params) - 1
-            
-            log.error(sequence)
-
             currency: str = extract_currency_from_text(message_channel)
 
             currency_upper = currency.upper()
@@ -239,11 +235,16 @@ async def saving_ws_data(
 
                 DATABASE: str = "databases/trading.sqlite3"
 
+                sequence = sequence + len(message_params) - 1
+                
+                log.error(sequence)
+
                 log.error (f"market_condition {market_condition}")
                 log.warning (f"chart_trade {chart_trade}")
                 data_to_dispatch: dict = dict(
                     message_params=message_params,
                     currency=currency,
+                    sequence=sequence,
                     cached_orders=cached_orders,
                     chart_trade=chart_trade,
                     market_condition=market_condition,
