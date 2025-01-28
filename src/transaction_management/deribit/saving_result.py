@@ -236,13 +236,6 @@ async def saving_ws_data(
                 "2",
                 sequence)
 
-            await queue_redis.put(data_to_dispatch)
-            await queue_cancelling.put(data_to_dispatch)
-
-            await queue_hedging.put(data_to_dispatch)
-            # has_order.release()
-            await queue_combo.put(data_to_dispatch)
-
             if "user.portfolio" in message_channel:
 
                 await update_db_pkl("portfolio", data, currency)
@@ -262,10 +255,6 @@ async def saving_ws_data(
                     currency,
                     
                 )
-                await queue_capturing_user_changes.put(message_params)
-                # has_order.release()
-                await queue_avoiding_double.put(message_params)
-                # has_order.release()
 
     except Exception as error:
 
