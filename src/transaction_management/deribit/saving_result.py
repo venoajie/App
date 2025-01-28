@@ -208,7 +208,7 @@ async def saving_ws_data(
                 client,
                 CHANNEL_NAME,
                 "2",
-                data_to_dispatch)
+                sequence)
 
             await queue_redis.put(data_to_dispatch)
             await queue_cancelling.put(data_to_dispatch)
