@@ -10,12 +10,6 @@ import orjson
 
 logging.basicConfig(level=logging.DEBUG)
 
-
-async def send_message(CHANNEL_NAME, user_id: int, message: str):
-    # write real code here
-    log.debug(f"Sending message to user {CHANNEL_NAME} {user_id}: {message}")
-
-
 async def handle_notification(CHANNEL_NAME):
     r = redis.Redis()
     pubsub = r.pubsub()
@@ -27,7 +21,7 @@ async def handle_notification(CHANNEL_NAME):
                 if message and message["type"] == "message":
                     payload = orjson.loads(message["data"])
                     # TODO: do validation on payload
-                    await send_message(CHANNEL_NAME, payload["user_id"], payload["message"])
+                    log.warning (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
         except Exception as e:
             logging.error(e)
 
