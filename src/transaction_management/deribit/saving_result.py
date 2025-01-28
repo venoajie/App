@@ -157,8 +157,15 @@ async def saving_ws_data(
 
                 CHANNEL_NAME = "user_changes"
 
+                await update_cached_orders(
+                    cached_orders,
+                    data,
+                    )
+
+
                 data_to_dispatch: dict = dict(
                     data=data,
+                    cached_orders=cached_orders,
                     currency=currency,
                 )
 
@@ -169,11 +176,6 @@ async def saving_ws_data(
                     CHANNEL_NAME,
                     "2",
                     data_to_dispatch,
-                    )
-
-                await update_cached_orders(
-                    cached_orders,
-                    data,
                     )
 
                 await saving_orders(

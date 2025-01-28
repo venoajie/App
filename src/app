@@ -132,13 +132,7 @@ async def main():
                 modify_order_and_db,
                 config_app,
                 idle_time),
-            
-            avoiding_double_ids(
-                private_data,
-                modify_order_and_db,
-                config_app,
-                queue_avoiding_double),
-    
+          
             """
             
         await asyncio.gather(
@@ -172,6 +166,15 @@ async def main():
                 modify_order_and_db,
                 client_redis,
                 config_app,),
+    
+      
+            avoiding_double_ids(
+                private_data,
+                modify_order_and_db,
+                client_redis,
+                config_app,
+                ),
+    
     
                         )  
 

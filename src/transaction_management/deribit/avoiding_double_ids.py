@@ -4,29 +4,24 @@
 # built ins
 import asyncio
 
-import uvloop
-
 # installed
+import uvloop
+import orjson
 from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import telegram_bot_sendtext
 
-# from transaction_management.deribit.managing_deribit import ModifyOrderDb
-from utilities.caching import combining_order_data, update_cached_orders
-from utilities.string_modification import (
-    extract_currency_from_text,
-    remove_redundant_elements,
-)
+from utilities.string_modification import remove_redundant_elements
 from utilities.system_tools import parse_error_message
 
 
 async def avoiding_double_ids(
     private_data: object,
     modify_order_and_db: object,
+    client_redis: object,
     config_app: list,
-    queue: object,
 ):
     """ """
     try:
@@ -45,68 +40,78 @@ async def avoiding_double_ids(
 
         order_db_table = relevant_tables["orders_table"]
 
-        # get tradable strategies
-        tradable_config_app = config_app["tradable"]
+        pubsub: object = client_redis.pubsub()
 
-        # get TRADABLE currencies
-        currencies: list = [o["spot"] for o in tradable_config_app][0]
+        CHANNEL_NAME: str = "user_changes"
 
-        cached_orders: list = await combining_order_data(private_data, currencies)
+        await pubsub.subscribe(CHANNEL_NAME)
 
         while True:
 
-            message_params: str = await queue.get()
+            try:
 
-            data: list = message_params["data"]
+                message = await pubsub.get_message()
 
-            message_channel: str = message_params["channel"]
+                if message and message["type"] == "message":
 
-            currency: str = extract_currency_from_text(message_channel)
+                    message_data = orjson.loads(message["data"])
 
-            currency_upper: str = currency.upper()
+                    message = message_data["message"]
 
-            await update_cached_orders(cached_orders, data)
+                    currency: str = message["currency"]
+                    
+                    cached_orders: list = message["cached_orders"]
 
-            orders_currency: list = (
-                []
-                if not cached_orders
-                else [
-                    o for o in cached_orders if currency_upper in o["instrument_name"]
-                ]
-            )
+                    currency_upper: str = currency.upper()
 
-            for strategy in active_strategies:
-
-                orders_currency_strategy: list = (
-                    []
-                    if not orders_currency
-                    else [o for o in orders_currency if strategy in (o["label"])]
-                )
-
-                if orders_currency_strategy:
-
-                    outstanding_order_id: list = remove_redundant_elements(
-                        [o["label"] for o in orders_currency_strategy]
+                    orders_currency: list = (
+                        []
+                        if not cached_orders
+                        else [
+                            o for o in cached_orders if currency_upper in o["instrument_name"]
+                        ]
                     )
 
-                    for label in outstanding_order_id:
+                    for strategy in active_strategies:
 
-                        orders = [o for o in orders_currency if label in o["label"]]
+                        orders_currency_strategy: list = (
+                            []
+                            if not orders_currency
+                            else [o for o in orders_currency if strategy in (o["label"])]
+                        )
 
-                        len_label = len(orders)
+                        if orders_currency_strategy:
 
-                        if len_label > 1:
+                            outstanding_order_id: list = remove_redundant_elements(
+                                [o["label"] for o in orders_currency_strategy]
+                            )
 
-                            for order in orders:
-                                log.critical(f"double ids {label}")
-                                log.critical(
-                                    [o for o in orders_currency if label in o["label"]]
-                                )
-                                await modify_order_and_db.cancel_by_order_id(
-                                    order_db_table, order["order_id"]
-                                )
+                            for label in outstanding_order_id:
 
-            queue.task_done
+                                orders = [o for o in orders_currency if label in o["label"]]
+
+                                len_label = len(orders)
+
+                                if len_label > 1:
+
+                                    for order in orders:
+                                        log.critical(f"double ids {label}")
+                                        log.critical(
+                                            [o for o in orders_currency if label in o["label"]]
+                                        )
+                                        await modify_order_and_db.cancel_by_order_id(
+                                            order_db_table, order["order_id"]
+                                        )
+
+            except Exception as error:
+
+                parse_error_message(error)
+
+                continue
+
+            finally:
+                await asyncio.sleep(0.001)
+
 
     except Exception as error:
 

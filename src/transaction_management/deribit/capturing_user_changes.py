@@ -11,7 +11,6 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.orders_management import saving_orders
-from utilities.string_modification import extract_currency_from_text
 from utilities.system_tools import parse_error_message
 
 
@@ -47,11 +46,11 @@ async def saving_and_relabelling_orders(
 
         order_db_table: str = relevant_tables["orders_table"]
 
-        not_cancel = True
+        not_cancel: bool = True
 
-        pubsub = client_redis.pubsub()
+        pubsub: object = client_redis.pubsub()
 
-        CHANNEL_NAME = "user_changes"
+        CHANNEL_NAME: str = "user_changes"
 
         await pubsub.subscribe(CHANNEL_NAME)
 
@@ -64,7 +63,6 @@ async def saving_and_relabelling_orders(
                 if message and message["type"] == "message":
 
                     message_data = orjson.loads(message["data"])
-                    print (f"message_data {message_data}")
 
                     message = message_data["message"]
 
@@ -74,10 +72,6 @@ async def saving_and_relabelling_orders(
 
                     data: list = message["data"]
 
-                    # log.warning (f"len_msg {message_params}")
-                    # log.warning (f"message_channel {message_channel}")
-
-                    # log.warning (f"message_params {message_params}")
                     await saving_orders(
                         modify_order_and_db,
                         private_data,
@@ -90,7 +84,9 @@ async def saving_and_relabelling_orders(
                     )
 
             except Exception as error:
+
                 parse_error_message(error)
+
                 continue
 
             finally:
