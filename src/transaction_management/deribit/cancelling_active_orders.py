@@ -145,7 +145,7 @@ async def cancelling_orders(
             
                     #payload = orjson.loads(message["data"])
                     
-                    message = orjson.loads(message["data"])
+                    message = orjson.loads(message["data"])["message"]
                     
                     log.debug (message)
 
