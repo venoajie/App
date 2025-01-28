@@ -127,6 +127,11 @@ async def saving_ws_data(
         sequence = 0
  
         CHANNEL_NAME = "notification"
+        r = redis.Redis()
+
+        redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
+        client_redis = redis.Redis(connection_pool=redis_pool)
+
         while True:
 
             message_params: str = await queue_general.get()
