@@ -143,11 +143,6 @@ async def main():
             #    config_app,
             #    queue_combo,
             #    semaphore),
-       
-            #relabelling_trades(
-            #    modify_order_and_db,
-            #    config_app),
-    
     
             saving_task,
             
@@ -171,6 +166,11 @@ async def main():
                 client_redis,
                 config_app,
                 ),
+       
+            relabelling_trades(
+                modify_order_and_db,
+                config_app),
+    
     
        
             reconciling_size(
