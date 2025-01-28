@@ -228,8 +228,6 @@ async def main():
 
             saving_task,
             handle_notification(CHANNEL_NAME),
-            handle_notification2(CHANNEL_NAME),
-            handle_notification3(CHANNEL_NAME)
             
             #main_redis(queue_redis),    
             
