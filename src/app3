@@ -134,9 +134,9 @@ def get_config(file_name: str) -> list:
         return []
 
 
-async def handle_notification(CHANNEL_NAME):
+async def handle_notification(client_redis,
+                              CHANNEL_NAME):
 
-    client_redis = redis.Redis()
     pubsub = client_redis.pubsub()     
     await pubsub.subscribe(CHANNEL_NAME)
     while True:
@@ -147,8 +147,6 @@ async def handle_notification(CHANNEL_NAME):
                 payload = orjson.loads(message["data"])
 
                 log.warning (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
-                
-                await asyncio.sleep(1) 
                 
         except:
             continue
@@ -227,7 +225,9 @@ async def main():
             producer_task, 
 
             saving_task,
-            handle_notification(CHANNEL_NAME),
+            handle_notification(
+                client_redis,
+                CHANNEL_NAME),
             
             #main_redis(queue_redis),    
             
