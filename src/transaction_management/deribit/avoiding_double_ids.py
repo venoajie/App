@@ -59,7 +59,7 @@ async def avoiding_double_ids(
                     message = message_data["message"]
 
                     currency: str = message["currency"]
-                    
+
                     cached_orders: list = message["cached_orders"]
 
                     currency_upper: str = currency.upper()
@@ -68,7 +68,9 @@ async def avoiding_double_ids(
                         []
                         if not cached_orders
                         else [
-                            o for o in cached_orders if currency_upper in o["instrument_name"]
+                            o
+                            for o in cached_orders
+                            if currency_upper in o["instrument_name"]
                         ]
                     )
 
@@ -77,7 +79,9 @@ async def avoiding_double_ids(
                         orders_currency_strategy: list = (
                             []
                             if not orders_currency
-                            else [o for o in orders_currency if strategy in (o["label"])]
+                            else [
+                                o for o in orders_currency if strategy in (o["label"])
+                            ]
                         )
 
                         if orders_currency_strategy:
@@ -88,7 +92,9 @@ async def avoiding_double_ids(
 
                             for label in outstanding_order_id:
 
-                                orders = [o for o in orders_currency if label in o["label"]]
+                                orders = [
+                                    o for o in orders_currency if label in o["label"]
+                                ]
 
                                 len_label = len(orders)
 
@@ -97,7 +103,11 @@ async def avoiding_double_ids(
                                     for order in orders:
                                         log.critical(f"double ids {label}")
                                         log.critical(
-                                            [o for o in orders_currency if label in o["label"]]
+                                            [
+                                                o
+                                                for o in orders_currency
+                                                if label in o["label"]
+                                            ]
                                         )
                                         await modify_order_and_db.cancel_by_order_id(
                                             order_db_table, order["order_id"]
@@ -111,7 +121,6 @@ async def avoiding_double_ids(
 
             finally:
                 await asyncio.sleep(0.001)
-
 
     except Exception as error:
 

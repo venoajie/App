@@ -148,10 +148,10 @@ async def saving_ws_data(
             if "user.portfolio" in message_channel:
 
                 await update_db_pkl(
-                    "portfolio", 
-                    data, 
+                    "portfolio",
+                    data,
                     currency,
-                    )
+                )
 
             if "user.changes.any" in message_channel:
 
@@ -160,8 +160,7 @@ async def saving_ws_data(
                 await update_cached_orders(
                     cached_orders,
                     data,
-                    )
-
+                )
 
                 data_to_dispatch: dict = dict(
                     data=data,
@@ -169,14 +168,12 @@ async def saving_ws_data(
                     currency=currency,
                 )
 
-                log.warning(f"data_to_dispatch {data_to_dispatch}")
-                
                 await send_notification(
-                    client_redis, 
+                    client_redis,
                     CHANNEL_NAME,
                     "2",
                     data_to_dispatch,
-                    )
+                )
 
                 await saving_orders(
                     modify_order_and_db,
@@ -187,7 +184,6 @@ async def saving_ws_data(
                     order_db_table,
                     currency,
                 )
-
 
             instrument_name_future = (message_channel)[19:]
             if message_channel == f"incremental_ticker.{instrument_name_future}":
@@ -267,7 +263,6 @@ async def saving_ws_data(
                     server_time=server_time,
                     ticker_all=ticker_all,
                 )
-
 
                 CHANNEL_NAME = "notification"
                 await send_notification(
