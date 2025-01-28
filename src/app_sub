@@ -28,7 +28,7 @@ async def handle_notification(CHANNEL_NAME):
                     payload = orjson.loads(message["data"])
                     # TODO: do validation on payload
                     await send_message(CHANNEL_NAME, payload["user_id"], payload["message"])
-        except (asyncio.TimeoutError, orjson.decoder.JSONDecodeError) as e:
+        except Exception as e:
             logging.error(e)
 
 
