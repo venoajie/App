@@ -139,13 +139,17 @@ async def cancelling_orders(
                     
                 while not_cancel:
                     
-                    message = await pubsub.get_message()
-                                    
-                    if message and message["type"] == "message":
+                    try:
+                        message = await pubsub.get_message()
+                        
+                        if message and message["type"] == "message":
                     
-                        payload = orjson.loads(message["data"])
+                            payload = orjson.loads(message["data"])
 
-                        log.warning (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
+                            log.critical (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
+                                    
+                    except:
+                        continue
                         
                         # message_params = message["message_params"]
 
