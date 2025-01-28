@@ -338,17 +338,14 @@ def get_settlement_period(strategy_attributes) -> list:
 
 
 async def send_notification(
-    client: object,
+    client_redis: object,
     CHANNEL_NAME,
     user_id: int, 
     message: str):
     """
-    Send a notification to a user.
-    note: this maybe located in services.py
     """
-    ...
     
-    client.publish(
+    client_redis.publish(
         CHANNEL_NAME,
         orjson.dumps(
             {"user_id": user_id,

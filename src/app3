@@ -142,7 +142,7 @@ async def handle_notification(client_redis,
     while True:
         try:
             message = await pubsub.get_message()
-            #log.critical (message)
+
             if message["type"] == "message":
                 payload = orjson.loads(message["data"])
 
@@ -150,6 +150,7 @@ async def handle_notification(client_redis,
                 
         except:
             continue
+
         finally:
             await asyncio.sleep(.001) 
 
@@ -229,7 +230,13 @@ async def main():
                 client_redis,
                 CHANNEL_NAME),
             
-            #main_redis(queue_redis),    
+
+            cancelling_orders(
+                private_data,
+                modify_order_and_db,
+                config_app,
+                client_redis),    
+        #main_redis(queue_redis),    
             
             )  
 

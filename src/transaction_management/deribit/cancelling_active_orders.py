@@ -9,6 +9,7 @@ import uvloop
 
 # installed
 from loguru import logger as log
+import orjson
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -59,10 +60,8 @@ async def cancelling_orders(
     private_data: object,
     modify_order_and_db: object,
     config_app: list,
-    queue: object,
-    has_order: object,
-    idle_time: int = 1,
-):
+    client_redis: object,
+    )-> None:
     """ """
 
     try:
@@ -126,17 +125,26 @@ async def cancelling_orders(
         # cached_orders: list = await combining_order_data(private_data, currencies)
 
         # server_time = 0
+        
+        CHANNEL_NAME = "notification"
 
-        while await has_order.acquire():
+        pubsub = client_redis.pubsub()     
+        await pubsub.subscribe(CHANNEL_NAME)
+
+        while True:
+            
+            message = await pubsub.get_message()
 
             try:
 
                 not_cancel = True
 
-                while not_cancel:
+                while not_cancel and message["type"] == "message":
+                
+                    payload = orjson.loads(message["data"])
 
-                    message = queue.get_nowait()
-
+                    log.warning (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
+                    
                     # message_params = message["message_params"]
 
                     # message_channel = (
@@ -327,8 +335,6 @@ async def cancelling_orders(
                                                         cancel_allowed,
                                                     )
 
-                                                    queue.task_done
-
                                                     not_cancel = False
 
                                                     break
@@ -369,19 +375,18 @@ async def cancelling_orders(
                                                         cancel_allowed,
                                                     )
 
-                                                    queue.task_done
-
                                                     not_cancel = False
 
                                                     break
 
-                    queue.task_done
-                    # await asyncio.sleep(idle_time)
-
-            except asyncio.QueueEmpty:
+            except:
                 continue
                 # check for stop
-            if message is None:
+            
+            finally:
+
+                await asyncio.sleep(.001) 
+
                 break
 
     except Exception as error:
