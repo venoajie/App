@@ -14,17 +14,19 @@ from data_cleaning.managing_delivered_transactions import (
     is_instrument_name_has_delivered,
     updating_delivered_instruments,
 )
-from data_cleaning.reconciling_db import is_my_trades_and_sub_account_size_reconciled_each_other
+from data_cleaning.reconciling_db import (
+    is_my_trades_and_sub_account_size_reconciled_each_other,
+)
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,
 )
-from transaction_management.deribit.get_instrument_summary import get_futures_instruments
-from utilities.pickling import (
-    read_data, 
-    replace_data)
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,
+)
+from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
     remove_redundant_elements,
@@ -46,9 +48,9 @@ def get_settlement_period(strategy_attributes: list) -> list:
 
 def reading_from_pkl_data(
     end_point: str,
-    currency: str, 
+    currency: str,
     status: str = None,
-    ) -> dict:
+) -> dict:
     """ """
 
     path: str = provide_path_for_file(end_point, currency, status)
@@ -98,10 +100,10 @@ async def update_instruments(idle_time: int):
 
 
 async def reconciling_size(
-    modify_order_and_db: object, 
-    config_app: list, 
+    modify_order_and_db: object,
+    config_app: list,
     idle_time: int,
-    ) -> None:
+) -> None:
 
     try:
 
@@ -250,7 +252,7 @@ async def reconciling_size(
                             await update_instruments_per_currency(currency)
 
                             await updating_delivered_instruments(
-                                archive_db_table, 
+                                archive_db_table,
                                 instrument_name,
                             )
 
@@ -271,7 +273,7 @@ async def reconciling_size(
                         if instrument_name_has_delivered:
 
                             await updating_delivered_instruments(
-                                archive_db_table, 
+                                archive_db_table,
                                 my_trade_instrument,
                             )
 
@@ -328,6 +330,6 @@ async def reconciling_size(
     except Exception as error:
         await async_raise_error_message(error)
         await telegram_bot_sendtext(
-            error, 
+            error,
             "general_error",
-            )
+        )

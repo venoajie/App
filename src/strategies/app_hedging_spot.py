@@ -3,10 +3,9 @@
 # built ins
 import asyncio
 
-import numpy as np
-import uvloop
-
 # installed
+import uvloop
+import orjson
 from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -15,10 +14,6 @@ from data_cleaning.reconciling_db import (
     is_size_sub_account_and_my_trades_reconciled,
 )
 from db_management.sqlite_management import executing_query_with_return
-from market_understanding.price_action.candles_analysis import (
-    combining_candles_data,
-    get_market_condition,
-)
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.hedging.hedging_spot import (
     HedgingSpot,
@@ -28,20 +23,12 @@ from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
 from transaction_management.deribit.managing_deribit import (
-    #    ModifyOrderDb,
     currency_inline_with_database_address,
 )
 from transaction_management.deribit.processing_orders import processing_orders
-from utilities.caching import (
-    combining_ticker_data as cached_ticker,
-    combining_order_data,
-    update_cached_orders,
-)
-from utilities.caching import update_cached_ticker
 from utilities.number_modification import get_closest_value
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
-    extract_currency_from_text,
     parsing_label,
     remove_double_brackets_in_list,
     remove_redundant_elements,
@@ -52,21 +39,11 @@ from utilities.system_tools import (
 )
 
 
-async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
-
-    my_path_portfolio = provide_path_for_file(path, currency)
-
-    if currency_inline_with_database_address(currency, my_path_portfolio):
-
-        replace_data(my_path_portfolio, data_orders)
-
-
 async def hedging_spot(
     private_data: object,
     modify_order_and_db: object,
+    client_redis: object,
     config_app: list,
-    queue: object,
-    semaphore: object,
 ):
     """ """
 
@@ -75,13 +52,10 @@ async def hedging_spot(
 
     try:
 
-        #        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
-
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
 
         # get tradable currencies
-        # currencies_spot= ([o["spot"] for o in tradable_config_app]) [0]
         currencies = ([o["spot"] for o in tradable_config_app])[0]
 
         # currencies= random.sample(currencies_spot,len(currencies_spot))
@@ -136,26 +110,32 @@ async def hedging_spot(
 
         server_time = 0
 
-        sem = await semaphore.acquire()
+        CHANNEL_NAME = "notification"
 
-        log.debug(f"semaphore.acquire() {sem}")
+        not_order = True
 
-        while await semaphore.acquire():
+        pubsub = client_redis.pubsub()
+
+        await pubsub.subscribe(CHANNEL_NAME)
+
+        while not_order:
 
             try:
 
-                not_order = True
+                message = await pubsub.get_message()
 
-                while not_order:
+                if message and message["type"] == "message":
 
-                    message = queue.get_nowait()
+                    message = orjson.loads(message["data"])["message"]
 
-                    # message_params = message["message_params"]
+                    message_params = message["message_params"]
 
-                    # message_channel = (
-                    #    message_params["channel"],
-                    # message_params["data"],
-                    # )
+                    message_channel, data = (
+                        message_params["channel"],
+                        message_params["data"],
+                    )
+
+                    log.debug(message["sequence"])
 
                     cached_orders, ticker_all = (
                         message["cached_orders"],
@@ -167,37 +147,12 @@ async def hedging_spot(
                         message["server_time"],
                     )
 
-                    # log.critical(f"{message["sequence"]}")
-
-                    # if "user.changes.any" in message_channel:
-
-                    #    log.error (f"data_orders user.changes.any {data_orders}")
-
-                    #    await update_cached_orders(cached_orders, data_orders)
-
                     currency: str = message["currency"]
 
                     currency_upper: str = currency.upper()
 
                     currency_lower: str = currency
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
-
-                    # instrument_name_future = (message_channel)[19:]
-                    # if message_channel == f"incremental_ticker.{instrument_name_future}":
-
-                    #    update_cached_ticker(
-                    #        instrument_name_future,
-                    #        ticker_all,
-                    #        data_orders,
-                    #    )
-
-                    #    server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
-
-                    # chart_trade = await chart_trade_in_msg(
-                    #    message_channel,
-                    #    data_orders,
-                    #    cached_candles_data,
-                    # )
 
                     archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
@@ -414,8 +369,6 @@ async def hedging_spot(
 
                                     if not size_future_reconciled:
 
-                                        queue.task_done
-
                                         not_order = False
 
                                         break
@@ -459,8 +412,6 @@ async def hedging_spot(
                                                     config_app,
                                                     send_order,
                                                 )
-
-                                                queue.task_done
 
                                                 not_order = False
 
@@ -575,8 +526,6 @@ async def hedging_spot(
                                                                             modify_order_and_db,
                                                                         )
 
-                                                                        queue.task_done
-
                                                                         not_order = (
                                                                             False
                                                                         )
@@ -622,28 +571,19 @@ async def hedging_spot(
                                                                             send_closing_order,
                                                                         )
 
-                                                                        queue.task_done
-
                                                                         not_order = (
                                                                             False
                                                                         )
 
                                                                         break
+            except Exception as error:
 
-                # await asyncio.sleep(0.1)
+                parse_error_message(error)
 
-            except asyncio.QueueEmpty:
-
-                # await asyncio.sleep(0.1)
                 continue
-                # check for stop
 
             finally:
-                queue.task_done
-                semaphore.release()
-
-            if message is None:
-                break
+                await asyncio.sleep(0.001)
 
     except Exception as error:
 
@@ -659,33 +599,6 @@ def get_settlement_period(strategy_attributes) -> list:
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
-
-
-async def chart_trade_in_msg(
-    message_channel,
-    data_orders,
-    candles_data,
-):
-    """ """
-
-    if "chart.trades" in message_channel:
-        tick_from_exchange = data_orders["tick"]
-
-        tick_from_cache = max(
-            [o["max_tick"] for o in candles_data if o["resolution"] == 5]
-        )
-
-        if tick_from_exchange <= tick_from_cache:
-            return True
-
-        else:
-
-            log.warning("update ohlc")
-            # await sleep_and_restart()
-
-    else:
-
-        return False
 
 
 def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
