@@ -12,6 +12,8 @@ from time import sleep
 logging.basicConfig(level=logging.DEBUG)
 
 async def handle_notification(CHANNEL_NAME):
+    import redis.asyncio as redis
+
     r = redis.Redis()
     pubsub = r.pubsub()     
     await pubsub.subscribe(CHANNEL_NAME)

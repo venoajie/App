@@ -11,7 +11,7 @@ from random import sample
 
 import json,orjson
 import redis
-
+import redis.asyncio as redis
 #import signal
 #from multiprocessing import Manager
 #from multiprocessing.queues import Queue
@@ -135,10 +135,9 @@ def get_config(file_name: str) -> list:
 
 
 async def handle_notification(CHANNEL_NAME):
-    import redis.asyncio as redis
 
-    r = redis.Redis()
-    pubsub = r.pubsub()     
+    client_redis = redis.Redis()
+    pubsub = client_redis.pubsub()     
     await pubsub.subscribe(CHANNEL_NAME)
     while True:
         try:
@@ -147,7 +146,7 @@ async def handle_notification(CHANNEL_NAME):
             if message["type"] == "message":
                 payload = orjson.loads(message["data"])
 
-                log.warning (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]} sleep 1")
+                log.warning (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
                 
                 await asyncio.sleep(1) 
                 
@@ -156,51 +155,6 @@ async def handle_notification(CHANNEL_NAME):
         finally:
             await asyncio.sleep(.001) 
 
-
-async def handle_notification2(CHANNEL_NAME):
-    import redis.asyncio as redis
-
-    r = redis.Redis()
-    pubsub = r.pubsub()     
-    await pubsub.subscribe(CHANNEL_NAME)
-    while True:
-        try:
-            message = await pubsub.get_message()
-            #log.critical (message)
-            if message["type"] == "message":
-                payload = orjson.loads(message["data"])
-
-                log.error (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]} sleep 5")
-                
-                await asyncio.sleep(5) 
-                
-        except:
-            continue
-        finally:
-            await asyncio.sleep(.001) 
-
-async def handle_notification3(CHANNEL_NAME):
-    import redis.asyncio as redis
-
-    r = redis.Redis()
-    pubsub = r.pubsub()     
-    await pubsub.subscribe(CHANNEL_NAME)
-    while True:
-        try:
-            message = await pubsub.get_message()
-            #log.critical (message)
-            if message["type"] == "message":
-                payload = orjson.loads(message["data"])
-
-                log.debug (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]} sleep 10")
-                
-                await asyncio.sleep(10) 
-                
-                
-        except:
-            continue
-        finally:
-            await asyncio.sleep(.001) 
 
 async def main():
     
@@ -248,6 +202,7 @@ async def main():
             saving_ws_data(
                 private_data,
                 modify_order_and_db,
+                client_redis,
                            config_app,
                 queue_general,
                 queue_cancelling,
