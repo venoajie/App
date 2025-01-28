@@ -142,12 +142,12 @@ async def main():
                 config_app,),
 
                
-            future_spreads(
-                private_data,
-                modify_order_and_db,
-                client_redis,
-                config_app,
-                ),
+            #future_spreads(
+            #    private_data,
+            #    modify_order_and_db,
+            #    client_redis,
+            #    config_app,
+            #    ),
             
             cancelling_orders(
                 private_data,

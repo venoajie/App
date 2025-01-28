@@ -22,25 +22,20 @@ from strategies.cash_carry.combo_auto import (
     ComboAuto,
     check_if_minimum_waiting_time_has_passed,
 )
-from transaction_management.deribit.get_instrument_summary import get_futures_instruments
-from transaction_management.deribit.managing_deribit import currency_inline_with_database_address
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,
+)
+from transaction_management.deribit.managing_deribit import (
+    currency_inline_with_database_address,
+)
 from transaction_management.deribit.processing_orders import processing_orders
-from utilities.caching import     combining_ticker_data as cached_ticker
+from utilities.caching import combining_ticker_data as cached_ticker
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
 from utilities.system_tools import parse_error_message, provide_path_for_file
-
-
-async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
-
-    my_path_portfolio = provide_path_for_file(path, currency)
-
-    if currency_inline_with_database_address(currency, my_path_portfolio):
-
-        replace_data(my_path_portfolio, data_orders)
 
 
 async def future_spreads(
@@ -59,7 +54,6 @@ async def future_spreads(
         tradable_config_app = config_app["tradable"]
 
         # get tradable currencies
-        # currencies_spot= ([o["spot"] for o in tradable_config_app]) [0]
         currencies = ([o["spot"] for o in tradable_config_app])[0]
 
         # currencies= random.sample(currencies_spot,len(currencies_spot))
@@ -90,7 +84,7 @@ async def future_spreads(
         pubsub: object = client_redis.pubsub()
 
         CHANNEL_NAME: str = "notification"
-        
+
         not_cancel = True
 
         await pubsub.subscribe(CHANNEL_NAME)
@@ -567,11 +561,9 @@ async def future_spreads(
                                                                         send_order,
                                                                     )
 
-
                                                                     not_order = False
 
                                                                     break
-
 
             except Exception as error:
 
@@ -585,9 +577,9 @@ async def future_spreads(
     except Exception as error:
 
         await telegram_bot_sendtext(
-            f"app future spreads - {error}", 
+            f"app future spreads - {error}",
             "general_error",
-            )
+        )
 
         parse_error_message(error)
 
@@ -627,3 +619,16 @@ def get_index(ticker: dict) -> float:
         index_price = ticker["estimated_delivery_price"]
 
     return index_price
+
+async def update_db_pkl(
+    path: str, 
+    data_orders: dict,
+    currency: str,
+    ) -> None:
+
+    my_path_portfolio = provide_path_for_file(path, currency)
+
+    if currency_inline_with_database_address(currency, my_path_portfolio):
+
+        replace_data(my_path_portfolio, data_orders)
+
