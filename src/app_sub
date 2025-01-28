@@ -11,9 +11,9 @@ import orjson
 logging.basicConfig(level=logging.DEBUG)
 
 
-async def send_message(user_id: int, message: str):
+async def send_message(CHANNEL_NAME, user_id: int, message: str):
     # write real code here
-    log.debug(f"Sending message to user {user_id}: {message}")
+    log.debug(f"Sending message to user {CHANNEL_NAME} {user_id}: {message}")
 
 
 async def handle_notification(CHANNEL_NAME):
