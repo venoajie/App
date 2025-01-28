@@ -61,7 +61,7 @@ async def cancelling_orders(
     modify_order_and_db: object,
     client_redis: object,
     config_app: list,
-    )-> None:
+) -> None:
     """ """
 
     try:
@@ -125,33 +125,33 @@ async def cancelling_orders(
         # cached_orders: list = await combining_order_data(private_data, currencies)
 
         # server_time = 0
-        
+
         CHANNEL_NAME = "notification"
-        
+
         not_cancel = True
 
         pubsub = client_redis.pubsub()
-        
-        await pubsub.subscribe(CHANNEL_NAME)                      
-        
+
+        await pubsub.subscribe(CHANNEL_NAME)
+
         while not_cancel:
-  
+
             try:
-                
+
                 message = await pubsub.get_message()
-                
+
                 if message and message["type"] == "message":
-            
+
                     message = orjson.loads(message["data"])["message"]
-                    
-                    message_params = (message["message_params"])
 
-                    message_channel,data = (
+                    message_params = message["message_params"]
+
+                    message_channel, data = (
                         message_params["channel"],
-                     message_params["data"],
-                     )
+                        message_params["data"],
+                    )
 
-                    log.debug (message["sequence"])
+                    log.debug(message["sequence"])
 
                     cached_orders, ticker_all = (
                         message["cached_orders"],
@@ -170,7 +170,6 @@ async def cancelling_orders(
                     currency_lower: str = currency
 
                     # if "user.changes.any" in message_channel:
-
 
                     #    await update_cached_orders(cached_orders, data_orders)
 
@@ -376,15 +375,14 @@ async def cancelling_orders(
                                                     not_cancel = False
 
                                                     break
-                            
-            except Exception as error:
-                parse_error_message (error)
-                continue
-                
-            finally:
-                await asyncio.sleep(.001) 
 
-            
+            except Exception as error:
+                parse_error_message(error)
+                continue
+
+            finally:
+                await asyncio.sleep(0.001)
+
     except Exception as error:
 
         parse_error_message(error)

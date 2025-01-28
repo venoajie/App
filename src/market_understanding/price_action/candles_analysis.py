@@ -187,10 +187,10 @@ def combining_candles_data(
 
 
 def get_market_condition(
-    np: object, 
-    candles_data: list, 
+    np: object,
+    candles_data: list,
     currency_upper: str,
-    )->dict:
+) -> dict:
     """ """
     candles_data_instrument = [
         o for o in candles_data if currency_upper in o["instrument_name"]

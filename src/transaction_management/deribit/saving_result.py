@@ -20,8 +20,12 @@ from market_understanding.price_action.candles_analysis import (
     get_market_condition,
 )
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.get_instrument_summary import get_futures_instruments
-from transaction_management.deribit.managing_deribit import currency_inline_with_database_address
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,
+)
+from transaction_management.deribit.managing_deribit import (
+    currency_inline_with_database_address,
+)
 from transaction_management.deribit.orders_management import saving_orders
 from utilities.pickling import read_data, replace_data
 from utilities.system_tools import parse_error_message, provide_path_for_file
@@ -74,7 +78,7 @@ async def saving_ws_data(
 
         # get TRADABLE currencies
         currencies = [o["spot"] for o in tradable_config_app][0]
- 
+
         resolution: int = 1
 
         strategy_attributes = config_app["strategies"]
@@ -84,7 +88,7 @@ async def saving_ws_data(
         futures_instruments = await get_futures_instruments(
             currencies, settlement_periods
         )
-                
+
         strategy_attributes_active: list = [
             o for o in strategy_attributes if o["is_active"] == True
         ]
@@ -125,7 +129,7 @@ async def saving_ws_data(
         )
 
         sequence = 0
- 
+
         CHANNEL_NAME = "notification"
 
         redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
@@ -134,7 +138,7 @@ async def saving_ws_data(
         while True:
 
             message_params: str = await queue_general.get()
- 
+
             data: dict = message_params["data"]
 
             message_channel: str = message_params["channel"]
@@ -154,7 +158,7 @@ async def saving_ws_data(
                 await update_db_pkl("portfolio", data, currency)
 
             if "user.changes.any" in message_channel:
-                
+
                 CHANNEL_NAME = "user_changes"
 
                 log.warning(f"message_params {message_params}")
@@ -169,15 +173,10 @@ async def saving_ws_data(
                     data,
                     order_db_table,
                     currency,
-                    
                 )
 
-                await send_notification(
-                    client_redis,
-                    CHANNEL_NAME,
-                    "2",
-                    data)
-                
+                await send_notification(client_redis, CHANNEL_NAME, "2", data)
+
             instrument_name_future = (message_channel)[19:]
             if message_channel == f"incremental_ticker.{instrument_name_future}":
 
@@ -214,8 +213,6 @@ async def saving_ws_data(
 
                         chart_trades_buffer = []
 
-
-
             if "PERPETUAL" in instrument_name_future:
 
                 market_condition = get_market_condition(
@@ -232,25 +229,22 @@ async def saving_ws_data(
                     market_condition,
                 )
 
+                # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
 
-                    # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
-
-
-                    # log.info (f"my_path_ticker {instrument_ticker} {my_path_ticker}")
-                    # distribute_ticker_result_as_per_data_type(
-                    #    my_path_ticker,
-                    #    data,
-                    # )
-
+                # log.info (f"my_path_ticker {instrument_ticker} {my_path_ticker}")
+                # distribute_ticker_result_as_per_data_type(
+                #    my_path_ticker,
+                #    data,
+                # )
 
                 DATABASE: str = "databases/trading.sqlite3"
 
                 sequence = sequence + len(message_params) - 1
-                
+
                 log.error(sequence)
 
-                log.error (f"market_condition {market_condition}")
-                log.warning (f"chart_trade {chart_trade}")
+                log.error(f"market_condition {market_condition}")
+                log.warning(f"chart_trade {chart_trade}")
                 data_to_dispatch: dict = dict(
                     message_params=message_params,
                     currency=currency,
@@ -261,12 +255,10 @@ async def saving_ws_data(
                     server_time=server_time,
                     ticker_all=ticker_all,
                 )
-                
+
                 await send_notification(
-                    client_redis,
-                    CHANNEL_NAME,
-                    "2",
-                    data_to_dispatch)
+                    client_redis, CHANNEL_NAME, "2", data_to_dispatch
+                )
 
     except Exception as error:
 
@@ -337,21 +329,11 @@ def get_settlement_period(strategy_attributes) -> list:
     )
 
 
-
 async def send_notification(
-    client_redis: object,
-    CHANNEL_NAME,
-    user_id: int, 
-    message: str):
-    """
-    """
-    
-    client_redis.publish(
-        CHANNEL_NAME,
-        orjson.dumps(
-            {"user_id": user_id,
-             "message": message
-             }
-            )
-        )
+    client_redis: object, CHANNEL_NAME, user_id: int, message: str
+):
+    """ """
 
+    client_redis.publish(
+        CHANNEL_NAME, orjson.dumps({"user_id": user_id, "message": message})
+    )

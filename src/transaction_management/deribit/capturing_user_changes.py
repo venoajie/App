@@ -4,6 +4,7 @@
 import asyncio
 import uvloop
 import orjson
+
 # installed
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -49,23 +50,23 @@ async def saving_and_relabelling_orders(
         not_cancel = True
 
         pubsub = client_redis.pubsub()
-        
+
         CHANNEL_NAME = "user_changes"
-        
-        await pubsub.subscribe(CHANNEL_NAME)                      
-        
+
+        await pubsub.subscribe(CHANNEL_NAME)
+
         while not_cancel:
-  
+
             try:
-                
+
                 message = await pubsub.get_message()
-                
+
                 if message and message["type"] == "message":
-            
+
                     message = orjson.loads(message["data"])["message"]
-                        
-                    message_params = (message["message_params"])
-                    
+
+                    message_params = message["message_params"]
+
                     data: list = message_params["data"]
 
                     message_channel: str = message_params["channel"]
@@ -87,17 +88,16 @@ async def saving_and_relabelling_orders(
                         data,
                         order_db_table,
                         currency_lower,
-                        False
+                        False,
                     )
 
             except Exception as error:
-                parse_error_message (error)
+                parse_error_message(error)
                 continue
-                
-            finally:
-                await asyncio.sleep(.001) 
 
-            
+            finally:
+                await asyncio.sleep(0.001)
+
     except Exception as error:
 
         parse_error_message(error)

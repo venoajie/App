@@ -39,9 +39,9 @@ async def saving_traded_orders(
 
 
 async def saving_order_based_on_state(
-    order_table: str, 
+    order_table: str,
     order: dict,
-    ) -> None:
+) -> None:
     """_summary_
 
     Args:
@@ -136,9 +136,9 @@ def labelling_unlabelled_order(order: dict) -> None:
 
 
 def labelling_unlabelled_order_oto(
-    transaction_main: list, 
+    transaction_main: list,
     transaction_secondary: list,
-    ) -> None:
+) -> None:
     """
 
     orders_example= [
@@ -209,7 +209,7 @@ async def saving_oto_order(
     non_checked_strategies,
     orders,
     order_db_table,
-    save_only: bool= True
+    save_only: bool = True,
 ) -> None:
 
     len_oto_order_ids = len(orders[0]["oto_order_ids"])
@@ -240,15 +240,16 @@ async def saving_oto_order(
         transaction_secondary = transaction_secondary[0]
 
         # no label
-        if  (save_only == False 
-             and transaction_main["label"] == ""
-             and "open" in transaction_main["order_state"]
+        if (
+            save_only == False
+            and transaction_main["label"] == ""
+            and "open" in transaction_main["order_state"]
         ):
 
             await insert_tables(
-                order_db_table, 
+                order_db_table,
                 transaction_main,
-                )
+            )
 
             order_attributes = labelling_unlabelled_order_oto(
                 transaction_main, transaction_secondary
@@ -268,9 +269,9 @@ async def saving_oto_order(
 
         else:
             await insert_tables(
-                order_db_table, 
+                order_db_table,
                 transaction_main,
-                )
+            )
 
 
 async def saving_orders(
@@ -281,7 +282,7 @@ async def saving_orders(
     data,
     order_db_table,
     currency_lower,
-    save_only: bool= True
+    save_only: bool = True,
 ) -> None:
 
     trades = data["trades"]
@@ -306,9 +307,9 @@ async def saving_orders(
             if save_only == False:
                 await modify_order_and_db.cancel_the_cancellables(
                     order_db_table,
-                    currency_lower, 
+                    currency_lower,
                     cancellable_strategies,
-                    )
+                )
 
         else:
 
@@ -322,7 +323,7 @@ async def saving_orders(
                     non_checked_strategies,
                     orders,
                     order_db_table,
-                    save_only
+                    save_only,
                 )
 
             else:
@@ -366,7 +367,7 @@ async def saving_orders(
                                 await saving_order_based_on_state(
                                     order_db_table,
                                     order,
-                                    )
+                                )
 
                             # check if transaction has label. Provide one if not any
                             if not label_and_side_consistent:
@@ -381,14 +382,14 @@ async def saving_orders(
                                     await insert_tables(
                                         order_db_table,
                                         order,
-                                        )
-                                    
+                                    )
+
                                     if save_only == False:
-                                        
+
                                         await modify_order_and_db.cancel_by_order_id(
                                             order_db_table,
                                             order_id,
-                                            )
+                                        )
 
 
 async def cancelling_and_relabelling(
@@ -399,7 +400,7 @@ async def cancelling_and_relabelling(
     label,
     order_state,
     order_id,
-    save_only: bool= True
+    save_only: bool = True,
 ) -> None:
 
     # no label
@@ -411,13 +412,13 @@ async def cancelling_and_relabelling(
                 await insert_tables(
                     order_db_table,
                     order,
-                    )
+                )
 
             if "OTO" not in order["order_id"]:
                 await modify_order_and_db.cancel_by_order_id(
-                    order_db_table, 
+                    order_db_table,
                     order_id,
-                    )
+                )
 
             order_attributes = labelling_unlabelled_order(order)
 
