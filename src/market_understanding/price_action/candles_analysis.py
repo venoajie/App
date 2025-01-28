@@ -164,7 +164,7 @@ def combining_candles_data(
 
             np_data = np.array(
                 [tuple(user.values()) for user in np_users_data], dtype=dtype
-            ).tolist()
+            )
 
             three_dim_sequence = my_generator_candle(np, np_data[1:], dim_sequence)
 
@@ -186,7 +186,11 @@ def combining_candles_data(
     return result
 
 
-def get_market_condition(np: object, candles_data: list, currency_upper: str):
+def get_market_condition(
+    np: object, 
+    candles_data: list, 
+    currency_upper: str,
+    )->dict:
     """ """
     candles_data_instrument = [
         o for o in candles_data if currency_upper in o["instrument_name"]

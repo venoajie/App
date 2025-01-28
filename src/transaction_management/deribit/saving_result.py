@@ -120,7 +120,7 @@ async def saving_ws_data(
         qty_candles = 5
         dim_sequence = 3
 
-        market_condition = combining_candles_data(
+        combining_candles = combining_candles_data(
             np, currencies, qty_candles, resolutions, dim_sequence
         )
 
@@ -168,36 +168,6 @@ async def saving_ws_data(
                     else data["timestamp"]
                 )
 
-
-            if "PERPETUAL" in instrument_name_future:
-
-                market_condition = get_market_condition(
-                    np, market_condition, currency_upper
-                )
-
-                await inserting_open_interest(
-                    currency, WHERE_FILTER_TICK, TABLE_OHLC1, data
-                )
-
-            chart_trade = await chart_trade_in_msg(
-                message_channel,
-                data,
-                market_condition,
-            )
-
-
-                # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
-
-
-                # log.info (f"my_path_ticker {instrument_ticker} {my_path_ticker}")
-                # distribute_ticker_result_as_per_data_type(
-                #    my_path_ticker,
-                #    data,
-                # )
-
-
-            DATABASE: str = "databases/trading.sqlite3"
-
             if "chart.trades" in message_channel:
 
                 chart_trades_buffer.append(data)
@@ -219,44 +189,74 @@ async def saving_ws_data(
 
                         chart_trades_buffer = []
 
-            log.error (f"market_condition {market_condition}")
-            log.warning (f"chart_trade {chart_trade}")
-            data_to_dispatch: dict = dict(
-                message_params=message_params,
-                currency=currency,
-                cached_orders=cached_orders,
-                chart_trade=chart_trade,
-                market_condition=market_condition,
-                server_time=server_time,
-                ticker_all=ticker_all,
-                sequence=sequence,
-            )
-            
-            await send_notification(
-                client_redis,
-                CHANNEL_NAME,
-                "2",
-                data_to_dispatch)
 
-            if "user.portfolio" in message_channel:
+                if "user.portfolio" in message_channel:
 
-                await update_db_pkl("portfolio", data, currency)
+                    await update_db_pkl("portfolio", data, currency)
 
-            if "user.changes.any" in message_channel:
+                if "user.changes.any" in message_channel:
 
-                log.warning(f"message_params {message_params}")
-                await update_cached_orders(cached_orders, data)
+                    log.warning(f"message_params {message_params}")
+                    await update_cached_orders(cached_orders, data)
 
-                await saving_orders(
-                    modify_order_and_db,
-                    private_data,
-                    cancellable_strategies,
-                    non_checked_strategies,
-                    data,
-                    order_db_table,
-                    currency,
-                    
+                    await saving_orders(
+                        modify_order_and_db,
+                        private_data,
+                        cancellable_strategies,
+                        non_checked_strategies,
+                        data,
+                        order_db_table,
+                        currency,
+                        
+                    )
+
+            if "PERPETUAL" in instrument_name_future:
+
+                market_condition = get_market_condition(
+                    np, combining_candles, currency_upper
                 )
+
+                await inserting_open_interest(
+                    currency, WHERE_FILTER_TICK, TABLE_OHLC1, data
+                )
+
+                chart_trade = await chart_trade_in_msg(
+                    message_channel,
+                    data,
+                    market_condition,
+                )
+
+
+                    # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
+
+
+                    # log.info (f"my_path_ticker {instrument_ticker} {my_path_ticker}")
+                    # distribute_ticker_result_as_per_data_type(
+                    #    my_path_ticker,
+                    #    data,
+                    # )
+
+
+                DATABASE: str = "databases/trading.sqlite3"
+
+                log.error (f"market_condition {market_condition}")
+                log.warning (f"chart_trade {chart_trade}")
+                data_to_dispatch: dict = dict(
+                    message_params=message_params,
+                    currency=currency,
+                    cached_orders=cached_orders,
+                    chart_trade=chart_trade,
+                    market_condition=market_condition,
+                    server_time=server_time,
+                    ticker_all=ticker_all,
+                    sequence=sequence,
+                )
+                
+                await send_notification(
+                    client_redis,
+                    CHANNEL_NAME,
+                    "2",
+                    data_to_dispatch)
 
     except Exception as error:
 
@@ -344,3 +344,4 @@ async def send_notification(
              }
             )
         )
+
