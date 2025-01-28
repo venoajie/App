@@ -149,6 +149,35 @@ async def saving_ws_data(
 
             instrument_ticker: str = (message_channel)[19:]
 
+            if "user.portfolio" in message_channel:
+
+                await update_db_pkl("portfolio", data, currency)
+
+            if "user.changes.any" in message_channel:
+                
+                CHANNEL_NAME = "user_changes"
+
+                log.warning(f"message_params {message_params}")
+
+                await update_cached_orders(cached_orders, data)
+
+                await saving_orders(
+                    modify_order_and_db,
+                    private_data,
+                    cancellable_strategies,
+                    non_checked_strategies,
+                    data,
+                    order_db_table,
+                    currency,
+                    
+                )
+
+                await send_notification(
+                    client_redis,
+                    CHANNEL_NAME,
+                    "2",
+                    data)
+                
             instrument_name_future = (message_channel)[19:]
             if message_channel == f"incremental_ticker.{instrument_name_future}":
 
@@ -186,34 +215,6 @@ async def saving_ws_data(
                         chart_trades_buffer = []
 
 
-                if "user.portfolio" in message_channel:
-
-                    await update_db_pkl("portfolio", data, currency)
-
-                if "user.changes.any" in message_channel:
-                    
-                    CHANNEL_NAME = "user_changes"
-
-                    log.warning(f"message_params {message_params}")
-
-                    await update_cached_orders(cached_orders, data)
-
-                    await saving_orders(
-                        modify_order_and_db,
-                        private_data,
-                        cancellable_strategies,
-                        non_checked_strategies,
-                        data,
-                        order_db_table,
-                        currency,
-                        
-                    )
-
-                    await send_notification(
-                        client_redis,
-                        CHANNEL_NAME,
-                        "2",
-                        data)
 
             if "PERPETUAL" in instrument_name_future:
 
