@@ -137,6 +137,7 @@ async def cancelling_orders(
             
             await pubsub.subscribe(CHANNEL_NAME)            
             try:
+                
                 message = await pubsub.get_message()
                 
                 if message and message["type"] == "message":
@@ -384,8 +385,7 @@ async def cancelling_orders(
 
                 await asyncio.sleep(.001) 
 
-                break
-
+            
     except Exception as error:
 
         parse_error_message(error)
