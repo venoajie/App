@@ -381,7 +381,8 @@ async def cancelling_orders(
 
                                                     break
                             
-            except:
+            except Exception as error:
+                parse_error_message (error)
                 continue
             
             
