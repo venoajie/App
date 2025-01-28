@@ -130,12 +130,13 @@ async def cancelling_orders(
 
         
         not_cancel = True
-            
-        while not_cancel:
 
-            pubsub = client_redis.pubsub()
-            
-            await pubsub.subscribe(CHANNEL_NAME)            
+        pubsub = client_redis.pubsub()
+        
+        await pubsub.subscribe(CHANNEL_NAME)                      
+        
+        while not_cancel:
+  
             try:
                 
                 message = await pubsub.get_message()
