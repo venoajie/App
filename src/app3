@@ -174,7 +174,9 @@ async def main():
                 queue_general)
             ) 
         saving_task = asyncio.create_task(
-            saving_ws_data(private_data,
+            saving_ws_data(
+                private_data,
+                modify_order_and_db,
                            config_app,
                 queue_general,
                 queue_cancelling,

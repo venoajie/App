@@ -22,6 +22,7 @@ from market_understanding.price_action.candles_analysis import (
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.get_instrument_summary import get_futures_instruments
 from transaction_management.deribit.managing_deribit import currency_inline_with_database_address
+from transaction_management.deribit.orders_management import saving_orders
 from utilities.pickling import read_data, replace_data
 from utilities.system_tools import parse_error_message, provide_path_for_file
 from websocket_management.allocating_ohlc import (
@@ -53,6 +54,7 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 async def saving_ws_data(
     private_data: object,
+    modify_order_and_db: object,
     config_app,
     queue_general: object,
     queue_cancelling: object,
@@ -81,6 +83,28 @@ async def saving_ws_data(
         futures_instruments = await get_futures_instruments(
             currencies, settlement_periods
         )
+                
+        strategy_attributes_active: list = [
+            o for o in strategy_attributes if o["is_active"] == True
+        ]
+
+        # get strategies that have not short/long attributes in the label
+        non_checked_strategies: list = [
+            o["strategy_label"]
+            for o in strategy_attributes_active
+            if o["non_checked_for_size_label_consistency"] == True
+        ]
+
+        cancellable_strategies: list = [
+            o["strategy_label"]
+            for o in strategy_attributes_active
+            if o["cancellable"] == True
+        ]
+
+        relevant_tables: dict = config_app["relevant_tables"][0]
+
+        order_db_table: str = relevant_tables["orders_table"]
+
         instruments_name = futures_instruments["instruments_name"]
 
         chart_trades_buffer: list = []
@@ -228,6 +252,16 @@ async def saving_ws_data(
                 log.warning(f"message_params {message_params}")
                 await update_cached_orders(cached_orders, data)
 
+                await saving_orders(
+                    modify_order_and_db,
+                    private_data,
+                    cancellable_strategies,
+                    non_checked_strategies,
+                    data,
+                    order_db_table,
+                    currency,
+                    True
+                )
                 await queue_capturing_user_changes.put(message_params)
                 # has_order.release()
                 await queue_avoiding_double.put(message_params)

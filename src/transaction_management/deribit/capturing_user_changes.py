@@ -75,6 +75,7 @@ async def saving_and_relabelling_orders(
                     data,
                     order_db_table,
                     currency_lower,
+                    False
                 )
 
             except asyncio.QueueEmpty:
