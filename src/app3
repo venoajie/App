@@ -154,6 +154,47 @@ async def handle_notification(CHANNEL_NAME):
         finally:
             await asyncio.sleep(.001) 
 
+
+async def handle_notification2(CHANNEL_NAME):
+    import redis.asyncio as redis
+
+    r = redis.Redis()
+    pubsub = r.pubsub()     
+    await pubsub.subscribe(CHANNEL_NAME)
+    while True:
+        try:
+            message = await pubsub.get_message()
+            #log.critical (message)
+            if message["type"] == "message":
+                payload = orjson.loads(message["data"])
+
+                log.error (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
+                
+        except:
+            continue
+        finally:
+            await asyncio.sleep(.001) 
+
+async def handle_notification3(CHANNEL_NAME):
+    import redis.asyncio as redis
+
+    r = redis.Redis()
+    pubsub = r.pubsub()     
+    await pubsub.subscribe(CHANNEL_NAME)
+    while True:
+        try:
+            message = await pubsub.get_message()
+            #log.critical (message)
+            if message["type"] == "message":
+                payload = orjson.loads(message["data"])
+
+                log.debug (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
+                
+        except:
+            continue
+        finally:
+            await asyncio.sleep(.001) 
+
 async def main():
     
     sub_account_id = "deribit-148510"
@@ -223,8 +264,8 @@ async def main():
 
             saving_task,
             handle_notification(CHANNEL_NAME),
-            handle_notification(CHANNEL_NAME),
-            handle_notification(CHANNEL_NAME)
+            handle_notification2(CHANNEL_NAME),
+            handle_notification3(CHANNEL_NAME)
             
             #main_redis(queue_redis),    
             
