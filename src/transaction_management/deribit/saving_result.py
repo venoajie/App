@@ -191,8 +191,11 @@ async def saving_ws_data(
                     await update_db_pkl("portfolio", data, currency)
 
                 if "user.changes.any" in message_channel:
+                    
+                    CHANNEL_NAME = "user_changes"
 
                     log.warning(f"message_params {message_params}")
+
                     await update_cached_orders(cached_orders, data)
 
                     await saving_orders(
@@ -205,6 +208,12 @@ async def saving_ws_data(
                         currency,
                         
                     )
+
+                    await send_notification(
+                        client_redis,
+                        CHANNEL_NAME,
+                        "2",
+                        data)
 
             if "PERPETUAL" in instrument_name_future:
 

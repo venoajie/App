@@ -50,7 +50,7 @@ async def saving_and_relabelling_orders(
 
         pubsub = client_redis.pubsub()
         
-        CHANNEL_NAME = "notification"
+        CHANNEL_NAME = "user_changes"
         
         await pubsub.subscribe(CHANNEL_NAME)                      
         
