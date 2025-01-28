@@ -127,7 +127,6 @@ async def cancelling_orders(
         # server_time = 0
         
         CHANNEL_NAME = "notification"
-
         
         not_cancel = True
 
@@ -143,8 +142,6 @@ async def cancelling_orders(
                 
                 if message and message["type"] == "message":
             
-                    #payload = orjson.loads(message["data"])
-                    
                     message = orjson.loads(message["data"])["message"]
                     
                     message_params = (message["message_params"])
@@ -165,8 +162,6 @@ async def cancelling_orders(
                         message["chart_trade"],
                         message["server_time"],
                     )
-
-                    # log.critical(f"{message["sequence"]}")
 
                     currency: str = message["currency"]
 
@@ -387,7 +382,7 @@ async def cancelling_orders(
                 continue
                 
             finally:
-                await asyncio.sleep(.001) 
+                await asyncio.sleep(.000001) 
 
             
     except Exception as error:
