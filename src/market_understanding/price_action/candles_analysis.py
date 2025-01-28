@@ -168,7 +168,7 @@ def combining_candles_data(
 
             three_dim_sequence = my_generator_candle(np, np_data[1:], dim_sequence)
 
-            candles_analysis_result = analysis_based_on_length(np, three_dim_sequence)
+            candles_analysis_result = analysis_based_on_length(np, three_dim_sequence).tolist()
 
             max_tick = max([o["tick"] for o in ohlc])
 
