@@ -19,7 +19,7 @@ async def handle_notification(CHANNEL_NAME):
         try:
             async with async_timeout.timeout(1):
                 message = await pubsub.get_message()
-                log.critical (message)
+                #log.critical (message)
                 if message and message["type"] == "message":
                     payload = orjson.loads(message["data"])
                     # TODO: do validation on payload
