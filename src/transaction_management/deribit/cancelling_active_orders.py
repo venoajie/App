@@ -195,6 +195,7 @@ async def cancelling_orders(
                     #  cached_candles_data,
                     # )
 
+                    log.debug (currency)
                     if not chart_trade and server_time != 0:
 
                         # get portfolio data
