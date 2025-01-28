@@ -9,8 +9,9 @@ import signal
 import sys
 from random import sample
 
-import json
 import redis
+import orjson
+from redis import ConnectionPool
 
 #import signal
 #from multiprocessing import Manager
@@ -133,6 +134,24 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
+async def handle_notification(
+    client_redis,
+    CHANNEL_NAME):
+    #r = redis.Redis()
+    pubsub = client_redis.pubsub()     
+    await pubsub.subscribe(CHANNEL_NAME)
+    while True:
+        try:
+            message = await pubsub.get_message()
+            #log.critical (message)
+            if message["type"] == "message":
+                payload = orjson.loads(message["data"])
+
+                log.warning (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
+                await asyncio.sleep(.001) 
+        except Exception as e:
+            log.error(e)
+
 async def main():
     
     sub_account_id = "deribit-148510"
@@ -144,11 +163,18 @@ async def main():
 
     idle_time = 1
     
+    CHANNEL_NAME = "notification"
+    
     try:
 
         private_data: str = SendApiRequest(sub_account_id)
 
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
+
+        r = redis.Redis()
+
+        redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
+        client_redis = redis.Redis(connection_pool=redis_pool)
 
         #time_elapsed = (server_time - server_time_fixed)/1000
         
@@ -177,6 +203,7 @@ async def main():
             saving_ws_data(
                 private_data,
                 modify_order_and_db,
+                client_redis,
                            config_app,
                 queue_general,
                 queue_cancelling,
@@ -199,7 +226,9 @@ async def main():
             producer_task, 
 
             saving_task,
-            
+            handle_notification(
+    client_redis,
+    CHANNEL_NAME)
             #main_redis(queue_redis),    
             
             )  
