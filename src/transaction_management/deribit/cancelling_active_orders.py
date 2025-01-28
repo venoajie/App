@@ -147,10 +147,12 @@ async def cancelling_orders(
                     
                     message_params = orjson.loads(message["data"])
 
-                    message_channel = (
+                    message_channel,data = (
                         message_params["channel"],
                      message_params["data"],
                      )
+
+                    log.debug (message_channel)
 
                     cached_orders, ticker_all = (
                         message["cached_orders"],
@@ -195,7 +197,6 @@ async def cancelling_orders(
                     #  cached_candles_data,
                     # )
 
-                    log.debug (currency)
                     if not chart_trade and server_time != 0:
 
                         # get portfolio data
