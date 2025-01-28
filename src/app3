@@ -12,7 +12,6 @@ from random import sample
 import redis
 import orjson
 from redis import ConnectionPool
-import redis.asyncio as redis
 #import signal
 #from multiprocessing import Manager
 #from multiprocessing.queues import Queue
@@ -136,7 +135,10 @@ def get_config(file_name: str) -> list:
 
 async def handle_notification(
     client_redis,
-    CHANNEL_NAME):
+    CHANNEL_NAME):   
+    
+    import redis.asyncio as redis
+    
     r = redis.Redis()
     pubsub = r.pubsub()     
     await pubsub.subscribe(CHANNEL_NAME)
