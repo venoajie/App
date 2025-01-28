@@ -220,7 +220,7 @@ async def saving_ws_data(
                         chart_trades_buffer = []
 
             data_to_dispatch: dict = dict(
-                # message_params=message_params,
+                message_params=message_params,
                 currency=currency,
                 cached_orders=cached_orders,
 #                chart_trade=chart_trade,
@@ -234,7 +234,7 @@ async def saving_ws_data(
                 client_redis,
                 CHANNEL_NAME,
                 "2",
-                sequence)
+                data_to_dispatch)
 
             if "user.portfolio" in message_channel:
 
