@@ -197,7 +197,7 @@ async def saving_ws_data(
                 # message_params=message_params,
                 currency=currency,
                 cached_orders=cached_orders,
-                chart_trade=chart_trade,
+#                chart_trade=chart_trade,
                 market_condition=market_condition,
                 server_time=server_time,
                 ticker_all=ticker_all,
