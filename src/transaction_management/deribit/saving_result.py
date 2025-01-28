@@ -187,7 +187,12 @@ async def saving_ws_data(
                     currency,
                 )
 
-                await send_notification(client_redis, CHANNEL_NAME, "2", data_to_dispatch)
+                await send_notification(
+                    client_redis, 
+                    CHANNEL_NAME,
+                    "2",
+                    data_to_dispatch,
+                    )
 
             instrument_name_future = (message_channel)[19:]
             if message_channel == f"incremental_ticker.{instrument_name_future}":
