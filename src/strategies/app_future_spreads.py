@@ -130,9 +130,7 @@ async def future_spreads(
 
                     currency_upper: str = currency.upper()
 
-                    data: list = message["data"]
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
-
 
                     if not chart_trade and server_time != 0:
 
