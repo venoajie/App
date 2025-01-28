@@ -133,6 +133,27 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
+
+async def handle_notification(CHANNEL_NAME):
+    import redis.asyncio as redis
+
+    r = redis.Redis()
+    pubsub = r.pubsub()     
+    await pubsub.subscribe(CHANNEL_NAME)
+    while True:
+        try:
+            message = await pubsub.get_message()
+            #log.critical (message)
+            if message["type"] == "message":
+                payload = orjson.loads(message["data"])
+
+                log.warning (f"{CHANNEL_NAME}, {payload["user_id"]}, {payload["message"]}")
+                
+        except:
+            continue
+        finally:
+            await asyncio.sleep(.001) 
+
 async def main():
     
     sub_account_id = "deribit-148510"
@@ -143,6 +164,8 @@ async def main():
     #server_time_fixed = get_now_unix_time()  
 
     idle_time = 1
+    
+    CHANNEL_NAME = "notification"
     
     try:
 
@@ -199,6 +222,7 @@ async def main():
             producer_task, 
 
             saving_task,
+            handle_notification(CHANNEL_NAME)
             
             #main_redis(queue_redis),    
             
