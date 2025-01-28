@@ -169,29 +169,7 @@ async def cancelling_orders(
 
                     currency_lower: str = currency
 
-                    # if "user.changes.any" in message_channel:
-
-                    #    await update_cached_orders(cached_orders, data_orders)
-
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
-
-                    # instrument_name_future = (message_channel)[19:]
-
-                    # if message_channel == f"incremental_ticker.{instrument_name_future}":
-
-                    #    update_cached_ticker(
-                    #        instrument_name_future,
-                    #        ticker_all,
-                    #        data_orders,
-                    #    )
-
-                    #    server_time = data_orders["timestamp"] + server_time if server_time == 0 else data_orders["timestamp"]
-
-                    # hart_trade = await chart_trade_in_msg(
-                    #    message_channel,
-                    #   data_orders,
-                    #  cached_candles_data,
-                    # )
 
                     if not chart_trade and server_time != 0:
 
