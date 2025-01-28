@@ -250,7 +250,6 @@ async def saving_ws_data(
                     market_condition=market_condition,
                     server_time=server_time,
                     ticker_all=ticker_all,
-                    sequence=sequence,
                 )
                 
                 await send_notification(
