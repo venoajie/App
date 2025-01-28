@@ -12,7 +12,7 @@ from random import sample
 import redis
 import orjson
 from redis import ConnectionPool
-
+import redis.asyncio as redis
 #import signal
 #from multiprocessing import Manager
 #from multiprocessing.queues import Queue
