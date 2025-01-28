@@ -142,7 +142,8 @@ async def saving_ws_data(
                     else data["timestamp"]
                 )
 
-            if "PERPETUAL" in data["instrument_name"]:
+            log.debug(instrument_name_future)
+            if "PERPETUAL" in instrument_name_future:
 
                 market_condition = get_market_condition(
                     np, market_condition, currency_upper
