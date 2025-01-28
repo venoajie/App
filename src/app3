@@ -133,45 +133,6 @@ def get_config(file_name: str) -> list:
     except:
         return []
 
-from redis import ConnectionPool
-
-CHANNEL_NAME = "notification"
-r = redis.Redis()
-
-redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
-client = redis.Redis(connection_pool=redis_pool)
-
-def send_notification(
-    user_id: int, 
-    message: str):
-    """
-    Send a notification to a user.
-    note: this maybe located in services.py
-    """
-    ...
-    
-    client.publish(CHANNEL_NAME, orjson.dumps({"user_id": user_id, "message": message}))
-
-    pubsub = client.pubsub()
-    pubsub.psubscribe('test-*')
-
-async def main_redis(queue_redis,):
-    
-    try:
-
-        while True:
-
-            message_params: str = await queue_redis.get()
-            log.error (message_params["sequence"])
-            send_notification(42, message_params["sequence"])
-
-    except Exception as error:
-
-        parse_error_message(error)
-
-        await telegram_bot_sendtext(f"saving result {error}", "general_error")
-
-
 async def main():
     
     sub_account_id = "deribit-148510"
