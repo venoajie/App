@@ -22,6 +22,7 @@ from loguru import logger as log
 import redis
 import orjson
 from redis import ConnectionPool
+import redis.asyncio as redis
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -241,12 +242,16 @@ async def main():
             #    modify_order_and_db,
             #    config_app),
     
+    
+            saving_task,
+            
             cancelling_orders(
                 private_data,
                 modify_order_and_db,
-                config_app,
-                queue_cancelling),    
-            
+                client_redis,
+                config_app
+                ),    
+        
                         )  
 
 
