@@ -222,6 +222,8 @@ async def main():
             producer_task, 
 
             saving_task,
+            handle_notification(CHANNEL_NAME),
+            handle_notification(CHANNEL_NAME),
             handle_notification(CHANNEL_NAME)
             
             #main_redis(queue_redis),    
