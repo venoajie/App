@@ -325,7 +325,7 @@ def proforma_delta(delta: float, selected_transaction_size: int, side: str) -> f
     return delta + selected_transaction
 
 
-def is_new_transaction_will_reduce_delta(
+def is_contra_order_will_reduce_delta(
     delta: float, selected_transaction_size: int, side: str
 ) -> float:
 
@@ -982,17 +982,17 @@ class ComboAuto(BasicStrategy):
 
         basic_size = selected_transaction["amount"]
 
-        new_transaction_will_reduce_delta = is_new_transaction_will_reduce_delta(
+        contra_order_will_reduce_delta = is_contra_order_will_reduce_delta(
             delta, selected_transaction_size, counter_side
         )
 
-        if new_transaction_will_reduce_delta:
+        if contra_order_will_reduce_delta:
 
-            instrument_name_perpetual = ticker_perpetual["instrument_name"]
+            instrument_name_perpetual: str = ticker_perpetual["instrument_name"]
 
-            instrument_name_transaction = selected_transaction["instrument_name"]
+            instrument_name_transaction: str = selected_transaction["instrument_name"]
 
-            selected_transaction_side = selected_transaction["side"]
+            selected_transaction_side: str = selected_transaction["side"]
 
             orders_instrument_perpetual: list = [
                 o
@@ -1085,6 +1085,7 @@ class ComboAuto(BasicStrategy):
                     f"transaction_in_profit {transaction_in_profit} bid_price_perpetual {bid_price_perpetual} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}"
                 )
 
+                # sell immediately when in profit
                 if transaction_in_profit:
 
                     if len_orders_instrument_perpetual == 0:
@@ -1098,19 +1099,6 @@ class ComboAuto(BasicStrategy):
 
                         params.update({"label": label})
                         params.update({"entry_price": bid_price_perpetual})
-
-                else:
-
-                    if len_orders_instrument_transaction == 0:
-
-                        order_allowed = True
-
-                        params.update({"instrument_name": instrument_name_transaction})
-
-                        label = f"{strategy_label}-closed-{label_integer}"
-
-                        params.update({"label": label})
-                        params.update({"entry_price": bid_price_selected_transaction})
 
             if (
                 "PERPETUAL" not in instrument_name_transaction
@@ -1238,11 +1226,11 @@ class ComboAuto(BasicStrategy):
 
         basic_size = selected_transaction["amount"]
 
-        new_transaction_will_reduce_delta = is_new_transaction_will_reduce_delta(
+        contra_order_will_reduce_delta = is_contra_order_will_reduce_delta(
             delta, selected_transaction_size, counter_side
         )
 
-        if new_transaction_will_reduce_delta:
+        if contra_order_will_reduce_delta:
 
             instrument_name_perpetual = ticker_perpetual["instrument_name"]
 
@@ -1286,7 +1274,7 @@ class ComboAuto(BasicStrategy):
             ]
 
             log.info(
-                f"new_transaction_will_reduce_delta {new_transaction_will_reduce_delta} {reduce_only}"
+                f"contra_order_will_reduce_delta {contra_order_will_reduce_delta} {reduce_only}"
             )
 
             log.info(
@@ -1373,40 +1361,6 @@ class ComboAuto(BasicStrategy):
                             )
 
                             order_allowed = True
-
-                    # using other future instrument (should with higher price)
-                    else:
-
-                        orders_instrument_future: list = [
-                            o
-                            for o in orders_currency
-                            if instrument_name_future in o["instrument_name"]
-                        ]
-
-                        len_orders_instrument_future: int = (
-                            0
-                            if not orders_instrument_future
-                            else len(orders_instrument_future)
-                        )
-
-                        log.debug(
-                            f"random_instruments_name {random_instruments_name} instrument_name {instrument_name_future}"
-                        )
-
-                        if len_orders_instrument_future == 0:
-
-                            if ticker_instrument:
-                                ticker_instrument = ticker_instrument[0]
-
-                                params.update(
-                                    {"entry_price": ticker_instrument["best_ask_price"]}
-                                )
-
-                                params.update(
-                                    {"instrument_name": instrument_name_future}
-                                )
-
-                                order_allowed = True
 
             if "PERPETUAL" in instrument_name_transaction:
 
