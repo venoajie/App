@@ -478,7 +478,7 @@ async def future_spreads(
 
                                             #! closing unpaired transactions
                                             log.critical(
-                                                f"selected_transaction {selected_transaction} {sum_selected_transaction}"
+                                                f"sum_selected_transaction {sum_selected_transaction}"
                                             )
                                             if sum_selected_transaction != 0:
 
@@ -565,7 +565,7 @@ async def future_spreads(
                                                                     not_order = False
 
                                                                     break
-
+                                                                
             except Exception as error:
 
                 parse_error_message(error)

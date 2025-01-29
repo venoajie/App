@@ -249,7 +249,7 @@ async def saving_ws_data(
 
                 sequence = sequence + len(message_params) - 1
 
-                log.error(sequence)
+                log.error(f"{sequence} {currency_upper}")
 
                 log.error(f"market_condition {market_condition}")
                 log.warning(f"chart_trade {chart_trade}")

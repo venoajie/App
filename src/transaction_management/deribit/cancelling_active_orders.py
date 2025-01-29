@@ -151,8 +151,6 @@ async def cancelling_orders(
                         message_params["data"],
                     )
 
-                    log.debug(message["sequence"])
-
                     cached_orders, ticker_all = (
                         message["cached_orders"],
                         message["ticker_all"],
@@ -170,6 +168,8 @@ async def cancelling_orders(
                     currency_lower: str = currency
 
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
+
+                    log.debug(f"""{message["sequence"]} {currency}""")
 
                     if not chart_trade and server_time != 0:
 
@@ -226,7 +226,7 @@ async def cancelling_orders(
                                 ]
                             )
 
-                            log.warning(f"orders_currency {len(orders_currency)}")
+                            log.warning(f"orders_currency {currency_upper}  {len(orders_currency)}")
 
                             position = [o for o in sub_account["positions"]]
                             # log.debug (f"position {position}")
