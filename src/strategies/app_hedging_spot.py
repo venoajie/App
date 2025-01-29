@@ -581,7 +581,6 @@ async def hedging_spot(
 
             finally:
                 await asyncio.sleep(0.001)
-                await client_redis.aclose()
 
     except Exception as error:
 
