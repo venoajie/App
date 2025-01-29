@@ -138,9 +138,6 @@ async def main():
             saving_task,
                 
     
-            saving_task,
-    
-    
             hedging_spot(
                 private_data,
                 modify_order_and_db,
