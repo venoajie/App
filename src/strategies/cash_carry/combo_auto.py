@@ -341,52 +341,6 @@ def is_new_transaction_will_reduce_delta(
         # log.warning (f"will_reduce_delta {delta < proforma} proforma {proforma} delta {delta}")
         return delta < proforma
 
-
-async def get_market_condition_future_spread(
-    TA_result_data, index_price, threshold
-) -> dict:
-    """ """
-    neutral_price, rising_price, falling_price = False, False, False
-    strong_rising_price, strong_falling_price = False, False
-
-    TA_data = [
-        o
-        for o in TA_result_data
-        if o["tick"] == max([i["tick"] for i in TA_result_data])
-    ][0]
-
-    open_60 = TA_data["60_open"]
-
-    fluctuation_exceed_threshold = TA_data["1m_fluctuation_exceed_threshold"]
-
-    delta_price_pct = delta_pct(index_price, open_60)
-
-    if fluctuation_exceed_threshold or True:
-
-        if index_price > open_60:
-            rising_price = True
-
-            if delta_price_pct > threshold:
-                strong_rising_price = True
-
-        if index_price < open_60:
-            falling_price = True
-
-            if delta_price_pct > threshold:
-                strong_falling_price = True
-
-    if not rising_price and not falling_price:
-        neutral_price = True
-
-    return dict(
-        rising_price=rising_price,
-        strong_rising_price=strong_rising_price,
-        neutral_price=neutral_price,
-        falling_price=falling_price,
-        strong_falling_price=strong_falling_price,
-    )
-
-
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto(BasicStrategy):
     """ """
