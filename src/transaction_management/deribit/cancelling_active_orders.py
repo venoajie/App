@@ -359,8 +359,8 @@ async def cancelling_orders(
                 continue
 
             finally:
-                await client_redis.aclose()
                 await asyncio.sleep(0.001)
+                await client_redis.aclose()
 
     except Exception as error:
 
