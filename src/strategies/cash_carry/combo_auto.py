@@ -726,8 +726,8 @@ class ComboAuto(BasicStrategy):
         my_trades_long = [o for o in my_trades if "sell" in o["side"]]
         my_trades_short = [o for o in my_trades if "buy" in o["side"]]
 
-        my_trades_long_timestamp = max([o["timestamp"] for o in my_trades_long])
-        my_trades_short_timestamp = max([o["timestamp"] for o in my_trades_short])
+        my_trades_long_timestamp = (0 if my_trades_long == [] else max([o["timestamp"] for o in my_trades_long]))
+        my_trades_short_timestamp = (0 if my_trades_short == [] else max([o["timestamp"] for o in my_trades_short]))
 
         delta = self.delta
         strategy_params: dict = self.strategy_parameters
