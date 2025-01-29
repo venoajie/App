@@ -1,5 +1,6 @@
-from loguru import logger as log
+# # -*- coding: utf-8 -*-
 
+# user defined formula
 from transaction_management.deribit.api_requests import get_ohlc_data
 from utilities.string_modification import remove_list_elements
 
@@ -10,7 +11,10 @@ https://www.dataleadsfuture.com/exploring-numexpr-a-powerful-engine-behind-panda
     """
 
 
-def analysis_based_on_length(np: object, data_per_resolution: int):
+def analysis_based_on_length(
+    np: object,
+    data_per_resolution: int,
+):
     """_summary_
     https://www.tradingview.com/script/uuinZwsR-Big-Bar-Strategy/
         Args:
@@ -237,14 +241,14 @@ def get_market_condition(
         weak_bearish = True if candle_5_type < 0 else False
 
     if candle_60_long_body_any and candle_15_long_body_any:
-        bullish = True if  weak_bullish and candle_15_type > 0 else False
-        bearish = True if  weak_bearish and candle_15_type < 0 else False
+        bullish = True if weak_bullish and candle_15_type > 0 else False
+        bearish = True if weak_bearish and candle_15_type < 0 else False
 
     if candle_60_long_body_more_than_2:
-        strong_bullish = True if  bullish and candle_60_long_body_more_than_2 else False
+        strong_bullish = True if bullish and candle_60_long_body_more_than_2 else False
         strong_bearish = True if bearish and candle_60_long_body_more_than_2 else False
 
-    neutral = True if  not weak_bearish and not weak_bullish else False
+    neutral = True if not weak_bearish and not weak_bullish else False
 
     return dict(
         strong_bullish=strong_bullish,

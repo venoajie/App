@@ -620,15 +620,15 @@ def get_index(ticker: dict) -> float:
 
     return index_price
 
+
 async def update_db_pkl(
-    path: str, 
+    path: str,
     data_orders: dict,
     currency: str,
-    ) -> None:
+) -> None:
 
     my_path_portfolio = provide_path_for_file(path, currency)
 
     if currency_inline_with_database_address(currency, my_path_portfolio):
 
         replace_data(my_path_portfolio, data_orders)
-

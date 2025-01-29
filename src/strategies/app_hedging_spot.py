@@ -19,7 +19,9 @@ from strategies.hedging.hedging_spot import (
     HedgingSpot,
     modify_hedging_instrument,
 )
-from transaction_management.deribit.get_instrument_summary import    get_futures_instruments
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,
+)
 from transaction_management.deribit.processing_orders import processing_orders
 from utilities.number_modification import get_closest_value
 from utilities.pickling import read_data
