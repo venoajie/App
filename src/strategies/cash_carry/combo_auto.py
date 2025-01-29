@@ -1120,11 +1120,13 @@ class ComboAuto(BasicStrategy):
                     basic_size,
                     selected_transaction_side,
                 )
-
-                transaction_in_profit = bid_price_selected_transaction < (
+                
+                target_price = (
                     selected_transaction_price
                     - (selected_transaction_price * tp_threshold)
                 )
+
+                transaction_in_profit = bid_price_selected_transaction < target_price
 
                 log.error(
                     f"transaction_in_profit {transaction_in_profit} bid_price_selected_transaction {bid_price_selected_transaction} {selected_transaction_price} {(selected_transaction_price - selected_transaction_price * tp_threshold)}"
@@ -1158,7 +1160,7 @@ class ComboAuto(BasicStrategy):
                         f"sum_orders_instrument_perpetual_open {sum_orders_instrument_perpetual_open} "
                     )
                     log.error(
-                        f"selected_transaction_price <= bid_price_perpetual {selected_transaction_price <= bid_price_perpetual} "
+                        f"selected_transaction_price {selected_transaction_price} <= bid_price_perpetual {bid_price_perpetual}  {selected_transaction_price <= bid_price_perpetual} "
                     )
                     log.warning(
                         f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}"
