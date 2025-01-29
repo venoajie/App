@@ -96,7 +96,7 @@ async def main():
         client_redis = redis.Redis(connection_pool=redis_pool)
         
                 
-        pool = await redis.ConnectionPool.from_url("redis://localhost", port=6379, protocol=3)
+        pool = redis.ConnectionPool.from_url("redis://localhost", port=6379, protocol=3)
         client_redis = redis.Redis.from_pool(pool)
 
         #client_redis = redis.Redis()

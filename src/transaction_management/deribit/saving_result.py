@@ -152,126 +152,123 @@ async def saving_ws_data(
                     data,
                     currency,
                 )
-                
 
-            async with client_redis.pubsub() as pubsub:
-                    
-                #future = asyncio.create_task(reader(pubsub))
-                
-                if "user.changes.any" in message_channel:
+            if "user.changes.any" in message_channel:
 
-                    CHANNEL_NAME = "user_changes"
+                CHANNEL_NAME = "user_changes"
 
-                    await update_cached_orders(
-                        cached_orders,
-                        data,
-                    )
+                await update_cached_orders(
+                    cached_orders,
+                    data,
+                )
 
-                    data_to_dispatch: dict = dict(
-                        data=data,
-                        cached_orders=cached_orders,
-                        currency=currency,
-                    )
+                data_to_dispatch: dict = dict(
+                    data=data,
+                    cached_orders=cached_orders,
+                    currency=currency,
+                )
 
-                    await  client_redis.publish(CHANNEL_NAME, data_to_dispatch
-                    )
+                await send_notification(
+                    client_redis,
+                    CHANNEL_NAME,
+                    "2",
+                    data_to_dispatch,
+                )
 
-                    await saving_orders(
-                        modify_order_and_db,
-                        private_data,
-                        cancellable_strategies,
-                        non_checked_strategies,
-                        data,
-                        order_db_table,
-                        currency,
-                    )
+                await saving_orders(
+                    modify_order_and_db,
+                    private_data,
+                    cancellable_strategies,
+                    non_checked_strategies,
+                    data,
+                    order_db_table,
+                    currency,
+                )
 
-                instrument_name_future = (message_channel)[19:]
-                if message_channel == f"incremental_ticker.{instrument_name_future}":
+            instrument_name_future = (message_channel)[19:]
+            if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                    update_cached_ticker(
-                        instrument_name_future,
-                        ticker_all,
-                        data,
-                    )
+                update_cached_ticker(
+                    instrument_name_future,
+                    ticker_all,
+                    data,
+                )
 
-                    server_time = (
-                        data["timestamp"] + server_time
-                        if server_time == 0
-                        else data["timestamp"]
-                    )
+                server_time = (
+                    data["timestamp"] + server_time
+                    if server_time == 0
+                    else data["timestamp"]
+                )
 
-                if "chart.trades" in message_channel:
+            if "chart.trades" in message_channel:
 
-                    chart_trades_buffer.append(data)
+                chart_trades_buffer.append(data)
 
-                    if len(chart_trades_buffer) > 3:
+                if len(chart_trades_buffer) > 3:
 
-                        instrument_ticker: str = ((message_channel)[13:]).partition(".")[0]
+                    instrument_ticker: str = ((message_channel)[13:]).partition(".")[0]
 
-                        if "PERPETUAL" in instrument_ticker:
+                    if "PERPETUAL" in instrument_ticker:
 
-                            for data in chart_trades_buffer:
-                                await ohlc_result_per_time_frame(
-                                    instrument_ticker,
-                                    resolution,
-                                    data,
-                                    TABLE_OHLC1,
-                                    WHERE_FILTER_TICK,
-                                )
+                        for data in chart_trades_buffer:
+                            await ohlc_result_per_time_frame(
+                                instrument_ticker,
+                                resolution,
+                                data,
+                                TABLE_OHLC1,
+                                WHERE_FILTER_TICK,
+                            )
 
-                            chart_trades_buffer = []
+                        chart_trades_buffer = []
 
-                if "PERPETUAL" in instrument_name_future:
+            if "PERPETUAL" in instrument_name_future:
 
-                    market_condition = get_market_condition(
-                        np, combining_candles, currency_upper
-                    )
+                market_condition = get_market_condition(
+                    np, combining_candles, currency_upper
+                )
 
-                    await inserting_open_interest(
-                        currency, WHERE_FILTER_TICK, TABLE_OHLC1, data
-                    )
+                await inserting_open_interest(
+                    currency, WHERE_FILTER_TICK, TABLE_OHLC1, data
+                )
 
-                    chart_trade = await chart_trade_in_msg(
-                        message_channel,
-                        data,
-                        market_condition,
-                    )
+                chart_trade = await chart_trade_in_msg(
+                    message_channel,
+                    data,
+                    market_condition,
+                )
 
-                    # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
+                # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
 
-                    # log.info (f"my_path_ticker {instrument_ticker} {my_path_ticker}")
-                    # distribute_ticker_result_as_per_data_type(
-                    #    my_path_ticker,
-                    #    data,
-                    # )
+                # log.info (f"my_path_ticker {instrument_ticker} {my_path_ticker}")
+                # distribute_ticker_result_as_per_data_type(
+                #    my_path_ticker,
+                #    data,
+                # )
 
-                    DATABASE: str = "databases/trading.sqlite3"
+                DATABASE: str = "databases/trading.sqlite3"
 
-                    sequence = sequence + len(message_params) - 1
+                sequence = sequence + len(message_params) - 1
 
-                    log.error(sequence)
+                log.error(sequence)
 
-                    log.error(f"market_condition {market_condition}")
-                    log.warning(f"chart_trade {chart_trade}")
-                    data_to_dispatch: dict = dict(
-                        message_params=message_params,
-                        currency=currency,
-                        sequence=sequence,
-                        cached_orders=cached_orders,
-                        chart_trade=chart_trade,
-                        market_condition=market_condition,
-                        server_time=server_time,
-                        ticker_all=ticker_all,
-                    )
+                log.error(f"market_condition {market_condition}")
+                log.warning(f"chart_trade {chart_trade}")
+                data_to_dispatch: dict = dict(
+                    message_params=message_params,
+                    currency=currency,
+                    sequence=sequence,
+                    cached_orders=cached_orders,
+                    chart_trade=chart_trade,
+                    market_condition=market_condition,
+                    server_time=server_time,
+                    ticker_all=ticker_all,
+                )
 
-                    CHANNEL_NAME = "notification"
-                    await client_redis.publish(CHANNEL_NAME, data_to_dispatch
-                    )
+                CHANNEL_NAME = "notification"
+                await send_notification(
+                    client_redis, CHANNEL_NAME, "2", data_to_dispatch
+                )
 
-
-                #await future
-                
     except Exception as error:
 
         parse_error_message(error)
