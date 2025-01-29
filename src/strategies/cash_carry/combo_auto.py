@@ -904,6 +904,7 @@ class ComboAuto(BasicStrategy):
 
         strategy_label = self.strategy_label
 
+        #provide placeholder for result
         result = dict(order_allowed=False, order_parameters=[])
 
         if selected_transaction:
