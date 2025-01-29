@@ -120,6 +120,7 @@ async def avoiding_double_ids(
                 continue
 
             finally:
+                await client_redis.aclose()
                 await asyncio.sleep(0.001)
 
     except Exception as error:
