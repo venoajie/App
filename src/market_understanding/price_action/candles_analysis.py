@@ -237,14 +237,14 @@ def get_market_condition(
         weak_bearish = True if candle_5_type < 0 else False
 
     if candle_60_long_body_any and candle_15_long_body_any:
-        bullish = weak_bullish and candle_15_type > 0
-        bearish = weak_bearish and candle_15_type < 0
+        bullish = True if  weak_bullish and candle_15_type > 0 else False
+        bearish = True if  weak_bearish and candle_15_type < 0 else False
 
     if candle_60_long_body_more_than_2:
-        strong_bullish = bullish and candle_60_long_body_more_than_2
-        strong_bearish = bearish and candle_60_long_body_more_than_2
+        strong_bullish = True if  bullish and candle_60_long_body_more_than_2 else False
+        strong_bearish = True if bearish and candle_60_long_body_more_than_2 else False
 
-    neutral = not weak_bearish and not weak_bullish
+    neutral = True if  not weak_bearish and not weak_bullish else False
 
     return dict(
         strong_bullish=strong_bullish,
