@@ -190,7 +190,8 @@ async def future_spreads(
                             len_cleaned_orders = len(orders_currency)
 
                             position = [o for o in sub_account["positions"]]
-                            # log.debug (f"position {position}")
+                            log.debug (f"cached_orders {cached_orders}")
+                            log.warning (f"orders_currency {orders_currency}")
                             position_without_combo = [
                                 o
                                 for o in position

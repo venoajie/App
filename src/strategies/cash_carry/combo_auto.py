@@ -1166,9 +1166,7 @@ class ComboAuto(BasicStrategy):
                         f"waiting_time_for_perpetual_order {waiting_time_for_perpetual_order} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}"
                     )
 
-                    if (
-                        reduce_only
-                        and len_orders_instrument_perpetual == 0
+                    if (len_orders_instrument_perpetual == 0
                         and sum_orders_instrument_perpetual_open < abs(delta)
                         and delta <= 0
                     ):
@@ -1276,7 +1274,7 @@ class ComboAuto(BasicStrategy):
             ]
 
             log.info(
-                f"contra_order_will_reduce_delta {contra_order_will_reduce_delta} {reduce_only}"
+                f"contra_order_will_reduce_delta {contra_order_will_reduce_delta}"
             )
 
             log.info(
@@ -1436,7 +1434,7 @@ class ComboAuto(BasicStrategy):
                             else len(orders_instrument_future)
                         )
 
-                        if reduce_only and len_orders_instrument_future == 0:
+                        if len_orders_instrument_future == 0:
 
                             params.update(
                                 {"entry_price": ticker_instrument["best_ask_price"]}
