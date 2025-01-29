@@ -268,9 +268,7 @@ async def saving_ws_data(
                 await send_notification(
                     client_redis, CHANNEL_NAME, "2", data_to_dispatch
                 )
-            
-            await client_redis.aclose()
-    
+                
     except Exception as error:
 
         parse_error_message(error)
