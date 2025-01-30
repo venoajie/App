@@ -359,22 +359,22 @@ async def future_spreads(
                                                 f"future_control {future_control} instrument_name_combo {instrument_name_combo} instrument_name_future {instrument_name_future}"
                                             )
 
-                                            instrument_name_future_not_in_control = (
+                                            instrument_name_future_in_control = (
                                                 True
                                                 if future_control == []
                                                 else [
                                                     o
                                                     for o in future_control
-                                                    if instrument_name_future not in o
+                                                    if instrument_name_future in o
                                                 ]
                                             )
 
                                             log.debug(
-                                                f"instrument_name_future_not_in_control {instrument_name_future_not_in_control}"
+                                                f"instrument_name_future_not_in_control {instrument_name_future_in_control} {not instrument_name_future_in_control}"
                                             )
 
                                             if (
-                                                instrument_name_future_not_in_control
+                                                not instrument_name_future_in_control
                                                 and len_cleaned_orders < 50
                                                 and ticker_future
                                                 and ticker_combo
