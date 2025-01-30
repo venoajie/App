@@ -251,8 +251,8 @@ async def caching_distributing_data(
 
                 log.error(f"{sequence} {currency_upper}")
 
-                log.error(f"market_condition {market_condition}")
-                log.warning(f"chart_trade {chart_trade}")
+                #log.error(f"market_condition {market_condition}")
+                #log.warning(f"chart_trade {chart_trade}")
                 data_to_dispatch: dict = dict(
                     message_params=message_params,
                     currency=currency,
