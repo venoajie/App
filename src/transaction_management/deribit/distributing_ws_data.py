@@ -256,7 +256,7 @@ async def caching_distributing_data(
 
                 DATABASE: str = "databases/trading.sqlite3"
 
-                sequence_update = sequence + len(message_params) - 1
+            sequence_update = sequence + len(message_params) - 1
 
             log.error(f"{sequence} {currency_upper}")
 
