@@ -93,9 +93,11 @@ async def future_spreads(
 
                 if message and message["type"] == "message":
 
-                    message = orjson.loads(message["data"])["message"]
+                    message_data = orjson.loads(message["data"])
+                    
+                    log.critical(message_data["sequence"])
 
-                    log.debug(message["sequence"])
+                    message = message_data["message"]
 
                     cached_orders, ticker_all = (
                         message["cached_orders"],

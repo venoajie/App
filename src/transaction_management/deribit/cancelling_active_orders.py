@@ -104,9 +104,12 @@ async def cancelling_orders(
 
                 if message and message["type"] == "message":
 
-                    message = orjson.loads(message["data"])["message"]
+                    message_data = orjson.loads(message["data"])
+                    
+                    log.critical(message_data["sequence"])
 
-        
+                    message = message_data["message"]
+
                     cached_orders, ticker_all = (
                         message["cached_orders"],
                         message["ticker_all"],

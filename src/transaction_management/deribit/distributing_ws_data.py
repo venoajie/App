@@ -354,11 +354,14 @@ def get_settlement_period(strategy_attributes) -> list:
 async def send_notification(
     client_redis: object,
     CHANNEL_NAME,
-    user_id: int,
+    sequence: int,
     message: str,
 ) -> None:
     """ """
 
     client_redis.publish(
-        CHANNEL_NAME, orjson.dumps({"user_id": user_id, "message": message})
+        CHANNEL_NAME, orjson.dumps(
+            {"sequence": sequence, 
+             "message": message},
+            )
     )

@@ -56,7 +56,7 @@ async def avoiding_double_ids(
 
                     message_data = orjson.loads(message["data"])
                     
-                    log.critical(message_data)
+                    log.critical(message_data["sequence"])
 
                     message = message_data["message"]
 
