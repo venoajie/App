@@ -132,11 +132,11 @@ async def main():
             saving_task,
                 
     
-            #hedging_spot(
-            #    private_data,
-            #    modify_order_and_db,
-            #    client_redis,
-            #    config_app,),
+            hedging_spot(
+                private_data,
+                modify_order_and_db,
+                client_redis,
+                config_app,),
 
                
             future_spreads(
@@ -167,9 +167,9 @@ async def main():
                 config_app,
                 ),
        
-            #relabelling_trades(
-            #    modify_order_and_db,
-            #    config_app),
+            relabelling_trades(
+                modify_order_and_db,
+                config_app),
     
             reconciling_size(
                 modify_order_and_db,

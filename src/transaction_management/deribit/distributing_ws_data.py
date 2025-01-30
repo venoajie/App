@@ -265,7 +265,6 @@ async def caching_distributing_data(
             data_to_dispatch: dict = dict(
                 message_params=message_params,
                 currency=currency,
-                sequence=sequence,
                 cached_orders=cached_orders,
                 chart_trade=chart_trade,
                 market_condition=market_condition,
