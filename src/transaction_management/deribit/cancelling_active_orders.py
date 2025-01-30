@@ -128,8 +128,6 @@ async def cancelling_orders(
 
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                    log.debug(f"""{message["sequence"]} {currency}""")
-
                     if not chart_trade and server_time != 0:
 
                         # get portfolio data
