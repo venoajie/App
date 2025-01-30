@@ -925,12 +925,15 @@ class ComboAuto(BasicStrategy):
             label_integer = get_label_integer(selected_transaction["label"])
 
             # order was not existed yet
-
             orders_currency = self.orders_currency_strategy
+            
+            log.info (f"orders_currency {orders_currency}")
 
             label_integer_in_orders_currency: list = [
                 o for o in orders_currency if str(label_integer) in o["label"]
             ]
+            
+            log.info (f"label_integer_in_orders_currency {label_integer_in_orders_currency} not label_integer_in_orders_currency")
 
             if not label_integer_in_orders_currency:
 
