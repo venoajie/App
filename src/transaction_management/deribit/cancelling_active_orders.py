@@ -4,7 +4,6 @@
 # built ins
 import asyncio
 
-import numpy as np
 import uvloop
 
 # installed
@@ -13,47 +12,22 @@ import orjson
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.reconciling_db import (
-    is_size_sub_account_and_my_trades_reconciled,
-)
+from data_cleaning.reconciling_db import  is_size_sub_account_and_my_trades_reconciled
 from db_management.sqlite_management import executing_query_with_return
-from market_understanding.price_action.candles_analysis import (
-    combining_candles_data,
-    get_market_condition,
-)
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.cash_carry.combo_auto import ComboAuto
 from strategies.hedging.hedging_spot import HedgingSpot
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
-from transaction_management.deribit.managing_deribit import (
-    #    ModifyOrderDb,
-    currency_inline_with_database_address,
-)
-from utilities.caching import (
-    combining_ticker_data as cached_ticker,
-    combining_order_data,
-    update_cached_orders,
-)
-from utilities.caching import update_cached_ticker
+from transaction_management.deribit.get_instrument_summary import get_futures_instruments
+from transaction_management.deribit.managing_deribit import currency_inline_with_database_address
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
-    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
-
-from utilities.system_tools import parse_error_message, provide_path_for_file
-
-
-async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
-
-    my_path_portfolio = provide_path_for_file(path, currency)
-
-    if currency_inline_with_database_address(currency, my_path_portfolio):
-
-        replace_data(my_path_portfolio, data_orders)
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,
+    )
 
 
 async def cancelling_orders(
@@ -106,26 +80,14 @@ async def cancelling_orders(
 
         instrument_attributes_futures_all = futures_instruments["active_futures"]
 
-        instruments_name = futures_instruments["instruments_name"]
-
         # filling currencies attributes
         my_path_cur = provide_path_for_file("currencies")
-        replace_data(my_path_cur, currencies)
-
-        # resolutions = [60, 15, 5]
-        # qty_candles = 5
-        # dim_sequence = 3
-
-        # cached_candles_data = combining_candles_data(
-        #    np, currencies, qty_candles, resolutions, dim_sequence
-        # )
-
-        # ticker_all = cached_ticker(instruments_name)
-
-        # cached_orders: list = await combining_order_data(private_data, currencies)
-
-        # server_time = 0
-
+        
+        replace_data(
+            my_path_cur, 
+            currencies,
+            )
+        
         CHANNEL_NAME = "notification"
 
         not_cancel = True
@@ -144,13 +106,7 @@ async def cancelling_orders(
 
                     message = orjson.loads(message["data"])["message"]
 
-                    message_params = message["message_params"]
-
-                    message_channel, data = (
-                        message_params["channel"],
-                        message_params["data"],
-                    )
-
+        
                     cached_orders, ticker_all = (
                         message["cached_orders"],
                         message["ticker_all"],
@@ -228,6 +184,9 @@ async def cancelling_orders(
 
                             log.warning(
                                 f"orders_currency {currency_upper}  {len(orders_currency)}"
+                            )
+
+                            log.warning(f"{(orders_currency)}"
                             )
 
                             position = [o for o in sub_account["positions"]]
@@ -380,31 +339,6 @@ def get_settlement_period(strategy_attributes) -> list:
         )
     )
 
-
-async def chart_trade_in_msg(
-    message_channel,
-    data_orders,
-    candles_data,
-):
-    """ """
-
-    if "chart.trades" in message_channel:
-        tick_from_exchange = data_orders["tick"]
-
-        tick_from_cache = max(
-            [o["max_tick"] for o in candles_data if o["resolution"] == 5]
-        )
-
-        if tick_from_exchange <= tick_from_cache:
-            return True
-
-        else:
-
-            log.warning("update ohlc")
-
-    else:
-
-        return False
 
 
 def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:

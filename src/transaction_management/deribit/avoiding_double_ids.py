@@ -73,6 +73,8 @@ async def avoiding_double_ids(
                             if currency_upper in o["instrument_name"]
                         ]
                     )
+                    
+                    log.warning (f"cached_orders {cached_orders}")
 
                     for strategy in active_strategies:
 

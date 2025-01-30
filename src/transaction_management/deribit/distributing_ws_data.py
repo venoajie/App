@@ -155,12 +155,16 @@ async def caching_distributing_data(
 
             if "user.changes.any" in message_channel:
 
+                log.warning(f"user.changes {data}")
+
                 CHANNEL_NAME = "user_changes"
 
                 await update_cached_orders(
                     cached_orders,
                     data,
                 )
+
+                log.warning(f"cached_orders {cached_orders}")
 
                 data_to_dispatch: dict = dict(
                     data=data,
@@ -249,25 +253,25 @@ async def caching_distributing_data(
 
                 sequence = sequence + len(message_params) - 1
 
-                log.error(f"{sequence} {currency_upper}")
+            log.error(f"{sequence} {currency_upper}")
 
-                #log.error(f"market_condition {market_condition}")
-                #log.warning(f"chart_trade {chart_trade}")
-                data_to_dispatch: dict = dict(
-                    message_params=message_params,
-                    currency=currency,
-                    sequence=sequence,
-                    cached_orders=cached_orders,
-                    chart_trade=chart_trade,
-                    market_condition=market_condition,
-                    server_time=server_time,
-                    ticker_all=ticker_all,
-                )
+            #log.error(f"market_condition {market_condition}")
+            #log.warning(f"chart_trade {chart_trade}")
+            data_to_dispatch: dict = dict(
+                message_params=message_params,
+                currency=currency,
+                sequence=sequence,
+                cached_orders=cached_orders,
+                chart_trade=chart_trade,
+                market_condition=market_condition,
+                server_time=server_time,
+                ticker_all=ticker_all,
+            )
 
-                CHANNEL_NAME = "notification"
-                await send_notification(
-                    client_redis, CHANNEL_NAME, "2", data_to_dispatch
-                )
+            CHANNEL_NAME = "notification"
+            await send_notification(
+                client_redis, CHANNEL_NAME, "2", data_to_dispatch
+            )
 
     except Exception as error:
 

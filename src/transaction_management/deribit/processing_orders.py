@@ -46,8 +46,6 @@ async def processing_orders(
 
             if result_order:
 
-                log.error(f"result_order {result_order}")
-
                 try:
                     data_orders = result_order["result"]
 
