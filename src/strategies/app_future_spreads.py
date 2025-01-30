@@ -407,9 +407,6 @@ async def future_spreads(
                                                         market_condition,
                                                     )
 
-                                                    future_control.append(
-                                                        instrument_name_future
-                                                    )
 
                                                     if send_order["order_allowed"]:
 
@@ -423,6 +420,9 @@ async def future_spreads(
 
                                                         break
 
+                                            future_control.append(
+                                                instrument_name_future
+                                            )
                                     # get labels from active trades
                                     labels = remove_redundant_elements(
                                         my_trades_currency_strategy_labels
