@@ -38,7 +38,7 @@ from transaction_management.deribit.data_producer import StreamingAccountData
 from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from transaction_management.deribit.running_strategies import \
     executing_strategies
-from transaction_management.deribit.saving_result import saving_ws_data
+from transaction_management.deribit.distributing_ws_data import caching_distributing_data
 from transaction_management.deribit.capturing_user_changes import \
     saving_and_relabelling_orders
 from utilities.caching import combining_order_data
@@ -115,7 +115,7 @@ async def main():
             ) 
         
         saving_task = asyncio.create_task(
-            saving_ws_data(
+            caching_distributing_data(
                 private_data,
                 modify_order_and_db,
                 client_redis,
