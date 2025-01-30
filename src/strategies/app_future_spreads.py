@@ -82,7 +82,7 @@ async def future_spreads(
         CHANNEL_NAME: str = "notification"
 
         not_cancel = True
-
+        
         await pubsub.subscribe(CHANNEL_NAME)
 
         while not_cancel:

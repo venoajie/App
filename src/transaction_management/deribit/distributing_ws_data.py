@@ -256,7 +256,7 @@ async def caching_distributing_data(
 
                 DATABASE: str = "databases/trading.sqlite3"
 
-                sequence = sequence + len(message_params) - 1
+                sequence_update = sequence + len(message_params) - 1
 
             log.error(f"{sequence} {currency_upper}")
 
@@ -275,12 +275,16 @@ async def caching_distributing_data(
 
             CHANNEL_NAME = "notification"
             
-            await send_notification(
+            if sequence_update > sequence:
+                
+                await send_notification(
                 client_redis, 
                 CHANNEL_NAME, 
                 sequence, 
                 data_to_dispatch,
             )
+                
+                sequence = sequence_update
 
     except Exception as error:
 
