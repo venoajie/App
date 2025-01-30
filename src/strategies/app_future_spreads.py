@@ -12,9 +12,7 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.reconciling_db import (
-    is_size_sub_account_and_my_trades_reconciled,
-)
+from data_cleaning.reconciling_db import  is_size_sub_account_and_my_trades_reconciled
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.basic_strategy import get_label_integer
@@ -22,28 +20,25 @@ from strategies.cash_carry.combo_auto import (
     ComboAuto,
     check_if_minimum_waiting_time_has_passed,
 )
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
-from transaction_management.deribit.managing_deribit import (
-    currency_inline_with_database_address,
-)
+from transaction_management.deribit.get_instrument_summary import get_futures_instruments
 from transaction_management.deribit.processing_orders import processing_orders
-from utilities.caching import combining_ticker_data as cached_ticker
-from utilities.pickling import read_data, replace_data
+from utilities.pickling import read_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
-from utilities.system_tools import parse_error_message, provide_path_for_file
 
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,
+)
 
 async def future_spreads(
     private_data: object,
     modify_order_and_db: object,
     client_redis: object,
     config_app: list,
-):
+)-> None:
     """ """
 
     strategy = "futureSpread"
@@ -55,8 +50,6 @@ async def future_spreads(
 
         # get tradable currencies
         currencies = ([o["spot"] for o in tradable_config_app])[0]
-
-        # currencies= random.sample(currencies_spot,len(currencies_spot))
 
         strategy_attributes = config_app["strategies"]
 
@@ -99,13 +92,6 @@ async def future_spreads(
 
                     message = orjson.loads(message["data"])["message"]
 
-                    message_params = message["message_params"]
-
-                    message_channel, data = (
-                        message_params["channel"],
-                        message_params["data"],
-                    )
-
                     log.debug(message["sequence"])
 
                     cached_orders, ticker_all = (
@@ -128,8 +114,6 @@ async def future_spreads(
 
                     if not chart_trade and server_time != 0:
 
-                        archive_db_table = f"my_trades_all_{currency_lower}_json"
-
                         # get portfolio data
                         portfolio = reading_from_pkl_data("portfolio", currency)[0]
 
@@ -150,8 +134,6 @@ async def future_spreads(
                         # sub_account_orders = sub_account["open_orders"]
 
                         market_condition = message["market_condition"]
-
-                        log.warning(market_condition)
 
                         if sub_account:
 
@@ -190,8 +172,11 @@ async def future_spreads(
                             len_cleaned_orders = len(orders_currency)
 
                             position = [o for o in sub_account["positions"]]
+                            
                             log.debug(f"cached_orders {cached_orders}")
+                            
                             log.warning(f"orders_currency {orders_currency}")
+                            
                             position_without_combo = [
                                 o
                                 for o in position
@@ -305,10 +290,9 @@ async def future_spreads(
                                     ]
 
                                     # send combo orders
-                                    for (
-                                        instrument_attributes_combo
-                                    ) in instrument_attributes_combo_all:
-
+                                    instrument_name_future_control = []
+                                    for instrument_attributes_combo in instrument_attributes_combo_all:
+                                        
                                         try:
                                             instrument_name_combo = (
                                                 instrument_attributes_combo[
@@ -364,11 +348,20 @@ async def future_spreads(
                                                 if instrument_name_future
                                                 in o["instrument_name"]
                                             ]
+                                            
+                                            future_control = instrument_name_future_control.append(instrument_name_future)
 
+                                            log.debug (f"future_control {future_control} instrument_name_combo {instrument_name_combo} instrument_name_future {instrument_name_future}")
+                                            
+                                            instrument_name_future_not_in_control = [o for o in future_control if instrument_name_future not in o]
+                                            
+                                            log.debug (f"instrument_name_future_not_in_control {instrument_name_future_not_in_control}")
+                                            
                                             if (
                                                 len_cleaned_orders < 50
                                                 and ticker_future
                                                 and ticker_combo
+                                                and instrument_name_future_not_in_control
                                             ):
                                                 # and not reduce_only \
 
@@ -621,15 +614,3 @@ def get_index(ticker: dict) -> float:
 
     return index_price
 
-
-async def update_db_pkl(
-    path: str,
-    data_orders: dict,
-    currency: str,
-) -> None:
-
-    my_path_portfolio = provide_path_for_file(path, currency)
-
-    if currency_inline_with_database_address(currency, my_path_portfolio):
-
-        replace_data(my_path_portfolio, data_orders)

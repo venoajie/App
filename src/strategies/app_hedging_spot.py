@@ -10,18 +10,14 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.reconciling_db import (
-    is_size_sub_account_and_my_trades_reconciled,
-)
+from data_cleaning.reconciling_db import  is_size_sub_account_and_my_trades_reconciled
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.hedging.hedging_spot import (
     HedgingSpot,
     modify_hedging_instrument,
 )
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
+from transaction_management.deribit.get_instrument_summary import get_futures_instruments
 from transaction_management.deribit.processing_orders import processing_orders
 from utilities.number_modification import get_closest_value
 from utilities.pickling import read_data
@@ -41,11 +37,10 @@ async def hedging_spot(
     modify_order_and_db: object,
     client_redis: object,
     config_app: list,
-):
+)-> None:
     """ """
 
     strategy = "hedgingSpot"
-    log.critical(f"starting {strategy}")
 
     try:
 
@@ -54,8 +49,6 @@ async def hedging_spot(
 
         # get tradable currencies
         currencies = ([o["spot"] for o in tradable_config_app])[0]
-
-        # currencies= random.sample(currencies_spot,len(currencies_spot))
 
         strategy_attributes = config_app["strategies"]
 
@@ -91,20 +84,6 @@ async def hedging_spot(
 
         instrument_attributes_futures_all = futures_instruments["active_futures"]
 
-        # instruments_name = futures_instruments["instruments_name"]
-
-        # resolutions = [60, 15, 5]
-        ##qty_candles = 5
-        # dim_sequence = 3
-
-        # ached_candles_data = combining_candles_data(
-        #    np, currencies, qty_candles, resolutions, dim_sequence
-        # )
-
-        # ticker_all = cached_ticker(instruments_name)
-
-        # cached_orders: list = await combining_order_data(private_data, currencies)
-
         server_time = 0
 
         CHANNEL_NAME = "notification"
@@ -124,13 +103,6 @@ async def hedging_spot(
                 if message and message["type"] == "message":
 
                     message = orjson.loads(message["data"])["message"]
-
-                    message_params = message["message_params"]
-
-                    message_channel, data = (
-                        message_params["channel"],
-                        message_params["data"],
-                    )
 
                     log.debug(message["sequence"])
 
@@ -155,8 +127,6 @@ async def hedging_spot(
 
                     if not chart_trade and server_time != 0:
 
-                        archive_db_table = f"my_trades_all_{currency_lower}_json"
-
                         # get portfolio data
                         portfolio = reading_from_pkl_data("portfolio", currency)[0]
 
@@ -177,8 +147,6 @@ async def hedging_spot(
                         # sub_account_orders = sub_account["open_orders"]
 
                         market_condition = message["market_condition"]
-
-                        log.warning(market_condition)
 
                         if sub_account:
 
