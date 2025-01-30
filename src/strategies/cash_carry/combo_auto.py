@@ -923,7 +923,7 @@ class ComboAuto(BasicStrategy):
 
             # order was not existed yet
 
-            orders_currency = self.orders_currency_strateg
+            orders_currency = self.orders_currency_strategy
 
             label_integer_in_orders_currency: list = [
                 o for o in orders_currency if str(label_integer) in o["label"]
