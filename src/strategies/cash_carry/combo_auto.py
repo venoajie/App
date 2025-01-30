@@ -751,8 +751,8 @@ class ComboAuto(BasicStrategy):
         orders_instrument_future: list = [
             o for o in orders_currency if instrument_name_future in o["instrument_name"]
         ]
-        
-        log.info (f"orders_currency_strategy {orders_currency}")
+
+        log.info(f"orders_currency_strategy {orders_currency}")
 
         orders_instrument_future_open_all: list = [
             o
@@ -761,7 +761,9 @@ class ComboAuto(BasicStrategy):
             and "-FS-" not in o["instrument_name"]
             and "open" in o["label"]
         ]
-        log.info (f"orders_instrument_future_open_all {orders_instrument_future_open_all}")
+        log.info(
+            f"orders_instrument_future_open_all {orders_instrument_future_open_all}"
+        )
 
         len_orders_instrument_future_open_all = (
             0
@@ -926,14 +928,16 @@ class ComboAuto(BasicStrategy):
 
             # order was not existed yet
             orders_currency = self.orders_currency_strategy
-            
-            log.info (f"orders_currency {orders_currency}")
+
+            log.info(f"orders_currency {orders_currency}")
 
             label_integer_in_orders_currency: list = [
                 o for o in orders_currency if str(label_integer) in o["label"]
             ]
-            
-            log.info (f"label_integer_in_orders_currency {label_integer_in_orders_currency} not label_integer_in_orders_currency")
+
+            log.info(
+                f"label_integer_in_orders_currency {label_integer_in_orders_currency} not label_integer_in_orders_currency"
+            )
 
             if not label_integer_in_orders_currency:
 

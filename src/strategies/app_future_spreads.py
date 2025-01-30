@@ -12,7 +12,7 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.reconciling_db import  is_size_sub_account_and_my_trades_reconciled
+from data_cleaning.reconciling_db import is_size_sub_account_and_my_trades_reconciled
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.basic_strategy import get_label_integer
@@ -20,7 +20,9 @@ from strategies.cash_carry.combo_auto import (
     ComboAuto,
     check_if_minimum_waiting_time_has_passed,
 )
-from transaction_management.deribit.get_instrument_summary import get_futures_instruments
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,
+)
 from transaction_management.deribit.processing_orders import processing_orders
 from utilities.pickling import read_data
 from utilities.string_modification import (
@@ -33,12 +35,13 @@ from utilities.system_tools import (
     provide_path_for_file,
 )
 
+
 async def future_spreads(
     private_data: object,
     modify_order_and_db: object,
     client_redis: object,
     config_app: list,
-)-> None:
+) -> None:
     """ """
 
     strategy = "futureSpread"
@@ -172,11 +175,11 @@ async def future_spreads(
                             len_cleaned_orders = len(orders_currency)
 
                             position = [o for o in sub_account["positions"]]
-                            
+
                             log.debug(f"cached_orders {cached_orders}")
-                            
+
                             log.warning(f"orders_currency {orders_currency}")
-                            
+
                             position_without_combo = [
                                 o
                                 for o in position
@@ -291,8 +294,10 @@ async def future_spreads(
 
                                     # send combo orders
                                     instrument_name_future_control = []
-                                    for instrument_attributes_combo in instrument_attributes_combo_all:
-                                        
+                                    for (
+                                        instrument_attributes_combo
+                                    ) in instrument_attributes_combo_all:
+
                                         try:
                                             instrument_name_combo = (
                                                 instrument_attributes_combo[
@@ -348,20 +353,32 @@ async def future_spreads(
                                                 if instrument_name_future
                                                 in o["instrument_name"]
                                             ]
-                                            
-                                            future_control = instrument_name_future_control.append(instrument_name_future)
 
-                                            log.debug (f"future_control {future_control} instrument_name_combo {instrument_name_combo} instrument_name_future {instrument_name_future}")
-                                            
-                                            instrument_name_future_not_in_control = [o for o in future_control if instrument_name_future not in o]
-                                            
-                                            log.debug (f"instrument_name_future_not_in_control {instrument_name_future_not_in_control}")
-                                            
+                                            future_control = (
+                                                instrument_name_future_control.append(
+                                                    instrument_name_future
+                                                )
+                                            )
+
+                                            log.debug(
+                                                f"future_control {future_control} instrument_name_combo {instrument_name_combo} instrument_name_future {instrument_name_future}"
+                                            )
+
+                                            instrument_name_future_not_in_control = [
+                                                o
+                                                for o in future_control
+                                                if instrument_name_future not in o
+                                            ]
+
+                                            log.debug(
+                                                f"instrument_name_future_not_in_control {instrument_name_future_not_in_control}"
+                                            )
+
                                             if (
-                                                len_cleaned_orders < 50
+                                                instrument_name_future_not_in_control
+                                                and len_cleaned_orders < 50
                                                 and ticker_future
                                                 and ticker_combo
-                                                and instrument_name_future_not_in_control
                                             ):
                                                 # and not reduce_only \
 
@@ -613,4 +630,3 @@ def get_index(ticker: dict) -> float:
         index_price = ticker["estimated_delivery_price"]
 
     return index_price
-

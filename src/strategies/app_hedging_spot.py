@@ -10,14 +10,16 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.reconciling_db import  is_size_sub_account_and_my_trades_reconciled
+from data_cleaning.reconciling_db import is_size_sub_account_and_my_trades_reconciled
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.hedging.hedging_spot import (
     HedgingSpot,
     modify_hedging_instrument,
 )
-from transaction_management.deribit.get_instrument_summary import get_futures_instruments
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,
+)
 from transaction_management.deribit.processing_orders import processing_orders
 from utilities.number_modification import get_closest_value
 from utilities.pickling import read_data
@@ -37,7 +39,7 @@ async def hedging_spot(
     modify_order_and_db: object,
     client_redis: object,
     config_app: list,
-)-> None:
+) -> None:
     """ """
 
     strategy = "hedgingSpot"
