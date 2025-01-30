@@ -182,7 +182,7 @@ async def caching_distributing_data(
                 await send_notification(
                     client_redis,
                     CHANNEL_NAME,
-                    "2",
+                    sequence,
                     data_to_dispatch,
                 )
 
@@ -274,8 +274,12 @@ async def caching_distributing_data(
             )
 
             CHANNEL_NAME = "notification"
+            
             await send_notification(
-                client_redis, CHANNEL_NAME, "2", data_to_dispatch
+                client_redis, 
+                CHANNEL_NAME, 
+                sequence, 
+                data_to_dispatch,
             )
 
     except Exception as error:
