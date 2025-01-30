@@ -183,13 +183,6 @@ async def cancelling_orders(
                                 ]
                             )
 
-                            log.warning(
-                                f"orders_currency {currency_upper}  {len(orders_currency)}"
-                            )
-
-                            log.warning(f"{(orders_currency)}"
-                            )
-
                             position = [o for o in sub_account["positions"]]
                             # log.debug (f"position {position}")
                             position_without_combo = [
@@ -300,10 +293,6 @@ async def cancelling_orders(
                                                     order,
                                                     orders_currency_strategy,
                                                     server_time,
-                                                )
-
-                                                log.error(
-                                                    f"cancel_allowed {cancel_allowed} {order} server_time {server_time}"
                                                 )
 
                                                 if cancel_allowed["cancel_allowed"]:
