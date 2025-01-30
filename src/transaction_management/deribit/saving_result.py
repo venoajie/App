@@ -128,7 +128,7 @@ async def saving_ws_data(
         client_redis = redis.Redis(connection_pool=redis_pool)
 
         while True:
-            
+
             message_params: str = await queue_general.get()
 
             data: dict = message_params["data"]
@@ -268,7 +268,7 @@ async def saving_ws_data(
                 await send_notification(
                     client_redis, CHANNEL_NAME, "2", data_to_dispatch
                 )
-                
+
     except Exception as error:
 
         parse_error_message(error)
@@ -339,11 +339,11 @@ def get_settlement_period(strategy_attributes) -> list:
 
 
 async def send_notification(
-    client_redis: object, 
-    CHANNEL_NAME, 
+    client_redis: object,
+    CHANNEL_NAME,
     user_id: int,
     message: str,
-)->None:
+) -> None:
     """ """
 
     client_redis.publish(

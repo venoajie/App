@@ -12,7 +12,10 @@ from db_management.sqlite_management import querying_table
 from utilities.string_modification import parsing_label
 
 
-def positions_and_orders(current_size: int, current_orders_size: int) -> int:
+def positions_and_orders(
+    current_size: int,
+    current_orders_size: int,
+) -> int:
     """ """
 
     return current_size + current_orders_size
@@ -24,7 +27,9 @@ def ensure_sign_consistency(side) -> float:
 
 
 def proforma_size(
-    current_size: int, current_orders_size: int, next_orders_size: int
+    current_size: int,
+    current_orders_size: int,
+    next_orders_size: int,
 ) -> int:
     """ """
 
@@ -79,7 +84,9 @@ def are_size_and_order_appropriate(
 
 
 def check_if_next_closing_size_will_not_exceed_the_original(
-    basic_size: int, net_size: int, next_size: int
+    basic_size: int,
+    net_size: int,
+    next_size: int,
 ) -> bool:
     """ """
 
@@ -105,7 +112,10 @@ def check_if_next_closing_size_will_not_exceed_the_original(
     )  # and net_size_exceeding_the_basic_size
 
 
-def provide_size_to_close_transaction(basic_size: int, net_size: int) -> int:
+def provide_size_to_close_transaction(
+    basic_size: int,
+    net_size: int,
+) -> int:
     """ """
 
     next_size = min(basic_size, net_size)
@@ -114,7 +124,9 @@ def provide_size_to_close_transaction(basic_size: int, net_size: int) -> int:
 
 
 def size_rounding(
-    instrument_name: str, futures_instruments, proposed_size: float
+    instrument_name: str,
+    futures_instruments,
+    proposed_size: float,
 ) -> int:
     """ """
 
@@ -129,7 +141,10 @@ def size_rounding(
     return max(min_trade_amount, rounded_size)  # size is never 0
 
 
-def delta(last_price: float, prev_price: float) -> float:
+def delta(
+    last_price: float,
+    prev_price: float,
+) -> float:
     """ """
     return last_price - prev_price
 
@@ -139,7 +154,10 @@ def delta_pct(last_price: float, prev_price: float) -> float:
     return abs(delta(last_price, prev_price) / prev_price)
 
 
-def get_label(status: str, label_main_or_label_transactions: str) -> str:
+def get_label(
+    status: str,
+    label_main_or_label_transactions: str,
+) -> str:
     """
     provide transaction label
     """
@@ -195,33 +213,52 @@ def compute_profit_usd(
     return profit
 
 
-def pct_price_in_usd(price: float, pct_threshold: float) -> float:
+def pct_price_in_usd(
+    price: float,
+    pct_threshold: float,
+) -> float:
 
     return price * pct_threshold
 
 
-def price_plus_pct(price: float, pct_threshold: float) -> float:
+def price_plus_pct(
+    price: float,
+    pct_threshold: float,
+) -> float:
 
     return price + pct_price_in_usd(price, pct_threshold)
 
 
-def price_minus_pct(price: float, pct_threshold: float) -> float:
+def price_minus_pct(
+    price: float,
+    pct_threshold: float,
+) -> float:
 
     return price - pct_price_in_usd(price, pct_threshold)
 
 
 def is_transaction_price_minus_below_threshold(
-    last_transaction_price: float, current_price: float, pct_threshold: float
+    last_transaction_price: float,
+    current_price: float,
+    pct_threshold: float,
 ) -> bool:
 
     return price_minus_pct(last_transaction_price, pct_threshold) >= current_price
 
 
 def is_transaction_price_plus_above_threshold(
-    last_transaction_price: float, current_price: float, pct_threshold: float
+    last_transaction_price: float,
+    current_price: float,
+    pct_threshold: float,
 ) -> bool:
 
-    return price_plus_pct(last_transaction_price, pct_threshold) < current_price
+    return (
+        price_plus_pct(
+            last_transaction_price,
+            pct_threshold,
+        )
+        < current_price
+    )
 
 
 def profit_usd_has_exceed_target(
@@ -246,7 +283,10 @@ def profit_usd_has_exceed_target(
     return current_profit > 0 and current_profit > target
 
 
-def delta_time(server_time, time_stamp) -> int:
+def delta_time(
+    server_time: int,
+    time_stamp: int,
+) -> int:
     """
     get difference between now and transaction time
     """
@@ -254,7 +294,11 @@ def delta_time(server_time, time_stamp) -> int:
     return server_time - time_stamp
 
 
-def is_minimum_waiting_time_has_passed(server_time, time_stamp, time_threshold) -> bool:
+def is_minimum_waiting_time_has_passed(
+    server_time: int,
+    time_stamp: int,
+    time_threshold: float,
+) -> bool:
     """
     check whether delta time has exceed time threhold
     """

@@ -190,8 +190,8 @@ async def future_spreads(
                             len_cleaned_orders = len(orders_currency)
 
                             position = [o for o in sub_account["positions"]]
-                            log.debug (f"cached_orders {cached_orders}")
-                            log.warning (f"orders_currency {orders_currency}")
+                            log.debug(f"cached_orders {cached_orders}")
+                            log.warning(f"orders_currency {orders_currency}")
                             position_without_combo = [
                                 o
                                 for o in position
@@ -565,7 +565,7 @@ async def future_spreads(
                                                                     not_order = False
 
                                                                     break
-                                                                
+
             except Exception as error:
 
                 parse_error_message(error)

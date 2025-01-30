@@ -9,6 +9,7 @@ from loguru import logger as log
 
 from strategies.basic_strategy import (
     BasicStrategy,
+    are_size_and_order_appropriate,
     check_if_next_closing_size_will_not_exceed_the_original,
     delta_pct,
     ensure_sign_consistency,
@@ -340,6 +341,7 @@ def is_contra_order_will_reduce_delta(
     if delta < 0:
         # log.warning (f"will_reduce_delta {delta < proforma} proforma {proforma} delta {delta}")
         return delta < proforma
+
 
 @dataclass(unsafe_hash=True, slots=True)
 class ComboAuto(BasicStrategy):
@@ -726,8 +728,14 @@ class ComboAuto(BasicStrategy):
         my_trades_long = [o for o in my_trades if "sell" in o["side"]]
         my_trades_short = [o for o in my_trades if "buy" in o["side"]]
 
-        my_trades_long_timestamp = (0 if my_trades_long == [] else max([o["timestamp"] for o in my_trades_long]))
-        my_trades_short_timestamp = (0 if my_trades_short == [] else max([o["timestamp"] for o in my_trades_short]))
+        my_trades_long_timestamp = (
+            0 if my_trades_long == [] else max([o["timestamp"] for o in my_trades_long])
+        )
+        my_trades_short_timestamp = (
+            0
+            if my_trades_short == []
+            else max([o["timestamp"] for o in my_trades_short])
+        )
 
         delta = self.delta
         strategy_params: dict = self.strategy_parameters
@@ -791,7 +799,9 @@ class ComboAuto(BasicStrategy):
                 ask_price_future,
                 bid_price_perpetual,
             )
-            # log.debug (f"contango {contango} len_orders_instrument_future_open_all {len_orders_instrument_future_open_all}")
+            log.debug(
+                f"contango {contango} len_orders_instrument_future_open_all {len_orders_instrument_future_open_all}"
+            )
 
             if len_orders_instrument == 0 and contango:
 
@@ -904,53 +914,63 @@ class ComboAuto(BasicStrategy):
 
         strategy_label = self.strategy_label
 
-        #provide placeholder for result
+        # provide placeholder for result
         result = dict(order_allowed=False, order_parameters=[])
 
         if selected_transaction:
 
-            instrument_side = selected_transaction["side"]
+            label_integer = get_label_integer(selected_transaction["label"])
 
-            instrument_name_transaction = selected_transaction["instrument_name"]
+            # order was not existed yet
 
-            orders_currency = self.orders_currency_strategy
+            orders_currency = self.orders_currency_strateg
 
-            tp_threshold = modified_tp_threshold(
-                instrument_attributes_futures,
-                take_profit_threshold_original,
-                instrument_name_transaction,
-            )
+            label_integer_in_orders_currency: list = [
+                o for o in orders_currency if str(label_integer) in o["label"]
+            ]
 
-            order_params_opening = get_basic_opening_parameters(strategy_label)
+            if not label_integer_in_orders_currency:
 
-            if instrument_side == "buy":
+                instrument_side = selected_transaction["side"]
 
-                result = await self.contra_order_for_unpaired_transaction_buy_side(
-                    strategy_label,
-                    tp_threshold,
-                    delta,
-                    order_params_opening,
-                    orders_currency,
-                    selected_transaction,
-                    ticker_selected_transaction,
-                    ticker_perpetual,
-                    random_instruments_name,
-                    waiting_time_for_selected_transaction,
+                instrument_name_transaction = selected_transaction["instrument_name"]
+
+                tp_threshold = modified_tp_threshold(
+                    instrument_attributes_futures,
+                    take_profit_threshold_original,
+                    instrument_name_transaction,
                 )
 
-            if instrument_side == "sell":
+                order_params_opening = get_basic_opening_parameters(strategy_label)
 
-                result = await self.contra_order_for_unpaired_transaction_sell_side(
-                    strategy_label,
-                    tp_threshold,
-                    delta,
-                    order_params_opening,
-                    orders_currency,
-                    selected_transaction,
-                    ticker_selected_transaction,
-                    ticker_perpetual,
-                    waiting_time_for_selected_transaction,
-                )
+                if instrument_side == "buy":
+
+                    result = await self.contra_order_for_unpaired_transaction_buy_side(
+                        strategy_label,
+                        tp_threshold,
+                        delta,
+                        order_params_opening,
+                        orders_currency,
+                        selected_transaction,
+                        ticker_selected_transaction,
+                        ticker_perpetual,
+                        random_instruments_name,
+                        waiting_time_for_selected_transaction,
+                    )
+
+                if instrument_side == "sell":
+
+                    result = await self.contra_order_for_unpaired_transaction_sell_side(
+                        strategy_label,
+                        tp_threshold,
+                        delta,
+                        order_params_opening,
+                        orders_currency,
+                        selected_transaction,
+                        ticker_selected_transaction,
+                        ticker_perpetual,
+                        waiting_time_for_selected_transaction,
+                    )
 
         log.error(f"result {result} ")
         return result
@@ -1092,10 +1112,9 @@ class ComboAuto(BasicStrategy):
                     basic_size,
                     selected_transaction_side,
                 )
-                
-                target_price = (
-                    selected_transaction_price
-                    - (selected_transaction_price * tp_threshold)
+
+                target_price = selected_transaction_price - (
+                    selected_transaction_price * tp_threshold
                 )
 
                 transaction_in_profit = bid_price_selected_transaction < target_price
@@ -1138,7 +1157,8 @@ class ComboAuto(BasicStrategy):
                         f"waiting_time_for_selected_transaction {waiting_time_for_selected_transaction} selected_transaction_price > bid_price_perpetual {selected_transaction_price > bid_price_perpetual}"
                     )
 
-                    if (len_orders_instrument_perpetual == 0
+                    if (
+                        len_orders_instrument_perpetual == 0
                         and sum_orders_instrument_perpetual_open < abs(delta)
                         and delta <= 0
                     ):
@@ -1150,7 +1170,9 @@ class ComboAuto(BasicStrategy):
                             if selected_transaction_price > bid_price_perpetual:
                                 params.update({"label": selected_transaction["label"]})
 
-                            params.update({"instrument_name": instrument_name_perpetual})
+                            params.update(
+                                {"instrument_name": instrument_name_perpetual}
+                            )
 
                             params.update({"entry_price": bid_price_perpetual})
 
@@ -1224,7 +1246,9 @@ class ComboAuto(BasicStrategy):
         basic_size = selected_transaction["amount"]
 
         contra_order_will_reduce_delta = is_contra_order_will_reduce_delta(
-            delta, selected_transaction_size, counter_side
+            delta,
+            selected_transaction_size,
+            counter_side,
         )
 
         if contra_order_will_reduce_delta:
@@ -1270,14 +1294,12 @@ class ComboAuto(BasicStrategy):
                 o for o in orders_instrument_perpetual if "closed" in o["label"]
             ]
 
-            log.info(
-                f"contra_order_will_reduce_delta {contra_order_will_reduce_delta}"
-            )
+            log.info(f"contra_order_will_reduce_delta {contra_order_will_reduce_delta}")
 
             log.info(
                 f"delta {delta} selected_transaction_size {selected_transaction_size} counter_side {counter_side}"
             )
-            
+
             selected_transaction_label = selected_transaction["label"]
 
             label_integer = get_label_integer(selected_transaction_label)
@@ -1344,11 +1366,9 @@ class ComboAuto(BasicStrategy):
                         order_allowed = True
 
                 else:
-                    
-                    log.debug(
-                    f"ticker_instrument {ticker_instrument}"
-                )
-                    if ticker_instrument:
+
+                    log.debug(f"ticker_instrument {ticker_instrument}")
+                    if ticker_instrument and "PERPETUAL" not in instrument_name_future:
 
                         ticker_instrument = ticker_instrument[0]
 
@@ -1363,26 +1383,26 @@ class ComboAuto(BasicStrategy):
                             if not orders_instrument_future
                             else len(orders_instrument_future)
                         )
-                        
+
                         log.debug(
-                    f"len_orders_instrument_future {len_orders_instrument_future}"
-                )
+                            f"len_orders_instrument_future {len_orders_instrument_future}"
+                        )
                         if len_orders_instrument_future == 0:
-                            
+
                             if waiting_time_for_selected_transaction:
                                 order_allowed = True
-                                
+
                                 ask_price = ticker_instrument["best_ask_price"]
-                                
-                                #creating paired combo, else independent transaction
+
+                                # creating paired combo, else independent transaction
                                 if ask_price > selected_transaction_price:
                                     params.update({"label": selected_transaction_label})
-                                    
-                                params.update(
-                                    {"entry_price": ask_price}
-                                )
 
-                                params.update({"instrument_name": instrument_name_future})
+                                params.update({"entry_price": ask_price})
+
+                                params.update(
+                                    {"instrument_name": instrument_name_future}
+                                )
 
                                 order_allowed = True
 
