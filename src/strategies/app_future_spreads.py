@@ -294,8 +294,10 @@ async def future_spreads(
 
                                     # send combo orders
                                     future_control = []
-                                    
-                                    for instrument_attributes_combo in instrument_attributes_combo_all:
+
+                                    for (
+                                        instrument_attributes_combo
+                                    ) in instrument_attributes_combo_all:
 
                                         try:
                                             instrument_name_combo = (
@@ -353,20 +355,19 @@ async def future_spreads(
                                                 in o["instrument_name"]
                                             ]
 
-                                            future_control.append(
-                                                    instrument_name_future
-                                                )
-                                            
-
                                             log.debug(
                                                 f"future_control {future_control} instrument_name_combo {instrument_name_combo} instrument_name_future {instrument_name_future}"
                                             )
 
-                                            instrument_name_future_not_in_control = [
-                                                o
-                                                for o in future_control
-                                                if instrument_name_future not in o
-                                            ]
+                                            instrument_name_future_not_in_control = (
+                                                True
+                                                if future_control == []
+                                                else [
+                                                    o
+                                                    for o in future_control
+                                                    if instrument_name_future not in o
+                                                ]
+                                            )
 
                                             log.debug(
                                                 f"instrument_name_future_not_in_control {instrument_name_future_not_in_control}"
@@ -404,6 +405,10 @@ async def future_spreads(
                                                             max_order_currency,
                                                         ),
                                                         market_condition,
+                                                    )
+
+                                                    future_control.append(
+                                                        instrument_name_future
                                                     )
 
                                                     if send_order["order_allowed"]:
