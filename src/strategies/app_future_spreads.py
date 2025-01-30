@@ -293,11 +293,9 @@ async def future_spreads(
                                     ]
 
                                     # send combo orders
-                                    future_control_list = []
+                                    future_control = []
                                     
-                                    for (
-                                        instrument_attributes_combo
-                                    ) in instrument_attributes_combo_all:
+                                    for instrument_attributes_combo in instrument_attributes_combo_all:
 
                                         try:
                                             instrument_name_combo = (
@@ -355,7 +353,7 @@ async def future_spreads(
                                                 in o["instrument_name"]
                                             ]
 
-                                            future_control = future_control_list.append(
+                                            future_control.append(
                                                     instrument_name_future
                                                 )
                                             
