@@ -121,6 +121,10 @@ async def caching_distributing_data(
         combining_candles = combining_candles_data(
             np, currencies, qty_candles, resolutions, dim_sequence
         )
+        
+        market_condition = get_market_condition(
+                    np, combining_candles, currency_upper
+                )
 
         sequence = 0
 
@@ -229,12 +233,16 @@ async def caching_distributing_data(
 
             if "PERPETUAL" in instrument_name_future:
 
-                market_condition = get_market_condition(
-                    np, combining_candles, currency_upper
+                get_market_condition(
+                    np, 
+                    combining_candles, 
+                    currency_upper,
                 )
 
                 await inserting_open_interest(
-                    currency, WHERE_FILTER_TICK, TABLE_OHLC1, data
+                    currency, WHERE_FILTER_TICK,
+                    TABLE_OHLC1, 
+                    data,
                 )
 
                 chart_trade = await chart_trade_in_msg(
