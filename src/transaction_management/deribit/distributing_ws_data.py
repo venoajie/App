@@ -122,10 +122,6 @@ async def caching_distributing_data(
             np, currencies, qty_candles, resolutions, dim_sequence
         )
         
-        market_condition = get_market_condition(
-                    np, combining_candles, currency_upper
-                )
-
         sequence = 0
 
         redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
@@ -151,6 +147,11 @@ async def caching_distributing_data(
 
             instrument_ticker: str = (message_channel)[19:]
 
+            market_condition = get_market_condition(
+                    np,
+                    combining_candles, 
+                    currency_upper,
+                )
             if "user.portfolio" in message_channel:
 
                 await update_db_pkl(
@@ -232,12 +233,6 @@ async def caching_distributing_data(
                         chart_trades_buffer = []
 
             if "PERPETUAL" in instrument_name_future:
-
-                get_market_condition(
-                    np, 
-                    combining_candles, 
-                    currency_upper,
-                )
 
                 await inserting_open_interest(
                     currency, WHERE_FILTER_TICK,
