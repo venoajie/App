@@ -751,6 +751,8 @@ class ComboAuto(BasicStrategy):
         orders_instrument_future: list = [
             o for o in orders_currency if instrument_name_future in o["instrument_name"]
         ]
+        
+        log.inf (f"orders_currency_strategy {orders_currency}")
 
         orders_instrument_future_open_all: list = [
             o
@@ -759,6 +761,7 @@ class ComboAuto(BasicStrategy):
             and "-FS-" not in o["instrument_name"]
             and "open" in o["label"]
         ]
+        log.inf (f"orders_instrument_future_open_all {orders_instrument_future_open_all}")
 
         len_orders_instrument_future_open_all = (
             0
