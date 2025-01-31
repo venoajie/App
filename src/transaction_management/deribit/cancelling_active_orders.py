@@ -105,10 +105,10 @@ async def cancelling_orders(
 
         # prepare channels placeholders
         channels = [
-            chart_channel,
-            user_changes_channel,
-            portfolio_channel,
-            market_condition_channel,
+            # chart_channel,
+            # user_changes_channel,
+            # portfolio_channel,
+            # market_condition_channel,
             ticker_channel,
         ]
 
@@ -338,7 +338,8 @@ async def cancelling_orders(
         parse_error_message(error)
 
         await telegram_bot_sendtext(
-            f"cancelling active orders - {error}", "general_error"
+            f"cancelling active orders - {error}",
+            "general_error",
         )
 
 
@@ -351,14 +352,21 @@ def get_settlement_period(strategy_attributes) -> list:
     )
 
 
-def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
+def reading_from_pkl_data(
+    end_point: str,
+    currency,
+    status: str = None,
+) -> dict:
     """ """
 
     path: str = provide_path_for_file(end_point, currency, status)
     return read_data(path)
 
 
-def compute_notional_value(index_price: float, equity: float) -> float:
+def compute_notional_value(
+    index_price: float,
+    equity: float,
+) -> float:
     """ """
     return index_price * equity
 

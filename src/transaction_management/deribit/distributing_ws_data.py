@@ -143,6 +143,8 @@ async def caching_distributing_data(
             data: dict = message_params["data"]
 
             message_channel: str = message_params["channel"]
+            
+            log.warning (f"message_channel {message_channel}")
 
             currency: str = extract_currency_from_text(message_channel)
 
@@ -170,8 +172,6 @@ async def caching_distributing_data(
             if "user.changes.any" in message_channel:
 
                 log.warning(f"user.changes {data}")
-
-                CHANNEL_NAME = "user_changes"
 
                 await update_cached_orders(
                     cached_orders,
@@ -295,7 +295,10 @@ async def caching_distributing_data(
 
         parse_error_message(error)
 
-        await telegram_bot_sendtext(f"saving result {error}", "general_error")
+        await telegram_bot_sendtext(
+            f"saving result {error}",
+            "general_error",
+            )
 
 
 def distribute_ticker_result_as_per_data_type(
@@ -321,7 +324,10 @@ def distribute_ticker_result_as_per_data_type(
 
                 ticker_change[0][item] = data_orders[item]
 
-                replace_data(my_path_ticker, ticker_change)
+                replace_data(
+                    my_path_ticker, 
+                    ticker_change,
+                    )
 
 
 async def chart_trade_in_msg(
@@ -362,7 +368,7 @@ def get_settlement_period(strategy_attributes) -> list:
 
 async def send_notification(
     client_redis: object,
-    CHANNEL_NAME,
+    CHANNEL_NAME: str,
     sequence: int,
     message: str,
 ) -> None:

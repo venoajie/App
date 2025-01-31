@@ -65,8 +65,6 @@ async def avoiding_double_ids(
 
                     message_data = orjson.loads(message["data"])
 
-                    log.info(message_data)
-
                     log.critical(message_data["sequence"])
 
                     message = message_data["message"]
@@ -86,8 +84,6 @@ async def avoiding_double_ids(
                             if currency_upper in o["instrument_name"]
                         ]
                     )
-
-                    log.warning(f"cached_orders {cached_orders}")
 
                     for strategy in active_strategies:
 
@@ -123,6 +119,11 @@ async def avoiding_double_ids(
                                             order_db_table, order["order_id"]
                                         )
 
+                                        await telegram_bot_sendtext(
+                                            f"avoiding double ids - {orders}",
+                                            "general_error",
+                                        )
+
             except Exception as error:
 
                 parse_error_message(error)
@@ -136,4 +137,7 @@ async def avoiding_double_ids(
 
         parse_error_message(error)
 
-        await telegram_bot_sendtext(f"avoiding double ids - {error}", "general_error")
+        await telegram_bot_sendtext(
+            f"avoiding double ids - {error}",
+            "general_error",
+        )
