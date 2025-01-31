@@ -67,6 +67,9 @@ async def caching_distributing_data(
 
     try:
 
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
+
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
 
@@ -106,6 +109,13 @@ async def caching_distributing_data(
 
         instruments_name = futures_instruments["instruments_name"]
 
+        redis_channels: dict = config_app["redis_channels"][0]
+        chart_channel: str = redis_channels["chart"]
+        user_changes_channel: str = redis_channels["user_changes"]
+        portfolio_channel: str = redis_channels["portfolio"]
+        market_condition_channel: str = redis_channels["market_condition"]
+        ticker_channel: str = redis_channels["ticker"]
+
         chart_trades_buffer: list = []
 
         ticker_all = cached_ticker(instruments_name)
@@ -121,12 +131,9 @@ async def caching_distributing_data(
         combining_candles = combining_candles_data(
             np, currencies, qty_candles, resolutions, dim_sequence
         )
-        
+
         sequence = 0
 
-        redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
-        client_redis = redis.Redis(connection_pool=redis_pool)
-        
         chart_trade = False
 
         while True:
@@ -148,10 +155,10 @@ async def caching_distributing_data(
             instrument_ticker: str = (message_channel)[19:]
 
             market_condition = get_market_condition(
-                    np,
-                    combining_candles, 
-                    currency_upper,
-                )
+                np,
+                combining_candles,
+                currency_upper,
+            )
             if "user.portfolio" in message_channel:
 
                 await update_db_pkl(
@@ -181,7 +188,7 @@ async def caching_distributing_data(
 
                 await send_notification(
                     client_redis,
-                    CHANNEL_NAME,
+                    user_changes_channel,
                     sequence,
                     data_to_dispatch,
                 )
@@ -235,8 +242,9 @@ async def caching_distributing_data(
             if "PERPETUAL" in instrument_name_future:
 
                 await inserting_open_interest(
-                    currency, WHERE_FILTER_TICK,
-                    TABLE_OHLC1, 
+                    currency,
+                    WHERE_FILTER_TICK,
+                    TABLE_OHLC1,
                     data,
                 )
 
@@ -260,8 +268,8 @@ async def caching_distributing_data(
 
             log.error(f"{sequence} {currency_upper}")
 
-            #log.error(f"market_condition {market_condition}")
-            #log.warning(f"chart_trade {chart_trade}")
+            # log.error(f"market_condition {market_condition}")
+            # log.warning(f"chart_trade {chart_trade}")
             data_to_dispatch: dict = dict(
                 message_params=message_params,
                 currency=currency,
@@ -272,17 +280,15 @@ async def caching_distributing_data(
                 ticker_all=ticker_all,
             )
 
-            CHANNEL_NAME = "notification"
-            
             if sequence_update > sequence:
-                
+
                 await send_notification(
-                client_redis, 
-                CHANNEL_NAME, 
-                sequence, 
-                data_to_dispatch,
-            )
-                
+                    client_redis,
+                    ticker_channel,
+                    sequence,
+                    data_to_dispatch,
+                )
+
                 sequence = sequence_update
 
     except Exception as error:
@@ -363,8 +369,8 @@ async def send_notification(
     """ """
 
     client_redis.publish(
-        CHANNEL_NAME, orjson.dumps(
-            {"sequence": sequence, 
-             "message": message},
-            )
+        CHANNEL_NAME,
+        orjson.dumps(
+            {"sequence": sequence, "message": message},
+        ),
     )

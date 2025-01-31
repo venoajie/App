@@ -12,13 +12,17 @@ import orjson
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.reconciling_db import  is_size_sub_account_and_my_trades_reconciled
+from data_cleaning.reconciling_db import is_size_sub_account_and_my_trades_reconciled
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.cash_carry.combo_auto import ComboAuto
 from strategies.hedging.hedging_spot import HedgingSpot
-from transaction_management.deribit.get_instrument_summary import get_futures_instruments
-from transaction_management.deribit.managing_deribit import currency_inline_with_database_address
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,
+)
+from transaction_management.deribit.managing_deribit import (
+    currency_inline_with_database_address,
+)
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
@@ -27,7 +31,7 @@ from utilities.string_modification import (
 from utilities.system_tools import (
     parse_error_message,
     provide_path_for_file,
-    )
+)
 
 
 async def cancelling_orders(
@@ -39,6 +43,9 @@ async def cancelling_orders(
     """ """
 
     try:
+
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
@@ -82,19 +89,33 @@ async def cancelling_orders(
 
         # filling currencies attributes
         my_path_cur = provide_path_for_file("currencies")
-        
+
         replace_data(
-            my_path_cur, 
+            my_path_cur,
             currencies,
-            )
+        )
+
+        #get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+        chart_channel: str = redis_channels["chart"]
+        user_changes_channel: str = redis_channels["user_changes"]
+        portfolio_channel: str = redis_channels["portfolio"]
+        market_condition_channel: str = redis_channels["market_condition"]
+        ticker_channel: str = redis_channels["ticker"]
         
-        CHANNEL_NAME = "notification"
+        # prepare channels placeholders
+        channels = [
+            chart_channel,
+            user_changes_channel,
+            portfolio_channel,
+            market_condition_channel,
+            ticker_channel,
+            ]
+
+        # subscribe to channels
+        [await pubsub.subscribe(o) for o in channels]
 
         not_cancel = True
-
-        pubsub = client_redis.pubsub()
-
-        await pubsub.subscribe(CHANNEL_NAME)
 
         while not_cancel:
 
@@ -105,7 +126,9 @@ async def cancelling_orders(
                 if message and message["type"] == "message":
 
                     message_data = orjson.loads(message["data"])
-                    
+
+                    log.info (message_data)
+
                     log.critical(message_data["sequence"])
 
                     message = message_data["message"]
@@ -328,7 +351,6 @@ def get_settlement_period(strategy_attributes) -> list:
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
-
 
 
 def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:

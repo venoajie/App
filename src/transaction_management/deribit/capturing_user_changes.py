@@ -22,7 +22,10 @@ async def saving_and_relabelling_orders(
 ):
     """ """
     try:
-
+        
+        # preparing redis connection
+        pubsub = client_redis.pubsub()
+        
         strategy_attributes: list = config_app["strategies"]
 
         strategy_attributes_active: list = [
@@ -46,13 +49,27 @@ async def saving_and_relabelling_orders(
 
         order_db_table: str = relevant_tables["orders_table"]
 
+        #get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+        chart_channel: str = redis_channels["chart"]
+        user_changes_channel: str = redis_channels["user_changes"]
+        portfolio_channel: str = redis_channels["portfolio"]
+        market_condition_channel: str = redis_channels["market_condition"]
+        ticker_channel: str = redis_channels["ticker"]
+        
+        # prepare channels placeholders
+        channels = [
+            chart_channel,
+            user_changes_channel,
+            portfolio_channel,
+            market_condition_channel,
+            ticker_channel,
+            ]
+
+        # subscribe to channels
+        [await pubsub.subscribe(o) for o in channels]
+
         not_cancel: bool = True
-
-        pubsub: object = client_redis.pubsub()
-
-        CHANNEL_NAME: str = "user_changes"
-
-        await pubsub.subscribe(CHANNEL_NAME)
 
         while not_cancel:
 
@@ -63,7 +80,9 @@ async def saving_and_relabelling_orders(
                 if message and message["type"] == "message":
 
                     message_data = orjson.loads(message["data"])
-                    
+
+
+                    print (message_data)
                     print(f"""capturing user changes {message_data["sequence"]}""")
 
                     message = message_data["message"]

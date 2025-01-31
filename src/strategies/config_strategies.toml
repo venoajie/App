@@ -27,6 +27,13 @@ closed_table = "my_trades_closed_json"
 transaction_log = "transaction_log"
 archive = "my_trades_all"
 
+[[redis_channels]]
+chart = "chart"
+user_changes = "user_changes"
+portfolio = "portfolio"
+market_condition = "market_condition"
+ticker = "ticker"
+
 [[strategies]]
 strategy_label = "hedgingSpot"
 is_active = true

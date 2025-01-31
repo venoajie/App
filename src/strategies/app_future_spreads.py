@@ -48,6 +48,9 @@ async def future_spreads(
 
     try:
 
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
+
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
 
@@ -77,13 +80,27 @@ async def future_spreads(
 
         server_time = 0
 
-        pubsub: object = client_redis.pubsub()
+        #get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+        chart_channel: str = redis_channels["chart"]
+        user_changes_channel: str = redis_channels["user_changes"]
+        portfolio_channel: str = redis_channels["portfolio"]
+        market_condition_channel: str = redis_channels["market_condition"]
+        ticker_channel: str = redis_channels["ticker"]
+        
+        # prepare channels placeholders
+        channels = [
+            chart_channel,
+            user_changes_channel,
+            portfolio_channel,
+            market_condition_channel,
+            ticker_channel,
+            ]
 
-        CHANNEL_NAME: str = "notification"
+        # subscribe to channels
+        [await pubsub.subscribe(o) for o in channels]
 
         not_cancel = True
-        
-        await pubsub.subscribe(CHANNEL_NAME)
 
         while not_cancel:
 
@@ -93,8 +110,12 @@ async def future_spreads(
 
                 if message and message["type"] == "message":
 
+                    log.info (message_data)
+
                     message_data = orjson.loads(message["data"])
-                    
+
+                    log.info (message_data)
+
                     log.critical(message_data["sequence"])
 
                     message = message_data["message"]
@@ -408,7 +429,6 @@ async def future_spreads(
                                                         ),
                                                         market_condition,
                                                     )
-
 
                                                     if send_order["order_allowed"]:
 

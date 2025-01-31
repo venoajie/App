@@ -198,24 +198,30 @@ def get_market_condition(
     """ """
     try:
         candles_data_instrument = [
-        o for o in candles_data if currency_upper in o["instrument_name"]
-    ]
-    # log.warning (candles_data_instrument)
+            o for o in candles_data if currency_upper in o["instrument_name"]
+        ]
+        # log.warning (candles_data_instrument)
 
         candle_60 = [
-            o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 60
+            o["candles_analysis"]
+            for o in candles_data_instrument
+            if o["resolution"] == 60
         ]
         candle_60_type = np.sum([o["candle_type"] for o in candle_60])
         candle_60_is_long = np.sum([o["is_long_body"] for o in candle_60])
 
         candle_5 = [
-            o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 5
+            o["candles_analysis"]
+            for o in candles_data_instrument
+            if o["resolution"] == 5
         ]
         candle_5_type = np.sum([o["candle_type"] for o in candle_5])
         candle_5_is_long = np.sum([o["is_long_body"] for o in candle_5])
 
         candle_15 = [
-            o["candles_analysis"] for o in candles_data_instrument if o["resolution"] == 15
+            o["candles_analysis"]
+            for o in candles_data_instrument
+            if o["resolution"] == 15
         ]
         candle_15_type = np.sum([o["candle_type"] for o in candle_15])
         candle_15_is_long = np.sum([o["is_long_body"] for o in candle_15])
@@ -246,8 +252,12 @@ def get_market_condition(
             bearish = True if weak_bearish and candle_15_type < 0 else False
 
         if candle_60_long_body_more_than_2:
-            strong_bullish = True if bullish and candle_60_long_body_more_than_2 else False
-            strong_bearish = True if bearish and candle_60_long_body_more_than_2 else False
+            strong_bullish = (
+                True if bullish and candle_60_long_body_more_than_2 else False
+            )
+            strong_bearish = (
+                True if bearish and candle_60_long_body_more_than_2 else False
+            )
 
         neutral = True if not weak_bearish and not weak_bullish else False
 

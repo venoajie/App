@@ -26,6 +26,9 @@ async def avoiding_double_ids(
     """ """
     try:
 
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
+
         strategy_attributes: list = config_app["strategies"]
 
         strategy_attributes_active: list = [
@@ -40,11 +43,26 @@ async def avoiding_double_ids(
 
         order_db_table = relevant_tables["orders_table"]
 
-        pubsub: object = client_redis.pubsub()
 
-        CHANNEL_NAME: str = "user_changes"
+        #get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+        chart_channel: str = redis_channels["chart"]
+        user_changes_channel: str = redis_channels["user_changes"]
+        portfolio_channel: str = redis_channels["portfolio"]
+        market_condition_channel: str = redis_channels["market_condition"]
+        ticker_channel: str = redis_channels["ticker"]
+        
+        # prepare channels placeholders
+        channels = [
+            chart_channel,
+            user_changes_channel,
+            portfolio_channel,
+            market_condition_channel,
+            ticker_channel,
+            ]
 
-        await pubsub.subscribe(CHANNEL_NAME)
+        # subscribe to channels
+        [await pubsub.subscribe(o) for o in channels]
 
         while True:
 
@@ -55,7 +73,9 @@ async def avoiding_double_ids(
                 if message and message["type"] == "message":
 
                     message_data = orjson.loads(message["data"])
-                    
+
+                    log.info (message_data)
+
                     log.critical(message_data["sequence"])
 
                     message = message_data["message"]
@@ -75,8 +95,8 @@ async def avoiding_double_ids(
                             if currency_upper in o["instrument_name"]
                         ]
                     )
-                    
-                    log.warning (f"cached_orders {cached_orders}")
+
+                    log.warning(f"cached_orders {cached_orders}")
 
                     for strategy in active_strategies:
 

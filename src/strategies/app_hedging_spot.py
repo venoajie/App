@@ -46,6 +46,9 @@ async def hedging_spot(
 
     try:
 
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
+
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
 
@@ -88,13 +91,27 @@ async def hedging_spot(
 
         server_time = 0
 
-        CHANNEL_NAME = "notification"
+        #get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+        chart_channel: str = redis_channels["chart"]
+        user_changes_channel: str = redis_channels["user_changes"]
+        portfolio_channel: str = redis_channels["portfolio"]
+        market_condition_channel: str = redis_channels["market_condition"]
+        ticker_channel: str = redis_channels["ticker"]
+        
+        # prepare channels placeholders
+        channels = [
+            chart_channel,
+            user_changes_channel,
+            portfolio_channel,
+            market_condition_channel,
+            ticker_channel,
+            ]
+
+        # subscribe to channels
+        [await pubsub.subscribe(o) for o in channels]
 
         not_order = True
-
-        pubsub = client_redis.pubsub()
-
-        await pubsub.subscribe(CHANNEL_NAME)
 
         while not_order:
 
@@ -106,6 +123,8 @@ async def hedging_spot(
 
                     message_data = orjson.loads(message["data"])
                     
+                    log.info (message_data)
+
                     log.critical(message_data["sequence"])
 
                     message = message_data["message"]
