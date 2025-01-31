@@ -8,10 +8,7 @@ import uvloop
 
 import numpy as np
 from loguru import logger as log
-import redis
 import orjson
-from redis import ConnectionPool
-
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
@@ -208,19 +205,19 @@ async def caching_distributing_data(
                         currency,
                     )
 
-                data_to_dispatch: dict = dict(
-                    data=data,
-                    ticker_all=ticker_all,
-                    cached_orders=cached_orders,
-                    currency=currency,
-                )
+                    data_to_dispatch: dict = dict(
+                        data=data,
+                        ticker_all=ticker_all,
+                        cached_orders=cached_orders,
+                        currency=currency,
+                    )
 
-                await send_notification(
-                    client_redis,
-                    user_changes_channel,
-                    sequence,
-                    data_to_dispatch,
-                )
+                    await send_notification(
+                        client_redis,
+                        user_changes_channel,
+                        sequence,
+                        data_to_dispatch,
+                    )
 
             if "chart.trades" in message_channel:
 

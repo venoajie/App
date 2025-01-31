@@ -100,7 +100,7 @@ async def hedging_spot(
         # prepare channels placeholders
         channels = [
             # chart_channel,
-            user_changes_channel,
+            #user_changes_channel,
             portfolio_channel,
             # market_condition_channel,
             ticker_channel,
