@@ -164,7 +164,6 @@ async def main():
     
       
             avoiding_double_ids(
-                private_data,
                 modify_order_and_db,
                 client_redis,
                 config_app,

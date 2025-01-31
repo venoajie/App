@@ -18,7 +18,6 @@ from utilities.system_tools import parse_error_message
 
 
 async def avoiding_double_ids(
-    private_data: object,
     modify_order_and_db: object,
     client_redis: object,
     config_app: list,
@@ -66,6 +65,7 @@ async def avoiding_double_ids(
                     message_data = orjson.loads(message["data"])
 
                     log.critical(message_data["sequence"])
+                    log.info(message_data)
 
                     message = message_data["message"]
 
