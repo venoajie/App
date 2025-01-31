@@ -368,7 +368,7 @@ async def send_notification(
 ) -> None:
     """ """
 
-    client_redis.publish(
+    await client_redis.publish(
         CHANNEL_NAME,
         orjson.dumps(
             {"sequence": sequence, "message": message},
