@@ -395,7 +395,7 @@ async def hedging_spot(
 
                                                 await send_notification(
                                                     client_redis,
-                                                    user_changes_channel,
+                                                    open_order,
                                                     sequence,
                                                     send_order,
                                                 )
@@ -509,7 +509,7 @@ async def hedging_spot(
 
                                                                         await send_notification(
                                                                             client_redis,
-                                                                            user_changes_channel,
+                                                                            open_order,
                                                                             sequence,
                                                                             send_order,
                                                                         )
@@ -553,7 +553,7 @@ async def hedging_spot(
 
                                                                         await send_notification(
                                                                             client_redis,
-                                                                            user_changes_channel,
+                                                                            open_order,
                                                                             sequence,
                                                                             send_order,
                                                                         )
