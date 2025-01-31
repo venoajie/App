@@ -102,8 +102,8 @@ async def hedging_spot(
         # prepare channels placeholders
         channels = [
             # chart_channel,
-            # user_changes_channel,
-            # portfolio_channel,
+            user_changes_channel,
+            portfolio_channel,
             # market_condition_channel,
             ticker_channel,
         ]
@@ -225,11 +225,11 @@ async def hedging_spot(
                                 )
                             )
 
-                            if not size_perpetuals_reconciled:
+                            #if not size_perpetuals_reconciled:
 
-                                not_order = False
+                            #    not_order = False
 
-                                break
+                            #    break
 
                             if index_price is not None and equity > 0:
                                 my_trades_currency: list = [
@@ -353,11 +353,11 @@ async def hedging_spot(
                                         > INSTRUMENT_EXPIRATION_THRESHOLD
                                     )
 
-                                    if not size_future_reconciled:
+                                    #if not size_future_reconciled:
 
-                                        not_order = False
+                                    #    not_order = False
 
-                                        break
+                                    #    break
 
                                     if size_future_reconciled:
 
@@ -399,7 +399,7 @@ async def hedging_spot(
                                                     send_order,
                                                 )
 
-                                                not_order = False
+                                                #not_order = False
 
                                                 break
 
@@ -512,9 +512,8 @@ async def hedging_spot(
                                                                             modify_order_and_db,
                                                                         )
 
-                                                                        not_order = (
-                                                                            False
-                                                                        )
+                                                                        #not_order = False
+                                                                        
 
                                                                         break
 
@@ -557,9 +556,8 @@ async def hedging_spot(
                                                                             send_closing_order,
                                                                         )
 
-                                                                        not_order = (
-                                                                            False
-                                                                        )
+                                                                        #not_order = False
+                                                                        #)
 
                                                                         break
             except Exception as error:

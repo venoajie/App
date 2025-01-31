@@ -91,8 +91,8 @@ async def future_spreads(
         # prepare channels placeholders
         channels = [
             # chart_channel,
-            # user_changes_channel,
-            # portfolio_channel,
+            user_changes_channel,
+            portfolio_channel,
             # market_condition_channel,
             ticker_channel,
         ]
@@ -434,7 +434,7 @@ async def future_spreads(
                                                             send_order,
                                                         )
 
-                                                        not_order = False
+                                                        #not_order = False
 
                                                         break
 
@@ -494,7 +494,7 @@ async def future_spreads(
                                                             send_order,
                                                         )
 
-                                                        not_order = False
+                                                        #not_order = False
 
                                                         break
 
@@ -593,7 +593,7 @@ async def future_spreads(
                                                                         send_order,
                                                                     )
 
-                                                                    not_order = False
+                                                                    #not_order = False
 
                                                                     break
 

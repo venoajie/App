@@ -161,24 +161,38 @@ async def caching_distributing_data(
                 combining_candles,
                 currency_upper,
             )
-            if "user.portfolio" in message_channel:
+            
+            
+            if "user" in message_channel:
 
-                await update_db_pkl(
-                    "portfolio",
-                    data,
-                    currency,
-                )
+                if "portfolio" in message_channel:
 
-            if "user.changes.any" in message_channel:
+                    await update_db_pkl(
+                        "portfolio",
+                        data,
+                        currency,
+                    )
 
-                log.warning(f"user.changes {data}")
+                if "changes.any" in message_channel:
 
-                await update_cached_orders(
-                    cached_orders,
-                    data,
-                )
+                    log.warning(f"user.changes {data}")
 
-                log.warning(f"cached_orders {cached_orders}")
+                    await update_cached_orders(
+                        cached_orders,
+                        data,
+                    )
+
+                    log.warning(f"cached_orders {cached_orders}")
+
+                    await saving_orders(
+                        modify_order_and_db,
+                        private_data,
+                        cancellable_strategies,
+                        non_checked_strategies,
+                        data,
+                        order_db_table,
+                        currency,
+                    )
 
                 data_to_dispatch: dict = dict(
                     data=data,
@@ -191,16 +205,6 @@ async def caching_distributing_data(
                     user_changes_channel,
                     sequence,
                     data_to_dispatch,
-                )
-
-                await saving_orders(
-                    modify_order_and_db,
-                    private_data,
-                    cancellable_strategies,
-                    non_checked_strategies,
-                    data,
-                    order_db_table,
-                    currency,
                 )
 
             instrument_name_future = (message_channel)[19:]
