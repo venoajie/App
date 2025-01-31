@@ -110,11 +110,7 @@ async def future_spreads(
 
                 if message and message["type"] == "message":
 
-                    log.info(message_data)
-
                     message_data = orjson.loads(message["data"])
-
-                    log.info(message_data)
 
                     log.critical(message_data["sequence"])
 

@@ -73,7 +73,6 @@ async def saving_and_relabelling_orders(
 
                     message_data = orjson.loads(message["data"])
 
-                    print(message_data)
                     print(f"""capturing user changes {message_data["sequence"]}""")
 
                     message = message_data["message"]

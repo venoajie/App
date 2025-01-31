@@ -123,8 +123,6 @@ async def hedging_spot(
 
                     message_data = orjson.loads(message["data"])
 
-                    log.info(message_data)
-
                     log.critical(message_data["sequence"])
 
                     message = message_data["message"]
