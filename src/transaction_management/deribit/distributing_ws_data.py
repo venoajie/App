@@ -143,8 +143,8 @@ async def caching_distributing_data(
             data: dict = message_params["data"]
 
             message_channel: str = message_params["channel"]
-            
-            log.warning (f"message_channel {message_channel}")
+
+            log.warning(f"message_channel {message_channel}")
 
             currency: str = extract_currency_from_text(message_channel)
 
@@ -161,7 +161,6 @@ async def caching_distributing_data(
                 combining_candles,
                 currency_upper,
             )
-            
 
             instrument_name_future = (message_channel)[19:]
             if message_channel == f"incremental_ticker.{instrument_name_future}":
@@ -177,7 +176,7 @@ async def caching_distributing_data(
                     if server_time == 0
                     else data["timestamp"]
                 )
-            
+
             if "user" in message_channel:
 
                 if "portfolio" in message_channel:
@@ -303,7 +302,7 @@ async def caching_distributing_data(
         await telegram_bot_sendtext(
             f"saving result {error}",
             "general_error",
-            )
+        )
 
 
 def distribute_ticker_result_as_per_data_type(
@@ -330,9 +329,9 @@ def distribute_ticker_result_as_per_data_type(
                 ticker_change[0][item] = data_orders[item]
 
                 replace_data(
-                    my_path_ticker, 
+                    my_path_ticker,
                     ticker_change,
-                    )
+                )
 
 
 async def chart_trade_in_msg(
@@ -382,6 +381,9 @@ async def send_notification(
     await client_redis.publish(
         CHANNEL_NAME,
         orjson.dumps(
-            {"sequence": sequence, "message": message},
+            {
+                "sequence": sequence,
+                "message": message,
+            },
         ),
     )

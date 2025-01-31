@@ -7,6 +7,7 @@ import asyncio
 # installed
 from loguru import logger as log
 import uvloop
+import orjson
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -19,73 +20,120 @@ from utilities.system_tools import (
 
 async def processing_orders(
     modify_order_and_db: object,
+    client_redis: object,
     config_app: list,
-    order_analysis_result: dict,
 ) -> None:
     """ """
 
     try:
 
-        if order_analysis_result["order_allowed"]:
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
 
-            # log.error(f"send_order {order_analysis_result}")
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+        open_order: str = redis_channels["open_order"]
 
-            strategy_attributes = config_app["strategies"]
+        # prepare channels placeholders
+        channels = [
+            open_order,
+        ]
 
-            # get strategies that have not short/long attributes in the label
-            non_checked_strategies = [
-                o["strategy_label"]
-                for o in strategy_attributes
-                if o["non_checked_for_size_label_consistency"] == True
-            ]
+        # subscribe to channels
+        [await pubsub.subscribe(o) for o in channels]
 
-            result_order = await modify_order_and_db.if_order_is_true(
-                non_checked_strategies,
-                order_analysis_result,
-            )
+        while True:
 
-            if result_order:
+            try:
 
-                try:
-                    data_orders = result_order["result"]
+                message = await pubsub.get_message()
 
-                    try:
-                        instrument_name = data_orders["order"]["instrument_name"]
+                if message and message["type"] == "message":
 
-                    except:
-                        instrument_name = data_orders["trades"]["instrument_name"]
+                    message_data = orjson.loads(message["data"])
 
-                    currency = extract_currency_from_text(instrument_name)
+                    log.critical(message_data["sequence"])
 
-                    transaction_log_trading_table = (
-                        f"transaction_log_{currency.lower()}_json"
-                    )
+                    message = message_data["message"]
+                    
+                    log.error(f"message {message}")
 
-                    archive_db_table = f"my_trades_all_{currency.lower()}_json"
+                    if message["order_allowed"]:
 
-                    relevant_tables = config_app["relevant_tables"][0]
+                        strategy_attributes = config_app["strategies"]
 
-                    order_db_table = relevant_tables["orders_table"]
+                        # get strategies that have not short/long attributes in the label
+                        non_checked_strategies = [
+                            o["strategy_label"]
+                            for o in strategy_attributes
+                            if o["non_checked_for_size_label_consistency"] == True
+                        ]
 
-                    await modify_order_and_db.update_user_changes_non_ws(
-                        non_checked_strategies,
-                        data_orders,
-                        order_db_table,
-                        archive_db_table,
-                        transaction_log_trading_table,
-                    )
+                        result_order = await modify_order_and_db.if_order_is_true(
+                            non_checked_strategies,
+                            message,
+                        )
 
-                    """
-                    non-combo transaction need to restart after sending order to ensure it recalculate orders and trades
-                    """
+                        if result_order:
 
-                except Exception as error:
-                    pass
+                            try:
+                                data_orders = result_order["result"]
 
-                log.warning("processing order done")
+                                try:
+                                    instrument_name = data_orders["order"][
+                                        "instrument_name"
+                                    ]
+
+                                except:
+                                    instrument_name = data_orders["trades"][
+                                        "instrument_name"
+                                    ]
+
+                                currency = extract_currency_from_text(instrument_name)
+
+                                transaction_log_trading_table = (
+                                    f"transaction_log_{currency.lower()}_json"
+                                )
+
+                                archive_db_table = (
+                                    f"my_trades_all_{currency.lower()}_json"
+                                )
+
+                                relevant_tables = config_app["relevant_tables"][0]
+
+                                order_db_table = relevant_tables["orders_table"]
+
+                                await modify_order_and_db.update_user_changes_non_ws(
+                                    non_checked_strategies,
+                                    data_orders,
+                                    order_db_table,
+                                    archive_db_table,
+                                    transaction_log_trading_table,
+                                )
+
+                                """
+                                non-combo transaction need to restart after sending order to ensure it recalculate orders and trades
+                                """
+
+                            except Exception as error:
+                                pass
+
+                            log.warning("processing order done")
+
+            except Exception as error:
+
+                parse_error_message(error)
+
+                continue
+
+            finally:
+                await asyncio.sleep(0.001)
 
     except Exception as error:
 
         parse_error_message(f"procesing orders {error}")
 
-        await telegram_bot_sendtext(f"processing order - {error}", "general_error")
+        await telegram_bot_sendtext(
+            f"processing order - {error}", 
+            "general_error",
+            )

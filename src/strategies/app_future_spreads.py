@@ -23,7 +23,6 @@ from strategies.cash_carry.combo_auto import (
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-from transaction_management.deribit.processing_orders import processing_orders
 from utilities.pickling import read_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
@@ -37,8 +36,6 @@ from utilities.system_tools import (
 
 
 async def future_spreads(
-    private_data: object,
-    modify_order_and_db: object,
     client_redis: object,
     config_app: list,
 ) -> None:
@@ -87,6 +84,7 @@ async def future_spreads(
         portfolio_channel: str = redis_channels["portfolio"]
         market_condition_channel: str = redis_channels["market_condition"]
         ticker_channel: str = redis_channels["ticker"]
+        open_order: str = redis_channels["open_order"]
 
         # prepare channels placeholders
         channels = [
@@ -95,6 +93,7 @@ async def future_spreads(
             portfolio_channel,
             # market_condition_channel,
             ticker_channel,
+            open_order,
         ]
 
         # subscribe to channels
@@ -111,6 +110,8 @@ async def future_spreads(
                 if message and message["type"] == "message":
 
                     message_data = orjson.loads(message["data"])
+
+                    sequence = message_data["sequence"]
 
                     log.critical(message_data["sequence"])
 
@@ -428,13 +429,14 @@ async def future_spreads(
 
                                                     if send_order["order_allowed"]:
 
-                                                        await processing_orders(
-                                                            modify_order_and_db,
-                                                            config_app,
+                                                        await send_notification(
+                                                            client_redis,
+                                                            user_changes_channel,
+                                                            sequence,
                                                             send_order,
                                                         )
 
-                                                        #not_order = False
+                                                        # not_order = False
 
                                                         break
 
@@ -488,13 +490,14 @@ async def future_spreads(
 
                                                     if send_order["order_allowed"]:
 
-                                                        await processing_orders(
-                                                            modify_order_and_db,
-                                                            config_app,
+                                                        await send_notification(
+                                                            client_redis,
+                                                            user_changes_channel,
+                                                            sequence,
                                                             send_order,
                                                         )
 
-                                                        #not_order = False
+                                                        # not_order = False
 
                                                         break
 
@@ -587,13 +590,14 @@ async def future_spreads(
                                                                     "order_allowed"
                                                                 ]:
 
-                                                                    await processing_orders(
-                                                                        modify_order_and_db,
-                                                                        config_app,
+                                                                    await send_notification(
+                                                                        client_redis,
+                                                                        user_changes_channel,
+                                                                        sequence,
                                                                         send_order,
                                                                     )
 
-                                                                    #not_order = False
+                                                                    # not_order = False
 
                                                                     break
 
@@ -651,3 +655,22 @@ def get_index(ticker: dict) -> float:
         index_price = ticker["estimated_delivery_price"]
 
     return index_price
+
+
+async def send_notification(
+    client_redis: object,
+    CHANNEL_NAME: str,
+    sequence: int,
+    message: str,
+) -> None:
+    """ """
+
+    await client_redis.publish(
+        CHANNEL_NAME,
+        orjson.dumps(
+            {
+                "sequence": sequence,
+                "message": message,
+            },
+        ),
+    )

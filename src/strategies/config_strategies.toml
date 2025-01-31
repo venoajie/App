@@ -29,6 +29,7 @@ archive = "my_trades_all"
 
 [[redis_channels]]
 chart = "chart"
+open_order = "open_order"
 user_changes = "user_changes"
 portfolio = "portfolio"
 market_condition = "market_condition"

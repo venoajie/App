@@ -31,6 +31,8 @@ from transaction_management.deribit.avoiding_double_ids import \
     avoiding_double_ids
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
+from transaction_management.deribit.processing_orders import \
+    processing_orders
 from transaction_management.deribit.data_producer import StreamingAccountData
 from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from transaction_management.deribit.distributing_ws_data import caching_distributing_data
@@ -130,17 +132,18 @@ async def main():
             producer_task, 
         
             saving_task,
-                
-    
+                    
             hedging_spot(
-                private_data,
-                modify_order_and_db,
                 client_redis,
                 config_app,),
 
                
             future_spreads(
-                private_data,
+                client_redis,
+                config_app,
+                ),
+            
+            processing_orders(
                 modify_order_and_db,
                 client_redis,
                 config_app,

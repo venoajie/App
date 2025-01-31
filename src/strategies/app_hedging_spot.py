@@ -20,7 +20,6 @@ from strategies.hedging.hedging_spot import (
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-from transaction_management.deribit.processing_orders import processing_orders
 from utilities.number_modification import get_closest_value
 from utilities.pickling import read_data
 from utilities.string_modification import (
@@ -35,8 +34,6 @@ from utilities.system_tools import (
 
 
 async def hedging_spot(
-    private_data: object,
-    modify_order_and_db: object,
     client_redis: object,
     config_app: list,
 ) -> None:
@@ -98,6 +95,7 @@ async def hedging_spot(
         portfolio_channel: str = redis_channels["portfolio"]
         market_condition_channel: str = redis_channels["market_condition"]
         ticker_channel: str = redis_channels["ticker"]
+        open_order: str = redis_channels["open_order"]
 
         # prepare channels placeholders
         channels = [
@@ -106,6 +104,7 @@ async def hedging_spot(
             portfolio_channel,
             # market_condition_channel,
             ticker_channel,
+            open_order,
         ]
 
         # subscribe to channels
@@ -123,7 +122,8 @@ async def hedging_spot(
 
                     message_data = orjson.loads(message["data"])
 
-                    log.critical(message_data["sequence"])
+                    sequence = message_data["sequence"]
+                    log.critical(sequence)
 
                     message = message_data["message"]
 
@@ -225,7 +225,7 @@ async def hedging_spot(
                                 )
                             )
 
-                            #if not size_perpetuals_reconciled:
+                            # if not size_perpetuals_reconciled:
 
                             #    not_order = False
 
@@ -353,7 +353,7 @@ async def hedging_spot(
                                         > INSTRUMENT_EXPIRATION_THRESHOLD
                                     )
 
-                                    #if not size_future_reconciled:
+                                    # if not size_future_reconciled:
 
                                     #    not_order = False
 
@@ -393,13 +393,14 @@ async def hedging_spot(
 
                                             if send_order["order_allowed"]:
 
-                                                await processing_orders(
-                                                    modify_order_and_db,
-                                                    config_app,
+                                                await send_notification(
+                                                    client_redis,
+                                                    user_changes_channel,
+                                                    sequence,
                                                     send_order,
                                                 )
 
-                                                #not_order = False
+                                                # not_order = False
 
                                                 break
 
@@ -506,14 +507,14 @@ async def hedging_spot(
                                                                         "order_allowed"
                                                                     ]:
 
-                                                                        await processing_orders(
-                                                                            send_closing_order,
-                                                                            config_app,
-                                                                            modify_order_and_db,
+                                                                        await send_notification(
+                                                                            client_redis,
+                                                                            user_changes_channel,
+                                                                            sequence,
+                                                                            send_order,
                                                                         )
 
-                                                                        #not_order = False
-                                                                        
+                                                                        # not_order = False
 
                                                                         break
 
@@ -550,14 +551,15 @@ async def hedging_spot(
                                                                         "order_allowed"
                                                                     ]:
 
-                                                                        await processing_orders(
-                                                                            modify_order_and_db,
-                                                                            config_app,
-                                                                            send_closing_order,
+                                                                        await send_notification(
+                                                                            client_redis,
+                                                                            user_changes_channel,
+                                                                            sequence,
+                                                                            send_order,
                                                                         )
 
-                                                                        #not_order = False
-                                                                        #)
+                                                                        # not_order = False
+                                                                        # )
 
                                                                         break
             except Exception as error:
@@ -611,3 +613,22 @@ def get_index(ticker: dict) -> float:
         index_price = ticker["estimated_delivery_price"]
 
     return index_price
+
+
+async def send_notification(
+    client_redis: object,
+    CHANNEL_NAME: str,
+    sequence: int,
+    message: str,
+) -> None:
+    """ """
+
+    await client_redis.publish(
+        CHANNEL_NAME,
+        orjson.dumps(
+            {
+                "sequence": sequence,
+                "message": message,
+            },
+        ),
+    )
