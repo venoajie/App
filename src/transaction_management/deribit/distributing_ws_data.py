@@ -162,6 +162,21 @@ async def caching_distributing_data(
                 currency_upper,
             )
             
+
+            instrument_name_future = (message_channel)[19:]
+            if message_channel == f"incremental_ticker.{instrument_name_future}":
+
+                update_cached_ticker(
+                    instrument_name_future,
+                    ticker_all,
+                    data,
+                )
+
+                server_time = (
+                    data["timestamp"] + server_time
+                    if server_time == 0
+                    else data["timestamp"]
+                )
             
             if "user" in message_channel:
 
@@ -196,6 +211,7 @@ async def caching_distributing_data(
 
                 data_to_dispatch: dict = dict(
                     data=data,
+                    ticker_all=ticker_all,
                     cached_orders=cached_orders,
                     currency=currency,
                 )
@@ -205,21 +221,6 @@ async def caching_distributing_data(
                     user_changes_channel,
                     sequence,
                     data_to_dispatch,
-                )
-
-            instrument_name_future = (message_channel)[19:]
-            if message_channel == f"incremental_ticker.{instrument_name_future}":
-
-                update_cached_ticker(
-                    instrument_name_future,
-                    ticker_all,
-                    data,
-                )
-
-                server_time = (
-                    data["timestamp"] + server_time
-                    if server_time == 0
-                    else data["timestamp"]
                 )
 
             if "chart.trades" in message_channel:
