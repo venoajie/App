@@ -95,14 +95,14 @@ async def cancelling_orders(
             currencies,
         )
 
-        #get redis channels
+        # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         chart_channel: str = redis_channels["chart"]
         user_changes_channel: str = redis_channels["user_changes"]
         portfolio_channel: str = redis_channels["portfolio"]
         market_condition_channel: str = redis_channels["market_condition"]
         ticker_channel: str = redis_channels["ticker"]
-        
+
         # prepare channels placeholders
         channels = [
             chart_channel,
@@ -110,7 +110,7 @@ async def cancelling_orders(
             portfolio_channel,
             market_condition_channel,
             ticker_channel,
-            ]
+        ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -127,7 +127,7 @@ async def cancelling_orders(
 
                     message_data = orjson.loads(message["data"])
 
-                    log.info (message_data)
+                    log.info(message_data)
 
                     log.critical(message_data["sequence"])
 

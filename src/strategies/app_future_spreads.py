@@ -80,14 +80,14 @@ async def future_spreads(
 
         server_time = 0
 
-        #get redis channels
+        # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         chart_channel: str = redis_channels["chart"]
         user_changes_channel: str = redis_channels["user_changes"]
         portfolio_channel: str = redis_channels["portfolio"]
         market_condition_channel: str = redis_channels["market_condition"]
         ticker_channel: str = redis_channels["ticker"]
-        
+
         # prepare channels placeholders
         channels = [
             chart_channel,
@@ -95,7 +95,7 @@ async def future_spreads(
             portfolio_channel,
             market_condition_channel,
             ticker_channel,
-            ]
+        ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -110,11 +110,11 @@ async def future_spreads(
 
                 if message and message["type"] == "message":
 
-                    log.info (message_data)
+                    log.info(message_data)
 
                     message_data = orjson.loads(message["data"])
 
-                    log.info (message_data)
+                    log.info(message_data)
 
                     log.critical(message_data["sequence"])
 

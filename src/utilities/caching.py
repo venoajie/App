@@ -6,18 +6,24 @@ from loguru import logger as log
 
 from transaction_management.deribit.api_requests import get_tickers
 from utilities.pickling import read_data
-from utilities.system_tools import parse_error_message, provide_path_for_file
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,
+)
 
 
-def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
+def reading_from_pkl_data(
+    end_point: str,
+    currency,
+    status: str = None,
+) -> dict:
     """ """
 
     path: str = provide_path_for_file(end_point, currency, status)
     return read_data(path)
 
 
-# Using the LRUCache decorator function with a maximum cache size of 3
-def combining_ticker_data(instruments_name):
+def combining_ticker_data(instruments_name: str) -> list:
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
     https://medium.com/@jodielovesmaths/memoization-in-python-using-cache-36b676cb21ef
@@ -99,19 +105,11 @@ def update_cached_ticker(
 
 
 # Using the LRUCache decorator function with a maximum cache size of 3
-async def combining_order_data(private_data: object, currencies: list) -> list:
-    """_summary_
-    https://blog.apify.com/python-cache-complete-guide/]
-    https://medium.com/@jodielovesmaths/memoization-in-python-using-cache-36b676cb21ef
-    data caching
-    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
-
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
+async def combining_order_data(
+    private_data: object,
+    currencies: list,
+) -> list:
+    """ """
 
     from utilities.pickling import replace_data
 
@@ -122,7 +120,10 @@ async def combining_order_data(private_data: object, currencies: list) -> list:
 
         my_path_sub_account = provide_path_for_file("sub_accounts", currency)
 
-        replace_data(my_path_sub_account, sub_accounts)
+        replace_data(
+            my_path_sub_account,
+            sub_accounts,
+        )
 
         if sub_accounts:
 
@@ -139,7 +140,11 @@ async def combining_order_data(private_data: object, currencies: list) -> list:
     return result
 
 
-async def update_cached_orders_(queue_orders_all, queue_orders, queue: dict):
+async def update_cached_orders_(
+    queue_orders_all,
+    queue_orders,
+    queue: dict,
+):
     """_summary_
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
 

@@ -43,23 +43,14 @@ async def avoiding_double_ids(
 
         order_db_table = relevant_tables["orders_table"]
 
-
-        #get redis channels
+        # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        chart_channel: str = redis_channels["chart"]
         user_changes_channel: str = redis_channels["user_changes"]
-        portfolio_channel: str = redis_channels["portfolio"]
-        market_condition_channel: str = redis_channels["market_condition"]
-        ticker_channel: str = redis_channels["ticker"]
-        
+
         # prepare channels placeholders
         channels = [
-            chart_channel,
             user_changes_channel,
-            portfolio_channel,
-            market_condition_channel,
-            ticker_channel,
-            ]
+        ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -74,7 +65,7 @@ async def avoiding_double_ids(
 
                     message_data = orjson.loads(message["data"])
 
-                    log.info (message_data)
+                    log.info(message_data)
 
                     log.critical(message_data["sequence"])
 
@@ -126,13 +117,8 @@ async def avoiding_double_ids(
 
                                     for order in orders:
                                         log.critical(f"double ids {label}")
-                                        log.critical(
-                                            [
-                                                o
-                                                for o in orders_currency
-                                                if label in o["label"]
-                                            ]
-                                        )
+                                        log.critical(orders)
+
                                         await modify_order_and_db.cancel_by_order_id(
                                             order_db_table, order["order_id"]
                                         )
