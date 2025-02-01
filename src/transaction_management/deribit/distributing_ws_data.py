@@ -261,7 +261,6 @@ async def caching_distributing_data(
 
             sequence_update = sequence + len(message_params) - 1
             
-
             log.error(f"sequence {sequence} {currency_upper}")
 
             # log.error(f"market_condition {market_condition}")
@@ -275,7 +274,7 @@ async def caching_distributing_data(
                 ticker_all=ticker_all
             )
 
-            if sequence_update > sequence:
+            if not chart_trade and sequence_update > sequence:
 
                 await send_notification(
                     client_redis,

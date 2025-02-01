@@ -79,23 +79,25 @@ async def saving_and_relabelling_orders(
                     message = message_data["message"]                    
                     
                     try:
+                        
+                        if message["sequence_user_trade"] > 0:
 
-                        data: list = message["data"]
+                            data: list = message["data"]
 
-                        currency: str = message["currency"]
+                            currency: str = message["currency"]
 
-                        currency_lower: str = currency
+                            currency_lower: str = currency
 
-                        await saving_orders(
-                            modify_order_and_db,
-                            private_data,
-                            cancellable_strategies,
-                            non_checked_strategies,
-                            data,
-                            order_db_table,
-                            currency_lower,
-                            False,
-                        )
+                            await saving_orders(
+                                modify_order_and_db,
+                                private_data,
+                                cancellable_strategies,
+                                non_checked_strategies,
+                                data,
+                                order_db_table,
+                                currency_lower,
+                                False,
+                            )
 
                     except Exception as error:
                         parse_error_message(error)
