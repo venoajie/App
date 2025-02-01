@@ -112,10 +112,14 @@ async def future_spreads(
             try:
 
                 message = await pubsub.get_message()
+                
+                
 
                 if message and message["type"] == "message":
 
                     message_data = orjson.loads(message["data"])
+                    
+                    log.debug(message)
 
                     sequence = message_data["sequence"]
 
