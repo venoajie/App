@@ -119,8 +119,6 @@ async def hedging_spot(
             try:
 
                 message = await pubsub.get_message()
-                
-                log.debug (message)
 
                 if message and message["type"] == "message":
 
@@ -130,7 +128,7 @@ async def hedging_spot(
 
                     log.critical(sequence)
 
-                    if message["channel"] == "user_changes":
+                    if "user_changes" in message:
                         
                         cached_orders = message_data["cached_orders"]
 

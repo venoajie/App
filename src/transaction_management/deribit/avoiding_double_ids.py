@@ -68,10 +68,12 @@ async def avoiding_double_ids(
 
                     log.critical(message_data["sequence"])
                     #log.info(message_data)
+
                     
-                    if "user_changes" in message["channel"]:
+                    if "user_changes" in message:
                         
                         cached_orders = message["cached_orders"]
+
 
                     message = message_data["message"]
 
