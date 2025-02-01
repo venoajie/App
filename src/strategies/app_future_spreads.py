@@ -347,17 +347,7 @@ async def future_spreads(
                                                     f"{currency_upper}-{instrument_name_combo[7:][:7]}"
                                                 ).strip("_")
                                                 
-                                                log.info ((
-                                                        [
-                                                            o["expiration_timestamp"]
-                                                            for o in instrument_attributes_futures_all
-                                                            if o["instrument_name"]
-                                                            == instrument_name_future
-                                                        ]
-                                                    ))
-
-                                                instrument_time_left = (
-                                                    max(
+                                                log.info (
                                                         [
                                                             o["expiration_timestamp"]
                                                             for o in instrument_attributes_futures_all
@@ -365,6 +355,15 @@ async def future_spreads(
                                                             == instrument_name_future
                                                         ]
                                                     )
+
+                                                instrument_time_left = max(
+                                                        [
+                                                            o["expiration_timestamp"]
+                                                            for o in instrument_attributes_futures_all
+                                                            if o["instrument_name"]
+                                                            == instrument_name_future
+                                                        ]
+                                                    
                                                     - server_time
                                                 ) / ONE_MINUTE
 
