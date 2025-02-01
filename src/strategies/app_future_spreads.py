@@ -124,6 +124,7 @@ async def future_spreads(
                     if "user_changes" in message:
                         
                         cached_orders = message_data["cached_orders"]
+                        log.warning(cached_orders)
 
                     log.debug(cached_orders)
 

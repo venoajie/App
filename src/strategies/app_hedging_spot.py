@@ -131,6 +131,7 @@ async def hedging_spot(
                     if "user_changes" in message:
                         
                         cached_orders = message_data["cached_orders"]
+                        #cached_orders = [o for o in message_data["cached_orders"]]
 
                     message = message_data["message"]
 
