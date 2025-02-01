@@ -130,7 +130,7 @@ async def hedging_spot(
 
                     log.critical(message_data["sequence"])
                     
-                    if "user_changes" in orjson.loads(message["channel"]):
+                    if "user_changes" in (message["channel"]):
                         
                         cached_orders = message_data["cached_orders"]
                         log.warning(cached_orders)
