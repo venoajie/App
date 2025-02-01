@@ -122,11 +122,11 @@ async def hedging_spot(
         # prepare channels placeholders
         channels = [
             # chart_channel,
-            #user_changes_channel,
+            # user_changes_channel,
             general_channel,
-            #portfolio_channel,
+            # portfolio_channel,
             # market_condition_channel,
-            #ticker_channel,
+            # ticker_channel,
             open_order,
         ]
 
@@ -167,7 +167,7 @@ async def hedging_spot(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message = message_byte_data["message"]
-                   
+
                     message_channel: str = message["channel"]
 
                     message_data: str = message["data"]
@@ -175,7 +175,7 @@ async def hedging_spot(
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
-            
+
                     if "user.changes.any" in message_channel:
 
                         log.warning(f"user.changes {message_data}")
@@ -184,7 +184,6 @@ async def hedging_spot(
                             cached_orders,
                             message_data,
                         )
-
 
                     if b"ticker" in (message_byte["channel"]):
 

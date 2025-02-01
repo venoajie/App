@@ -23,26 +23,23 @@ from transaction_management.deribit.get_instrument_summary import (
 from transaction_management.deribit.managing_deribit import (
     currency_inline_with_database_address,
 )
-from utilities.pickling import read_data, replace_data
-from utilities.string_modification import (
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,
-)
-
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
     combining_order_data,
     update_cached_orders,
     update_cached_ticker,
 )
+
+from utilities.pickling import read_data, replace_data
+
 from utilities.string_modification import (
     extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
+)
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,
 )
 
 
@@ -120,10 +117,10 @@ async def cancelling_orders(
         channels = [
             # chart_channel,
             general_channel,
-            #user_changes_channel,
+            # user_changes_channel,
             # portfolio_channel,
             # market_condition_channel,
-            #ticker_channel,
+            # ticker_channel,
         ]
 
         # subscribe to channels
@@ -144,7 +141,7 @@ async def cancelling_orders(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message = message_byte_data["message"]
-         
+
                     message_channel: str = message["channel"]
 
                     message_data: str = message["data"]
@@ -152,7 +149,7 @@ async def cancelling_orders(
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
-            
+
                     if "user.changes.any" in message_channel:
 
                         log.warning(f"user.changes {message_data}")
@@ -161,7 +158,6 @@ async def cancelling_orders(
                             cached_orders,
                             message_data,
                         )
-
 
                     if b"ticker" in (message_byte["channel"]):
 

@@ -15,6 +15,10 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from data_cleaning.reconciling_db import is_size_sub_account_and_my_trades_reconciled
 from db_management.sqlite_management import executing_query_with_return
+from market_understanding.price_action.candles_analysis import (
+    combining_candles_data,
+    get_market_condition,
+)
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.basic_strategy import get_label_integer
 from strategies.cash_carry.combo_auto import (
@@ -24,32 +28,21 @@ from strategies.cash_carry.combo_auto import (
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-from utilities.pickling import read_data
-from utilities.string_modification import (
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-)
-
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,
-)
-
-from market_understanding.price_action.candles_analysis import (
-    combining_candles_data,
-    get_market_condition,
-)
 from utilities.caching import (
     combining_ticker_data as cached_ticker,
     combining_order_data,
     update_cached_orders,
     update_cached_ticker,
 )
-
+from utilities.pickling import read_data
 from utilities.string_modification import (
     extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
+)
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,
 )
 
 
@@ -114,11 +107,11 @@ async def future_spreads(
         # prepare channels placeholders
         channels = [
             # chart_channel,
-            #user_changes_channel,
+            # user_changes_channel,
             general_channel,
-            #portfolio_channel,
+            # portfolio_channel,
             # market_condition_channel,
-            #ticker_channel,
+            # ticker_channel,
         ]
 
         # subscribe to channels
@@ -159,7 +152,7 @@ async def future_spreads(
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
-            
+
                     if "user.changes.any" in message_channel:
 
                         log.warning(f"user.changes {message_data}")
@@ -168,7 +161,6 @@ async def future_spreads(
                             cached_orders,
                             message_data,
                         )
-
 
                     if b"ticker" in (message_byte["channel"]):
 
