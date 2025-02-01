@@ -125,19 +125,6 @@ async def main():
         """
                             
             #scanning_volume()
-              
-            """
-            
-        await asyncio.gather(
-            producer_task, 
-        
-            saving_task,
-                    
-            hedging_spot(
-                client_redis,
-                config_app,),
-
-                """        
             future_spreads(
                 client_redis,
                 config_app,
@@ -177,7 +164,18 @@ async def main():
                 modify_order_and_db,
                 config_app,
                 idle_time),
-    """
+                  
+            """
+            
+        await asyncio.gather(
+            producer_task, 
+        
+            saving_task,
+                    
+            hedging_spot(
+                client_redis,
+                config_app,),
+
                         )  
 
         await queue.join()
