@@ -101,11 +101,11 @@ async def future_spreads(
 
         not_cancel = True
 
-
         sequence = 0
 
         chart_trade = False
-
+        
+        cached_orders =[]
 
         while not_cancel:
 
@@ -123,10 +123,15 @@ async def future_spreads(
 
                     message = message_data["message"]
 
-                    cached_orders, ticker_all = (
-                        message["cached_orders"],
+                    ticker_all = (
                         message["ticker_all"],
                     )
+                    
+                    try:
+                        cached_orders = message["cached_orders"]
+
+                    except:
+                        cached_orders = cached_orders
 
                     chart_trade, server_time = (
                         message["chart_trade"],
