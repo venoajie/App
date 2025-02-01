@@ -33,6 +33,12 @@ from utilities.system_tools import (
     provide_path_for_file,
 )
 
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    combining_order_data,
+    update_cached_orders,
+    update_cached_ticker,
+)
 from utilities.string_modification import (
     extract_currency_from_text,
     remove_double_brackets_in_list,
@@ -150,12 +156,16 @@ async def cancelling_orders(
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
+            
+                    if "user.changes.any" in message_channel:
 
-                    if b"user_changes" in (message_byte["channel"]):
+                        log.warning(f"user.changes {message_data}")
 
-                        cached_orders = message["cached_orders"]
-                        sequence_user_trade = message["sequence_user_trade"]
-                        log.critical(f"sequence_user_trade {sequence_user_trade}")
+                        await update_cached_orders(
+                            cached_orders,
+                            message_data,
+                        )
+
 
                     if b"ticker" in (message_byte["channel"]):
 

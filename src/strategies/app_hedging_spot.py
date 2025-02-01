@@ -179,12 +179,16 @@ async def hedging_spot(
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
+            
+                    if "user.changes.any" in message_channel:
 
-                    if b"user_changes" in (message_byte["channel"]):
+                        log.warning(f"user.changes {message_data}")
 
-                        cached_orders = message["cached_orders"]
-                        sequence_user_trade = message["sequence_user_trade"]
-                        log.critical(f"sequence_user_trade {sequence_user_trade}")
+                        await update_cached_orders(
+                            cached_orders,
+                            message_data,
+                        )
+
 
                     if b"ticker" in (message_byte["channel"]):
 
