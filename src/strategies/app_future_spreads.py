@@ -351,9 +351,7 @@ async def future_spreads(
                                                             o["expiration_timestamp"]
                                                             for o in instrument_attributes_futures_all
                                                             if instrument_name_future in o["instrument_name"]][0]
-                                                
-                                                log.info (server_time)
-    
+                                                    
                                                 instrument_time_left = (expiration_timestamp - server_time) / ONE_MINUTE
 
                                                 instrument_time_left_exceed_threshold = (
@@ -381,9 +379,9 @@ async def future_spreads(
                                                     in o["instrument_name"]
                                                 ]
 
-                                                log.debug(
-                                                    f"future_control {future_control} instrument_name_combo {instrument_name_combo} instrument_name_future {instrument_name_future}"
-                                                )
+                                                #log.debug(
+                                                #    f"future_control {future_control} instrument_name_combo {instrument_name_combo} instrument_name_future {instrument_name_future}"
+                                                #)
 
                                                 instrument_name_future_in_control = (
                                                     False
@@ -395,9 +393,9 @@ async def future_spreads(
                                                     ]
                                                 )
 
-                                                log.debug(
-                                                    f"instrument_name_future_not_in_control {instrument_name_future_in_control} {not instrument_name_future_in_control}"
-                                                )
+                                                #log.debug(
+                                                #    f"instrument_name_future_not_in_control {instrument_name_future_in_control} {not instrument_name_future_in_control}"
+                                                #)
 
                                                 if (
                                                     not instrument_name_future_in_control

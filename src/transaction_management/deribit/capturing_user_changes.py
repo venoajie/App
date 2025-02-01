@@ -76,11 +76,12 @@ async def saving_and_relabelling_orders(
                     
                     message_data = orjson.loads(message_byte["data"])
                     
-                    message = message_data["message"]                    
+                    message = message_data["message"]     
+                    message_channel= message ["message_channel"]               
                     
                     try:
                         
-                        if message["sequence_user_trade"] > 0:
+                        if "user.changes" in message_channel:
 
                             data: list = message["data"]
 
