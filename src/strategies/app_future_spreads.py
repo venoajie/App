@@ -347,25 +347,14 @@ async def future_spreads(
                                                     f"{currency_upper}-{instrument_name_combo[7:][:7]}"
                                                 ).strip("_")
                                                 
-                                                log.info (
-                                                        [
+                                                expiration_timestamp = [
                                                             o["expiration_timestamp"]
                                                             for o in instrument_attributes_futures_all
-                                                            if o["instrument_name"]
-                                                            == instrument_name_future
-                                                        ]
-                                                    )
-
-                                                instrument_time_left = (
-                                                        [
-                                                            o["expiration_timestamp"]
-                                                            for o in instrument_attributes_futures_all
-                                                            if o["instrument_name"]
-                                                            == instrument_name_future
-                                                        ][0]
-                                                    
-                                                    - server_time
-                                                ) / ONE_MINUTE
+                                                            if instrument_name_future in o["instrument_name"]][0]
+                                                
+                                                log.info (expiration_timestamp)
+    
+                                                instrument_time_left = (expiration_timestamp - server_time) / ONE_MINUTE
 
                                                 instrument_time_left_exceed_threshold = (
                                                     instrument_time_left
