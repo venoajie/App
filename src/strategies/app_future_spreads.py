@@ -129,11 +129,10 @@ async def future_spreads(
                     sequence = message_data["sequence"]
                     log.critical(sequence)
                     
-                    try:
-                        ticker_all = (
-                        message["ticker_all"],
-                    )
+                    try:     
                         
+                        ticker_all = message["ticker_all"]
+
                         chart_trade, server_time = (
                             message["chart_trade"],
                             message["server_time"],

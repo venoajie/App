@@ -138,10 +138,8 @@ async def hedging_spot(
                     log.critical(sequence)
                     
                     try:
-                        ticker_all = (
-                        message["ticker_all"]
-                    )
-
+                        ticker_all = message["ticker_all"]
+                    
                         chart_trade, server_time = (
                             message["chart_trade"],
                             message["server_time"],

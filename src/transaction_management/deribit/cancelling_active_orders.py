@@ -143,9 +143,8 @@ async def cancelling_orders(
                     log.critical(sequence)
                     
                     try:
-                        ticker_all = (
-                        message["ticker_all"],
-                    )
+                        
+                        ticker_all = message["ticker_all"]
 
                         chart_trade, server_time = (
                             message["chart_trade"],
