@@ -130,6 +130,7 @@ async def caching_distributing_data(
         )
 
         sequence = 0
+        sequence_user_trade = 0
 
         chart_trade = False
 
@@ -175,7 +176,7 @@ async def caching_distributing_data(
                 )
 
             if "user" in message_channel:
-
+                
                 if "portfolio" in message_channel:
 
                     await update_db_pkl(
@@ -193,31 +194,24 @@ async def caching_distributing_data(
                         data,
                     )
 
-                    log.warning(f"cached_orders {cached_orders}")
+                log.warning(f"cached_orders {cached_orders}")
 
-                    await saving_orders(
-                        modify_order_and_db,
-                        private_data,
-                        cancellable_strategies,
-                        non_checked_strategies,
-                        data,
-                        order_db_table,
-                        currency,
-                    )
+                data_to_dispatch: dict = dict(
+                    data=data,
+                    ticker_all=ticker_all,
+                    cached_orders=cached_orders,
+                    currency=currency,
+                )
 
-                    data_to_dispatch: dict = dict(
-                        data=data,
-                        ticker_all=ticker_all,
-                        cached_orders=cached_orders,
-                        currency=currency,
-                    )
+                await send_notification(
+                    client_redis,
+                    user_changes_channel,
+                    sequence_user_trade,
+                    cached_orders,
+                )
 
-                    await send_notification(
-                        client_redis,
-                        user_changes_channel,
-                        sequence,
-                        data_to_dispatch,
-                    )
+                sequence_user_trade = sequence_user_trade + len(message_params) - 1
+                log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
 
             if "chart.trades" in message_channel:
 
@@ -266,15 +260,15 @@ async def caching_distributing_data(
                 DATABASE: str = "databases/trading.sqlite3"
 
             sequence_update = sequence + len(message_params) - 1
+            
 
-            log.error(f"{sequence} {currency_upper}")
+            log.error(f"sequence {sequence} {currency_upper}")
 
             # log.error(f"market_condition {market_condition}")
             # log.warning(f"chart_trade {chart_trade}")
             data_to_dispatch: dict = dict(
                 message_params=message_params,
                 currency=currency,
-                cached_orders=cached_orders,
                 chart_trade=chart_trade,
                 market_condition=market_condition,
                 server_time=server_time,

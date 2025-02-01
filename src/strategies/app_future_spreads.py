@@ -6,11 +6,16 @@ from random import sample
 
 import orjson
 import uvloop
-
+import numpy as np
 # installed
 from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+from market_understanding.price_action.candles_analysis import (
+    combining_candles_data,
+    get_market_condition,
+)
 
 from data_cleaning.reconciling_db import is_size_sub_account_and_my_trades_reconciled
 from db_management.sqlite_management import executing_query_with_return
@@ -23,8 +28,16 @@ from strategies.cash_carry.combo_auto import (
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
+
+from utilities.caching import (
+    combining_ticker_data as cached_ticker,
+    combining_order_data,
+    update_cached_orders,
+    update_cached_ticker,
+)
 from utilities.pickling import read_data
 from utilities.string_modification import (
+    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -101,6 +114,28 @@ async def future_spreads(
 
         not_cancel = True
 
+
+        chart_trades_buffer: list = []
+
+        ticker_all = cached_ticker(instruments_name)
+
+        cached_orders: list = await combining_order_data(private_data, currencies)
+
+        server_time = 0
+
+        resolutions = [60, 15, 5]
+        qty_candles = 5
+        dim_sequence = 3
+
+        combining_candles = combining_candles_data(
+            np, currencies, qty_candles, resolutions, dim_sequence
+        )
+
+        sequence = 0
+
+        chart_trade = False
+
+
         while not_cancel:
 
             try:
@@ -111,9 +146,47 @@ async def future_spreads(
 
                     message_data = orjson.loads(message["data"])
 
+                    currency: str = extract_currency_from_text(message_channel)
+
+                    currency_upper = currency.upper()
+
                     sequence = message_data["sequence"]
 
                     log.critical(message_data["sequence"])
+
+
+                    instrument_name_future = (message_channel)[19:]
+                    if message_channel == f"incremental_ticker.{instrument_name_future}":
+
+                        update_cached_ticker(
+                            instrument_name_future,
+                            ticker_all,
+                            data,
+                        )
+
+                        server_time = (
+                            data["timestamp"] + server_time
+                            if server_time == 0
+                            else data["timestamp"]
+                        )
+
+                    if "user" in message_channel:
+
+
+                        if "changes.any" in message_channel:
+
+                            log.warning(f"user.changes {data}")
+
+                            await update_cached_orders(
+                                cached_orders,
+                                data,
+                            )
+
+                            log.warning(f"cached_orders {cached_orders}")
+
+                    if "chart.trades" in message_channel:
+
+                        chart_trades_buffer.append(data)
 
                     message = message_data["message"]
 

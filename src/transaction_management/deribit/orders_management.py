@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from loguru import logger as log
 
 # user defined formula
-from db_management.sqlite_management import deleting_row, insert_tables
+from db_management.sqlite_management import (
+    deleting_row, 
+    insert_tables
+    )
 from strategies.basic_strategy import is_label_and_side_consistent
 
 
@@ -50,8 +52,44 @@ async def saving_order_based_on_state(
 
     Examples:
 
-        original=  {'jsonrpc': '2.0', 'id': 1002, 'result': {'trades': [], 'order': {'is_liquidation': False, 'risk_reducing': False, 'order_type': 'limit', 'creation_timestamp': 1728090482863, 'order_state': 'open', 'reject_post_only': False, 'contracts': 5.0, 'average_price': 0.0, 'reduce_only': False, 'last_update_timestamp': 1728090482863, 'filled_amount': 0.0, 'post_only': True, 'replaced': False, 'mmp': False, 'order_id': 'ETH-49960097702', 'web': False, 'api': True, 'instrument_name': 'ETH-PERPETUAL', 'max_show': 5.0, 'time_in_force': 'good_til_cancelled', 'direction': 'sell', 'amount': 5.0, 'price': 2424.05, 'label': 'hedgingSpot-open-1728090482812'}}, 'usIn': 1728090482862653, 'usOut': 1728090482864640, 'usDiff': 1987, 'testnet': False}
-        cancelled=  {'jsonrpc': '2.0', 'id': 1002, 'result': {'is_liquidation': False, 'risk_reducing': False, 'order_type': 'limit', 'creation_timestamp': 1728090482863, 'order_state': 'cancelled', 'reject_post_only': False, 'contracts': 5.0, 'average_price': 0.0, 'reduce_only': False, 'last_update_timestamp': 1728090483773, 'filled_amount': 0.0, 'post_only': True, 'replaced': False, 'mmp': False, 'cancel_reason': 'user_request', 'order_id': 'ETH-49960097702', 'web': False, 'api': True, 'instrument_name': 'ETH-PERPETUAL', 'max_show': 5.0, 'time_in_force': 'good_til_cancelled', 'direction': 'sell', 'amount': 5.0, 'price': 2424.05, 'label': 'hedgingSpot-open-1728090482812'}, 'usIn': 1728090483773107, 'usOut': 1728090483774372, 'usDiff': 1265, 'testnet': False}
+        original=  {
+            'jsonrpc': '2.0', 
+            'id': 1002, 
+            'result': {
+                'trades': [], 
+                'order': {
+                    'is_liquidation': False, 'risk_reducing': False, 'order_type': 'limit', 
+                    'creation_timestamp': 1728090482863, 'order_state': 'open', 'reject_post_only': False,
+                    'contracts': 5.0, 'average_price': 0.0, 'reduce_only': False, 
+                    'last_update_timestamp': 1728090482863, 'filled_amount': 0.0, 'post_only': True, 
+                    'replaced': False, 'mmp': False, 'order_id': 'ETH-49960097702', 'web': False, 'api': True, 
+                    'instrument_name': 'ETH-PERPETUAL', 'max_show': 5.0, 'time_in_force': 'good_til_cancelled',
+                    'direction': 'sell', 'amount': 5.0, 'price': 2424.05, 'label': 'hedgingSpot-open-1728090482812'
+                    }
+                    }, 
+                    'usIn': 1728090482862653, 
+                    'usOut': 1728090482864640, 
+                    'usDiff': 1987, 
+                    'testnet': False
+                    }
+        
+        cancelled=  {
+            'jsonrpc': '2.0',
+            'id': 1002, 
+            'result': {
+                'is_liquidation': False, 'risk_reducing': False, 'order_type': 'limit', 
+                'creation_timestamp': 1728090482863, 'order_state': 'cancelled','reject_post_only': False, 
+                'contracts': 5.0, 'average_price': 0.0,'reduce_only': False, 
+                'last_update_timestamp': 1728090483773, 'filled_amount': 0.0,'post_only': True, 
+                'replaced': False, 'mmp': False, 'cancel_reason': 'user_request','order_id': 'ETH-49960097702', 
+                'web': False, 'api': True, 'instrument_name': 'ETH-PERPETUAL',
+                'max_show': 5.0, 'time_in_force': 'good_til_cancelled', 'direction': 'sell', 'amount': 5.0, 
+                'price': 2424.05, 'label': 'hedgingSpot-open-1728090482812'},
+                'usIn': 1728090483773107,
+                'usOut': 1728090483774372, 
+                'usDiff': 1265,
+                'testnet': False
+                }
 
     """
 
@@ -61,7 +99,8 @@ async def saving_order_based_on_state(
 
     order_state = order["order_state"]
 
-    if order_state == "cancelled" or order_state == "filled":
+    if (order_state == "cancelled" 
+        or order_state == "filled"):
 
         await deleting_row(
             order_table,
@@ -215,34 +254,27 @@ async def saving_oto_order(
     len_oto_order_ids = len(orders[0]["oto_order_ids"])
 
     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
-    # log.debug (f"transaction_main {transaction_main}")
 
     if len_oto_order_ids == 1:
         pass
 
     transaction_main_oto = transaction_main["oto_order_ids"][0]
-    # log.warning (f"transaction_main_oto {transaction_main_oto}")
 
     kind = "future"
     type = "trigger_all"
 
     open_orders_from_exchange = await private_data.get_open_orders(kind, type)
-    # log.debug (f"open_orders_from_exchange {open_orders_from_exchange}")
 
     transaction_secondary = [
         o for o in open_orders_from_exchange if transaction_main_oto in o["order_id"]
     ]
-
-    # log.warning (f"transaction_secondary {transaction_secondary}")
 
     if transaction_secondary:
 
         transaction_secondary = transaction_secondary[0]
 
         # no label
-        if (
-            save_only == False
-            and transaction_main["label"] == ""
+        if (transaction_main["label"] == ""
             and "open" in transaction_main["order_state"]
         ):
 
@@ -254,8 +286,6 @@ async def saving_oto_order(
             order_attributes = labelling_unlabelled_order_oto(
                 transaction_main, transaction_secondary
             )
-
-            # log.debug (f"order_attributes {order_attributes}")
 
             await modify_order_and_db.cancel_by_order_id(
                 order_db_table,
@@ -289,13 +319,17 @@ async def saving_orders(
 
     orders = data["orders"]
 
-    # log.error (f"orders {orders}")
-
     if orders:
 
         if trades:
 
             archive_db_table = f"my_trades_all_{currency_lower}_json"
+
+            await modify_order_and_db.cancel_the_cancellables(
+                order_db_table,
+                currency_lower,
+                cancellable_strategies,
+            )
 
             for trade in trades:
                 await saving_traded_orders(
@@ -304,18 +338,9 @@ async def saving_orders(
                     order_db_table,
                 )
 
-            if save_only == False:
-                await modify_order_and_db.cancel_the_cancellables(
-                    order_db_table,
-                    currency_lower,
-                    cancellable_strategies,
-                )
-
         else:
 
             if "oto_order_ids" in (orders[0]):
-
-                # log.warning(orders)
 
                 await saving_oto_order(
                     modify_order_and_db,
@@ -332,14 +357,10 @@ async def saving_orders(
 
                     if "OTO" not in order["order_id"]:
 
-                        # log.debug (f"order {order}")
-
                         label = order["label"]
 
                         order_id = order["order_id"]
                         order_state = order["order_state"]
-
-                        # log.error (f"order_state {order_state}")
 
                         # no label
                         if label == "":
@@ -360,9 +381,8 @@ async def saving_orders(
                                 non_checked_strategies, order
                             )
 
-                            # log.error (f"label_and_side_consistent {label_and_side_consistent} {label}")
-
-                            if label_and_side_consistent and label:
+                            if (label_and_side_consistent 
+                                and label):
 
                                 await saving_order_based_on_state(
                                     order_db_table,
@@ -376,20 +396,15 @@ async def saving_orders(
                                     order_state != "cancelled"
                                     or order_state != "filled"
                                 ):
-
-                                    # log.warning (f" not label_and_side_consistent {order} {order_state}")
+                                    await modify_order_and_db.cancel_by_order_id(
+                                        order_db_table,
+                                        order_id,
+                                    )
 
                                     await insert_tables(
                                         order_db_table,
                                         order,
                                     )
-
-                                    if save_only == False:
-
-                                        await modify_order_and_db.cancel_by_order_id(
-                                            order_db_table,
-                                            order_id,
-                                        )
 
 
 async def cancelling_and_relabelling(
@@ -406,13 +421,8 @@ async def cancelling_and_relabelling(
     # no label
     if label == "":
 
-        if "open" in order_state or "untriggered" in order_state:
-
-            if save_only:
-                await insert_tables(
-                    order_db_table,
-                    order,
-                )
+        if ("open" in order_state 
+            or "untriggered" in order_state):
 
             if "OTO" not in order["order_id"]:
                 await modify_order_and_db.cancel_by_order_id(
@@ -422,8 +432,12 @@ async def cancelling_and_relabelling(
 
             order_attributes = labelling_unlabelled_order(order)
 
-            # og.error (f"order_attributes {order_attributes}")
             await modify_order_and_db.if_order_is_true(
                 non_checked_strategies,
                 order_attributes,
+            )
+
+            await insert_tables(
+                order_db_table,
+                order,
             )
