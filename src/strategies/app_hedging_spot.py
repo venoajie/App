@@ -117,16 +117,16 @@ async def hedging_spot(
         market_condition_channel: str = redis_channels["market_condition"]
         ticker_channel: str = redis_channels["ticker"]
         open_order: str = redis_channels["open_order"]
-        general: str = redis_channels["general"]
+        general_channel: str = redis_channels["general"]
 
         # prepare channels placeholders
         channels = [
             # chart_channel,
             user_changes_channel,
-            general,
+            general_channel,
             portfolio_channel,
             # market_condition_channel,
-            ticker_channel,
+            #ticker_channel,
             open_order,
         ]
 
