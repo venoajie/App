@@ -74,15 +74,13 @@ async def saving_and_relabelling_orders(
 
                 if message_byte and message_byte["type"] == "message":
 
-                    message_data = orjson.loads(message_byte["data"])
+                    message_byte_data = orjson.loads(message_byte["data"])
 
-                    message = message_data["message"]
+                    message = message_byte_data["message"]
 
-                    message_params = message["message_params"]
+                    message_channel: str = message["channel"]
 
-                    message_channel: str = message_params["channel"]
-
-                    message_data: str = message_params["data"]
+                    message_data: str = message["data"]
 
                     currency: str = extract_currency_from_text(message_channel)
 
