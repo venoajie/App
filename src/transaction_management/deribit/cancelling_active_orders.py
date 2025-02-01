@@ -109,7 +109,7 @@ async def cancelling_orders(
         portfolio_channel: str = redis_channels["portfolio"]
         ticker_channel: str = redis_channels["ticker"]
         user_changes_channel: str = redis_channels["user_changes"]
-        
+
         # prepare channels placeholders
         channels = [
             # chart_channel,
@@ -153,7 +153,7 @@ async def cancelling_orders(
 
                     if b"ticker" in (message_byte["channel"]):
 
-                        sequence = message_data["sequence"]
+                        sequence = message["sequence"]
 
                         log.critical(sequence)
 

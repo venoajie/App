@@ -54,6 +54,7 @@ from utilities.string_modification import (
 
 
 async def future_spreads(
+    private_data: object,
     client_redis: object,
     config_app: list,
 ) -> None:
@@ -93,6 +94,12 @@ async def future_spreads(
 
         instruments_name = futures_instruments["instruments_name"]
 
+        ticker_all = cached_ticker(instruments_name)
+
+        cached_orders: list = await combining_order_data(
+            private_data,
+            currencies,
+        )
         server_time = 0
 
         # get redis channels
@@ -103,7 +110,7 @@ async def future_spreads(
         portfolio_channel: str = redis_channels["portfolio"]
         ticker_channel: str = redis_channels["ticker"]
         user_changes_channel: str = redis_channels["user_changes"]
-        
+
         # prepare channels placeholders
         channels = [
             # chart_channel,
@@ -112,7 +119,6 @@ async def future_spreads(
             portfolio_channel,
             # market_condition_channel,
             ticker_channel,
-            open_order,
         ]
 
         # subscribe to channels
@@ -125,6 +131,14 @@ async def future_spreads(
         chart_trade = False
 
         cached_orders = []
+
+        resolutions = [60, 15, 5]
+        qty_candles = 5
+        dim_sequence = 3
+
+        combining_candles = combining_candles_data(
+            np, currencies, qty_candles, resolutions, dim_sequence
+        )
 
         while not_cancel:
 
@@ -152,7 +166,7 @@ async def future_spreads(
 
                     if b"ticker" in (message_byte["channel"]):
 
-                        sequence = message_data["sequence"]
+                        sequence = message["sequence"]
 
                         log.critical(sequence)
 

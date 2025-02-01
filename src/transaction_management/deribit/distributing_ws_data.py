@@ -148,7 +148,7 @@ async def caching_distributing_data(
                 sequence_user_trade,
                 message_params,
             )
-            
+
             data: dict = message_params["data"]
 
             message_channel: str = message_params["channel"]

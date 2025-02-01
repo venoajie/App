@@ -52,6 +52,7 @@ from utilities.string_modification import (
 
 
 async def hedging_spot(
+    private_data: object,
     client_redis: object,
     config_app: list,
 ) -> None:
@@ -102,6 +103,8 @@ async def hedging_spot(
             settlement_periods,
         )
 
+        instruments_name = futures_instruments["instruments_name"]
+
         instrument_attributes_futures_all = futures_instruments["active_futures"]
 
         server_time = 0
@@ -136,7 +139,10 @@ async def hedging_spot(
 
         ticker_all = cached_ticker(instruments_name)
 
-        cached_orders: list = await combining_order_data(private_data, currencies)
+        cached_orders: list = await combining_order_data(
+            private_data,
+            currencies,
+        )
 
         server_time = 0
 
@@ -176,7 +182,7 @@ async def hedging_spot(
 
                     if b"ticker" in (message_byte["channel"]):
 
-                        sequence = message_data["sequence"]
+                        sequence = message["sequence"]
 
                         log.critical(sequence)
 
