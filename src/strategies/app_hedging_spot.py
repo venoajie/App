@@ -166,9 +166,9 @@ async def hedging_spot(
 
                     message = orjson.loads(message_byte["data"])
 
-                    message_channel: str = message["channel"]
-                    
-                    log.warning (message_channel)
+                    log.warning (message)
+
+                    message_channel: str = message["channel"]                    
 
                     currency: str = extract_currency_from_text(message_channel)
 
