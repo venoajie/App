@@ -131,8 +131,14 @@ async def cancelling_orders(
 
                     message = message_data["message"]
 
-                    cached_orders, ticker_all = (
-                        message["cached_orders"],
+                    
+                    try:
+                        cached_orders = message["cached_orders"]
+
+                    except:
+                        cached_orders = cached_orders
+
+                    ticker_all = (
                         message["ticker_all"],
                     )
 
@@ -149,7 +155,7 @@ async def cancelling_orders(
 
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                    if not chart_trade and server_time != 0:
+                    if not chart_trade and server_time != 0 and ticker_all:
 
                         # get portfolio data
                         portfolio = reading_from_pkl_data("portfolio", currency)[0]
