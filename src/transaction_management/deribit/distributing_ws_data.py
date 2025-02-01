@@ -142,7 +142,7 @@ async def caching_distributing_data(
 
             message_channel: str = message_params["channel"]
 
-            log.warning(f"message_channel {message_channel}")
+            #log.warning(f"message_channel {message_channel}")
 
             currency: str = extract_currency_from_text(message_channel)
 
@@ -264,18 +264,18 @@ async def caching_distributing_data(
             
             log.error(f"sequence {sequence} {currency_upper}")
 
+            if not chart_trade and sequence_update > sequence:
+
             # log.error(f"market_condition {market_condition}")
             # log.warning(f"chart_trade {chart_trade}")
-            data_to_dispatch: dict = dict(
-                message_params=message_params,
-                currency=currency,
-                chart_trade=chart_trade,
-                market_condition=market_condition,
-                server_time=server_time,
-                ticker_all=ticker_all
-            )
-
-            if not chart_trade and sequence_update > sequence:
+                data_to_dispatch: dict = dict(
+                    message_params=message_params,
+                    currency=currency,
+                    chart_trade=chart_trade,
+                    market_condition=market_condition,
+                    server_time=server_time,
+                    ticker_all=ticker_all
+                )
 
                 await send_notification(
                     client_redis,

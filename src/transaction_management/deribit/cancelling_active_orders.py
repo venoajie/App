@@ -136,7 +136,7 @@ async def cancelling_orders(
                         
                         cached_orders = message["cached_orders"]
                         sequence_user_trade = message["sequence_user_trade"]
-                        log.critical(sequence_user_trade)
+                        log.critical(f"sequence_user_trade {sequence_user_trade}")
                     
                     if b"ticker" in (message_byte["channel"]):
                         
