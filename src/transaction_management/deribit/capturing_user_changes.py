@@ -62,6 +62,8 @@ async def saving_and_relabelling_orders(
         [await pubsub.subscribe(o) for o in channels]
 
         not_cancel: bool = True
+        
+        cached_orders=[]
 
         while not_cancel:
 
@@ -76,6 +78,12 @@ async def saving_and_relabelling_orders(
                     print(f"""capturing user changes {message_data["sequence"]}""")
 
                     message = message_data["message"]
+
+                    try:
+                        cached_orders = message["cached_orders"]
+
+                    except:
+                        cached_orders = cached_orders
 
                     currency: str = message["currency"]
 

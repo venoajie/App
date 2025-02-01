@@ -111,6 +111,8 @@ async def hedging_spot(
         [await pubsub.subscribe(o) for o in channels]
 
         not_order = True
+        
+        cached_orders=[]
 
         while not_order:
 
@@ -127,8 +129,13 @@ async def hedging_spot(
 
                     message = message_data["message"]
 
-                    cached_orders, ticker_all = (
-                        message["cached_orders"],
+                    try:
+                        cached_orders = message["cached_orders"]
+
+                    except:
+                        cached_orders = cached_orders
+
+                    ticker_all = (
                         message["ticker_all"],
                     )
 

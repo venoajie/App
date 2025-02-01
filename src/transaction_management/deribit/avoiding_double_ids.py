@@ -53,6 +53,8 @@ async def avoiding_double_ids(
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
+        
+        cached_orders=[]
 
         while True:
 
@@ -68,6 +70,12 @@ async def avoiding_double_ids(
                     #log.info(message_data)
 
                     message = message_data["message"]
+
+                    try:
+                        cached_orders = message["cached_orders"]
+
+                    except:
+                        cached_orders = cached_orders
 
                     currency: str = message["currency"]
 
