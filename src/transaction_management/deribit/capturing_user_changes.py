@@ -83,12 +83,13 @@ async def saving_and_relabelling_orders(
 
                     message = message_data["message"]
 
-                    currency: str = message["currency"]
-
-                    currency_lower: str = currency
-
                     try:
+
                         data: list = message["data"]
+
+                        currency: str = message["currency"]
+
+                        currency_lower: str = currency
 
                         await saving_orders(
                             modify_order_and_db,

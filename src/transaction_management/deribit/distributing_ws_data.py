@@ -198,6 +198,8 @@ async def caching_distributing_data(
 
                 data_to_dispatch: dict = dict(
                     cached_orders=cached_orders,
+                    currency=currency,
+
                 )
                 
                 sequence_user_trade = sequence_user_trade + len(message_params) - 1
