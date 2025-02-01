@@ -131,7 +131,7 @@ async def cancelling_orders(
 
                     log.critical(message_data["sequence"])
         
-                    if "user_changes" in message["channel"]:
+                    if message["channel"] == "user_changes":
                         
                         cached_orders = message_data["cached_orders"]
 
