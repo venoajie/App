@@ -48,7 +48,7 @@ async def processing_orders(
 
                 message_byte = await pubsub.get_message()
 
-                if message and message["type"] == "message":
+                if message_byte and message_byte["type"] == "message":
 
                     message = orjson.loads(message_byte["data"])
 
