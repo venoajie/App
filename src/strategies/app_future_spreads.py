@@ -152,6 +152,8 @@ async def future_spreads(
                         portfolio = reading_from_pkl_data("portfolio", currency)[0]
 
                         equity: float = portfolio["equity"]
+                        
+                        log.info (ticker_all)
 
                         ticker_perpetual_instrument_name = [
                             o
