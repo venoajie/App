@@ -352,7 +352,7 @@ async def future_spreads(
                                                             for o in instrument_attributes_futures_all
                                                             if instrument_name_future in o["instrument_name"]][0]
                                                 
-                                                log.info (expiration_timestamp)
+                                                log.info (server_time)
     
                                                 instrument_time_left = (expiration_timestamp - server_time) / ONE_MINUTE
 
