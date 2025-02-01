@@ -137,7 +137,7 @@ async def main():
                 client_redis,
                 config_app,),
 
-               
+                """        
             future_spreads(
                 client_redis,
                 config_app,
@@ -155,7 +155,7 @@ async def main():
                 client_redis,
                 config_app
                 ),    
-                
+       
             saving_and_relabelling_orders(
                 private_data,
                 modify_order_and_db,
@@ -177,7 +177,7 @@ async def main():
                 modify_order_and_db,
                 config_app,
                 idle_time),
-    
+    """
                         )  
 
         await queue.join()

@@ -121,6 +121,8 @@ async def hedging_spot(
                 message = await pubsub.get_message()
 
                 if message and message["type"] == "message":
+                    
+                    log.debug (message)
 
                     message_data = orjson.loads(message["data"])
                     
