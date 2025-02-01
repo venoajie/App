@@ -134,7 +134,7 @@ async def future_spreads(
                     
                         ticker_all = message["ticker_all"]
 
-                        server_time = message["server_time"],
+                        server_time = message["server_time"]
                         
                         currency: str = message["currency"]
 
