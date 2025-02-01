@@ -9,6 +9,7 @@ import uvloop
 import numpy as np
 from loguru import logger as log
 import orjson
+
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
@@ -112,6 +113,7 @@ async def caching_distributing_data(
         portfolio_channel: str = redis_channels["portfolio"]
         market_condition_channel: str = redis_channels["market_condition"]
         ticker_channel: str = redis_channels["ticker"]
+        general: str = redis_channels["general"]
 
         chart_trades_buffer: list = []
 
@@ -137,20 +139,21 @@ async def caching_distributing_data(
         while True:
 
             message_params: str = await queue_general.get()
-            
+
             log.debug(message_params)
 
             await send_notification(
                 client_redis,
-                user_changes_channel,
+                general,
                 sequence_user_trade,
                 message_params,
             )
+            
             data: dict = message_params["data"]
 
             message_channel: str = message_params["channel"]
 
-            #log.warning(f"message_channel {message_channel}")
+            # log.warning(f"message_channel {message_channel}")
 
             currency: str = extract_currency_from_text(message_channel)
 
@@ -184,7 +187,7 @@ async def caching_distributing_data(
                 )
 
             if "user" in message_channel:
-                
+
                 if "portfolio" in message_channel:
 
                     await update_db_pkl(
@@ -207,10 +210,9 @@ async def caching_distributing_data(
                     data=data,
                     message_channel=message_channel,
                     sequence_user_trade=sequence_user_trade,
-                    currency=currency
-
+                    currency=currency,
                 )
-                
+
                 sequence_user_trade = sequence_user_trade + len(message_params) - 1
 
                 log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
@@ -269,20 +271,20 @@ async def caching_distributing_data(
                 DATABASE: str = "databases/trading.sqlite3"
 
             sequence_update = sequence + len(message_params) - 1
-            
+
             log.error(f"sequence {sequence} {currency_upper}")
 
             if not chart_trade and sequence_update > sequence:
 
-            # log.error(f"market_condition {market_condition}")
-            # log.warning(f"chart_trade {chart_trade}")
+                # log.error(f"market_condition {market_condition}")
+                # log.warning(f"chart_trade {chart_trade}")
                 data_to_dispatch: dict = dict(
                     message_params=message_params,
                     currency=currency,
                     chart_trade=chart_trade,
                     market_condition=market_condition,
                     server_time=server_time,
-                    ticker_all=ticker_all
+                    ticker_all=ticker_all,
                 )
 
                 await send_notification(

@@ -114,11 +114,13 @@ async def hedging_spot(
         market_condition_channel: str = redis_channels["market_condition"]
         ticker_channel: str = redis_channels["ticker"]
         open_order: str = redis_channels["open_order"]
+        general: str = redis_channels["general"]
 
         # prepare channels placeholders
         channels = [
             # chart_channel,
             user_changes_channel,
+            general,
             portfolio_channel,
             # market_condition_channel,
             ticker_channel,
@@ -129,7 +131,7 @@ async def hedging_spot(
         [await pubsub.subscribe(o) for o in channels]
 
         not_order = True
-        
+
         chart_trades_buffer: list = []
 
         ticker_all = cached_ticker(instruments_name)
@@ -154,33 +156,34 @@ async def hedging_spot(
 
                 message_byte = await pubsub.get_message()
 
-                if (message_byte 
-                    and message_byte["type"] == "message"):
-                    
-                    message_data = orjson.loads(message_byte["data"])
-                    
-                    message = message_data["message"]
-                    
+                if message_byte and message_byte["type"] == "message":
+
+                    message = orjson.loads(message_byte["data"])
+
+                    data: dict = message["data"]
+
+                    message_channel: str = message["channel"]
+
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
-                    
+
                     if b"user_changes" in (message_byte["channel"]):
-                        
+
                         cached_orders = message["cached_orders"]
                         sequence_user_trade = message["sequence_user_trade"]
                         log.critical(f"sequence_user_trade {sequence_user_trade}")
-                            
+
                     if b"ticker" in (message_byte["channel"]):
-                        
+
                         sequence = message_data["sequence"]
 
                         log.critical(sequence)
-                
+
                         ticker_all = message["ticker_all"]
-                    
+
                         server_time = message["server_time"]
-                        
+
                         currency: str = message["currency"]
 
                         currency_upper: str = currency.upper()
@@ -196,7 +199,7 @@ async def hedging_spot(
                             portfolio = reading_from_pkl_data("portfolio", currency)[0]
 
                             equity: float = portfolio["equity"]
-                            
+
                             ticker_perpetual_instrument_name = [
                                 o
                                 for o in ticker_all
@@ -205,7 +208,9 @@ async def hedging_spot(
 
                             index_price = get_index(ticker_perpetual_instrument_name)
 
-                            sub_account = reading_from_pkl_data("sub_accounts", currency)
+                            sub_account = reading_from_pkl_data(
+                                "sub_accounts", currency
+                            )
 
                             sub_account = sub_account[0]
 
@@ -249,7 +254,7 @@ async def hedging_spot(
 
                                 len_cleaned_orders = len(orders_currency)
 
-                                #log.info(f"len orders_currency {len_cleaned_orders}")
+                                # log.info(f"len orders_currency {len_cleaned_orders}")
 
                                 # if orders_currency:
 
@@ -258,7 +263,8 @@ async def hedging_spot(
                                 position_without_combo = [
                                     o
                                     for o in position
-                                    if f"{currency_upper}-FS" not in o["instrument_name"]
+                                    if f"{currency_upper}-FS"
+                                    not in o["instrument_name"]
                                 ]
 
                                 size_perpetuals_reconciled = (
@@ -348,12 +354,16 @@ async def hedging_spot(
 
                                         instrument_attributes_futures_for_hedging = [
                                             o
-                                            for o in futures_instruments["active_futures"]
+                                            for o in futures_instruments[
+                                                "active_futures"
+                                            ]
                                             if o["settlement_period"] != "month"
                                             and o["kind"] == "future"
                                         ]
 
-                                        strong_bearish = market_condition["strong_bearish"]
+                                        strong_bearish = market_condition[
+                                            "strong_bearish"
+                                        ]
 
                                         bearish = market_condition["bearish"]
 
@@ -372,12 +382,10 @@ async def hedging_spot(
                                             "instrument_name"
                                         ]
 
-                                        size_future_reconciled = (
-                                            is_size_sub_account_and_my_trades_reconciled(
-                                                position_without_combo,
-                                                my_trades_currency_all,
-                                                instrument_name,
-                                            )
+                                        size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
+                                            position_without_combo,
+                                            my_trades_currency_all,
+                                            instrument_name,
                                         )
 
                                         instrument_time_left = (
@@ -484,22 +492,22 @@ async def hedging_spot(
 
                                                             for (
                                                                 instrument_name
-                                                            ) in (
-                                                                transaction_instrument_name
-                                                            ):
+                                                            ) in transaction_instrument_name:
 
                                                                 instrument_ticker: list = [
                                                                     o
                                                                     for o in ticker_all
                                                                     if instrument_name
-                                                                    in o["instrument_name"]
+                                                                    in o[
+                                                                        "instrument_name"
+                                                                    ]
                                                                 ]
 
                                                                 if instrument_ticker:
 
-                                                                    instrument_ticker = (
-                                                                        instrument_ticker[0]
-                                                                    )
+                                                                    instrument_ticker = instrument_ticker[
+                                                                        0
+                                                                    ]
 
                                                                     get_prices_in_label_transaction_main = [
                                                                         o["price"]
@@ -534,7 +542,9 @@ async def hedging_spot(
                                                                         nearest_transaction_to_index = [
                                                                             o
                                                                             for o in my_trades_currency_strategy_status
-                                                                            if o["price"]
+                                                                            if o[
+                                                                                "price"
+                                                                            ]
                                                                             == closest_price
                                                                         ]
 
@@ -562,7 +572,10 @@ async def hedging_spot(
 
                                                                             break
 
-                                                                    if status == "closed":
+                                                                    if (
+                                                                        status
+                                                                        == "closed"
+                                                                    ):
 
                                                                         best_ask_prc: (
                                                                             float
@@ -578,7 +591,9 @@ async def hedging_spot(
                                                                         nearest_transaction_to_index = [
                                                                             o
                                                                             for o in my_trades_currency_strategy_status
-                                                                            if o["price"]
+                                                                            if o[
+                                                                                "price"
+                                                                            ]
                                                                             == closest_price
                                                                         ]
 
@@ -606,7 +621,7 @@ async def hedging_spot(
                                                                             # )
 
                                                                             break
-                
+
             except Exception as error:
 
                 parse_error_message(error)

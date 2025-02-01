@@ -33,6 +33,12 @@ from utilities.system_tools import (
     provide_path_for_file,
 )
 
+from utilities.string_modification import (
+    extract_currency_from_text,
+    remove_double_brackets_in_list,
+    remove_redundant_elements,
+)
+
 
 async def cancelling_orders(
     private_data: object,
@@ -98,14 +104,16 @@ async def cancelling_orders(
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         chart_channel: str = redis_channels["chart"]
-        user_changes_channel: str = redis_channels["user_changes"]
-        portfolio_channel: str = redis_channels["portfolio"]
+        general_channel: str = redis_channels["general"]
         market_condition_channel: str = redis_channels["market_condition"]
+        portfolio_channel: str = redis_channels["portfolio"]
         ticker_channel: str = redis_channels["ticker"]
-
+        user_changes_channel: str = redis_channels["user_changes"]
+        
         # prepare channels placeholders
         channels = [
             # chart_channel,
+            general_channel,
             user_changes_channel,
             # portfolio_channel,
             # market_condition_channel,
@@ -117,7 +125,7 @@ async def cancelling_orders(
 
         not_cancel = True
 
-        cached_orders=[]
+        cached_orders = []
 
         while not_cancel:
 
@@ -125,29 +133,34 @@ async def cancelling_orders(
 
                 message_byte = await pubsub.get_message()
 
-                if (message_byte 
-                    and message_byte["type"] == "message"):
-                    
-                    message_data = orjson.loads(message_byte["data"])
-                    
-                    message = message_data["message"]
-                    
+                if message_byte and message_byte["type"] == "message":
+
+                    message = orjson.loads(message_byte["data"])
+
+                    data: dict = message["data"]
+
+                    message_channel: str = message["channel"]
+
+                    currency: str = extract_currency_from_text(message_channel)
+
+                    currency_upper = currency.upper()
+
                     if b"user_changes" in (message_byte["channel"]):
-                        
+
                         cached_orders = message["cached_orders"]
                         sequence_user_trade = message["sequence_user_trade"]
                         log.critical(f"sequence_user_trade {sequence_user_trade}")
-                    
+
                     if b"ticker" in (message_byte["channel"]):
-                        
+
                         sequence = message_data["sequence"]
 
                         log.critical(sequence)
-                            
+
                         ticker_all = message["ticker_all"]
 
                         server_time = message["server_time"]
-                        
+
                         currency: str = message["currency"]
 
                         currency_upper: str = currency.upper()
@@ -156,7 +169,7 @@ async def cancelling_orders(
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                        if  server_time != 0 and ticker_all:
+                        if server_time != 0 and ticker_all:
 
                             # get portfolio data
                             portfolio = reading_from_pkl_data("portfolio", currency)[0]
@@ -171,7 +184,9 @@ async def cancelling_orders(
 
                             index_price = get_index(ticker_perpetual_instrument_name)
 
-                            sub_account = reading_from_pkl_data("sub_accounts", currency)
+                            sub_account = reading_from_pkl_data(
+                                "sub_accounts", currency
+                            )
 
                             sub_account = sub_account[0]
 
@@ -216,7 +231,8 @@ async def cancelling_orders(
                                 position_without_combo = [
                                     o
                                     for o in position
-                                    if f"{currency_upper}-FS" not in o["instrument_name"]
+                                    if f"{currency_upper}-FS"
+                                    not in o["instrument_name"]
                                 ]
 
                                 if index_price is not None and equity > 0:
@@ -332,7 +348,7 @@ async def cancelling_orders(
                                                         not_cancel = False
 
                                                         break
-    
+
             except Exception as error:
                 parse_error_message(error)
                 continue

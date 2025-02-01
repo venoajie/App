@@ -52,6 +52,7 @@ from utilities.string_modification import (
     remove_redundant_elements,
 )
 
+
 async def future_spreads(
     client_redis: object,
     config_app: list,
@@ -97,16 +98,17 @@ async def future_spreads(
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         chart_channel: str = redis_channels["chart"]
-        user_changes_channel: str = redis_channels["user_changes"]
-        portfolio_channel: str = redis_channels["portfolio"]
+        general_channel: str = redis_channels["general"]
         market_condition_channel: str = redis_channels["market_condition"]
+        portfolio_channel: str = redis_channels["portfolio"]
         ticker_channel: str = redis_channels["ticker"]
-        open_order: str = redis_channels["open_order"]
-
+        user_changes_channel: str = redis_channels["user_changes"]
+        
         # prepare channels placeholders
         channels = [
             # chart_channel,
             user_changes_channel,
+            general_channel,
             portfolio_channel,
             # market_condition_channel,
             ticker_channel,
@@ -121,8 +123,8 @@ async def future_spreads(
         sequence = 0
 
         chart_trade = False
-        
-        cached_orders =[]
+
+        cached_orders = []
 
         while not_cancel:
 
@@ -130,37 +132,34 @@ async def future_spreads(
 
                 message_byte = await pubsub.get_message()
 
-                if (message_byte 
-                    and message_byte["type"] == "message"):
-                    
-                    message_data = orjson.loads(message_byte["data"])
-                    
-                    message = message["message"]
-                    
+                if message_byte and message_byte["type"] == "message":
+
+                    message = orjson.loads(message_byte["data"])
+
                     data: dict = message["data"]
 
                     message_channel: str = message["channel"]
 
-                    
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
+
                     if b"user_changes" in (message_byte["channel"]):
-                        
+
                         cached_orders = message["cached_orders"]
                         sequence_user_trade = message["sequence_user_trade"]
                         log.critical(f"sequence_user_trade {sequence_user_trade}")
-                        
+
                     if b"ticker" in (message_byte["channel"]):
-                        
+
                         sequence = message_data["sequence"]
 
                         log.critical(sequence)
-                    
+
                         ticker_all = message["ticker_all"]
 
                         server_time = message["server_time"]
-                        
+
                         currency: str = message["currency"]
 
                         currency_lower: str = currency
@@ -175,17 +174,18 @@ async def future_spreads(
                             portfolio = reading_from_pkl_data("portfolio", currency)[0]
 
                             equity: float = portfolio["equity"]
-                            
+
                             ticker_perpetual_instrument_name = [
                                 o
                                 for o in ticker_all
                                 if instrument_name_perpetual in o["instrument_name"]
                             ][0]
 
-
                             index_price = get_index(ticker_perpetual_instrument_name)
 
-                            sub_account = reading_from_pkl_data("sub_accounts", currency)
+                            sub_account = reading_from_pkl_data(
+                                "sub_accounts", currency
+                            )
 
                             sub_account = sub_account[0]
 
@@ -231,14 +231,15 @@ async def future_spreads(
 
                                 position = [o for o in sub_account["positions"]]
 
-                                #log.debug(f"cached_orders {cached_orders}")
+                                # log.debug(f"cached_orders {cached_orders}")
 
-                                #log.warning(f"orders_currency {orders_currency}")
+                                # log.warning(f"orders_currency {orders_currency}")
 
                                 position_without_combo = [
                                     o
                                     for o in position
-                                    if f"{currency_upper}-FS" not in o["instrument_name"]
+                                    if f"{currency_upper}-FS"
+                                    not in o["instrument_name"]
                                 ]
 
                                 size_perpetuals_reconciled = (
@@ -304,7 +305,9 @@ async def future_spreads(
                                         and size_perpetuals_reconciled
                                     ):
 
-                                        extra = 3  # waiting minute before reorder  15 min
+                                        extra = (
+                                            3  # waiting minute before reorder  15 min
+                                        )
 
                                         BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = (
                                             strategy_params[
@@ -344,7 +347,8 @@ async def future_spreads(
                                         )
 
                                         my_trades_currency_strategy_labels: list = [
-                                            o["label"] for o in my_trades_currency_strategy
+                                            o["label"]
+                                            for o in my_trades_currency_strategy
                                         ]
 
                                         # send combo orders
@@ -366,19 +370,24 @@ async def future_spreads(
 
                                             if (
                                                 instrument_name_combo
-                                                and currency_upper in instrument_name_combo
+                                                and currency_upper
+                                                in instrument_name_combo
                                             ):
 
                                                 instrument_name_future = (
                                                     f"{currency_upper}-{instrument_name_combo[7:][:7]}"
                                                 ).strip("_")
-                                                
+
                                                 expiration_timestamp = [
-                                                            o["expiration_timestamp"]
-                                                            for o in instrument_attributes_futures_all
-                                                            if instrument_name_future in o["instrument_name"]][0]
-                                                    
-                                                instrument_time_left = (expiration_timestamp - server_time) / ONE_MINUTE
+                                                    o["expiration_timestamp"]
+                                                    for o in instrument_attributes_futures_all
+                                                    if instrument_name_future
+                                                    in o["instrument_name"]
+                                                ][0]
+
+                                                instrument_time_left = (
+                                                    expiration_timestamp - server_time
+                                                ) / ONE_MINUTE
 
                                                 instrument_time_left_exceed_threshold = (
                                                     instrument_time_left
@@ -405,9 +414,9 @@ async def future_spreads(
                                                     in o["instrument_name"]
                                                 ]
 
-                                                #log.debug(
+                                                # log.debug(
                                                 #    f"future_control {future_control} instrument_name_combo {instrument_name_combo} instrument_name_future {instrument_name_future}"
-                                                #)
+                                                # )
 
                                                 instrument_name_future_in_control = (
                                                     False
@@ -419,9 +428,9 @@ async def future_spreads(
                                                     ]
                                                 )
 
-                                                #log.debug(
+                                                # log.debug(
                                                 #    f"instrument_name_future_not_in_control {instrument_name_future_in_control} {not instrument_name_future_in_control}"
-                                                #)
+                                                # )
 
                                                 if (
                                                     not instrument_name_future_in_control
@@ -483,7 +492,9 @@ async def future_spreads(
                                         #! closing active trades
                                         for label in labels:
 
-                                            label_integer: int = get_label_integer(label)
+                                            label_integer: int = get_label_integer(
+                                                label
+                                            )
                                             selected_transaction = [
                                                 o
                                                 for o in my_trades_currency_strategy
@@ -491,7 +502,8 @@ async def future_spreads(
                                             ]
 
                                             selected_transaction_amount = [
-                                                o["amount"] for o in selected_transaction
+                                                o["amount"]
+                                                for o in selected_transaction
                                             ]
                                             sum_selected_transaction = sum(
                                                 selected_transaction_amount
@@ -501,7 +513,10 @@ async def future_spreads(
                                             )
 
                                             #! closing combo auto trading
-                                            if "Auto" in label and len_cleaned_orders < 50:
+                                            if (
+                                                "Auto" in label
+                                                and len_cleaned_orders < 50
+                                            ):
 
                                                 if sum_selected_transaction == 0:
 
@@ -567,7 +582,9 @@ async def future_spreads(
                                                                 )
 
                                                                 timestamp: int = (
-                                                                    transaction["timestamp"]
+                                                                    transaction[
+                                                                        "timestamp"
+                                                                    ]
                                                                 )
 
                                                                 waiting_time_for_selected_transaction: (
@@ -581,17 +598,17 @@ async def future_spreads(
                                                                     * 2
                                                                 )
 
-                                                                instrument_name = (
-                                                                    transaction[
-                                                                        "instrument_name"
-                                                                    ]
-                                                                )
+                                                                instrument_name = transaction[
+                                                                    "instrument_name"
+                                                                ]
 
                                                                 ticker_transaction = [
                                                                     o
                                                                     for o in ticker_all
                                                                     if instrument_name
-                                                                    in o["instrument_name"]
+                                                                    in o[
+                                                                        "instrument_name"
+                                                                    ]
                                                                 ]
 
                                                                 if (
@@ -630,7 +647,7 @@ async def future_spreads(
                                                                         # not_order = False
 
                                                                         break
-    
+
             except Exception as error:
 
                 parse_error_message(error)

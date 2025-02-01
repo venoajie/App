@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # user defined formula
-from db_management.sqlite_management import (
-    deleting_row, 
-    insert_tables
-    )
+from db_management.sqlite_management import deleting_row, insert_tables
 from strategies.basic_strategy import is_label_and_side_consistent
 
 
@@ -53,40 +50,40 @@ async def saving_order_based_on_state(
     Examples:
 
         original=  {
-            'jsonrpc': '2.0', 
-            'id': 1002, 
+            'jsonrpc': '2.0',
+            'id': 1002,
             'result': {
-                'trades': [], 
+                'trades': [],
                 'order': {
-                    'is_liquidation': False, 'risk_reducing': False, 'order_type': 'limit', 
+                    'is_liquidation': False, 'risk_reducing': False, 'order_type': 'limit',
                     'creation_timestamp': 1728090482863, 'order_state': 'open', 'reject_post_only': False,
-                    'contracts': 5.0, 'average_price': 0.0, 'reduce_only': False, 
-                    'last_update_timestamp': 1728090482863, 'filled_amount': 0.0, 'post_only': True, 
-                    'replaced': False, 'mmp': False, 'order_id': 'ETH-49960097702', 'web': False, 'api': True, 
+                    'contracts': 5.0, 'average_price': 0.0, 'reduce_only': False,
+                    'last_update_timestamp': 1728090482863, 'filled_amount': 0.0, 'post_only': True,
+                    'replaced': False, 'mmp': False, 'order_id': 'ETH-49960097702', 'web': False, 'api': True,
                     'instrument_name': 'ETH-PERPETUAL', 'max_show': 5.0, 'time_in_force': 'good_til_cancelled',
                     'direction': 'sell', 'amount': 5.0, 'price': 2424.05, 'label': 'hedgingSpot-open-1728090482812'
                     }
-                    }, 
-                    'usIn': 1728090482862653, 
-                    'usOut': 1728090482864640, 
-                    'usDiff': 1987, 
+                    },
+                    'usIn': 1728090482862653,
+                    'usOut': 1728090482864640,
+                    'usDiff': 1987,
                     'testnet': False
                     }
-        
+
         cancelled=  {
             'jsonrpc': '2.0',
-            'id': 1002, 
+            'id': 1002,
             'result': {
-                'is_liquidation': False, 'risk_reducing': False, 'order_type': 'limit', 
-                'creation_timestamp': 1728090482863, 'order_state': 'cancelled','reject_post_only': False, 
-                'contracts': 5.0, 'average_price': 0.0,'reduce_only': False, 
-                'last_update_timestamp': 1728090483773, 'filled_amount': 0.0,'post_only': True, 
-                'replaced': False, 'mmp': False, 'cancel_reason': 'user_request','order_id': 'ETH-49960097702', 
+                'is_liquidation': False, 'risk_reducing': False, 'order_type': 'limit',
+                'creation_timestamp': 1728090482863, 'order_state': 'cancelled','reject_post_only': False,
+                'contracts': 5.0, 'average_price': 0.0,'reduce_only': False,
+                'last_update_timestamp': 1728090483773, 'filled_amount': 0.0,'post_only': True,
+                'replaced': False, 'mmp': False, 'cancel_reason': 'user_request','order_id': 'ETH-49960097702',
                 'web': False, 'api': True, 'instrument_name': 'ETH-PERPETUAL',
-                'max_show': 5.0, 'time_in_force': 'good_til_cancelled', 'direction': 'sell', 'amount': 5.0, 
+                'max_show': 5.0, 'time_in_force': 'good_til_cancelled', 'direction': 'sell', 'amount': 5.0,
                 'price': 2424.05, 'label': 'hedgingSpot-open-1728090482812'},
                 'usIn': 1728090483773107,
-                'usOut': 1728090483774372, 
+                'usOut': 1728090483774372,
                 'usDiff': 1265,
                 'testnet': False
                 }
@@ -99,8 +96,7 @@ async def saving_order_based_on_state(
 
     order_state = order["order_state"]
 
-    if (order_state == "cancelled" 
-        or order_state == "filled"):
+    if order_state == "cancelled" or order_state == "filled":
 
         await deleting_row(
             order_table,
@@ -274,7 +270,8 @@ async def saving_oto_order(
         transaction_secondary = transaction_secondary[0]
 
         # no label
-        if (transaction_main["label"] == ""
+        if (
+            transaction_main["label"] == ""
             and "open" in transaction_main["order_state"]
         ):
 
@@ -381,8 +378,7 @@ async def saving_orders(
                                 non_checked_strategies, order
                             )
 
-                            if (label_and_side_consistent 
-                                and label):
+                            if label_and_side_consistent and label:
 
                                 await saving_order_based_on_state(
                                     order_db_table,
@@ -421,8 +417,7 @@ async def cancelling_and_relabelling(
     # no label
     if label == "":
 
-        if ("open" in order_state 
-            or "untriggered" in order_state):
+        if "open" in order_state or "untriggered" in order_state:
 
             if "OTO" not in order["order_id"]:
                 await modify_order_and_db.cancel_by_order_id(

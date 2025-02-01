@@ -46,16 +46,20 @@ async def processing_orders(
 
             try:
 
-                message = await pubsub.get_message()
+                message_byte = await pubsub.get_message()
 
                 if message and message["type"] == "message":
 
-                    message_data = orjson.loads(message["data"])
+                    message = orjson.loads(message_byte["data"])
 
-                    log.critical(message_data["sequence"])
+                    data: dict = message["data"]
 
-                    message = message_data["message"]
-                    
+                    message_channel: str = message["channel"]
+
+                    currency: str = extract_currency_from_text(message_channel)
+
+                    currency_upper = currency.upper()
+
                     log.error(f"message {message}")
 
                     if message["order_allowed"]:
@@ -134,6 +138,6 @@ async def processing_orders(
         parse_error_message(f"procesing orders {error}")
 
         await telegram_bot_sendtext(
-            f"processing order - {error}", 
+            f"processing order - {error}",
             "general_error",
-            )
+        )

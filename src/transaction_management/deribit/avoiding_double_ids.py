@@ -53,8 +53,8 @@ async def avoiding_double_ids(
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
-        
-        cached_orders=[]
+
+        cached_orders = []
 
         while True:
 
@@ -62,18 +62,17 @@ async def avoiding_double_ids(
 
                 message_byte = await pubsub.get_message()
 
-                if (message_byte 
-                    and message_byte["type"] == "message"):
-                    
+                if message_byte and message_byte["type"] == "message":
+
                     message_data = orjson.loads(message_byte["data"])
-                    
+
                     message = message_data["message"]
-                    
+
                     if b"user_changes" in (message_byte["channel"]):
-                        
+
                         cached_orders = message["cached_orders"]
                         sequence_user_trade = message["sequence_user_trade"]
-                        
+
                     sequence = message_data["sequence"]
                     log.critical(sequence_user_trade)
                     log.critical(sequence)
