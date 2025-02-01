@@ -115,15 +115,16 @@ async def future_spreads(
                 
                 if message and message["type"] == "message":
 
-                    message = orjson.loads(message)
-                    message_data = (message["data"])
+                    message_data = orjson.loads (message["data"])
                     
                     sequence = message_data["sequence"]
 
                     log.critical(message_data["sequence"])
                     
-                    if "user_changes" in message["channel"]:
-                        
+                    message_data = orjson.loads (message["data"])
+                    
+                    if "user_changes" in orjson.loads(message["channel"]):
+                            
                         cached_orders = message_data["cached_orders"]
                         log.warning(cached_orders)
 

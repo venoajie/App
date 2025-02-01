@@ -126,14 +126,11 @@ async def cancelling_orders(
                 message = await pubsub.get_message()
 
                 if message and message["type"] == "message":
-                    message = orjson.loads(message)
-                    message_data = (message["data"])
-                    
-                    sequence = message_data["sequence"]
 
-                    log.critical(message_data["sequence"])
+
+                    message_data = orjson.loads (message["data"])
                     
-                    if "user_changes" in message["channel"]:
+                    if "user_changes" in orjson.loads(message["channel"]):
                         
                         cached_orders = message_data["cached_orders"]
                         log.warning(cached_orders)
