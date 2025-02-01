@@ -160,8 +160,6 @@ async def hedging_spot(
 
                             equity: float = portfolio["equity"]
                             
-                            log.info (ticker_all)
-
                             ticker_perpetual_instrument_name = [
                                 o
                                 for o in ticker_all
