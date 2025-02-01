@@ -127,13 +127,13 @@ async def hedging_spot(
                     
                     message = message_data["message"]
                     
-                    if (f"""{b"{user_changes_channel}"}""") in (message_byte["channel"]):
+                    if b"user_changes" in (message_byte["channel"]):
                         
                         cached_orders = message["cached_orders"]
                         
                     sequence = message_data["sequence"]
-                    log.critical(message_data["sequence"])
-                    log.info (cached_orders)
+                    log.critical(message_data["sequence_user_trade"])
+                    log.critical(sequence)
                     
                     try:
                         ticker_all = (
