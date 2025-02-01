@@ -120,24 +120,21 @@ async def hedging_spot(
 
                 message_byte = await pubsub.get_message()
 
-                if message_byte and message_byte["type"] == "message":
+                if (message_byte 
+                    and message_byte["type"] == "message"):
                     
-                    log.debug (message_byte["channel"])
-
                     message_data = orjson.loads(message_byte["data"])
                     
-                    sequence = message_data["sequence"]
-
-                    log.critical(message_data["sequence"])
-
                     message = message_data["message"]
                     
-                    if b"user_changes" in (message_byte["channel"]):
+                    if (f"""{b"{user_changes_channel}"}""") in (message_byte["channel"]):
                         
                         cached_orders = message["cached_orders"]
+                        
+                    sequence = message_data["sequence"]
+                    log.critical(message_data["sequence"])
+                    log.info (cached_orders)
                     
-                    log.warning(cached_orders)
-
                     try:
                         ticker_all = (
                         message["ticker_all"],
