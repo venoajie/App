@@ -198,8 +198,11 @@ async def caching_distributing_data(
 
                 data_to_dispatch: dict = dict(
                     cached_orders=cached_orders,
-                    currency=currency,
                 )
+                
+                sequence_user_trade = sequence_user_trade + len(message_params) - 1
+
+                log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
 
                 await send_notification(
                     client_redis,
@@ -207,9 +210,6 @@ async def caching_distributing_data(
                     sequence_user_trade,
                     data_to_dispatch,
                 )
-
-                sequence_user_trade = sequence_user_trade + len(message_params) - 1
-                log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
 
             if "chart.trades" in message_channel:
 
