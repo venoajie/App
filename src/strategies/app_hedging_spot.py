@@ -127,10 +127,10 @@ async def hedging_spot(
                     sequence = message_data["sequence"]
 
                     log.critical(sequence)
-                    
+
                     if "user_changes" in message["channel"]:
                         
-                        cached_orders = message["cached_orders"]
+                        cached_orders = message_data["cached_orders"]
 
                     message = message_data["message"]
 

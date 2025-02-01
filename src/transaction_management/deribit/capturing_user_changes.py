@@ -79,7 +79,7 @@ async def saving_and_relabelling_orders(
 
                     if "user_changes" in message["channel"]:
                         
-                        cached_orders = message["cached_orders"]
+                        cached_orders = message_data["cached_orders"]
 
                     message = message_data["message"]
 

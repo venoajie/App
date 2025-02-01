@@ -131,11 +131,9 @@ async def cancelling_orders(
 
                     log.critical(message_data["sequence"])
         
-                    try:
-                        cached_orders = message["cached_orders"]
-
-                    except:
-                        cached_orders = cached_orders
+                    if "user_changes" in message["channel"]:
+                        
+                        cached_orders = message_data["cached_orders"]
 
                     message = message_data["message"]
 

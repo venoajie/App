@@ -120,11 +120,10 @@ async def future_spreads(
                     sequence = message_data["sequence"]
 
                     log.critical(message_data["sequence"])
-
                     
                     if "user_changes" in message["channel"]:
                         
-                        cached_orders = message["cached_orders"]
+                        cached_orders = message_data["cached_orders"]
 
                     log.debug(cached_orders)
 
