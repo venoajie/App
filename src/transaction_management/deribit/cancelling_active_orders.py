@@ -130,15 +130,14 @@ async def cancelling_orders(
                     message_data = orjson.loads(message["data"])
 
                     log.critical(message_data["sequence"])
-
-                    message = message_data["message"]
-
-                    
+        
                     try:
                         cached_orders = message["cached_orders"]
 
                     except:
                         cached_orders = cached_orders
+
+                    message = message_data["message"]
 
                     ticker_all = (
                         message["ticker_all"],
