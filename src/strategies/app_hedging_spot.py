@@ -132,6 +132,7 @@ async def hedging_spot(
                     
                     if b"user_changes" in (message["channel"]):
                         
+                        log.info(message_data)
                         cached_orders = message_data["cached_orders"]
                         log.warning(cached_orders)
 
