@@ -64,14 +64,18 @@ async def avoiding_double_ids(
 
                 if message and message["type"] == "message":
 
-                    message_data = orjson.loads(message["data"])
+                    message = orjson.loads(message)
+                    message_data = (message["data"])
+                    
+                    sequence = message_data["sequence"]
 
                     log.critical(message_data["sequence"])
-                    #log.info(message_data)
                     
-                    if "user_changes" in message:
+                    if "user_changes" in message["channel"]:
                         
-                        cached_orders = message["cached_orders"]
+                        cached_orders = message_data["cached_orders"]
+                        log.warning(cached_orders)
+
 
                     message = message_data["message"]
 

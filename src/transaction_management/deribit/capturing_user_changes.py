@@ -72,14 +72,13 @@ async def saving_and_relabelling_orders(
                 message = await pubsub.get_message()
 
                 if message and message["type"] == "message":
-
-                    message_data = orjson.loads(message["data"])
-
-                    print(f"""capturing user changes {message_data["sequence"]}""")
-
-                    if "user_changes" in message:
+                    message = orjson.loads(message)
+                    message_data = (message["data"])
+                    
+                    if "user_changes" in message["channel"]:
                         
                         cached_orders = message_data["cached_orders"]
+
 
                     message = message_data["message"]
 
