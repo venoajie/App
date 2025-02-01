@@ -132,19 +132,17 @@ async def hedging_spot(
                         cached_orders = message["cached_orders"]
                         sequence_user_trade = message["sequence_user_trade"]
                         log.critical(sequence_user_trade)
+                            
+                    else:
                         
-                    sequence = message_data["sequence"]
-                    
-                    log.critical(sequence)
-                    
-                    try:
+                        sequence = message_data["sequence"]
+
+                        log.critical(sequence)
+                
                         ticker_all = message["ticker_all"]
                     
-                        chart_trade, server_time = (
-                            message["chart_trade"],
-                            message["server_time"],
-                        )
-
+                        server_time = message["server_time"],
+                        
                         currency: str = message["currency"]
 
                         currency_upper: str = currency.upper()
@@ -154,7 +152,7 @@ async def hedging_spot(
 
                         archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
-                        if not chart_trade and server_time != 0 and ticker_all:
+                        if server_time != 0 and ticker_all:
 
                             # get portfolio data
                             portfolio = reading_from_pkl_data("portfolio", currency)[0]
@@ -570,12 +568,7 @@ async def hedging_spot(
                                                                             # )
 
                                                                             break
-            
-                    except Exception as error:
-                        parse_error_message(error)
-                        continue
                 
-                    
             except Exception as error:
 
                 parse_error_message(error)
