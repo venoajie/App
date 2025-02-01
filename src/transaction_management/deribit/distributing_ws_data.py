@@ -194,8 +194,6 @@ async def caching_distributing_data(
                         data,
                     )
 
-                log.warning(f"cached_orders {cached_orders}")
-
                 data_to_dispatch: dict = dict(
                     cached_orders=cached_orders,
                     currency=currency,
