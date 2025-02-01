@@ -32,6 +32,7 @@ chart = "chart"
 open_order = "open_order"
 user_changes = "user_changes"
 portfolio = "portfolio"
+general = "general"
 market_condition = "market_condition"
 ticker = "ticker"
 

@@ -137,7 +137,15 @@ async def caching_distributing_data(
         while True:
 
             message_params: str = await queue_general.get()
+            
+            log.debug(message_params)
 
+            await send_notification(
+                client_redis,
+                user_changes_channel,
+                sequence_user_trade,
+                message_params,
+            )
             data: dict = message_params["data"]
 
             message_channel: str = message_params["channel"]
