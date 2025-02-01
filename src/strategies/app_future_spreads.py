@@ -102,22 +102,6 @@ async def future_spreads(
         not_cancel = True
 
 
-        chart_trades_buffer: list = []
-
-        ticker_all = cached_ticker(instruments_name)
-
-        cached_orders: list = await combining_order_data(private_data, currencies)
-
-        server_time = 0
-
-        resolutions = [60, 15, 5]
-        qty_candles = 5
-        dim_sequence = 3
-
-        combining_candles = combining_candles_data(
-            np, currencies, qty_candles, resolutions, dim_sequence
-        )
-
         sequence = 0
 
         chart_trade = False
