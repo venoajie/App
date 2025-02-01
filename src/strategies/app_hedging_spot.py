@@ -118,13 +118,13 @@ async def hedging_spot(
 
             try:
 
-                message = await pubsub.get_message()
+                message_byte = await pubsub.get_message()
 
-                if message and message["type"] == "message":
+                if message_byte and message_byte["type"] == "message":
                     
-                    log.debug (message["channel"])
+                    log.debug (message_byte["channel"])
 
-                    message_data = orjson.loads(message["data"])
+                    message_data = orjson.loads(message_byte["data"])
                     
                     sequence = message_data["sequence"]
 
@@ -132,7 +132,7 @@ async def hedging_spot(
 
                     message = message_data["message"]
                     
-                    if b"user_changes" in (message["channel"]):
+                    if b"user_changes" in (message_byte["channel"]):
                         
                         log.info(message_data)
                         cached_orders = message["cached_orders"]
