@@ -150,11 +150,9 @@ async def future_spreads(
 
 
                     message_data = orjson.loads(message_byte["data"])
-                    print(message_data)
-                    message = message_data["message"]
-                    print(message)
 
-                    log.critical (message_byte["data"]["sequence"])
+                    message = message_data["message"]
+
                     message_channel: str = message["channel"]
 
                     currency: str = extract_currency_from_text(message_channel)
