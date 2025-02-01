@@ -70,12 +70,10 @@ async def avoiding_double_ids(
                     #log.info(message_data)
 
                     message = message_data["message"]
-
-                    try:
+                    
+                    if "user_changes" in message["channel"]:
+                        
                         cached_orders = message["cached_orders"]
-
-                    except:
-                        cached_orders = cached_orders
 
                     currency: str = message["currency"]
 

@@ -78,12 +78,10 @@ async def saving_and_relabelling_orders(
                     print(f"""capturing user changes {message_data["sequence"]}""")
 
                     message = message_data["message"]
-
-                    try:
+                    
+                    if "user_changes" in message["channel"]:
+                        
                         cached_orders = message["cached_orders"]
-
-                    except:
-                        cached_orders = cached_orders
 
                     currency: str = message["currency"]
 

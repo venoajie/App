@@ -117,8 +117,6 @@ async def future_spreads(
 
                     message_data = orjson.loads(message["data"])
                     
-                    log.debug(message)
-
                     sequence = message_data["sequence"]
 
                     log.critical(message_data["sequence"])
@@ -129,11 +127,11 @@ async def future_spreads(
                         message["ticker_all"],
                     )
                     
-                    try:
+                    if "user_changes" in message["channel"]:
+                        
                         cached_orders = message["cached_orders"]
 
-                    except:
-                        cached_orders = cached_orders
+                    log.debug(cached_orders)
 
                     chart_trade, server_time = (
                         message["chart_trade"],
