@@ -72,7 +72,7 @@ async def saving_and_relabelling_orders(
 
                 message_byte = await pubsub.get_message()
 
-                if message_byte and message_byte["type"] == "message":
+                if False and message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
