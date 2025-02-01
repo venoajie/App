@@ -113,7 +113,7 @@ async def caching_distributing_data(
         portfolio_channel: str = redis_channels["portfolio"]
         market_condition_channel: str = redis_channels["market_condition"]
         ticker_channel: str = redis_channels["ticker"]
-        general: str = redis_channels["general"]
+        general_channel: str = redis_channels["general"]
 
         chart_trades_buffer: list = []
 
@@ -139,10 +139,12 @@ async def caching_distributing_data(
         while True:
 
             message_params: str = await queue_general.get()
+            
+            log.warning (message_params)
 
             await send_notification(
                 client_redis,
-                general,
+                general_channel,
                 sequence_user_trade,
                 message_params,
             )
