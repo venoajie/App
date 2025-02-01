@@ -140,8 +140,6 @@ async def caching_distributing_data(
 
             message_params: str = await queue_general.get()
 
-            log.debug(message_params)
-
             await send_notification(
                 client_redis,
                 general,

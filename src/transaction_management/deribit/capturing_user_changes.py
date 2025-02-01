@@ -76,8 +76,6 @@ async def saving_and_relabelling_orders(
 
                     message = orjson.loads(message_byte["data"])
 
-                    data: dict = message["data"]
-
                     message_channel: str = message["channel"]
 
                     currency: str = extract_currency_from_text(message_channel)
