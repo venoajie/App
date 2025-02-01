@@ -82,7 +82,7 @@ async def main():
     
     try:
 
-        private_data: str = SendApiRequest(sub_account_id)
+        private_data: object = SendApiRequest(sub_account_id)
 
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
 
@@ -134,10 +134,12 @@ async def main():
             saving_task,
                     
             hedging_spot(
+                private_data,
                 client_redis,
                 config_app,),
 
             future_spreads(
+                private_data,
                 client_redis,
                 config_app,
                 ),
