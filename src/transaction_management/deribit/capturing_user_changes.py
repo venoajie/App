@@ -98,6 +98,7 @@ async def saving_and_relabelling_orders(
                         )
 
                     except:
+                        parse_error_message(error)
                         continue
 
             except Exception as error:

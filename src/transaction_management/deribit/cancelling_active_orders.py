@@ -142,7 +142,6 @@ async def cancelling_orders(
 
                     log.critical(sequence)
                     
-
                     try:
                         ticker_all = (
                         message["ticker_all"],
@@ -339,6 +338,7 @@ async def cancelling_orders(
                                                         break
 
                     except:
+                        parse_error_message(error)
                         continue
                     
             except Exception as error:

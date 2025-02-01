@@ -614,6 +614,7 @@ async def future_spreads(
                                                                         break
 
                     except:
+                        parse_error_message(error)
                         continue
                     
             except Exception as error:
