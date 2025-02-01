@@ -197,8 +197,6 @@ async def caching_distributing_data(
                 log.warning(f"cached_orders {cached_orders}")
 
                 data_to_dispatch: dict = dict(
-                    data=data,
-                    ticker_all=ticker_all,
                     cached_orders=cached_orders,
                     currency=currency,
                 )
@@ -207,7 +205,7 @@ async def caching_distributing_data(
                     client_redis,
                     user_changes_channel,
                     sequence_user_trade,
-                    cached_orders,
+                    data_to_dispatch,
                 )
 
                 sequence_user_trade = sequence_user_trade + len(message_params) - 1
