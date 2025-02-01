@@ -197,7 +197,7 @@ async def caching_distributing_data(
                 data_to_dispatch: dict = dict(
                     cached_orders=cached_orders,
                     sequence_user_trade=sequence_user_trade,
-                    currency=currency,
+                    currency=currency
 
                 )
                 
@@ -271,7 +271,7 @@ async def caching_distributing_data(
                 chart_trade=chart_trade,
                 market_condition=market_condition,
                 server_time=server_time,
-                ticker_all=ticker_all,
+                ticker_all=ticker_all
             )
 
             if sequence_update > sequence:
