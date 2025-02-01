@@ -139,7 +139,7 @@ async def hedging_spot(
                     
                     try:
                         ticker_all = (
-                        message["ticker_all"],
+                        message["ticker_all"]
                     )
 
                         chart_trade, server_time = (
