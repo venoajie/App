@@ -153,7 +153,7 @@ async def hedging_spot(
 
                     archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
-                    if not chart_trade and server_time != 0:
+                    if not chart_trade and server_time != 0 and ticker_all:
 
                         # get portfolio data
                         portfolio = reading_from_pkl_data("portfolio", currency)[0]

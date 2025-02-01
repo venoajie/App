@@ -146,7 +146,7 @@ async def future_spreads(
 
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                    if not chart_trade and server_time != 0:
+                    if not chart_trade and server_time != 0 and ticker_all:
 
                         # get portfolio data
                         portfolio = reading_from_pkl_data("portfolio", currency)[0]
