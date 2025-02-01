@@ -164,9 +164,10 @@ async def hedging_spot(
 
                 if message_byte and message_byte["type"] == "message":
 
-                    message = orjson.loads(message_byte["data"])
+                    message = orjson.loads(message_byte["data"]["message"])
 
-                    log.warning (message)
+                    log.critical (message_byte["data"]["sequence"])
+                    message_channel: str = message["channel"]
 
                     message_channel: str = message["channel"]                    
 

@@ -74,7 +74,13 @@ async def saving_and_relabelling_orders(
 
                 if message_byte and message_byte["type"] == "message":
 
-                    message = orjson.loads(message_byte["data"])
+                    message = orjson.loads(message_byte["data"]["message"])
+
+                    message_channel: str = message["channel"]
+
+                    print (message_byte["data"]["sequence"])
+
+                    message_channel: str = message["channel"]
 
                     message_channel: str = message["channel"]
 
