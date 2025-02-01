@@ -221,8 +221,6 @@ class StreamingAccountData:
 
                                 message_params: dict = message["params"]
 
-                                print(message_params)
-
                                 # queing message to dispatcher
                                 await queue_general.put(message_params)
 
