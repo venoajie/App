@@ -356,13 +356,13 @@ async def future_spreads(
                                                         ]
                                                     )
 
-                                                instrument_time_left = max(
+                                                instrument_time_left = (
                                                         [
                                                             o["expiration_timestamp"]
                                                             for o in instrument_attributes_futures_all
                                                             if o["instrument_name"]
                                                             == instrument_name_future
-                                                        ]
+                                                        ][0]
                                                     
                                                     - server_time
                                                 ) / ONE_MINUTE
