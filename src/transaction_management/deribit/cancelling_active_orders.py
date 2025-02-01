@@ -117,7 +117,7 @@ async def cancelling_orders(
             user_changes_channel,
             # portfolio_channel,
             # market_condition_channel,
-            ticker_channel,
+            #ticker_channel,
         ]
 
         # subscribe to channels
@@ -141,14 +141,12 @@ async def cancelling_orders(
                     
                     log.debug (message)
 
-                    message_params: str = message["message_params"]
+                    message_channel: str = message["channel"]
 
-                    message_channel: str = message_params["channel"]
-
-                    message_data: str = message_params["data"]
+                    message_data: str = message["data"]
 
                     log.debug (message_data)
-                    
+       
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()

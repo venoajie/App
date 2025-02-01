@@ -170,11 +170,9 @@ async def hedging_spot(
                     
                     log.debug (message)
 
-                    message_params: str = message["message_params"]
+                    message_channel: str = message["channel"]
 
-                    message_channel: str = message_params["channel"]
-
-                    message_data: str = message_params["data"]
+                    message_data: str = message["data"]
 
                     log.debug (message_data)
 
