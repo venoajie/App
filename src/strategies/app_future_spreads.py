@@ -614,9 +614,8 @@ async def future_spreads(
 
                     except Exception as error:
 
-                        log.debug (ticker_all)
-                        log.info (instrument_name_perpetual)
                         parse_error_message(error)
+
                         continue
                     
             except Exception as error:
