@@ -60,25 +60,25 @@ async def avoiding_double_ids(
 
             try:
 
-                message = await pubsub.get_message()
+                message_byte = await pubsub.get_message()
 
-                if message and message["type"] == "message":
-
-                    message_data = orjson.loads (message["data"])
-
-                    log.critical(message_data["sequence"])
+                if (message_byte 
+                    and message_byte["type"] == "message"):
                     
-                    if "user_changes" in message["channel"]:
-                        
-                        cached_orders = message_data["cached_orders"]
-                        log.warning(cached_orders)
-
-
+                    message_data = orjson.loads(message_byte["data"])
+                    
                     message = message_data["message"]
+                    
+                    if b"user_changes" in (message_byte["channel"]):
+                        
+                        cached_orders = message["cached_orders"]
+                        sequence_user_trade = message["sequence_user_trade"]
+                        
+                    sequence = message_data["sequence"]
+                    log.critical(sequence_user_trade)
+                    log.critical(sequence)
 
                     currency: str = message["currency"]
-
-                    cached_orders: list = message["cached_orders"]
 
                     currency_upper: str = currency.upper()
 

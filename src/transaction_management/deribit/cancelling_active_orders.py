@@ -123,20 +123,24 @@ async def cancelling_orders(
 
             try:
 
-                message = await pubsub.get_message()
+                message_byte = await pubsub.get_message()
 
-                if message and message["type"] == "message":
-
-
-                    message_data = orjson.loads (message["data"])
+                if (message_byte 
+                    and message_byte["type"] == "message"):
                     
-                    if "user_changes" in orjson.loads(message["channel"]):
-                        
-                        cached_orders = message_data["cached_orders"]
-                        log.warning(cached_orders)
-
-
+                    message_data = orjson.loads(message_byte["data"])
+                    
                     message = message_data["message"]
+                    
+                    if b"user_changes" in (message_byte["channel"]):
+                        
+                        cached_orders = message["cached_orders"]
+                        sequence_user_trade = message["sequence_user_trade"]
+                        
+                    sequence = message_data["sequence"]
+                    log.critical(sequence_user_trade)
+                    log.critical(sequence)
+                    
 
                     try:
                         ticker_all = (
