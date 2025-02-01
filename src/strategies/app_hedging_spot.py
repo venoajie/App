@@ -129,15 +129,14 @@ async def hedging_spot(
                     sequence = message_data["sequence"]
 
                     log.critical(message_data["sequence"])
+
+                    message = message_data["message"]
                     
                     if b"user_changes" in (message["channel"]):
                         
                         log.info(message_data)
-                        cached_orders = message_data["cached_orders"]
+                        cached_orders = message["cached_orders"]
                         log.warning(cached_orders)
-
-
-                    message = message_data["message"]
 
                     try:
                         ticker_all = (
