@@ -133,7 +133,7 @@ async def hedging_spot(
                         sequence_user_trade = message["sequence_user_trade"]
                         log.critical(sequence_user_trade)
                             
-                    else:
+                    if b"ticker" in (message_byte["channel"]):
                         
                         sequence = message_data["sequence"]
 
