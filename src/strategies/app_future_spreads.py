@@ -124,9 +124,9 @@ async def future_spreads(
                         
                         cached_orders = message["cached_orders"]
                         sequence_user_trade = message["sequence_user_trade"]
+                        log.critical(sequence_user_trade)
                         
                     sequence = message_data["sequence"]
-                    log.critical(sequence_user_trade)
                     log.critical(sequence)
                     
                     try:
