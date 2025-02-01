@@ -78,10 +78,12 @@ async def saving_and_relabelling_orders(
 
                     message = message_byte_data["message"]
 
-                    message_channel: str = message["channel"]
+                    message_params: str = message["message_params"]
 
-                    message_data: str = message["data"]
+                    message_channel: str = message_params["channel"]
 
+                    message_data: str = message_params["data"]
+                    
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
