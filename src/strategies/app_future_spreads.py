@@ -89,7 +89,7 @@ async def future_spreads(
         # prepare channels placeholders
         channels = [
             # chart_channel,
-            #user_changes_channel,
+            user_changes_channel,
             portfolio_channel,
             # market_condition_channel,
             ticker_channel,
@@ -113,8 +113,6 @@ async def future_spreads(
 
                 message = await pubsub.get_message()
                 
-                
-
                 if message and message["type"] == "message":
 
                     message_data = orjson.loads(message["data"])
