@@ -205,9 +205,9 @@ async def future_spreads(
 
                                 position = [o for o in sub_account["positions"]]
 
-                                log.debug(f"cached_orders {cached_orders}")
+                                #log.debug(f"cached_orders {cached_orders}")
 
-                                log.warning(f"orders_currency {orders_currency}")
+                                #log.warning(f"orders_currency {orders_currency}")
 
                                 position_without_combo = [
                                     o
@@ -346,6 +346,15 @@ async def future_spreads(
                                                 instrument_name_future = (
                                                     f"{currency_upper}-{instrument_name_combo[7:][:7]}"
                                                 ).strip("_")
+                                                
+                                                log.info ((
+                                                        [
+                                                            o["expiration_timestamp"]
+                                                            for o in instrument_attributes_futures_all
+                                                            if o["instrument_name"]
+                                                            == instrument_name_future
+                                                        ]
+                                                    ))
 
                                                 instrument_time_left = (
                                                     max(
