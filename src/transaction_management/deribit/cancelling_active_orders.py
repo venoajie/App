@@ -117,6 +117,8 @@ async def cancelling_orders(
 
         not_cancel = True
 
+        cached_orders=[]
+
         while not_cancel:
 
             try:

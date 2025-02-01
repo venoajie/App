@@ -89,18 +89,22 @@ async def saving_and_relabelling_orders(
 
                     currency_lower: str = currency
 
-                    data: list = message["data"]
+                    try:
+                        data: list = message["data"]
 
-                    await saving_orders(
-                        modify_order_and_db,
-                        private_data,
-                        cancellable_strategies,
-                        non_checked_strategies,
-                        data,
-                        order_db_table,
-                        currency_lower,
-                        False,
-                    )
+                        await saving_orders(
+                            modify_order_and_db,
+                            private_data,
+                            cancellable_strategies,
+                            non_checked_strategies,
+                            data,
+                            order_db_table,
+                            currency_lower,
+                            False,
+                        )
+
+                    except:
+                        continue
 
             except Exception as error:
 
