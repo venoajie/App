@@ -50,9 +50,15 @@ async def processing_orders(
 
                 if message_byte and message_byte["type"] == "message":
 
-                    message = orjson.loads(message_byte["data"])
+                    message_data = orjson.loads(message_byte["data"])
 
-                    message_channel: str = message["channel"]
+                    message = message_data["message"]
+
+                    message_params = message["message_params"]
+
+                    message_channel: str = message_params["channel"]
+
+                    message_data: str = message_params["data"]
 
                     currency: str = extract_currency_from_text(message_channel)
 
