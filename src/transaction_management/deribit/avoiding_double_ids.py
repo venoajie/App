@@ -42,13 +42,16 @@ async def avoiding_double_ids(
 
         order_db_table = relevant_tables["orders_table"]
 
+        redis_keys: dict = config_app["redis_keys"][0]
+        orders_keys: str = redis_keys["orders"]
+
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        user_changes_channel: str = redis_channels["user_changes"]
+        order_channel: str = redis_channels["order"]
 
         # prepare channels placeholders
         channels = [
-            user_changes_channel,
+            order_channel,
         ]
 
         # subscribe to channels
@@ -64,71 +67,69 @@ async def avoiding_double_ids(
 
                 if message_byte and message_byte["type"] == "message":
 
-                    message_data = orjson.loads(message_byte["data"])
+                    message_byte_data = orjson.loads(message_byte["data"])
 
-                    message = message_data["message"]
+                    message_channel = message_byte_data["channel"]
 
-                    if b"user_changes" in (message_byte["channel"]):
+                    if order_channel in message_channel:
 
-                        cached_orders = message["cached_orders"]
-                        sequence_user_trade = message["sequence_user_trade"]
+                        cached_orders = orjson.loads(
+                            await client_redis.hget(
+                                orders_keys,
+                                order_channel,
+                            )
+                        )
 
-                    sequence = message_data["sequence"]
-                    log.critical(sequence_user_trade)
-                    log.critical(sequence)
+                        currency_upper = message_byte_data["currency_upper"]
 
-                    currency: str = message["currency"]
-
-                    currency_upper: str = currency.upper()
-
-                    orders_currency: list = (
-                        []
-                        if not cached_orders
-                        else [
-                            o
-                            for o in cached_orders
-                            if currency_upper in o["instrument_name"]
-                        ]
-                    )
-
-                    for strategy in active_strategies:
-
-                        orders_currency_strategy: list = (
+                        orders_currency: list = (
                             []
-                            if not orders_currency
+                            if not cached_orders
                             else [
-                                o for o in orders_currency if strategy in (o["label"])
+                                o
+                                for o in cached_orders
+                                if currency_upper in o["instrument_name"]
                             ]
                         )
 
-                        if orders_currency_strategy:
+                        for strategy in active_strategies:
 
-                            outstanding_order_id: list = remove_redundant_elements(
-                                [o["label"] for o in orders_currency_strategy]
+                            orders_currency_strategy: list = (
+                                []
+                                if not orders_currency
+                                else [
+                                    o for o in orders_currency if strategy in (o["label"])
+                                ]
                             )
 
-                            for label in outstanding_order_id:
+                            if orders_currency_strategy:
 
-                                orders = [
-                                    o for o in orders_currency if label in o["label"]
-                                ]
+                                outstanding_order_id: list = remove_redundant_elements(
+                                    [o["label"] for o in orders_currency_strategy]
+                                )
 
-                                len_label = len(orders)
+                                for label in outstanding_order_id:
 
-                                if len_label > 1:
+                                    orders = [
+                                        o for o in orders_currency if label in o["label"]
+                                    ]
 
-                                    for order in orders:
-                                        log.critical(f"double ids {label}")
-                                        log.critical(orders)
+                                    len_label = len(orders)
 
-                                        await modify_order_and_db.cancel_by_order_id(
-                                            order_db_table, order["order_id"]
-                                        )
+                                    if len_label > 1:
 
-                                        await telegram_bot_sendtext(
-                                            f"avoiding double ids - {orders}",
-                                            "general_error",
-                                        )
+                                        for order in orders:
+                                            log.critical(f"double ids {label}")
+                                            log.critical(orders)
+
+                                            await modify_order_and_db.cancel_by_order_id(
+                                                order_db_table, order["order_id"]
+                                            )
+
+                                            await telegram_bot_sendtext(
+                                                f"avoiding double ids - {orders}",
+                                                "general_error",
+                                            )
 
             except Exception as error:
 

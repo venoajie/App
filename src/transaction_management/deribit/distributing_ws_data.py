@@ -145,6 +145,7 @@ async def caching_distributing_data(
                             pub_message = dict(
                                 sequence=sequence,
                                 channel=order_channel,
+                                currency_upper=currency_upper,
                             )
 
                         if "portfolio" in message_channel:
@@ -188,10 +189,10 @@ async def caching_distributing_data(
 
                     pub_message = dict(
                         sequence=sequence,
+                        channel=ticker_channel,
                         server_time=server_time,
                         currency=currency,
                         currency_upper=currency_upper,
-                        channel=ticker_channel,
                     )
 
                     await save_and_publish_result(
@@ -252,8 +253,8 @@ async def caching_distributing_data(
 
                         pub_message = dict(
                             sequence=sequence,
-                            is_chart_trade=is_chart_trade,
                             channel=chart_update_channel,
+                            is_chart_trade=is_chart_trade,
                         )
 
                         await save_and_publish_result(
