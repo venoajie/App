@@ -183,7 +183,7 @@ async def caching_distributing_data(
                         orjson.dumps(ticker_all),
                         )
                     
-                    await client_redis.publish(
+                    await pipe.publish(
                         ticker_channel,
                         orjson.dumps(
                             {
