@@ -310,13 +310,6 @@ async def caching_distributing_data(
                         ticker_all=ticker_all,
                     )
 
-                    await send_notification(
-                        client_redis,
-                        ticker_channel,
-                        sequence,
-                        data_to_dispatch,
-                    )
-
                     sequence = sequence_update
 
                 await pipe.execute()
