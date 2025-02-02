@@ -201,6 +201,8 @@ async def caching_distributing_data(
                     pub_message = dict(
                         sequence=sequence,
                         server_time=server_time,
+                        currency=currency,
+                        currency_upper=currency_upper,
                         channel=ticker_channel,
                     )
 

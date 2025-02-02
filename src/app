@@ -127,12 +127,31 @@ async def main():
                 client_redis,
                 config_app,),
 
+            reconciling_size(
+                modify_order_and_db,
+                config_app,
+                idle_time),                
+            #scanning_volume()
+                  
+            """
+            
+        await asyncio.gather(
+            producer_task, 
+        
+            saving_task,
+                    
+            #future_spreads(
+            #    private_data,
+            #    client_redis,
+            #    config_app,
+            #    ),
+
             processing_orders(
                 modify_order_and_db,
                 client_redis,
                 config_app,
                 ),
-            
+                        
             cancelling_orders(
                 private_data,
                 modify_order_and_db,
@@ -157,25 +176,6 @@ async def main():
                 modify_order_and_db,
                 config_app),
     
-            reconciling_size(
-                modify_order_and_db,
-                config_app,
-                idle_time),                
-            #scanning_volume()
-                  
-            """
-            
-        await asyncio.gather(
-            producer_task, 
-        
-            saving_task,
-                    
-            future_spreads(
-                private_data,
-                client_redis,
-                config_app,
-                ),
-            
             
             
                         )  

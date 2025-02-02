@@ -30,19 +30,39 @@ async def processing_orders(
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
+        redis_keys: dict = config_app["redis_keys"][0]
+        ticker_keys: str = redis_keys["ticker"]
+        orders_keys: str = redis_keys["orders"]
+
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        open_order: str = redis_channels["open_order"]
+        ticker_channel: str = redis_channels["ticker_update"]
+        order_channel: str = redis_channels["order"]
+        chart_update_channel: str = redis_channels["chart_update"]
 
         # prepare channels placeholders
         channels = [
-            open_order,
+            chart_update_channel,
+            order_channel,
+            ticker_channel,
         ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        while True:
+        sequence = 0
+
+        server_time = 0
+
+        cached_orders = []
+
+        currency = None
+
+        chart_trade = False
+
+        not_cancel = True
+
+        while not_cancel:
 
             try:
 
@@ -52,11 +72,38 @@ async def processing_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message = message_byte_data["message"]
+                    if chart_update_channel in message_byte_data["channel"]:
+                        cached_ticker_all = orjson.loads(
+                            await client_redis.hget(
+                                ticker_keys,
+                                chart_update_channel,
+                            )
+                        )
 
-                    message_channel: str = message["channel"]
+                    if order_channel in message_byte_data["channel"]:
+                        cached_orders = orjson.loads(
+                            await client_redis.hget(
+                                orders_keys,
+                                order_channel,
+                            )
+                        )
 
-                    message_data: str = message["data"]
+                        server_time = message_byte_data["server_time"]
+
+                    if ticker_channel in message_byte_data["channel"]:
+                        cached_ticker_all = orjson.loads(
+                            await client_redis.hget(
+                                ticker_keys,
+                                ticker_channel,
+                            )
+                        )
+
+                        server_time = message_byte_data["server_time"]
+                        currency = message_byte_data["currency"]
+                        currency_upper = message_byte_data["currency_upper"]
+                    log.warning(
+                        f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
+                    )
 
                     currency: str = extract_currency_from_text(message_channel)
 

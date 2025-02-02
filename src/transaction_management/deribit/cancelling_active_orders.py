@@ -105,31 +105,39 @@ async def cancelling_orders(
             currencies,
         )
 
+        redis_keys: dict = config_app["redis_keys"][0]
+        ticker_keys: str = redis_keys["ticker"]
+        orders_keys: str = redis_keys["orders"]
+
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        chart_channel: str = redis_channels["chart"]
-        general_channel: str = redis_channels["general"]
-        market_condition_channel: str = redis_channels["market_condition"]
-        portfolio_channel: str = redis_channels["portfolio"]
-        ticker_channel: str = redis_channels["ticker"]
-        user_changes_channel: str = redis_channels["user_changes"]
+        ticker_channel: str = redis_channels["ticker_update"]
+        order_channel: str = redis_channels["order"]
+        chart_update_channel: str = redis_channels["chart_update"]
 
         # prepare channels placeholders
         channels = [
-            # chart_channel,
-            general_channel,
-            # user_changes_channel,
-            # portfolio_channel,
-            # market_condition_channel,
-            # ticker_channel,
+            chart_update_channel,
+            order_channel,
+            ticker_channel,
         ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        not_cancel = True
+        sequence = 0
+
+        server_time = 0
 
         cached_orders = []
+
+        currency = None
+
+        cached_ticker_all = None
+
+        chart_trade = False
+
+        not_cancel = True
 
         while not_cancel:
 
@@ -141,42 +149,47 @@ async def cancelling_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message = message_byte_data["message"]
+                    message_channel = message_byte_data["channel"]
 
-                    message_channel: str = message["channel"]
+                    if chart_update_channel in message_channel:
 
-                    message_data: str = message["data"]
+                        cached_ticker_all = orjson.loads(
+                            await client_redis.hget(
+                                ticker_keys,
+                                chart_update_channel,
+                            )
+                        )
+
+                    if order_channel in message_channel:
+
+                        cached_orders = orjson.loads(
+                            await client_redis.hget(
+                                orders_keys,
+                                order_channel,
+                            )
+                        )
+
+                        server_time = message_byte_data["server_time"]
+
+                    if ticker_channel in message_channel:
+
+                        cached_ticker_all = orjson.loads(
+                            await client_redis.hget(
+                                ticker_keys,
+                                ticker_channel,
+                            )
+                        )
+
+                        server_time = message_byte_data["server_time"]
+                        currency = message_byte_data["currency"]
+                        currency_upper = message_byte_data["currency_upper"]
+                    log.warning(
+                        f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
+                    )
 
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
-
-                    if "user.changes.any" in message_channel:
-
-                        log.warning(f"user.changes {message_data}")
-
-                        await update_cached_orders(
-                            cached_orders,
-                            message_data,
-                        )
-
-                    instrument_name_future = (message_channel)[19:]
-                    if (
-                        message_channel
-                        == f"incremental_ticker.{instrument_name_future}"
-                    ):
-
-                        await update_cached_ticker(
-                            instrument_name_future,
-                            ticker_all,
-                            message_data,
-                        )
-
-                        server_time = (
-                            message_data["timestamp"] + server_time
-                            if server_time == 0
-                            else message_data["timestamp"]
-                        )
 
                     if b"ticker" in (message_byte["channel"]):
 
@@ -184,7 +197,7 @@ async def cancelling_orders(
 
                         log.critical(sequence)
 
-                        ticker_all = message["ticker_all"]
+                        cached_ticker_all = message["cached_ticker_all"]
 
                         server_time = message["server_time"]
 
@@ -196,7 +209,7 @@ async def cancelling_orders(
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                        if server_time != 0 and ticker_all:
+                        if server_time != 0 and cached_ticker_all:
 
                             # get portfolio data
                             portfolio = reading_from_pkl_data("portfolio", currency)[0]
@@ -205,7 +218,7 @@ async def cancelling_orders(
 
                             ticker_perpetual_instrument_name = [
                                 o
-                                for o in ticker_all
+                                for o in cached_ticker_all
                                 if instrument_name_perpetual in o["instrument_name"]
                             ][0]
 

@@ -108,56 +108,41 @@ async def hedging_spot(
 
         instrument_attributes_futures_all = futures_instruments["active_futures"]
 
-        server_time = 0
+        redis_keys: dict = config_app["redis_keys"][0]
+        ticker_keys: str = redis_keys["ticker"]
+        orders_keys: str = redis_keys["orders"]
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        chart_channel: str = redis_channels["chart"]
-        user_changes_channel: str = redis_channels["user_changes"]
-        portfolio_channel: str = redis_channels["portfolio"]
-        market_condition_channel: str = redis_channels["market_condition"]
-        ticker_channel: str = redis_channels["ticker"]
-        open_order: str = redis_channels["open_order"]
-        general_channel: str = redis_channels["general"]
+        ticker_channel: str = redis_channels["ticker_update"]
+        order_channel: str = redis_channels["order"]
+        chart_update_channel: str = redis_channels["chart_update"]
 
         # prepare channels placeholders
         channels = [
-            # chart_channel,
-            # user_changes_channel,
-            general_channel,
-            # portfolio_channel,
-            # market_condition_channel,
-            # ticker_channel,
-            open_order,
+            chart_update_channel,
+            order_channel,
+            ticker_channel,
         ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        not_order = True
-
-        chart_trades_buffer: list = []
-
-        ticker_all = cached_ticker(instruments_name)
-
-        cached_orders: list = await combining_order_data(
-            private_data,
-            currencies,
-        )
+        sequence = 0
 
         server_time = 0
 
-        resolutions = [60, 15, 5]
-        qty_candles = 5
-        dim_sequence = 3
+        cached_orders = []
 
-        combining_candles = combining_candles_data(
-            np, currencies, qty_candles, resolutions, dim_sequence
-        )
+        currency = None
 
-        sequence = 0
-        sequence_user_trade = 0
-        while not_order:
+        cached_ticker_all = None
+
+        chart_trade = False
+
+        not_cancel = True
+
+        while not_cancel:
 
             try:
 
@@ -167,12 +152,42 @@ async def hedging_spot(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message = message_byte_data["message"]
+                    message_channel = message_byte_data["channel"]
 
-                    message_channel: str = message["channel"]
+                    if chart_update_channel in message_channel:
 
-                    message_data: str = message["data"]
+                        cached_ticker_all = orjson.loads(
+                            await client_redis.hget(
+                                ticker_keys,
+                                chart_update_channel,
+                            )
+                        )
 
+                    if order_channel in message_channel:
+
+                        cached_orders = orjson.loads(
+                            await client_redis.hget(
+                                orders_keys,
+                                order_channel,
+                            )
+                        )
+
+                        server_time = message_byte_data["server_time"]
+
+                    if ticker_channel in message_channel:
+                        cached_ticker_all = orjson.loads(
+                            await client_redis.hget(
+                                ticker_keys,
+                                ticker_channel,
+                            )
+                        )
+
+                        server_time = message_byte_data["server_time"]
+                        currency = message_byte_data["currency"]
+                        currency_upper = message_byte_data["currency_upper"]
+                    log.warning(
+                        f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
+                    )
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
@@ -192,7 +207,7 @@ async def hedging_spot(
 
                         log.critical(sequence)
 
-                        ticker_all = message["ticker_all"]
+                        cached_ticker_all = message["cached_ticker_all"]
 
                         server_time = message["server_time"]
 
@@ -205,7 +220,7 @@ async def hedging_spot(
 
                         archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
-                        if server_time != 0 and ticker_all:
+                        if server_time != 0 and cached_ticker_all:
 
                             # get portfolio data
                             portfolio = reading_from_pkl_data("portfolio", currency)[0]
@@ -214,7 +229,7 @@ async def hedging_spot(
 
                             ticker_perpetual_instrument_name = [
                                 o
-                                for o in ticker_all
+                                for o in cached_ticker_all
                                 if instrument_name_perpetual in o["instrument_name"]
                             ][0]
 
@@ -385,7 +400,7 @@ async def hedging_spot(
                                             strong_bearish,
                                             bearish,
                                             instrument_attributes_futures_for_hedging,
-                                            ticker_all,
+                                            cached_ticker_all,
                                             ticker_perpetual_instrument_name,
                                             currency_upper,
                                         )
@@ -508,7 +523,7 @@ async def hedging_spot(
 
                                                                 instrument_ticker: list = [
                                                                     o
-                                                                    for o in ticker_all
+                                                                    for o in cached_ticker_all
                                                                     if instrument_name
                                                                     in o[
                                                                         "instrument_name"

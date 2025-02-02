@@ -87,15 +87,22 @@ async def future_spreads(
 
         instrument_attributes_combo_all = futures_instruments["active_combo"]
 
+        resolutions = [60, 15, 5]
+        qty_candles = 5
+        dim_sequence = 3
+
+        combining_candles = combining_candles_data(
+            np, currencies, qty_candles, resolutions, dim_sequence
+        )
+
         instruments_name = futures_instruments["instruments_name"]
 
-        ticker_all = cached_ticker(instruments_name)
+        cached_ticker_all = cached_ticker(instruments_name)
 
         cached_orders: list = await combining_order_data(
             private_data,
             currencies,
         )
-        server_time = 0
 
         redis_keys: dict = config_app["redis_keys"][0]
         ticker_keys: str = redis_keys["ticker"]
@@ -111,30 +118,25 @@ async def future_spreads(
         channels = [
             chart_update_channel,
             order_channel,
-            # general_channel,
-            # portfolio_channel,
-            # market_condition_channel,
             ticker_channel,
         ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        not_cancel = True
-
         sequence = 0
 
-        chart_trade = False
+        server_time = 0
 
         cached_orders = []
 
-        resolutions = [60, 15, 5]
-        qty_candles = 5
-        dim_sequence = 3
+        currency = None
 
-        combining_candles = combining_candles_data(
-            np, currencies, qty_candles, resolutions, dim_sequence
-        )
+        cached_ticker_all = None
+
+        chart_trade = False
+
+        not_cancel = True
 
         while not_cancel:
 
@@ -146,15 +148,19 @@ async def future_spreads(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    if chart_update_channel in message_byte_data["channel"]:
-                        ticker_all = orjson.loads(
+                    message_channel = message_byte_data["channel"]
+
+                    if chart_update_channel in message_channel:
+
+                        cached_ticker_all = orjson.loads(
                             await client_redis.hget(
                                 ticker_keys,
                                 chart_update_channel,
                             )
                         )
 
-                    if order_channel in message_byte_data["channel"]:
+                    if order_channel in message_channel:
+
                         cached_orders = orjson.loads(
                             await client_redis.hget(
                                 orders_keys,
@@ -164,8 +170,8 @@ async def future_spreads(
 
                         server_time = message_byte_data["server_time"]
 
-                    if ticker_channel in message_byte_data["channel"]:
-                        ticker_all = orjson.loads(
+                    if ticker_channel in message_channel:
+                        cached_ticker_all = orjson.loads(
                             await client_redis.hget(
                                 ticker_keys,
                                 ticker_channel,
@@ -173,6 +179,8 @@ async def future_spreads(
                         )
 
                         server_time = message_byte_data["server_time"]
+                        currency = message_byte_data["currency"]
+                        currency_upper = message_byte_data["currency_upper"]
                     log.warning(
                         f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
                     )
@@ -202,7 +210,7 @@ async def future_spreads(
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
-                        if server_time != 0 and ticker_all:
+                        if server_time != 0 and cached_ticker_all:
 
                             # get portfolio data
                             portfolio = reading_from_pkl_data("portfolio", currency)[0]
@@ -211,7 +219,7 @@ async def future_spreads(
 
                             ticker_perpetual_instrument_name = [
                                 o
-                                for o in ticker_all
+                                for o in cached_ticker_all
                                 if instrument_name_perpetual in o["instrument_name"]
                             ][0]
 
@@ -436,14 +444,14 @@ async def future_spreads(
 
                                                 ticker_combo = [
                                                     o
-                                                    for o in ticker_all
+                                                    for o in cached_ticker_all
                                                     if instrument_name_combo
                                                     in o["instrument_name"]
                                                 ]
 
                                                 ticker_future = [
                                                     o
-                                                    for o in ticker_all
+                                                    for o in cached_ticker_all
                                                     if instrument_name_future
                                                     in o["instrument_name"]
                                                 ]
@@ -638,7 +646,7 @@ async def future_spreads(
 
                                                                 ticker_transaction = [
                                                                     o
-                                                                    for o in ticker_all
+                                                                    for o in cached_ticker_all
                                                                     if instrument_name
                                                                     in o[
                                                                         "instrument_name"
