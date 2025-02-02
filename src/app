@@ -94,7 +94,6 @@ async def main():
             )
         
         client_redis = redis.Redis.from_pool(pool)
-        redis_client = RedisClient()
 
         # parsing config file
         config_app = get_config(file_toml)
@@ -113,7 +112,7 @@ async def main():
             caching_distributing_data(
                 private_data,
                 modify_order_and_db,
-                redis_client,
+                client_redis,
                 config_app,
                 queue,
                 )
@@ -173,7 +172,7 @@ async def main():
                     
             future_spreads(
                 private_data,
-                redis_client,
+                client_redis,
                 config_app,
                 ),
             

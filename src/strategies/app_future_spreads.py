@@ -60,7 +60,7 @@ async def future_spreads(
     try:
 
         # connecting to redis pubsub
-        pubsub: object = client_redis().pubsub()
+        pubsub: object = client_redis.pubsub()
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
@@ -146,7 +146,7 @@ async def future_spreads(
 
                     if "ticker" in message_byte_data["ticker_channel"]:
                         ticker_all = orjson.loads(
-                            await client_redis().hget(
+                            await client_redis.hget(
                                 ticker_keys,
                                 ticker_channel,
                             )
