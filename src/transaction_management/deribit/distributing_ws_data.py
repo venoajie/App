@@ -142,7 +142,7 @@ async def caching_distributing_data(
         while True:
             
             with client_redis.pipeline() as pipe:
-
+                
                 message_params: str = (await queue_general.get())
                 
                 log.warning(message_params)
@@ -200,14 +200,14 @@ async def caching_distributing_data(
                     )
 
 
-                    await pipe.hset(
+                    await client_redis.hset(
                         ticker_keys, 
                         ticker_channel, 
                         orjson.dumps(ticker_all),
                         )
                                 
                     await send_notification(
-                        pipe,
+                        client_redis,
                         general_channel,
                         sequence_user_trade,
                         sequence_user_trade,
@@ -316,6 +316,8 @@ async def caching_distributing_data(
                     )
 
                     sequence = sequence_update
+
+                pipe.execute()
 
     except Exception as error:
 
