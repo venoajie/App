@@ -143,21 +143,21 @@ async def future_spreads(
             try:
 
                 message_byte = await pubsub.get_message()
-            
-                value = orjson.loads (
-                    await  client_redis.hget(
-                        ticker_keys,
-                        ticker_channel,
-                        )
-                    )
-                             
+                    
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
-                    if "ticker" in ticker_channel:
-                        log.debug (f"message_byte_data {message_byte_data}")
-                    log.warning (f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} ")
+                    if "ticker" in message_byte_data["ticker_channel"]:
+                        cached_orders = orjson.loads (
+                            await  client_redis.hget(
+                                ticker_keys,
+                                ticker_channel,
+                                )
+                            )
+                        
+                        server_time = message_byte_data["server_time"]
+                    log.warning (f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time}")
 
                     message = message_byte_data["message"]
 
