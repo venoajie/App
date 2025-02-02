@@ -207,7 +207,7 @@ async def caching_distributing_data(
                         )
                                 
                     await send_notification(
-                        client_redis,
+                        pipe,
                         general_channel,
                         sequence_user_trade,
                         sequence_user_trade,
