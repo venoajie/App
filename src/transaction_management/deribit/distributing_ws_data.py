@@ -188,7 +188,7 @@ async def caching_distributing_data(
                                 ticker_keys=ticker_keys)
                     
                     await send_notification(
-                        client_redis,
+                        pipe,
                         user_changes_channel,
                         sequence_user_trade,
                         data,
@@ -397,7 +397,6 @@ def get_settlement_period(strategy_attributes) -> list:
         )
     )
 
-
 async def send_notification(
     client_redis: object,
     CHANNEL_NAME: str,
@@ -408,5 +407,10 @@ async def send_notification(
 
     await client_redis.publish(
         CHANNEL_NAME,
-        orjson.dumps(message),
-        )
+        orjson.dumps(
+            {
+                "sequence": sequence,
+                "message": message,
+            },
+        ),
+    )
