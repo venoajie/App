@@ -144,6 +144,8 @@ async def future_spreads(
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
+                    
+                    log.debug (f"message_byte_data {message_byte_data}")
 
                     message = message_byte_data["message"]
 
