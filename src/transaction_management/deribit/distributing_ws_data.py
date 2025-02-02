@@ -185,7 +185,7 @@ async def caching_distributing_data(
             instrument_name_future = (message_channel)[19:]
             if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                update_cached_ticker(
+                await update_cached_ticker(
                     instrument_name_future,
                     ticker_all,
                     data,
@@ -197,6 +197,19 @@ async def caching_distributing_data(
                     else data["timestamp"]
                 )
 
+
+                await client_redis.hset(
+                    ticker_keys, 
+                    ticker_channel, 
+                    orjson.dumps(ticker_all),
+                    )
+                            
+                await send_notification(
+                    client_redis,
+                    general_channel,
+                    sequence_user_trade,
+                    sequence_user_trade,
+                )
             if "user" in message_channel:
 
                 if "portfolio" in message_channel:
@@ -229,18 +242,6 @@ async def caching_distributing_data(
                 log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
 
 
-                await client_redis.hset(
-                    ticker_keys, 
-                    ticker_channel, 
-                    orjson.dumps(data_to_dispatch),
-                    )
-                            
-                await send_notification(
-                    client_redis,
-                    general_channel,
-                    sequence_user_trade,
-                    sequence_user_trade,
-                )
 
             if "chart.trades" in message_channel:
 
