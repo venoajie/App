@@ -185,7 +185,7 @@ async def caching_distributing_data(
                     
                     pub_message = dict(sequence=sequence,
                                 server_time=server_time,
-                                ticker_keys=ticker_keys)
+                                ticker_channel=ticker_channel)
                     
                     await pipe.publish(
                         ticker_channel,
