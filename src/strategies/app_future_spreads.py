@@ -61,6 +61,8 @@ async def future_spreads(
 
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
+        
+        log.debug (config_app)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
