@@ -183,15 +183,13 @@ async def caching_distributing_data(
                         orjson.dumps(ticker_all),
                         )
                     
+                    pub_message = dict(sequence=sequence,
+                                server_time=server_time,
+                                ticker_keys=ticker_keys)
+                    
                     await pipe.publish(
                         ticker_channel,
-                        orjson.dumps(
-                            {
-                                "sequence": sequence,
-                                "server_time": server_time,
-                                "ticker_keys": ticker_keys,
-                                }
-                            )
+                        orjson.dumps(pub_message)
                         )
                     
                     
