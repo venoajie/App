@@ -295,18 +295,20 @@ async def chart_trade_in_msg(
     if "chart.trades" in message_channel:
         tick_from_exchange = data_orders["tick"]
 
-        tick_from_cache = max(
+        tick_from_cache = (
             [o["max_tick"] for o in candles_data if o["resolution"] == 5]
         )
+        
+        if tick_from_cache:
+            max_tick_from_cache = max(tick_from_cache)
 
-        if tick_from_exchange <= tick_from_cache:
-            return True
+            if tick_from_exchange <= max_tick_from_cache:
+                return True
 
-        else:
+            else:
 
-            log.warning("update ohlc")
-            # await sleep_and_restart()
-
+                log.warning("update ohlc")
+        
     else:
 
         return False
