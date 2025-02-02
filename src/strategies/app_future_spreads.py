@@ -106,7 +106,8 @@ async def future_spreads(
 
         redis_keys: dict = config_app["redis_keys"][0]
         ticker_keys: str = redis_keys["ticker"]
-        orders_keys: str = redis_keys["orders"]
+        orders_key: str = redis_keys["orders"]
+        market_condition_keys: str = redis_keys["market_condition"]
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
@@ -163,7 +164,7 @@ async def future_spreads(
 
                         cached_orders = orjson.loads(
                             await client_redis.hget(
-                                orders_keys,
+                                orders_key,
                                 order_channel,
                             )
                         )

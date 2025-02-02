@@ -42,8 +42,7 @@ portfolio = "account:portfolio"
 ticker = "market:ticker"
 chart = "market:chart"
 user_changes = "user_changes"
-general = "general"
-market_condition = "market_condition"
+market_condition = "market:market_condition"
 
 [[strategies]]
 strategy_label = "hedgingSpot"

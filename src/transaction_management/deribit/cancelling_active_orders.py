@@ -183,27 +183,10 @@ async def cancelling_orders(
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]
-                    log.warning(
-                        f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
-                    )
 
-                    currency: str = extract_currency_from_text(message_channel)
-
-                    currency_upper = currency.upper()
-
-                    if b"ticker" in (message_byte["channel"]):
-
-                        sequence = message["sequence"]
-
-                        log.critical(sequence)
-
-                        cached_ticker_all = message["cached_ticker_all"]
-
-                        server_time = message["server_time"]
-
-                        currency: str = message["currency"]
-
-                        currency_upper: str = currency.upper()
+                        log.warning(
+                            f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
+                        )
 
                         currency_lower: str = currency
 

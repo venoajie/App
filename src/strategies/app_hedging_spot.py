@@ -111,6 +111,7 @@ async def hedging_spot(
         redis_keys: dict = config_app["redis_keys"][0]
         ticker_keys: str = redis_keys["ticker"]
         orders_keys: str = redis_keys["orders"]
+        market_condition_keys: str = redis_keys["market_condition"]
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
