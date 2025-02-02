@@ -225,7 +225,7 @@ class StreamingAccountData:
                                 await queue_general.put(message_params)
 
                                 """
-                                message:
+                                message examples:
                                 
                                 incremental_ticker = {
                                     'channel': 'incremental_ticker.BTC-7FEB25', 

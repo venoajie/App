@@ -45,6 +45,7 @@ from utilities.caching import (
 )
 
 from utilities.string_modification import (
+    convert_to_bytes,
     extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,

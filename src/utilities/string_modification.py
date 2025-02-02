@@ -435,3 +435,23 @@ def hashing(
         urlencode(payload).encode("utf-8"),
         hashlib.sha256,
     ).hexdigest()
+
+
+def convert_to_bytes(input_string: str, encoding: str = "utf-8") -> bytes:
+
+    """
+    https://www.w3resource.com/python-exercises/extended-data-types/python-extended-data-types-bytes-bytearrays-exercise-1.php
+
+    encodings = [
+        "utf-8",
+        "utf-16",
+        "ascii"
+        ]
+
+    """
+    try:
+        encoded_bytes = input_string.encode(encoding)
+        return encoded_bytes
+    except Exception as e:
+        print("Error:", e)
+        return None

@@ -35,7 +35,9 @@ from utilities.caching import (
     update_cached_ticker,
 )
 from utilities.pickling import read_data
+
 from utilities.string_modification import (
+    convert_to_bytes,
     extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,

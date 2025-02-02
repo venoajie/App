@@ -163,19 +163,6 @@ async def caching_distributing_data(
 
                 log.warning(f"user.changes {data}")
 
-                await update_cached_orders(
-                    cached_orders,
-                    data,
-                )
-
-                data_to_dispatch: dict = dict(
-                    cached_orders=cached_orders,
-                    data=data,
-                    message_channel=message_channel,
-                    sequence_user_trade=sequence_user_trade,
-                    currency=currency,
-                )
-
                 sequence_user_trade = sequence_user_trade + len(message_params) - 1
 
                 log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
@@ -184,7 +171,7 @@ async def caching_distributing_data(
                     client_redis,
                     user_changes_channel,
                     sequence_user_trade,
-                    data_to_dispatch,
+                    data,
                 )
 
             WHERE_FILTER_TICK: str = "tick"

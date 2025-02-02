@@ -33,6 +33,7 @@ from utilities.caching import (
 from utilities.pickling import read_data, replace_data
 
 from utilities.string_modification import (
+    convert_to_bytes,
     extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
@@ -157,6 +158,24 @@ async def cancelling_orders(
                         await update_cached_orders(
                             cached_orders,
                             message_data,
+                        )
+
+                    instrument_name_future = (message_channel)[19:]
+                    if (
+                        message_channel
+                        == f"incremental_ticker.{instrument_name_future}"
+                    ):
+
+                        await update_cached_ticker(
+                            instrument_name_future,
+                            ticker_all,
+                            message_data,
+                        )
+
+                        server_time = (
+                            message_data["timestamp"] + server_time
+                            if server_time == 0
+                            else message_data["timestamp"]
                         )
 
                     if b"ticker" in (message_byte["channel"]):
