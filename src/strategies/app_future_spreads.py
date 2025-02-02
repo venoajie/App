@@ -144,7 +144,7 @@ async def future_spreads(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    if "ticker" in message_byte_data["ticker_channel"]:
+                    if ticker_channel in message_byte_data["ticker_channel"]:
                         ticker_all = orjson.loads(
                             await client_redis.hget(
                                 ticker_keys,

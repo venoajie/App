@@ -155,8 +155,6 @@ async def caching_distributing_data(
 
                 TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
 
-                instrument_ticker: str = (message_channel)[19:]
-
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 
@@ -172,19 +170,11 @@ async def caching_distributing_data(
                         else data["timestamp"]
                     )
 
-                    await pipe.hset(
-                        ticker_keys,
-                        ticker_channel,
-                        orjson.dumps(ticker_all),
-                    )
-
                     pub_message = dict(
                         sequence=sequence,
                         server_time=server_time,
                         ticker_channel=ticker_channel,
                     )
-
-                    await pipe.publish(ticker_channel, orjson.dumps(pub_message))
 
                 if "user.changes.any" in message_channel:
 
@@ -308,6 +298,19 @@ async def caching_distributing_data(
                     )
 
                     sequence = sequence_update
+
+                await pipe.hset(
+                    ticker_keys,
+                    ticker_channel,
+                    orjson.dumps(ticker_all),
+                )
+
+                await pipe.publish(
+                    ticker_channel, 
+                    orjson.dumps(
+                        pub_message
+                        )
+                    )
 
                 await pipe.execute()
 
