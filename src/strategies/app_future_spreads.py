@@ -156,15 +156,15 @@ async def future_spreads(
 
                     message = message_byte_data["message"]
 
-                    message_channel: str = message["channel"]
+#                    message_channel: str = message["channel"]
 
                     message_data: str = message["data"]
 
-                    currency: str = extract_currency_from_text(message_channel)
+#                    currency: str = extract_currency_from_text(message_channel)
 
-                    currency_upper = currency.upper()
+#                    currency_upper = currency.upper()
 
-                    if "user.changes.any" in message_channel:
+                    if False and "user.changes.any" in message_channel:
 
                         log.warning(f"user.changes {message_data}")
 
