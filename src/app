@@ -14,9 +14,7 @@ import tomli
 import uvloop
 from loguru import logger as log
 
-import redis
 import orjson
-from redis import ConnectionPool
 import redis.asyncio as redis
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -86,14 +84,8 @@ async def main():
         private_data: object = SendApiRequest(sub_account_id)
 
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
-
-        r = redis.Redis()
-
-        redis_pool = ConnectionPool(host="localhost", port=6379, db=0)
-        client_redis = redis.Redis(connection_pool=redis_pool)
-        
                 
-        pool = redis.ConnectionPool.from_url("redis://localhost", port=6379, protocol=3)
+        pool = redis.ConnectionPool.from_url("redis://localhost", port=6379, db=0, protocol=3)
         client_redis = redis.Redis.from_pool(pool)
 
         #client_redis = redis.Redis()

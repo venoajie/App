@@ -175,8 +175,6 @@ async def future_spreads(
                     if b"ticker" in (message_byte["channel"]):
                         
                         log.warning (f"server_time {server_time} sequence {sequence}")
-                        log.debug (f" {ticker_all}")
-
 
                         currency: str = message["currency"]
 
