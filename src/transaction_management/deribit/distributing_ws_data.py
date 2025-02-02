@@ -140,180 +140,182 @@ async def caching_distributing_data(
         chart_trade = False
 
         while True:
-
-            message_params: str = (await queue_general.get())
             
-            log.warning(message_params)
+            with client_redis.pipeline() as pipe:
 
-            data: dict = message_params["data"]
+                message_params: str = (await queue_general.get())
+                
+                log.warning(message_params)
 
-            message_channel: str = message_params["channel"]
+                data: dict = message_params["data"]
 
-            # log.warning(f"message_channel {message_channel}")
+                message_channel: str = message_params["channel"]
 
-            currency: str = extract_currency_from_text(message_channel)
+                # log.warning(f"message_channel {message_channel}")
 
-            currency_upper = currency.upper()
+                currency: str = extract_currency_from_text(message_channel)
 
-            if "user.changes.any" in message_channel:
+                currency_upper = currency.upper()
 
-                log.warning(f"user.changes {data}")
-
-                sequence_user_trade = sequence_user_trade + len(message_params) - 1
-
-                log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
-
-                await send_notification(
-                    client_redis,
-                    user_changes_channel,
-                    sequence_user_trade,
-                    data,
-                )
-
-            WHERE_FILTER_TICK: str = "tick"
-
-            TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
-
-            instrument_ticker: str = (message_channel)[19:]
-
-            market_condition = get_market_condition(
-                np,
-                combining_candles,
-                currency_upper,
-            )
-
-            instrument_name_future = (message_channel)[19:]
-            if message_channel == f"incremental_ticker.{instrument_name_future}":
-
-                await update_cached_ticker(
-                    instrument_name_future,
-                    ticker_all,
-                    data,
-                )
-
-                server_time = (
-                    data["timestamp"] + server_time
-                    if server_time == 0
-                    else data["timestamp"]
-                )
-
-
-                await client_redis.hset(
-                    ticker_keys, 
-                    ticker_channel, 
-                    orjson.dumps(ticker_all),
-                    )
-                            
-                await send_notification(
-                    client_redis,
-                    general_channel,
-                    sequence_user_trade,
-                    sequence_user_trade,
-                )
-            if "user" in message_channel:
-
-                if "portfolio" in message_channel:
-
-                    await update_db_pkl(
-                        "portfolio",
-                        data,
-                        currency,
-                    )
-
-                if "changes.any" in message_channel:
+                if "user.changes.any" in message_channel:
 
                     log.warning(f"user.changes {data}")
 
-                    await update_cached_orders(
-                        cached_orders,
+                    sequence_user_trade = sequence_user_trade + len(message_params) - 1
+
+                    log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
+
+                    await send_notification(
+                        client_redis,
+                        user_changes_channel,
+                        sequence_user_trade,
                         data,
                     )
 
-                data_to_dispatch: dict = dict(
-                    cached_orders=cached_orders,
-                    data=data,
-                    message_channel=message_channel,
-                    sequence_user_trade=sequence_user_trade,
-                    currency=currency,
+                WHERE_FILTER_TICK: str = "tick"
+
+                TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
+
+                instrument_ticker: str = (message_channel)[19:]
+
+                market_condition = get_market_condition(
+                    np,
+                    combining_candles,
+                    currency_upper,
                 )
 
-                sequence_user_trade = sequence_user_trade + len(message_params) - 1
+                instrument_name_future = (message_channel)[19:]
+                if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
+                    await update_cached_ticker(
+                        instrument_name_future,
+                        ticker_all,
+                        data,
+                    )
+
+                    server_time = (
+                        data["timestamp"] + server_time
+                        if server_time == 0
+                        else data["timestamp"]
+                    )
+
+
+                    await pipe.hset(
+                        ticker_keys, 
+                        ticker_channel, 
+                        orjson.dumps(ticker_all),
+                        )
+                                
+                    await send_notification(
+                        pipe,
+                        general_channel,
+                        sequence_user_trade,
+                        sequence_user_trade,
+                    )
+                if "user" in message_channel:
+
+                    if "portfolio" in message_channel:
+
+                        await update_db_pkl(
+                            "portfolio",
+                            data,
+                            currency,
+                        )
+
+                    if "changes.any" in message_channel:
+
+                        log.warning(f"user.changes {data}")
+
+                        await update_cached_orders(
+                            cached_orders,
+                            data,
+                        )
+
+                    data_to_dispatch: dict = dict(
+                        cached_orders=cached_orders,
+                        data=data,
+                        message_channel=message_channel,
+                        sequence_user_trade=sequence_user_trade,
+                        currency=currency,
+                    )
+
+                    sequence_user_trade = sequence_user_trade + len(message_params) - 1
+
+                    log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
 
 
 
-            if "chart.trades" in message_channel:
+                if "chart.trades" in message_channel:
 
-                chart_trades_buffer.append(data)
+                    chart_trades_buffer.append(data)
 
-                if len(chart_trades_buffer) > 3:
+                    if len(chart_trades_buffer) > 3:
 
-                    instrument_ticker: str = ((message_channel)[13:]).partition(".")[0]
+                        instrument_ticker: str = ((message_channel)[13:]).partition(".")[0]
 
-                    if "PERPETUAL" in instrument_ticker:
+                        if "PERPETUAL" in instrument_ticker:
 
-                        for data in chart_trades_buffer:
-                            await ohlc_result_per_time_frame(
-                                instrument_ticker,
-                                resolution,
-                                data,
-                                TABLE_OHLC1,
-                                WHERE_FILTER_TICK,
-                            )
+                            for data in chart_trades_buffer:
+                                await ohlc_result_per_time_frame(
+                                    instrument_ticker,
+                                    resolution,
+                                    data,
+                                    TABLE_OHLC1,
+                                    WHERE_FILTER_TICK,
+                                )
 
-                        chart_trades_buffer = []
+                            chart_trades_buffer = []
 
-            if "PERPETUAL" in instrument_name_future:
+                if "PERPETUAL" in instrument_name_future:
 
-                await inserting_open_interest(
-                    currency,
-                    WHERE_FILTER_TICK,
-                    TABLE_OHLC1,
-                    data,
-                )
+                    await inserting_open_interest(
+                        currency,
+                        WHERE_FILTER_TICK,
+                        TABLE_OHLC1,
+                        data,
+                    )
 
-                chart_trade = await chart_trade_in_msg(
-                    message_channel,
-                    data,
-                    market_condition,
-                )
+                    chart_trade = await chart_trade_in_msg(
+                        message_channel,
+                        data,
+                        market_condition,
+                    )
 
-                # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
+                    # my_path_ticker: str = provide_path_for_file("ticker", instrument_ticker)
 
-                # log.info (f"my_path_ticker {instrument_ticker} {my_path_ticker}")
-                # distribute_ticker_result_as_per_data_type(
-                #    my_path_ticker,
-                #    data,
-                # )
+                    # log.info (f"my_path_ticker {instrument_ticker} {my_path_ticker}")
+                    # distribute_ticker_result_as_per_data_type(
+                    #    my_path_ticker,
+                    #    data,
+                    # )
 
-                DATABASE: str = "databases/trading.sqlite3"
+                    DATABASE: str = "databases/trading.sqlite3"
 
-            sequence_update = sequence + len(message_params) - 1
+                sequence_update = sequence + len(message_params) - 1
 
-            log.error(f"sequence {sequence} {currency_upper}")
+                log.error(f"sequence {sequence} {currency_upper}")
 
-            if not chart_trade and sequence_update > sequence:
+                if not chart_trade and sequence_update > sequence:
 
-                # log.error(f"market_condition {market_condition}")
-                # log.warning(f"chart_trade {chart_trade}")
-                data_to_dispatch: dict = dict(
-                    message_params=message_params,
-                    currency=currency,
-                    chart_trade=chart_trade,
-                    market_condition=market_condition,
-                    server_time=server_time,
-                    ticker_all=ticker_all,
-                )
+                    # log.error(f"market_condition {market_condition}")
+                    # log.warning(f"chart_trade {chart_trade}")
+                    data_to_dispatch: dict = dict(
+                        message_params=message_params,
+                        currency=currency,
+                        chart_trade=chart_trade,
+                        market_condition=market_condition,
+                        server_time=server_time,
+                        ticker_all=ticker_all,
+                    )
 
-                await send_notification(
-                    client_redis,
-                    ticker_channel,
-                    sequence,
-                    data_to_dispatch,
-                )
+                    await send_notification(
+                        client_redis,
+                        ticker_channel,
+                        sequence,
+                        data_to_dispatch,
+                    )
 
-                sequence = sequence_update
+                    sequence = sequence_update
 
     except Exception as error:
 
