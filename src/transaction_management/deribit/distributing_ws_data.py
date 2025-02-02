@@ -151,11 +151,6 @@ async def caching_distributing_data(
                 orjson.dumps(message_params),
                 )
                         
-            value = await  client_redis.hget(ticker_keys,ticker_channel)
-            
-            
-            log.warning(value)
-            
             await send_notification(
                 client_redis,
                 general_channel,

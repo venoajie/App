@@ -97,6 +97,9 @@ async def future_spreads(
         )
         server_time = 0
 
+        redis_keys: dict = config_app["redis_keys"][0]
+        ticker_keys: str = redis_keys["ticker"]
+
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         chart_channel: str = redis_channels["chart"]
@@ -145,6 +148,9 @@ async def future_spreads(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
+                    value = await  client_redis.hget(ticker_keys,ticker_channel)
+                                                    
+                    log.warning (f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} value {value}")
                     log.debug (f"message_byte_data {message_byte_data}")
 
                     message = message_byte_data["message"]
