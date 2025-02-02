@@ -437,7 +437,10 @@ def hashing(
     ).hexdigest()
 
 
-def convert_to_bytes(input_string: str, encoding: str = "utf-8") -> bytes:
+def convert_to_bytes(
+    input_string: str,
+    encoding: str = "utf-8"
+    ) -> bytes:
 
     """
     https://www.w3resource.com/python-exercises/extended-data-types/python-extended-data-types-bytes-bytearrays-exercise-1.php
@@ -452,6 +455,7 @@ def convert_to_bytes(input_string: str, encoding: str = "utf-8") -> bytes:
     try:
         encoded_bytes = input_string.encode(encoding)
         return encoded_bytes
+    
     except Exception as e:
-        print("Error:", e)
+        ("Error:", e)
         return None
