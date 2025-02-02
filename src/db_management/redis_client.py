@@ -49,11 +49,5 @@ class RedisClient(metaclass=Singleton):
             protocol = self.protocol,
             )
 
-    @property
-    def conn(self):
-        if not hasattr(self, '_conn'):
-            self.get_connection()
-        return self._conn
-
     def get_connection(self):
-        self._conn = redis.Redis.from_pool(self.pool)
+        redis.Redis.from_pool(self.pool)
