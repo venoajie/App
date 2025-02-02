@@ -113,10 +113,10 @@ async def future_spreads(
         channels = [
             # chart_channel,
             # user_changes_channel,
-            general_channel,
+            #general_channel,
             # portfolio_channel,
             # market_condition_channel,
-            # ticker_channel,
+            ticker_channel,
         ]
 
         # subscribe to channels
@@ -143,7 +143,7 @@ async def future_spreads(
             try:
 
                 message_byte = await pubsub.get_message()
-                
+            
                 value = orjson.loads (
                     await  client_redis.hget(
                         ticker_keys,
@@ -151,13 +151,15 @@ async def future_spreads(
                         )
                     )
                                                 
-                log.warning (f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} ")
-
+                
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
                     log.debug (f"message_byte_data {message_byte_data}")
+                    log.warning (f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} ")
+
+
 
                     message = message_byte_data["message"]
 
