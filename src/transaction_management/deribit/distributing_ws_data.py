@@ -141,11 +141,11 @@ async def caching_distributing_data(
 
         while True:
 
-            message_params: str = eval(await queue_general.get())
+            message_params: str = (await queue_general.get())
             
             log.warning(message_params)
 
-            await client_redis.hset(ticker_keys, ticker_channel, (message_params))
+            await client_redis.hset(ticker_keys, ticker_channel, orjson.dumps(message_params))
                         
             value = await  client_redis.hget(ticker_keys)
             
