@@ -52,7 +52,7 @@ class RedisClient(metaclass=Singleton):
     @property
     def conn(self):
         if not hasattr(self, '_conn'):
-            self.getConnection()
+            self.get_connection()
         return self._conn
 
     def get_connection(self):
