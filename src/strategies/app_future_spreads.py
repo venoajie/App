@@ -158,7 +158,7 @@ async def future_spreads(
 
 #                    message_channel: str = message["channel"]
 
-                    message_data: str = message["data"]
+#                    message_data: str = message["data"]
 
 #                    currency: str = extract_currency_from_text(message_channel)
 
