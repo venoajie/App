@@ -66,7 +66,7 @@ async def caching_distributing_data(
     try:
 
         # connecting to redis pubsub
-        pubsub: object = client_redis.conn().pubsub()
+        pubsub: object = client_redis.pubsub()
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
@@ -147,7 +147,7 @@ async def caching_distributing_data(
 
             currency_upper = currency.upper()
 
-            async with client_redis.conn().pipeline() as pipe:
+            async with client_redis.pipeline() as pipe:
 
                 log.warning(message_params)
 

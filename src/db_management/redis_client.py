@@ -3,19 +3,11 @@
 
 # built ins
 import asyncio
-from asyncio import Queue
-import os
-import signal
-import sys
-from random import sample
 
 # installed
-import tomli
 import uvloop
-from loguru import logger as log
-from dataclassy import dataclass, fields
+from dataclassy import dataclass
 
-import orjson
 import redis.asyncio as redis
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -42,7 +34,7 @@ class RedisClient(metaclass=Singleton):
     pool: object = None
 
     def __post_init__(self):
-        self.pool = redis.Redis.from_pool(redis.ConnectionPool.from_url(
+        return redis.Redis.from_pool(redis.ConnectionPool.from_url(
             self.host, 
             port = self.port, 
             db = self.db,
