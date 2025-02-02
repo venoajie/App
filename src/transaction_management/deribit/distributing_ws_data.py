@@ -183,7 +183,16 @@ async def caching_distributing_data(
                         orjson.dumps(ticker_all),
                         )
                     
-                    await client_redis.publish(ticker_channel)
+                    await client_redis.publish(
+                        ticker_channel,
+                        orjson.dumps(
+                            {
+                                "sequence": sequence,
+                                "server_time": server_time,
+                                "ticker_keys": ticker_keys,
+                                }
+                            )
+                        )
                     
                     
                 if "user.changes.any" in message_channel:
