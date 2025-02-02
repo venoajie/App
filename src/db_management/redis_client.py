@@ -48,3 +48,7 @@ class RedisClient(metaclass=Singleton):
             db = self.db,
             protocol = self.protocol,
             ))
+
+    def conn(self):
+        return self.pool
+        
