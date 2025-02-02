@@ -37,7 +37,6 @@ market_condition = "market_condition"
 ticker = "ticker"
 
 [[redis_keys]]
-chart = "chart"
 open_order = "account:open_order"
 user_changes = "user_changes"
 portfolio = "account:portfolio"
