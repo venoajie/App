@@ -37,13 +37,13 @@ market_condition = "market_condition"
 ticker = "ticker"
 
 [[redis_keys]]
-open_order = "account:open_order"
-user_changes = "user_changes"
+open_order = "account:order"
 portfolio = "account:portfolio"
-general = "general"
-market_condition = "market_condition"
 ticker = "market:ticker"
 chart = "market:chart"
+user_changes = "user_changes"
+general = "general"
+market_condition = "market_condition"
 
 [[strategies]]
 strategy_label = "hedgingSpot"
