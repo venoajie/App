@@ -143,6 +143,8 @@ async def future_spreads(
             try:
 
                 message_byte = await pubsub.get_message()
+                
+                log.debug (message_byte)
 
                 if message_byte and message_byte["type"] == "message":
 
