@@ -245,11 +245,11 @@ async def caching_distributing_data(
                                 )
 
                             chart_trades_buffer = []
-                            pub_message = dict(
-                                sequence=sequence,
-                                server_time=server_time,
-                                ticker_channel=ticker_channel,
-                            )
+                    pub_message = dict(
+                        sequence=sequence,
+                        server_time=server_time,
+                        ticker_channel=ticker_channel,
+                        )
 
 
 
