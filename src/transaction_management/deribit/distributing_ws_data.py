@@ -111,12 +111,8 @@ async def caching_distributing_data(
         ticker_keys: str = redis_keys["ticker"]
 
         redis_channels: dict = config_app["redis_channels"][0]
-        chart_channel: str = redis_channels["chart"]
         user_changes_channel: str = redis_channels["user_changes"]
-        portfolio_channel: str = redis_channels["portfolio"]
-        market_condition_channel: str = redis_channels["market_condition"]
-        ticker_channel: str = redis_channels["ticker"]
-        general_channel: str = redis_channels["general"]
+        ticker_channel: str = redis_channels["ticker_update"]
 
         chart_trades_buffer: list = []
 
