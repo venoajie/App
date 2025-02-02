@@ -145,9 +145,9 @@ async def caching_distributing_data(
             
             log.warning(message_params)
 
-            await client_redis.hset(ticker_keys, ticker_channel, mapping=message_params)
+            await client_redis.hset(ticker_keys, mapping=message_params)
                         
-            value = await  client_redis.hget('myhash', 'key1')
+            value = await  client_redis.hget(ticker_keys)
             
             
             log.warning(value)
