@@ -102,11 +102,7 @@ async def future_spreads(
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        chart_channel: str = redis_channels["chart"]
-        general_channel: str = redis_channels["general"]
-        market_condition_channel: str = redis_channels["market_condition"]
-        portfolio_channel: str = redis_channels["portfolio"]
-        ticker_channel: str = redis_channels["ticker"]
+        ticker_channel: str = redis_channels["ticker_update"]
         user_changes_channel: str = redis_channels["user_changes"]
 
         # prepare channels placeholders
