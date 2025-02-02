@@ -147,7 +147,7 @@ async def caching_distributing_data(
 
             currency_upper = currency.upper()
 
-            async with client_redis.pipeline() as pipe:
+            async with client_redis.conn().pipeline() as pipe:
 
                 log.warning(message_params)
 
