@@ -209,7 +209,7 @@ async def caching_distributing_data(
                     await send_notification(
                         pipe,
                         general_channel,
-                        sequence_user_trade,
+                        ticker_keys,
                         sequence_user_trade,
                     )
                 if "user" in message_channel:
