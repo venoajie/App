@@ -186,13 +186,6 @@ async def caching_distributing_data(
                         f"sequence_user_trade {sequence_user_trade} {currency_upper}"
                     )
 
-                    await send_notification(
-                        client_redis,
-                        user_changes_channel,
-                        sequence_user_trade,
-                        data,
-                    )
-
                 if "user" in message_channel:
 
                     if "portfolio" in message_channel:
@@ -212,12 +205,10 @@ async def caching_distributing_data(
                             data,
                         )
 
-                    data_to_dispatch: dict = dict(
-                        cached_orders=cached_orders,
-                        data=data,
-                        message_channel=message_channel,
-                        sequence_user_trade=sequence_user_trade,
-                        currency=currency,
+                    pub_message = dict(
+                        sequence=sequence,
+                        server_time=server_time,
+                        ticker_channel=ticker_channel,
                     )
 
                     sequence_user_trade = sequence_user_trade + len(message_params) - 1
@@ -254,6 +245,13 @@ async def caching_distributing_data(
                                 )
 
                             chart_trades_buffer = []
+                            pub_message = dict(
+                                sequence=sequence,
+                                server_time=server_time,
+                                ticker_channel=ticker_channel,
+                            )
+
+
 
                 if "PERPETUAL" in instrument_name_future:
 
