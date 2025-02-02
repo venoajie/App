@@ -42,15 +42,19 @@ class RedisClient(metaclass=Singleton):
     pool: object = None
 
     def __post_init__(self):
-        self.pool = redis.ConnectionPool.from_url(
+        self.pool = redis.Redis.from_pool(redis.ConnectionPool.from_url(
             self.host, 
             port = self.port, 
             db = self.db,
             protocol = self.protocol,
-            )
+            ))
 
     def get_connection(self):
         redis.Redis.from_pool(self.pool)
         
     def pub_sub(self):
         redis.Redis.from_pool(self.pool).pubsub()
+        
+    def conn(self):
+        redis.Redis.from_pool(self.pool)
+        
