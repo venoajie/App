@@ -153,8 +153,6 @@ async def caching_distributing_data(
 
             async with client_redis.pipeline() as pipe:
     
-                log.warning(message_params)
-    
                 WHERE_FILTER_TICK: str = "tick"
 
                 TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
@@ -164,6 +162,8 @@ async def caching_distributing_data(
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 
+                    log.warning(message_params)
+    
                     await update_cached_ticker(
                         instrument_name_future,
                         ticker_all,
