@@ -53,4 +53,4 @@ class RedisClient(metaclass=Singleton):
         redis.Redis.from_pool(self.pool)
         
     def pub_sub(self):
-        self.get_connection().pubsub()
+        redis.Redis.from_pool(self.pool).pubsub()
