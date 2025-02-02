@@ -140,8 +140,8 @@ async def caching_distributing_data(
         chart_trade = False
 
         while True:
-            
-            message_params: str = (await queue_general.get())
+
+            message_params: str = await queue_general.get()
 
             data: dict = message_params["data"]
 
@@ -152,9 +152,9 @@ async def caching_distributing_data(
             currency_upper = currency.upper()
 
             async with client_redis.pipeline() as pipe:
-    
+
                 log.warning(message_params)
-    
+
                 WHERE_FILTER_TICK: str = "tick"
 
                 TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
@@ -176,30 +176,29 @@ async def caching_distributing_data(
                         else data["timestamp"]
                     )
 
-
                     await pipe.hset(
-                        ticker_keys, 
-                        ticker_channel, 
-                        orjson.dumps(ticker_all),
-                        )
-                    
-                    pub_message = dict(sequence=sequence,
-                                server_time=server_time,
-                                ticker_channel=ticker_channel)
-                    
-                    await pipe.publish(
+                        ticker_keys,
                         ticker_channel,
-                        orjson.dumps(pub_message)
-                        )
-                    
-                    
+                        orjson.dumps(ticker_all),
+                    )
+
+                    pub_message = dict(
+                        sequence=sequence,
+                        server_time=server_time,
+                        ticker_channel=ticker_channel,
+                    )
+
+                    await pipe.publish(ticker_channel, orjson.dumps(pub_message))
+
                 if "user.changes.any" in message_channel:
 
                     log.warning(f"user.changes {data}")
 
                     sequence_user_trade = sequence_user_trade + len(message_params) - 1
 
-                    log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
+                    log.error(
+                        f"sequence_user_trade {sequence_user_trade} {currency_upper}"
+                    )
 
                     await send_notification(
                         client_redis,
@@ -237,8 +236,9 @@ async def caching_distributing_data(
 
                     sequence_user_trade = sequence_user_trade + len(message_params) - 1
 
-                    log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
-
+                    log.error(
+                        f"sequence_user_trade {sequence_user_trade} {currency_upper}"
+                    )
 
                 market_condition = get_market_condition(
                     np,
@@ -246,14 +246,15 @@ async def caching_distributing_data(
                     currency_upper,
                 )
 
-
                 if "chart.trades" in message_channel:
 
                     chart_trades_buffer.append(data)
 
                     if len(chart_trades_buffer) > 3:
 
-                        instrument_ticker: str = ((message_channel)[13:]).partition(".")[0]
+                        instrument_ticker: str = ((message_channel)[13:]).partition(
+                            "."
+                        )[0]
 
                         if "PERPETUAL" in instrument_ticker:
 
@@ -400,4 +401,4 @@ async def send_notification(
     await client_redis.publish(
         CHANNEL_NAME,
         orjson.dumps(message),
-        )
+    )

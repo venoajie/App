@@ -40,7 +40,8 @@ from utilities.system_tools import (
     SignalHandler,
     parse_error_message, 
     provide_path_for_file,
-                                    )
+    )
+from db_management.redis_client import RedisClient
 
 
 def handle_ctrl_c(
@@ -85,11 +86,16 @@ async def main():
 
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
                 
-        pool = redis.ConnectionPool.from_url("redis://localhost", port=6379, db=0, protocol=3)
+        pool = redis.ConnectionPool.from_url(
+            "redis://localhost", 
+            port=6379, 
+            db=0, 
+            protocol=3,
+            )
+        
         client_redis = redis.Redis.from_pool(pool)
+        redis_client = RedisClient()
 
-        #client_redis = redis.Redis()
-            
         # parsing config file
         config_app = get_config(file_toml)
 
@@ -107,7 +113,7 @@ async def main():
             caching_distributing_data(
                 private_data,
                 modify_order_and_db,
-                client_redis,
+                redis_client,
                 config_app,
                 queue,
                 )
@@ -167,7 +173,7 @@ async def main():
                     
             future_spreads(
                 private_data,
-                client_redis,
+                redis_client,
                 config_app,
                 ),
             

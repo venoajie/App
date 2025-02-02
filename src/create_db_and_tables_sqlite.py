@@ -12,7 +12,10 @@ import asyncio
 from db_management import sql_executing_queries
 
 
-def catch_error(error, idle: int = None) -> list:
+def catch_error(
+    error,
+    idle: int = None,
+) -> list:
     """ """
     from utilities import system_tools
 
@@ -20,11 +23,15 @@ def catch_error(error, idle: int = None) -> list:
 
 
 async def create_db_sqlite(
-    db_name: str = "databases/trading", ext: str = "sqlite3"
+    db_name: str = "databases/trading",
+    ext: str = "sqlite3",
 ) -> list:
     """ """
 
-    await sql_executing_queries.create_dataBase_sqlite(db_name, ext)
+    await sql_executing_queries.create_dataBase_sqlite(
+        db_name,
+        ext,
+    )
 
 
 async def create_tbl_json_sqlite() -> list:
@@ -32,7 +39,6 @@ async def create_tbl_json_sqlite() -> list:
 
     tables = [
         "my_trades_all_json",
-        "my_trades_closed_json",
         "orders_all_json",
         "portfolio_json",
         "account_summary_json",

@@ -61,7 +61,7 @@ async def future_spreads(
 
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
-        
+
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
 
@@ -113,7 +113,7 @@ async def future_spreads(
         channels = [
             # chart_channel,
             # user_changes_channel,
-            #general_channel,
+            # general_channel,
             # portfolio_channel,
             # market_condition_channel,
             ticker_channel,
@@ -143,25 +143,27 @@ async def future_spreads(
             try:
 
                 message_byte = await pubsub.get_message()
-                    
+
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
-                    
+
                     if "ticker" in message_byte_data["ticker_channel"]:
-                        ticker_all = orjson.loads (
-                            await  client_redis.hget(
+                        ticker_all = orjson.loads(
+                            await client_redis.hget(
                                 ticker_keys,
                                 ticker_channel,
-                                )
                             )
-                        
+                        )
+
                         server_time = message_byte_data["server_time"]
-                    log.warning (f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}")
+                    log.warning(
+                        f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
+                    )
 
-#                    currency: str = extract_currency_from_text(message_channel)
+                    #                    currency: str = extract_currency_from_text(message_channel)
 
-#                    currency_upper = currency.upper()
+                    #                    currency_upper = currency.upper()
 
                     if False and "user.changes.any" in message_channel:
 
@@ -173,8 +175,8 @@ async def future_spreads(
                         )
 
                     if b"ticker" in (message_byte["channel"]):
-                        
-                        log.warning (f"server_time {server_time} sequence {sequence}")
+
+                        log.warning(f"server_time {server_time} sequence {sequence}")
 
                         currency: str = message["currency"]
 
