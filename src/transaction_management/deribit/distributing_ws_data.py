@@ -187,10 +187,12 @@ async def caching_distributing_data(
                                 server_time=server_time,
                                 ticker_keys=ticker_keys)
                     
-                    await pipe.publish(
-                        ticker_channel,
-                        orjson.dumps(pub_message)
-                        )
+                    await send_notification(
+                        client_redis,
+                        user_changes_channel,
+                        sequence_user_trade,
+                        data,
+                    )
                     
                     
                 if "user.changes.any" in message_channel:

@@ -148,6 +148,8 @@ async def future_spreads(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
+                    log.debug (f"message_byte_data {message_byte_data}")
+
                     value = orjson.loads (
                         await  client_redis.hget(
                             ticker_keys,
@@ -157,7 +159,6 @@ async def future_spreads(
                                                     
                     log.warning (f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} ")
 
-                    log.debug (f"message_byte_data {message_byte_data}")
 
                     message = message_byte_data["message"]
 
