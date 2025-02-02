@@ -17,12 +17,14 @@ class Singleton(type):
     """
     https://stackoverflow.com/questions/49398590/correct-way-of-using-redis-connection-pool-in-python
     """
+
     _instances = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
+
 
 @dataclass(unsafe_hash=True, slots=True)
 class RedisClient(metaclass=Singleton):
@@ -34,13 +36,14 @@ class RedisClient(metaclass=Singleton):
     pool: object = None
 
     def __post_init__(self):
-        return redis.Redis.from_pool(redis.ConnectionPool.from_url(
-            self.host, 
-            port = self.port, 
-            db = self.db,
-            protocol = self.protocol,
-            ))
+        return redis.Redis.from_pool(
+            redis.ConnectionPool.from_url(
+                self.host,
+                port=self.port,
+                db=self.db,
+                protocol=self.protocol,
+            )
+        )
 
     def conn(self):
         return self.pool
-        

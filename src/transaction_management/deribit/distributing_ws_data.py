@@ -111,8 +111,9 @@ async def caching_distributing_data(
         ticker_keys: str = redis_keys["ticker"]
 
         redis_channels: dict = config_app["redis_channels"][0]
-        user_changes_channel: str = redis_channels["user_changes"]
+        order_channel: str = redis_channels["order_channel"]
         ticker_channel: str = redis_channels["ticker_update"]
+        chart_update_channel: str = redis_channels["chart_update"]
 
         chart_trades_buffer: list = []
 
@@ -151,6 +152,33 @@ async def caching_distributing_data(
 
                 log.warning(message_params)
 
+                if "user.changes.any" in message_channel:
+
+                    log.warning(f"user.changes {data}")
+
+                if "user" in message_channel:
+
+                    if "changes.any" in message_channel:
+
+                        log.warning(f"user.changes {data}")
+
+                        await update_cached_orders(
+                            cached_orders,
+                            data,
+                        )
+
+                        pub_message = dict(
+                            sequence=sequence,
+                            channel=order_channel,
+                        )
+
+                    if "portfolio" in message_channel:
+
+                        await update_db_pkl(
+                            "portfolio",
+                            data,
+                            currency,
+                        )
                 WHERE_FILTER_TICK: str = "tick"
 
                 TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
@@ -173,48 +201,7 @@ async def caching_distributing_data(
                     pub_message = dict(
                         sequence=sequence,
                         server_time=server_time,
-                        ticker_channel=ticker_channel,
-                    )
-
-                if "user.changes.any" in message_channel:
-
-                    log.warning(f"user.changes {data}")
-
-                    sequence_user_trade = sequence_user_trade + len(message_params) - 1
-
-                    log.error(
-                        f"sequence_user_trade {sequence_user_trade} {currency_upper}"
-                    )
-
-                if "user" in message_channel:
-
-                    if "portfolio" in message_channel:
-
-                        await update_db_pkl(
-                            "portfolio",
-                            data,
-                            currency,
-                        )
-
-                    if "changes.any" in message_channel:
-
-                        log.warning(f"user.changes {data}")
-
-                        await update_cached_orders(
-                            cached_orders,
-                            data,
-                        )
-
-                    pub_message = dict(
-                        sequence=sequence,
-                        server_time=server_time,
-                        ticker_channel=ticker_channel,
-                    )
-
-                    sequence_user_trade = sequence_user_trade + len(message_params) - 1
-
-                    log.error(
-                        f"sequence_user_trade {sequence_user_trade} {currency_upper}"
+                        channel=ticker_channel,
                     )
 
                 market_condition = get_market_condition(
@@ -247,11 +234,8 @@ async def caching_distributing_data(
                             chart_trades_buffer = []
                     pub_message = dict(
                         sequence=sequence,
-                        server_time=server_time,
-                        ticker_channel=ticker_channel,
-                        )
-
-
+                        channel=chart_update_channel,
+                    )
 
                 if "PERPETUAL" in instrument_name_future:
 
@@ -303,12 +287,7 @@ async def caching_distributing_data(
                     orjson.dumps(ticker_all),
                 )
 
-                await pipe.publish(
-                    ticker_channel, 
-                    orjson.dumps(
-                        pub_message
-                        )
-                    )
+                await pipe.publish(ticker_channel, orjson.dumps(pub_message))
 
                 await pipe.execute()
 

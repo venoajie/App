@@ -99,16 +99,18 @@ async def future_spreads(
 
         redis_keys: dict = config_app["redis_keys"][0]
         ticker_keys: str = redis_keys["ticker"]
+        orders_keys: str = redis_keys["orders"]
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         ticker_channel: str = redis_channels["ticker_update"]
-        user_changes_channel: str = redis_channels["user_changes"]
+        order_channel: str = redis_channels["order"]
+        chart_update_channel: str = redis_channels["chart_update"]
 
         # prepare channels placeholders
         channels = [
-            # chart_channel,
-            # user_changes_channel,
+            chart_update_channel,
+            order_channel,
             # general_channel,
             # portfolio_channel,
             # market_condition_channel,
@@ -144,7 +146,25 @@ async def future_spreads(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    if ticker_channel in message_byte_data["ticker_channel"]:
+                    if chart_update_channel in message_byte_data["channel"]:
+                        ticker_all = orjson.loads(
+                            await client_redis.hget(
+                                ticker_keys,
+                                chart_update_channel,
+                            )
+                        )
+
+                    if order_channel in message_byte_data["channel"]:
+                        cached_orders = orjson.loads(
+                            await client_redis.hget(
+                                orders_keys,
+                                order_channel,
+                            )
+                        )
+
+                        server_time = message_byte_data["server_time"]
+
+                    if ticker_channel in message_byte_data["channel"]:
                         ticker_all = orjson.loads(
                             await client_redis.hget(
                                 ticker_keys,
