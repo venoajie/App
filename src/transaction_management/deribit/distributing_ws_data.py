@@ -66,7 +66,7 @@ async def caching_distributing_data(
     try:
 
         # connecting to redis pubsub
-        pubsub: object = client_redis.conn.pubsub()
+        pubsub: object = client_redis.get_connection.pubsub()
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
