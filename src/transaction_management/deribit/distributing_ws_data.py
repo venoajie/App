@@ -295,11 +295,11 @@ async def chart_trade_in_msg(
     if "chart.trades" in message_channel:
         tick_from_exchange = data_orders["tick"]
 
+        log.debug(candles_data)
+        
         tick_from_cache = (
             [o["max_tick"] for o in candles_data if o["resolution"] == 5]
         )
-        
-        log.debug(candles_data)
         
         if tick_from_cache:
             max_tick_from_cache = max(tick_from_cache)
