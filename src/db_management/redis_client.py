@@ -39,6 +39,7 @@ class RedisClient(metaclass=Singleton):
     port: int = 6379
     db: int = 0
     protocol: int = 3
+    pool: object = None
 
     def __post_init__(self):
         self.pool = redis.ConnectionPool.from_url(
