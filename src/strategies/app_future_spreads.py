@@ -149,7 +149,7 @@ async def future_spreads(
                     message_byte_data = orjson.loads(message_byte["data"])
                     
                     if "ticker" in message_byte_data["ticker_channel"]:
-                        cached_orders = orjson.loads (
+                        ticker_all = orjson.loads (
                             await  client_redis.hget(
                                 ticker_keys,
                                 ticker_channel,
@@ -157,13 +157,7 @@ async def future_spreads(
                             )
                         
                         server_time = message_byte_data["server_time"]
-                    log.warning (f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time}")
-
-                    message = message_byte_data["message"]
-
-#                    message_channel: str = message["channel"]
-
-#                    message_data: str = message["data"]
+                    log.warning (f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}")
 
 #                    currency: str = extract_currency_from_text(message_channel)
 
@@ -179,14 +173,10 @@ async def future_spreads(
                         )
 
                     if b"ticker" in (message_byte["channel"]):
+                        
+                        log.warning (f"server_time {server_time} sequence {sequence}")
+                        log.debug (f" {ticker_all}")
 
-                        sequence = message["sequence"]
-
-                        log.critical(sequence)
-
-                        ticker_all = message["ticker_all"]
-
-                        server_time = message["server_time"]
 
                         currency: str = message["currency"]
 
