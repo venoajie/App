@@ -107,6 +107,9 @@ async def caching_distributing_data(
 
         instruments_name = futures_instruments["instruments_name"]
 
+        redis_keys: dict = config_app["redis_keys"][0]
+        ticker_keys: str = redis_keys["ticker"]
+
         redis_channels: dict = config_app["redis_channels"][0]
         chart_channel: str = redis_channels["chart"]
         user_changes_channel: str = redis_channels["user_changes"]
@@ -139,9 +142,16 @@ async def caching_distributing_data(
         while True:
 
             message_params: str = await queue_general.get()
-
+            
             log.warning(message_params)
 
+            client_redis.hset(ticker_keys, ticker_channel, message_params)
+                        
+            value = client_redis.hget('myhash', 'key1')
+            
+            
+            log.warning(value)
+            
             await send_notification(
                 client_redis,
                 general_channel,
