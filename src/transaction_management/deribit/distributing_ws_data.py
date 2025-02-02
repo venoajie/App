@@ -145,19 +145,6 @@ async def caching_distributing_data(
             
             log.warning(message_params)
 
-            await client_redis.hset(
-                ticker_keys, 
-                ticker_channel, 
-                orjson.dumps(message_params),
-                )
-                        
-            await send_notification(
-                client_redis,
-                general_channel,
-                sequence_user_trade,
-                message_params,
-            )
-
             data: dict = message_params["data"]
 
             message_channel: str = message_params["channel"]
@@ -241,11 +228,18 @@ async def caching_distributing_data(
 
                 log.error(f"sequence_user_trade {sequence_user_trade} {currency_upper}")
 
+
+                await client_redis.hset(
+                    ticker_keys, 
+                    ticker_channel, 
+                    orjson.dumps(data_to_dispatch),
+                    )
+                            
                 await send_notification(
                     client_redis,
-                    user_changes_channel,
+                    general_channel,
                     sequence_user_trade,
-                    data_to_dispatch,
+                    sequence_user_trade,
                 )
 
             if "chart.trades" in message_channel:
