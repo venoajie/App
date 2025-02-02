@@ -153,6 +153,8 @@ async def caching_distributing_data(
 
             async with client_redis.pipeline() as pipe:
     
+                log.warning(message_params)
+    
                 WHERE_FILTER_TICK: str = "tick"
 
                 TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
@@ -162,8 +164,6 @@ async def caching_distributing_data(
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                    log.warning(message_params)
-    
                     await update_cached_ticker(
                         instrument_name_future,
                         ticker_all,
@@ -183,19 +183,14 @@ async def caching_distributing_data(
                         orjson.dumps(ticker_all),
                         )
                     
-                    await send_notification(
-                        pipe,
-                        ticker_channel,
-                        sequence_user_trade,
-                        data,
-                    )
+                    pub_message = dict(sequence=sequence,
+                                server_time=server_time,
+                                ticker_keys=ticker_keys)
                     
-                    await send_notification(
-                        pipe,
-                        ticker_keys,
-                        sequence_user_trade,
-                        data,
-                    )
+                    await pipe.publish(
+                        ticker_channel,
+                        orjson.dumps(pub_message)
+                        )
                     
                     
                 if "user.changes.any" in message_channel:
@@ -400,6 +395,7 @@ def get_settlement_period(strategy_attributes) -> list:
         )
     )
 
+
 async def send_notification(
     client_redis: object,
     CHANNEL_NAME: str,
@@ -410,10 +406,5 @@ async def send_notification(
 
     await client_redis.publish(
         CHANNEL_NAME,
-        orjson.dumps(
-            {
-                "sequence": sequence,
-                "message": message,
-            },
-        ),
-    )
+        orjson.dumps(message),
+        )

@@ -150,16 +150,13 @@ async def future_spreads(
                         ticker_channel,
                         )
                     )
-                                                
-                
+                             
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
                     log.debug (f"message_byte_data {message_byte_data}")
                     log.warning (f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} ")
-
-
 
                     message = message_byte_data["message"]
 
