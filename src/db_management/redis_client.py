@@ -21,7 +21,6 @@ import redis.asyncio as redis
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
-@dataclass(unsafe_hash=True, slots=True)
 class Singleton(type):
     """
     https://stackoverflow.com/questions/49398590/correct-way-of-using-redis-connection-pool-in-python
@@ -33,7 +32,7 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
-
+@dataclass(unsafe_hash=True, slots=True)
 class RedisClient(metaclass=Singleton):
 
     host: str = "redis://localhost"
