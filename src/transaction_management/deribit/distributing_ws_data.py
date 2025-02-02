@@ -189,7 +189,7 @@ async def caching_distributing_data(
                     
                     await send_notification(
                         pipe,
-                        user_changes_channel,
+                        ticker_channel,
                         sequence_user_trade,
                         data,
                     )
