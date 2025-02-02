@@ -200,7 +200,7 @@ async def caching_distributing_data(
                     )
 
 
-                    await client_redis.hset(
+                    await pipe.hset(
                         ticker_keys, 
                         ticker_channel, 
                         orjson.dumps(ticker_all),
@@ -317,7 +317,7 @@ async def caching_distributing_data(
 
                     sequence = sequence_update
 
-                pipe.execute()
+                await pipe.execute()
 
     except Exception as error:
 
