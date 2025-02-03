@@ -165,9 +165,7 @@ async def caching_distributing_data(
 
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                    log.warning(
-                        f"message_channel {message_channel} ticker_channel {ticker_channel} {instrument_name_future}"
-                    )
+                    
 
                     server_time = (
                         data["timestamp"] + server_time
@@ -183,7 +181,14 @@ async def caching_distributing_data(
                         instrument_name=instrument_name_future,
                         currency_upper=currency_upper,
                     )
-
+                    log.warning(
+                        f"data {data}"
+                    )
+                    
+                    log.warning(
+                        f"pub_message {pub_message}"
+                    )
+                    
                     await publishing_result(
                         pipe,
                         ticker_channel,
