@@ -11,7 +11,7 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from db_management.redis_client import saving_and_publishing_result,publishing_result
+from db_management.redis_client import saving_and_publishing_result, publishing_result
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition,
@@ -42,22 +42,22 @@ from websocket_management.allocating_ohlc import (
 
 
 async def update_db_pkl(
-    path: str, 
-    data_orders: dict, 
+    path: str,
+    data_orders: dict,
     currency: str,
-    ) -> None:
+) -> None:
 
     my_path_portfolio: str = provide_path_for_file(path, currency)
 
     if currency_inline_with_database_address(
         currency,
         my_path_portfolio,
-        ):
+    ):
 
         replace_data(
             my_path_portfolio,
             data_orders,
-            )
+        )
 
 
 async def caching_distributing_data(
@@ -87,7 +87,7 @@ async def caching_distributing_data(
         ticker_channel: str = redis_channels["ticker_update"]
 
         redis_keys: dict = config_app["redis_keys"][0]
-        market_condition_keys: str = redis_keys["market_condition"]      
+        market_condition_keys: str = redis_keys["market_condition"]
         order_keys: str = redis_keys["orders"]
         chart_trades_buffer: list = []
 
@@ -162,10 +162,12 @@ async def caching_distributing_data(
                 TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
 
                 instrument_name_future = (message_channel)[19:]
-                
+
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
-                    
-                    log.warning(f"message_channel {message_channel} ticker_channel {ticker_channel} {instrument_name_future}")
+
+                    log.warning(
+                        f"message_channel {message_channel} ticker_channel {ticker_channel} {instrument_name_future}"
+                    )
 
                     server_time = (
                         data["timestamp"] + server_time
@@ -207,10 +209,10 @@ async def caching_distributing_data(
                         currency_upper,
                     )
 
-                    log.warning (f" combining_candles {combining_candles}")
+                    log.warning(f" combining_candles {combining_candles}")
 
                     chart_trades_buffer.append(data)
-                    log.error (f" chart_trades_buffer {chart_trades_buffer}")
+                    log.error(f" chart_trades_buffer {chart_trades_buffer}")
 
                     if len(chart_trades_buffer) > 3:
 
@@ -238,7 +240,7 @@ async def caching_distributing_data(
                     )
 
                     if is_chart_trade:
-                        
+
                         log.info(combining_candles)
 
                         pub_message = dict(
@@ -253,7 +255,6 @@ async def caching_distributing_data(
                             market_condition,
                             pub_message,
                         )
-
 
                         pub_message = dict(
                             channel=chart_update_channel,
@@ -289,10 +290,8 @@ async def chart_trade_in_msg(
     if "chart.trades" in message_channel:
         tick_from_exchange = data_orders["tick"]
 
-        tick_from_cache = (
-            [o["max_tick"] for o in candles_data if o["resolution"] == 5]
-        )
-        
+        tick_from_cache = [o["max_tick"] for o in candles_data if o["resolution"] == 5]
+
         if tick_from_cache:
             max_tick_from_cache = max(tick_from_cache)
 
@@ -311,4 +310,3 @@ def get_settlement_period(strategy_attributes: list) -> list:
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
-

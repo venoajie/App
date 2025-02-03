@@ -97,7 +97,7 @@ async def update_cached_ticker(
         )
 
         instruments_name = futures_instruments["instruments_name"]
-        
+
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         ticker_channel: str = redis_channels["ticker_update"]
@@ -112,28 +112,30 @@ async def update_cached_ticker(
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
-        
+
         ticker_all = combining_ticker_data(instruments_name)
 
         while True:
 
             try:
-                
+
                 message_byte = await pubsub.get_message()
 
                 if message_byte and message_byte["type"] == "message":
 
-                    message_byte_data = orjson.loads(message_byte["data"])                    
-                    
-                    message_channel = message_byte_data["channel"]  
+                    message_byte_data = orjson.loads(message_byte["data"])
 
-                    log.debug (f" message_byte_data {message_byte_data} ticker_update_channel {ticker_channel} message_channel {message_channel}")
-                    
+                    message_channel = message_byte_data["channel"]
+
+                    log.debug(
+                        f" message_byte_data {message_byte_data} ticker_update_channel {ticker_channel} message_channel {message_channel}"
+                    )
+
                     if ticker_channel in message_channel:
 
-                        data = message_byte_data["data"]                  
+                        data = message_byte_data["data"]
 
-                        instrument_name = message_byte_data["instrument_name"]                  
+                        instrument_name = message_byte_data["instrument_name"]
 
                         for item in data:
 
@@ -142,27 +144,29 @@ async def update_cached_ticker(
                                 and "instrument_name" not in item
                                 and "type" not in item
                             ):
-                                [o for o in ticker_all if instrument_name in o["instrument_name"]][0][
-                                    item
-                                ] = data[item]
+                                [
+                                    o
+                                    for o in ticker_all
+                                    if instrument_name in o["instrument_name"]
+                                ][0][item] = data[item]
 
                             if "stats" in item:
 
                                 data_orders_stat = data[item]
 
                                 for item in data_orders_stat:
-                                    [o for o in ticker_all if instrument_name in o["instrument_name"]][0][
-                                        "stats"
-                                    ][item] = data_orders_stat[item]
-                                    
-                        
+                                    [
+                                        o
+                                        for o in ticker_all
+                                        if instrument_name in o["instrument_name"]
+                                    ][0]["stats"][item] = data_orders_stat[item]
+
                         await saving_result(
                             client_redis,
                             ticker_channel,
                             ticker_keys,
                             ticker_all,
-                            )
-                            
+                        )
 
             except Exception as error:
 
@@ -195,4 +199,3 @@ def get_settlement_period(strategy_attributes: list) -> list:
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
-

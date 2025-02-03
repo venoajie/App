@@ -16,6 +16,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.system_tools import parse_error_message
 
+
 class Singleton(type):
     """
     https://stackoverflow.com/questions/49398590/correct-way-of-using-redis-connection-pool-in-python
@@ -51,6 +52,7 @@ class RedisClient(metaclass=Singleton):
     def conn(self):
         return self.pool
 
+
 async def saving_and_publishing_result(
     client_redis: object,
     channel: str,
@@ -61,57 +63,56 @@ async def saving_and_publishing_result(
     """ """
 
     try:
-        #updating cached data
+        # updating cached data
         if cached_data:
             await saving_result(
                 client_redis,
                 channel,
                 keys,
                 cached_data,
-                )
+            )
 
-        #publishing message
+        # publishing message
         await publishing_result(
             client_redis,
             channel,
             message,
-            )
+        )
 
     except Exception as error:
-    
+
         parse_error_message(error)
 
         await telegram_bot_sendtext(
             f"redis saving and publishing result - {error}",
             "general_error",
         )
-        
-        
+
+
 async def publishing_result(
     client_redis: object,
     channel: str,
     message: dict,
 ) -> None:
     """ """
-    
+
     try:
-            
-        #publishing message
+
+        # publishing message
         await client_redis.publish(
             channel,
             orjson.dumps(message),
         )
 
     except Exception as error:
-    
+
         parse_error_message(error)
 
         await telegram_bot_sendtext(
             f"redis publishing result - {error}",
             "general_error",
         )
-        
-        
+
 
 async def saving_result(
     client_redis: object,
@@ -122,23 +123,23 @@ async def saving_result(
     """ """
 
     try:
-            
+
         await client_redis.hset(
-                keys,
-                channel,
-                orjson.dumps(cached_data),
-                )
+            keys,
+            channel,
+            orjson.dumps(cached_data),
+        )
 
     except Exception as error:
-    
+
         parse_error_message(error)
 
         await telegram_bot_sendtext(
             f"redis saving result - {error}",
             "general_error",
         )
-        
-        
+
+
 async def querying_data(
     client_redis: object,
     channel: str,
@@ -147,21 +148,19 @@ async def querying_data(
     """ """
 
     try:
-            
+
         await orjson.loads(
             await client_redis.hget(
                 keys,
                 channel,
-                )
             )
+        )
 
     except Exception as error:
-    
+
         parse_error_message(error)
 
         await telegram_bot_sendtext(
             f"redis qurying result - {error}",
             "general_error",
         )
-        
-        

@@ -78,7 +78,7 @@ async def saving_and_relabelling_orders(
                     try:
 
                         if receive_order_channel in message_channel:
-                        
+
                             data = message_byte_data["data"]
 
                             currency_lower = message_byte_data["currency"]
@@ -101,11 +101,11 @@ async def saving_and_relabelling_orders(
             except Exception as error:
 
                 parse_error_message(error)
-                                
+
                 await telegram_bot_sendtext(
-                    f"capturing user changes - {error}", 
+                    f"capturing user changes - {error}",
                     "general_error",
-                    )
+                )
 
                 continue
 
@@ -120,4 +120,3 @@ async def saving_and_relabelling_orders(
             f"capturing user changes - {error}",
             "general_error",
         )
-

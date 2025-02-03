@@ -125,7 +125,7 @@ async def cancelling_orders(
         chart_trade = False
 
         not_cancel = True
-        
+
         market_condition = None
 
         while not_cancel:
@@ -142,31 +142,30 @@ async def cancelling_orders(
 
                     if market_analytics_channel in message_channel:
 
-                        market_condition = orjson.loads(
-                            await client_redis.hget(
-                                market_condition_keys,
-                                market_analytics_channel,
-                            )
+                        market_condition = await querying_data(
+                            client_redis,
+                            market_analytics_channel,
+                            market_condition_keys,
                         )
 
                     if receive_order_channel in message_channel:
 
-                        cached_orders = orjson.loads(
-                            await client_redis.hget(
-                                orders_keys,
-                                receive_order_channel,
-                            )
+                        cached_orders = await querying_data(
+                            client_redis,
+                            receive_order_channel,
+                            orders_keys,
                         )
 
                         server_time = message_byte_data["server_time"]
 
-                    if ticker_channel in message_channel :
+                    if ticker_channel in message_channel:  # and market_condition:
 
                         cached_ticker_all = await querying_data(
-                                ticker_keys,
-                                ticker_channel,
-                            )
-                        
+                            client_redis,
+                            ticker_channel,
+                            ticker_keys,
+                        )
+
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]
@@ -188,9 +187,7 @@ async def cancelling_orders(
 
                         index_price = get_index(ticker_perpetual_instrument_name)
 
-                        sub_account = reading_from_pkl_data(
-                            "sub_accounts", currency
-                        )
+                        sub_account = reading_from_pkl_data("sub_accounts", currency)
 
                         sub_account = sub_account[0]
 
@@ -233,8 +230,7 @@ async def cancelling_orders(
                             position_without_combo = [
                                 o
                                 for o in position
-                                if f"{currency_upper}-FS"
-                                not in o["instrument_name"]
+                                if f"{currency_upper}-FS" not in o["instrument_name"]
                             ]
 
                             if index_price is not None and equity > 0:
@@ -358,7 +354,7 @@ async def cancelling_orders(
                     f"cancelling active orders - {error}",
                     "general_error",
                 )
-                
+
                 continue
 
             finally:

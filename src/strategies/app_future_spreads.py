@@ -79,10 +79,10 @@ async def future_spreads(
         instruments_name = futures_instruments["instruments_name"]
 
         redis_keys: dict = config_app["redis_keys"][0]
-        market_condition_keys: str = redis_keys["market_condition"]      
+        market_condition_keys: str = redis_keys["market_condition"]
         order_keys: str = redis_keys["orders"]
         ticker_keys: str = redis_keys["ticker"]
-        
+
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
@@ -136,7 +136,6 @@ async def future_spreads(
                             )
                         )
 
-                        
                     if receive_order_channel in message_channel:
 
                         cached_orders = orjson.loads(
@@ -159,12 +158,10 @@ async def future_spreads(
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]
-                    
 
                     #                    currency: str = extract_currency_from_text(message_channel)
 
                     #                    currency_upper = currency.upper()
-
 
                     if b"ticker" in (message_byte["channel"]):
 
@@ -312,12 +309,10 @@ async def future_spreads(
                                         strategy in active_strategies
                                         and size_perpetuals_reconciled
                                     ):
-                                        
+
                                         async with client_redis.pipeline() as pipe:
 
-                                            extra = (
-                                                3  # waiting minute before reorder  15 min
-                                            )
+                                            extra = 3  # waiting minute before reorder  15 min
 
                                             BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = (
                                                 strategy_params[
@@ -396,7 +391,8 @@ async def future_spreads(
                                                     ][0]
 
                                                     instrument_time_left = (
-                                                        expiration_timestamp - server_time
+                                                        expiration_timestamp
+                                                        - server_time
                                                     ) / ONE_MINUTE
 
                                                     instrument_time_left_exceed_threshold = (
@@ -434,7 +430,8 @@ async def future_spreads(
                                                         else [
                                                             o
                                                             for o in future_control
-                                                            if instrument_name_future in o
+                                                            if instrument_name_future
+                                                            in o
                                                         ]
                                                     )
 
@@ -476,7 +473,9 @@ async def future_spreads(
                                                                 market_condition,
                                                             )
 
-                                                            if send_order["order_allowed"]:
+                                                            if send_order[
+                                                                "order_allowed"
+                                                            ]:
 
                                                                 await saving_and_publishing_result(
                                                                     pipe,
@@ -484,7 +483,7 @@ async def future_spreads(
                                                                     None,
                                                                     None,
                                                                     send_order,
-                                                                    )
+                                                                )
 
                                                                 # not_order = False
 
@@ -544,7 +543,9 @@ async def future_spreads(
                                                                 THRESHOLD_MARKET_CONDITIONS_COMBO,
                                                             )
 
-                                                            if send_order["order_allowed"]:
+                                                            if send_order[
+                                                                "order_allowed"
+                                                            ]:
 
                                                                 await saving_and_publishing_result(
                                                                     pipe,
@@ -552,9 +553,7 @@ async def future_spreads(
                                                                     None,
                                                                     None,
                                                                     send_order,
-                                                                    )
-
-
+                                                                )
 
                                                                 # not_order = False
 
@@ -576,7 +575,8 @@ async def future_spreads(
                                                     if sum_selected_transaction != 0:
 
                                                         if (
-                                                            len_selected_transaction == 1
+                                                            len_selected_transaction
+                                                            == 1
                                                             and "closed" not in label
                                                         ):
 
@@ -586,7 +586,9 @@ async def future_spreads(
 
                                                                 for (
                                                                     transaction
-                                                                ) in selected_transaction:
+                                                                ) in (
+                                                                    selected_transaction
+                                                                ):
 
                                                                     waiting_minute_before_ordering = (
                                                                         strategy_params[
@@ -651,16 +653,15 @@ async def future_spreads(
                                                                             "order_allowed"
                                                                         ]:
 
-
                                                                             await saving_and_publishing_result(
                                                                                 pipe,
                                                                                 sending_order_channel,
                                                                                 None,
                                                                                 None,
                                                                                 send_order,
-                                                                                )
+                                                                            )
 
-                                                                                        # not_order = False
+                                                                            # not_order = False
 
                                                                             break
 

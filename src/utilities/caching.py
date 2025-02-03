@@ -139,6 +139,7 @@ async def combining_order_data(
 
     return result
 
+
 async def update_cached_orders(
     queue_orders_all,
     queue_orders,

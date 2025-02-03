@@ -52,12 +52,12 @@ async def processing_orders(
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
-                    
+
                     message_channel = message_byte_data["channel"]
 
                     if sending_order_channel in message_channel:
 
-                        currency = message_byte_data["currency"]                        
+                        currency = message_byte_data["currency"]
 
                         if message_byte_data["order_allowed"]:
 
@@ -90,7 +90,9 @@ async def processing_orders(
                                             "instrument_name"
                                         ]
 
-                                    currency = extract_currency_from_text(instrument_name)
+                                    currency = extract_currency_from_text(
+                                        instrument_name
+                                    )
 
                                     transaction_log_trading_table = (
                                         f"transaction_log_{currency.lower()}_json"
@@ -118,7 +120,6 @@ async def processing_orders(
 
                                 except Exception as error:
                                     pass
-
 
             except Exception as error:
 

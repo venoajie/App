@@ -98,7 +98,9 @@ async def avoiding_double_ids(
                                 []
                                 if not orders_currency
                                 else [
-                                    o for o in orders_currency if strategy in (o["label"])
+                                    o
+                                    for o in orders_currency
+                                    if strategy in (o["label"])
                                 ]
                             )
 
@@ -111,7 +113,9 @@ async def avoiding_double_ids(
                                 for label in outstanding_order_id:
 
                                     orders = [
-                                        o for o in orders_currency if label in o["label"]
+                                        o
+                                        for o in orders_currency
+                                        if label in o["label"]
                                     ]
 
                                     len_label = len(orders)

@@ -110,10 +110,10 @@ async def hedging_spot(
         instrument_attributes_futures_all = futures_instruments["active_futures"]
 
         redis_keys: dict = config_app["redis_keys"][0]
-        market_condition_keys: str = redis_keys["market_condition"]      
+        market_condition_keys: str = redis_keys["market_condition"]
         order_keys: str = redis_keys["orders"]
         ticker_keys: str = redis_keys["ticker"]
-        
+
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
@@ -128,7 +128,6 @@ async def hedging_spot(
             sending_order_channel,
             ticker_channel,
         ]
-
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -168,7 +167,6 @@ async def hedging_spot(
                             )
                         )
 
-                        
                     if receive_order_channel in message_channel:
 
                         cached_orders = orjson.loads(
@@ -191,7 +189,7 @@ async def hedging_spot(
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]
-                    
+
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
@@ -457,9 +455,11 @@ async def hedging_spot(
                                             ):
                                                 async with client_redis.pipeline() as pipe:
 
-                                                    best_ask_prc: float = instrument_ticker[
-                                                        "best_ask_price"
-                                                    ]
+                                                    best_ask_prc: float = (
+                                                        instrument_ticker[
+                                                            "best_ask_price"
+                                                        ]
+                                                    )
 
                                                     send_order: dict = await hedging.is_send_open_order_allowed(
                                                         non_checked_strategies,
@@ -479,8 +479,7 @@ async def hedging_spot(
                                                             None,
                                                             None,
                                                             send_order,
-                                                            )
-
+                                                        )
 
                                                         # not_order = False
 
@@ -495,18 +494,22 @@ async def hedging_spot(
 
                                                         # log.error (f"{orders_currency_strategy} ")
 
-                                                        for status in status_transaction:
+                                                        for (
+                                                            status
+                                                        ) in status_transaction:
 
                                                             my_trades_currency_strategy_status = [
                                                                 o
                                                                 for o in my_trades_currency_strategy
-                                                                if status in (o["label"])
+                                                                if status
+                                                                in (o["label"])
                                                             ]
 
                                                             orders_currency_strategy_label_contra_status = [
                                                                 o
                                                                 for o in orders_currency_strategy
-                                                                if status not in o["label"]
+                                                                if status
+                                                                not in o["label"]
                                                             ]
 
                                                             # log.error (f"{status} ")
@@ -515,7 +518,9 @@ async def hedging_spot(
 
                                                                 transaction_instrument_name = remove_redundant_elements(
                                                                     [
-                                                                        o["instrument_name"]
+                                                                        o[
+                                                                            "instrument_name"
+                                                                        ]
                                                                         for o in my_trades_currency_strategy_status
                                                                     ]
                                                                 )
@@ -553,7 +558,8 @@ async def hedging_spot(
                                                                         )
 
                                                                         if (
-                                                                            status == "open"
+                                                                            status
+                                                                            == "open"
                                                                             and my_trades_currency_contribute_to_hedging_sum
                                                                             <= 0
                                                                         ):
@@ -591,14 +597,13 @@ async def hedging_spot(
                                                                                 "order_allowed"
                                                                             ]:
 
-
                                                                                 await saving_and_publishing_result(
                                                                                     pipe,
                                                                                     sending_order_channel,
                                                                                     None,
                                                                                     None,
                                                                                     send_order,
-                                                                                    )
+                                                                                )
 
                                                                                 # not_order = False
 
@@ -648,7 +653,7 @@ async def hedging_spot(
                                                                                     None,
                                                                                     None,
                                                                                     send_order,
-                                                                                    )
+                                                                                )
 
                                                                                 # not_order = False
                                                                                 # )
@@ -706,4 +711,3 @@ def get_index(ticker: dict) -> float:
         index_price = ticker["estimated_delivery_price"]
 
     return index_price
-
