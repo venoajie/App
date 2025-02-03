@@ -13,6 +13,10 @@ from utilities.system_tools import (
     parse_error_message,
     provide_path_for_file,
 )
+from websocket_management.allocating_ohlc import (
+    inserting_open_interest,
+    ohlc_result_per_time_frame,
+)
 
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
@@ -85,6 +89,8 @@ async def update_cached_ticker(
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
 
+        resolution: int = 1
+
         # get TRADABLE currencies
         currencies = [o["spot"] for o in tradable_config_app][0]
 
@@ -106,9 +112,7 @@ async def update_cached_ticker(
         ticker_keys: str = redis_keys["ticker"]
 
         # prepare channels placeholders
-        channels = [
-            ticker_channel
-        ]
+        channels = [ticker_channel]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -122,7 +126,7 @@ async def update_cached_ticker(
                 message_byte = await pubsub.get_message()
 
                 if message_byte and message_byte["type"] == "message":
-                    
+
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte_data["channel"]
@@ -132,6 +136,8 @@ async def update_cached_ticker(
                         data = message_byte_data["data"]
 
                         instrument_name = message_byte_data["instrument_name"]
+
+                        currency = message_byte_data["currency"]
 
                         for item in data:
 
@@ -163,7 +169,19 @@ async def update_cached_ticker(
                             ticker_keys,
                             ticker_all,
                         )
-                        
+
+                        if "PERPETUAL" in instrument_name:
+
+                            WHERE_FILTER_TICK: str = "tick"
+
+                            TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
+
+                            await inserting_open_interest(
+                                currency,
+                                WHERE_FILTER_TICK,
+                                TABLE_OHLC1,
+                                data,
+                            )
 
             except Exception as error:
 

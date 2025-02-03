@@ -131,7 +131,7 @@ async def cancelling_orders(
         while not_cancel:
 
             try:
-                
+
                 from loguru import logger as log
 
                 message_byte = await pubsub.get_message()
@@ -141,8 +141,8 @@ async def cancelling_orders(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte_data["channel"]
-                    
-                    log.critical (f" message_channel {message_channel}")
+
+                    log.critical(f" message_channel {message_channel}")
 
                     if market_analytics_channel in message_channel:
 
@@ -151,7 +151,8 @@ async def cancelling_orders(
                             market_analytics_channel,
                             market_condition_keys,
                         )
-                    log.critical (f" market_condition {market_condition}")
+
+                        log.critical(f" market_condition {market_condition}")
 
                     if receive_order_channel in message_channel:
 
@@ -163,15 +164,15 @@ async def cancelling_orders(
 
                         server_time = message_byte_data["server_time"]
 
-                    if ticker_channel in message_channel :#and market_condition:
+                    if ticker_channel in message_channel:  # and market_condition:
 
                         cached_ticker_all = await querying_data(
                             client_redis,
                             ticker_channel,
                             ticker_keys,
                         )
-                        
-                        log.warning (f"cached_ticker_all {cached_ticker_all}")
+
+                        log.warning(f"cached_ticker_all {cached_ticker_all}")
 
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]

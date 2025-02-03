@@ -178,21 +178,12 @@ async def caching_distributing_data(
                         instrument_name=instrument_name_future,
                         currency_upper=currency_upper,
                     )
-                    
+
                     await publishing_result(
                         pipe,
                         ticker_channel,
                         pub_message,
                     )
-
-                    if "PERPETUAL" in instrument_name_future:
-
-                        await inserting_open_interest(
-                            currency,
-                            WHERE_FILTER_TICK,
-                            TABLE_OHLC1,
-                            data,
-                        )
 
                 if "chart.trades" in message_channel:
 
@@ -204,7 +195,7 @@ async def caching_distributing_data(
                         currency_upper,
                     )
 
-                    #log.warning(f" combining_candles {combining_candles}")
+                    # log.warning(f" combining_candles {combining_candles}")
 
                     chart_trades_buffer.append(data)
                     log.error(f" chart_trades_buffer {chart_trades_buffer}")
