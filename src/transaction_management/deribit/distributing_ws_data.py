@@ -246,7 +246,7 @@ async def caching_distributing_data(
                     is_chart_trade = await chart_trade_in_msg(
                         message_channel,
                         data,
-                        market_condition,
+                        combining_candles,
                     )
 
                     if is_chart_trade:
