@@ -7,7 +7,7 @@ import asyncio
 # installed
 import uvloop
 from dataclassy import dataclass
-
+import orjson
 import redis.asyncio as redis
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -47,3 +47,26 @@ class RedisClient(metaclass=Singleton):
 
     def conn(self):
         return self.pool
+
+async def saving_and_publishing_result(
+    client_redis: object,
+    channel: str,
+    keys: str,
+    cached_data: list,
+    message: dict,
+) -> None:
+    """ """
+
+    #updating cached data
+    if cached_data:
+        await client_redis.hset(
+        keys,
+        channel,
+        orjson.dumps(cached_data),
+    )
+
+    #publishing message
+    await client_redis.publish(
+        channel,
+        orjson.dumps(message),
+    )

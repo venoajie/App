@@ -12,7 +12,7 @@ import orjson
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-
+from db_management.redis_client import saving_and_publishing_result
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition,
@@ -85,16 +85,17 @@ async def caching_distributing_data(
 
         instruments_name = futures_instruments["instruments_name"]
 
-        redis_keys: dict = config_app["redis_keys"][0]
-        ticker_keys: str = redis_keys["ticker"]
-        order_keys: str = redis_keys["orders"]
-        market_condition_keys: str = redis_keys["market_condition"]
-
+        # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        order_channel: str = redis_channels["order"]
-        ticker_channel: str = redis_channels["ticker_update"]
         chart_update_channel: str = redis_channels["chart_update"]
+        receive_order_channel: str = redis_channels["receive_order"]
+        sending_order_channel: str = redis_channels["sending_order"]
+        ticker_channel: str = redis_channels["ticker_update"]
 
+        redis_keys: dict = config_app["redis_keys"][0]
+        market_condition_keys: str = redis_keys["market_condition"]      
+        order_keys: str = redis_keys["orders"]
+        ticker_keys: str = redis_keys["ticker"]
         chart_trades_buffer: list = []
 
         ticker_all = cached_ticker(instruments_name)
@@ -144,7 +145,8 @@ async def caching_distributing_data(
 
                             pub_message = dict(
                                 sequence=sequence,
-                                channel=order_channel,
+                                channel=receive_order_channel,
+                                data=data,
                                 currency_upper=currency_upper,
                             )
 
@@ -156,9 +158,9 @@ async def caching_distributing_data(
                                 currency,
                             )
 
-                    await save_and_publish_result(
+                    await saving_and_publishing_result(
                         pipe,
-                        order_channel,
+                        receive_order_channel,
                         order_keys,
                         cached_orders,
                         pub_message,
@@ -195,7 +197,7 @@ async def caching_distributing_data(
                         currency_upper=currency_upper,
                     )
 
-                    await save_and_publish_result(
+                    await saving_and_publishing_result(
                         pipe,
                         ticker_channel,
                         ticker_keys,
@@ -257,7 +259,7 @@ async def caching_distributing_data(
                             is_chart_trade=is_chart_trade,
                         )
 
-                        await save_and_publish_result(
+                        await saving_and_publishing_result(
                             pipe,
                             chart_update_channel,
                             market_condition_keys,
@@ -324,23 +326,3 @@ def get_settlement_period(strategy_attributes: list) -> list:
         )
     )
 
-
-async def save_and_publish_result(
-    client_redis: object,
-    channel: str,
-    keys: str,
-    cached_data: list,
-    message: dict,
-) -> None:
-    """ """
-
-    await client_redis.hset(
-        keys,
-        channel,
-        orjson.dumps(cached_data),
-    )
-
-    await client_redis.publish(
-        channel,
-        orjson.dumps(message),
-    )

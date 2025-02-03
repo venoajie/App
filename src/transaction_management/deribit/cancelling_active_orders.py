@@ -112,14 +112,15 @@ async def cancelling_orders(
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        ticker_channel: str = redis_channels["ticker_update"]
-        order_channel: str = redis_channels["order"]
         chart_update_channel: str = redis_channels["chart_update"]
+        receive_order_channel: str = redis_channels["receive_order"]
+        sending_order_channel: str = redis_channels["sending_order"]
+        ticker_channel: str = redis_channels["ticker_update"]
 
         # prepare channels placeholders
         channels = [
             chart_update_channel,
-            order_channel,
+            receive_order_channel,
             ticker_channel,
         ]
 
@@ -163,12 +164,12 @@ async def cancelling_orders(
                             )
                         )
 
-                    if order_channel in message_channel:
+                    if receive_order_channel in message_channel:
 
                         cached_orders = orjson.loads(
                             await client_redis.hget(
                                 orders_keys,
-                                order_channel,
+                                receive_order_channel,
                             )
                         )
 

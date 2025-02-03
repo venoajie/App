@@ -12,7 +12,6 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.orders_management import saving_orders
 from utilities.system_tools import parse_error_message
-from utilities.string_modification import extract_currency_from_text
 
 
 async def saving_and_relabelling_orders(
@@ -50,37 +49,23 @@ async def saving_and_relabelling_orders(
 
         order_db_table: str = relevant_tables["orders_table"]
 
-        redis_keys: dict = config_app["redis_keys"][0]
-        ticker_keys: str = redis_keys["ticker"]
-        orders_keys: str = redis_keys["orders"]
-
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        ticker_channel: str = redis_channels["ticker_update"]
-        order_channel: str = redis_channels["order"]
         chart_update_channel: str = redis_channels["chart_update"]
+        receive_order_channel: str = redis_channels["receive_order"]
+        ticker_channel: str = redis_channels["ticker_update"]
 
         # prepare channels placeholders
         channels = [
             chart_update_channel,
-            order_channel,
+            receive_order_channel,
             ticker_channel,
         ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        sequence = 0
-
-        server_time = 0
-
-        cached_orders = []
-
         currency = None
-
-        cached_ticker_all = None
-
-        chart_trade = False
 
         not_cancel = True
 
@@ -96,52 +81,13 @@ async def saving_and_relabelling_orders(
 
                     message_channel = message_byte_data["channel"]
 
-                    if chart_update_channel in message_channel:
-
-                        cached_ticker_all = orjson.loads(
-                            await client_redis.hget(
-                                ticker_keys,
-                                chart_update_channel,
-                            )
-                        )
-
-                    if order_channel in message_channel:
-
-                        cached_orders = orjson.loads(
-                            await client_redis.hget(
-                                orders_keys,
-                                order_channel,
-                            )
-                        )
-
-                        server_time = message_byte_data["server_time"]
-
-                    if ticker_channel in message_channel:
-                        cached_ticker_all = orjson.loads(
-                            await client_redis.hget(
-                                ticker_keys,
-                                ticker_channel,
-                            )
-                        )
-
-                        server_time = message_byte_data["server_time"]
-                        currency = message_byte_data["currency"]
-                        currency_upper = message_byte_data["currency_upper"]
-                    log.warning(
-                        f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
-                    )
-
-                    currency: str = extract_currency_from_text(message_channel)
-
-                    currency_upper = currency.upper()
-
                     try:
 
-                        if "user.changes" in message_channel:
+                        if receive_order_channel in message_channel:
 
-                            data: list = message["data"]
+                            data = message_byte_data["data"]
 
-                            currency: str = message["currency"]
+                            currency = message_byte_data["currency"]
 
                             currency_lower: str = currency
 

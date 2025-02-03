@@ -30,35 +30,17 @@ async def processing_orders(
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
-        redis_keys: dict = config_app["redis_keys"][0]
-        ticker_keys: str = redis_keys["ticker"]
-        orders_keys: str = redis_keys["orders"]
-
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        ticker_channel: str = redis_channels["ticker_update"]
-        order_channel: str = redis_channels["order"]
-        chart_update_channel: str = redis_channels["chart_update"]
+        sending_order_channel: str = redis_channels["sending_order"]
 
         # prepare channels placeholders
         channels = [
-            chart_update_channel,
-            order_channel,
-            ticker_channel,
+            sending_order_channel,
         ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
-
-        sequence = 0
-
-        server_time = 0
-
-        cached_orders = []
-
-        currency = None
-
-        chart_trade = False
 
         not_cancel = True
 
@@ -72,104 +54,72 @@ async def processing_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    if chart_update_channel in message_byte_data["channel"]:
-                        cached_ticker_all = orjson.loads(
-                            await client_redis.hget(
-                                ticker_keys,
-                                chart_update_channel,
-                            )
-                        )
-
-                    if order_channel in message_byte_data["channel"]:
-                        cached_orders = orjson.loads(
-                            await client_redis.hget(
-                                orders_keys,
-                                order_channel,
-                            )
-                        )
-
-                        server_time = message_byte_data["server_time"]
-
-                    if ticker_channel in message_byte_data["channel"]:
-                        cached_ticker_all = orjson.loads(
-                            await client_redis.hget(
-                                ticker_keys,
-                                ticker_channel,
-                            )
-                        )
-
-                        server_time = message_byte_data["server_time"]
+                    if sending_order_channel in message_byte_data["channel"]:
                         currency = message_byte_data["currency"]
-                        currency_upper = message_byte_data["currency_upper"]
-                    log.warning(
-                        f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
-                    )
+                        
+                        log.warning(message_byte_data)
 
-                    currency: str = extract_currency_from_text(message_channel)
+                        if message_byte_data["order_allowed"]:
 
-                    currency_upper = currency.upper()
+                            strategy_attributes = config_app["strategies"]
 
-                    if message["order_allowed"]:
+                            # get strategies that have not short/long attributes in the label
+                            non_checked_strategies = [
+                                o["strategy_label"]
+                                for o in strategy_attributes
+                                if o["non_checked_for_size_label_consistency"] == True
+                            ]
 
-                        strategy_attributes = config_app["strategies"]
+                            result_order = await modify_order_and_db.if_order_is_true(
+                                non_checked_strategies,
+                                message_byte_data,
+                            )
 
-                        # get strategies that have not short/long attributes in the label
-                        non_checked_strategies = [
-                            o["strategy_label"]
-                            for o in strategy_attributes
-                            if o["non_checked_for_size_label_consistency"] == True
-                        ]
-
-                        result_order = await modify_order_and_db.if_order_is_true(
-                            non_checked_strategies,
-                            message,
-                        )
-
-                        if result_order:
-
-                            try:
-                                data_orders = result_order["result"]
+                            if result_order:
 
                                 try:
-                                    instrument_name = data_orders["order"][
-                                        "instrument_name"
-                                    ]
+                                    data_orders = result_order["result"]
 
-                                except:
-                                    instrument_name = data_orders["trades"][
-                                        "instrument_name"
-                                    ]
+                                    try:
+                                        instrument_name = data_orders["order"][
+                                            "instrument_name"
+                                        ]
 
-                                currency = extract_currency_from_text(instrument_name)
+                                    except:
+                                        instrument_name = data_orders["trades"][
+                                            "instrument_name"
+                                        ]
 
-                                transaction_log_trading_table = (
-                                    f"transaction_log_{currency.lower()}_json"
-                                )
+                                    currency = extract_currency_from_text(instrument_name)
 
-                                archive_db_table = (
-                                    f"my_trades_all_{currency.lower()}_json"
-                                )
+                                    transaction_log_trading_table = (
+                                        f"transaction_log_{currency.lower()}_json"
+                                    )
 
-                                relevant_tables = config_app["relevant_tables"][0]
+                                    archive_db_table = (
+                                        f"my_trades_all_{currency.lower()}_json"
+                                    )
 
-                                order_db_table = relevant_tables["orders_table"]
+                                    relevant_tables = config_app["relevant_tables"][0]
 
-                                await modify_order_and_db.update_user_changes_non_ws(
-                                    non_checked_strategies,
-                                    data_orders,
-                                    order_db_table,
-                                    archive_db_table,
-                                    transaction_log_trading_table,
-                                )
+                                    order_db_table = relevant_tables["orders_table"]
 
-                                """
-                                non-combo transaction need to restart after sending order to ensure it recalculate orders and trades
-                                """
+                                    await modify_order_and_db.update_user_changes_non_ws(
+                                        non_checked_strategies,
+                                        data_orders,
+                                        order_db_table,
+                                        archive_db_table,
+                                        transaction_log_trading_table,
+                                    )
 
-                            except Exception as error:
-                                pass
+                                    """
+                                    non-combo transaction need to restart after sending order to ensure it recalculate orders and trades
+                                    """
 
-                            log.warning("processing order done")
+                                except Exception as error:
+                                    pass
+
+                                log.warning("processing order done")
 
             except Exception as error:
 

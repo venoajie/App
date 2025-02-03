@@ -47,11 +47,11 @@ async def avoiding_double_ids(
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        order_channel: str = redis_channels["order"]
+        receive_order_channel: str = redis_channels["receive_order"]
 
         # prepare channels placeholders
         channels = [
-            order_channel,
+            receive_order_channel,
         ]
 
         # subscribe to channels
@@ -71,12 +71,12 @@ async def avoiding_double_ids(
 
                     message_channel = message_byte_data["channel"]
 
-                    if order_channel in message_channel:
+                    if receive_order_channel in message_channel:
 
                         cached_orders = orjson.loads(
                             await client_redis.hget(
                                 orders_keys,
-                                order_channel,
+                                receive_order_channel,
                             )
                         )
 

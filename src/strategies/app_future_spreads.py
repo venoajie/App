@@ -14,6 +14,7 @@ from loguru import logger as log
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from data_cleaning.reconciling_db import is_size_sub_account_and_my_trades_reconciled
+from db_management.redis_client import saving_and_publishing_result
 from db_management.sqlite_management import executing_query_with_return
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
@@ -105,20 +106,22 @@ async def future_spreads(
         )
 
         redis_keys: dict = config_app["redis_keys"][0]
+        market_condition_keys: str = redis_keys["market_condition"]      
+        order_keys: str = redis_keys["orders"]
         ticker_keys: str = redis_keys["ticker"]
-        orders_key: str = redis_keys["orders"]
-        market_condition_keys: str = redis_keys["market_condition"]
-
+        
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        ticker_channel: str = redis_channels["ticker_update"]
-        order_channel: str = redis_channels["order"]
         chart_update_channel: str = redis_channels["chart_update"]
+        receive_order_channel: str = redis_channels["receive_order"]
+        sending_order_channel: str = redis_channels["sending_order"]
+        ticker_channel: str = redis_channels["ticker_update"]
 
         # prepare channels placeholders
         channels = [
             chart_update_channel,
-            order_channel,
+            receive_order_channel,
+            sending_order_channel,
             ticker_channel,
         ]
 
@@ -162,12 +165,12 @@ async def future_spreads(
                             )
                         )
                         
-                    if order_channel in message_channel:
+                    if receive_order_channel in message_channel:
 
                         cached_orders = orjson.loads(
                             await client_redis.hget(
-                                orders_key,
-                                order_channel,
+                                order_keys,
+                                receive_order_channel,
                             )
                         )
 
@@ -349,349 +352,357 @@ async def future_spreads(
                                         strategy in active_strategies
                                         and size_perpetuals_reconciled
                                     ):
+                                        
+                                        async with client_redis.pipeline() as pipe:
 
-                                        extra = (
-                                            3  # waiting minute before reorder  15 min
-                                        )
+                                            extra = (
+                                                3  # waiting minute before reorder  15 min
+                                            )
 
-                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = (
-                                            strategy_params[
-                                                "waiting_minute_before_relabelling"
+                                            BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = (
+                                                strategy_params[
+                                                    "waiting_minute_before_relabelling"
+                                                ]
+                                                + extra
+                                            )
+
+                                            AVERAGE_MOVEMENT: float = 0.15 / 100
+
+                                            monthly_target_profit = strategy_params[
+                                                "monthly_profit_pct"
                                             ]
-                                            + extra
-                                        )
 
-                                        AVERAGE_MOVEMENT: float = 0.15 / 100
+                                            max_order_currency = 2
 
-                                        monthly_target_profit = strategy_params[
-                                            "monthly_profit_pct"
-                                        ]
-
-                                        max_order_currency = 2
-
-                                        random_instruments_name = sample(
-                                            (
-                                                [
-                                                    o
-                                                    for o in instruments_name
-                                                    if "-FS-" not in o
-                                                    and currency_upper in o
-                                                ]
-                                            ),
-                                            max_order_currency,
-                                        )
-
-                                        combo_auto = ComboAuto(
-                                            strategy,
-                                            strategy_params,
-                                            orders_currency_strategy,
-                                            server_time,
-                                            market_condition,
-                                            my_trades_currency_strategy,
-                                            ticker_perpetual_instrument_name,
-                                        )
-
-                                        my_trades_currency_strategy_labels: list = [
-                                            o["label"]
-                                            for o in my_trades_currency_strategy
-                                        ]
-
-                                        # send combo orders
-                                        future_control = []
-
-                                        for (
-                                            instrument_attributes_combo
-                                        ) in instrument_attributes_combo_all:
-
-                                            try:
-                                                instrument_name_combo = (
-                                                    instrument_attributes_combo[
-                                                        "instrument_name"
-                                                    ]
-                                                )
-
-                                            except:
-                                                instrument_name_combo = None
-
-                                            if (
-                                                instrument_name_combo
-                                                and currency_upper
-                                                in instrument_name_combo
-                                            ):
-
-                                                instrument_name_future = (
-                                                    f"{currency_upper}-{instrument_name_combo[7:][:7]}"
-                                                ).strip("_")
-
-                                                expiration_timestamp = [
-                                                    o["expiration_timestamp"]
-                                                    for o in instrument_attributes_futures_all
-                                                    if instrument_name_future
-                                                    in o["instrument_name"]
-                                                ][0]
-
-                                                instrument_time_left = (
-                                                    expiration_timestamp - server_time
-                                                ) / ONE_MINUTE
-
-                                                instrument_time_left_exceed_threshold = (
-                                                    instrument_time_left
-                                                    > INSTRUMENT_EXPIRATION_THRESHOLD
-                                                )
-
-                                                size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
-                                                    position_without_combo,
-                                                    my_trades_currency_all,
-                                                    instrument_name_future,
-                                                )
-
-                                                ticker_combo = [
-                                                    o
-                                                    for o in cached_ticker_all
-                                                    if instrument_name_combo
-                                                    in o["instrument_name"]
-                                                ]
-
-                                                ticker_future = [
-                                                    o
-                                                    for o in cached_ticker_all
-                                                    if instrument_name_future
-                                                    in o["instrument_name"]
-                                                ]
-
-                                                # log.debug(
-                                                #    f"future_control {future_control} instrument_name_combo {instrument_name_combo} instrument_name_future {instrument_name_future}"
-                                                # )
-
-                                                instrument_name_future_in_control = (
-                                                    False
-                                                    if future_control == []
-                                                    else [
+                                            random_instruments_name = sample(
+                                                (
+                                                    [
                                                         o
-                                                        for o in future_control
-                                                        if instrument_name_future in o
+                                                        for o in instruments_name
+                                                        if "-FS-" not in o
+                                                        and currency_upper in o
                                                     ]
-                                                )
+                                                ),
+                                                max_order_currency,
+                                            )
 
-                                                # log.debug(
-                                                #    f"instrument_name_future_not_in_control {instrument_name_future_in_control} {not instrument_name_future_in_control}"
-                                                # )
+                                            combo_auto = ComboAuto(
+                                                strategy,
+                                                strategy_params,
+                                                orders_currency_strategy,
+                                                server_time,
+                                                market_condition,
+                                                my_trades_currency_strategy,
+                                                ticker_perpetual_instrument_name,
+                                            )
 
-                                                if (
-                                                    not instrument_name_future_in_control
-                                                    and len_cleaned_orders < 50
-                                                    and ticker_future
-                                                    and ticker_combo
-                                                ):
-                                                    # and not reduce_only \
+                                            my_trades_currency_strategy_labels: list = [
+                                                o["label"]
+                                                for o in my_trades_currency_strategy
+                                            ]
 
-                                                    ticker_combo, ticker_future = (
-                                                        ticker_combo[0],
-                                                        ticker_future[0],
+                                            # send combo orders
+                                            future_control = []
+
+                                            for (
+                                                instrument_attributes_combo
+                                            ) in instrument_attributes_combo_all:
+
+                                                try:
+                                                    instrument_name_combo = (
+                                                        instrument_attributes_combo[
+                                                            "instrument_name"
+                                                        ]
                                                     )
 
-                                                    if (
-                                                        instrument_time_left_exceed_threshold
-                                                        and instrument_name_future
-                                                        in random_instruments_name
-                                                        and size_future_reconciled
-                                                    ):
+                                                except:
+                                                    instrument_name_combo = None
 
-                                                        send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
-                                                            ticker_future,
-                                                            instrument_attributes_futures_all,
-                                                            notional,
-                                                            monthly_target_profit,
-                                                            AVERAGE_MOVEMENT,
-                                                            BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
-                                                            min(
-                                                                1,
-                                                                max_order_currency,
-                                                            ),
-                                                            market_condition,
-                                                        )
+                                                if (
+                                                    instrument_name_combo
+                                                    and currency_upper
+                                                    in instrument_name_combo
+                                                ):
 
-                                                        if send_order["order_allowed"]:
+                                                    instrument_name_future = (
+                                                        f"{currency_upper}-{instrument_name_combo[7:][:7]}"
+                                                    ).strip("_")
 
-                                                            await send_notification(
-                                                                client_redis,
-                                                                open_order,
-                                                                sequence,
-                                                                send_order,
-                                                            )
+                                                    expiration_timestamp = [
+                                                        o["expiration_timestamp"]
+                                                        for o in instrument_attributes_futures_all
+                                                        if instrument_name_future
+                                                        in o["instrument_name"]
+                                                    ][0]
 
-                                                            # not_order = False
+                                                    instrument_time_left = (
+                                                        expiration_timestamp - server_time
+                                                    ) / ONE_MINUTE
 
-                                                            break
+                                                    instrument_time_left_exceed_threshold = (
+                                                        instrument_time_left
+                                                        > INSTRUMENT_EXPIRATION_THRESHOLD
+                                                    )
 
-                                                future_control.append(
-                                                    instrument_name_future
-                                                )
-                                        # get labels from active trades
-                                        labels = remove_redundant_elements(
-                                            my_trades_currency_strategy_labels
-                                        )
+                                                    size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
+                                                        position_without_combo,
+                                                        my_trades_currency_all,
+                                                        instrument_name_future,
+                                                    )
 
-                                        filter = "label"
-
-                                        #! closing active trades
-                                        for label in labels:
-
-                                            label_integer: int = get_label_integer(
-                                                label
-                                            )
-                                            selected_transaction = [
-                                                o
-                                                for o in my_trades_currency_strategy
-                                                if str(label_integer) in o["label"]
-                                            ]
-
-                                            selected_transaction_amount = [
-                                                o["amount"]
-                                                for o in selected_transaction
-                                            ]
-                                            sum_selected_transaction = sum(
-                                                selected_transaction_amount
-                                            )
-                                            len_selected_transaction = len(
-                                                selected_transaction_amount
-                                            )
-
-                                            #! closing combo auto trading
-                                            if (
-                                                "Auto" in label
-                                                and len_cleaned_orders < 50
-                                            ):
-
-                                                if sum_selected_transaction == 0:
-
-                                                    abnormal_transaction = [
+                                                    ticker_combo = [
                                                         o
-                                                        for o in selected_transaction
-                                                        if "closed" in o["label"]
+                                                        for o in cached_ticker_all
+                                                        if instrument_name_combo
+                                                        in o["instrument_name"]
                                                     ]
 
-                                                    if not abnormal_transaction:
-                                                        send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto(
-                                                            label,
-                                                            instrument_attributes_combo_all,
-                                                            THRESHOLD_MARKET_CONDITIONS_COMBO,
+                                                    ticker_future = [
+                                                        o
+                                                        for o in cached_ticker_all
+                                                        if instrument_name_future
+                                                        in o["instrument_name"]
+                                                    ]
+
+                                                    # log.debug(
+                                                    #    f"future_control {future_control} instrument_name_combo {instrument_name_combo} instrument_name_future {instrument_name_future}"
+                                                    # )
+
+                                                    instrument_name_future_in_control = (
+                                                        False
+                                                        if future_control == []
+                                                        else [
+                                                            o
+                                                            for o in future_control
+                                                            if instrument_name_future in o
+                                                        ]
+                                                    )
+
+                                                    # log.debug(
+                                                    #    f"instrument_name_future_not_in_control {instrument_name_future_in_control} {not instrument_name_future_in_control}"
+                                                    # )
+
+                                                    if (
+                                                        not instrument_name_future_in_control
+                                                        and len_cleaned_orders < 50
+                                                        and ticker_future
+                                                        and ticker_combo
+                                                    ):
+                                                        # and not reduce_only \
+
+                                                        ticker_combo, ticker_future = (
+                                                            ticker_combo[0],
+                                                            ticker_future[0],
                                                         )
 
-                                                        if send_order["order_allowed"]:
+                                                        if (
+                                                            instrument_time_left_exceed_threshold
+                                                            and instrument_name_future
+                                                            in random_instruments_name
+                                                            and size_future_reconciled
+                                                        ):
 
-                                                            await send_notification(
-                                                                client_redis,
-                                                                open_order,
-                                                                sequence,
-                                                                send_order,
+                                                            send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
+                                                                ticker_future,
+                                                                instrument_attributes_futures_all,
+                                                                notional,
+                                                                monthly_target_profit,
+                                                                AVERAGE_MOVEMENT,
+                                                                BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
+                                                                min(
+                                                                    1,
+                                                                    max_order_currency,
+                                                                ),
+                                                                market_condition,
                                                             )
 
-                                                            # not_order = False
+                                                            if send_order["order_allowed"]:
+
+                                                                await saving_and_publishing_result(
+                                                                    pipe,
+                                                                    sending_order_channel,
+                                                                    None,
+                                                                    None,
+                                                                    send_order,
+                                                                    )
+
+                                                                # not_order = False
+
+                                                                break
+
+                                                    future_control.append(
+                                                        instrument_name_future
+                                                    )
+                                            # get labels from active trades
+                                            labels = remove_redundant_elements(
+                                                my_trades_currency_strategy_labels
+                                            )
+
+                                            filter = "label"
+
+                                            #! closing active trades
+                                            for label in labels:
+
+                                                label_integer: int = get_label_integer(
+                                                    label
+                                                )
+                                                selected_transaction = [
+                                                    o
+                                                    for o in my_trades_currency_strategy
+                                                    if str(label_integer) in o["label"]
+                                                ]
+
+                                                selected_transaction_amount = [
+                                                    o["amount"]
+                                                    for o in selected_transaction
+                                                ]
+                                                sum_selected_transaction = sum(
+                                                    selected_transaction_amount
+                                                )
+                                                len_selected_transaction = len(
+                                                    selected_transaction_amount
+                                                )
+
+                                                #! closing combo auto trading
+                                                if (
+                                                    "Auto" in label
+                                                    and len_cleaned_orders < 50
+                                                ):
+
+                                                    if sum_selected_transaction == 0:
+
+                                                        abnormal_transaction = [
+                                                            o
+                                                            for o in selected_transaction
+                                                            if "closed" in o["label"]
+                                                        ]
+
+                                                        if not abnormal_transaction:
+                                                            send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto(
+                                                                label,
+                                                                instrument_attributes_combo_all,
+                                                                THRESHOLD_MARKET_CONDITIONS_COMBO,
+                                                            )
+
+                                                            if send_order["order_allowed"]:
+
+                                                                await saving_and_publishing_result(
+                                                                    pipe,
+                                                                    sending_order_channel,
+                                                                    None,
+                                                                    None,
+                                                                    send_order,
+                                                                    )
+
+
+
+                                                                # not_order = False
+
+                                                                break
+
+                                                        else:
+                                                            log.critical(
+                                                                f"abnormal_transaction {abnormal_transaction}"
+                                                            )
 
                                                             break
 
-                                                    else:
-                                                        log.critical(
-                                                            f"abnormal_transaction {abnormal_transaction}"
-                                                        )
+                                                else:
 
-                                                        break
+                                                    #! closing unpaired transactions
+                                                    log.critical(
+                                                        f"sum_selected_transaction {sum_selected_transaction}"
+                                                    )
+                                                    if sum_selected_transaction != 0:
 
-                                            else:
+                                                        if (
+                                                            len_selected_transaction == 1
+                                                            and "closed" not in label
+                                                        ):
 
-                                                #! closing unpaired transactions
-                                                log.critical(
-                                                    f"sum_selected_transaction {sum_selected_transaction}"
-                                                )
-                                                if sum_selected_transaction != 0:
+                                                            send_order = []
 
-                                                    if (
-                                                        len_selected_transaction == 1
-                                                        and "closed" not in label
-                                                    ):
+                                                            if size_perpetuals_reconciled:
 
-                                                        send_order = []
+                                                                for (
+                                                                    transaction
+                                                                ) in selected_transaction:
 
-                                                        if size_perpetuals_reconciled:
-
-                                                            for (
-                                                                transaction
-                                                            ) in selected_transaction:
-
-                                                                waiting_minute_before_ordering = (
-                                                                    strategy_params[
-                                                                        "waiting_minute_before_cancel"
-                                                                    ]
-                                                                    * ONE_MINUTE
-                                                                )
-
-                                                                timestamp: int = (
-                                                                    transaction[
-                                                                        "timestamp"
-                                                                    ]
-                                                                )
-
-                                                                waiting_time_for_selected_transaction: (
-                                                                    bool
-                                                                ) = (
-                                                                    check_if_minimum_waiting_time_has_passed(
-                                                                        waiting_minute_before_ordering,
-                                                                        timestamp,
-                                                                        server_time,
+                                                                    waiting_minute_before_ordering = (
+                                                                        strategy_params[
+                                                                            "waiting_minute_before_cancel"
+                                                                        ]
+                                                                        * ONE_MINUTE
                                                                     )
-                                                                    * 2
-                                                                )
 
-                                                                instrument_name = transaction[
-                                                                    "instrument_name"
-                                                                ]
+                                                                    timestamp: int = (
+                                                                        transaction[
+                                                                            "timestamp"
+                                                                        ]
+                                                                    )
 
-                                                                ticker_transaction = [
-                                                                    o
-                                                                    for o in cached_ticker_all
-                                                                    if instrument_name
-                                                                    in o[
+                                                                    waiting_time_for_selected_transaction: (
+                                                                        bool
+                                                                    ) = (
+                                                                        check_if_minimum_waiting_time_has_passed(
+                                                                            waiting_minute_before_ordering,
+                                                                            timestamp,
+                                                                            server_time,
+                                                                        )
+                                                                        * 2
+                                                                    )
+
+                                                                    instrument_name = transaction[
                                                                         "instrument_name"
                                                                     ]
-                                                                ]
 
-                                                                if (
-                                                                    ticker_transaction
-                                                                    and len_cleaned_orders
-                                                                    < 50
-                                                                ):
+                                                                    ticker_transaction = [
+                                                                        o
+                                                                        for o in cached_ticker_all
+                                                                        if instrument_name
+                                                                        in o[
+                                                                            "instrument_name"
+                                                                        ]
+                                                                    ]
 
-                                                                    TP_THRESHOLD = (
-                                                                        THRESHOLD_MARKET_CONDITIONS_COMBO
-                                                                        * 5
-                                                                    )
+                                                                    if (
+                                                                        ticker_transaction
+                                                                        and len_cleaned_orders
+                                                                        < 50
+                                                                    ):
 
-                                                                    send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                        ticker_transaction[
-                                                                            0
-                                                                        ],
-                                                                        instrument_attributes_futures_all,
-                                                                        TP_THRESHOLD,
-                                                                        transaction,
-                                                                        waiting_time_for_selected_transaction,
-                                                                        random_instruments_name,
-                                                                    )
-
-                                                                    if send_order[
-                                                                        "order_allowed"
-                                                                    ]:
-
-                                                                        await send_notification(
-                                                                            client_redis,
-                                                                            open_order,
-                                                                            sequence,
-                                                                            send_order,
+                                                                        TP_THRESHOLD = (
+                                                                            THRESHOLD_MARKET_CONDITIONS_COMBO
+                                                                            * 5
                                                                         )
 
-                                                                        # not_order = False
+                                                                        send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                                            ticker_transaction[
+                                                                                0
+                                                                            ],
+                                                                            instrument_attributes_futures_all,
+                                                                            TP_THRESHOLD,
+                                                                            transaction,
+                                                                            waiting_time_for_selected_transaction,
+                                                                            random_instruments_name,
+                                                                        )
 
-                                                                        break
+                                                                        if send_order[
+                                                                            "order_allowed"
+                                                                        ]:
+
+
+                                                                            await saving_and_publishing_result(
+                                                                                pipe,
+                                                                                sending_order_channel,
+                                                                                None,
+                                                                                None,
+                                                                                send_order,
+                                                                                )
+
+                                                                                        # not_order = False
+
+                                                                            break
 
             except Exception as error:
 
