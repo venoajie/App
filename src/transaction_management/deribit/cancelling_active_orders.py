@@ -276,6 +276,8 @@ async def cancelling_orders(
                                 notional: float = compute_notional_value(
                                     index_price, equity
                                 )
+                                
+                                log.warning(f" {market_condition}")
 
                                 for strategy in active_strategies:
 
