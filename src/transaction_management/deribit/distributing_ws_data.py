@@ -156,6 +156,8 @@ async def caching_distributing_data(
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
+                    
+                    log.info(f"incremental_ticker {ticker_channel}")
 
                     server_time = (
                         data["timestamp"] + server_time
