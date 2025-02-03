@@ -51,15 +51,11 @@ async def saving_and_relabelling_orders(
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        chart_update_channel: str = redis_channels["chart_update"]
         receive_order_channel: str = redis_channels["receive_order"]
-        ticker_channel: str = redis_channels["ticker_update"]
 
         # prepare channels placeholders
         channels = [
-            chart_update_channel,
             receive_order_channel,
-            ticker_channel,
         ]
 
         # subscribe to channels
