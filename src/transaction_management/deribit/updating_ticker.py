@@ -18,7 +18,6 @@ from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
 from utilities.string_modification import (
-    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -185,115 +184,6 @@ async def update_cached_ticker(
             f"updating ticker - {error}",
             "general_error",
         )
-
-# Using the LRUCache decorator function with a maximum cache size of 3
-async def combining_order_data(
-    private_data: object,
-    currencies: list,
-) -> list:
-    """ """
-
-    from utilities.pickling import replace_data
-
-    result = []
-    for currency in currencies:
-
-        sub_accounts = await private_data.get_subaccounts_details(currency)
-
-        my_path_sub_account = provide_path_for_file("sub_accounts", currency)
-
-        replace_data(
-            my_path_sub_account,
-            sub_accounts,
-        )
-
-        if sub_accounts:
-
-            sub_account = sub_accounts[0]
-
-            sub_account_orders = sub_account["open_orders"]
-
-            if sub_account_orders:
-
-                for order in sub_account_orders:
-
-                    result.append(order)
-
-    return result
-
-async def update_cached_orders(
-    queue_orders_all,
-    queue_orders,
-):
-    """_summary_
-    https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
-
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
-    try:
-        
-        log.debug(f" queue_orders {queue_orders}")
-        log.warning(f" queue_orders_all {queue_orders_all}")
-
-        orders_all = queue_orders_all
-
-        if queue_orders:
-
-            orders = queue_orders["orders"]
-
-            trades = queue_orders["trades"]
-
-            if orders:
-
-                if trades:
-
-                    for trade in trades:
-
-                        order_id = trade["order_id"]
-
-                        selected_order = [
-                            o for o in orders_all if order_id in o["order_id"]
-                        ]
-
-                        if selected_order:
-
-                            orders_all.remove(selected_order[0])
-
-                if orders:
-
-                    for order in orders:
-
-                        # print(f"cached order {order}")
-
-                        order_state = order["order_state"]
-
-                        if order_state == "cancelled" or order_state == "filled":
-
-                            order_id = order["order_id"]
-
-                            selected_order = [
-                                o for o in orders_all if order_id in o["order_id"]
-                            ]
-
-                            # print(f"caching selected_order {selected_order}")
-
-                            if selected_order:
-
-                                orders_all.remove(selected_order[0])
-
-                        else:
-
-                            orders_all.append(order)
-
-    except Exception as error:
-
-        parse_error_message(error)
-
 
 
 def get_settlement_period(strategy_attributes: list) -> list:
