@@ -30,7 +30,7 @@ archive = "my_trades_all"
 [[redis_channels]]
 chart_update = "market.chart"
 receive_order = "account.user_changes.order"
-sending_order = "account.user_changes.order"
+sending_order = "app.sending_order"
 ticker_update = "market.ticker"
 market_analytics_update = "market.analytics"
 
