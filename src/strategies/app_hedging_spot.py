@@ -133,8 +133,6 @@ async def hedging_spot(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        sequence = 0
-
         server_time = 0
 
         cached_orders = []
@@ -193,9 +191,7 @@ async def hedging_spot(
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]
-                    log.warning(
-                        f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
-                    )
+                    
                     currency: str = extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
@@ -210,10 +206,6 @@ async def hedging_spot(
                         )
 
                     if b"ticker" in (message_byte["channel"]):
-
-                        sequence = message["sequence"]
-
-                        log.critical(sequence)
 
                         cached_ticker_all = message["cached_ticker_all"]
 
@@ -715,21 +707,3 @@ def get_index(ticker: dict) -> float:
 
     return index_price
 
-
-async def send_notification(
-    client_redis: object,
-    CHANNEL_NAME: str,
-    sequence: int,
-    message: str,
-) -> None:
-    """ """
-
-    await client_redis.publish(
-        CHANNEL_NAME,
-        orjson.dumps(
-            {
-                "sequence": sequence,
-                "message": message,
-            },
-        ),
-    )

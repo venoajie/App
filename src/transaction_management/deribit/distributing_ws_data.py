@@ -116,9 +116,6 @@ async def caching_distributing_data(
         combining_candles = combining_candles_data(
             np, currencies, qty_candles, resolutions, dim_sequence
         )
-
-        sequence = 0
-
         is_chart_trade = False
 
         while True:
@@ -149,7 +146,6 @@ async def caching_distributing_data(
                             )
 
                             pub_message = dict(
-                                sequence=sequence,
                                 channel=receive_order_channel,
                                 data=data,
                                 server_time=server_time,
@@ -197,7 +193,6 @@ async def caching_distributing_data(
                     )
 
                     pub_message = dict(
-                        sequence=sequence,
                         channel=ticker_channel,
                         server_time=server_time,
                         currency=currency,
@@ -263,7 +258,6 @@ async def caching_distributing_data(
                         log.info(combining_candles)
 
                         pub_message = dict(
-                            sequence=sequence,
                             channel=market_analytics_channel,
                             is_chart_trade=is_chart_trade,
                         )
@@ -278,7 +272,6 @@ async def caching_distributing_data(
 
 
                         pub_message = dict(
-                            sequence=sequence,
                             channel=chart_update_channel,
                             is_chart_trade=is_chart_trade,
                         )
@@ -289,14 +282,6 @@ async def caching_distributing_data(
                             None,
                             pub_message,
                         )
-
-                sequence_update = sequence + len(message_params) - 1
-
-                log.error(f"sequence {sequence} {currency_upper}")
-
-                if not is_chart_trade and sequence_update > sequence:
-
-                    sequence = sequence_update
 
                 await pipe.execute()
 

@@ -7,7 +7,6 @@ import asyncio
 import uvloop
 
 # installed
-from loguru import logger as log
 import orjson
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -20,21 +19,10 @@ from strategies.hedging.hedging_spot import HedgingSpot
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-from transaction_management.deribit.managing_deribit import (
-    currency_inline_with_database_address,
-)
-from utilities.caching import (
-    combining_ticker_data as cached_ticker,
-    combining_order_data,
-    update_cached_orders,
-    update_cached_ticker,
-)
 
 from utilities.pickling import read_data, replace_data
 
 from utilities.string_modification import (
-    convert_to_bytes,
-    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -126,8 +114,6 @@ async def cancelling_orders(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        sequence = 0
-
         server_time = 0
 
         cached_orders = []
@@ -187,10 +173,6 @@ async def cancelling_orders(
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]
 
-                        log.warning(
-                            f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
-                        )
-
                         currency_lower: str = currency
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
@@ -249,7 +231,7 @@ async def cancelling_orders(
                             )
 
                             position = [o for o in sub_account["positions"]]
-                            # log.debug (f"position {position}")
+
                             position_without_combo = [
                                 o
                                 for o in position
@@ -275,8 +257,6 @@ async def cancelling_orders(
                                 notional: float = compute_notional_value(
                                     index_price, equity
                                 )
-                                
-                                log.warning(f" {market_condition}")
 
                                 for strategy in active_strategies:
 

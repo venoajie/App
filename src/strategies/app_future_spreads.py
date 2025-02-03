@@ -16,9 +16,6 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from data_cleaning.reconciling_db import is_size_sub_account_and_my_trades_reconciled
 from db_management.redis_client import saving_and_publishing_result
 from db_management.sqlite_management import executing_query_with_return
-from market_understanding.price_action.candles_analysis import (
-    combining_candles_data,
-)
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.basic_strategy import get_label_integer
 from strategies.cash_carry.combo_auto import (
@@ -28,16 +25,9 @@ from strategies.cash_carry.combo_auto import (
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-from utilities.caching import (
-    combining_ticker_data as cached_ticker,
-    combining_order_data,
-    update_cached_orders,
-)
 from utilities.pickling import read_data
 
 from utilities.string_modification import (
-    convert_to_bytes,
-    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -86,22 +76,7 @@ async def future_spreads(
 
         instrument_attributes_combo_all = futures_instruments["active_combo"]
 
-        resolutions = [60, 15, 5]
-        qty_candles = 5
-        dim_sequence = 3
-
-        combining_candles = combining_candles_data(
-            np, currencies, qty_candles, resolutions, dim_sequence
-        )
-
         instruments_name = futures_instruments["instruments_name"]
-
-        cached_ticker_all = cached_ticker(instruments_name)
-
-        cached_orders: list = await combining_order_data(
-            private_data,
-            currencies,
-        )
 
         redis_keys: dict = config_app["redis_keys"][0]
         market_condition_keys: str = redis_keys["market_condition"]      
@@ -125,8 +100,6 @@ async def future_spreads(
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
-
-        sequence = 0
 
         server_time = 0
 
@@ -186,26 +159,14 @@ async def future_spreads(
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]
-                    log.warning(
-                        f"ticker_keys {ticker_keys} ticker_channel {ticker_channel} server_time {server_time} sequence {sequence}"
-                    )
+                    
 
                     #                    currency: str = extract_currency_from_text(message_channel)
 
                     #                    currency_upper = currency.upper()
 
-                    if False and "user.changes.any" in message_channel:
-
-                        log.warning(f"user.changes {message_data}")
-
-                        await update_cached_orders(
-                            cached_orders,
-                            message_data,
-                        )
 
                     if b"ticker" in (message_byte["channel"]):
-
-                        log.warning(f"server_time {server_time} sequence {sequence}")
 
                         currency: str = message["currency"]
 
@@ -757,22 +718,3 @@ def get_index(ticker: dict) -> float:
         index_price = ticker["estimated_delivery_price"]
 
     return index_price
-
-
-async def send_notification(
-    client_redis: object,
-    CHANNEL_NAME: str,
-    sequence: int,
-    message: str,
-) -> None:
-    """ """
-
-    await client_redis.publish(
-        CHANNEL_NAME,
-        orjson.dumps(
-            {
-                "sequence": sequence,
-                "message": message,
-            },
-        ),
-    )
