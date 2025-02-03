@@ -143,6 +143,8 @@ async def hedging_spot(
 
         not_cancel = True
 
+        market_condition = None
+
         while not_cancel:
 
             try:
@@ -155,15 +157,16 @@ async def hedging_spot(
 
                     message_channel = message_byte_data["channel"]
 
+
                     if chart_update_channel in message_channel:
 
-                        cached_ticker_all = orjson.loads(
+                        market_condition = orjson.loads(
                             await client_redis.hget(
-                                ticker_keys,
+                                market_condition_keys,
                                 chart_update_channel,
                             )
                         )
-
+                        
                     if order_channel in message_channel:
 
                         cached_orders = orjson.loads(
