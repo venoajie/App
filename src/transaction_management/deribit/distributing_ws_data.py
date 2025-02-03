@@ -313,10 +313,6 @@ async def chart_trade_in_msg(
             if tick_from_exchange <= max_tick_from_cache:
                 return True
 
-            else:
-
-                log.warning("update ohlc")
-        
     else:
 
         return False
