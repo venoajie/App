@@ -162,7 +162,6 @@ async def caching_distributing_data(
                 TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
 
                 instrument_name_future = (message_channel)[19:]
-
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 
                     server_time = (

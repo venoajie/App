@@ -98,6 +98,8 @@ async def publishing_result(
 
     try:
         
+#        print (f" channel {channel} message {message}")
+
         # publishing message
         await client_redis.publish(
             channel,
@@ -124,7 +126,7 @@ async def saving_result(
 
     try:
 
-            await client_redis.hset(
+        await client_redis.hset(
             keys,
             channel,
             orjson.dumps(cached_data),
