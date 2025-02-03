@@ -356,12 +356,13 @@ async def cancelling_orders(
                                                     break
 
             except Exception as error:
-                parse_error_message(error)
 
                 await telegram_bot_sendtext(
                     f"cancelling active orders - {error}",
                     "general_error",
                 )
+
+                parse_error_message(error)
 
                 continue
 
@@ -370,12 +371,13 @@ async def cancelling_orders(
 
     except Exception as error:
 
-        parse_error_message(error)
-
         await telegram_bot_sendtext(
             f"cancelling active orders - {error}",
             "general_error",
         )
+        
+        parse_error_message(error)
+
 
 
 def get_settlement_period(strategy_attributes) -> list:

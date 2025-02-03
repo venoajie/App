@@ -213,7 +213,6 @@ async def caching_distributing_data(
                             chart_trades_buffer = []
 
                     is_chart_trade = await chart_trade_in_msg(
-                        message_channel,
                         data,
                         combining_candles,
                     )
@@ -270,24 +269,23 @@ async def caching_distributing_data(
 
 
 async def chart_trade_in_msg(
-    message_channel: str,
     data_orders: list,
     candles_data: list,
 ):
     """ """
 
-    if "chart.trades" in message_channel:
-        tick_from_exchange = data_orders["tick"]
+    chart_trade_in_msg = False
+    
+    tick_from_exchange = data_orders["tick"]
 
-        tick_from_cache = [o["max_tick"] for o in candles_data if o["resolution"] == 5]
+    tick_from_cache = [o["max_tick"] for o in candles_data if o["resolution"] == 5]
 
-        if tick_from_cache:
-            max_tick_from_cache = max(tick_from_cache)
+    if tick_from_cache:
+        max_tick_from_cache = max(tick_from_cache)
 
-            if tick_from_exchange <= max_tick_from_cache:
-                return True
-
-    else:
-
-        return False
+        if tick_from_exchange <= max_tick_from_cache:
+            
+            chart_trade_in_msg = True
+            
+    return chart_trade_in_msg
 
