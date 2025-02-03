@@ -17,26 +17,19 @@ from market_understanding.price_action.candles_analysis import (
     get_market_condition,
 )
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
 from transaction_management.deribit.managing_deribit import (
     currency_inline_with_database_address,
 )
 from utilities.caching import (
-    combining_ticker_data as cached_ticker,
     combining_order_data,
     update_cached_orders,
 )
 from utilities.pickling import replace_data
 from utilities.string_modification import (
     extract_currency_from_text,
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
 )
 from utilities.system_tools import parse_error_message, provide_path_for_file
 from websocket_management.allocating_ohlc import (
-    inserting_open_interest,
     ohlc_result_per_time_frame,
 )
 
@@ -195,8 +188,6 @@ async def caching_distributing_data(
                         currency_upper,
                     )
 
-                    # log.warning(f" combining_candles {combining_candles}")
-
                     chart_trades_buffer.append(data)
                     log.error(f" chart_trades_buffer {chart_trades_buffer}")
 
@@ -225,7 +216,17 @@ async def caching_distributing_data(
                         combining_candles,
                     )
 
+
+                    log.warning(f" combining_candles {combining_candles}")
+                    log.debug(f" is_chart_trade {is_chart_trade}")
+
                     if is_chart_trade:
+                        
+                        await telegram_bot_sendtext(
+                            f"is_chart_trade {is_chart_trade}",
+                            "general_error",
+                        )
+                        log.critical(f" is_chart_trade {is_chart_trade}")
 
                         log.info(combining_candles)
 
@@ -288,11 +289,3 @@ async def chart_trade_in_msg(
 
         return False
 
-
-def get_settlement_period(strategy_attributes: list) -> list:
-
-    return remove_redundant_elements(
-        remove_double_brackets_in_list(
-            [o["settlement_period"] for o in strategy_attributes]
-        )
-    )
