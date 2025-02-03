@@ -127,10 +127,6 @@ async def update_cached_ticker(
 
                     message_channel = message_byte_data["channel"]
 
-                    log.debug(
-                        f" message_byte_data {message_byte_data} ticker_update_channel {ticker_channel} message_channel {message_channel}"
-                    )
-
                     if ticker_channel in message_channel:
 
                         data = message_byte_data["data"]

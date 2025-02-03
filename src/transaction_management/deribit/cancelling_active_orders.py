@@ -151,6 +151,7 @@ async def cancelling_orders(
                             market_analytics_channel,
                             market_condition_keys,
                         )
+                    log.critical (f" market_condition {market_condition}")
 
                     if receive_order_channel in message_channel:
 
