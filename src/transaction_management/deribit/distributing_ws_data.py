@@ -107,16 +107,16 @@ async def caching_distributing_data(
         while True:
 
             message_params: str = await queue_general.get()
-
-            data: dict = message_params["data"]
-
-            message_channel: str = message_params["channel"]
-
-            currency: str = extract_currency_from_text(message_channel)
-
-            currency_upper = currency.upper()
-
             async with client_redis.pipeline() as pipe:
+
+                data: dict = message_params["data"]
+
+                message_channel: str = message_params["channel"]
+
+                currency: str = extract_currency_from_text(message_channel)
+
+                currency_upper = currency.upper()
+
 
                 if "user.changes.any" in message_channel:
 
@@ -165,8 +165,6 @@ async def caching_distributing_data(
 
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                    
-
                     server_time = (
                         data["timestamp"] + server_time
                         if server_time == 0
@@ -182,10 +180,6 @@ async def caching_distributing_data(
                         currency_upper=currency_upper,
                     )
                     log.warning(
-                        f"data {data}"
-                    )
-                    
-                    log.warning(
                         f"pub_message {pub_message}"
                     )
                     
@@ -195,6 +189,10 @@ async def caching_distributing_data(
                         pub_message,
                     )
 
+                    log.warning(
+                        f"data {data}"
+                    )
+                    
                     if "PERPETUAL" in instrument_name_future:
 
                         await inserting_open_interest(
