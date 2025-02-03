@@ -277,11 +277,16 @@ async def chart_trade_in_msg(
     chart_trade_in_msg = False
     
     tick_from_exchange = data_orders["tick"]
+    
+    log.debug(f" tick_from_exchange {tick_from_exchange}")
 
     tick_from_cache = [o["max_tick"] for o in candles_data if o["resolution"] == 5]
+    log.debug(f" tick_from_cache {tick_from_cache}")
 
     if tick_from_cache:
         max_tick_from_cache = max(tick_from_cache)
+        
+        log.critical(f" max_tick_from_cache {max_tick_from_cache} {tick_from_exchange <= max_tick_from_cache}")
 
         if tick_from_exchange <= max_tick_from_cache:
             
