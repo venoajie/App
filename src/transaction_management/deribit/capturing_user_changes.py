@@ -78,8 +78,13 @@ async def saving_and_relabelling_orders(
                     message_channel = message_byte_data["channel"]
 
                     try:
+                        
+                        from loguru import logger as log
 
                         if receive_order_channel in message_channel:
+                            
+                            log.error(message_byte_data)
+                            log.error(receive_order_channel)
 
                             data = message_byte_data["data"]
 

@@ -53,11 +53,14 @@ async def processing_orders(
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
+                    
+                    message_channel = message_byte_data["channel"]
 
-                    if sending_order_channel in message_byte_data["channel"]:
-                        currency = message_byte_data["currency"]
-                        
+                    if sending_order_channel in message_channel:
                         log.warning(message_byte_data)
+                        log.warning(message_channel)
+                        
+                        currency = message_byte_data["currency"]                        
 
                         if message_byte_data["order_allowed"]:
 
