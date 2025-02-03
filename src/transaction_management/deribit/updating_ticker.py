@@ -100,14 +100,14 @@ async def update_cached_ticker(
         
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        ticker_update_channel: str = redis_channels["ticker_update"]
+        ticker_channel: str = redis_channels["ticker_update"]
 
         redis_keys: dict = config_app["redis_keys"][0]
         ticker_keys: str = redis_keys["ticker"]
 
         # prepare channels placeholders
         channels = [
-            ticker_update_channel,
+            ticker_channel,
         ]
 
         # subscribe to channels
@@ -123,14 +123,13 @@ async def update_cached_ticker(
 
                 if message_byte and message_byte["type"] == "message":
 
-                    message_byte_data = orjson.loads(message_byte["data"])
-                    
+                    message_byte_data = orjson.loads(message_byte["data"])                    
                     
                     message_channel = message_byte_data["channel"]  
 
-                    log.debug (f" message_byte_data {message_byte_data} ticker_update_channel {ticker_update_channel} message_channel {message_channel}")
+                    log.debug (f" message_byte_data {message_byte_data} ticker_update_channel {ticker_channel} message_channel {message_channel}")
                     
-                    if ticker_update_channel in message_channel:
+                    if ticker_channel in message_channel:
 
                         data = message_byte_data["data"]                  
 
@@ -159,7 +158,7 @@ async def update_cached_ticker(
                         
                         await saving_result(
                             client_redis,
-                            ticker_update_channel,
+                            ticker_channel,
                             ticker_keys,
                             ticker_all,
                             )
