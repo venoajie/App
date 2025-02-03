@@ -111,7 +111,7 @@ async def caching_distributing_data(
 
                 data: dict = message_params["data"]
                 
-                log.info (f"data {data}")
+                log.info (f"message_params {message_params}")
 
                 message_channel: str = message_params["channel"]
 
