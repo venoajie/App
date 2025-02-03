@@ -375,6 +375,12 @@ async def cancelling_orders(
 
             except Exception as error:
                 parse_error_message(error)
+
+                await telegram_bot_sendtext(
+                    f"cancelling active orders - {error}",
+                    "general_error",
+                )
+                
                 continue
 
             finally:

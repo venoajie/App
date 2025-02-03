@@ -5,7 +5,6 @@
 import asyncio
 
 # installed
-from loguru import logger as log
 import uvloop
 import orjson
 
@@ -57,11 +56,7 @@ async def processing_orders(
                     message_channel = message_byte_data["channel"]
 
                     if sending_order_channel in message_channel:
-                        log.warning(message_byte_data)
-                        log.warning(message_channel)
-                        log.warning(sending_order_channel)
-                        log.warning(sending_order_channel in message_channel)
-                        
+
                         currency = message_byte_data["currency"]                        
 
                         if message_byte_data["order_allowed"]:
@@ -124,11 +119,15 @@ async def processing_orders(
                                 except Exception as error:
                                     pass
 
-                                log.warning("processing order done")
 
             except Exception as error:
 
                 parse_error_message(error)
+
+                await telegram_bot_sendtext(
+                    f"cancelling active orders - {error}",
+                    "general_error",
+                )
 
                 continue
 
