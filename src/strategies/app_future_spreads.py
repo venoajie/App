@@ -18,7 +18,6 @@ from db_management.redis_client import saving_and_publishing_result
 from db_management.sqlite_management import executing_query_with_return
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
-    get_market_condition,
 )
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.basic_strategy import get_label_integer
@@ -33,7 +32,6 @@ from utilities.caching import (
     combining_ticker_data as cached_ticker,
     combining_order_data,
     update_cached_orders,
-    update_cached_ticker,
 )
 from utilities.pickling import read_data
 

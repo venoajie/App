@@ -89,7 +89,6 @@ async def caching_distributing_data(
         redis_channels: dict = config_app["redis_channels"][0]
         chart_update_channel: str = redis_channels["chart_update"]
         receive_order_channel: str = redis_channels["receive_order"]
-        sending_order_channel: str = redis_channels["sending_order"]
         ticker_channel: str = redis_channels["ticker_update"]
 
         redis_keys: dict = config_app["redis_keys"][0]
@@ -147,6 +146,8 @@ async def caching_distributing_data(
                                 sequence=sequence,
                                 channel=receive_order_channel,
                                 data=data,
+                                server_time=server_time,
+                                currency_upper=currency_upper,
                                 currency=currency,
                             )
 

@@ -114,7 +114,6 @@ async def cancelling_orders(
         redis_channels: dict = config_app["redis_channels"][0]
         chart_update_channel: str = redis_channels["chart_update"]
         receive_order_channel: str = redis_channels["receive_order"]
-        sending_order_channel: str = redis_channels["sending_order"]
         ticker_channel: str = redis_channels["ticker_update"]
 
         # prepare channels placeholders

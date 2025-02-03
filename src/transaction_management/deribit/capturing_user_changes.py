@@ -61,8 +61,6 @@ async def saving_and_relabelling_orders(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        currency = None
-
         not_cancel = True
 
         while not_cancel:
@@ -78,22 +76,12 @@ async def saving_and_relabelling_orders(
                     message_channel = message_byte_data["channel"]
 
                     try:
-                        
-                        from loguru import logger as log
 
                         if receive_order_channel in message_channel:
-                            
-                            log.error(message_byte_data)
-                            log.error(receive_order_channel)
-
-                            log.warning(receive_order_channel)
-                            log.warning(receive_order_channel in message_channel)
                         
                             data = message_byte_data["data"]
 
-                            currency = message_byte_data["currency"]
-
-                            currency_lower: str = currency
+                            currency_lower = message_byte_data["currency"]
 
                             await saving_orders(
                                 modify_order_and_db,
@@ -113,6 +101,11 @@ async def saving_and_relabelling_orders(
             except Exception as error:
 
                 parse_error_message(error)
+                                
+                await telegram_bot_sendtext(
+                    error, 
+                    "general_error",
+                    )
 
                 continue
 
@@ -123,4 +116,7 @@ async def saving_and_relabelling_orders(
 
         parse_error_message(error)
 
-        await telegram_bot_sendtext(error, "general_error")
+        await telegram_bot_sendtext(
+            error, 
+            "general_error",
+            )
