@@ -224,7 +224,10 @@ async def caching_distributing_data(
                         currency_upper,
                     )
 
+                    log.warning (f" combining_candles {combining_candles}")
+
                     chart_trades_buffer.append(data)
+                    log.error (f" chart_trades_buffer {chart_trades_buffer}")
 
                     if len(chart_trades_buffer) > 3:
 
