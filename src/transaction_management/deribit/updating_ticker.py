@@ -129,11 +129,11 @@ async def update_cached_ticker(
                     
                     message_channel = message_byte_data["channel"]  
                     
-                    data = message_byte_data["data"]                  
-
-                    instrument_name = message_byte_data["instrument_name"]                  
-
                     if ticker_update_channel in message_channel:
+
+                        data = message_byte_data["data"]                  
+
+                        instrument_name = message_byte_data["instrument_name"]                  
 
                         for item in data:
 
