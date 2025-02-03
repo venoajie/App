@@ -286,7 +286,7 @@ async def caching_distributing_data(
                             pipe,
                             chart_update_channel,
                             None,
-                            combining_candles,
+                            None,
                             pub_message,
                         )
 
