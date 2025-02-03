@@ -163,6 +163,8 @@ async def update_cached_ticker(
                             ticker_keys,
                             ticker_all,
                         )
+                        
+                        log.error (f"ticker_all {ticker_all}")
 
             except Exception as error:
 
