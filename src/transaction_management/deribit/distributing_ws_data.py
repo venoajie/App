@@ -11,7 +11,7 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from db_management.redis_client import saving_and_publishing_result
+from db_management.redis_client import saving_and_publishing_result,publishing_result
 from market_understanding.price_action.candles_analysis import (
     combining_candles_data,
     get_market_condition,
@@ -178,12 +178,6 @@ async def caching_distributing_data(
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                    await update_cached_ticker(
-                        instrument_name_future,
-                        ticker_all,
-                        data,
-                    )
-
                     server_time = (
                         data["timestamp"] + server_time
                         if server_time == 0
@@ -193,15 +187,15 @@ async def caching_distributing_data(
                     pub_message = dict(
                         channel=ticker_channel,
                         server_time=server_time,
+                        data=data,
                         currency=currency,
+                        instrument_name=instrument_name_future,
                         currency_upper=currency_upper,
                     )
 
-                    await saving_and_publishing_result(
+                    await publishing_result(
                         pipe,
                         ticker_channel,
-                        ticker_keys,
-                        ticker_all,
                         pub_message,
                     )
 

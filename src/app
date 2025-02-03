@@ -23,18 +23,20 @@ from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.app_future_spreads import future_spreads
 from strategies.app_hedging_spot import hedging_spot
 from strategies.relabelling_trading_result import relabelling_trades
+from streaming_data.data_producer import StreamingAccountData
 from transaction_management.deribit.api_requests import SendApiRequest
 from transaction_management.deribit.avoiding_double_ids import \
     avoiding_double_ids
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
-from transaction_management.deribit.processing_orders import \
-    processing_orders
-from streaming_data.data_producer import StreamingAccountData
-from transaction_management.deribit.managing_deribit import ModifyOrderDb
-from transaction_management.deribit.distributing_ws_data import caching_distributing_data
 from transaction_management.deribit.capturing_user_changes import \
     saving_and_relabelling_orders
+from transaction_management.deribit.distributing_ws_data import caching_distributing_data
+from transaction_management.deribit.managing_deribit import ModifyOrderDb
+from transaction_management.deribit.processing_orders import \
+    processing_orders
+from transaction_management.deribit.updating_ticker import \
+    update_cached_orders
 from utilities.system_tools import (
     SignalHandler,
     parse_error_message, 
@@ -174,7 +176,10 @@ async def main():
             relabelling_trades(
                 modify_order_and_db,
                 config_app),
-    
+            
+            update_cached_orders(
+                modify_order_and_db,
+                config_app),
             
             
                         )  

@@ -19,7 +19,7 @@ from strategies.hedging.hedging_spot import HedgingSpot
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-
+from db_management.redis_client import querying_data
 from utilities.pickling import read_data, replace_data
 
 from utilities.string_modification import (
@@ -162,13 +162,11 @@ async def cancelling_orders(
 
                     if ticker_channel in message_channel and market_condition:
 
-                        cached_ticker_all = orjson.loads(
-                            await client_redis.hget(
+                        cached_ticker_all = await querying_data(
                                 ticker_keys,
                                 ticker_channel,
                             )
-                        )
-
+                        
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]

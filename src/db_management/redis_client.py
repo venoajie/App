@@ -63,12 +63,39 @@ async def saving_and_publishing_result(
     try:
         #updating cached data
         if cached_data:
-            await client_redis.hset(
-            keys,
+            await saving_result(
+                client_redis,
+                channel,
+                keys,
+                cached_data,
+                )
+
+        #publishing message
+        await publishing_result(
+            client_redis,
             channel,
-            orjson.dumps(cached_data),
+            message,
             )
 
+    except Exception as error:
+    
+        parse_error_message(error)
+
+        await telegram_bot_sendtext(
+            f"redis saving and publishing result - {error}",
+            "general_error",
+        )
+        
+        
+async def publishing_result(
+    client_redis: object,
+    channel: str,
+    message: dict,
+) -> None:
+    """ """
+    
+    try:
+            
         #publishing message
         await client_redis.publish(
             channel,
@@ -79,8 +106,62 @@ async def saving_and_publishing_result(
     
         parse_error_message(error)
 
-
         await telegram_bot_sendtext(
-            f"redis saving and publishing result - {error}",
+            f"redis publishing result - {error}",
             "general_error",
         )
+        
+        
+
+async def saving_result(
+    client_redis: object,
+    channel: str,
+    keys: str,
+    cached_data: list,
+) -> None:
+    """ """
+
+    try:
+            
+        await client_redis.hset(
+                keys,
+                channel,
+                orjson.dumps(cached_data),
+                )
+
+    except Exception as error:
+    
+        parse_error_message(error)
+
+        await telegram_bot_sendtext(
+            f"redis saving result - {error}",
+            "general_error",
+        )
+        
+        
+async def querying_data(
+    client_redis: object,
+    channel: str,
+    keys: str,
+) -> None:
+    """ """
+
+    try:
+            
+        await orjson.loads(
+            await client_redis.hget(
+                keys,
+                channel,
+                )
+            )
+
+    except Exception as error:
+    
+        parse_error_message(error)
+
+        await telegram_bot_sendtext(
+            f"redis qurying result - {error}",
+            "general_error",
+        )
+        
+        
