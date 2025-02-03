@@ -17,14 +17,11 @@ from utilities.system_tools import parse_error_message
 async def saving_and_relabelling_orders(
     private_data: object,
     modify_order_and_db: object,
-    client_redis: object,
+    pubsub: object,
     config_app: list,
 ):
     """ """
     try:
-
-        # preparing redis connection
-        pubsub = client_redis.pubsub()
 
         strategy_attributes: list = config_app["strategies"]
 
