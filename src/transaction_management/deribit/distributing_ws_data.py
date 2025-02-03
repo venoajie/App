@@ -27,7 +27,6 @@ from utilities.caching import (
     combining_ticker_data as cached_ticker,
     combining_order_data,
     update_cached_orders,
-    update_cached_ticker,
 )
 from utilities.pickling import replace_data
 from utilities.string_modification import (
@@ -80,16 +79,6 @@ async def caching_distributing_data(
 
         resolution: int = 1
 
-        strategy_attributes = config_app["strategies"]
-
-        settlement_periods = get_settlement_period(strategy_attributes)
-
-        futures_instruments = await get_futures_instruments(
-            currencies, settlement_periods
-        )
-
-        instruments_name = futures_instruments["instruments_name"]
-
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         chart_update_channel: str = redis_channels["chart_update"]
@@ -100,10 +89,7 @@ async def caching_distributing_data(
         redis_keys: dict = config_app["redis_keys"][0]
         market_condition_keys: str = redis_keys["market_condition"]      
         order_keys: str = redis_keys["orders"]
-        ticker_keys: str = redis_keys["ticker"]
         chart_trades_buffer: list = []
-
-        ticker_all = cached_ticker(instruments_name)
 
         cached_orders: list = await combining_order_data(private_data, currencies)
 

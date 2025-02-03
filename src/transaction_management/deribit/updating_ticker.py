@@ -236,6 +236,9 @@ async def update_cached_orders(
     """
 
     try:
+        
+        log.debug(f" queue_orders {queue_orders}")
+        log.warning(f" queue_orders_all {queue_orders_all}")
 
         orders_all = queue_orders_all
 
