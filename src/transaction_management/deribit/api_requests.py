@@ -147,7 +147,11 @@ def ohlc_end_point(
     return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
 
 
-def get_ohlc_data(instrument_name: str, qty_candles: int, resolution: list):
+def get_ohlc_data(
+    instrument_name: str,
+    qty_candles: int,
+    resolution: list,
+) -> list:
     """_summary_
     https://blog.apify.com/python-cache-complete-guide/]
     data caching
@@ -267,7 +271,10 @@ class SendApiRequest:
 
         return result_open_order["result"]
 
-    async def send_limit_order(self, params) -> None:
+    async def send_limit_order(
+        self,
+        params: dict,
+    ) -> None:
         """ """
 
         # basic params
@@ -346,7 +353,10 @@ class SendApiRequest:
 
         return order_result
 
-    async def get_subaccounts_details(self, currency: str) -> list:
+    async def get_subaccounts_details(
+        self,
+        currency: str,
+    ) -> list:
 
         # Set endpoint
         endpoint: str = "private/get_subaccounts_details"
@@ -361,7 +371,11 @@ class SendApiRequest:
 
         return result_sub_account["result"]
 
-    async def get_user_trades_by_currency(self, currency, count: int = 1000):
+    async def get_user_trades_by_currency(
+        self,
+        currency: str,
+        count: int = 1000,
+    ):
 
         # Set endpoint
         endpoint: str = f"private/get_user_trades_by_currency"
@@ -375,7 +389,10 @@ class SendApiRequest:
         return [] if user_trades == [] else user_trades["result"]["trades"]
 
     async def get_user_trades_by_instrument_and_time(
-        self, instrument_name, start_timestamp, count: int = 1000
+        self,
+        instrument_name: str,
+        start_timestamp: int,
+        count: int = 1000,
     ) -> list:
 
         # Set endpoint
@@ -449,7 +466,10 @@ class SendApiRequest:
                 f"transaction_log message: {message}, (params: {params})"
             )
 
-    async def get_cancel_order_byOrderId(self, order_id: str) -> None:
+    async def get_cancel_order_byOrderId(
+        self,
+        order_id: str,
+    ) -> None:
         # Set endpoint
         endpoint: str = "private/cancel"
 
@@ -475,7 +495,10 @@ class SendApiRequest:
         return result_sub_account["result"]
 
 
-def get_api_end_point(endpoint, parameters: dict = None) -> dict:
+def get_api_end_point(
+    endpoint,
+    parameters: dict = None,
+) -> dict:
 
     private_endpoint = f"private/{endpoint}"
 
@@ -494,14 +517,20 @@ def get_api_end_point(endpoint, parameters: dict = None) -> dict:
     return params
 
 
-async def get_end_point_result(endpoint, parameters: dict = None) -> list:
+async def get_end_point_result(
+    endpoint,
+    parameters: dict = None,
+) -> list:
     # Set endpoint
 
     result_endpoint = get_api_end_point(endpoint, parameters)
     return result_endpoint  # ["result"]
 
 
-async def get_cancel_order_byOrderId(private_connection, order_id: str) -> None:
+async def get_cancel_order_byOrderId(
+    private_connection,
+    order_id: str,
+) -> None:
     # Set endpoint
     endpoint: str = "private/cancel"
 

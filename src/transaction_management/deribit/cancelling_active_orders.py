@@ -142,7 +142,7 @@ async def cancelling_orders(
 
                     message_channel = message_byte_data["channel"]
 
-#                    log.critical(f" message_channel {message_channel}")
+                    #                    log.critical(f" message_channel {message_channel}")
 
                     if market_analytics_channel in message_channel:
 
@@ -172,7 +172,7 @@ async def cancelling_orders(
                             ticker_keys,
                         )
 
-                        #log.warning(f"cached_ticker_all {cached_ticker_all}")
+                        # log.warning(f"cached_ticker_all {cached_ticker_all}")
 
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
@@ -375,9 +375,8 @@ async def cancelling_orders(
             f"cancelling active orders - {error}",
             "general_error",
         )
-        
-        parse_error_message(error)
 
+        parse_error_message(error)
 
 
 def get_settlement_period(strategy_attributes) -> list:

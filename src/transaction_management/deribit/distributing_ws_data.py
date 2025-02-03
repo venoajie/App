@@ -156,8 +156,8 @@ async def caching_distributing_data(
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
-                    
-                    #log.info(f"incremental_ticker {ticker_channel}")
+
+                    # log.info(f"incremental_ticker {ticker_channel}")
 
                     server_time = (
                         data["timestamp"] + server_time
@@ -217,12 +217,11 @@ async def caching_distributing_data(
                         combining_candles,
                     )
 
-
                     log.warning(f" combining_candles {combining_candles}")
                     log.debug(f" is_chart_trade {is_chart_trade}")
 
                     if is_chart_trade:
-                        
+
                         await telegram_bot_sendtext(
                             f"is_chart_trade {is_chart_trade}",
                             "general_error",
@@ -275,9 +274,9 @@ async def chart_trade_in_msg(
     """ """
 
     chart_trade_in_msg = False
-    
+
     tick_from_exchange = data_orders["tick"]
-    
+
     log.debug(f" tick_from_exchange {tick_from_exchange}")
 
     tick_from_cache = [o["max_tick"] for o in candles_data if o["resolution"] == 5]
@@ -285,12 +284,13 @@ async def chart_trade_in_msg(
 
     if tick_from_cache:
         max_tick_from_cache = max(tick_from_cache)
-        
-        log.critical(f" max_tick_from_cache {max_tick_from_cache} {tick_from_exchange <= max_tick_from_cache}")
+
+        log.critical(
+            f" max_tick_from_cache {max_tick_from_cache} {tick_from_exchange <= max_tick_from_cache}"
+        )
 
         if tick_from_exchange <= max_tick_from_cache:
-            
-            chart_trade_in_msg = True
-            
-    return chart_trade_in_msg
 
+            chart_trade_in_msg = True
+
+    return chart_trade_in_msg
