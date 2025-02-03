@@ -107,11 +107,12 @@ async def caching_distributing_data(
         while True:
 
             message_params: str = await queue_general.get()
+            log.info (f"message_params {message_params}")
             async with client_redis.pipeline() as pipe:
 
                 data: dict = message_params["data"]
                 
-                log.info (f"message_params {message_params}")
+                
 
                 message_channel: str = message_params["channel"]
 
