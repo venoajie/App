@@ -79,7 +79,8 @@ async def saving_and_publishing_result(
     
         parse_error_message(error)
 
+
         await telegram_bot_sendtext(
-            error, 
+            f"redis saving and publishing result - {error}",
             "general_error",
-            )
+        )

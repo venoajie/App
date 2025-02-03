@@ -103,7 +103,7 @@ async def saving_and_relabelling_orders(
                 parse_error_message(error)
                                 
                 await telegram_bot_sendtext(
-                    error, 
+                    f"capturing user changes - {error}", 
                     "general_error",
                     )
 
@@ -117,6 +117,7 @@ async def saving_and_relabelling_orders(
         parse_error_message(error)
 
         await telegram_bot_sendtext(
-            error, 
+            f"capturing user changes - {error}",
             "general_error",
-            )
+        )
+
