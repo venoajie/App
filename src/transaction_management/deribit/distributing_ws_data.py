@@ -162,10 +162,10 @@ async def caching_distributing_data(
                 TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
 
                 instrument_name_future = (message_channel)[19:]
-                log.warning(f"message_channel {message_channel} ticker_channel {ticker_channel} instrument_name_future {instrument_name_future}")
+                
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
                     
-                    log.warning(f"message_channel {message_channel} ticker_channel {ticker_channel}")
+                    log.warning(f"message_channel {message_channel} ticker_channel {ticker_channel} {instrument_name_future}")
 
                     server_time = (
                         data["timestamp"] + server_time

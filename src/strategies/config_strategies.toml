@@ -31,7 +31,6 @@ archive = "my_trades_all"
 chart_update = "market.chart"
 receive_order = "account.user_changes.order"
 sending_order = "app.sending_order"
-ticker_update = "market.ticker"
 market_analytics_update = "market.analytics"
 
 [[redis_keys]]
