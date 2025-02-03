@@ -107,7 +107,7 @@ async def update_cached_ticker(
 
         # prepare channels placeholders
         channels = [
-            ticker_channel,
+            ticker_channel
         ]
 
         # subscribe to channels
