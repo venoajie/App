@@ -176,7 +176,7 @@ async def caching_distributing_data(
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                    log.error(message_params)
+                    log.error(message_channel)
 
                     await update_cached_ticker(
                         instrument_name_future,
