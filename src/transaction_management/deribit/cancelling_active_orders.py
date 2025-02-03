@@ -158,7 +158,7 @@ async def cancelling_orders(
 
                         server_time = message_byte_data["server_time"]
 
-                    if ticker_channel in message_channel:  # and market_condition:
+                    if False and ticker_channel in message_channel:  # and market_condition:
 
                         cached_ticker_all = await querying_data(
                             client_redis,
