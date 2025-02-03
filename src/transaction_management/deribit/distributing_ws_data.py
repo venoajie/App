@@ -263,7 +263,7 @@ async def caching_distributing_data(
                             pipe,
                             chart_update_channel,
                             market_condition_keys,
-                            ticker_all,
+                            combining_candles,
                             pub_message,
                         )
 
