@@ -125,6 +125,8 @@ async def update_cached_ticker(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
+                    log.debug (f" message_byte_data {message_byte_data}")
+                    
                     message_channel = message_byte_data["channel"]  
                     
                     data = message_byte_data["data"]                  
