@@ -149,7 +149,7 @@ async def querying_data(
 
     try:
 
-        orjson.loads(
+        return orjson.loads(
             await client_redis.hget(
                 keys,
                 channel,

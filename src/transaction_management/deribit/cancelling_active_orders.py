@@ -171,7 +171,7 @@ async def cancelling_orders(
                             ticker_keys,
                         )
                         
-                        print (f"cached_ticker_all {cached_ticker_all}")
+                        log.warning (f"cached_ticker_all {cached_ticker_all}")
 
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
