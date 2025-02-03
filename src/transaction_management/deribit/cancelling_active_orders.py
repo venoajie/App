@@ -131,6 +131,8 @@ async def cancelling_orders(
         while not_cancel:
 
             try:
+                
+                from loguru import logger as log
 
                 message_byte = await pubsub.get_message()
 
@@ -139,6 +141,8 @@ async def cancelling_orders(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte_data["channel"]
+                    
+                    log.critical (f" message_channel {message_channel}")
 
                     if market_analytics_channel in message_channel:
 
