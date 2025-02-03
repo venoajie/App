@@ -178,7 +178,7 @@ async def main():
                 config_app),
             
             update_cached_ticker(
-                modify_order_and_db,
+                client_redis,
                 config_app),
             
             
