@@ -8,7 +8,6 @@ import uvloop
 
 import numpy as np
 from loguru import logger as log
-import orjson
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -51,9 +50,15 @@ async def update_db_pkl(
 
     my_path_portfolio: str = provide_path_for_file(path, currency)
 
-    if currency_inline_with_database_address(currency, my_path_portfolio):
+    if currency_inline_with_database_address(
+        currency,
+        my_path_portfolio,
+        ):
 
-        replace_data(my_path_portfolio, data_orders)
+        replace_data(
+            my_path_portfolio,
+            data_orders,
+            )
 
 
 async def caching_distributing_data(
@@ -88,6 +93,7 @@ async def caching_distributing_data(
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         chart_update_channel: str = redis_channels["chart_update"]
+        market_analytics_channel: str = redis_channels["market_analytics_update"]
         receive_order_channel: str = redis_channels["receive_order"]
         ticker_channel: str = redis_channels["ticker_update"]
 
@@ -258,14 +264,28 @@ async def caching_distributing_data(
 
                         pub_message = dict(
                             sequence=sequence,
-                            channel=chart_update_channel,
+                            channel=market_analytics_channel,
                             is_chart_trade=is_chart_trade,
                         )
 
                         await saving_and_publishing_result(
                             pipe,
-                            chart_update_channel,
+                            market_analytics_channel,
                             market_condition_keys,
+                            market_condition,
+                            pub_message,
+                        )
+
+
+                        pub_message = dict(
+                            sequence=sequence,
+                            channel=chart_update_channel,
+                            is_chart_trade=is_chart_trade,
+                        )
+                        await saving_and_publishing_result(
+                            pipe,
+                            chart_update_channel,
+                            None,
                             combining_candles,
                             pub_message,
                         )

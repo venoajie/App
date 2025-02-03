@@ -116,14 +116,14 @@ async def hedging_spot(
         
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        chart_update_channel: str = redis_channels["chart_update"]
+        market_analytics_channel: str = redis_channels["market_analytics_update"]
         receive_order_channel: str = redis_channels["receive_order"]
         sending_order_channel: str = redis_channels["sending_order"]
         ticker_channel: str = redis_channels["ticker_update"]
 
         # prepare channels placeholders
         channels = [
-            chart_update_channel,
+            market_analytics_channel,
             receive_order_channel,
             sending_order_channel,
             ticker_channel,
@@ -161,15 +161,15 @@ async def hedging_spot(
 
                     message_channel = message_byte_data["channel"]
 
-
-                    if chart_update_channel in message_channel:
+                    if market_analytics_channel in message_channel:
 
                         market_condition = orjson.loads(
                             await client_redis.hget(
                                 market_condition_keys,
-                                chart_update_channel,
+                                market_analytics_channel,
                             )
                         )
+
                         
                     if receive_order_channel in message_channel:
 
