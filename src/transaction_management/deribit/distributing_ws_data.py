@@ -253,6 +253,8 @@ async def caching_distributing_data(
                     )
 
                     if is_chart_trade:
+                        
+                        log.info(combining_candles)
 
                         pub_message = dict(
                             sequence=sequence,
