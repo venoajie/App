@@ -86,6 +86,9 @@ async def saving_and_relabelling_orders(
                             log.error(message_byte_data)
                             log.error(receive_order_channel)
 
+                            log.warning(receive_order_channel)
+                            log.warning(receive_order_channel in message_channel)
+                        
                             data = message_byte_data["data"]
 
                             currency = message_byte_data["currency"]

@@ -59,6 +59,8 @@ async def processing_orders(
                     if sending_order_channel in message_channel:
                         log.warning(message_byte_data)
                         log.warning(message_channel)
+                        log.warning(sending_order_channel)
+                        log.warning(sending_order_channel in message_channel)
                         
                         currency = message_byte_data["currency"]                        
 
