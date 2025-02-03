@@ -108,7 +108,7 @@ async def cancelling_orders(
         channels = [
             market_analytics_channel,
             receive_order_channel,
-#            ticker_channel,
+            ticker_channel,
         ]
 
         # subscribe to channels
@@ -158,7 +158,7 @@ async def cancelling_orders(
 
                         server_time = message_byte_data["server_time"]
 
-                    if False and ticker_channel in message_channel:  # and market_condition:
+                    if ticker_channel in message_channel and market_condition:
 
                         cached_ticker_all = await querying_data(
                             client_redis,
