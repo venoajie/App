@@ -147,7 +147,7 @@ async def caching_distributing_data(
                                 sequence=sequence,
                                 channel=receive_order_channel,
                                 data=data,
-                                currency_upper=currency_upper,
+                                currency=currency,
                             )
 
                         if "portfolio" in message_channel:
