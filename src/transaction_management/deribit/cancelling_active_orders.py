@@ -142,7 +142,7 @@ async def cancelling_orders(
 
                     message_channel = message_byte_data["channel"]
 
-                    log.critical(f" message_channel {message_channel}")
+#                    log.critical(f" message_channel {message_channel}")
 
                     if market_analytics_channel in message_channel:
 
