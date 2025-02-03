@@ -13,6 +13,9 @@ import redis.asyncio as redis
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
+from messaging.telegram_bot import telegram_bot_sendtext
+from utilities.system_tools import parse_error_message
+
 class Singleton(type):
     """
     https://stackoverflow.com/questions/49398590/correct-way-of-using-redis-connection-pool-in-python
@@ -57,16 +60,26 @@ async def saving_and_publishing_result(
 ) -> None:
     """ """
 
-    #updating cached data
-    if cached_data:
-        await client_redis.hset(
-        keys,
-        channel,
-        orjson.dumps(cached_data),
-    )
+    try:
+        #updating cached data
+        if cached_data:
+            await client_redis.hset(
+            keys,
+            channel,
+            orjson.dumps(cached_data),
+            )
 
-    #publishing message
-    await client_redis.publish(
-        channel,
-        orjson.dumps(message),
-    )
+        #publishing message
+        await client_redis.publish(
+            channel,
+            orjson.dumps(message),
+        )
+
+    except Exception as error:
+    
+        parse_error_message(error)
+
+        await telegram_bot_sendtext(
+            error, 
+            "general_error",
+            )
