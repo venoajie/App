@@ -94,8 +94,6 @@ async def main():
         
         client_redis = redis.Redis.from_pool(pool)
         
-        pubsub = client_redis.pubsub()
-
         # parsing config file
         config_app = get_config(file_toml)
 
@@ -157,14 +155,13 @@ async def main():
                 private_data,
                 modify_order_and_db,
                 client_redis,
-                pubsub,
                 config_app
                 ),    
        
             saving_and_relabelling_orders(
                 private_data,
                 modify_order_and_db,
-                pubsub,
+                client_redis,
                 config_app,),
     
       

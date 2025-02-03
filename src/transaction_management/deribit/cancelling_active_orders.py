@@ -36,12 +36,14 @@ async def cancelling_orders(
     private_data: object,
     modify_order_and_db: object,
     client_redis: object,
-    pubsub: object,
     config_app: list,
 ) -> None:
     """ """
 
     try:
+
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
