@@ -97,6 +97,8 @@ async def publishing_result(
     """ """
 
     try:
+        
+        print(f"publishing_result channel {channel}")
 
         # publishing message
         await client_redis.publish(
@@ -123,6 +125,7 @@ async def saving_result(
     """ """
 
     try:
+        print(f"saving_result channel {channel}")
 
         await client_redis.hset(
             keys,
