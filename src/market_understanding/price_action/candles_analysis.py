@@ -398,7 +398,7 @@ async def get_market_condition(
                 continue
 
             finally:
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.001)
 
     except Exception as error:
 
