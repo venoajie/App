@@ -128,8 +128,8 @@ async def saving_result(
         await client_redis.hset(
             keys,
             channel,
-            cached_data,
-#            orjson.dumps(cached_data),
+            #cached_data,
+            orjson.dumps(cached_data),
         )
 
     except Exception as error:
