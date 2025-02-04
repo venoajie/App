@@ -98,7 +98,7 @@ async def main():
             )
         
         client_redis = redis.Redis.from_pool(pool)
-        ts = r.ts()
+        ts = client_redis.ts()
         
         # prepare redis db 
         [await ts.create(f"ohlc{o}_btc_perp") for o in time_frame]
