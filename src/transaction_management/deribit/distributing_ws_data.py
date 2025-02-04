@@ -166,10 +166,15 @@ async def caching_distributing_data(
 
                 if "chart.trades" in message_channel:
                     
+                    pub_message = dict(
+                        channel=ticker_channel,
+                        data=data,
+                        instrument_name=instrument_name_future,
+                    )
                     await publishing_result(
                         pipe,
                         chart_update_channel,
-                        data,
+                        pub_message,
                     )
 
                     log.debug(message_params)
