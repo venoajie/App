@@ -144,6 +144,9 @@ async def cancelling_orders(
                     log.warning(f" message_byte_data {message_byte_data}")
                     message_channel = message_byte["channel"]
 
+                    log.warning(f" market_analytics_channel in message_channel {market_analytics_channel in message_channel}")
+                    log.warning(f" receive_order_channel in message_channel {receive_order_channel in message_channel}")
+                    log.warning(f" ticker_channel in message_channel {ticker_channel in message_channel}")
                     if market_analytics_channel in message_channel:
 
                         market_condition_all = await querying_data(

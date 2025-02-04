@@ -225,7 +225,10 @@ async def get_market_condition(
         market_condition_keys: str = redis_keys["market_condition"]
 
         # prepare channels placeholders
-        channels = [chart_update_channel, market_analytics_channel]
+        channels = [
+            chart_update_channel, 
+            market_analytics_channel,
+            ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -372,8 +375,6 @@ async def get_market_condition(
                             
                             result.append(pub_message)
 
-                        log.debug(result)
-
                         await saving_and_publishing_result(
                             client_redis,
                             market_analytics_channel,
@@ -382,7 +383,7 @@ async def get_market_condition(
                             result,
                         )
 
-                        return
+                        return pub_message
 
             except Exception as error:
 
