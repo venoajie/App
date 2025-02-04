@@ -254,14 +254,9 @@ async def get_market_condition(
 
                     message_channel = message_byte_data["channel"]
                     
-                    log.info (message_channel)
-
                     if chart_update_channel in message_channel:
 
                         data = message_byte_data["data"]
-                        
-                        log.info (data)
-                        log.error (candles_data)
                         
                         result = []
                         for instrument_name in candles_instrument_name:
@@ -331,6 +326,7 @@ async def get_market_condition(
                             neutral = True if not weak_bearish and not weak_bullish else False
                             
                             pub_message = dict(
+                                channel=market_analytics_channel,
                                 instrument_name=instrument_name,
                                 strong_bullish=strong_bullish,
                                 bullish=bullish,
@@ -340,6 +336,7 @@ async def get_market_condition(
                                 bearish=bearish,
                                 strong_bearish=strong_bearish,
                             )
+                    
                             result.append(pub_message)
                             
 

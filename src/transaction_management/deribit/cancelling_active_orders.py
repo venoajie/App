@@ -145,7 +145,7 @@ async def cancelling_orders(
 
                     if market_analytics_channel in message_channel:
 
-                        market_condition = await querying_data(
+                        market_condition_all = await querying_data(
                             client_redis,
                             market_analytics_channel,
                             market_condition_keys,
@@ -170,7 +170,7 @@ async def cancelling_orders(
                             ticker_channel,
                             ticker_keys,
                         )
-
+                        
                         # log.warning(f"cached_ticker_all {cached_ticker_all}")
 
                         server_time = message_byte_data["server_time"]
@@ -180,6 +180,8 @@ async def cancelling_orders(
                         currency_lower: str = currency
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
+
+                        market_condition = [o for o in market_condition_all if o["instrument_name"]]
 
                         # get portfolio data
                         portfolio = reading_from_pkl_data("portfolio", currency)[0]
