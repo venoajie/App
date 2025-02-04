@@ -272,121 +272,121 @@ async def get_market_condition(
                         result = []
                         for instrument_name in candles_instrument_name:
                             
-                            if instrument_name in 
+                            if instrument_name in data["instrument_name"]:
 
-                            candles_data_instrument = [
-                                o
-                                for o in candles_data
-                                if instrument_name in o["instrument_name"]
-                            ]
-                            # log.warning (candles_data_instrument)
+                                candles_data_instrument = [
+                                    o
+                                    for o in candles_data
+                                    if instrument_name in o["instrument_name"]
+                                ]
+                                # log.warning (candles_data_instrument)
 
-                            candle_60 = [
-                                o["candles_analysis"]
-                                for o in candles_data_instrument
-                                if o["resolution"] == 60
-                            ]
-                            
-                            candle_60_type = np.sum(
-                                [o["candle_type"] for o in candle_60]
-                            )
-                            
-                            candle_60_is_long = np.sum(
-                                [o["is_long_body"] for o in candle_60]
-                            )
-
-                            candle_5 = [
-                                o["candles_analysis"]
-                                for o in candles_data_instrument
-                                if o["resolution"] == 5
-                            ]
-
-                            candle_5_type = np.sum([o["candle_type"] for o in candle_5])
-
-                            candle_5_is_long = np.sum(
-                                [o["is_long_body"] for o in candle_5]
-                            )
-
-                            candle_15 = [
-                                o["candles_analysis"]
-                                for o in candles_data_instrument
-                                if o["resolution"] == 15
-                            ]
-
-                            candle_15_type = np.sum(
-                                [o["candle_type"] for o in candle_15]
-                            )
-
-                            candle_15_is_long = np.sum(
-                                [o["is_long_body"] for o in candle_15]
-                            )
-
-                            candle_60_long_body_more_than_2 = candle_60_is_long >= 2
-                            candle_5_long_body_any = candle_5_is_long > 0
-                            candle_15_long_body_any = candle_15_is_long > 0
-                            candle_60_long_body_any = candle_60_is_long > 0
-
-                            candle_60_no_long = candle_60_is_long == 0
-
-                            neutral = True
-                            weak_bullish, weak_bearish = False, False
-                            bullish, bearish = False, False
-                            strong_bullish, strong_bearish = False, False
-
-                            if candle_5_long_body_any:
-                                weak_bullish = True if candle_5_type > 0 else False
-                                weak_bearish = True if candle_5_type < 0 else False
-
-                            if candle_60_long_body_any and candle_15_long_body_any:
-                                bullish = (
-                                    True
-                                    if weak_bullish and candle_15_type > 0
-                                    else False
-                                )
-                                bearish = (
-                                    True
-                                    if weak_bearish and candle_15_type < 0
-                                    else False
-                                )
-
-                            if candle_60_long_body_more_than_2:
-                                strong_bullish = (
-                                    True
-                                    if bullish and candle_60_long_body_more_than_2
-                                    else False
+                                candle_60 = [
+                                    o["candles_analysis"]
+                                    for o in candles_data_instrument
+                                    if o["resolution"] == 60
+                                ]
+                                
+                                candle_60_type = np.sum(
+                                    [o["candle_type"] for o in candle_60]
                                 )
                                 
-                                strong_bearish = (
-                                    True
-                                    if bearish and candle_60_long_body_more_than_2
-                                    else False
+                                candle_60_is_long = np.sum(
+                                    [o["is_long_body"] for o in candle_60]
                                 )
 
-                            neutral = (
-                                True if not weak_bearish and not weak_bullish else False
-                            )
+                                candle_5 = [
+                                    o["candles_analysis"]
+                                    for o in candles_data_instrument
+                                    if o["resolution"] == 5
+                                ]
 
-                            pub_message = dict(
-                                instrument_name=instrument_name,
-                                strong_bullish=strong_bullish,
-                                bullish=bullish,
-                                weak_bullish=weak_bullish,
-                                neutral=neutral,
-                                weak_bearish=weak_bearish,
-                                bearish=bearish,
-                                strong_bearish=strong_bearish,
-                            )
-                            
-                            result.append(pub_message)
+                                candle_5_type = np.sum([o["candle_type"] for o in candle_5])
 
-                        log.critical(f"result {result}")
-                        await saving_and_publishing_result(
-                            client_redis,
-                            market_analytics_channel,
-                            market_condition_keys,
-                            result,
-                            result,
-                        )
+                                candle_5_is_long = np.sum(
+                                    [o["is_long_body"] for o in candle_5]
+                                )
+
+                                candle_15 = [
+                                    o["candles_analysis"]
+                                    for o in candles_data_instrument
+                                    if o["resolution"] == 15
+                                ]
+
+                                candle_15_type = np.sum(
+                                    [o["candle_type"] for o in candle_15]
+                                )
+
+                                candle_15_is_long = np.sum(
+                                    [o["is_long_body"] for o in candle_15]
+                                )
+
+                                candle_60_long_body_more_than_2 = candle_60_is_long >= 2
+                                candle_5_long_body_any = candle_5_is_long > 0
+                                candle_15_long_body_any = candle_15_is_long > 0
+                                candle_60_long_body_any = candle_60_is_long > 0
+
+                                candle_60_no_long = candle_60_is_long == 0
+
+                                neutral = True
+                                weak_bullish, weak_bearish = False, False
+                                bullish, bearish = False, False
+                                strong_bullish, strong_bearish = False, False
+
+                                if candle_5_long_body_any:
+                                    weak_bullish = True if candle_5_type > 0 else False
+                                    weak_bearish = True if candle_5_type < 0 else False
+
+                                if candle_60_long_body_any and candle_15_long_body_any:
+                                    bullish = (
+                                        True
+                                        if weak_bullish and candle_15_type > 0
+                                        else False
+                                    )
+                                    bearish = (
+                                        True
+                                        if weak_bearish and candle_15_type < 0
+                                        else False
+                                    )
+
+                                if candle_60_long_body_more_than_2:
+                                    strong_bullish = (
+                                        True
+                                        if bullish and candle_60_long_body_more_than_2
+                                        else False
+                                    )
+                                    
+                                    strong_bearish = (
+                                        True
+                                        if bearish and candle_60_long_body_more_than_2
+                                        else False
+                                    )
+
+                                neutral = (
+                                    True if not weak_bearish and not weak_bullish else False
+                                )
+
+                                pub_message = dict(
+                                    instrument_name=instrument_name,
+                                    strong_bullish=strong_bullish,
+                                    bullish=bullish,
+                                    weak_bullish=weak_bullish,
+                                    neutral=neutral,
+                                    weak_bearish=weak_bearish,
+                                    bearish=bearish,
+                                    strong_bearish=strong_bearish,
+                                )
+                                
+                                result.append(pub_message)
+
+                            log.critical(f"result {result}")
+                            await saving_and_publishing_result(
+                                client_redis,
+                                market_analytics_channel,
+                                market_condition_keys,
+                                result,
+                                result,
+                            )
 
             except Exception as error:
 
