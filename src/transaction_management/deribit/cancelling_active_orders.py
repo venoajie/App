@@ -136,21 +136,9 @@ async def cancelling_orders(
 
                 if message_byte and message_byte["type"] == "message":
 
-                    log.warning(f" message_byte {message_byte}")
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    log.warning(f" message_byte_data {message_byte_data}")
                     message_channel = message_byte["channel"]
-
-                    log.warning(
-                        f" market_analytics_channel in message_channel {market_analytics_channel in message_channel}"
-                    )
-                    log.warning(
-                        f" receive_order_channel in message_channel {receive_order_channel in message_channel}"
-                    )
-                    log.warning(
-                        f" ticker_channel in message_channel {message_channel} {ticker_channel in message_channel}"
-                    )
 
                     if market_analytics_channel in message_channel:
 
@@ -177,8 +165,6 @@ async def cancelling_orders(
                             ticker_channel,
                             ticker_keys,
                         )
-
-                        # log.warning(f"cached_ticker_all {cached_ticker_all}")
 
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]

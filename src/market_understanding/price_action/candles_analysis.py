@@ -148,10 +148,38 @@ def my_generator_candle(np: object, data: object, lookback: int) -> list:
     return arr
 
 
+async def get_candles_data(
+    currencies: list,
+    qty_candles: int,
+    resolutions: int,
+):
+    """ """
+    result = []
+    for currency in currencies:
+        instrument_name = f"{currency}-PERPETUAL"
+
+        for resolution in resolutions:
+
+            ohlc = await get_ohlc_data(
+                instrument_name, 
+                qty_candles, 
+                resolution,
+                )
+
+            result.append(
+                dict(
+                    instrument_name=instrument_name,
+                    ohlc = (ohlc),
+                )
+            )
+
+    return result
+
+
 def combining_candles_data(
     np: object,
     currencies: list,
-    qty_candles: int,
+    candles_data: int,
     resolutions: int,
     dim_sequence: int = 3,
 ):
@@ -170,9 +198,7 @@ def combining_candles_data(
 
         for resolution in resolutions:
 
-            ohlc = get_ohlc_data(instrument_name, qty_candles, resolution)
-
-            ohlc_without_ticks = remove_list_elements(ohlc, "tick")
+            ohlc_without_ticks = remove_list_elements(candles_data, "tick")
 
             np_users_data = np.array(ohlc_without_ticks)
 
@@ -184,7 +210,7 @@ def combining_candles_data(
 
             candles_analysis_result = analysis_based_on_length(np, three_dim_sequence)
 
-            max_tick = max([o["tick"] for o in ohlc])
+            max_tick = max([o["tick"] for o in candles_data])
 
             result.append(
                 dict(
@@ -235,11 +261,19 @@ async def get_market_condition(
         resolutions = [60, 15, 5]
         qty_candles = 5
         dim_sequence = 3
+        
+        candles_from_exchanges = await get_candles_data(
+            currencies,
+            qty_candles,
+            resolutions,
+            )
+        
+        log.debug(f"candles_data {candles_from_exchanges}")
 
         candles_data = combining_candles_data(
             np,
             currencies,
-            qty_candles,
+            candles_from_exchanges,
             resolutions,
             dim_sequence,
         )
@@ -262,14 +296,11 @@ async def get_market_condition(
 
                     log.error(f" message_byte_data {message_byte_data}")
                     message_channel = message_byte["channel"]
-
-                    log.error(f" chart_update_channel in message_channel {message_channel} {chart_update_channel in message_channel}")
                     
                     if chart_update_channel  in message_channel:
 
-                        data = message_byte_data["data"]
-
                         result = []
+                        
                         for instrument_name in candles_instrument_name:
                             
                             if instrument_name in message_byte_data["instrument_name"]:
@@ -279,7 +310,7 @@ async def get_market_condition(
                                     for o in candles_data
                                     if instrument_name in o["instrument_name"]
                                 ]
-                                # log.warning (candles_data_instrument)
+                        
 
                                 candle_60 = [
                                     o["candles_analysis"]

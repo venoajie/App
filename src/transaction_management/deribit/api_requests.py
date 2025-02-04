@@ -147,7 +147,7 @@ def ohlc_end_point(
     return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
 
 
-def get_ohlc_data(
+async def get_ohlc_data(
     instrument_name: str,
     qty_candles: int,
     resolution: list,
@@ -181,8 +181,11 @@ def get_ohlc_data(
         now_unix,
     )
 
-    with httpx.Client() as client:
-        ohlc_request = client.get(end_point, follow_redirects=True).json()["result"]
+    async with httpx.AsyncClient() as client:
+        ohlc_request = await client.get(
+            end_point, 
+            follow_redirects=True,
+            ).json()["result"]
 
     return transform_nested_dict_to_list_ohlc(ohlc_request)
 
