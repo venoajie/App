@@ -7,7 +7,7 @@ from loguru import logger as log
 from db_management.redis_client import saving_and_publishing_result, publishing_result
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_ohlc_data
-from utilities.string_modification import remove_list_elements
+from utilities.string_modification import remove_list_elements, remove_redundant_elements
 from utilities.system_tools import  parse_error_message
 
 """
@@ -238,7 +238,10 @@ async def get_market_condition(
             np, currencies, qty_candles, resolutions, dim_sequence
         )
         
+        candles_instrument_name = remove_redundant_elements([o["instrument_name"] for o in candles_data])
+        
         log.error (candles_data)
+        log.error (candles_instrument_name)
         
         while True:
 
