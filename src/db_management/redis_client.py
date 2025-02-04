@@ -101,8 +101,8 @@ async def publishing_result(
         # publishing message
         await client_redis.publish(
             channel,
-            message,
-            #orjson.dumps(message),
+            #message,
+            orjson.dumps(message),
         )
 
     except Exception as error:
