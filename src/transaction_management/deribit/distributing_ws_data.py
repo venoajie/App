@@ -171,6 +171,7 @@ async def caching_distributing_data(
                         data=data,
                         instrument_name=instrument_name_future,
                     )
+                    
                     await publishing_result(
                         pipe,
                         chart_update_channel,
@@ -180,7 +181,7 @@ async def caching_distributing_data(
                     log.debug(message_params)
 
                     chart_trades_buffer.append(data)
-                    log.error(f" chart_trades_buffer {chart_trades_buffer}")
+
 
                     if len(chart_trades_buffer) > 3:
 
