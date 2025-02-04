@@ -375,6 +375,7 @@ async def get_market_condition(
                             
                             result.append(pub_message)
 
+                        log.critical(f"result {result}")
                         await saving_and_publishing_result(
                             client_redis,
                             market_analytics_channel,
