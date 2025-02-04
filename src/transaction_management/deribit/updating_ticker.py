@@ -129,7 +129,7 @@ async def update_cached_ticker(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message_channel =message_byte["channel"]
+                    message_channel = message_byte["channel"]
 
                     if ticker_channel in message_channel:
 

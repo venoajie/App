@@ -97,7 +97,7 @@ async def publishing_result(
     """ """
 
     try:
-        
+
         print(f"publishing_result channel {channel}")
 
         # publishing message

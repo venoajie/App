@@ -409,7 +409,7 @@ def transform_nested_dict_to_list_ohlc(list_example) -> dict:
 
 
 def filtering_list_with_missing_key(
-    list_examples: list, 
+    list_examples: list,
     missing_key: str = "label",
 ) -> dict:
     """
@@ -440,10 +440,10 @@ def sorting_list(
     import operator
 
     return sorted(
-        listing, 
-        key=operator.itemgetter(item_reference), 
+        listing,
+        key=operator.itemgetter(item_reference),
         reverse=is_reversed,
-        )
+    )
 
 
 def hashing(

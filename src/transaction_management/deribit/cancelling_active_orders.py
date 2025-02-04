@@ -122,8 +122,6 @@ async def cancelling_orders(
 
         cached_ticker_all = None
 
-        chart_trade = False
-
         not_cancel = True
 
         market_condition = None
@@ -144,10 +142,16 @@ async def cancelling_orders(
                     log.warning(f" message_byte_data {message_byte_data}")
                     message_channel = message_byte["channel"]
 
-                    log.warning(f" market_analytics_channel in message_channel {market_analytics_channel in message_channel}")
-                    log.warning(f" receive_order_channel in message_channel {receive_order_channel in message_channel}")
-                    log.warning(f" ticker_channel in message_channel {message_channel} {ticker_channel in message_channel}")
-                    
+                    log.warning(
+                        f" market_analytics_channel in message_channel {market_analytics_channel in message_channel}"
+                    )
+                    log.warning(
+                        f" receive_order_channel in message_channel {receive_order_channel in message_channel}"
+                    )
+                    log.warning(
+                        f" ticker_channel in message_channel {message_channel} {ticker_channel in message_channel}"
+                    )
+
                     if market_analytics_channel in message_channel:
 
                         market_condition_all = await querying_data(
@@ -373,7 +377,7 @@ async def cancelling_orders(
                 continue
 
             finally:
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.1)
 
     except Exception as error:
 

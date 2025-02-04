@@ -10,6 +10,7 @@ from db_management.sqlite_management import (
     querying_ohlc_price_vol,
     querying_table,
 )
+from utilities.string_modification import get_strings_before_character
 
 data = {"type": "user", "info": {"name": "Alice", "age": 30}}
 
@@ -163,12 +164,8 @@ def ema_list(ohlc, ratio):
     return y
 
 
-table_1 = f"ohlc5_btc_perp_json"
-ohlc_1_high_9 = asyncio.run(cleaned_up_ohlc("close", table_1, 9))
+import string
 
-ohlc = ohlc_1_high_9["ohlc"]
-
-ema = ema_list(ohlc, ratio)
-
-log.warning(f"ohlc {ohlc}")
-log.debug(f"ema {ema}")
+channel = "chart.trades.BTC-PERPETUAL.1"
+s = channel
+print(channel.split(".")[2])
