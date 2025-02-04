@@ -409,7 +409,8 @@ def transform_nested_dict_to_list_ohlc(list_example) -> dict:
 
 
 def filtering_list_with_missing_key(
-    list_examples: list, missing_key: str = "label"
+    list_examples: list, 
+    missing_key: str = "label",
 ) -> dict:
     """
     https://stackoverflow.com/questions/34710571/can-i-use-a-list-comprehension-on-a-list-of-dictionaries-if-a-key-is-missing
@@ -438,7 +439,11 @@ def sorting_list(
     """
     import operator
 
-    return sorted(listing, key=operator.itemgetter(item_reference), reverse=is_reversed)
+    return sorted(
+        listing, 
+        key=operator.itemgetter(item_reference), 
+        reverse=is_reversed,
+        )
 
 
 def hashing(
