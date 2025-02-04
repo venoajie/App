@@ -185,9 +185,9 @@ async def get_ohlc_data(
         ohlc_request = await client.get(
             end_point, 
             follow_redirects=True,
-            ).json()["result"]
+            ).json()
 
-    return transform_nested_dict_to_list_ohlc(ohlc_request)
+    return transform_nested_dict_to_list_ohlc(ohlc_request["result"])
 
 
 @dataclass(unsafe_hash=True, slots=True)
