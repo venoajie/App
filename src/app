@@ -99,8 +99,8 @@ async def main():
         ts = client_redis.ts()
         
         # prepare redis db 
-        [ts.create(f"ohlc{o}_btc_perp") for o in time_frame]
-        [ts.create(f"ohlc{o}_eth_perp") for o in time_frame]
+        await [ts.create(f"ohlc{o}_btc_perp") for o in time_frame]
+        await [ts.create(f"ohlc{o}_eth_perp") for o in time_frame]
                 
         # parsing config file
         config_app = get_config(file_toml)
