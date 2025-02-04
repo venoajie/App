@@ -386,8 +386,6 @@ async def get_market_condition(
                             result,
                         )
 
-                        return pub_message
-
             except Exception as error:
 
                 parse_error_message(error)
