@@ -87,7 +87,7 @@ async def caching_distributing_data(
 
             async with client_redis.pipeline() as pipe:
 
-                data: dict = dict(message_params["data"])
+                data: dict = message_params["data"]
 
                 message_channel: str = message_params["channel"]
 
