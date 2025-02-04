@@ -258,9 +258,9 @@ async def get_market_condition(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message_channel = message_byte_data["channel"]
+                    message_channel = message_byte["channel"]
 
-                    if chart_update_channel in message_byte["channel"]:
+                    if chart_update_channel  in message_channel:
 
                         data = message_byte_data["data"]
 
