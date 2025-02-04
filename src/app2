@@ -1,0 +1,22 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+import redis
+
+
+def main():
+    """
+    https://redis-py.readthedocs.io/en/stable/examples/asyncio_examples.html
+    """
+    r = redis.Redis(decode_responses=True)
+    ts = r.ts()
+    ts.create("ohlc_15_btc_perp")
+    ts.create("ohlc_5_btc_perp")
+    ts.create("ohlc_60_btc_perp")
+    ts.create("ohlc_15_eth_perp")
+    ts.create("ohlc_5_eth_perp")
+    ts.create("ohlc_60_eth_perp")
+    
+if __name__ == "__main__":
+    
+    (main())
+    
