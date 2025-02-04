@@ -348,6 +348,7 @@ async def get_market_condition(
                                     if bullish and candle_60_long_body_more_than_2
                                     else False
                                 )
+                                
                                 strong_bearish = (
                                     True
                                     if bearish and candle_60_long_body_more_than_2
@@ -368,18 +369,19 @@ async def get_market_condition(
                                 bearish=bearish,
                                 strong_bearish=strong_bearish,
                             )
+                            
+                            pub_message.update({"channel": market_analytics_channel})
 
                             result.append(pub_message)
 
                         log.debug(result)
-                        result_all= list(dict(channel=market_analytics_channel,result=result))
-                        log.warning(result_all)
+
                         await saving_and_publishing_result(
                             client_redis,
                             market_analytics_channel,
                             market_condition_keys,
-                            result_all,
-                            result_all,
+                            result,
+                            result,
                         )
 
                         return
