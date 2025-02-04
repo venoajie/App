@@ -140,7 +140,6 @@ async def cancelling_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
-                    log.info(f" message_byte_data {message_byte_data}")
                     message_channel = message_byte_data["channel"]
 
                     if market_analytics_channel in message_channel:
