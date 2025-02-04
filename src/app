@@ -185,10 +185,10 @@ async def main():
                 client_redis,
                 config_app),
             
-            #get_market_condition(
-            #    client_redis,
-            #    config_app,
-            #    np),
+            get_market_condition(
+                client_redis,
+                config_app,
+                np),
             
                         )  
 

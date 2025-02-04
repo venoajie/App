@@ -2,7 +2,7 @@
 
 import asyncio
 import orjson
-
+from loguru import logger as log
 # user defined formula
 from db_management.redis_client import saving_and_publishing_result, publishing_result
 from messaging.telegram_bot import telegram_bot_sendtext
@@ -237,6 +237,8 @@ async def get_market_condition(
         candles_data = combining_candles_data(
             np, currencies, qty_candles, resolutions, dim_sequence
         )
+        
+        log.error (candles_data)
         
         while True:
 
