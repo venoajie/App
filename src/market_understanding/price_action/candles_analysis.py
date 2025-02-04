@@ -169,6 +169,7 @@ async def get_candles_data(
             result.append(
                 dict(
                     instrument_name=instrument_name,
+                    resolution=resolution,
                     ohlc = ohlc,
                 )
             )
