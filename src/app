@@ -94,7 +94,9 @@ async def main():
             "redis://localhost", 
             port=6379, 
             db=0, 
-            protocol=3,decode_responses=True
+            protocol=3,
+            charset="utf-8", 
+            decode_responses=True
             )
         
         client_redis = redis.Redis.from_pool(pool)
