@@ -87,6 +87,8 @@ async def main():
         private_data: object = SendApiRequest(sub_account_id)
 
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
+        
+        r = redis.Redis(decode_responses=True)
                 
         pool = redis.ConnectionPool.from_url(
             "redis://localhost", 
@@ -96,11 +98,11 @@ async def main():
             )
         
         client_redis = redis.Redis.from_pool(pool)
-        ts = client_redis.ts()
+        ts = r.ts()
         
         # prepare redis db 
-        await [ts.create(f"ohlc{o}_btc_perp") for o in time_frame]
-        await [ts.create(f"ohlc{o}_eth_perp") for o in time_frame]
+        [ts.create(f"ohlc{o}_btc_perp") for o in time_frame]
+        [ts.create(f"ohlc{o}_eth_perp") for o in time_frame]
                 
         # parsing config file
         config_app = get_config(file_toml)
