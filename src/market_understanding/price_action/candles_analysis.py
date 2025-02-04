@@ -373,6 +373,7 @@ async def get_market_condition(
 
                         log.debug(result)
                         result_all= (dict(channel=market_analytics_channel,result=result))
+                        log.warning(result_all)
                         await saving_and_publishing_result(
                             client_redis,
                             market_analytics_channel,
