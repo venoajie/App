@@ -98,8 +98,7 @@ async def main():
             decode_responses=True
             )
         
-        client_redis = redis.Redis.from_pool(pool,
-            charset="utf-8")
+        client_redis = redis.Redis.from_pool(pool)
                 
         # parsing config file
         config_app = get_config(file_toml)
