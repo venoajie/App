@@ -15,7 +15,7 @@ from loguru import logger as log
 
 import orjson
 import redis.asyncio as redis
-from redistimeseries.client import Client
+#from redistimeseries.client import Client
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -98,9 +98,9 @@ async def main():
         
         client_redis = redis.Redis.from_pool(pool)
                         
-        ts = client_redis.ts()
+        #ts = client_redis.ts()
         
-        rts = Client()
+        #rts = Client()
         
         # prepare redis db 
         #[await rts.create(f"ohlc{o}_btc_perp") for o in time_frame]
