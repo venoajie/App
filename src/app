@@ -97,16 +97,6 @@ async def main():
         
         client_redis = redis.Redis.from_pool(pool)
         
-        import redis
-        
-        r = redis.Redis(decode_responses=True)
-        
-        ts = r.ts()
-        
-        # prepare redis db 
-        [ts.create(f"ohlc{o}_btc_perp") for o in time_frame]
-        [ts.create(f"ohlc{o}_eth_perp") for o in time_frame]
-                
         # parsing config file
         config_app = get_config(file_toml)
 
