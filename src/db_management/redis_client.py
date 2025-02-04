@@ -101,7 +101,8 @@ async def publishing_result(
         # publishing message
         await client_redis.publish(
             channel,
-            orjson.dumps(message),
+            message,
+            #orjson.dumps(message),
         )
 
     except Exception as error:
@@ -127,7 +128,8 @@ async def saving_result(
         await client_redis.hset(
             keys,
             channel,
-            orjson.dumps(cached_data),
+            cached_data,
+#            orjson.dumps(cached_data),
         )
 
     except Exception as error:
@@ -149,6 +151,7 @@ async def querying_data(
 
     try:
 
+        #return orjson.loads(
         return (
             await client_redis.hget(
                 keys,
