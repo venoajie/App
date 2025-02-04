@@ -187,15 +187,11 @@ async def get_ohlc_data(
             follow_redirects=True,
             )
 
-        log.info (f"ohlc_request {ohlc_request}")
-
-        result = ohlc_request.json()
+        result = ohlc_request.json() ["result"]
         
         log.info (f"ohlresultc_request {result}")
 
-        log.info (transform_nested_dict_to_list_ohlc(result["result"]))
-
-    return transform_nested_dict_to_list_ohlc(ohlc_request["result"])
+    return transform_nested_dict_to_list_ohlc(result)
 
 
 @dataclass(unsafe_hash=True, slots=True)
