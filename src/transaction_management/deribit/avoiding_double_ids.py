@@ -69,9 +69,9 @@ async def avoiding_double_ids(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message_channel = message_byte_data["channel"]
+                    message_channel = message_byte["channel"]
 
-                    if receive_order_channel in message_channel:
+                    if message_byte["channel"] in message_channel:
 
                         cached_orders = orjson.loads(
                             await client_redis.hget(

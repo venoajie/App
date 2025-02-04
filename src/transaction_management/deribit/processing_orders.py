@@ -53,7 +53,7 @@ async def processing_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message_channel = message_byte_data["channel"]
+                    message_channel = message_byte["channel"]
 
                     if sending_order_channel in message_channel:
 

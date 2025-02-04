@@ -138,13 +138,13 @@ async def cancelling_orders(
 
                 if message_byte and message_byte["type"] == "message":
 
-                    log.info(f" message_byte {message_byte}")
+                    log.warning(f" message_byte {message_byte}")
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     log.warning(f" message_byte_data {message_byte_data}")
-                    message_channel = message_byte_data["channel"]
+                    message_channel = message_byte["channel"]
 
-                    if message_byte["channel"] in message_channel:
+                    if market_analytics_channel in message_channel:
 
                         market_condition_all = await querying_data(
                             client_redis,
@@ -152,7 +152,7 @@ async def cancelling_orders(
                             market_condition_keys,
                         )
 
-                    if message_byte["channel"] in message_channel:
+                    if receive_order_channel in message_channel:
 
                         cached_orders = await querying_data(
                             client_redis,
@@ -162,7 +162,7 @@ async def cancelling_orders(
 
                         server_time = message_byte_data["server_time"]
 
-                    if message_byte["channel"] in message_channel and market_condition:
+                    if ticker_channel in message_channel and market_condition:
 
                         cached_ticker_all = await querying_data(
                             client_redis,

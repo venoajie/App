@@ -260,7 +260,7 @@ async def get_market_condition(
 
                     message_channel = message_byte_data["channel"]
 
-                    if chart_update_channel in message_channel:
+                    if chart_update_channel in message_byte["channel"]:
 
                         data = message_byte_data["data"]
 
@@ -370,8 +370,6 @@ async def get_market_condition(
                                 strong_bearish=strong_bearish,
                             )
                             
-                            pub_message.update({"channel": market_analytics_channel})
-
                             result.append(pub_message)
 
                         log.debug(result)

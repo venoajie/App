@@ -73,7 +73,7 @@ async def saving_and_relabelling_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message_channel = message_byte_data["channel"]
+                    message_channel = message_byte["channel"]
 
                     try:
 

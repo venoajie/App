@@ -125,7 +125,7 @@ async def future_spreads(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message_channel = message_byte_data["channel"]
+                    message_channel = message_byte["channel"]
 
                     if market_analytics_channel in message_channel:
 

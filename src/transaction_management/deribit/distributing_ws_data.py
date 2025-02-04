@@ -109,7 +109,6 @@ async def caching_distributing_data(
                             )
 
                             pub_message = dict(
-                                channel=receive_order_channel,
                                 data=data,
                                 server_time=server_time,
                                 currency_upper=currency_upper,
@@ -126,7 +125,6 @@ async def caching_distributing_data(
 
                     await saving_and_publishing_result(
                         pipe,
-                        receive_order_channel,
                         order_keys,
                         cached_orders,
                         pub_message,
@@ -150,7 +148,6 @@ async def caching_distributing_data(
                     )
 
                     pub_message = dict(
-                        channel=ticker_channel,
                         server_time=server_time,
                         data=data,
                         currency=currency,
@@ -167,14 +164,12 @@ async def caching_distributing_data(
                 if "chart.trades" in message_channel:
 
                     pub_message = dict(
-                        channel=chart_update_channel,
                         data=data,
                         instrument_name=instrument_name_future,
                     )
 
                     await publishing_result(
                         pipe,
-                        chart_update_channel,
                         pub_message,
                     )
 
