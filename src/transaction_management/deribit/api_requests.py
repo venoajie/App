@@ -189,8 +189,6 @@ async def get_ohlc_data(
 
         result = ohlc_request.json() ["result"]
         
-        log.info (f"ohlresultc_request {result}")
-
     return transform_nested_dict_to_list_ohlc(result)
 
 
