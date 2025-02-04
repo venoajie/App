@@ -326,7 +326,6 @@ async def get_market_condition(
                             neutral = True if not weak_bearish and not weak_bullish else False
                             
                             pub_message = dict(
-                                channel=market_analytics_channel,
                                 instrument_name=instrument_name,
                                 strong_bullish=strong_bullish,
                                 bullish=bullish,
@@ -340,6 +339,8 @@ async def get_market_condition(
                             result.append(pub_message)
                             
                         log.debug (result)
+                        result.append(dict(
+                                channel=market_analytics_channel))
                         await saving_and_publishing_result(
                             client_redis,
                             market_analytics_channel,
