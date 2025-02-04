@@ -81,6 +81,7 @@ async def main():
     
     idle_time = 2
     
+    time_frame = [1,5,15,60]
     try:
 
         private_data: object = SendApiRequest(sub_account_id)
@@ -95,7 +96,12 @@ async def main():
             )
         
         client_redis = redis.Redis.from_pool(pool)
+        ts = client_redis.ts()
         
+        # prepare redis db 
+        [ts.create(f"ohlc{o}_btc_perp") for o in time_frame]
+        [ts.create(f"ohlc{o}_eth_perp") for o in time_frame]
+                
         # parsing config file
         config_app = get_config(file_toml)
 
