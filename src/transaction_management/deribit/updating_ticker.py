@@ -126,13 +126,10 @@ async def update_cached_ticker(
                 message_byte = await pubsub.get_message()
 
                 if message_byte and message_byte["type"] == "message":
-                    
-                    log.debug (message_byte)
 
-                    message_byte_data = eval(message_byte["data"])
-                    log.warning (message_byte_data)
+                    message_byte_data = (message_byte["data"])
 
-                    message_channel = message_byte_data["channel"]
+                    message_channel = orjson.loads(message_byte_data["channel"])
 
                     if ticker_channel in message_channel:
 
