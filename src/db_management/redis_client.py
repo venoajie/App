@@ -149,11 +149,9 @@ async def querying_data(
 
     try:
 
-        return (
-            await client_redis.hget(
-                keys,
-                channel,
-            )
+        return await client_redis.hget(
+            keys,
+            channel,
         )
 
     except Exception as error:

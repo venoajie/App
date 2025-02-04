@@ -79,7 +79,10 @@ def remove_redundant_elements(data: list) -> list:
     return result
 
 
-def find_non_repeatable_elements(data1: list, data2: list) -> list:
+def find_non_repeatable_elements(
+    data1: list,
+    data2: list,
+) -> list:
     """
 
     Comparing two lists and picking non-repeatable items between them
@@ -102,7 +105,10 @@ def find_non_repeatable_elements(data1: list, data2: list) -> list:
     return [i for i in data1 if i not in data2]
 
 
-def get_unique_elements(data1: list, data2: list) -> list:
+def get_unique_elements(
+    data1: list,
+    data2: list,
+) -> list:
     """
 
     Comparing two lists and picking only unique items between them
@@ -125,13 +131,19 @@ def get_unique_elements(data1: list, data2: list) -> list:
     return list(set(data1).difference(data2))
 
 
-def remove_dict_elements(original: dict, item_to_remove: str) -> str:
+def remove_dict_elements(
+    original: dict,
+    item_to_remove: str,
+) -> str:
     """ """
 
     return {i: original[i] for i in original if i != item_to_remove}
 
 
-def remove_list_elements(original: dict, item_to_remove: str) -> str:
+def remove_list_elements(
+    original: dict,
+    item_to_remove: str,
+) -> str:
     """
     https://stackoverflow.com/questions/13254241/removing-key-values-pairs-from-a-list-of-dictionaries
     """
@@ -203,7 +215,9 @@ def parsing_sqlite_json_output(json_load: list) -> int:
 
 
 def get_strings_before_character(
-    label: str, character: str = "-", character_place: int = [0, 2]
+    label: str,
+    character: str = "-",
+    character_place: int = [0, 2],
 ) -> str:
     """
 
@@ -246,7 +260,11 @@ def extract_integers_from_text(words: list) -> int:
     return int("".join([o for o in words_to_str if o.isdigit()]))
 
 
-def extract_integers_aggregation_from_text(identifier, aggregator, words: list) -> int:
+def extract_integers_aggregation_from_text(
+    identifier,
+    aggregator,
+    words: list,
+) -> int:
     """
     identifier: id: trade/order/etc
     aggregator: min, max, len
@@ -255,7 +273,10 @@ def extract_integers_aggregation_from_text(identifier, aggregator, words: list) 
     return aggregator([extract_integers_from_text(o[f"{identifier}"]) for o in words])
 
 
-def parsing_label(label: str, integer: int = None) -> dict:
+def parsing_label(
+    label: str,
+    integer: int = None,
+) -> dict:
     """
 
     Args:
@@ -398,7 +419,9 @@ def filtering_list_with_missing_key(
 
 
 def sorting_list(
-    listing: list, item_reference: str = "price", is_reversed: bool = True
+    listing: list,
+    item_reference: str = "price",
+    is_reversed: bool = True,
 ) -> list:
     """
     https://sparkbyexamples.com/python/sort-list-of-dictionaries-by-value-in-python/

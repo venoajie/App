@@ -3,12 +3,16 @@
 import asyncio
 import orjson
 from loguru import logger as log
+
 # user defined formula
 from db_management.redis_client import saving_and_publishing_result, publishing_result
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_ohlc_data
-from utilities.string_modification import remove_list_elements, remove_redundant_elements
-from utilities.system_tools import  parse_error_message
+from utilities.string_modification import (
+    remove_list_elements,
+    remove_redundant_elements,
+)
+from utilities.system_tools import parse_error_message
 
 """
 
@@ -203,10 +207,10 @@ async def get_market_condition(
 ) -> dict:
     """ """
     try:
-        
+
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
-        
+
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
 
@@ -221,31 +225,33 @@ async def get_market_condition(
         market_condition_keys: str = redis_keys["market_condition"]
 
         # prepare channels placeholders
-        channels = [
-            chart_update_channel,
-            market_analytics_channel
-            ]
+        channels = [chart_update_channel, market_analytics_channel]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
-
 
         resolutions = [60, 15, 5]
         qty_candles = 5
         dim_sequence = 3
 
         candles_data = combining_candles_data(
-            np, currencies, qty_candles, resolutions, dim_sequence
+            np,
+            currencies,
+            qty_candles,
+            resolutions,
+            dim_sequence,
         )
 
-        log.info (candles_data)
-        
-        candles_instrument_name = remove_redundant_elements([o["instrument_name"] for o in candles_data])
-        
+        log.info(candles_data)
+
+        candles_instrument_name = remove_redundant_elements(
+            [o["instrument_name"] for o in candles_data]
+        )
+
         while True:
 
             try:
-                
+
                 message_byte = await pubsub.get_message()
 
                 if message_byte and message_byte["type"] == "message":
@@ -253,16 +259,18 @@ async def get_market_condition(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte_data["channel"]
-                    
+
                     if chart_update_channel in message_channel:
 
                         data = message_byte_data["data"]
-                        
+
                         result = []
                         for instrument_name in candles_instrument_name:
-                                
+
                             candles_data_instrument = [
-                                o for o in candles_data if instrument_name in o["instrument_name"]
+                                o
+                                for o in candles_data
+                                if instrument_name in o["instrument_name"]
                             ]
                             # log.warning (candles_data_instrument)
 
@@ -271,29 +279,40 @@ async def get_market_condition(
                                 for o in candles_data_instrument
                                 if o["resolution"] == 60
                             ]
-                            candle_60_type = np.sum([o["candle_type"] for o in candle_60])
-                            candle_60_is_long = np.sum([o["is_long_body"] for o in candle_60])
+                            
+                            candle_60_type = np.sum(
+                                [o["candle_type"] for o in candle_60]
+                            )
+                            
+                            candle_60_is_long = np.sum(
+                                [o["is_long_body"] for o in candle_60]
+                            )
 
                             candle_5 = [
                                 o["candles_analysis"]
                                 for o in candles_data_instrument
                                 if o["resolution"] == 5
                             ]
+
                             candle_5_type = np.sum([o["candle_type"] for o in candle_5])
-                            candle_5_is_long = np.sum([o["is_long_body"] for o in candle_5])
+
+                            candle_5_is_long = np.sum(
+                                [o["is_long_body"] for o in candle_5]
+                            )
 
                             candle_15 = [
                                 o["candles_analysis"]
                                 for o in candles_data_instrument
                                 if o["resolution"] == 15
                             ]
-                            candle_15_type = np.sum([o["candle_type"] for o in candle_15])
-                            candle_15_is_long = np.sum([o["is_long_body"] for o in candle_15])
 
-                            # log.warning (candle_60)
-                            # log.debug (candle_5)
-                            # log.debug (candle_60_type)
-                            # log.warning (candle_15)
+                            candle_15_type = np.sum(
+                                [o["candle_type"] for o in candle_15]
+                            )
+
+                            candle_15_is_long = np.sum(
+                                [o["is_long_body"] for o in candle_15]
+                            )
 
                             candle_60_long_body_more_than_2 = candle_60_is_long >= 2
                             candle_5_long_body_any = candle_5_is_long > 0
@@ -312,19 +331,33 @@ async def get_market_condition(
                                 weak_bearish = True if candle_5_type < 0 else False
 
                             if candle_60_long_body_any and candle_15_long_body_any:
-                                bullish = True if weak_bullish and candle_15_type > 0 else False
-                                bearish = True if weak_bearish and candle_15_type < 0 else False
+                                bullish = (
+                                    True
+                                    if weak_bullish and candle_15_type > 0
+                                    else False
+                                )
+                                bearish = (
+                                    True
+                                    if weak_bearish and candle_15_type < 0
+                                    else False
+                                )
 
                             if candle_60_long_body_more_than_2:
                                 strong_bullish = (
-                                    True if bullish and candle_60_long_body_more_than_2 else False
+                                    True
+                                    if bullish and candle_60_long_body_more_than_2
+                                    else False
                                 )
                                 strong_bearish = (
-                                    True if bearish and candle_60_long_body_more_than_2 else False
+                                    True
+                                    if bearish and candle_60_long_body_more_than_2
+                                    else False
                                 )
 
-                            neutral = True if not weak_bearish and not weak_bullish else False
-                            
+                            neutral = (
+                                True if not weak_bearish and not weak_bullish else False
+                            )
+
                             pub_message = dict(
                                 instrument_name=instrument_name,
                                 strong_bullish=strong_bullish,
@@ -335,22 +368,21 @@ async def get_market_condition(
                                 bearish=bearish,
                                 strong_bearish=strong_bearish,
                             )
-                    
+
                             result.append(pub_message)
-                            
-                        log.debug (result)
-                        result.append(channel=market_analytics_channel)
-                        log.error (result)
+
+                        log.debug(result)
+                        result_all= (dict(channel=market_analytics_channel,result=result))
                         await saving_and_publishing_result(
                             client_redis,
                             market_analytics_channel,
                             market_condition_keys,
-                            result,
-                            result,
+                            result_all,
+                            result_all,
                         )
 
-                        return 
-                        
+                        return
+
             except Exception as error:
 
                 parse_error_message(error)
@@ -368,11 +400,7 @@ async def get_market_condition(
     except Exception as error:
 
         parse_error_message(error)
-        
-        asyncio.run(
-            telegram_bot_sendtext (
-            f"get_market_condition - {error}",
-            "general_error"
-            )
-            )
 
+        asyncio.run(
+            telegram_bot_sendtext(f"get_market_condition - {error}", "general_error")
+        )
