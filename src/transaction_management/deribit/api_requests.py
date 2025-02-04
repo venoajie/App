@@ -185,7 +185,11 @@ async def get_ohlc_data(
         ohlc_request = await client.get(
             end_point, 
             follow_redirects=True,
-            ).json()
+            )
+        
+        log.info (f"ohlc_request {ohlc_request}")
+
+        log.info (transform_nested_dict_to_list_ohlc(ohlc_request["result"]))
 
     return transform_nested_dict_to_list_ohlc(ohlc_request["result"])
 
