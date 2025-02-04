@@ -227,7 +227,6 @@ async def get_market_condition(
         # prepare channels placeholders
         channels = [
             chart_update_channel, 
-            market_analytics_channel,
             ]
 
         # subscribe to channels
@@ -245,8 +244,6 @@ async def get_market_condition(
             dim_sequence,
         )
 
-        log.info(candles_data)
-
         candles_instrument_name = remove_redundant_elements(
             [o["instrument_name"] for o in candles_data]
         )
@@ -263,6 +260,11 @@ async def get_market_condition(
 
                     message_channel = message_byte["channel"]
 
+                    log.error(f" message_byte_data {message_byte_data}")
+                    message_channel = message_byte["channel"]
+
+                    log.error(f" chart_update_channel in message_channel {message_channel} {chart_update_channel in message_channel}")
+                    
                     if chart_update_channel  in message_channel:
 
                         data = message_byte_data["data"]
