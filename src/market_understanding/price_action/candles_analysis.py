@@ -1,8 +1,13 @@
 # # -*- coding: utf-8 -*-
 
+import asyncio
+import orjson
+
 # user defined formula
 from transaction_management.deribit.api_requests import get_ohlc_data
 from utilities.string_modification import remove_list_elements
+from utilities.system_tools import  parse_error_message
+from messaging.telegram_bot import telegram_bot_sendtext
 
 """
 
@@ -190,86 +195,159 @@ def combining_candles_data(
     return result
 
 
-def get_market_condition(
+async def get_market_condition(
+    client_redis: object,
+    config_app: list,
     np: object,
     candles_data: list,
     currency_upper: str,
 ) -> dict:
     """ """
     try:
-        candles_data_instrument = [
-            o for o in candles_data if currency_upper in o["instrument_name"]
-        ]
-        # log.warning (candles_data_instrument)
+        
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
+        
+        # get tradable strategies
+        tradable_config_app = config_app["tradable"]
 
-        candle_60 = [
-            o["candles_analysis"]
-            for o in candles_data_instrument
-            if o["resolution"] == 60
-        ]
-        candle_60_type = np.sum([o["candle_type"] for o in candle_60])
-        candle_60_is_long = np.sum([o["is_long_body"] for o in candle_60])
+        # get TRADABLE currencies
+        currencies = [o["spot"] for o in tradable_config_app][0]
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+        ticker_channel: str = redis_channels["ticker_update"]
 
-        candle_5 = [
-            o["candles_analysis"]
-            for o in candles_data_instrument
-            if o["resolution"] == 5
-        ]
-        candle_5_type = np.sum([o["candle_type"] for o in candle_5])
-        candle_5_is_long = np.sum([o["is_long_body"] for o in candle_5])
+        redis_keys: dict = config_app["redis_keys"][0]
+        ticker_keys: str = redis_keys["ticker"]
 
-        candle_15 = [
-            o["candles_analysis"]
-            for o in candles_data_instrument
-            if o["resolution"] == 15
-        ]
-        candle_15_type = np.sum([o["candle_type"] for o in candle_15])
-        candle_15_is_long = np.sum([o["is_long_body"] for o in candle_15])
+        # prepare channels placeholders
+        channels = [ticker_channel]
 
-        # log.warning (candle_60)
-        # log.debug (candle_5)
-        # log.debug (candle_60_type)
-        # log.warning (candle_15)
+        # subscribe to channels
+        [await pubsub.subscribe(o) for o in channels]
 
-        candle_60_long_body_more_than_2 = candle_60_is_long >= 2
-        candle_5_long_body_any = candle_5_is_long > 0
-        candle_15_long_body_any = candle_15_is_long > 0
-        candle_60_long_body_any = candle_60_is_long > 0
 
-        candle_60_no_long = candle_60_is_long == 0
+        resolutions = [60, 15, 5]
+        qty_candles = 5
+        dim_sequence = 3
 
-        neutral = True
-        weak_bullish, weak_bearish = False, False
-        bullish, bearish = False, False
-        strong_bullish, strong_bearish = False, False
-
-        if candle_5_long_body_any:
-            weak_bullish = True if candle_5_type > 0 else False
-            weak_bearish = True if candle_5_type < 0 else False
-
-        if candle_60_long_body_any and candle_15_long_body_any:
-            bullish = True if weak_bullish and candle_15_type > 0 else False
-            bearish = True if weak_bearish and candle_15_type < 0 else False
-
-        if candle_60_long_body_more_than_2:
-            strong_bullish = (
-                True if bullish and candle_60_long_body_more_than_2 else False
-            )
-            strong_bearish = (
-                True if bearish and candle_60_long_body_more_than_2 else False
-            )
-
-        neutral = True if not weak_bearish and not weak_bullish else False
-
-        return dict(
-            strong_bullish=strong_bullish,
-            bullish=bullish,
-            weak_bullish=weak_bullish,
-            neutral=neutral,
-            weak_bearish=weak_bearish,
-            bearish=bearish,
-            strong_bearish=strong_bearish,
+        candles_data = combining_candles_data(
+            np, currencies, qty_candles, resolutions, dim_sequence
         )
+        
+        while True:
 
-    except:
-        pass
+            try:
+
+
+                message_byte = await pubsub.get_message()
+
+                if message_byte and message_byte["type"] == "message":
+
+                    message_byte_data = orjson.loads(message_byte["data"])
+
+                    message_channel = message_byte_data["channel"]
+
+                    if ticker_channel in message_channel:
+
+                        data = message_byte_data["data"]
+                            
+                        candles_data_instrument = [
+                            o for o in candles_data if currency_upper in o["instrument_name"]
+                        ]
+                        # log.warning (candles_data_instrument)
+
+                        candle_60 = [
+                            o["candles_analysis"]
+                            for o in candles_data_instrument
+                            if o["resolution"] == 60
+                        ]
+                        candle_60_type = np.sum([o["candle_type"] for o in candle_60])
+                        candle_60_is_long = np.sum([o["is_long_body"] for o in candle_60])
+
+                        candle_5 = [
+                            o["candles_analysis"]
+                            for o in candles_data_instrument
+                            if o["resolution"] == 5
+                        ]
+                        candle_5_type = np.sum([o["candle_type"] for o in candle_5])
+                        candle_5_is_long = np.sum([o["is_long_body"] for o in candle_5])
+
+                        candle_15 = [
+                            o["candles_analysis"]
+                            for o in candles_data_instrument
+                            if o["resolution"] == 15
+                        ]
+                        candle_15_type = np.sum([o["candle_type"] for o in candle_15])
+                        candle_15_is_long = np.sum([o["is_long_body"] for o in candle_15])
+
+                        # log.warning (candle_60)
+                        # log.debug (candle_5)
+                        # log.debug (candle_60_type)
+                        # log.warning (candle_15)
+
+                        candle_60_long_body_more_than_2 = candle_60_is_long >= 2
+                        candle_5_long_body_any = candle_5_is_long > 0
+                        candle_15_long_body_any = candle_15_is_long > 0
+                        candle_60_long_body_any = candle_60_is_long > 0
+
+                        candle_60_no_long = candle_60_is_long == 0
+
+                        neutral = True
+                        weak_bullish, weak_bearish = False, False
+                        bullish, bearish = False, False
+                        strong_bullish, strong_bearish = False, False
+
+                        if candle_5_long_body_any:
+                            weak_bullish = True if candle_5_type > 0 else False
+                            weak_bearish = True if candle_5_type < 0 else False
+
+                        if candle_60_long_body_any and candle_15_long_body_any:
+                            bullish = True if weak_bullish and candle_15_type > 0 else False
+                            bearish = True if weak_bearish and candle_15_type < 0 else False
+
+                        if candle_60_long_body_more_than_2:
+                            strong_bullish = (
+                                True if bullish and candle_60_long_body_more_than_2 else False
+                            )
+                            strong_bearish = (
+                                True if bearish and candle_60_long_body_more_than_2 else False
+                            )
+
+                        neutral = True if not weak_bearish and not weak_bullish else False
+
+                        return dict(
+                            strong_bullish=strong_bullish,
+                            bullish=bullish,
+                            weak_bullish=weak_bullish,
+                            neutral=neutral,
+                            weak_bearish=weak_bearish,
+                            bearish=bearish,
+                            strong_bearish=strong_bearish,
+                        )
+                        
+            except Exception as error:
+
+                parse_error_message(error)
+
+                await telegram_bot_sendtext(
+                    f"get_market_condition - {error}",
+                    "general_error",
+                )
+
+                continue
+
+            finally:
+                await asyncio.sleep(0.1)
+
+    except Exception as error:
+
+        parse_error_message(error)
+        
+        asyncio.run(
+            telegram_bot_sendtext (
+            f"get_market_condition - {error}",
+            "general_error"
+            )
+            )
+
