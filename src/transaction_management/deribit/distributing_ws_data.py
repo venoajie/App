@@ -125,6 +125,7 @@ async def caching_distributing_data(
 
                     await saving_and_publishing_result(
                         pipe,
+                        receive_order_channel,
                         order_keys,
                         cached_orders,
                         pub_message,
@@ -162,20 +163,22 @@ async def caching_distributing_data(
                     )
 
                 if "chart.trades" in message_channel:
-
+                    
                     pub_message = dict(
                         data=data,
                         instrument_name=instrument_name_future,
                     )
-
+                    
                     await publishing_result(
                         pipe,
+                        chart_update_channel,
                         pub_message,
                     )
 
                     log.debug(message_params)
 
                     chart_trades_buffer.append(data)
+
 
                     if len(chart_trades_buffer) > 3:
 
@@ -206,3 +209,4 @@ async def caching_distributing_data(
             f"saving result {error}",
             "general_error",
         )
+
