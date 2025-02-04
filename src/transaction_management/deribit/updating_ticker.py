@@ -130,6 +130,7 @@ async def update_cached_ticker(
                     log.debug (message_byte)
 
                     message_byte_data = (message_byte["data"])
+                    log.warning (message_byte_data)
 
                     message_channel = message_byte_data["channel"]
 
