@@ -272,7 +272,7 @@ async def get_market_condition(
                         result = []
                         for instrument_name in candles_instrument_name:
                             
-                            if instrument_name in data["instrument_name"]:
+                            if instrument_name in message_byte_data["instrument_name"]:
 
                                 candles_data_instrument = [
                                     o
