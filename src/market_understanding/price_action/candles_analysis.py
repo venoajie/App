@@ -345,7 +345,7 @@ async def get_market_condition(
                             market_analytics_channel,
                             market_condition_keys,
                             result,
-                            pub_message,
+                            result,
                         )
 
                         return 
