@@ -88,8 +88,6 @@ async def main():
 
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
         
-        r = redis.Redis(decode_responses=True)
-                
         pool = redis.ConnectionPool.from_url(
             "redis://localhost", 
             port=6379, 
