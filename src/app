@@ -12,7 +12,7 @@ import sys
 import tomli
 import uvloop
 from loguru import logger as log
-
+import numpy as np
 import orjson
 import redis.asyncio as redis
 #from redistimeseries.client import Client
@@ -28,6 +28,7 @@ from streaming_data.data_producer import StreamingAccountData
 from transaction_management.deribit.api_requests import SendApiRequest
 from transaction_management.deribit.avoiding_double_ids import \
     avoiding_double_ids
+from market_understanding.price_action.candles_analysis import get_market_condition
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
 from transaction_management.deribit.capturing_user_changes import \
@@ -183,6 +184,10 @@ async def main():
                 client_redis,
                 config_app),
             
+            #get_market_condition(
+            #    client_redis,
+            #    config_app,
+            #    np),
             
                         )  
 

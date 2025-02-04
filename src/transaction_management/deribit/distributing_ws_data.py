@@ -6,16 +6,11 @@ import asyncio
 
 import uvloop
 
-import numpy as np
 from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from db_management.redis_client import saving_and_publishing_result, publishing_result
-from market_understanding.price_action.candles_analysis import (
-    combining_candles_data,
-    get_market_condition,
-)
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.managing_deribit import (
     currency_inline_with_database_address,
@@ -75,27 +70,16 @@ async def caching_distributing_data(
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         chart_update_channel: str = redis_channels["chart_update"]
-        market_analytics_channel: str = redis_channels["market_analytics_update"]
         receive_order_channel: str = redis_channels["receive_order"]
         ticker_channel: str = redis_channels["ticker_update"]
 
         redis_keys: dict = config_app["redis_keys"][0]
-        market_condition_keys: str = redis_keys["market_condition"]
         order_keys: str = redis_keys["orders"]
         chart_trades_buffer: list = []
 
         cached_orders: list = await combining_order_data(private_data, currencies)
 
         server_time = 0
-
-        resolutions = [60, 15, 5]
-        qty_candles = 5
-        dim_sequence = 3
-
-        combining_candles = combining_candles_data(
-            np, currencies, qty_candles, resolutions, dim_sequence
-        )
-        is_chart_trade = False
 
         while True:
 
@@ -184,12 +168,6 @@ async def caching_distributing_data(
 
                     log.debug(message_params)
 
-                    market_condition = get_market_condition(
-                        np,
-                        combining_candles,
-                        currency_upper,
-                    )
-
                     chart_trades_buffer.append(data)
                     log.error(f" chart_trades_buffer {chart_trades_buffer}")
 
@@ -212,49 +190,6 @@ async def caching_distributing_data(
 
                             chart_trades_buffer = []
 
-                    is_chart_trade = await chart_trade_in_msg(
-                        data,
-                        combining_candles,
-                    )
-
-                    log.warning(f" combining_candles {combining_candles}")
-                    log.debug(f" is_chart_trade {is_chart_trade}")
-
-                    if is_chart_trade:
-
-                        await telegram_bot_sendtext(
-                            f"is_chart_trade {is_chart_trade}",
-                            "general_error",
-                        )
-                        log.critical(f" is_chart_trade {is_chart_trade}")
-
-                        log.info(combining_candles)
-
-                        pub_message = dict(
-                            channel=market_analytics_channel,
-                            is_chart_trade=is_chart_trade,
-                        )
-
-                        await saving_and_publishing_result(
-                            pipe,
-                            market_analytics_channel,
-                            market_condition_keys,
-                            market_condition,
-                            pub_message,
-                        )
-
-                        pub_message = dict(
-                            channel=chart_update_channel,
-                            is_chart_trade=is_chart_trade,
-                        )
-                        await saving_and_publishing_result(
-                            pipe,
-                            chart_update_channel,
-                            None,
-                            None,
-                            pub_message,
-                        )
-
                 await pipe.execute()
 
     except Exception as error:
@@ -266,31 +201,3 @@ async def caching_distributing_data(
             "general_error",
         )
 
-
-async def chart_trade_in_msg(
-    data_orders: list,
-    candles_data: list,
-):
-    """ """
-
-    chart_trade_in_msg = False
-
-    tick_from_exchange = data_orders["tick"]
-
-    log.debug(f" tick_from_exchange {tick_from_exchange}")
-
-    tick_from_cache = [o["max_tick"] for o in candles_data if o["resolution"] == 5]
-    log.debug(f" tick_from_cache {tick_from_cache}")
-
-    if tick_from_cache:
-        max_tick_from_cache = max(tick_from_cache)
-
-        log.critical(
-            f" max_tick_from_cache {max_tick_from_cache} {tick_from_exchange <= max_tick_from_cache}"
-        )
-
-        if tick_from_exchange <= max_tick_from_cache:
-
-            chart_trade_in_msg = True
-
-    return chart_trade_in_msg

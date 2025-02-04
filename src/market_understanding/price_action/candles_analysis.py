@@ -4,10 +4,11 @@ import asyncio
 import orjson
 
 # user defined formula
+from db_management.redis_client import saving_and_publishing_result, publishing_result
+from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_ohlc_data
 from utilities.string_modification import remove_list_elements
 from utilities.system_tools import  parse_error_message
-from messaging.telegram_bot import telegram_bot_sendtext
 
 """
 
@@ -199,8 +200,6 @@ async def get_market_condition(
     client_redis: object,
     config_app: list,
     np: object,
-    candles_data: list,
-    currency_upper: str,
 ) -> dict:
     """ """
     try:
@@ -215,13 +214,17 @@ async def get_market_condition(
         currencies = [o["spot"] for o in tradable_config_app][0]
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        ticker_channel: str = redis_channels["ticker_update"]
+        chart_update_channel: str = redis_channels["chart_update"]
+        market_analytics_channel: str = redis_channels["market_analytics_update"]
 
         redis_keys: dict = config_app["redis_keys"][0]
-        ticker_keys: str = redis_keys["ticker"]
+        market_condition_keys: str = redis_keys["market_condition"]
 
         # prepare channels placeholders
-        channels = [ticker_channel]
+        channels = [
+            chart_update_channel,
+            market_analytics_channel
+            ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -238,8 +241,7 @@ async def get_market_condition(
         while True:
 
             try:
-
-
+                
                 message_byte = await pubsub.get_message()
 
                 if message_byte and message_byte["type"] == "message":
@@ -248,7 +250,7 @@ async def get_market_condition(
 
                     message_channel = message_byte_data["channel"]
 
-                    if ticker_channel in message_channel:
+                    if chart_update_channel in message_channel:
 
                         data = message_byte_data["data"]
                             
@@ -315,8 +317,9 @@ async def get_market_condition(
                             )
 
                         neutral = True if not weak_bearish and not weak_bullish else False
-
-                        return dict(
+                        
+                        pub_message = dict(
+                            currency=currency_upper,
                             strong_bullish=strong_bullish,
                             bullish=bullish,
                             weak_bullish=weak_bullish,
@@ -325,6 +328,18 @@ async def get_market_condition(
                             bearish=bearish,
                             strong_bearish=strong_bearish,
                         )
+                        
+                        
+
+                        await saving_and_publishing_result(
+                            client_redis,
+                            market_analytics_channel,
+                            market_condition_keys,
+                            pub_message,
+                            pub_message,
+                        )
+
+                        return 
                         
             except Exception as error:
 
