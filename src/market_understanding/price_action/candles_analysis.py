@@ -197,7 +197,7 @@ def combining_candles_data(
         
         instrument_name = [f"{currency}-PERPETUAL"]
         
-        candles_per_instrument_name = [o for o in candles_data if instrument_name in o["instrument_name"]]
+        candles_per_instrument_name = [o for o in candles_data if instrument_name in o ]
 
         for resolution in resolutions:
 
