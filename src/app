@@ -94,12 +94,12 @@ async def main():
             "redis://localhost", 
             port=6379, 
             db=0, 
-            protocol=3,
-            charset="utf-8", 
+            protocol=3, 
             decode_responses=True
             )
         
-        client_redis = redis.Redis.from_pool(pool)
+        client_redis = redis.Redis.from_pool(pool,
+            charset="utf-8")
                 
         # parsing config file
         config_app = get_config(file_toml)
