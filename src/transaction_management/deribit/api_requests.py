@@ -180,6 +180,8 @@ def get_ohlc_data(
         start_timestamp,
         now_unix,
     )
+    
+    log.error (end_point)
 
     with httpx.Client() as client:
         ohlc_request = client.get(end_point, follow_redirects=True).json()["result"]

@@ -237,6 +237,7 @@ async def get_market_condition(
         candles_data = combining_candles_data(
             np, currencies, qty_candles, resolutions, dim_sequence
         )
+
         log.info (candles_data)
         
         candles_instrument_name = remove_redundant_elements([o["instrument_name"] for o in candles_data])
