@@ -339,8 +339,8 @@ async def get_market_condition(
                             result.append(pub_message)
                             
                         log.debug (result)
-                        result.append(dict(
-                                channel=market_analytics_channel))
+                        result.append(channel=market_analytics_channel)
+                        log.error (result)
                         await saving_and_publishing_result(
                             client_redis,
                             market_analytics_channel,
