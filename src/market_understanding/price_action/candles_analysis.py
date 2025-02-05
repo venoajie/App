@@ -205,7 +205,7 @@ def combining_candles_data(
 
         for resolution in resolutions:
             
-            candles_per_resolution = [o for o in candles_per_instrument_name if o["resolution"] == resolution ]
+            candles_per_resolution = [o["ohlc"] for o in candles_per_instrument_name if o["resolution"] == resolution ]
             
             log.debug(f" candles_per_resolution {candles_per_resolution}")
 
@@ -213,6 +213,7 @@ def combining_candles_data(
                 candles_per_resolution,
                 "tick",
                 )
+            log.debug(f" ohlc_without_ticks {ohlc_without_ticks}")
 
             np_users_data = np.array(ohlc_without_ticks)
 
