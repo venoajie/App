@@ -337,27 +337,27 @@ async def get_market_condition(
                                 if resolution == o["resolution"]
                             ]
 
-                            log.warning(
-                                f" candles_data_resolution {candles_data_resolution}"
-                            )
+                            #log.warning(
+                            #    f" candles_data_resolution {candles_data_resolution}"
+                            #)
                             ohlc_resolution = [
                                 o for o in candles_data_resolution[0]["ohlc"]
                             ]
-                            log.warning(f" ohlc_resolution {ohlc_resolution}")
+                            #log.warning(f" ohlc_resolution {ohlc_resolution}")
 
                             if ohlc_resolution:
                                 ohlc_tick_max = max(
                                     [o["tick"] for o in ohlc_resolution]
                                 )
-                                log.info(f" ohlc_tick_max {ohlc_tick_max}")
+                                #log.info(f" ohlc_tick_max {ohlc_tick_max}")
                                 ohlc_tick_max_elements = [
                                     o
                                     for o in ohlc_resolution
                                     if o["tick"] == ohlc_tick_max
                                 ][0]
-                                log.info(
-                                    f" ohlc_tick_max_elements {ohlc_tick_max_elements}"
-                                )
+                                #log.info(
+                                #    f" ohlc_tick_max_elements {ohlc_tick_max_elements}"
+                                #)
                                 ohlc_high = ohlc_tick_max_elements["high"]
                                 ohlc_low = ohlc_tick_max_elements["low"]
                                 log.info(
