@@ -346,11 +346,13 @@ async def get_market_condition(
                             # log.warning(f" ohlc_resolution {ohlc_resolution}")
 
                             if ohlc_resolution:
-                                log.critical(
-                                        f" resolution {resolution} {(tick_from_exchange - ohlc_tick_max)/resolution}")
+                                
                                 ohlc_tick_max = max(
                                     [o["tick"] for o in ohlc_resolution]
                                 )
+
+                                log.critical(
+                                        f" resolution {resolution} {(tick_from_exchange - ohlc_tick_max)/resolution}")
 
                                 log.info(f" ohlc_tick_max {ohlc_tick_max}")
 
