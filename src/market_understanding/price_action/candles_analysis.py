@@ -172,7 +172,7 @@ def candles_analysis(
 
     return candles_analysis_result
 
-        
+
 async def get_candles_data(
     currencies: list,
     qty_candles: int,
@@ -191,7 +191,7 @@ async def get_candles_data(
                 qty_candles,
                 resolution,
             )
-            
+
             result.append(
                 dict(
                     instrument_name=instrument_name,
@@ -337,6 +337,8 @@ async def get_market_condition(
                                 if resolution == o["resolution"]
                             ]
 
+                            log.critical(f" resolution {resolution} ")
+
                             # log.warning(
                             #    f" candles_data_resolution {candles_data_resolution}"
                             # )
@@ -346,69 +348,91 @@ async def get_market_condition(
                             # log.warning(f" ohlc_resolution {ohlc_resolution}")
 
                             if ohlc_resolution:
-                                
+
                                 ohlc_tick_max = max(
                                     [o["tick"] for o in ohlc_resolution]
                                 )
-                                
-                                tick_delta = (tick_from_exchange - ohlc_tick_max)/60000
-                                
-                                log.warning(f" ohlc_resolution before {ohlc_resolution}")
-                                        
+
+                                tick_delta = (
+                                    tick_from_exchange - ohlc_tick_max
+                                ) / 60000
+
+                                log.warning(
+                                    f" ohlc_resolution before {ohlc_resolution}"
+                                )
+
                                 # update all under resolution
                                 if tick_delta > resolution:
 
                                     log.critical(
                                         f" tick_delta > resolution {tick_delta > resolution}"
                                     )
-                                    
+
                                     cached_candles_data_is_updated = True
-                                    
+
                                     updated_data = await get_ohlc_data(
                                         instrument_name,
                                         qty_candles,
                                         resolution,
-                                        )
-                                    
-                                    result =  [o for o in [i for i in [y for y in candles_data_instrument
-                                if resolution == y["resolution"]] if instrument_name in i["instrument_name"]
-                        ][0]["ohlc"]][0]
-                                    
-                                    log.debug (f"result {result}")
-                                    log.warning (f"updated_data {updated_data}")
-                                    
-                                    
-                                    [o for o in [i for i in [y for y in candles_data_instrument
-                                if resolution == y["resolution"]] if instrument_name in i["instrument_name"]
-                        ][0]["ohlc"]][0] = updated_data
-                                    
-                                    log.warning(f" ohlc_resolution after {ohlc_resolution}")
-                                        
-                                
+                                    )
+
+                                    result = [
+                                        o
+                                        for o in [
+                                            i
+                                            for i in [
+                                                y
+                                                for y in candles_data_instrument
+                                                if resolution == y["resolution"]
+                                            ]
+                                            if instrument_name in i["instrument_name"]
+                                        ][0]["ohlc"]
+                                    ][0]
+
+                                    log.debug(f"result {result}")
+                                    log.warning(f"updated_data {updated_data}")
+
+                                    [
+                                        o
+                                        for o in [
+                                            i
+                                            for i in [
+                                                y
+                                                for y in candles_data_instrument
+                                                if resolution == y["resolution"]
+                                            ]
+                                            if instrument_name in i["instrument_name"]
+                                        ][0]["ohlc"]
+                                    ][0] = updated_data
+
+                                    log.warning(
+                                        f" ohlc_resolution after {ohlc_resolution}"
+                                    )
+
                                 # partial update
                                 else:
-                                    
+
                                     ohlc_tick_max_elements = [
                                         o
                                         for o in ohlc_resolution
                                         if o["tick"] == ohlc_tick_max
                                     ][0]
-                                    
+
                                     ohlc_high = ohlc_tick_max_elements["high"]
                                     ohlc_low = ohlc_tick_max_elements["low"]
 
                                     log.info(
-                                        f" resolution {resolution} ohlc_high {ohlc_high} high_from_exchange {high_from_exchange} ohlc_low {ohlc_low} low_from_exchange {low_from_exchange}"
+                                        f" ohlc_high {ohlc_high} high_from_exchange {high_from_exchange} ohlc_low {ohlc_low} low_from_exchange {low_from_exchange}"
                                     )
 
                                     if high_from_exchange > ohlc_high:
-                                        
+
                                         cached_candles_data_is_updated = True
 
                                         log.critical(
                                             f" high_from_exchange > ohlc_high {high_from_exchange > ohlc_high}"
                                         )
-                                        
+
                                         updating_cached_values(
                                             cached_candles_data,
                                             instrument_name,
@@ -416,18 +440,20 @@ async def get_market_condition(
                                             ohlc_tick_max,
                                             "high",
                                             high_from_exchange,
-                                            )
-                                        
-                                        log.warning(f" ohlc_resolution after {ohlc_resolution}")
-                                        
+                                        )
+
+                                        log.warning(
+                                            f" ohlc_resolution after {ohlc_resolution}"
+                                        )
+
                                     if low_from_exchange < ohlc_low:
-                                        
+
                                         cached_candles_data_is_updated = True
-                                        
+
                                         log.critical(
                                             f" low_from_exchange < ohlc_low {low_from_exchange < ohlc_low}"
                                         )
-                                        
+
                                         updating_cached_values(
                                             cached_candles_data,
                                             instrument_name,
@@ -435,10 +461,12 @@ async def get_market_condition(
                                             ohlc_tick_max,
                                             "low",
                                             low_from_exchange,
-                                            )
+                                        )
 
-                                        log.warning(f" ohlc_resolution after {ohlc_resolution}")
-                                        
+                                        log.warning(
+                                            f" ohlc_resolution after {ohlc_resolution}"
+                                        )
+
                         result = []
 
                         if cached_candles_data_is_updated:
@@ -583,7 +611,7 @@ async def get_market_condition(
 
                                     result.append(pub_message)
 
-                                #log.critical(f"result {result}")
+                                # log.critical(f"result {result}")
                                 await saving_and_publishing_result(
                                     client_redis,
                                     market_analytics_channel,
@@ -613,6 +641,8 @@ async def get_market_condition(
         asyncio.run(
             telegram_bot_sendtext(f"get_market_condition - {error}", "general_error")
         )
+
+
 
 
 def updating_cached_values(
