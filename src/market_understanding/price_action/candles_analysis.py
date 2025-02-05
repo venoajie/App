@@ -330,6 +330,19 @@ async def get_market_condition(
                         log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")
 
                         for resolution in resolutions:
+
+                            test = [
+                                o
+                                for o in [
+                                    i
+                                    for i in cached_candles_data
+                                    if instrument_name in i["instrument_name"]
+                                ]
+                                if resolution == o["resolution"]
+                            ]
+                            
+                            log.warning(f" test {test}")
+
                             candles_data_resolution = [
                                 o
                                 for o in candles_data_instrument
@@ -373,19 +386,6 @@ async def get_market_condition(
                                         f" resolution {resolution} ohlc_high {ohlc_high} high_from_exchange {high_from_exchange} ohlc_low {ohlc_low} low_from_exchange {low_from_exchange}"
                                     )
 
-
-
-                                    test = [
-                                        o
-                                        for o in [
-                                            i
-                                            for i in cached_candles_data
-                                            if instrument_name in i["instrument_name"]
-                                        ]
-                                        if resolution == o["resolution"]
-                                    ]
-                                    
-                                    log.warning(f" test {test}")
 
                                     
                                     if high_from_exchange > ohlc_high:
