@@ -350,18 +350,35 @@ async def get_market_condition(
                                 ohlc_tick_max = max(
                                     [o["tick"] for o in ohlc_resolution]
                                 )
-
+                                
+                                tick_delta = (tick_from_exchange - ohlc_tick_max)/60000
                                 log.critical(
-                                        f" resolution {resolution} {(tick_from_exchange - ohlc_tick_max)/60000}")
+                                        f" resolution {resolution} {tick_delta}")
 
                                 log.info(f" ohlc_tick_max {ohlc_tick_max}")
+                                log.info(f" test {[
+                                o for o in [
+                                o
+                                for o in candles_data_instrument
+                                if resolution == o["resolution"]
+                            ][0]["ohlc"]
+                            ]}")
 
-                                # update all
-                                if tick_from_exchange > ohlc_tick_max:
+
+                                # update all under resolution
+                                if tick_delta > resolution:
                                     cached_candles_data_is_updated = True
-
+                                    
+                                    ohlc_resolution = [
+                                o for o in [
+                                o
+                                for o in candles_data_instrument
+                                if resolution == o["resolution"]
+                            ][0]["ohlc"]
+                            ]
+                                
                                 # partial update
-                                if tick_from_exchange == ohlc_tick_max:
+                                else:
                                     
                                     ohlc_tick_max_elements = [
                                         o
