@@ -356,6 +356,13 @@ async def get_market_condition(
                                         f" resolution {resolution} {tick_delta}")
 
                                 log.info(f" ohlc_tick_max {ohlc_tick_max}")
+                                log.info(f" test {[
+                                o for o in [
+                                o
+                                for o in candles_data_instrument
+                                if resolution == o["resolution"]
+                            ][0]["ohlc"]
+                            ]}")
                                 
                                 log.warning(f" ohlc_resolution before {ohlc_resolution}")
                                         
@@ -370,13 +377,12 @@ async def get_market_condition(
                                         )
                                     
                                     [
-                                        o for o in [
-                                            i
+                                o for o in [
+                                i
                                 for i in candles_data_instrument
                                 if resolution == i["resolution"]
-                                ][0]["ohlc"]
-                                        ] = updated_data
-                                    
+                            ][0]["ohlc"]
+                            ] = updated_data
                                     log.warning(f" ohlc_resolution after {ohlc_resolution}")
                                         
                                 
@@ -619,6 +625,23 @@ def updating_cached_values(
     value_to_update: float,
 ):
     """ """
+    
+    log.debug(f" cached update {[
+        y
+        for y in [
+            x
+            for x in [
+                o
+                for o in [
+                    i
+                    for i in cached_candles_data
+                    if instrument_name in i["instrument_name"]
+                ]
+                if resolution == o["resolution"]
+            ][0]["ohlc"]
+        ]
+        if y["tick"] == ohlc_tick_max
+    ][0][(f"{key_to_update}")]} ")
 
     [
         y
