@@ -372,6 +372,11 @@ async def get_market_condition(
                                         
                                 # update all under resolution
                                 if tick_delta > resolution:
+
+                                    log.critical(
+                                        f" tick_delta > resolution {tick_delta > resolution}"
+                                    )
+                                    
                                     cached_candles_data_is_updated = True
                                     
                                     updated_data = await get_ohlc_data(
@@ -389,7 +394,7 @@ async def get_market_condition(
                         ]
                                 if resolution == o["resolution"]
                             ][0]["ohlc"]
-                            ]
+                            ]=updated_data
                                     
                                     log.warning(f" ohlc_resolution after {ohlc_resolution}")
                                         
