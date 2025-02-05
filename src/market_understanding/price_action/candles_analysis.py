@@ -332,7 +332,7 @@ async def get_market_condition(
                                 ]
 
                             log.warning(f" candles_data_resolution {candles_data_resolution}")
-                            ohlc_resolution = [o for o in candles_data_resolution["ohlc"]]
+                            ohlc_resolution = [o for o in candles_data_resolution[0]["ohlc"]]
                             log.warning(f" ohlc_resolution {ohlc_resolution}")
                             
                             if ohlc_resolution:
