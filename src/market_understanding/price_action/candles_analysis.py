@@ -156,6 +156,7 @@ async def get_candles_data(
     """ """
     result = []
     for currency in currencies:
+        
         instrument_name = f"{currency}-PERPETUAL"
 
         for resolution in resolutions:
@@ -198,12 +199,18 @@ def combining_candles_data(
         
         instrument_name = [f"{currency}-PERPETUAL"]
         
-        candles_per_instrument_name = [o for o in candles_data if instrument_name in o ]
+        candles_per_instrument_name = [o for o in candles_data if o["instrument_name"] == instrument_name ]
+        
+        log.debug(f" candles_per_instrument_name {candles_per_instrument_name}")
 
         for resolution in resolutions:
+            
+            candles_per_resolution = [o for o in candles_per_instrument_name if o["resolution"] == resolution ]
+            
+            log.debug(f" candles_per_resolution {candles_per_resolution}")
 
             ohlc_without_ticks = remove_list_elements(
-                candles_per_instrument_name,
+                candles_per_resolution,
                 "tick",
                 )
 
@@ -217,7 +224,7 @@ def combining_candles_data(
 
             candles_analysis_result = analysis_based_on_length(np, three_dim_sequence)
 
-            max_tick = max([o["tick"] for o in candles_per_instrument_name])
+            max_tick = max([o["tick"] for o in candles_per_resolution])
 
             result.append(
                 dict(
