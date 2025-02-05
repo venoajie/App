@@ -384,17 +384,16 @@ async def get_market_condition(
                                         qty_candles,
                                         resolution,
                                         )
+                                    
+                                    
                                     [
-                                o for o in [
-                                o
-                                for o in [
-                            o
-                            for o in cached_candles_data
-                            if instrument_name in o["instrument_name"]
-                        ]
-                                if resolution == o["resolution"]
-                            ][0]["ohlc"]
-                            ]=updated_data
+                                o for o in [i for i in [
+                                y
+                                for y in candles_data_instrument
+                                if resolution == y["resolution"]
+                            ] if instrument_name in i["instrument_name"]
+                        ][0]["ohlc"]
+                            ] = updated_data
                                     
                                     log.warning(f" ohlc_resolution after {ohlc_resolution}")
                                         
