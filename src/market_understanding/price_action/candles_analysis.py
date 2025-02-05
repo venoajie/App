@@ -309,20 +309,31 @@ async def get_market_condition(
                     
                     if chart_update_channel  in message_channel:
                         
-                        instrument_name = message_byte_data ["instrument_name"]
-                        log.error(f" message_byte_data {message_byte_data}  {instrument_name}")
-                        
+                        instrument_name = message_byte_data ["instrument_name"]                        
                         ohlc_from_exchange = message_byte_data ["data"]
-                        log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")
                         tick_from_exchange = ohlc_from_exchange ["tick"]
-                        log.warning(f" tick_from_exchange {tick_from_exchange}")
-                        
+
                         candles_data_instrument = [
                                     o
                                     for o in cached_candles_data
                                     if instrument_name in o["instrument_name"]
                                 ]
+
+
+                        log.error(f" {instrument_name}")
+                        log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")
+                        log.warning(f" tick_from_exchange {tick_from_exchange}")
                         
+                                                
+                        for resolution in resolutions:
+                            candles_data_resolution = [
+                                    o
+                                    for o in candles_data_instrument
+                                    if resolution == o["resolution"]
+                                ]
+                            
+                            log.warning(f" candles_data_resolution {candles_data_resolution}")
+
                         result = []
                         
 
