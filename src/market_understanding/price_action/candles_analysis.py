@@ -192,8 +192,6 @@ async def get_candles_data(
                 resolution,
             )
             
-            log.warning(f" updated_data {ohlc}")
-
             result.append(
                 dict(
                     instrument_name=instrument_name,
