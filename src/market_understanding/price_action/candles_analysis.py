@@ -353,18 +353,6 @@ async def get_market_condition(
                                 log.info(f" ohlc_tick_max {ohlc_tick_max}")
 
                                 test = [
-                                    o
-                                    for o in [
-                                        i
-                                        for i in cached_candles_data
-                                        if instrument_name in i["instrument_name"]
-                                    ]
-                                    if resolution == o["resolution"]
-                                ]
-                                
-                                log.warning(f" test {test}")
-
-                                test = [
                                 x for x in [
                                     o
                                     for o in [
@@ -377,6 +365,22 @@ async def get_market_condition(
                             ]
                                 
                                 log.error(f" test {test}")
+
+                                test = [y for y in 
+                                [
+                                x for x in [
+                                    o
+                                    for o in [
+                                        i
+                                        for i in cached_candles_data
+                                        if instrument_name in i["instrument_name"]
+                                    ]
+                                    if resolution == o["resolution"]
+                                ][0]["ohlc"]
+                            ]
+                                 if y["tick"] == ohlc_tick_max]
+                                
+                                log.warning (f" test {test}")
 
                                 if tick_from_exchange > ohlc_tick_max:
                                     cached_candles_data_is_updated = True
