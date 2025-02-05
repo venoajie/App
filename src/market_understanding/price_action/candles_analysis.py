@@ -582,3 +582,30 @@ async def get_market_condition(
         asyncio.run(
             telegram_bot_sendtext(f"get_market_condition - {error}", "general_error")
         )
+
+
+def updating_cached_values(
+    cached_candles_data: list,
+    instrument_name: str,
+    resolution: int,
+    ohlc_tick_max: int,
+    item_to_update: float,
+):
+    """ """
+
+    [
+        y
+        for y in [
+            x
+            for x in [
+                o
+                for o in [
+                    i
+                    for i in cached_candles_data
+                    if instrument_name in i["instrument_name"]
+                ]
+                if resolution == o["resolution"]
+            ][0]["ohlc"]
+        ]
+        if y["tick"] == ohlc_tick_max
+    ][0]
