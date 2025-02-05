@@ -148,8 +148,7 @@ def my_generator_candle(np: object, data: object, lookback: int) -> list:
     return arr
 
 
-
-def candles_analysis (
+def candles_analysis(
     np: object,
     ohlc_without_ticks: list,
     dim_sequence: int = 3,
@@ -165,15 +164,14 @@ def candles_analysis (
 
     np_users_data = np.array(ohlc_without_ticks)
 
-    np_data = np.array(
-        [tuple(user.values()) for user in np_users_data], dtype=dtype
-    )
+    np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
 
     three_dim_sequence = my_generator_candle(np, np_data[1:], dim_sequence)
 
     candles_analysis_result = analysis_based_on_length(np, three_dim_sequence)
 
     return candles_analysis_result
+
 
 async def get_candles_data(
     currencies: list,
@@ -183,22 +181,22 @@ async def get_candles_data(
     """ """
     result = []
     for currency in currencies:
-        
+
         instrument_name = f"{currency}-PERPETUAL"
 
         for resolution in resolutions:
 
             ohlc = await get_ohlc_data(
-                instrument_name, 
-                qty_candles, 
+                instrument_name,
+                qty_candles,
                 resolution,
-                )
+            )
 
             result.append(
                 dict(
                     instrument_name=instrument_name,
                     resolution=resolution,
-                    ohlc = ohlc,
+                    ohlc=ohlc,
                 )
             )
 
@@ -216,26 +214,32 @@ def combining_candles_data(
 
     result = []
     for currency in currencies:
-        
+
         instrument_name = f"{currency}-PERPETUAL"
-        
-        candles_per_instrument_name = [o for o in candles_data if o["instrument_name"] == instrument_name ]
-        
+
+        candles_per_instrument_name = [
+            o for o in candles_data if o["instrument_name"] == instrument_name
+        ]
+
         for resolution in resolutions:
-            
-            candles_per_resolution = [o["ohlc"] for o in candles_per_instrument_name if o["resolution"] == resolution ][0]
-            
+
+            candles_per_resolution = [
+                o["ohlc"]
+                for o in candles_per_instrument_name
+                if o["resolution"] == resolution
+            ][0]
+
             ohlc_without_ticks = remove_list_elements(
                 candles_per_resolution,
                 "tick",
-                )
-            
-            candles_analysis_result = candles_analysis (
+            )
+
+            candles_analysis_result = candles_analysis(
                 np,
                 ohlc_without_ticks,
                 dim_sequence,
-                )
-        
+            )
+
             max_tick = max([o["tick"] for o in candles_per_resolution])
 
             result.append(
@@ -278,8 +282,8 @@ async def get_market_condition(
 
         # prepare channels placeholders
         channels = [
-            chart_update_channel, 
-            ]
+            chart_update_channel,
+        ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -287,13 +291,12 @@ async def get_market_condition(
         resolutions = [60, 15, 5]
         qty_candles = 5
         dim_sequence = 3
-        
+
         cached_candles_data = await get_candles_data(
             currencies,
             qty_candles,
             resolutions,
-            )
-        
+        )
 
         while True:
 
@@ -306,50 +309,74 @@ async def get_market_condition(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
-                    
-                    if chart_update_channel  in message_channel:
-                        
-                        instrument_name = message_byte_data ["instrument_name"]                        
-                        ohlc_from_exchange = message_byte_data ["data"]
-                        tick_from_exchange = ohlc_from_exchange ["tick"]
-                        high_from_exchange = ohlc_from_exchange ["high"]
-                        low_from_exchange = ohlc_from_exchange ["low"]
+
+                    if chart_update_channel in message_channel:
+
+                        instrument_name = message_byte_data["instrument_name"]
+                        ohlc_from_exchange = message_byte_data["data"]
+                        tick_from_exchange = ohlc_from_exchange["tick"]
+                        high_from_exchange = ohlc_from_exchange["high"]
+                        low_from_exchange = ohlc_from_exchange["low"]
 
                         candles_data_instrument = [
-                                    o
-                                    for o in cached_candles_data
-                                    if instrument_name in o["instrument_name"]
-                                ]
-
+                            o
+                            for o in cached_candles_data
+                            if instrument_name in o["instrument_name"]
+                        ]
 
                         log.error(f" {instrument_name}")
                         log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")
                         log.warning(f" tick_from_exchange {tick_from_exchange}")
-                                
+
                         for resolution in resolutions:
                             candles_data_resolution = [
-                                    o
-                                    for o in candles_data_instrument
-                                    if resolution == o["resolution"]
-                                ]
+                                o
+                                for o in candles_data_instrument
+                                if resolution == o["resolution"]
+                            ]
 
-                            log.warning(f" candles_data_resolution {candles_data_resolution}")
-                            ohlc_resolution = [o for o in candles_data_resolution[0]["ohlc"]]
+                            log.warning(
+                                f" candles_data_resolution {candles_data_resolution}"
+                            )
+                            ohlc_resolution = [
+                                o for o in candles_data_resolution[0]["ohlc"]
+                            ]
                             log.warning(f" ohlc_resolution {ohlc_resolution}")
-                            
+
                             if ohlc_resolution:
-                                ohlc_tick_max = max([o["tick"] for o in ohlc_resolution])
+                                ohlc_tick_max = max(
+                                    [o["tick"] for o in ohlc_resolution]
+                                )
                                 log.info(f" ohlc_tick_max {ohlc_tick_max}")
-                                ohlc_tick_max_elements = [o for o in ohlc_resolution if o["tick"] == ohlc_tick_max][0]
-                                log.info(f" ohlc_tick_max_elements {ohlc_tick_max_elements}")
+                                ohlc_tick_max_elements = [
+                                    o
+                                    for o in ohlc_resolution
+                                    if o["tick"] == ohlc_tick_max
+                                ][0]
+                                log.info(
+                                    f" ohlc_tick_max_elements {ohlc_tick_max_elements}"
+                                )
                                 ohlc_high = ohlc_tick_max_elements["high"]
                                 ohlc_low = ohlc_tick_max_elements["low"]
-                                log.info(f" ohlc_high {ohlc_high} high_from_exchange {high_from_exchange} ohlc_low {ohlc_low} low_from_exchange {low_from_exchange}")
-                            
+                                log.info(
+                                    f" resolution {resolution} ohlc_high {ohlc_high} high_from_exchange {high_from_exchange} ohlc_low {ohlc_low} low_from_exchange {low_from_exchange}"
+                                )
+                                
+                                if high_from_exchange > ohlc_high:
+                                    log.critical(
+                                    f" high_from_exchange > ohlc_high {high_from_exchange > ohlc_high}"
+                                )
+                                    
+                                if low_from_exchange < ohlc_low:
+                                    log.critical(
+                                    f" low_from_exchange < ohlc_low {low_from_exchange < ohlc_low}"
+                                )
+                                    
+
                         result = []
-                        
-                        log.error(f" candles_data_instrument {candles_data_instrument}")
-        
+
+                        # log.error(f" candles_data_instrument {candles_data_instrument}")
+
                         candles_data = combining_candles_data(
                             np,
                             currencies,
@@ -358,13 +385,12 @@ async def get_market_condition(
                             dim_sequence,
                         )
 
-
                         candles_instrument_name = remove_redundant_elements(
                             [o["instrument_name"] for o in candles_data]
                         )
 
                         for instrument_name in candles_instrument_name:
-                                                
+
                             if instrument_name in message_byte_data["instrument_name"]:
 
                                 candles_data_instrument = [
@@ -372,17 +398,17 @@ async def get_market_condition(
                                     for o in candles_data
                                     if instrument_name in o["instrument_name"]
                                 ]
-        
+
                                 candle_60 = [
                                     o["candles_analysis"]
                                     for o in candles_data_instrument
                                     if o["resolution"] == 60
                                 ]
-                                
+
                                 candle_60_type = np.sum(
                                     [o["candle_type"] for o in candle_60]
                                 )
-                                
+
                                 candle_60_is_long = np.sum(
                                     [o["is_long_body"] for o in candle_60]
                                 )
@@ -393,7 +419,9 @@ async def get_market_condition(
                                     if o["resolution"] == 5
                                 ]
 
-                                candle_5_type = np.sum([o["candle_type"] for o in candle_5])
+                                candle_5_type = np.sum(
+                                    [o["candle_type"] for o in candle_5]
+                                )
 
                                 candle_5_is_long = np.sum(
                                     [o["is_long_body"] for o in candle_5]
@@ -447,7 +475,7 @@ async def get_market_condition(
                                         if bullish and candle_60_long_body_more_than_2
                                         else False
                                     )
-                                    
+
                                     strong_bearish = (
                                         True
                                         if bearish and candle_60_long_body_more_than_2
@@ -455,7 +483,9 @@ async def get_market_condition(
                                     )
 
                                 neutral = (
-                                    True if not weak_bearish and not weak_bullish else False
+                                    True
+                                    if not weak_bearish and not weak_bullish
+                                    else False
                                 )
 
                                 pub_message = dict(
@@ -468,7 +498,7 @@ async def get_market_condition(
                                     bearish=bearish,
                                     strong_bearish=strong_bearish,
                                 )
-                                
+
                                 result.append(pub_message)
 
                             log.critical(f"result {result}")

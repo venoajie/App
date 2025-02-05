@@ -183,12 +183,12 @@ async def get_ohlc_data(
 
     async with httpx.AsyncClient() as client:
         ohlc_request = await client.get(
-            end_point, 
+            end_point,
             follow_redirects=True,
-            )
+        )
 
-        result = ohlc_request.json() ["result"]
-        
+        result = ohlc_request.json()["result"]
+
     return transform_nested_dict_to_list_ohlc(result)
 
 
