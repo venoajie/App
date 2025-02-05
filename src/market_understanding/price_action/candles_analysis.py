@@ -297,10 +297,6 @@ async def get_market_condition(
             )
         
 
-        candles_instrument_name = remove_redundant_elements(
-            [o["instrument_name"] for o in candles_data]
-        )
-
         while True:
 
             try:
@@ -319,16 +315,20 @@ async def get_market_condition(
                     if chart_update_channel  in message_channel:
 
                         result = []
-                        
+                                
+                        candles_data = combining_candles_data(
+                            np,
+                            currencies,
+                            candles_from_exchanges,
+                            resolutions,
+                            dim_sequence,
+                        )
+
+                        candles_instrument_name = remove_redundant_elements(
+                            [o["instrument_name"] for o in candles_data]
+                        )
+
                         for instrument_name in candles_instrument_name:
-        
-                            candles_data = combining_candles_data(
-                                np,
-                                currencies,
-                                candles_from_exchanges,
-                                resolutions,
-                                dim_sequence,
-                            )
                                                 
                             if instrument_name in message_byte_data["instrument_name"]:
 
