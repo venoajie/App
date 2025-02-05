@@ -374,8 +374,8 @@ async def get_market_condition(
                                 if resolution == y["resolution"]] if instrument_name in i["instrument_name"]
                         ][0]["ohlc"]][0]
                                     
-                                    log.debug (result ["result"])
-                                    log.warning (updated_data ["updated_data"])
+                                    log.debug (f"result {result}")
+                                    log.warning (f"updated_data {updated_data}")
                                     
                                     
                                     [o for o in [i for i in [y for y in candles_data_instrument
