@@ -363,7 +363,7 @@ async def cancelling_orders(
                 continue
 
             finally:
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.001)
 
     except Exception as error:
 

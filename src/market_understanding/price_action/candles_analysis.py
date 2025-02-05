@@ -297,7 +297,7 @@ async def get_market_condition(
             qty_candles,
             resolutions,
         )
-        
+
         cached_candles_data_is_updated = False
 
         while True:
@@ -328,7 +328,6 @@ async def get_market_condition(
 
                         log.error(f" {instrument_name}")
                         log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")
-                        
 
                         for resolution in resolutions:
                             candles_data_resolution = [
@@ -337,57 +336,73 @@ async def get_market_condition(
                                 if resolution == o["resolution"]
                             ]
 
-                            #log.warning(
+                            # log.warning(
                             #    f" candles_data_resolution {candles_data_resolution}"
-                            #)
+                            # )
                             ohlc_resolution = [
                                 o for o in candles_data_resolution[0]["ohlc"]
                             ]
-                            #log.warning(f" ohlc_resolution {ohlc_resolution}")
+                            # log.warning(f" ohlc_resolution {ohlc_resolution}")
 
                             if ohlc_resolution:
                                 ohlc_tick_max = max(
                                     [o["tick"] for o in ohlc_resolution]
                                 )
-                                
+
                                 log.info(f" ohlc_tick_max {ohlc_tick_max}")
                                 if tick_from_exchange > ohlc_tick_max:
                                     cached_candles_data_is_updated = True
-                                    
+
                                     log.critical(
                                         f" tick_from_exchange > ohlc_tick_max {tick_from_exchange > ohlc_tick_max}"
                                     )
-                                    
+
                                 else:
                                     ohlc_tick_max_elements = [
                                         o
                                         for o in ohlc_resolution
                                         if o["tick"] == ohlc_tick_max
                                     ][0]
-                                    #log.info(
+                                    # log.info(
                                     #    f" ohlc_tick_max_elements {ohlc_tick_max_elements}"
-                                    #)
+                                    # )
                                     ohlc_high = ohlc_tick_max_elements["high"]
                                     ohlc_low = ohlc_tick_max_elements["low"]
+
                                     log.info(
                                         f" resolution {resolution} ohlc_high {ohlc_high} high_from_exchange {high_from_exchange} ohlc_low {ohlc_low} low_from_exchange {low_from_exchange}"
                                     )
+
+
+
+                                    test = [
+                                        o
+                                        for o in [
+                                            i
+                                            for i in cached_candles_data
+                                            if instrument_name in i["instrument_name"]
+                                        ]
+                                        if resolution == o["resolution"]
+                                    ]
+                                    
+                                    log.warning(f" test {test}")
+
                                     
                                     if high_from_exchange > ohlc_high:
                                         cached_candles_data_is_updated = True
+
                                         log.critical(
-                                        f" high_from_exchange > ohlc_high {high_from_exchange > ohlc_high}"
-                                    )
-                                        
+                                            f" high_from_exchange > ohlc_high {high_from_exchange > ohlc_high}"
+                                        )
+
                                     if low_from_exchange < ohlc_low:
                                         cached_candles_data_is_updated = True
                                         log.critical(
-                                        f" low_from_exchange < ohlc_low {low_from_exchange < ohlc_low}"
-                                    )
-                                        
+                                            f" low_from_exchange < ohlc_low {low_from_exchange < ohlc_low}"
+                                        )
 
                         result = []
-                        
+
                         if cached_candles_data_is_updated:
 
                             # log.error(f" candles_data_instrument {candles_data_instrument}")
@@ -406,7 +421,10 @@ async def get_market_condition(
 
                             for instrument_name in candles_instrument_name:
 
-                                if instrument_name in message_byte_data["instrument_name"]:
+                                if (
+                                    instrument_name
+                                    in message_byte_data["instrument_name"]
+                                ):
 
                                     candles_data_instrument = [
                                         o
@@ -456,7 +474,9 @@ async def get_market_condition(
                                         [o["is_long_body"] for o in candle_15]
                                     )
 
-                                    candle_60_long_body_more_than_2 = candle_60_is_long >= 2
+                                    candle_60_long_body_more_than_2 = (
+                                        candle_60_is_long >= 2
+                                    )
                                     candle_5_long_body_any = candle_5_is_long > 0
                                     candle_15_long_body_any = candle_15_is_long > 0
                                     candle_60_long_body_any = candle_60_is_long > 0
@@ -469,10 +489,17 @@ async def get_market_condition(
                                     strong_bullish, strong_bearish = False, False
 
                                     if candle_5_long_body_any:
-                                        weak_bullish = True if candle_5_type > 0 else False
-                                        weak_bearish = True if candle_5_type < 0 else False
+                                        weak_bullish = (
+                                            True if candle_5_type > 0 else False
+                                        )
+                                        weak_bearish = (
+                                            True if candle_5_type < 0 else False
+                                        )
 
-                                    if candle_60_long_body_any and candle_15_long_body_any:
+                                    if (
+                                        candle_60_long_body_any
+                                        and candle_15_long_body_any
+                                    ):
                                         bullish = (
                                             True
                                             if weak_bullish and candle_15_type > 0
@@ -487,13 +514,15 @@ async def get_market_condition(
                                     if candle_60_long_body_more_than_2:
                                         strong_bullish = (
                                             True
-                                            if bullish and candle_60_long_body_more_than_2
+                                            if bullish
+                                            and candle_60_long_body_more_than_2
                                             else False
                                         )
 
                                         strong_bearish = (
                                             True
-                                            if bearish and candle_60_long_body_more_than_2
+                                            if bearish
+                                            and candle_60_long_body_more_than_2
                                             else False
                                         )
 
