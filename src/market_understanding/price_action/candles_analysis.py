@@ -352,21 +352,6 @@ async def get_market_condition(
                                 )
                                 
                                 tick_delta = (tick_from_exchange - ohlc_tick_max)/60000
-                                log.critical(
-                                        f" resolution {resolution} {tick_delta}")
-
-                                log.info(f" ohlc_tick_max {ohlc_tick_max}")
-                                log.info(f" test {[
-                                o for o in [
-                                o
-                                for o in [
-                            o
-                            for o in cached_candles_data
-                            if instrument_name in o["instrument_name"]
-                        ]
-                                if resolution == o["resolution"]
-                            ][0]["ohlc"]
-                            ]}")
                                 
                                 log.warning(f" ohlc_resolution before {ohlc_resolution}")
                                         
@@ -389,7 +374,8 @@ async def get_market_condition(
                                 if resolution == y["resolution"]] if instrument_name in i["instrument_name"]
                         ][0]["ohlc"]][0]
                                     
-                                    log.debug (result)
+                                    log.debug (result ["result"])
+                                    log.warning (updated_data ["updated_data"])
                                     
                                     
                                     [o for o in [i for i in [y for y in candles_data_instrument
