@@ -347,7 +347,7 @@ async def get_market_condition(
 
                             if ohlc_resolution:
                                 log.critical(
-                                        f" resolution {resolution} ")
+                                        f" resolution {resolution} {(tick_from_exchange - ohlc_tick_max)/resolution}")
                                 ohlc_tick_max = max(
                                     [o["tick"] for o in ohlc_resolution]
                                 )
@@ -358,7 +358,6 @@ async def get_market_condition(
                                 if tick_from_exchange > ohlc_tick_max:
                                     cached_candles_data_is_updated = True
 
-                                log.critical ({(tick_from_exchange - ohlc_tick_max)/resolution})
                                 # partial update
                                 if tick_from_exchange == ohlc_tick_max:
                                     
