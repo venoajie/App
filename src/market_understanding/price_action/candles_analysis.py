@@ -338,7 +338,7 @@ async def get_market_condition(
                             if ohlc_resolution:
                                 ohlc_tick_max = max([o["tick"] for o in ohlc_resolution])
                                 log.info(f" ohlc_tick_max {ohlc_tick_max}")
-                                ohlc_tick_max_elements = [o for o in ohlc_resolution if o["ohlc"] == ohlc_tick_max][0]
+                                ohlc_tick_max_elements = [o for o in ohlc_resolution if o["tick"] == ohlc_tick_max][0]
                                 log.info(f" ohlc_tick_max_elements {ohlc_tick_max_elements}")
                                 ohlc_high = ohlc_tick_max_elements["high"]
                                 ohlc_low = ohlc_tick_max_elements["low"]
