@@ -359,7 +359,11 @@ async def get_market_condition(
                                 log.info(f" test {[
                                 o for o in [
                                 o
-                                for o in candles_data_instrument
+                                for o in [
+                            o
+                            for o in cached_candles_data
+                            if instrument_name in o["instrument_name"]
+                        ]
                                 if resolution == o["resolution"]
                             ][0]["ohlc"]
                             ]}")
@@ -376,13 +380,7 @@ async def get_market_condition(
                                         resolution,
                                         )
                                     
-                                    [
-                                o for o in [
-                                i
-                                for i in candles_data_instrument
-                                if resolution == i["resolution"]
-                            ][0]["ohlc"]
-                            ] = updated_data
+                                    
                                     log.warning(f" ohlc_resolution after {ohlc_resolution}")
                                         
                                 
