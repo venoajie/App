@@ -172,7 +172,7 @@ def candles_analysis(
 
     return candles_analysis_result
 
-
+        
 async def get_candles_data(
     currencies: list,
     qty_candles: int,
@@ -191,6 +191,8 @@ async def get_candles_data(
                 qty_candles,
                 resolution,
             )
+            
+            log.warning(f" updated_data {ohlc}")
 
             result.append(
                 dict(
@@ -368,6 +370,12 @@ async def get_market_condition(
                                 # update all under resolution
                                 if tick_delta > resolution:
                                     cached_candles_data_is_updated = True
+                                    
+                                    updated_data = await get_ohlc_data(
+                                        instrument_name,
+                                        qty_candles,
+                                        resolution,
+                                        )
                                     
                                     ohlc_resolution = [
                                 o for o in [
