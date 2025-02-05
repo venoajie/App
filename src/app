@@ -21,8 +21,8 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from data_cleaning.app_data_cleaning import reconciling_size
 from messaging.telegram_bot import telegram_bot_sendtext
-from strategies.app_future_spreads import future_spreads
-from strategies.app_hedging_spot import hedging_spot
+#from strategies.app_future_spreads import future_spreads
+#from strategies.app_hedging_spot import hedging_spot
 from strategies.relabelling_trading_result import relabelling_trades
 from streaming_data.data_producer import StreamingAccountData
 from transaction_management.deribit.api_requests import SendApiRequest
