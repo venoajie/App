@@ -314,6 +314,14 @@ async def get_market_condition(
                         log.error(f" message_byte_data {message_byte_data}  {instrument_name}")
                         
                         result = []
+                        
+                        candles_data_instrument = [
+                                    o
+                                    for o in candles_from_exchanges
+                                    if instrument_name in o["instrument_name"]
+                                ]
+
+                        log.error(f" candles_data_instrument {candles_data_instrument}")
         
                         candles_data = combining_candles_data(
                             np,
