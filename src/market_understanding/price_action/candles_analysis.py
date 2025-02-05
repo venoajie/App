@@ -312,6 +312,8 @@ async def get_market_condition(
                         instrument_name = message_byte_data ["instrument_name"]                        
                         ohlc_from_exchange = message_byte_data ["data"]
                         tick_from_exchange = ohlc_from_exchange ["tick"]
+                        high_from_exchange = ohlc_from_exchange ["high"]
+                        low_from_exchange = ohlc_from_exchange ["low"]
 
                         candles_data_instrument = [
                                     o
@@ -342,11 +344,10 @@ async def get_market_condition(
                                 log.info(f" ohlc_tick_max_elements {ohlc_tick_max_elements}")
                                 ohlc_high = ohlc_tick_max_elements["high"]
                                 ohlc_low = ohlc_tick_max_elements["low"]
+                                log.info(f" ohlc_high {ohlc_high} high_from_exchange {high_from_exchange} ohlc_low {ohlc_low} low_from_exchange {low_from_exchange}")
                             
-
                         result = []
                         
-
                         log.error(f" candles_data_instrument {candles_data_instrument}")
         
                         candles_data = combining_candles_data(
