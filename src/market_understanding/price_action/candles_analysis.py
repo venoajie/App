@@ -387,11 +387,15 @@ async def get_market_condition(
                                     
                                     result =  [o for o in [i for i in [y for y in candles_data_instrument
                                 if resolution == y["resolution"]] if instrument_name in i["instrument_name"]
-                        ][0]["ohlc"]]
+                        ][0]["ohlc"]][0]
                                     
                                     log.debug (result)
                                     
-                                                                    
+                                    
+                                    [o for o in [i for i in [y for y in candles_data_instrument
+                                if resolution == y["resolution"]] if instrument_name in i["instrument_name"]
+                        ][0]["ohlc"]][0] = updated_data
+                                    
                                     log.warning(f" ohlc_resolution after {ohlc_resolution}")
                                         
                                 
