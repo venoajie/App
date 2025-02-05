@@ -202,7 +202,7 @@ async def get_candles_data(
                 )
             )
 
-    yield result
+    return result
 
 
 def combining_candles_data(
@@ -296,13 +296,6 @@ async def get_market_condition(
             resolutions,
             )
         
-        candles_data = combining_candles_data(
-            np,
-            currencies,
-            candles_from_exchanges,
-            resolutions,
-            dim_sequence,
-        )
 
         candles_instrument_name = remove_redundant_elements(
             [o["instrument_name"] for o in candles_data]
@@ -328,7 +321,15 @@ async def get_market_condition(
                         result = []
                         
                         for instrument_name in candles_instrument_name:
-                            
+        
+                            candles_data = combining_candles_data(
+                                np,
+                                currencies,
+                                candles_from_exchanges,
+                                resolutions,
+                                dim_sequence,
+                            )
+                                                
                             if instrument_name in message_byte_data["instrument_name"]:
 
                                 candles_data_instrument = [
@@ -336,8 +337,7 @@ async def get_market_condition(
                                     for o in candles_data
                                     if instrument_name in o["instrument_name"]
                                 ]
-                        
-
+        
                                 candle_60 = [
                                     o["candles_analysis"]
                                     for o in candles_data_instrument
