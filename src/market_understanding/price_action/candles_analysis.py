@@ -345,6 +345,8 @@ async def get_market_condition(
                             ]
                             # log.warning(f" ohlc_resolution {ohlc_resolution}")
 
+                            log.warning(f" ohlc_resolution before {ohlc_resolution}")
+                                        
                             if ohlc_resolution:
                                 ohlc_tick_max = max(
                                     [o["tick"] for o in ohlc_resolution]
@@ -374,8 +376,6 @@ async def get_market_condition(
 
                                     if high_from_exchange > ohlc_high:
                                         
-                                        log.warning(f" ohlc_resolution before {ohlc_resolution}")
-                                        
                                         cached_candles_data_is_updated = True
 
                                         log.critical(
@@ -396,9 +396,6 @@ async def get_market_condition(
                                     if low_from_exchange < ohlc_low:
                                         
                                         cached_candles_data_is_updated = True
-                                        
-                                        log.warning(f" ohlc_resolution before {ohlc_resolution}")
-                                        
                                         
                                         log.critical(
                                             f" low_from_exchange < ohlc_low {low_from_exchange < ohlc_low}"
