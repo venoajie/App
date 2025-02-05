@@ -202,7 +202,7 @@ async def get_candles_data(
                 )
             )
 
-    return result
+    yield result
 
 
 def combining_candles_data(
@@ -296,8 +296,6 @@ async def get_market_condition(
             resolutions,
             )
         
-        log.debug(f"candles_data {candles_from_exchanges}")
-
         candles_data = combining_candles_data(
             np,
             currencies,
