@@ -323,16 +323,25 @@ async def get_market_condition(
                         log.error(f" {instrument_name}")
                         log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")
                         log.warning(f" tick_from_exchange {tick_from_exchange}")
-                        
-                                                
+                                
                         for resolution in resolutions:
                             candles_data_resolution = [
                                     o
                                     for o in candles_data_instrument
                                     if resolution == o["resolution"]
                                 ]
+
+                            ohlc_resolution = [o for o in candles_data_resolution["ohlc"]]
+                            log.warning(f" ohlc_resolution {ohlc_resolution}")
                             
-                            log.warning(f" candles_data_resolution {candles_data_resolution}")
+                            if ohlc_resolution:
+                                ohlc_tick_max = max([o["tick"] for o in ohlc_resolution])
+                                log.info(f" ohlc_tick_max {ohlc_tick_max}")
+                                ohlc_tick_max_elements = [o for o in ohlc_resolution if o["ohlc"] == ohlc_tick_max][0]
+                                log.info(f" ohlc_tick_max_elements {ohlc_tick_max_elements}")
+                                ohlc_high = ohlc_tick_max_elements["high"]
+                                ohlc_low = ohlc_tick_max_elements["low"]
+                            
 
                         result = []
                         
