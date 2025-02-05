@@ -328,7 +328,7 @@ async def get_market_condition(
 
                         log.error(f" {instrument_name}")
                         log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")
-                        log.warning(f" tick_from_exchange {tick_from_exchange}")
+                        
 
                         for resolution in resolutions:
                             candles_data_resolution = [
@@ -349,33 +349,42 @@ async def get_market_condition(
                                 ohlc_tick_max = max(
                                     [o["tick"] for o in ohlc_resolution]
                                 )
-                                #log.info(f" ohlc_tick_max {ohlc_tick_max}")
-                                ohlc_tick_max_elements = [
-                                    o
-                                    for o in ohlc_resolution
-                                    if o["tick"] == ohlc_tick_max
-                                ][0]
-                                #log.info(
-                                #    f" ohlc_tick_max_elements {ohlc_tick_max_elements}"
-                                #)
-                                ohlc_high = ohlc_tick_max_elements["high"]
-                                ohlc_low = ohlc_tick_max_elements["low"]
-                                log.info(
-                                    f" resolution {resolution} ohlc_high {ohlc_high} high_from_exchange {high_from_exchange} ohlc_low {ohlc_low} low_from_exchange {low_from_exchange}"
-                                )
                                 
-                                if high_from_exchange > ohlc_high:
+                                log.info(f" ohlc_tick_max {ohlc_tick_max}")
+                                if tick_from_exchange > ohlc_tick_max:
                                     cached_candles_data_is_updated = True
-                                    log.critical(
-                                    f" high_from_exchange > ohlc_high {high_from_exchange > ohlc_high}"
-                                )
                                     
-                                if low_from_exchange < ohlc_low:
-                                    cached_candles_data_is_updated = True
                                     log.critical(
-                                    f" low_from_exchange < ohlc_low {low_from_exchange < ohlc_low}"
-                                )
+                                        f" tick_from_exchange > ohlc_tick_max {tick_from_exchange > ohlc_tick_max}"
+                                    )
                                     
+                                else:
+                                    ohlc_tick_max_elements = [
+                                        o
+                                        for o in ohlc_resolution
+                                        if o["tick"] == ohlc_tick_max
+                                    ][0]
+                                    #log.info(
+                                    #    f" ohlc_tick_max_elements {ohlc_tick_max_elements}"
+                                    #)
+                                    ohlc_high = ohlc_tick_max_elements["high"]
+                                    ohlc_low = ohlc_tick_max_elements["low"]
+                                    log.info(
+                                        f" resolution {resolution} ohlc_high {ohlc_high} high_from_exchange {high_from_exchange} ohlc_low {ohlc_low} low_from_exchange {low_from_exchange}"
+                                    )
+                                    
+                                    if high_from_exchange > ohlc_high:
+                                        cached_candles_data_is_updated = True
+                                        log.critical(
+                                        f" high_from_exchange > ohlc_high {high_from_exchange > ohlc_high}"
+                                    )
+                                        
+                                    if low_from_exchange < ohlc_low:
+                                        cached_candles_data_is_updated = True
+                                        log.critical(
+                                        f" low_from_exchange < ohlc_low {low_from_exchange < ohlc_low}"
+                                    )
+                                        
 
                         result = []
                         
