@@ -205,7 +205,7 @@ def combining_candles_data(
 
         for resolution in resolutions:
             
-            candles_per_resolution = [o["ohlc"] for o in candles_per_instrument_name if o["resolution"] == resolution ]
+            candles_per_resolution = [o["ohlc"] for o in candles_per_instrument_name if o["resolution"] == resolution ][0]
             
             log.debug(f" candles_per_resolution {candles_per_resolution}")
 
