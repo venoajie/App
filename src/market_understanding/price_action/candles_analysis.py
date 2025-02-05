@@ -401,12 +401,30 @@ async def get_market_condition(
                                         log.critical(
                                             f" high_from_exchange > ohlc_high {high_from_exchange > ohlc_high}"
                                         )
-
+                                        
+                                        updating_cached_values(
+                                            cached_candles_data,
+                                            instrument_name,
+                                            resolution,
+                                            ohlc_tick_max,
+                                            "high",
+                                            high_from_exchange,
+                                            )
+                                        
                                     if low_from_exchange < ohlc_low:
                                         cached_candles_data_is_updated = True
                                         log.critical(
                                             f" low_from_exchange < ohlc_low {low_from_exchange < ohlc_low}"
                                         )
+                                        
+                                        updating_cached_values(
+                                            cached_candles_data,
+                                            instrument_name,
+                                            resolution,
+                                            ohlc_tick_max,
+                                            "low",
+                                            low_from_exchange,
+                                            )
 
                         result = []
 
@@ -589,9 +607,27 @@ def updating_cached_values(
     instrument_name: str,
     resolution: int,
     ohlc_tick_max: int,
-    item_to_update: float,
+    key_to_update: str,
+    value_to_update: float,
 ):
     """ """
+    
+    log.debug(f" cached update {[
+        y
+        for y in [
+            x
+            for x in [
+                o
+                for o in [
+                    i
+                    for i in cached_candles_data
+                    if instrument_name in i["instrument_name"]
+                ]
+                if resolution == o["resolution"]
+            ][0]["ohlc"]
+        ]
+        if y["tick"] == ohlc_tick_max
+    ][0][(f"{key_to_update}")]} ")
 
     [
         y
@@ -608,4 +644,4 @@ def updating_cached_values(
             ][0]["ohlc"]
         ]
         if y["tick"] == ohlc_tick_max
-    ][0]
+    ][0][(f"{key_to_update}")] =  value_to_update
