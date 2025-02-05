@@ -225,8 +225,6 @@ def combining_candles_data(
             
             candles_per_resolution = [o["ohlc"] for o in candles_per_instrument_name if o["resolution"] == resolution ][0]
             
-            log.debug(f" candles_per_resolution {candles_per_resolution}")
-
             ohlc_without_ticks = remove_list_elements(
                 candles_per_resolution,
                 "tick",
@@ -309,13 +307,16 @@ async def get_market_condition(
 
                     message_channel = message_byte["channel"]
 
-                    log.error(f" message_byte_data {message_byte_data}")
                     message_channel = message_byte["channel"]
                     
                     if chart_update_channel  in message_channel:
-
+                        
+                        instrument_name = message_channel ["instrument_name"]
+                        
+                        log.error(f" message_byte_data {message_byte_data}  {instrument_name}")
+                        
                         result = []
-                                
+        
                         candles_data = combining_candles_data(
                             np,
                             currencies,
@@ -323,6 +324,7 @@ async def get_market_condition(
                             resolutions,
                             dim_sequence,
                         )
+
 
                         candles_instrument_name = remove_redundant_elements(
                             [o["instrument_name"] for o in candles_data]
