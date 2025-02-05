@@ -197,7 +197,7 @@ def combining_candles_data(
     result = []
     for currency in currencies:
         
-        instrument_name = [f"{currency}-PERPETUAL"]
+        instrument_name = f"{currency}-PERPETUAL"
         
         candles_per_instrument_name = [o for o in candles_data if o["instrument_name"] == instrument_name ]
         
