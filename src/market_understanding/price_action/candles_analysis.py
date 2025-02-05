@@ -358,7 +358,7 @@ async def get_market_condition(
                                 ) / 60000
 
                                 log.warning(
-                                    f" ohlc_resolution before {ohlc_resolution} {len(ohlc_resolution)}"
+                                    f" ohlc_resolution before {ohlc_resolution} {len(ohlc_resolution)} {[o["tick"] for o in ohlc_resolution]}"
                                 )
 
                                 # update all under resolution
@@ -389,7 +389,7 @@ async def get_market_condition(
                                         ][0]["ohlc"]
                                     ][0]
 
-                                    log.debug(f"result {result}")
+                                    log.debug(f"old data {result}")
                                     log.warning(f"updated_data {updated_data}")
 
                                     [
@@ -406,7 +406,7 @@ async def get_market_condition(
                                     ][0] = updated_data
 
                                     log.warning(
-                                        f" ohlc_resolution after {ohlc_resolution} {len(ohlc_resolution)}"
+                                        f" ohlc_resolution after {ohlc_resolution} {len(ohlc_resolution)} {[o["tick"] for o in ohlc_resolution]}"
                                     )
 
                                 # partial update
