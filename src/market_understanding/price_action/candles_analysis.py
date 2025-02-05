@@ -148,6 +148,33 @@ def my_generator_candle(np: object, data: object, lookback: int) -> list:
     return arr
 
 
+
+def candles_analysis (
+    np: object,
+    ohlc_without_ticks: list,
+    dim_sequence: int = 3,
+):
+    """ """
+
+    dtype = [
+        ("open", "f4"),
+        ("high", "f4"),
+        ("low", "f4"),
+        ("close", "f4"),
+    ]
+
+    np_users_data = np.array(ohlc_without_ticks)
+
+    np_data = np.array(
+        [tuple(user.values()) for user in np_users_data], dtype=dtype
+    )
+
+    three_dim_sequence = my_generator_candle(np, np_data[1:], dim_sequence)
+
+    candles_analysis_result = analysis_based_on_length(np, three_dim_sequence)
+
+    return candles_analysis_result
+
 async def get_candles_data(
     currencies: list,
     qty_candles: int,
@@ -187,13 +214,6 @@ def combining_candles_data(
 ):
     """ """
 
-    dtype = [
-        ("open", "f4"),
-        ("high", "f4"),
-        ("low", "f4"),
-        ("close", "f4"),
-    ]
-
     result = []
     for currency in currencies:
         
@@ -201,8 +221,6 @@ def combining_candles_data(
         
         candles_per_instrument_name = [o for o in candles_data if o["instrument_name"] == instrument_name ]
         
-        log.debug(f" candles_per_instrument_name {candles_per_instrument_name}")
-
         for resolution in resolutions:
             
             candles_per_resolution = [o["ohlc"] for o in candles_per_instrument_name if o["resolution"] == resolution ][0]
@@ -213,18 +231,13 @@ def combining_candles_data(
                 candles_per_resolution,
                 "tick",
                 )
-            log.debug(f" ohlc_without_ticks {ohlc_without_ticks}")
-
-            np_users_data = np.array(ohlc_without_ticks)
-
-            np_data = np.array(
-                [tuple(user.values()) for user in np_users_data], dtype=dtype
-            )
-
-            three_dim_sequence = my_generator_candle(np, np_data[1:], dim_sequence)
-
-            candles_analysis_result = analysis_based_on_length(np, three_dim_sequence)
-
+            
+            candles_analysis_result = candles_analysis (
+                np,
+                ohlc_without_ticks,
+                dim_sequence,
+                )
+        
             max_tick = max([o["tick"] for o in candles_per_resolution])
 
             result.append(
