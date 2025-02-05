@@ -288,7 +288,7 @@ async def get_market_condition(
         qty_candles = 5
         dim_sequence = 3
         
-        candles_from_exchanges = await get_candles_data(
+        cached_candles_data = await get_candles_data(
             currencies,
             qty_candles,
             resolutions,
@@ -310,23 +310,28 @@ async def get_market_condition(
                     if chart_update_channel  in message_channel:
                         
                         instrument_name = message_byte_data ["instrument_name"]
-                        
                         log.error(f" message_byte_data {message_byte_data}  {instrument_name}")
                         
-                        result = []
+                        ohlc_from_exchange = message_byte_data ["data"]
+                        log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")
+                        tick_from_exchange = ohlc_from_exchange ["tick"]
+                        log.warning(f" tick_from_exchange {tick_from_exchange}")
                         
                         candles_data_instrument = [
                                     o
-                                    for o in candles_from_exchanges
+                                    for o in cached_candles_data
                                     if instrument_name in o["instrument_name"]
                                 ]
+                        
+                        result = []
+                        
 
                         log.error(f" candles_data_instrument {candles_data_instrument}")
         
                         candles_data = combining_candles_data(
                             np,
                             currencies,
-                            candles_from_exchanges,
+                            cached_candles_data,
                             resolutions,
                             dim_sequence,
                         )
