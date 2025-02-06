@@ -300,7 +300,7 @@ async def get_market_condition(
 
         cached_candles_data_is_updated = True
         
-        log.warning(f"cached_candles_data_is_updated {cached_candles_data_is_updated}")
+        log.warning(f"cached_candles_data {cached_candles_data}")
         
 
         while cached_candles_data_is_updated:
