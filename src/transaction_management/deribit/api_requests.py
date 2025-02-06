@@ -173,7 +173,6 @@ async def get_ohlc_data(
     now_unix = convert_time_to_unix(now_utc)
 
     start_timestamp = now_unix - (60000 * resolution) * qty_candles
-    
 
     end_point = ohlc_end_point(
         instrument_name,
@@ -181,9 +180,6 @@ async def get_ohlc_data(
         start_timestamp,
         now_unix,
     )
-
-    log.critical (f" start_timestamp {start_timestamp} {end_point}")
-
 
     async with httpx.AsyncClient() as client:
         ohlc_request = await client.get(
