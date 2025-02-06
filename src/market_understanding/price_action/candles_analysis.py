@@ -365,7 +365,6 @@ async def get_market_condition(
                                 # update all under resolution
                                 if tick_delta > resolution:
 
-
                                     log.warning(
                                         f" ohlc_resolution before {ohlc_resolution} {len(ohlc_resolution)} {[o["tick"] for o in ohlc_resolution]}"
                                     )
@@ -415,6 +414,7 @@ async def get_market_condition(
 
 
                                     cached_candles_data_is_updated = False
+
                                 # partial update
                                 else:
 
@@ -427,16 +427,7 @@ async def get_market_condition(
                                     ohlc_high = ohlc_tick_max_elements["high"]
                                     ohlc_low = ohlc_tick_max_elements["low"]
 
-                                    log.info(
-                                        f" ohlc_high {ohlc_high} high_from_exchange {high_from_exchange} ohlc_low {ohlc_low} low_from_exchange {low_from_exchange}"
-                                    )
-
                                     if high_from_exchange > ohlc_high:
-
-
-                                        log.critical(
-                                            f" high_from_exchange > ohlc_high {high_from_exchange > ohlc_high}"
-                                        )
 
                                         updating_cached_values(
                                             cached_candles_data,
@@ -447,17 +438,10 @@ async def get_market_condition(
                                             high_from_exchange,
                                         )
 
-                                        log.warning(
-                                            f" ohlc_resolution after {ohlc_resolution}"
-                                        )
                                         cached_candles_data_is_updated = False
 
+
                                     if low_from_exchange < ohlc_low:
-
-
-                                        log.critical(
-                                            f" low_from_exchange < ohlc_low {low_from_exchange < ohlc_low}"
-                                        )
 
                                         updating_cached_values(
                                             cached_candles_data,
@@ -466,10 +450,6 @@ async def get_market_condition(
                                             ohlc_tick_max,
                                             "low",
                                             low_from_exchange,
-                                        )
-
-                                        log.warning(
-                                            f" ohlc_resolution after {ohlc_resolution}"
                                         )
 
                                         cached_candles_data_is_updated = False
