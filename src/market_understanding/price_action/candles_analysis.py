@@ -373,11 +373,19 @@ async def get_market_condition(
                                         f" tick_delta > resolution {tick_delta > resolution}"
                                     )
 
-                                    updated_data = await get_ohlc_data(
+                                    log.debug(f"old data {result}")
+
+                                    updated_data_all = await get_ohlc_data(
                                         instrument_name,
                                         qty_candles,
                                         resolution,
-                                    )[0]
+                                    )
+
+                                    log.warning(f"updated_data {updated_data_all} {[o["tick"] for o in updated_data_all]}")
+                                    
+                                    updated_data = updated_data[0]
+
+                                    log.warning(f"updated_data {updated_data} {[o["tick"] for o in updated_data]}")
 
                                     result = [
                                         o
@@ -391,9 +399,6 @@ async def get_market_condition(
                                             if instrument_name in i["instrument_name"]
                                         ][0]["ohlc"]
                                     ][0]
-
-                                    log.debug(f"old data {result}")
-                                    log.warning(f"updated_data {updated_data} {[o["tick"] for o in updated_data]}")
 
                                     [
                                         o
