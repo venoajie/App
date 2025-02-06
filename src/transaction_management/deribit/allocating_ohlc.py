@@ -312,7 +312,7 @@ async def updating_ohlc(
                             result
                             )
             
-            await asyncio.sleep(3)
+#            await asyncio.sleep(3)
 
     except Exception as error:
 
