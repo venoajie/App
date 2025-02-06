@@ -294,6 +294,8 @@ async def updating_ohlc(
                                         )
                         
                         result = await get_ohlc_data(end_point)
+                        
+                        print (result)
 
                         await ohlc_result_per_time_frame (
                             instrument_name,
@@ -313,7 +315,7 @@ async def updating_ohlc(
     except Exception as error:
 
         await telegram_bot_sendtext(
-            f"cancelling active orders - {error}",
+            f"updating_ohlc - {error}",
             "general_error",
         )
 
