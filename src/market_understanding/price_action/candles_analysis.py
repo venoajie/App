@@ -373,19 +373,13 @@ async def get_market_condition(
                                         f" tick_delta > resolution {tick_delta > resolution}"
                                     )
 
-                                    log.debug(f"old data {result}")
-
-                                    updated_data_all = await get_ohlc_data(
+                                    updated_data = await get_ohlc_data(
                                         instrument_name,
                                         qty_candles,
                                         resolution,
                                     )
 
-                                    log.warning(f"updated_data_all {updated_data_all} {[o["tick"] for o in updated_data_all]}")
-                                    
-                                    updated_data = updated_data_all[0]
-
-                                    log.warning(f"updated_data {updated_data} ")
+                                    log.warning(f"updated_data {updated_data} {[o["tick"] for o in updated_data]} ")
 
                                     result = [
                                         o
@@ -411,13 +405,37 @@ async def get_market_condition(
                                             ]
                                             if instrument_name in i["instrument_name"]
                                         ][0]["ohlc"]
+
                                     ][0] = updated_data
+
+                                    log.debug(f"old data {result}")
+
+                                    for new_data in updated_data_all:
+                                        log.debug (f"new_data {new_data}")
+                                        new_data_tick = new_data["tick"]
+                                        log.debug (f"new_data_tick {new_data_tick}")
+                                        
+                                        new_data_tick_in_current_ohlc = [o for o in ohlc_resolution if ["tick"] != new_data_tick]
+                                        log.warning (f"new_data_tick_in_current_ohlc {new_data_tick_in_current_ohlc}")
+                                        if new_data_tick_in_current_ohlc:
+                                            [
+                                        o
+                                        for o in [
+                                            i
+                                            for i in [
+                                                y
+                                                for y in candles_data_instrument
+                                                if resolution == y["resolution"]
+                                            ]
+                                            if instrument_name in i["instrument_name"]
+                                        ][0]["ohlc"]
+
+                                    ].append(new_data)
+                                            
 
                                     log.warning(
                                         f" ohlc_resolution after {ohlc_resolution} {len(ohlc_resolution)} {[o["tick"] for o in ohlc_resolution]}"
                                     )
-
-
                                     cached_candles_data_is_updated = False
 
                                 # partial update
