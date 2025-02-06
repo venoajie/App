@@ -410,7 +410,7 @@ async def get_market_condition(
 
                                     log.debug(f"old data {result}")
 
-                                    for new_data in updated_data_all:
+                                    for new_data in updated_data:
                                         log.debug (f"new_data {new_data}")
                                         new_data_tick = new_data["tick"]
                                         log.debug (f"new_data_tick {new_data_tick}")
