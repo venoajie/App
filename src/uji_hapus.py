@@ -163,99 +163,23 @@ def ema_list(ohlc, ratio):
 
     return y
 
+new_data = {'tick': 1738817100000, 'open': 97635.0, 'high': 97635.0, 'low': 97568.0, 'close': 97588.5}
+ohlc_resolution = [
+    {'tick': 1738816800000, 'open': 97626.5, 'high': 97673.5, 'low': 97616.5, 'close': 97635.0}, 
+    {'tick': 1738817100000, 'open': 97635.0, 'high': 97635.0, 'low': 97568.0, 'close': 97588.5}, 
+    {'tick': 1738817400000, 'open': 97589.0, 'high': 97703.0, 'low': 97589.0, 'close': 97700.5},
+    {'tick': 1738817700000, 'open': 97700.0, 'high': 97700.5, 'low': 97671.5, 'close': 97672.0}, 
+    {'tick': 1738818000000, 'open': 97672.5, 'high': 97714.5, 'low': 97672.5, 'close': 97714.5}, 
+    {'tick': 1738818300000, 'open': 97714.5, 'high': 97714.5, 'low': 97656.0, 'close': 97714.5}]
 
-import string
-from utilities.string_modification import get_unique_elements
 
-updated_data_all = [
-    {
-        "tick": 1738807200000,
-        "open": 2789.9,
-        "high": 2795.6,
-        "low": 2785.75,
-        "close": 2792.75,
-    },
-    {
-        "tick": 1738807500000,
-        "open": 2793.65,
-        "high": 2804.1,
-        "low": 2790.55,
-        "close": 2802.5,
-    },
-    {
-        "tick": 1738807800000,
-        "open": 2802.3,
-        "high": 2805.75,
-        "low": 2797.65,
-        "close": 2801.8,
-    },
-    {
-        "tick": 1738808100000,
-        "open": 2802.7,
-        "high": 2810.3,
-        "low": 2797.65,
-        "close": 2805.5,
-    },
-    {
-        "tick": 1738808400000,
-        "open": 2806.55,
-        "high": 2816.65,
-        "low": 2803.7,
-        "close": 2806.4,
-    },
-    {
-        "tick": 1738808700000,
-        "open": 2806.75,
-        "high": 2813.95,
-        "low": 2805.9,
-        "close": 2813.95,
-    },
-]
+a = [{'name': 'kate', 'age': 25}]
+b = {'name': 'Nikki', 'age': 30}
+ohlc_resolution.append(b)
 
-ohlc_system = [
-    {
-        "tick": 1738806900000,
-        "open": 2790.9,
-        "high": 2793.95,
-        "low": 2788.5,
-        "close": 2788.95,
-    },
-    {
-        "tick": 1738807200000,
-        "open": 2789.9,
-        "high": 2795.6,
-        "low": 2785.75,
-        "close": 2792.75,
-    },
-    {
-        "tick": 1738807500000,
-        "open": 2793.65,
-        "high": 2804.1,
-        "low": 2790.55,
-        "close": 2802.5,
-    },
-    {
-        "tick": 1738807800000,
-        "open": 2802.3,
-        "high": 2805.75,
-        "low": 2797.65,
-        "close": 2801.8,
-    },
-    {
-        "tick": 1738808100000,
-        "open": 2802.7,
-        "high": 2810.3,
-        "low": 2797.65,
-        "close": 2805.5,
-    },
-    {
-        "tick": 1738808400000,
-        "open": 2806.55,
-        "high": 2816.65,
-        "low": 2803.7,
-        "close": 2808.05,
-    },
-]
+# Append the dictionary to the list
+a.append(new_data)
 
-elements = get_unique_elements(ohlc_system, updated_data_all)
-print(elements)
+print(a)
+
+log.warning (ohlc_resolution)
