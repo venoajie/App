@@ -393,7 +393,7 @@ async def get_market_condition(
                                     ][0]
 
                                     log.debug(f"old data {result}")
-                                    log.warning(f"updated_data {updated_data}")
+                                    log.warning(f"updated_data {updated_data} {[o["tick"] for o in updated_data]}")
 
                                     [
                                         o
@@ -406,7 +406,7 @@ async def get_market_condition(
                                             ]
                                             if instrument_name in i["instrument_name"]
                                         ][0]["ohlc"]
-                                    ][0] = updated_data
+                                    ][0] = updated_data[0]
 
                                     log.warning(
                                         f" ohlc_resolution after {ohlc_resolution} {len(ohlc_resolution)} {[o["tick"] for o in ohlc_resolution]}"
