@@ -29,6 +29,7 @@ from transaction_management.deribit.api_requests import SendApiRequest
 from transaction_management.deribit.avoiding_double_ids import \
     avoiding_double_ids
 from market_understanding.price_action.candles_analysis import get_market_condition
+from transaction_management.deribit.allocating_ohlc import updating_ohlc
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
 from transaction_management.deribit.capturing_user_changes import \
@@ -189,6 +190,11 @@ async def main():
                 client_redis,
                 config_app,
                 np),
+            
+            updating_ohlc(
+                client_redis,
+                config_app,
+                ),
             
                         )  
 

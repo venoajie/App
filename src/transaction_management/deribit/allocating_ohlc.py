@@ -7,6 +7,13 @@ import asyncio
 
 # import json
 import httpx
+from configuration.label_numbering import get_now_unix_time
+from messaging.telegram_bot import telegram_bot_sendtext
+from transaction_management.deribit.api_requests import get_ohlc_data
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,
+)
 
 from db_management.sqlite_management import (
     executing_query_with_return,
@@ -226,3 +233,121 @@ async def inserting_open_interest(
 
     except Exception as error:
         print(f"error allocating ohlc {error}")
+
+
+async def updating_ohlc(
+    client_redis,
+    config_app,
+    ) -> None:
+    """ """   
+    
+    try:
+        
+        end_timestamp =     get_now_unix_time() 
+        
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
+
+        # get tradable strategies
+        tradable_config_app = config_app["tradable"]
+
+        # get TRADABLE currencies
+        currencies: list = [o["spot"] for o in tradable_config_app][0]
+
+        while True:
+                
+            for currency in currencies:
+                
+                instrument_name= f"{currency}-PERPETUAL"
+            
+                time_frame= [3,5,15,60,30,"1D"]
+                    
+                ONE_SECOND = 1000
+                
+                one_minute = ONE_SECOND * 60
+                
+                WHERE_FILTER_TICK: str = "tick"
+                
+                for resolution in time_frame:
+                    
+                    table_ohlc= f"ohlc{resolution}_{currency.lower()}_perp_json" 
+                                
+                    last_tick_query_ohlc_resolution: str = querying_arithmetic_operator (
+                        WHERE_FILTER_TICK, 
+                        "MAX",
+                        table_ohlc
+                        )
+                    
+                    start_timestamp: int = await last_tick_fr_sqlite (last_tick_query_ohlc_resolution)
+                    
+                    if resolution == "1D":
+                        delta= (end_timestamp - start_timestamp)/(one_minute * 60 * 24)
+                
+                    else:
+                        delta= (end_timestamp - start_timestamp)/(one_minute * resolution)
+                                
+                    if delta > 1:
+                        end_point = ohlc_end_point(instrument_name,
+                                        resolution,
+                                        start_timestamp,
+                                        end_timestamp,
+                                        )
+                        
+                        result = await get_ohlc_data(end_point)
+
+                        await ohlc_result_per_time_frame (
+                            instrument_name,
+                            resolution,
+                            result,
+                            table_ohlc,
+                            WHERE_FILTER_TICK, 
+                            )
+
+                        await insert_tables(
+                            table_ohlc, 
+                            result
+                            )
+            
+            await asyncio.sleep(3)
+
+    except Exception as error:
+
+        await telegram_bot_sendtext(
+            f"cancelling active orders - {error}",
+            "general_error",
+        )
+
+        parse_error_message(error)
+
+
+async def get_ohlc_data(
+    instrument_name: str,
+    qty_candles: int,
+    resolution: list,
+) -> list:
+    """_summary_
+    https://blog.apify.com/python-cache-complete-guide/]
+    data caching
+    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
+
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    now_utc = datetime.now()
+
+    now_unix = convert_time_to_unix(now_utc)
+
+    start_timestamp = now_unix - (60000 * resolution) * qty_candles
+
+    end_point = ohlc_end_point(
+        instrument_name,
+        resolution,
+        start_timestamp,
+        now_unix,
+    )
+
+    return await send_request_to_url(end_point)
