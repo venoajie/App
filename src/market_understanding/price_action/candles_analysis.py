@@ -415,9 +415,9 @@ async def get_market_condition(
                                         new_data_tick = new_data["tick"]
                                         log.debug (f"new_data_tick {new_data_tick}")
                                         
-                                        new_data_tick_in_current_ohlc = [o for o in ohlc_resolution if ["tick"] != new_data_tick]
-                                        log.warning (f"new_data_tick_in_current_ohlc {new_data_tick_in_current_ohlc}")
-                                        if new_data_tick_in_current_ohlc:
+                                        new_data_tick_in_current_ohlc = [o for o in ohlc_resolution if o["tick"] == new_data_tick]
+                                        log.warning (f"new_data_tick_in_current_ohlc {new_data_tick_in_current_ohlc} {not new_data_tick_in_current_ohlc}")
+                                        if not new_data_tick_in_current_ohlc:
                                             [
                                         o
                                         for o in [
