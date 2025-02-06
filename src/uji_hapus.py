@@ -163,23 +163,33 @@ def ema_list(ohlc, ratio):
 
     return y
 
-new_data = {'tick': 1738817100000, 'open': 97635.0, 'high': 97635.0, 'low': 97568.0, 'close': 97588.5}
-ohlc_resolution = [
-    {'tick': 1738816800000, 'open': 97626.5, 'high': 97673.5, 'low': 97616.5, 'close': 97635.0}, 
-    {'tick': 1738817100000, 'open': 97635.0, 'high': 97635.0, 'low': 97568.0, 'close': 97588.5}, 
-    {'tick': 1738817400000, 'open': 97589.0, 'high': 97703.0, 'low': 97589.0, 'close': 97700.5},
-    {'tick': 1738817700000, 'open': 97700.0, 'high': 97700.5, 'low': 97671.5, 'close': 97672.0}, 
-    {'tick': 1738818000000, 'open': 97672.5, 'high': 97714.5, 'low': 97672.5, 'close': 97714.5}, 
-    {'tick': 1738818300000, 'open': 97714.5, 'high': 97714.5, 'low': 97656.0, 'close': 97714.5}]
+new_data = {'tick': "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}
 
 
-a = [{'name': 'kate', 'age': 25}]
-b = {'name': 'Nikki', 'age': 30}
-ohlc_resolution.append(b)
+cached_candles_data = [
+    {
+        'instrument_name': 'BTC-PERPETUAL', 
+        'resolution': 60, 
+        'ohlc': [
+            {
+                'tick': 1738810800000, 'open': 97398.5, 'high': 97500.0, 'low': 97115.0, 'close': 97360.0}, {'tick': 1738814400000, 'open': 97384.5, 'high': 97872.0, 'low': 97306.5, 'close': 97672.0}, {'tick': 1738818000000, 'open': 97672.5, 'high': 97906.5, 'low': 97635.5, 'close': 97860.0}, {'tick': 1738821600000, 'open': 97860.0, 'high': 98474.0, 'low': 97753.0, 'close': 98390.0}, {'tick': 1738825200000, 'open': 98398.5, 'high': 98401.0, 'low': 98100.0, 'close': 98257.5}, {'tick': 1738828800000, 'open': 98257.5, 'high': 98339.0, 'low': 97996.0, 'close': 98083.5}
+                ]
+        }, 
+    {
+            'instrument_name': 'BTC-PERPETUAL', 'resolution': 15, 'ohlc': [{'tick': 1738826100000, 'open': 98129.0, 'high': 98309.0, 'low': 98129.0, 'close': 98210.5}, {'tick': 1738827000000, 'open': 98238.5, 'high': 98364.0, 'low': 98185.5, 'close': 98189.0}, {'tick': 1738827900000, 'open': 98189.0, 'high': 98282.0, 'low': 98100.0, 'close': 98257.5}, {'tick': 1738828800000, 'open': 98257.5, 'high': 98339.0, 'low': 98160.5, 'close': 98210.5}, {'tick': 1738829700000, 'open': 98221.0, 'high': 98250.0, 'low': 98110.5, 'close': 98120.0}, {'tick': 1738830600000, 'open': 98119.5, 'high': 98166.0, 'low': 97996.0, 'close': 98083.5}]}, {'instrument_name': 'BTC-PERPETUAL', 'resolution': 5, 'ohlc': [{'tick': 1738829400000, 'open': 98325.5, 'high': 98325.5, 'low': 98190.0, 'close': 98210.5}, {'tick': 1738829700000, 'open': 98221.0, 'high': 98250.0, 'low': 98198.5, 'close': 98214.5}, {'tick': 1738830000000, 'open': 98218.0, 'high': 98218.0, 'low': 98117.0, 'close': 98128.0}, {'tick': 1738830300000, 'open': 98128.0, 'high': 98146.5, 'low': 98110.5, 'close': 98120.0}, {'tick': 1738830600000, 'open': 98119.5, 'high': 98166.0, 'low': 98064.5, 'close': 98064.5}, {'tick': 1738830900000, 'open': 98052.0, 'high': 98109.0, 'low': 97996.0, 'close': 98083.5}]}, {'instrument_name': 'ETH-PERPETUAL', 'resolution': 60, 'ohlc': [{'tick': 1738810800000, 'open': 2808.0, 'high': 2819.55, 'low': 2790.05, 'close': 2807.3}, {'tick': 1738814400000, 'open': 2806.5, 'high': 2832.2, 'low': 2806.35, 'close': 2822.0}, {'tick': 1738818000000, 'open': 2822.65, 'high': 2850.3, 'low': 2821.3, 'close': 2832.75}, {'tick': 1738821600000, 'open': 2832.7, 'high': 2857.1, 'low': 2823.45, 'close': 2853.35}, {'tick': 1738825200000, 'open': 2853.6, 'high': 2855.3, 'low': 2827.55, 'close': 2833.35}, {'tick': 1738828800000, 'open': 2833.2, 'high': 2846.35, 'low': 2825.0, 'close': 2833.85}]}, {'instrument_name': 'ETH-PERPETUAL', 'resolution': 15, 'ohlc': [{'tick': 1738826100000, 'open': 2838.3, 'high': 2845.2, 'low': 2838.3, 'close': 2840.2}, {'tick': 1738827000000, 'open': 2840.55, 'high': 2844.2, 'low': 2834.2, 'close': 2837.75}, {'tick': 1738827900000, 'open': 2837.65, 'high': 2838.9, 'low': 2827.55, 'close': 2833.35}, {'tick': 1738828800000, 'open': 2833.2, 'high': 2845.3, 'low': 2825.0, 'close': 2837.3}, {'tick': 1738829700000, 'open': 2837.4, 'high': 2846.35, 'low': 2835.95, 'close': 2840.25}, {'tick': 1738830600000, 'open': 2840.25, 'high': 2842.1, 'low': 2829.35, 'close': 2833.85}]}, {'instrument_name': 'ETH-PERPETUAL', 'resolution': 5, 'ohlc': [{'tick': 1738829400000, 'open': 2841.1, 'high': 2842.0, 'low': 2835.9, 'close': 2837.3}, {'tick': 1738829700000, 'open': 2837.4, 'high': 2844.35, 'low': 2835.95, 'close': 2844.35}, {'tick': 1738830000000, 'open': 2844.4, 'high': 2846.25, 'low': 2840.25, 'close': 2843.5}, {'tick': 1738830300000, 'open': 2843.65, 'high': 2846.35, 'low': 2839.1, 'close': 2840.25}, {'tick': 1738830600000, 'open': 2840.25, 'high': 2842.1, 'low': 2833.5, 'close': 2833.5}, {'tick': 1738830900000, 'open': 2832.8, 'high': 2835.45, 'low': 2829.35, 'close': 2833.85}]}]
 
-# Append the dictionary to the list
-a.append(new_data)
+instrument_name = "BTC-PERPETUAL"
+resolution = 5
+[i for i in [y for y in [
+                            o
+                            for o in cached_candles_data
+                            if instrument_name in o["instrument_name"]
+                        ] if resolution ==y["resolution"]][0]["ohlc"]][0]=(new_data)
 
-print(a)
+log.debug (cached_candles_data)
 
-log.warning (ohlc_resolution)
+log.warning ([i for i in [y for y in [
+                            o
+                            for o in cached_candles_data
+                            if instrument_name in o["instrument_name"]
+                        ] if resolution ==y["resolution"]][0]["ohlc"]])

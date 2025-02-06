@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 [[tradable]]
 spot = [
@@ -7,6 +6,7 @@ spot = [
     #"XRP",
     #"SOL",     
        ]
+
 strategy_labels = [#represert strategy
     "hedgingSpot",
     "futureSpread",
@@ -19,6 +19,12 @@ strategy_labels = [#represert strategy
        ]
 mode_full = [true]
 reduce_only = [false]
+
+[[resolution]]
+ohlc1 = 60
+ohlc5 = 5
+ohlc15 = 15
+ohlc60 = 60
 
 [[relevant_tables]]
 my_trades_table = "my_trades_all_json"
