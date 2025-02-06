@@ -374,8 +374,6 @@ async def get_market_condition(
                                         f" tick_delta > resolution {tick_delta > resolution}"
                                     )
 
-                                    cached_candles_data_is_updated = True
-
                                     updated_data = await get_ohlc_data(
                                         instrument_name,
                                         qty_candles,
@@ -415,6 +413,8 @@ async def get_market_condition(
                                         f" ohlc_resolution after {ohlc_resolution} {len(ohlc_resolution)} {[o["tick"] for o in ohlc_resolution]}"
                                     )
 
+
+                                    cached_candles_data_is_updated = False
                                 # partial update
                                 else:
 
@@ -433,7 +433,6 @@ async def get_market_condition(
 
                                     if high_from_exchange > ohlc_high:
 
-                                        cached_candles_data_is_updated = True
 
                                         log.critical(
                                             f" high_from_exchange > ohlc_high {high_from_exchange > ohlc_high}"
@@ -451,10 +450,10 @@ async def get_market_condition(
                                         log.warning(
                                             f" ohlc_resolution after {ohlc_resolution}"
                                         )
+                                        cached_candles_data_is_updated = False
 
                                     if low_from_exchange < ohlc_low:
 
-                                        cached_candles_data_is_updated = True
 
                                         log.critical(
                                             f" low_from_exchange < ohlc_low {low_from_exchange < ohlc_low}"
@@ -473,6 +472,8 @@ async def get_market_condition(
                                             f" ohlc_resolution after {ohlc_resolution}"
                                         )
 
+                                        cached_candles_data_is_updated = False
+                                        
                         result = []
 
                         if cached_candles_data_is_updated:
