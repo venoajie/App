@@ -381,13 +381,18 @@ async def get_market_condition(
 
                                     log.warning(f"updated_data {updated_data} {[o["tick"] for o in updated_data]} ")
 
+
                                     result = [
                                         o
                                         for o in [
                                             i
                                             for i in [
                                                 y
-                                                for y in candles_data_instrument
+                                                for y in [
+                            x
+                            for x in cached_candles_data
+                            if instrument_name in x["instrument_name"]
+                        ]
                                                 if resolution == y["resolution"]
                                             ]
                                             if instrument_name in i["instrument_name"]
@@ -410,7 +415,11 @@ async def get_market_condition(
                                             i
                                             for i in [
                                                 y
-                                                for y in candles_data_instrument
+                                                for y in [
+                            x
+                            for x in cached_candles_data
+                            if instrument_name in x["instrument_name"]
+                        ]
                                                 if resolution == y["resolution"]
                                             ]
                                             if instrument_name in i["instrument_name"]
