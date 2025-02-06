@@ -385,7 +385,7 @@ async def get_market_condition(
                                     
                                     updated_data = updated_data_all[0]
 
-                                    log.warning(f"updated_data {updated_data} {[o["tick"] for o in updated_data]}")
+                                    log.warning(f"updated_data {updated_data} ")
 
                                     result = [
                                         o
