@@ -8,8 +8,8 @@ import aiohttp
 import httpx
 from aiohttp.helpers import BasicAuth
 
-import sys,orjson
-sys.modules["json"] = orjson
+#import sys,orjson
+#sys.modules["json"] = orjson
 # installed
 from dataclassy import dataclass
 from loguru import logger as log
