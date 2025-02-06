@@ -377,7 +377,7 @@ async def get_market_condition(
                                         instrument_name,
                                         qty_candles,
                                         resolution,
-                                    )
+                                    )[0]
 
                                     result = [
                                         o
@@ -406,7 +406,7 @@ async def get_market_condition(
                                             ]
                                             if instrument_name in i["instrument_name"]
                                         ][0]["ohlc"]
-                                    ][0] = updated_data[0]
+                                    ][0] = updated_data
 
                                     log.warning(
                                         f" ohlc_resolution after {ohlc_resolution} {len(ohlc_resolution)} {[o["tick"] for o in ohlc_resolution]}"
