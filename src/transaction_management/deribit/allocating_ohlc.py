@@ -7,6 +7,7 @@ import asyncio
 
 # import json
 import httpx
+from loguru import logger as log
 from utilities.time_modification import  get_now_unix_time
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_ohlc_data

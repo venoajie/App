@@ -97,9 +97,12 @@ async def send_requests_to_url(end_point: str) -> list:
         result = client.get(
             end_point, 
             follow_redirects=True,
-            ).json()["result"]
+            )
+        
+        log.warning(result)
+        log.warning(result.json()["result"])
 
-    return result
+    return result.json()["result"]
 
 async def get_instruments(currency) -> list:
     # Set endpoint
