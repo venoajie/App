@@ -104,6 +104,21 @@ async def main():
         # parsing config file
         config_app = get_config(file_toml)
 
+        # get tradable strategies
+        tradable_config_app = config_app["tradable"]
+
+        # get TRADABLE currencies
+        currencies: list = [o["spot"] for o in tradable_config_app][0]
+
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+
+        resolutions = [
+            int("".join([o for o in x if o.isdigit()]))
+            for x in redis_channels
+            if "chart" in x
+        ]
+
         queue = Queue(maxsize=1)
         
         stream = StreamingAccountData(sub_account_id)
@@ -168,8 +183,6 @@ async def main():
                 config_app,
                 np),
             
-
-
             
             hedging_spot(
                 private_data,
@@ -197,7 +210,9 @@ async def main():
 
             updating_ohlc(
                 client_redis,
-                config_app,),
+                currencies,
+                resolutions,
+                redis_channels,),
             
                         )  
 
