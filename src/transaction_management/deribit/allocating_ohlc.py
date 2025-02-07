@@ -109,9 +109,6 @@ async def ohlc_result_per_time_frame(
         last_tick1_fr_sqlite == last_tick_fr_data_orders
     )
 
-    insert_new_ohlc_and_replace_previous_ohlc_using_fix_data = (
-        last_tick_fr_data_orders > last_tick1_fr_sqlite
-    )
 
     if refilling_current_ohlc_table_with_updated_streaming_data:
 
@@ -124,9 +121,16 @@ async def ohlc_result_per_time_frame(
             "is",
         )
 
+    insert_new_ohlc_and_replace_previous_ohlc_using_fix_data = (
+        last_tick_fr_data_orders > last_tick1_fr_sqlite
+    )
+
     if insert_new_ohlc_and_replace_previous_ohlc_using_fix_data:
 
-        await insert_tables(TABLE_OHLC1, data_orders)
+        await insert_tables(
+            TABLE_OHLC1, 
+            data_orders,
+            )
 
         await replace_previous_ohlc_using_fix_data(
             instrument_ticker,
@@ -138,15 +142,16 @@ async def ohlc_result_per_time_frame(
         )
 
 
-def currency_inline_with_database_address(currency: str, database_address: str) -> bool:
+def currency_inline_with_database_address(
+    currency: str, 
+    database_address: str,
+    ) -> bool:
 
     return currency.lower() in str(database_address)
 
 
 async def updating_ohlc(
     client_redis: object,
-    currencies: list,
-    resolutions: list,
     redis_channels: list,
 ) -> None:
     """ """
@@ -185,6 +190,8 @@ async def updating_ohlc(
                     if chart_channel in message_channel:
 
                         data = message_byte_data["data"]
+                        
+                        log.warning(data)
 
                         instrument_name = message_byte_data["instrument_name"]
 
@@ -198,7 +205,9 @@ async def updating_ohlc(
 
                         last_tick_query_ohlc_resolution: str = (
                             querying_arithmetic_operator(
-                                WHERE_FILTER_TICK, "MAX", table_ohlc
+                                WHERE_FILTER_TICK, 
+                                "MAX",
+                                table_ohlc,
                             )
                         )
 
@@ -261,43 +270,3 @@ async def updating_ohlc(
 
         parse_error_message(error)
 
-
-async def inserting_open_interest(
-    currency,
-    WHERE_FILTER_TICK,
-    TABLE_OHLC1,
-    data_orders,
-) -> None:
-    """ """
-    try:
-
-        if (
-            currency_inline_with_database_address(currency, TABLE_OHLC1)
-            and "open_interest" in data_orders
-        ):
-
-            open_interest = data_orders["open_interest"]
-
-            last_tick_query_ohlc1: str = querying_arithmetic_operator(
-                "tick", "MAX", TABLE_OHLC1
-            )
-
-            last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
-
-            await update_status_data(
-                TABLE_OHLC1,
-                "open_interest",
-                last_tick1_fr_sqlite,
-                WHERE_FILTER_TICK,
-                open_interest,
-                "is",
-            )
-
-    except Exception as error:
-
-        await telegram_bot_sendtext(
-            f"error inserting open interest - {error}",
-            "general_error",
-        )
-
-        parse_error_message(error)

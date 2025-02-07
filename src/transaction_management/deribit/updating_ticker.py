@@ -13,11 +13,6 @@ from utilities.system_tools import (
     parse_error_message,
     provide_path_for_file,
 )
-from transaction_management.deribit.allocating_ohlc import (
-    inserting_open_interest,
-    ohlc_result_per_time_frame,
-)
-
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
@@ -271,3 +266,45 @@ def ohlc_end_point(
     url = f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
 
     return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
+
+
+
+async def inserting_open_interest(
+    currency,
+    WHERE_FILTER_TICK,
+    TABLE_OHLC1,
+    data_orders,
+) -> None:
+    """ """
+    try:
+
+        if (
+            currency_inline_with_database_address(currency, TABLE_OHLC1)
+            and "open_interest" in data_orders
+        ):
+
+            open_interest = data_orders["open_interest"]
+
+            last_tick_query_ohlc1: str = querying_arithmetic_operator(
+                "tick", "MAX", TABLE_OHLC1
+            )
+
+            last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
+
+            await update_status_data(
+                TABLE_OHLC1,
+                "open_interest",
+                last_tick1_fr_sqlite,
+                WHERE_FILTER_TICK,
+                open_interest,
+                "is",
+            )
+
+    except Exception as error:
+
+        await telegram_bot_sendtext(
+            f"error inserting open interest - {error}",
+            "general_error",
+        )
+
+        parse_error_message(error)

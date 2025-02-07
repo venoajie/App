@@ -212,8 +212,6 @@ async def main():
 
             updating_ohlc(
                 client_redis,
-                currencies,
-                resolutions,
                 redis_channels,),
             
                         )  
