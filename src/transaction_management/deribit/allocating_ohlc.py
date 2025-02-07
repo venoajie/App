@@ -267,11 +267,12 @@ async def updating_ohlc(
                                 
                     if delta > 1:
                         
-                        result = await get_ohlc_data(instrument_name,
-                                        resolution,
-                                        start_timestamp,
-                                        end_timestamp,
-)
+                        result = await get_ohlc_data(
+                            instrument_name,
+                            resolution,
+                            start_timestamp,
+                            end_timestamp,
+                            )
                         
                         print (result)
 
@@ -298,36 +299,3 @@ async def updating_ohlc(
         )
 
         parse_error_message(error)
-
-
-async def get_ohlc_data(
-    instrument_name: str,
-    qty_candles: int,
-    resolution: list,
-) -> list:
-    """_summary_
-    https://blog.apify.com/python-cache-complete-guide/]
-    data caching
-    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
-
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
-    now_utc = datetime.now()
-
-    now_unix = convert_time_to_unix(now_utc)
-
-    start_timestamp = now_unix - (60000 * resolution) * qty_candles
-
-    end_point = ohlc_end_point(
-        instrument_name,
-        resolution,
-        start_timestamp,
-        now_unix,
-    )
-
-    return await send_request_to_url(end_point)

@@ -131,16 +131,35 @@ async def async_get_tickers(instrument_name: str) -> list:
     return await send_requests_to_url(end_point)
 
 
-
 def ohlc_end_point(
     instrument_ticker: str,
     resolution: int,
-    start_timestamp: int,
-    end_timestamp: int,
+    qty_or_start_time_stamp: int,
+    qty_as_start_time_stamp: bool = True,
+    end_timestamp_is_now: int = None,
 ) -> str:
-
-
+        
     url = f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
+
+    now_unix = convert_time_to_unix(now_utc)
+    
+    if qty_as_start_time_stamp:
+
+        now_utc = datetime.now()
+
+
+        start_timestamp = now_unix - (60000 * resolution) * qty_as_start_time_stamp
+
+
+    else:
+        start_timestamp = qty_or_start_time_stamp
+        
+    if not end_timestamp_is_now:
+
+        end_timestamp = now_unix
+
+    else:
+        end_timestamp = end_timestamp_is_now
 
     return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
 
@@ -148,16 +167,46 @@ def ohlc_end_point(
 async def get_ohlc_data(
     instrument_ticker: str,
     resolution: int,
-    start_timestamp: int,
-    end_timestamp: int,
+    qty_or_start_time_stamp: int,
+    qty_as_start_time_stamp: bool = True,
+    end_timestamp_is_now: int = None,
+    ) -> list:
+    # Set endpoint
+    
+   
+    end_point = ohlc_end_point(
+    instrument_ticker,
+    resolution,
+    qty_or_start_time_stamp,
+    qty_as_start_time_stamp,
+    end_timestamp_is_now,
+    )
+
+    result = await send_requests_to_url(end_point)
+    
+    log.debug(result)
+    
+    return transform_nested_dict_to_list_ohlc(result)
+
+
+async def get_ohlc_data_qty(
+    instrument_name: str,
+    resolution: int,
+    qty_candles: int,    
     ) -> list:
     # Set endpoint
 
+    now_utc = datetime.now()
+
+    now_unix = convert_time_to_unix(now_utc)
+
+    start_timestamp = now_unix - (60000 * resolution) * qty_candles
+
     end_point = ohlc_end_point(
-        instrument_ticker,
+        instrument_name,
         resolution,
         start_timestamp,
-        end_timestamp,
+        now_unix,
     )
 
     result = await send_requests_to_url(end_point)
