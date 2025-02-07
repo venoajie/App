@@ -8,7 +8,7 @@ import asyncio
 # import json
 import httpx
 from loguru import logger as log
-from utilities.time_modification import  get_now_unix_time
+from utilities.time_modification import get_now_unix_time
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_ohlc_data
 from utilities.system_tools import (
@@ -23,6 +23,7 @@ from db_management.sqlite_management import (
 )
 from utilities.string_modification import transform_nested_dict_to_list
 from utilities.system_tools import async_raise_error_message
+
 
 async def recording_multiple_time_frames(
     instrument_ticker: str,
@@ -44,7 +45,8 @@ async def recording_multiple_time_frames(
                 instrument_ticker,
                 resolution,
                 start_timestamp,
-                end_timestamp,)
+                end_timestamp,
+            )
 
             result = [
                 o
@@ -97,18 +99,16 @@ async def replace_previous_ohlc_using_fix_data(
 ) -> int:
     """ """
     try:
-        
-        ohlc_request = await get_ohlc_data(instrument_ticker,
-                                        resolution,
-                                        last_tick1_fr_sqlite,
-                                        last_tick_fr_data_orders,
-)
 
-        result = [
-            o
-            for o in (ohlc_request)
-            if o["tick"] == last_tick1_fr_sqlite
-        ][0]
+        ohlc_request = await get_ohlc_data(
+            instrument_ticker,
+            resolution,
+            last_tick1_fr_sqlite,
+            False,
+            last_tick1_fr_sqlite,
+            )
+
+        result = [o for o in (ohlc_request) if o["tick"] == last_tick1_fr_sqlite][0]
 
         await update_status_data(
             TABLE_OHLC1,
@@ -135,8 +135,8 @@ async def ohlc_result_per_time_frame(
 ) -> None:
 
     last_tick_query_ohlc1: str = querying_arithmetic_operator(
-        WHERE_FILTER_TICK, 
-        "MAX", 
+        WHERE_FILTER_TICK,
+        "MAX",
         TABLE_OHLC1,
     )
 
@@ -218,11 +218,11 @@ async def inserting_open_interest(
 async def updating_ohlc(
     client_redis,
     config_app,
-    ) -> None:
-    """ """   
-    
+) -> None:
+    """ """
+
     try:
-        
+
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
@@ -234,66 +234,73 @@ async def updating_ohlc(
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        
-        resolutions = [int("".join([o for o in x if o.isdigit()]))  for x in redis_channels if "chart" in x]
+
+        resolutions = [
+            int("".join([o for o in x if o.isdigit()]))
+            for x in redis_channels
+            if "chart" in x
+        ]
 
         while True:
-        
-            end_timestamp =  get_now_unix_time() 
-                    
+
+            end_timestamp = get_now_unix_time()
+
             for currency in currencies:
-                
-                instrument_name= f"{currency}-PERPETUAL"
-                    
+
+                instrument_name = f"{currency}-PERPETUAL"
+
                 ONE_SECOND = 1000
-                
+
                 one_minute = ONE_SECOND * 60
-                
+
                 WHERE_FILTER_TICK: str = "tick"
-                
+
                 for resolution in resolutions:
-                    
-                    table_ohlc= f"ohlc{resolution}_{currency.lower()}_perp_json" 
-                                
-                    last_tick_query_ohlc_resolution: str = querying_arithmetic_operator (
-                        WHERE_FILTER_TICK, 
-                        "MAX",
-                        table_ohlc
-                        )
-                    
-                    start_timestamp: int = await last_tick_fr_sqlite (last_tick_query_ohlc_resolution)
-                    
+
+                    table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
+
+                    last_tick_query_ohlc_resolution: str = querying_arithmetic_operator(
+                        WHERE_FILTER_TICK, "MAX", table_ohlc
+                    )
+
+                    start_timestamp: int = await last_tick_fr_sqlite(
+                        last_tick_query_ohlc_resolution
+                    )
+
                     if resolution == "1D":
-                        delta= (end_timestamp - start_timestamp)/(one_minute * 60 * 24)
-                
+                        delta = (end_timestamp - start_timestamp) / (
+                            one_minute * 60 * 24
+                        )
+
                     else:
-                        delta= (end_timestamp - start_timestamp)/(one_minute * resolution)
-                                
-                    log.error (f"resolution {resolution} start_timestamp {start_timestamp} end_timestamp {end_timestamp} delta {delta}")
+                        delta = (end_timestamp - start_timestamp) / (
+                            one_minute * resolution
+                        )
+
+                    log.error(
+                        f"resolution {resolution} start_timestamp {start_timestamp} end_timestamp {end_timestamp} delta {delta}"
+                    )
                     if delta > 1:
-                        
+
                         result = await get_ohlc_data(
                             instrument_name,
                             resolution,
                             start_timestamp,
                             False,
                             end_timestamp,
-                            )
-                        
-                        await ohlc_result_per_time_frame (
+                        )
+
+                        await ohlc_result_per_time_frame(
                             instrument_name,
                             resolution,
                             result,
                             table_ohlc,
-                            WHERE_FILTER_TICK, 
-                            )
+                            WHERE_FILTER_TICK,
+                        )
 
-                        await insert_tables(
-                            table_ohlc, 
-                            result
-                            )
-            
-#            await asyncio.sleep(3)
+                        await insert_tables(table_ohlc, result)
+
+    #            await asyncio.sleep(3)
 
     except Exception as error:
 

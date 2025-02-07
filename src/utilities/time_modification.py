@@ -305,4 +305,3 @@ def get_now_unix_time() -> int:
     now_utc = convert_time_to_utc()["utc_now"]
 
     return int(convert_time_to_unix(now_utc))
-

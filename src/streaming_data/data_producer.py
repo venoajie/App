@@ -129,9 +129,12 @@ class StreamingAccountData:
 
                 # get redis channels
                 redis_channels: dict = config_app["redis_channels"][0]
-                
+
                 resolutions = [
-                    int("".join([o for o in x if o.isdigit()]))  for x in redis_channels if "chart" in x]
+                    int("".join([o for o in x if o.isdigit()]))
+                    for x in redis_channels
+                    if "chart" in x
+                ]
 
                 while True:
 
@@ -157,18 +160,18 @@ class StreamingAccountData:
 
                         for ws in ws_channel_currency:
 
-                            print (f"subscribe ws {ws}")
+                            print(f"subscribe ws {ws}")
 
                             # asyncio.create_task(
                             await self.ws_operation(
                                 operation="subscribe", ws_channel=ws
                             )
-                            
+
                         for resolution in resolutions:
-                            
+
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
 
-                            print (f"subscribe ws {ws}")
+                            print(f"subscribe ws {ws}")
 
                             # asyncio.create_task(
                             await self.ws_operation(
@@ -183,7 +186,7 @@ class StreamingAccountData:
 
                         for ws in ws_channel_instrument:
 
-                            print (f"subscribe ws {ws}")
+                            print(f"subscribe ws {ws}")
 
                             await self.ws_operation(
                                 operation="subscribe",

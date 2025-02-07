@@ -282,11 +282,11 @@ async def pairing_single_label(
             o for o in strategy_attributes if o["strategy_label"] == strategy
         ][0]
 
-        #log.error(f"my_trades_amount {my_trades_amount}")
+        # log.error(f"my_trades_amount {my_trades_amount}")
 
         for amount in my_trades_amount:
 
-            #log.error(f"amount {amount}")
+            # log.error(f"amount {amount}")
 
             my_trades_with_the_same_amount = [
                 o for o in single_label_transaction if amount == abs(o["amount"])
@@ -313,9 +313,9 @@ async def pairing_single_label(
                 )
             )
 
-            #log.error(
+            # log.error(
             #    f"my_trades_with_the_same_amount_label_non_perpetual_instrument_name {my_trades_with_the_same_amount_label_non_perpetual_instrument_name}"
-            #)
+            # )
 
             for (
                 instrument_name_future
@@ -346,7 +346,7 @@ async def pairing_single_label(
                         my_trades_perpetual_with_lower_price, "price", False
                     )
 
-                    #log.error(f"my_trades_future_sorted {my_trades_future_sorted}")
+                    # log.error(f"my_trades_future_sorted {my_trades_future_sorted}")
 
                     if my_trades_perpetual_with_lower_price_sorted:
 

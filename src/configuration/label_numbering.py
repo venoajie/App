@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from utilities.time_modification import  get_now_unix_time 
+from utilities.time_modification import get_now_unix_time
+
 
 def labelling(order: str, strategy: str, id_strategy: int = None) -> str:
     """

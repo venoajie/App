@@ -261,7 +261,6 @@ async def get_ohlc_data(
     return transform_nested_dict_to_list_ohlc(result)
 
 
-
 def ohlc_end_point(
     instrument_ticker: str,
     resolution: int,

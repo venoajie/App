@@ -15,13 +15,15 @@ from loguru import logger as log
 # user defined formula
 from configuration import config, config_oci, id_numbering
 from messaging.telegram_bot import telegram_bot_sendtext
-from utilities.time_modification import  get_now_unix_time as get_now_unix
+from utilities.time_modification import get_now_unix_time as get_now_unix
 from utilities.string_modification import (
-        transform_nested_dict_to_list_ohlc,
-    )
+    transform_nested_dict_to_list_ohlc,
+)
+
 
 def parse_dotenv(sub_account) -> dict:
     return config.main_dotenv(sub_account)
+
 
 async def private_connection(
     sub_account: str,
@@ -91,15 +93,17 @@ async def get_server_time() -> int:
 
     return result
 
+
 async def send_requests_to_url(end_point: str) -> list:
 
     async with httpx.AsyncClient() as client:
         result = await client.get(
-            end_point, 
+            end_point,
             follow_redirects=True,
-            )
-        
+        )
+
     return result.json()["result"]
+
 
 async def get_instruments(currency) -> list:
     # Set endpoint
@@ -124,7 +128,6 @@ def get_tickers(instrument_name: str) -> list:
 async def async_get_tickers(instrument_name: str) -> list:
     # Set endpoint
 
-
     end_point = (
         f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}"
     )
@@ -139,14 +142,14 @@ def ohlc_end_point(
     provided_end_timestamp: int = None,
     qty_as_start_time_stamp: bool = False,
 ) -> str:
-        
+
     url = f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
 
     now_unix = get_now_unix()
-    
+
     # start timestamp is provided
     start_timestamp = qty_or_start_time_stamp
-    
+
     # recalculate start timestamp using qty as basis point
     if not qty_as_start_time_stamp:
         start_timestamp = now_unix - (60000 * resolution) * qty_as_start_time_stamp
@@ -155,7 +158,7 @@ def ohlc_end_point(
         end_timestamp = provided_end_timestamp
     else:
         end_timestamp = now_unix
-    
+
     return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_name}&resolution={resolution}&start_timestamp={start_timestamp}"
 
 
@@ -165,20 +168,21 @@ async def get_ohlc_data(
     qty_or_start_time_stamp: int,
     qty_as_start_time_stamp: bool = False,
     end_timestamp_is_now: bool = None,
-    ) -> list:
-    
+) -> list:
+
     # Set endpoint
     end_point = ohlc_end_point(
-    instrument_name,
-    resolution,
-    qty_or_start_time_stamp,
-    qty_as_start_time_stamp,
-    end_timestamp_is_now,
+        instrument_name,
+        resolution,
+        qty_or_start_time_stamp,
+        qty_as_start_time_stamp,
+        end_timestamp_is_now,
     )
 
     result = await send_requests_to_url(end_point)
-    
+
     return transform_nested_dict_to_list_ohlc(result)
+
 
 @dataclass(unsafe_hash=True, slots=True)
 class SendApiRequest:
