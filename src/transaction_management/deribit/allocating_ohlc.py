@@ -210,7 +210,7 @@ async def updating_ohlc(
 
                         else:
                             delta = (end_timestamp - start_timestamp) / (
-                                one_minute * resolution
+                                one_minute * int(resolution)
                             )
                             
                             log.error(
