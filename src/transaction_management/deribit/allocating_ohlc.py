@@ -268,7 +268,7 @@ async def updating_ohlc(
                     else:
                         delta= (end_timestamp - start_timestamp)/(one_minute * resolution)
                                 
-                    log.error (f"start_timestamp {start_timestamp} end_timestamp {end_timestamp} delta {delta}")
+                    log.error (f"resolution {resolution} start_timestamp {start_timestamp} end_timestamp {end_timestamp} delta {delta}")
                     if delta > 1:
                         
                         result = await get_ohlc_data(
