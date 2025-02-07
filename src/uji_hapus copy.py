@@ -105,4 +105,6 @@ sub_account = {
     "uid": 148510,
 }
 
-print(sub_account["open_orders"])
+channel= "chart.trades.ETH-PERPETUAL.1D"
+
+print(channel.split(".")[3])

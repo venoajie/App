@@ -161,8 +161,13 @@ async def updating_ohlc(
         [await pubsub.subscribe(o) for o in channels]
 
 
-        while True:
+        ONE_SECOND = 1000
 
+        one_minute = ONE_SECOND * 60
+
+        WHERE_FILTER_TICK: str = "tick"
+
+        while True:
 
             try:
 
@@ -178,69 +183,59 @@ async def updating_ohlc(
 
                         data = message_byte_data["data"]
                         
-                        log.info(data)
-
                         instrument_name = message_byte_data["instrument_name"]
 
                         currency = message_byte_data["currency"]
+                    
+                        resolution = message_byte_data["resolution"]
 
                         end_timestamp = get_now_unix_time()
 
-                        for currency in currencies:
+                        instrument_name = f"{currency}-PERPETUAL"
+                    
+                        table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
 
-                            instrument_name = f"{currency}-PERPETUAL"
+                        last_tick_query_ohlc_resolution: str = querying_arithmetic_operator(
+                            WHERE_FILTER_TICK, "MAX", table_ohlc
+                        )
 
-                            ONE_SECOND = 1000
+                        start_timestamp: int = await last_tick_fr_sqlite(
+                            last_tick_query_ohlc_resolution
+                        )
 
-                            one_minute = ONE_SECOND * 60
+                        if resolution == "1D":
+                            delta = (end_timestamp - start_timestamp) / (
+                                one_minute * 60 * 24
+                            )
 
-                            WHERE_FILTER_TICK: str = "tick"
+                        else:
+                            delta = (end_timestamp - start_timestamp) / (
+                                one_minute * resolution
+                            )
+                            
+                            log.error(
+                            f"resolution {resolution} start_timestamp {start_timestamp} end_timestamp {end_timestamp} delta {delta}"
+                        )
 
-                            for resolution in resolutions:
+                        if delta > 1:
 
-                                table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
+                            result = await get_ohlc_data(
+                                instrument_name,
+                                resolution,
+                                start_timestamp,
+                                False,
+                                end_timestamp,
+                            )
+                            
+                            await ohlc_result_per_time_frame(
+                                instrument_name,
+                                resolution,
+                                result,
+                                table_ohlc,
+                                WHERE_FILTER_TICK,
+                            )
 
-                                last_tick_query_ohlc_resolution: str = querying_arithmetic_operator(
-                                    WHERE_FILTER_TICK, "MAX", table_ohlc
-                                )
-
-                                start_timestamp: int = await last_tick_fr_sqlite(
-                                    last_tick_query_ohlc_resolution
-                                )
-
-                                if resolution == "1D":
-                                    delta = (end_timestamp - start_timestamp) / (
-                                        one_minute * 60 * 24
-                                    )
-
-                                else:
-                                    delta = (end_timestamp - start_timestamp) / (
-                                        one_minute * resolution
-                                    )
-
-            #                    log.error(
-            #                        f"resolution {resolution} start_timestamp {start_timestamp} end_timestamp {end_timestamp} delta {delta}"
-            #                    )
-
-                                if delta > 1:
-
-                                    result = await get_ohlc_data(
-                                        instrument_name,
-                                        resolution,
-                                        start_timestamp,
-                                        False,
-                                        end_timestamp,
-                                    )
-                                    
-                                    await ohlc_result_per_time_frame(
-                                        instrument_name,
-                                        resolution,
-                                        result,
-                                        table_ohlc,
-                                        WHERE_FILTER_TICK,
-                                    )
-
-                                    await insert_tables(table_ohlc, result)
+                            await insert_tables(table_ohlc, result)
 
             except Exception as error:
 
