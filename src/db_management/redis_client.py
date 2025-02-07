@@ -16,7 +16,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.system_tools import parse_error_message
 
-# import redis.asyncio as aioredis
+import redis.asyncio as aioredis
 import json
 
 class RedisPubSubManager:
