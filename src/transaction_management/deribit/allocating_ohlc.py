@@ -96,20 +96,16 @@ async def replace_previous_ohlc_using_fix_data(
 ) -> int:
     """ """
     try:
-
-        ohlc_endPoint = ohlc_end_point(
-            instrument_ticker,
-            resolution,
-            last_tick1_fr_sqlite,
-            last_tick_fr_data_orders,
-        )
-
-        with httpx.Client(follow_redirects=True) as client:
-            ohlc_request = client.get(ohlc_endPoint).json()["result"]
+        
+        ohlc_request = await get_ohlc_data(instrument_ticker,
+                                        resolution,
+                                        last_tick1_fr_sqlite,
+                                        last_tick_fr_data_orders,
+)
 
         result = [
             o
-            for o in transform_nested_dict_to_list(ohlc_request)
+            for o in (ohlc_request)
             if o["tick"] == last_tick1_fr_sqlite
         ][0]
 
@@ -270,13 +266,12 @@ async def updating_ohlc(
                         delta= (end_timestamp - start_timestamp)/(one_minute * resolution)
                                 
                     if delta > 1:
-                        end_point = ohlc_end_point(instrument_name,
+                        
+                        result = await get_ohlc_data(instrument_name,
                                         resolution,
                                         start_timestamp,
                                         end_timestamp,
-                                        )
-                        
-                        result = await get_ohlc_data(end_point)
+)
                         
                         print (result)
 
