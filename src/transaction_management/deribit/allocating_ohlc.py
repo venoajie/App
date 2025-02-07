@@ -147,8 +147,12 @@ async def ohlc_result_per_time_frame(
 
     log.debug (f"last_tick1_fr_sqlite {last_tick1_fr_sqlite}")
     log.debug (f"data_orders {data_orders}")
+    
+    if len(data_orders)>1:
+        last_tick_fr_data_orders: int = max([o["tick"] for o in data_orders])
 
-    last_tick_fr_data_orders: int = data_orders["tick"]
+    else:
+        last_tick_fr_data_orders: int = data_orders["tick"]
 
     # refilling current ohlc table with updated data
     refilling_current_ohlc_table_with_updated_streaming_data = (
