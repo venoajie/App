@@ -20,7 +20,7 @@ strategy_labels = [#represert strategy
 mode_full = [true]
 reduce_only = [false]
 
-[[resolution]]
+[[resolutions]]
 ohlc1 = 60
 ohlc5 = 5
 ohlc15 = 15

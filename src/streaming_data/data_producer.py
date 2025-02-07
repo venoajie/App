@@ -114,6 +114,8 @@ class StreamingAccountData:
                 # get tradable strategies
                 tradable_config_app = config_app["tradable"]
 
+                resolutions = config_app["resolutions"]
+
                 # get TRADABLE currencies
                 currencies = [o["spot"] for o in tradable_config_app][0]
 
@@ -138,8 +140,6 @@ class StreamingAccountData:
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
 
-                    resolution = 1
-
                     for currency in currencies:
 
                         currency_upper = currency.upper()
@@ -149,14 +149,22 @@ class StreamingAccountData:
                         ws_channel_currency = [
                             f"user.portfolio.{currency}",
                             f"user.changes.any.{currency_upper}.raw",
-                            f"chart.trades.{instrument_perpetual}.{resolution}",
                         ]
+                        
+                        print(ws_channel_currency)
 
                         for ws in ws_channel_currency:
 
                             # asyncio.create_task(
                             await self.ws_operation(
                                 operation="subscribe", ws_channel=ws
+                            )
+                            
+                        for resolution in resolutions:
+
+                            # asyncio.create_task(
+                            await self.ws_operation(
+                                operation="subscribe", ws_channel=f"chart.trades.{instrument_perpetual}.{resolution}"
                             )
 
                     for instrument in instruments_name:
