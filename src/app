@@ -14,7 +14,7 @@ import uvloop
 from loguru import logger as log
 import numpy as np
 import orjson
-import redis.asyncio as redis
+import redis.asyncio as aioredis
 #from redistimeseries.client import Client
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -91,7 +91,7 @@ async def main():
 
         modify_order_and_db: object = ModifyOrderDb(sub_account_id)
         
-        pool = redis.ConnectionPool.from_url(
+        pool = aioredis.ConnectionPool.from_url(
             "redis://localhost", 
             port=6379, 
             db=0, 
@@ -99,7 +99,7 @@ async def main():
             decode_responses=True
             )
         
-        client_redis = redis.Redis.from_pool(pool)
+        client_redis = aioredis.Redis.from_pool(pool)
                 
         # parsing config file
         config_app = get_config(file_toml)
