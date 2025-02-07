@@ -140,6 +140,38 @@ def currency_inline_with_database_address(currency: str, database_address: str) 
     return currency.lower() in str(database_address)
 
 
+async def inserting_open_interest(
+    currency, WHERE_FILTER_TICK, TABLE_OHLC1, data_orders
+) -> None:
+    """ """
+    try:
+
+        if (
+            currency_inline_with_database_address(currency, TABLE_OHLC1)
+            and "open_interest" in data_orders
+        ):
+
+            open_interest = data_orders["open_interest"]
+
+            last_tick_query_ohlc1: str = querying_arithmetic_operator(
+                "tick", "MAX", TABLE_OHLC1
+            )
+
+            last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
+
+            await update_status_data(
+                TABLE_OHLC1,
+                "open_interest",
+                last_tick1_fr_sqlite,
+                WHERE_FILTER_TICK,
+                open_interest,
+                "is",
+            )
+
+    except Exception as error:
+        print(f"error allocating ohlc {error}")
+
+
 async def updating_ohlc(
     client_redis,
     config_app,
