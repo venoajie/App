@@ -118,7 +118,7 @@ class StreamingAccountData:
                 
                 print (resolutions_all)
 
-                resolutions = [o.values() for o in resolutions_all]
+                resolutions = [o.values() for o in resolutions_all][0]
 
                 print (resolutions)
                 # get TRADABLE currencies
