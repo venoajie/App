@@ -191,13 +191,13 @@ async def updating_ohlc(
 
                         data = message_byte_data["data"]
                         
-                        log.warning(data)
-
                         instrument_name = message_byte_data["instrument_name"]
 
                         currency = message_byte_data["currency"]
 
                         resolution = message_byte_data["resolution"]
+
+                        log.warning(f" resolution {resolution} data {data}")
 
                         end_timestamp = data["tick"]
 
