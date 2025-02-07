@@ -166,6 +166,7 @@ async def caching_distributing_data(
 
                     pub_message = dict(
                         data=data,
+                        currency=currency,
                         instrument_name=message_channel.split(".")[2],
                     )
                     
