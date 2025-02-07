@@ -83,8 +83,7 @@ async def main():
     file_toml = "config_strategies.toml"
     
     idle_time = 2
-    
-    time_frame = [1,5,15,60]
+
     try:
 
         private_data: object = SendApiRequest(sub_account_id)
@@ -115,14 +114,18 @@ async def main():
 
         resolutions: list = config_app["resolutions"] 
 
+        strategy_attributes = config_app["strategies"]
+
         queue = Queue(maxsize=1)
         
         stream = StreamingAccountData(sub_account_id)
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(
-                config_app,
-                queue)
+                queue,
+                currencies,
+                resolutions,
+                strategy_attributes)
             ) 
         
         saving_task = asyncio.create_task(
