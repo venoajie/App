@@ -20,13 +20,8 @@ from utilities.caching import (
     update_cached_orders,
 )
 from utilities.pickling import replace_data
-from utilities.string_modification import (
-    extract_currency_from_text,
-)
+from utilities.string_modification import extract_currency_from_text
 from utilities.system_tools import parse_error_message, provide_path_for_file
-from transaction_management.deribit.allocating_ohlc import (
-    ohlc_result_per_time_frame,
-)
 
 
 async def update_db_pkl(
@@ -50,32 +45,21 @@ async def update_db_pkl(
 
 async def caching_distributing_data(
     private_data: object,
-    modify_order_and_db: object,
     client_redis: object,
-    config_app,
+    currencies: list,
+    redis_channels: list,
+    redis_keys: list,
     queue_general: object,
 ) -> None:
     """ """
 
     try:
 
-        # get tradable strategies
-        tradable_config_app = config_app["tradable"]
-
-        # get TRADABLE currencies
-        currencies = [o["spot"] for o in tradable_config_app][0]
-
-        resolution: int = 1
-
-        # get redis channels
-        redis_channels: dict = config_app["redis_channels"][0]
         chart_channel: str = redis_channels["chart_update"]
-        receive_order_channel: str = redis_channels["receive_order"]
+        receive_order_channel: str = redis_channels["receive_order"]        
         ticker_channel: str = redis_channels["ticker_update"]
-
-        redis_keys: dict = config_app["redis_keys"][0]
+        
         order_keys: str = redis_keys["orders"]
-        chart_trades_buffer: list = []
 
         cached_orders: list = await combining_order_data(private_data, currencies)
 
@@ -131,16 +115,8 @@ async def caching_distributing_data(
                         pub_message,
                     )
 
-                DATABASE: str = "databases/trading.sqlite3"
-
-                WHERE_FILTER_TICK: str = "tick"
-
-                TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
-
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
-
-                    # log.info(f"incremental_ticker {ticker_channel}")
 
                     server_time = (
                         data["timestamp"] + server_time
@@ -170,36 +146,12 @@ async def caching_distributing_data(
                         currency=currency,
                         instrument_name=message_channel.split(".")[2],
                     )
-                    
+
                     await publishing_result(
                         pipe,
                         chart_channel,
                         pub_message,
                     )
-
-                    log.debug(message_params)
-
-                    chart_trades_buffer.append(data)
-
-                    if len(chart_trades_buffer) > 3:
-
-                        instrument_ticker: str = ((message_channel)[13:]).partition(
-                            "."
-                        )[0]
-
-                        if "PERPETUAL" in instrument_ticker:
-
-                            for data in chart_trades_buffer:
-                                await ohlc_result_per_time_frame(
-                                    instrument_ticker,
-                                    resolution,
-                                    data,
-                                    TABLE_OHLC1,
-                                    WHERE_FILTER_TICK,
-                                )
-
-                            chart_trades_buffer = []
-
 
                 await pipe.execute()
 

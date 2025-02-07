@@ -18,13 +18,14 @@ from db_management.sqlite_management import (
     update_status_data,
 )
 
+
 async def last_tick_fr_sqlite(last_tick_query_ohlc1) -> int:
     """ """
     try:
         last_tick1 = await executing_query_with_return(last_tick_query_ohlc1)
 
     except Exception as error:
-        
+
         await telegram_bot_sendtext(
             f"Capture market data - failed to fetch last_tick_fr_sqlite - {error}",
             "general_error",
@@ -52,7 +53,7 @@ async def replace_previous_ohlc_using_fix_data(
             last_tick1_fr_sqlite,
             False,
             last_tick1_fr_sqlite,
-            )
+        )
 
         result = [o for o in (ohlc_request) if o["tick"] == last_tick1_fr_sqlite][0]
 
@@ -66,13 +67,14 @@ async def replace_previous_ohlc_using_fix_data(
         )
 
     except Exception as error:
-        
+
         await telegram_bot_sendtext(
             f"Capture market data - failed to fetch last_tick_fr_sqlite - {error}",
             "general_error",
         )
 
         parse_error_message(error)
+
 
 async def ohlc_result_per_time_frame(
     instrument_ticker,
@@ -87,18 +89,20 @@ async def ohlc_result_per_time_frame(
         "MAX",
         TABLE_OHLC1,
     )
-    
+
     last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
-    
+
     try:
-        log.warning (f"data_orders {data_orders} {len(data_orders)}")
+        log.warning(f"data_orders {data_orders} {len(data_orders)}")
         last_tick_fr_data_orders: int = data_orders["tick"]
 
     except:
-        log.error (f"data_orders {data_orders}")
+        log.error(f"data_orders {data_orders}")
         last_tick_fr_data_orders: int = max([o["tick"] for o in data_orders])
-        
-    log.debug (f"resolution {resolution} last_tick1_fr_sqlite {last_tick1_fr_sqlite} last_tick_fr_data_orders {last_tick_fr_data_orders}")
+
+    log.debug(
+        f"resolution {resolution} last_tick1_fr_sqlite {last_tick1_fr_sqlite} last_tick_fr_data_orders {last_tick_fr_data_orders}"
+    )
 
     # refilling current ohlc table with updated data
     refilling_current_ohlc_table_with_updated_streaming_data = (
@@ -133,9 +137,11 @@ async def ohlc_result_per_time_frame(
             WHERE_FILTER_TICK,
         )
 
+
 def currency_inline_with_database_address(currency: str, database_address: str) -> bool:
 
     return currency.lower() in str(database_address)
+
 
 async def updating_ohlc(
     client_redis: object,
@@ -151,15 +157,12 @@ async def updating_ohlc(
         pubsub: object = client_redis.pubsub()
 
         chart_channel: str = redis_channels["chart_update"]
-        
+
         # prepare channels placeholders
-        channels = [
-            chart_channel
-                    ]
+        channels = [chart_channel]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
-
 
         ONE_SECOND = 1000
 
@@ -182,19 +185,21 @@ async def updating_ohlc(
                     if chart_channel in message_channel:
 
                         data = message_byte_data["data"]
-                        
+
                         instrument_name = message_byte_data["instrument_name"]
 
                         currency = message_byte_data["currency"]
-                    
+
                         resolution = message_byte_data["resolution"]
 
                         end_timestamp = data["tick"]
-                    
+
                         table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
 
-                        last_tick_query_ohlc_resolution: str = querying_arithmetic_operator(
-                            WHERE_FILTER_TICK, "MAX", table_ohlc
+                        last_tick_query_ohlc_resolution: str = (
+                            querying_arithmetic_operator(
+                                WHERE_FILTER_TICK, "MAX", table_ohlc
+                            )
                         )
 
                         start_timestamp: int = await last_tick_fr_sqlite(
@@ -210,10 +215,6 @@ async def updating_ohlc(
                             delta = (end_timestamp - start_timestamp) / (
                                 one_minute * int(resolution)
                             )
-                            
-                            log.error(
-                            f"resolution {resolution} start_timestamp {start_timestamp} end_timestamp {end_timestamp} delta {delta}"
-                        )
 
                         if delta > 1:
 
@@ -224,7 +225,7 @@ async def updating_ohlc(
                                 False,
                                 end_timestamp,
                             )
-                            
+
                             await ohlc_result_per_time_frame(
                                 instrument_name,
                                 resolution,
@@ -249,7 +250,6 @@ async def updating_ohlc(
             finally:
                 await asyncio.sleep(0.001)
 
-
     #            await asyncio.sleep(3)
 
     except Exception as error:
@@ -262,11 +262,10 @@ async def updating_ohlc(
         parse_error_message(error)
 
 
-
 async def inserting_open_interest(
     currency,
-    WHERE_FILTER_TICK, 
-    TABLE_OHLC1, 
+    WHERE_FILTER_TICK,
+    TABLE_OHLC1,
     data_orders,
 ) -> None:
     """ """

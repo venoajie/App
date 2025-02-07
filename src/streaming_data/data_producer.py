@@ -112,9 +112,9 @@ class StreamingAccountData:
                 my_path_cur = provide_path_for_file("currencies")
 
                 replace_data(
-                    my_path_cur, 
+                    my_path_cur,
                     all_exc_currencies,
-                    )
+                )
 
                 settlement_periods = get_settlement_period(strategy_attributes)
 
@@ -123,7 +123,7 @@ class StreamingAccountData:
                 )
 
                 instruments_name = futures_instruments["instruments_name"]
-                
+
                 while True:
 
                     # Authenticate WebSocket Connection
@@ -154,7 +154,7 @@ class StreamingAccountData:
                             await self.ws_operation(
                                 operation="subscribe", ws_channel=ws
                             )
-                                                
+
                         for resolution in resolutions:
 
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"

@@ -95,7 +95,7 @@ async def get_server_time() -> int:
 
 
 async def send_requests_to_url(end_point: str) -> list:
-    
+
     try:
 
         async with httpx.AsyncClient() as client:
@@ -103,7 +103,7 @@ async def send_requests_to_url(end_point: str) -> list:
                 end_point,
                 follow_redirects=True,
             )
-            
+
         return result.json()["result"]
 
     except Exception as error:
@@ -187,7 +187,7 @@ async def get_ohlc_data(
         qty_as_start_time_stamp,
         end_timestamp_is_now,
     )
-    
+
     result = await send_requests_to_url(end_point)
 
     return transform_nested_dict_to_list_ohlc(result)

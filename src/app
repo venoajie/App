@@ -112,6 +112,8 @@ async def main():
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
+        redis_keys: dict = config_app["redis_keys"][0]
+        
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
@@ -131,9 +133,10 @@ async def main():
         saving_task = asyncio.create_task(
             caching_distributing_data(
                 private_data,
-                modify_order_and_db,
                 client_redis,
-                config_app,
+                currencies,
+                redis_channels,
+                redis_keys,
                 queue,
                 )
             ) 

@@ -19,9 +19,10 @@ from utilities.system_tools import parse_error_message
 import redis.asyncio as aioredis
 import json
 
+
 class RedisPubSubManager:
     """
-    
+
     https://medium.com/@nandagopal05/scaling-websockets-with-pub-sub-using-python-redis-fastapi-b16392ffe291
         Initializes the RedisPubSubManager.
 
@@ -30,7 +31,7 @@ class RedisPubSubManager:
         port (int): Redis server port.
     """
 
-    def __init__(self, host='localhost', port=6379):
+    def __init__(self, host="localhost", port=6379):
         self.redis_host = host
         self.redis_port = port
         self.pubsub = None
@@ -42,9 +43,9 @@ class RedisPubSubManager:
         Returns:
             aioredis.Redis: Redis connection object.
         """
-        return aioredis.Redis(host=self.redis_host,
-                              port=self.redis_port,
-                              auto_close_connection_pool=False)
+        return aioredis.Redis(
+            host=self.redis_host, port=self.redis_port, auto_close_connection_pool=False
+        )
 
     async def connect(self) -> None:
         """
@@ -84,6 +85,7 @@ class RedisPubSubManager:
             room_id (str): Channel or room ID to unsubscribe from.
         """
         await self.pubsub.unsubscribe(room_id)
+
 
 class Singleton(type):
     """

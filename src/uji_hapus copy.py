@@ -105,6 +105,6 @@ sub_account = {
     "uid": 148510,
 }
 
-channel= "chart.trades.ETH-PERPETUAL.1D"
+channel = "chart.trades.ETH-PERPETUAL.1D"
 
 print(channel.split(".")[3])
