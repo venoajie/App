@@ -76,8 +76,10 @@ class StreamingAccountData:
 
     async def ws_manager(
         self,
-        config_app: list,
         queue_general: object,
+        currencies: list,
+        resolutions: list,
+        strategy_attributes: list,
     ) -> None:
 
         async with websockets.connect(
@@ -109,15 +111,10 @@ class StreamingAccountData:
 
                 my_path_cur = provide_path_for_file("currencies")
 
-                replace_data(my_path_cur, all_exc_currencies)
-
-                # get tradable strategies
-                tradable_config_app = config_app["tradable"]
-
-                # get TRADABLE currencies
-                currencies = [o["spot"] for o in tradable_config_app][0]
-
-                strategy_attributes = config_app["strategies"]
+                replace_data(
+                    my_path_cur, 
+                    all_exc_currencies,
+                    )
 
                 settlement_periods = get_settlement_period(strategy_attributes)
 
@@ -126,16 +123,7 @@ class StreamingAccountData:
                 )
 
                 instruments_name = futures_instruments["instruments_name"]
-
-                # get redis channels
-                redis_channels: dict = config_app["redis_channels"][0]
-
-                resolutions = [
-                    int("".join([o for o in x if o.isdigit()]))
-                    for x in redis_channels
-                    if "chart" in x
-                ]
-
+                
                 while True:
 
                     # Authenticate WebSocket Connection
