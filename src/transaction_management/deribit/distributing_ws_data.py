@@ -69,7 +69,10 @@ async def caching_distributing_data(
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        chart_update_channel: str = redis_channels["chart_update"]
+        chart_update_channel_1: str = redis_channels["chart_update_1"]
+        chart_update_channel_5: str = redis_channels["chart_update_5"]
+        chart_update_channel_15: str = redis_channels["chart_update_15"]
+        chart_update_channel_60: str = redis_channels["chart_update_60"]
         receive_order_channel: str = redis_channels["receive_order"]
         ticker_channel: str = redis_channels["ticker_update"]
 
@@ -171,7 +174,7 @@ async def caching_distributing_data(
 
                     await publishing_result(
                         pipe,
-                        chart_update_channel,
+                        chart_update_channel_1,
                         pub_message,
                     )
 
