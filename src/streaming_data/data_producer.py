@@ -114,7 +114,9 @@ class StreamingAccountData:
                 # get tradable strategies
                 tradable_config_app = config_app["tradable"]
 
-                resolutions = config_app["resolutions"]
+                resolutions_all = config_app["resolutions"]
+
+                resolutions = list(resolutions_all.values())
 
                 # get TRADABLE currencies
                 currencies = [o["spot"] for o in tradable_config_app][0]
@@ -164,6 +166,7 @@ class StreamingAccountData:
                             
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
 
+                            print (f"resolution   {resolution}")
                             print (f"subscribe ws {ws}")
 
                             # asyncio.create_task(

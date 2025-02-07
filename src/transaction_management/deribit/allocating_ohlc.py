@@ -231,8 +231,10 @@ async def updating_ohlc(
 
         # get TRADABLE currencies
         currencies: list = [o["spot"] for o in tradable_config_app][0]
-        
-        resolutions = config_app["resolutions"]
+
+        resolutions_all = config_app["resolutions"]
+
+        resolutions = list(resolutions_all.values())
 
         print(currencies)
 
