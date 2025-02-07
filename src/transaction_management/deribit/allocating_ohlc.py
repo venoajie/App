@@ -140,6 +140,7 @@ async def ohlc_result_per_time_frame(
         TABLE_OHLC1,
     )
     
+    log.debug (f"WHERE_FILTER_TICK {WHERE_FILTER_TICK} TABLE_OHLC1 {TABLE_OHLC1}")
     log.debug (f"last_tick_query_ohlc1 {last_tick_query_ohlc1}")
 
     last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
