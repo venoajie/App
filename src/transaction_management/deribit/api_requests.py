@@ -94,7 +94,7 @@ async def get_server_time() -> int:
 async def send_requests_to_url(end_point: str) -> list:
 
     async with httpx.AsyncClient() as client:
-        result = client.get(
+        result = await client.get(
             end_point, 
             follow_redirects=True,
             )
