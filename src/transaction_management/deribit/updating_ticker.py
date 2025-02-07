@@ -13,7 +13,7 @@ from utilities.system_tools import (
     parse_error_message,
     provide_path_for_file,
 )
-from websocket_management.allocating_ohlc import (
+from transaction_management.deribit.allocating_ohlc import (
     inserting_open_interest,
     ohlc_result_per_time_frame,
 )
@@ -214,3 +214,61 @@ def get_settlement_period(strategy_attributes: list) -> list:
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
+
+
+async def get_ohlc_data(
+    instrument_name: str,
+    qty_candles: int,
+    resolution: list,
+) -> list:
+    """_summary_
+    https://blog.apify.com/python-cache-complete-guide/]
+    data caching
+    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
+
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    from utilities.string_modification import (
+        transform_nested_dict_to_list_ohlc,
+    )
+
+    now_utc = datetime.now()
+
+    now_unix = convert_time_to_unix(now_utc)
+
+    start_timestamp = now_unix - (60000 * resolution) * qty_candles
+
+    end_point = ohlc_end_point(
+        instrument_name,
+        resolution,
+        start_timestamp,
+        now_unix,
+    )
+
+    async with httpx.AsyncClient() as client:
+        ohlc_request = await client.get(
+            end_point,
+            follow_redirects=True,
+        )
+
+        result = ohlc_request.json()["result"]
+
+    return transform_nested_dict_to_list_ohlc(result)
+
+
+
+def ohlc_end_point(
+    instrument_ticker: str,
+    resolution: int,
+    start_timestamp: int,
+    end_timestamp: int,
+) -> str:
+
+    url = f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
+
+    return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"

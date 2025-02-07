@@ -29,6 +29,7 @@ from transaction_management.deribit.api_requests import SendApiRequest
 from transaction_management.deribit.avoiding_double_ids import \
     avoiding_double_ids
 from market_understanding.price_action.candles_analysis import get_market_condition
+from transaction_management.deribit.allocating_ohlc import updating_ohlc
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
 from transaction_management.deribit.capturing_user_changes import \
@@ -126,30 +127,7 @@ async def main():
         await asyncio.sleep(0.0005)
         
         """
-            
-            hedging_spot(
-                private_data,
-                client_redis,
-                config_app,),
 
-            reconciling_size(
-                modify_order_and_db,
-                config_app,
-                idle_time),                
-            #scanning_volume()
-                  
-            """
-            
-        await asyncio.gather(
-            producer_task, 
-        
-            saving_task,
-                    
-            #future_spreads(
-            #    private_data,
-            #    client_redis,
-            #    config_app,
-            #    ),
 
             processing_orders(
                 modify_order_and_db,
@@ -189,6 +167,37 @@ async def main():
                 client_redis,
                 config_app,
                 np),
+            
+
+
+            
+            hedging_spot(
+                private_data,
+                client_redis,
+                config_app,),
+
+            reconciling_size(
+                modify_order_and_db,
+                config_app,
+                idle_time),                
+            #scanning_volume()
+                  
+            """
+            
+        await asyncio.gather(
+            producer_task, 
+        
+            saving_task,
+                    
+            #future_spreads(
+            #    private_data,
+            #    client_redis,
+            #    config_app,
+            #    ),
+
+            updating_ohlc(
+                client_redis,
+                config_app,),
             
                         )  
 

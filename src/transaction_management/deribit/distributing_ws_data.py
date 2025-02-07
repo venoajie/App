@@ -24,7 +24,7 @@ from utilities.string_modification import (
     extract_currency_from_text,
 )
 from utilities.system_tools import parse_error_message, provide_path_for_file
-from websocket_management.allocating_ohlc import (
+from transaction_management.deribit.allocating_ohlc import (
     ohlc_result_per_time_frame,
 )
 

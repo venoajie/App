@@ -16,7 +16,6 @@ from loguru import logger as log
 from configuration import config, config_oci, id_numbering
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities import time_modification
-from utilities.time_modification import convert_time_to_unix
 
 
 def parse_dotenv(sub_account) -> dict:
@@ -55,6 +54,7 @@ async def private_connection(
             auth=BasicAuth(client_id, client_secret),
             json=payload,
         ) as response:
+
             # RESToverHTTP Status Code
             status_code: int = response.status
 
@@ -108,8 +108,6 @@ async def get_instruments(currency) -> list:
 def get_tickers(instrument_name: str) -> list:
     # Set endpoint
 
-    import httpx
-
     end_point = (
         f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}"
     )
@@ -123,74 +121,24 @@ def get_tickers(instrument_name: str) -> list:
 async def async_get_tickers(instrument_name: str) -> list:
     # Set endpoint
 
-    import httpx
 
     end_point = (
         f"https://deribit.com/api/v2/public/ticker?instrument_name={instrument_name}"
     )
 
+    return await send_requests_to_url(end_point)
+
+
+async def send_requests_to_url(end_point: str) -> list:
+    # Set endpoint
+
     async with httpx.AsyncClient() as client:
-        result = client.get(end_point, follow_redirects=True).json()["result"]
+        result = client.get(
+            end_point, 
+            follow_redirects=True,
+            ).json()["result"]
 
     return result
-
-
-def ohlc_end_point(
-    instrument_ticker: str,
-    resolution: int,
-    start_timestamp: int,
-    end_timestamp: int,
-) -> str:
-
-    url = f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
-
-    return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
-
-
-async def get_ohlc_data(
-    instrument_name: str,
-    qty_candles: int,
-    resolution: list,
-) -> list:
-    """_summary_
-    https://blog.apify.com/python-cache-complete-guide/]
-    data caching
-    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
-
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
-    from utilities.string_modification import (
-        transform_nested_dict_to_list_ohlc,
-    )
-
-    now_utc = datetime.now()
-
-    now_unix = convert_time_to_unix(now_utc)
-
-    start_timestamp = now_unix - (60000 * resolution) * qty_candles
-
-    end_point = ohlc_end_point(
-        instrument_name,
-        resolution,
-        start_timestamp,
-        now_unix,
-    )
-
-    async with httpx.AsyncClient() as client:
-        ohlc_request = await client.get(
-            end_point,
-            follow_redirects=True,
-        )
-
-        result = ohlc_request.json()["result"]
-
-    return transform_nested_dict_to_list_ohlc(result)
-
 
 @dataclass(unsafe_hash=True, slots=True)
 class SendApiRequest:
