@@ -236,6 +236,13 @@ async def updating_ohlc(
         
         resolutions = [o.values() for o in resolutions_all][0]
 
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+        
+        resolutions = [o  for o in redis_channels if "chart" in o]
+        
+        print (resolutions)
+
         while True:
         
             end_timestamp =  get_now_unix_time() 
