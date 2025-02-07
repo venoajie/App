@@ -113,11 +113,7 @@ async def main():
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
-        resolutions = [
-            int("".join([o for o in x if o.isdigit()]))
-            for x in redis_channels
-            if "chart" in x
-        ]
+        resolutions: list = config_app["resolutions"] 
 
         queue = Queue(maxsize=1)
         
