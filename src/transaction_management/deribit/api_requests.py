@@ -101,6 +101,8 @@ async def send_requests_to_url(end_point: str) -> list:
             end_point,
             follow_redirects=True,
         )
+        
+        log.info(result)
 
     return result.json()["result"]
 
