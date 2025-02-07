@@ -182,8 +182,6 @@ async def updating_ohlc(
 
                         instrument_name = message_byte_data["instrument_name"]
 
-                        currency = message_byte_data["currency"]
-
                         end_timestamp = get_now_unix_time()
 
                         for currency in currencies:
