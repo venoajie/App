@@ -135,7 +135,9 @@ async def ohlc_result_per_time_frame(
 ) -> None:
 
     last_tick_query_ohlc1: str = querying_arithmetic_operator(
-        WHERE_FILTER_TICK, "MAX", TABLE_OHLC1
+        WHERE_FILTER_TICK, 
+        "MAX", 
+        TABLE_OHLC1,
     )
 
     last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
@@ -266,6 +268,7 @@ async def updating_ohlc(
                     else:
                         delta= (end_timestamp - start_timestamp)/(one_minute * resolution)
                                 
+                    log.error (f"start_timestamp {start_timestamp} end_timestamp {end_timestamp} delta {delta}")
                     if delta > 1:
                         
                         result = await get_ohlc_data(
@@ -276,8 +279,6 @@ async def updating_ohlc(
                             end_timestamp,
                             )
                         
-                        print (result)
-
                         await ohlc_result_per_time_frame (
                             instrument_name,
                             resolution,

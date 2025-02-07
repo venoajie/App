@@ -99,9 +99,6 @@ async def send_requests_to_url(end_point: str) -> list:
             follow_redirects=True,
             )
         
-        log.warning(result)
-        log.warning(result.json()["result"])
-
     return result.json()["result"]
 
 async def get_instruments(currency) -> list:
