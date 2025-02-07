@@ -7,7 +7,7 @@ import asyncio
 
 # import json
 import httpx
-from configuration.label_numbering import get_now_unix_time
+from utilities.time_modification import  get_now_unix_time
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_ohlc_data
 from utilities.system_tools import (
@@ -220,8 +220,6 @@ async def updating_ohlc(
     
     try:
         
-        end_timestamp =     get_now_unix_time() 
-        
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
@@ -234,7 +232,9 @@ async def updating_ohlc(
         print(currencies)
 
         while True:
-                
+        
+            end_timestamp =  get_now_unix_time() 
+                    
             for currency in currencies:
                 
                 instrument_name= f"{currency}-PERPETUAL"
@@ -271,6 +271,7 @@ async def updating_ohlc(
                             instrument_name,
                             resolution,
                             start_timestamp,
+                            False,
                             end_timestamp,
                             )
                         

@@ -297,3 +297,12 @@ def resampling_time_frame(ohlc_data: list, time_frame: str = "5min"):
     df.resample(time_frame, closed="right", label="right").agg(d)
 
     return False
+
+
+def get_now_unix_time() -> int:
+    """ """
+
+    now_utc = convert_time_to_utc()["utc_now"]
+
+    return int(convert_time_to_unix(now_utc))
+

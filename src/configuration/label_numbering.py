@@ -1,14 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
-def get_now_unix_time() -> int:
-    """ """
-    from utilities import time_modification
-
-    now_utc = time_modification.convert_time_to_utc()["utc_now"]
-
-    return int(time_modification.convert_time_to_unix(now_utc))
-
+from utilities.time_modification import  get_now_unix_time 
 
 def labelling(order: str, strategy: str, id_strategy: int = None) -> str:
     """
