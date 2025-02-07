@@ -146,6 +146,7 @@ async def ohlc_result_per_time_frame(
     last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
 
     log.debug (f"last_tick1_fr_sqlite {last_tick1_fr_sqlite}")
+    log.debug (f"data_orders {data_orders}")
 
     last_tick_fr_data_orders: int = data_orders["tick"]
 
