@@ -178,8 +178,12 @@ async def get_ohlc_data(
         qty_as_start_time_stamp,
         end_timestamp_is_now,
     )
+    
+    log.debug(end_point)
 
     result = await send_requests_to_url(end_point)
+
+    log.debug(result)
 
     return transform_nested_dict_to_list_ohlc(result)
 
