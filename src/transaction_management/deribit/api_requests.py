@@ -179,7 +179,7 @@ async def get_ohlc_data(
         end_timestamp_is_now,
     )
     
-    log.debug(end_point)
+    log.error(end_point)
 
     result = await send_requests_to_url(end_point)
 
