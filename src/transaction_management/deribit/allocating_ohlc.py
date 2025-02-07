@@ -232,16 +232,10 @@ async def updating_ohlc(
         # get TRADABLE currencies
         currencies: list = [o["spot"] for o in tradable_config_app][0]
 
-        resolutions_all = config_app["resolution_channels"]
-        
-        resolutions = [o.values() for o in resolutions_all][0]
-
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         
         resolutions = [int("".join([o for o in x if o.isdigit()]))  for x in redis_channels if "chart" in x]
-        
-        print (resolutions)
 
         while True:
         

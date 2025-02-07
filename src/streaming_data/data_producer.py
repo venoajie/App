@@ -129,13 +129,9 @@ class StreamingAccountData:
 
                 # get redis channels
                 redis_channels: dict = config_app["redis_channels"][0]
-                chart_update_channel: str = redis_channels["chart_update"]
-
-                resolutions_all = config_app["resolution_channels"]
                 
-                resolutions = [o  for o in redis_channels if "chart" in o]
-                
-                print (resolutions)
+                resolutions = [
+                    int("".join([o for o in x if o.isdigit()]))  for x in redis_channels if "chart" in x]
 
                 while True:
 

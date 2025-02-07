@@ -37,11 +37,8 @@ sending_order = "app.sending_order"
 ticker_update = "market.ticker"
 market_analytics_update = "market.analytics"
 
-[[resolution_channels]]
-ohlc1 = 1
-ohlc5 = 5
-ohlc15 = 15
-ohlc60 = 60
+[[resolutions]]
+resolutions = [1,5,15,60]
 
 
 [[redis_keys]]
