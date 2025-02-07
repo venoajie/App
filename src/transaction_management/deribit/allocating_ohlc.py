@@ -232,7 +232,7 @@ async def updating_ohlc(
         # get TRADABLE currencies
         currencies: list = [o["spot"] for o in tradable_config_app][0]
 
-        resolutions_all = config_app["resolutions"]
+        resolutions_all = config_app["resolution_channels"]
         
         resolutions = [o.values() for o in resolutions_all][0]
 
