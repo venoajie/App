@@ -95,14 +95,23 @@ async def get_server_time() -> int:
 
 
 async def send_requests_to_url(end_point: str) -> list:
+    
+    try:
 
-    async with httpx.AsyncClient() as client:
-        result = await client.get(
-            end_point,
-            follow_redirects=True,
+        async with httpx.AsyncClient() as client:
+            result = await client.get(
+                end_point,
+                follow_redirects=True,
+            )
+            
+        return result.json()["result"]
+
+    except Exception as error:
+
+        await telegram_bot_sendtext(
+            f"error send_requests_to_url - {error} {end_point}",
+            "general_error",
         )
-        
-    return result.json()["result"]
 
 
 async def get_instruments(currency) -> list:
@@ -172,18 +181,14 @@ async def get_ohlc_data(
 
     # Set endpoint
     end_point = ohlc_end_point(
-        instrument_name.upper(),
+        instrument_name,
         resolution,
         qty_or_start_time_stamp,
         qty_as_start_time_stamp,
         end_timestamp_is_now,
     )
     
-    log.error(end_point)
-
     result = await send_requests_to_url(end_point)
-
-    log.debug(result)
 
     return transform_nested_dict_to_list_ohlc(result)
 

@@ -190,8 +190,6 @@ async def updating_ohlc(
                         resolution = message_byte_data["resolution"]
 
                         end_timestamp = data["tick"]
-
-                        instrument_name = f"{currency}-PERPETUAL"
                     
                         table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
 
