@@ -112,7 +112,7 @@ async def main():
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
-        resolutions: list = [o["resolutions"] for o in tradable_config_app]
+        resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
 
