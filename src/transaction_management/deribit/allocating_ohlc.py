@@ -239,7 +239,7 @@ async def updating_ohlc(
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         
-        resolutions = [o  for o in redis_channels if "chart" in o]
+        resolutions = [int("".join([o for o in x if o.isdigit()]))  for x in redis_channels if "chart" in x]
         
         print (resolutions)
 
