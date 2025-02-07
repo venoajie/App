@@ -7,6 +7,8 @@ spot = [
     #"SOL",     
        ]
 
+resolutions = [1,5,15,60,"1D"]
+
 strategy_labels = [#represert strategy
     "hedgingSpot",
     "futureSpread",
@@ -17,7 +19,9 @@ strategy_labels = [#represert strategy
     #"marketMakerShort",
     #"marketMakerLong",
        ]
+
 mode_full = [true]
+
 reduce_only = [false]
 
 [[relevant_tables]]
@@ -33,9 +37,6 @@ receive_order = "account.user_changes.order"
 sending_order = "app.sending_order"
 ticker_update = "market.ticker"
 market_analytics_update = "market.analytics"
-
-[[resolutions]]
-resolutions = [1,5,15,60,"1D"]
 
 
 [[redis_keys]]
