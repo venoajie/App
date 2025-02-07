@@ -144,6 +144,7 @@ async def ohlc_result_per_time_frame(
     
 
     try:
+        log.warning (f"data_orders {data_orders}")
         last_tick_fr_data_orders: int = data_orders["tick"]
 
     except:
