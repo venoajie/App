@@ -102,8 +102,6 @@ async def send_requests_to_url(end_point: str) -> list:
             follow_redirects=True,
         )
         
-        log.info(result)
-
     return result.json()["result"]
 
 
@@ -174,7 +172,7 @@ async def get_ohlc_data(
 
     # Set endpoint
     end_point = ohlc_end_point(
-        instrument_name,
+        instrument_name.upper(),
         resolution,
         qty_or_start_time_stamp,
         qty_as_start_time_stamp,
