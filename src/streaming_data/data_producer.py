@@ -154,7 +154,9 @@ class StreamingAccountData:
                             await self.ws_operation(
                                 operation="subscribe", ws_channel=ws
                             )
-
+                        
+                        print(f"resolutions {resolutions}")
+                        
                         for resolution in resolutions:
 
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
