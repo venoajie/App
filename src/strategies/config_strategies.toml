@@ -20,12 +20,6 @@ strategy_labels = [#represert strategy
 mode_full = [true]
 reduce_only = [false]
 
-[[resolution_channels]]
-ohlc1 = 1
-ohlc5 = 5
-ohlc15 = 15
-ohlc60 = 60
-
 [[relevant_tables]]
 my_trades_table = "my_trades_all_json"
 orders_table = "orders_all_json"
@@ -34,11 +28,21 @@ transaction_log = "transaction_log"
 archive = "my_trades_all"
 
 [[redis_channels]]
-chart_update = "market.chart"
+chart_update1 = "market.chart.1"
+chart_update5 = "market.chart.5"
+chart_update15 = "market.chart.15"
+chart_update60 = "market.chart.60"
 receive_order = "account.user_changes.order"
 sending_order = "app.sending_order"
 ticker_update = "market.ticker"
 market_analytics_update = "market.analytics"
+
+[[resolution_channels]]
+ohlc1 = 1
+ohlc5 = 5
+ohlc15 = 15
+ohlc60 = 60
+
 
 [[redis_keys]]
 orders = "order"

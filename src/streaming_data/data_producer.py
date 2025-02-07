@@ -114,10 +114,6 @@ class StreamingAccountData:
                 # get tradable strategies
                 tradable_config_app = config_app["tradable"]
 
-                resolutions_all = config_app["resolution_channels"]
-                
-                resolutions = [o.values() for o in resolutions_all][0]
-
                 # get TRADABLE currencies
                 currencies = [o["spot"] for o in tradable_config_app][0]
 
@@ -130,6 +126,16 @@ class StreamingAccountData:
                 )
 
                 instruments_name = futures_instruments["instruments_name"]
+
+                # get redis channels
+                redis_channels: dict = config_app["redis_channels"][0]
+                chart_update_channel: str = redis_channels["chart_update"]
+
+                resolutions_all = config_app["resolution_channels"]
+                
+                resolutions = [o  for o in redis_channels if "chart" in o]
+                
+                print (resolutions)
 
                 while True:
 
@@ -166,7 +172,6 @@ class StreamingAccountData:
                             
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
 
-                            print (f"resolution   {resolution}")
                             print (f"subscribe ws {ws}")
 
                             # asyncio.create_task(
