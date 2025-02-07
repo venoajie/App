@@ -16,7 +16,9 @@ from loguru import logger as log
 from configuration import config, config_oci, id_numbering
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities import time_modification
-
+from utilities.string_modification import (
+        transform_nested_dict_to_list_ohlc,
+    )
 
 def parse_dotenv(sub_account) -> dict:
     return config.main_dotenv(sub_account)
@@ -127,6 +129,42 @@ async def async_get_tickers(instrument_name: str) -> list:
     )
 
     return await send_requests_to_url(end_point)
+
+
+
+def ohlc_end_point(
+    instrument_ticker: str,
+    resolution: int,
+    start_timestamp: int,
+    end_timestamp: int,
+) -> str:
+
+
+    url = f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
+
+    return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
+
+
+async def get_ohlc_data(
+    instrument_ticker: str,
+    resolution: int,
+    start_timestamp: int,
+    end_timestamp: int,
+    ) -> list:
+    # Set endpoint
+
+    end_point = ohlc_end_point(
+        instrument_ticker,
+        resolution,
+        start_timestamp,
+        end_timestamp,
+    )
+
+    result = await send_requests_to_url(end_point)
+    
+    log.debug(result)
+    
+    return transform_nested_dict_to_list_ohlc(result)
 
 
 async def send_requests_to_url(end_point: str) -> list:

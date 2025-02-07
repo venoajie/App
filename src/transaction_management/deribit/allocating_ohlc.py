@@ -9,15 +9,11 @@ import asyncio
 import httpx
 from configuration.label_numbering import get_now_unix_time
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.api_requests import send_requests_to_url
+from transaction_management.deribit.api_requests import get_ohlc_data
 from utilities.system_tools import (
     parse_error_message,
     provide_path_for_file,
 )
-
-from utilities.string_modification import (
-        transform_nested_dict_to_list_ohlc,
-    )
 from db_management.sqlite_management import (
     executing_query_with_return,
     insert_tables,
@@ -26,19 +22,6 @@ from db_management.sqlite_management import (
 )
 from utilities.string_modification import transform_nested_dict_to_list
 from utilities.system_tools import async_raise_error_message
-
-
-def ohlc_end_point(
-    instrument_ticker: str,
-    resolution: int,
-    start_timestamp: int,
-    end_timestamp: int,
-) -> str:
-
-    url = f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
-
-    return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
-
 
 async def recording_multiple_time_frames(
     instrument_ticker: str,
@@ -55,14 +38,12 @@ async def recording_multiple_time_frames(
         delta = (end_timestamp - start_timestamp) / (one_minute * resolution)
 
         if delta > 1:
-            end_point = ohlc_end_point(
+
+            ohlc_request = await get_ohlc_data(
                 instrument_ticker,
                 resolution,
                 start_timestamp,
-                end_timestamp,
-            )
-
-            ohlc_request = await send_requests_to_url(end_point)
+                end_timestamp,)
 
             result = [
                 o
