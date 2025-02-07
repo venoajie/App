@@ -142,9 +142,8 @@ async def ohlc_result_per_time_frame(
     
     last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
     
-
     try:
-        log.warning (f"data_orders {data_orders}")
+        log.warning (f"data_orders {data_orders} {len(data_orders)}")
         last_tick_fr_data_orders: int = data_orders["tick"]
 
     except:
@@ -298,7 +297,7 @@ async def updating_ohlc(
                             False,
                             end_timestamp,
                         )
-
+                        
                         await ohlc_result_per_time_frame(
                             instrument_name,
                             resolution,
