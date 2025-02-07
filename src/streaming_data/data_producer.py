@@ -115,9 +115,12 @@ class StreamingAccountData:
                 tradable_config_app = config_app["tradable"]
 
                 resolutions_all = config_app["resolutions"]
+                
+                print (resolutions_all)
 
-                resolutions = (resolutions_all.values())
+                resolutions = [o.values() for o in resolutions_all]
 
+                print (resolutions)
                 # get TRADABLE currencies
                 currencies = [o["spot"] for o in tradable_config_app][0]
 
