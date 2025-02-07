@@ -150,10 +150,10 @@ class StreamingAccountData:
                             f"user.portfolio.{currency}",
                             f"user.changes.any.{currency_upper}.raw",
                         ]
-                        
-                        print(ws_channel_currency)
 
                         for ws in ws_channel_currency:
+
+                            print (f"subscribe ws {ws}")
 
                             # asyncio.create_task(
                             await self.ws_operation(
@@ -161,10 +161,14 @@ class StreamingAccountData:
                             )
                             
                         for resolution in resolutions:
+                            
+                            ws = f"chart.trades.{instrument_perpetual}.{resolution}"
+
+                            print (f"subscribe ws {ws}")
 
                             # asyncio.create_task(
                             await self.ws_operation(
-                                operation="subscribe", ws_channel=f"chart.trades.{instrument_perpetual}.{resolution}"
+                                operation="subscribe", ws_channel=ws
                             )
 
                     for instrument in instruments_name:
@@ -174,6 +178,9 @@ class StreamingAccountData:
                         ]
 
                         for ws in ws_channel_instrument:
+
+                            print (f"subscribe ws {ws}")
+
                             await self.ws_operation(
                                 operation="subscribe",
                                 ws_channel=ws,

@@ -232,6 +232,8 @@ async def updating_ohlc(
         # get TRADABLE currencies
         currencies: list = [o["spot"] for o in tradable_config_app][0]
         
+        resolutions = config_app["resolutions"]
+
         print(currencies)
 
         while True:
@@ -241,8 +243,6 @@ async def updating_ohlc(
             for currency in currencies:
                 
                 instrument_name= f"{currency}-PERPETUAL"
-            
-                time_frame= [3,5,15,60,30,"1D"]
                     
                 ONE_SECOND = 1000
                 
@@ -250,7 +250,7 @@ async def updating_ohlc(
                 
                 WHERE_FILTER_TICK: str = "tick"
                 
-                for resolution in time_frame:
+                for resolution in resolutions:
                     
                     table_ohlc= f"ohlc{resolution}_{currency.lower()}_perp_json" 
                                 
