@@ -233,13 +233,13 @@ def combining_candles_data(
                 if o["resolution"] == resolution
             ][0]
             
-            log.info (f"candles_per_resolution {candles_per_resolution}")
 
             ohlc_without_ticks = remove_list_elements(
                 candles_per_resolution,
                 "tick",
             )
 
+            log.info (f"ohlc_without_ticks {ohlc_without_ticks}")
             candles_analysis_result = candles_analysis(
                 np,
                 ohlc_without_ticks,
