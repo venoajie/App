@@ -237,8 +237,13 @@ def combining_candles_data(
                 if o["resolution"] == resolution
             ][0]
             
-            ohlc_without_cost = remove_list_elements(
+            ohlc_without_volume = remove_list_elements(
                 candles_per_resolution,
+                "volume",
+            )
+
+            ohlc_without_cost = remove_list_elements(
+                ohlc_without_volume,
                 "cost",
             )
 
