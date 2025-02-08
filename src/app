@@ -217,7 +217,6 @@ async def main():
             
             get_market_condition(
                 client_redis,
-                pubsub,
                 config_app,
                 currencies,
                 redis_channels,

@@ -282,7 +282,6 @@ def combining_candles_data(
 
 async def get_market_condition(
     client_redis: object,
-    pubsub: object,
     config_app: list,
     currencies,
     redis_channels,
@@ -291,6 +290,9 @@ async def get_market_condition(
 ) -> dict:
     """ """
     try:
+
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
 
         chart_update_channel: str = redis_channels["chart_update"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
