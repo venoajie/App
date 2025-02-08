@@ -72,7 +72,7 @@ async def updating_ohlc(
 
                     if chart_channel in message_channel:
                         
-                        log.warning(f"message_byte_data {message_byte_data}")
+                        log.warning(f"chart_channel {chart_channel} message_channel {message_channel} message_byte_data {message_byte_data}")
 
                         data = message_byte_data["data"]
 
