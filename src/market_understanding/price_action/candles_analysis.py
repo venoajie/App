@@ -297,7 +297,6 @@ async def get_market_condition(
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
-        chart_update_channel: str = redis_channels["chart_update"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
         chart_low_high_tick_channel: str = redis_channels["chart_low_high_tick"]
 
@@ -306,7 +305,6 @@ async def get_market_condition(
 
         # prepare channels placeholders
         channels = [
-            chart_update_channel,
             market_analytics_channel,
             chart_low_high_tick_channel,
         ]
@@ -344,6 +342,8 @@ async def get_market_condition(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
+                    
+                    log.debug (f"chart_low_high_tick_channel in message_channel {chart_low_high_tick_channel in message_channel}")
 
                     if chart_low_high_tick_channel in message_channel:
 
