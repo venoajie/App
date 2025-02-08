@@ -85,6 +85,7 @@ def ohlc_to_candlestick(conversion_array):
         wicks_up = abs(high - open)
         wicks_down = abs(low - close)
 
+    log.debug (f"candlestick_data {candlestick_data}")
     candlestick_data[0] = candle_type
 
     candlestick_data[1] = round(round(wicks_up, 5), 2)
@@ -94,6 +95,8 @@ def ohlc_to_candlestick(conversion_array):
     candlestick_data[3] = round(round(body_size, 5), 2)
 
     candlestick_data[4] = round(round(height, 5), 2)
+
+    log.debug (f"body_size {body_size} height {height}")
 
     candlestick_data[5] = (round(round(body_size / height, 5), 2) > 70 / 100) * 1
 
