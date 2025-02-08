@@ -35,6 +35,8 @@ from utilities.system_tools import (
 async def cancelling_orders(
     private_data: object,
     modify_order_and_db: object,
+    cancellable_strategies: list,
+    currencies: list,
     client_redis: object,
     config_app: list,
 ) -> None:
@@ -45,17 +47,7 @@ async def cancelling_orders(
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
-        # get tradable strategies
-        tradable_config_app = config_app["tradable"]
-
-        # get TRADABLE currencies
-        currencies: list = [o["spot"] for o in tradable_config_app][0]
-
         strategy_attributes = config_app["strategies"]
-
-        cancellable_strategies = [
-            o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
-        ]
 
         relevant_tables = config_app["relevant_tables"][0]
 

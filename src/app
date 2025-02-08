@@ -109,6 +109,10 @@ async def main():
         # get TRADABLE currencies
         currencies: list = [o["spot"] for o in tradable_config_app][0]
 
+        cancellable_strategies = [
+            o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
+        ]
+
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
@@ -145,40 +149,6 @@ async def main():
         
         """
 
-
-            processing_orders(
-                modify_order_and_db,
-                client_redis,
-                config_app,
-                ),
-                        
-            cancelling_orders(
-                private_data,
-                modify_order_and_db,
-                client_redis,
-                config_app
-                ),    
-       
-            saving_and_relabelling_orders(
-                private_data,
-                modify_order_and_db,
-                client_redis,
-                config_app,),
-    
-      
-            avoiding_double_ids(
-                modify_order_and_db,
-                client_redis,
-                config_app,
-                ),
-       
-            relabelling_trades(
-                modify_order_and_db,
-                config_app),
-            
-            update_cached_ticker(
-                client_redis,
-                config_app),
             
             get_market_condition(
                 client_redis,
@@ -209,6 +179,42 @@ async def main():
             #    client_redis,
             #    config_app,
             #    ),
+                        
+            cancelling_orders(
+                private_data,
+                modify_order_and_db,
+                cancellable_strategies,
+                currencies,
+                client_redis,
+                config_app
+                ),    
+
+            processing_orders(
+                modify_order_and_db,
+                client_redis,
+                config_app,
+                ),
+       
+            saving_and_relabelling_orders(
+                private_data,
+                modify_order_and_db,
+                client_redis,
+                config_app,),
+    
+      
+            avoiding_double_ids(
+                modify_order_and_db,
+                client_redis,
+                config_app,
+                ),
+       
+            relabelling_trades(
+                modify_order_and_db,
+                config_app),
+            
+            update_cached_ticker(
+                client_redis,
+                config_app),
 
             updating_ohlc(
                 client_redis,

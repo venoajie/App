@@ -6,7 +6,6 @@
 import asyncio
 import orjson
 
-from loguru import logger as log
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_ohlc_data
 from utilities.system_tools import parse_error_message
@@ -18,21 +17,11 @@ from db_management.sqlite_management import (
 )
 
 
-async def last_tick_fr_sqlite(last_tick_query_ohlc1) -> int:
+async def last_tick_fr_sqlite(last_tick_query_ohlc1: str) -> int:
     """ """
-    try:
-        last_tick1 = await executing_query_with_return(last_tick_query_ohlc1)
+    last_tick = await executing_query_with_return(last_tick_query_ohlc1)
 
-    except Exception as error:
-
-        await telegram_bot_sendtext(
-            f"Capture market data - failed to fetch last_tick_fr_sqlite - {error}",
-            "general_error",
-        )
-
-        parse_error_message(error)
-
-    return last_tick1[0]["MAX (tick)"]
+    return last_tick[0]["MAX (tick)"]
 
 
 def currency_inline_with_database_address(
@@ -67,8 +56,12 @@ async def updating_ohlc(
         one_minute = ONE_SECOND * 60
 
         WHERE_FILTER_TICK: str = "tick"
+        
+        is_updated = True
+        
+        start_timestamp = 0
 
-        while True:
+        while is_updated:
 
             try:
 
@@ -101,55 +94,55 @@ async def updating_ohlc(
                                 table_ohlc,
                             )
                         )
-
-                        start_timestamp: int = await last_tick_fr_sqlite(
-                            last_tick_query_ohlc_resolution
-                        )
-
-                        if resolution == "1D":
-                            delta = (end_timestamp - start_timestamp) / (
-                                one_minute * 60 * 24
-                            )
-
-                        else:
-                            delta = (end_timestamp - start_timestamp) / (
-                                one_minute * int(resolution)
-                            )
-
-                        log.warning(f" delta {delta} resolution {resolution} data {data}")
-
-                        if delta == 0:
                         
-                            # refilling current ohlc table with updated data    
-                            await update_status_data(
-                                table_ohlc,
-                                "data",
-                                start_timestamp,
-                                WHERE_FILTER_TICK,
-                                data,
-                                "is",
-                            )
+                        #need cached
+                        start_timestamp: int = await last_tick_fr_sqlite(
+                            last_tick_query_ohlc_resolution)
+                        
+                        delta_time = (end_timestamp - start_timestamp)
+                        
+                        if delta_time !=0:
 
 
-                        else:
+                            if resolution == "1D":
+                                delta_qty = delta_time / (one_minute * 60 * 24)
 
-                            result_all = await get_ohlc_data(
-                                instrument_name,
-                                resolution,
-                                start_timestamp,
-                                False,
-                                end_timestamp,
-                            )
+                            else:
+                                delta_qty = delta_time / (one_minute * int(resolution))
+
+                            if delta_qty == 0:
                             
-                            log.debug(result_all)
-                            
-                            for result in result_all:
-                                
-                                await insert_tables(
+                                # refilling current ohlc table with updated data    
+                                await update_status_data(
                                     table_ohlc,
-                                    result,
-                                    )
+                                    "data",
+                                    start_timestamp,
+                                    WHERE_FILTER_TICK,
+                                    data,
+                                    "is",
+                                )
 
+
+                            else:
+
+                                # catch up data through FIX 
+                                result_all = await get_ohlc_data(
+                                    instrument_name,
+                                    resolution,
+                                    start_timestamp,
+                                    False,
+                                    end_timestamp,
+                                )
+                                
+                                for result in result_all:
+                                    
+                                    await insert_tables(
+                                        table_ohlc,
+                                        result,
+                                        )
+
+                                is_updated = False
+                            
             except Exception as error:
 
                 parse_error_message(error)
@@ -162,9 +155,8 @@ async def updating_ohlc(
                 continue
 
             finally:
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.01)
 
-    #            await asyncio.sleep(3)
 
     except Exception as error:
 
