@@ -8,6 +8,7 @@ import orjson
 from db_management.redis_client import saving_result
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_tickers
+from transaction_management.deribit.allocating_ohlc import inserting_open_interest
 from utilities.pickling import read_data
 from utilities.system_tools import (
     parse_error_message,
@@ -211,99 +212,3 @@ def get_settlement_period(strategy_attributes: list) -> list:
     )
 
 
-async def get_ohlc_data(
-    instrument_name: str,
-    qty_candles: int,
-    resolution: list,
-) -> list:
-    """_summary_
-    https://blog.apify.com/python-cache-complete-guide/]
-    data caching
-    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
-
-    Args:
-        instrument_ticker (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
-    from utilities.string_modification import (
-        transform_nested_dict_to_list_ohlc,
-    )
-
-    now_utc = datetime.now()
-
-    now_unix = convert_time_to_unix(now_utc)
-
-    start_timestamp = now_unix - (60000 * resolution) * qty_candles
-
-    end_point = ohlc_end_point(
-        instrument_name,
-        resolution,
-        start_timestamp,
-        now_unix,
-    )
-
-    async with httpx.AsyncClient() as client:
-        ohlc_request = await client.get(
-            end_point,
-            follow_redirects=True,
-        )
-
-        result = ohlc_request.json()["result"]
-
-    return transform_nested_dict_to_list_ohlc(result)
-
-
-def ohlc_end_point(
-    instrument_ticker: str,
-    resolution: int,
-    start_timestamp: int,
-    end_timestamp: int,
-) -> str:
-
-    url = f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
-
-    return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
-
-
-async def inserting_open_interest(
-    currency,
-    WHERE_FILTER_TICK,
-    TABLE_OHLC1,
-    data_orders,
-) -> None:
-    """ """
-    try:
-
-        if (
-            currency_inline_with_database_address(currency, TABLE_OHLC1)
-            and "open_interest" in data_orders
-        ):
-
-            open_interest = data_orders["open_interest"]
-
-            last_tick_query_ohlc1: str = querying_arithmetic_operator(
-                "tick", "MAX", TABLE_OHLC1
-            )
-
-            last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
-
-            await update_status_data(
-                TABLE_OHLC1,
-                "open_interest",
-                last_tick1_fr_sqlite,
-                WHERE_FILTER_TICK,
-                open_interest,
-                "is",
-            )
-
-    except Exception as error:
-
-        await telegram_bot_sendtext(
-            f"error inserting open interest - {error}",
-            "general_error",
-        )
-
-        parse_error_message(error)

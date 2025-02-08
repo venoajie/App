@@ -23,15 +23,6 @@ async def last_tick_fr_sqlite(last_tick_query_ohlc1: str) -> int:
 
     return last_tick[0]["MAX (tick)"]
 
-
-def currency_inline_with_database_address(
-    currency: str,
-    database_address: str,
-) -> bool:
-
-    return currency.lower() in str(database_address)
-
-
 async def updating_ohlc(
     client_redis: object,
     redis_channels: list,
@@ -164,3 +155,54 @@ async def updating_ohlc(
         )
 
         parse_error_message(error)
+
+
+async def inserting_open_interest(
+    currency,
+    WHERE_FILTER_TICK,
+    TABLE_OHLC1,
+    data_orders,
+) -> None:
+    """ """
+    try:
+
+        if (
+            currency_inline_with_database_address(currency, TABLE_OHLC1)
+            and "open_interest" in data_orders
+        ):
+
+            open_interest = data_orders["open_interest"]
+
+            last_tick_query_ohlc1: str = querying_arithmetic_operator(
+                "tick", "MAX", TABLE_OHLC1
+            )
+
+            last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
+
+            await update_status_data(
+                TABLE_OHLC1,
+                "open_interest",
+                last_tick1_fr_sqlite,
+                WHERE_FILTER_TICK,
+                open_interest,
+                "is",
+            )
+
+    except Exception as error:
+
+        await telegram_bot_sendtext(
+            f"error inserting open interest - {error}",
+            "general_error",
+        )
+
+        parse_error_message(error)
+
+
+
+def currency_inline_with_database_address(
+    currency: str,
+    database_address: str,
+) -> bool:
+
+    return currency.lower() in str(database_address)
+
