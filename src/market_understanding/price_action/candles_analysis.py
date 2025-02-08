@@ -345,7 +345,7 @@ async def get_market_condition(
 
                     message_channel = message_byte["channel"]
                     
-                    log.debug (f"chart_low_high_tick_channel in message_channel {chart_low_high_tick_channel in message_channel}")
+                    log.debug (f"{message_byte_data} chart_low_high_tick_channel in message_channel {chart_low_high_tick_channel in message_channel}")
 
                     if chart_low_high_tick_channel in message_channel or not market_analytics_data:
 
