@@ -7,6 +7,7 @@ import signal
 import sys
 from functools import lru_cache, wraps
 from time import sleep
+from messaging.telegram_bot import telegram_bot_sendtext
 
 # https://python.plainenglish.io/five-python-wrappers-that-can-reduce-your-code-by-half-af775feb1d5
 
@@ -507,6 +508,38 @@ def kill_process(process_name):
 
     except:
         print("Error Encountered while running script")
+
+
+async def back_up_db(idle_time: int):
+    
+    from db_management.sqlite_management import back_up_db_sqlite
+    
+    extensions = ('.bak')
+    
+    while True:
+
+        folder_path = "databases/"
+
+        try:
+            file_list = os.listdir(folder_path)
+                        
+            for currentFile in file_list:
+                #log.error(currentFile)
+                if ".bak" in currentFile:
+                    os.remove(f"{folder_path}{currentFile}")
+            await back_up_db_sqlite ()
+            
+        except Exception as error:
+        
+            parse_error_message(error)
+
+            await telegram_bot_sendtext(
+                f"get_market_condition - {error}",
+                "general_error",
+            )
+            
+        await asyncio.sleep(idle_time)
+    
 
 
 def main():

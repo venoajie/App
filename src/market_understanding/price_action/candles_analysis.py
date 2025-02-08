@@ -85,7 +85,6 @@ def ohlc_to_candlestick(conversion_array):
         wicks_up = abs(high - open)
         wicks_down = abs(low - close)
 
-    log.debug (f"candlestick_data {candlestick_data}")
     candlestick_data[0] = candle_type
 
     candlestick_data[1] = round(round(wicks_up, 5), 2)

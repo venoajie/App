@@ -20,6 +20,7 @@ import redis.asyncio as aioredis
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from data_cleaning.app_data_cleaning import reconciling_size
+from data_cleaning.pruning_db import clean_up_databases
 from messaging.telegram_bot import telegram_bot_sendtext
 #from strategies.app_future_spreads import future_spreads
 #from strategies.app_hedging_spot import hedging_spot
@@ -42,6 +43,7 @@ from transaction_management.deribit.updating_ticker import \
     update_cached_ticker
 from utilities.system_tools import (
     SignalHandler,
+    back_up_db,
     parse_error_message, 
     provide_path_for_file,
     )
@@ -222,6 +224,10 @@ async def main():
                 redis_channels,
                 resolutions,
                 np),
+            
+            back_up_db(60*10),
+            
+            clean_up_databases(60)
             
             
                         )  
