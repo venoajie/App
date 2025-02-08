@@ -160,7 +160,7 @@ def ohlc_end_point(
     start_timestamp = qty_or_start_time_stamp
 
     # recalculate start timestamp using qty as basis point
-    if not qty_as_start_time_stamp:
+    if qty_as_start_time_stamp:
         start_timestamp = now_unix - (60000 * resolution) * qty_as_start_time_stamp
 
     if provided_end_timestamp:
