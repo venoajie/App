@@ -362,9 +362,6 @@ async def get_market_condition(
                             if instrument_name in o["instrument_name"]
                         ]
 
-                        log.error(f" {instrument_name}")
-                        log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")
-                        
                         result = []
 
                         for resolution in resolutions:
@@ -522,7 +519,7 @@ async def get_market_condition(
 
                                     result.append(pub_message)
 
-                                # log.critical(f"result {result}")
+                                log.critical(f"result {result}")
                                 await saving_and_publishing_result(
                                     client_redis,
                                     market_analytics_channel,
