@@ -44,7 +44,6 @@ async def updating_ohlc(
         # prepare channels placeholders
         channels = [
             chart_channel,
-            chart_low_high_tick_channel,
         ]
 
         # subscribe to channels
