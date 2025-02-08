@@ -336,7 +336,7 @@ async def get_market_condition(
                         
                         ohlc_query = f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
                         
-                        result_from_sqlite = executing_query_with_return(ohlc_query)
+                        result_from_sqlite = await executing_query_with_return(ohlc_query)
 
                         log.debug(f" result_from_sqlite {result_from_sqlite}")
 
