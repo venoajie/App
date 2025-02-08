@@ -344,7 +344,7 @@ async def get_market_condition(
                             
                             result_from_sqlite = await executing_query_with_return(ohlc_query)
 
-                            log.debug(f" result_from_sqlite {remove_apostrophes_from_json(result_from_sqlite["data"])}")
+                            log.debug(f" result_from_sqlite {remove_apostrophes_from_json(o["data"] for o in result_from_sqlite)}")
 
 
                             candles_data_resolution = [
