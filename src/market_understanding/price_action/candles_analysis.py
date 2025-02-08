@@ -332,19 +332,19 @@ async def get_market_condition(
                             if instrument_name in o["instrument_name"]
                         ]
 
-                        table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
-                        
-                        ohlc_query = f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
-                        
-                        result_from_sqlite = await executing_query_with_return(ohlc_query)
-
-                        log.debug(f" result_from_sqlite {result_from_sqlite}")
-
-
                         log.error(f" {instrument_name}")
                         log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")
 
                         for resolution in resolutions:
+
+                            table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
+                            
+                            ohlc_query = f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
+                            
+                            result_from_sqlite = await executing_query_with_return(ohlc_query)
+
+                            log.debug(f" result_from_sqlite {result_from_sqlite}")
+
 
                             candles_data_resolution = [
                                 o
