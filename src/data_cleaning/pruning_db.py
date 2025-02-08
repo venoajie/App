@@ -9,12 +9,12 @@ from db_management.sqlite_management import (
     executing_query_with_return,
     querying_arithmetic_operator,
 )
-from messaging.telegram_bot import telegram_bot_sendtext
-
+from utilities.system_tools import parse_error_message
 
 async def count_and_delete_ohlc_rows(database, table) -> None:
 
     try:
+        
         rows_threshold = max_rows(table)
 
         if "supporting_items_json" in table or "account_summary_json" in table:
@@ -46,7 +46,7 @@ async def count_and_delete_ohlc_rows(database, table) -> None:
             await deleting_row(table, database, where_filter, "=", first_tick)
 
     except Exception as error:
-        await telegram_bot_sendtext(f"error {error}")
+        parse_error_message(error)
 
 
 def max_rows(table) -> int:
