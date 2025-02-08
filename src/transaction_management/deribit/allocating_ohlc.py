@@ -7,7 +7,6 @@ import asyncio
 import orjson
 
 from loguru import logger as log
-from utilities.time_modification import get_now_unix_time
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_ohlc_data
 from utilities.system_tools import parse_error_message
@@ -34,112 +33,6 @@ async def last_tick_fr_sqlite(last_tick_query_ohlc1) -> int:
         parse_error_message(error)
 
     return last_tick1[0]["MAX (tick)"]
-
-
-async def replace_previous_ohlc_using_fix_data(
-    instrument_ticker,
-    TABLE_OHLC1,
-    resolution,
-    last_tick1_fr_sqlite,
-    last_tick_fr_data_orders,
-    WHERE_FILTER_TICK,
-) -> int:
-    """ """
-    try:
-
-        ohlc_request = await get_ohlc_data(
-            instrument_ticker,
-            resolution,
-            last_tick1_fr_sqlite,
-            False,
-            last_tick1_fr_sqlite,
-        )
-
-        result = [o for o in (ohlc_request) if o["tick"] == last_tick1_fr_sqlite][0]
-
-        await update_status_data(
-            TABLE_OHLC1,
-            "data",
-            last_tick1_fr_sqlite,
-            WHERE_FILTER_TICK,
-            result,
-            "is",
-        )
-
-    except Exception as error:
-
-        await telegram_bot_sendtext(
-            f"Capture market data - failed to fetch last_tick_fr_sqlite - {error}",
-            "general_error",
-        )
-
-        parse_error_message(error)
-
-
-async def ohlc_result_per_time_frame(
-    instrument_ticker,
-    resolution,
-    data_orders,
-    TABLE_OHLC1: str,
-    WHERE_FILTER_TICK: str = "tick",
-) -> None:
-
-    last_tick_query_ohlc1: str = querying_arithmetic_operator(
-        WHERE_FILTER_TICK,
-        "MAX",
-        TABLE_OHLC1,
-    )
-
-    last_tick1_fr_sqlite: int = await last_tick_fr_sqlite(last_tick_query_ohlc1)
-
-    try:
-        log.warning(f"data_orders {data_orders} {len(data_orders)}")
-        last_tick_fr_data_orders: int = data_orders["tick"]
-
-    except:
-        log.error(f"data_orders {data_orders}")
-        last_tick_fr_data_orders: int = max([o["tick"] for o in data_orders])
-
-    log.debug(
-        f"resolution {resolution} last_tick1_fr_sqlite {last_tick1_fr_sqlite} last_tick_fr_data_orders {last_tick_fr_data_orders}"
-    )
-
-    # refilling current ohlc table with updated data
-    refilling_current_ohlc_table_with_updated_streaming_data = (
-        last_tick1_fr_sqlite == last_tick_fr_data_orders
-    )
-
-
-    if refilling_current_ohlc_table_with_updated_streaming_data:
-
-        await update_status_data(
-            TABLE_OHLC1,
-            "data",
-            last_tick1_fr_sqlite,
-            WHERE_FILTER_TICK,
-            data_orders,
-            "is",
-        )
-
-    insert_new_ohlc_and_replace_previous_ohlc_using_fix_data = (
-        last_tick_fr_data_orders > last_tick1_fr_sqlite
-    )
-
-    if insert_new_ohlc_and_replace_previous_ohlc_using_fix_data:
-
-        await insert_tables(
-            TABLE_OHLC1, 
-            data_orders,
-            )
-
-        await replace_previous_ohlc_using_fix_data(
-            instrument_ticker,
-            TABLE_OHLC1,
-            resolution,
-            last_tick1_fr_sqlite,
-            last_tick_fr_data_orders,
-            WHERE_FILTER_TICK,
-        )
 
 
 def currency_inline_with_database_address(
@@ -197,8 +90,6 @@ async def updating_ohlc(
 
                         resolution = message_byte_data["resolution"]
 
-                        log.warning(f" resolution {resolution} data {data}")
-
                         end_timestamp = data["tick"]
 
                         table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
@@ -225,25 +116,39 @@ async def updating_ohlc(
                                 one_minute * int(resolution)
                             )
 
-                        if delta > 1:
+                        log.warning(f" delta {delta} resolution {resolution} data {data}")
 
-                            result = await get_ohlc_data(
+                        if delta == 0:
+                        
+                            # refilling current ohlc table with updated data    
+                            await update_status_data(
+                                table_ohlc,
+                                "data",
+                                start_timestamp,
+                                WHERE_FILTER_TICK,
+                                data,
+                                "is",
+                            )
+
+
+                        else:
+
+                            result_all = await get_ohlc_data(
                                 instrument_name,
                                 resolution,
                                 start_timestamp,
                                 False,
                                 end_timestamp,
                             )
-
-                            await ohlc_result_per_time_frame(
-                                instrument_name,
-                                resolution,
-                                result,
-                                table_ohlc,
-                                WHERE_FILTER_TICK,
-                            )
-
-                            await insert_tables(table_ohlc, result)
+                            
+                            log.debug(result_all)
+                            
+                            for result in result_all:
+                                
+                                await insert_tables(
+                                    table_ohlc,
+                                    result,
+                                    )
 
             except Exception as error:
 
