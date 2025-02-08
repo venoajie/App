@@ -50,10 +50,6 @@ async def updating_ohlc(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        ONE_SECOND = 1000
-
-        one_minute = ONE_SECOND * 60
-
         WHERE_FILTER_TICK: str = "tick"
 
         is_updated = True
