@@ -69,12 +69,10 @@ async def updating_ohlc(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
-                    
-                    log.warning(f"message_channel {message_channel}")
 
                     if chart_channel in message_channel:
                         
-                        log.warning(f"message_channel {message_channel}")
+                        log.warning(f"message_byte_data {message_byte_data}")
 
                         data = message_byte_data["data"]
 
