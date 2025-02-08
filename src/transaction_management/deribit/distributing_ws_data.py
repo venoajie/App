@@ -139,6 +139,8 @@ async def caching_distributing_data(
                     )
 
                 if "chart.trades" in message_channel:
+                    
+                    log.info(f"message_channel {message_channel}")
 
                     pub_message = dict(
                         data=data,
