@@ -91,7 +91,7 @@ async def main():
         pool = aioredis.ConnectionPool.from_url(
             "redis://localhost", 
             port=6379, 
-            db=1, 
+            db=0, 
             protocol=3, 
             decode_responses=True
             )
@@ -145,12 +145,6 @@ async def main():
         
         """
 
-            
-            get_market_condition(
-                client_redis,
-                config_app,
-                np),
-            
             
             hedging_spot(
                 private_data,
@@ -217,6 +211,12 @@ async def main():
             updating_ohlc(
                 client_redis,
                 redis_channels,),
+            
+            get_market_condition(
+                client_redis,
+                config_app,
+                np),
+            
             
                         )  
 
