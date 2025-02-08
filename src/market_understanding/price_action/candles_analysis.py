@@ -293,11 +293,11 @@ async def get_market_condition(
         qty_candles = 5
         dim_sequence = 3
 
-        cached_candles_data = await get_candles_data(
-            currencies,
-            qty_candles,
-            resolutions,
-        )
+        cached_candles_data = []#await get_candles_data(
+            #currencies,
+            #qty_candles,
+            #resolutions,
+        #)
 
         cached_candles_data_is_updated = True
         
