@@ -120,6 +120,8 @@ async def update_cached_ticker(
 
                 message_byte = await pubsub.get_message()
 
+                print (f"message_byte {message_byte}")
+
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
