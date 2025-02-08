@@ -17,7 +17,7 @@ from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_ohlc_data
 from utilities.string_modification import remove_apostrophes_from_json
 from utilities.system_tools import parse_error_message
-#from loguru import logger as log
+from loguru import logger as log
 
 
 async def last_tick_fr_sqlite(last_tick_query_ohlc1: str) -> int:
@@ -134,17 +134,17 @@ async def updating_ohlc(
                                 o["data"] for o in result_from_sqlite
                             )[0]
 
-#                            log.warning(f"ohlc_from_sqlite {ohlc_from_sqlite}")
-#                            log.info(f"data {data}")
-
                             high_from_db = ohlc_from_sqlite["high"]
                             low_from_db = ohlc_from_sqlite["low"]
 
-#                            log.warning(
-#                                f"high_from_ws > high_from_db or low_from_ws < low_from_db {high_from_ws > high_from_db or low_from_ws < low_from_db}"
-#                            )
-
                             if high_from_ws > high_from_db or low_from_ws < low_from_db:
+
+                                log.warning(f"ohlc_from_sqlite {ohlc_from_sqlite}")
+                                log.info(f"resolution {resolution} data {data}")
+
+                                log.warning(
+                                    f"high_from_ws > high_from_db or low_from_ws < low_from_db {high_from_ws > high_from_db or low_from_ws < low_from_db}"
+                                )
 
                                 await publishing_result(
                                     client_redis,
