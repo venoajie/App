@@ -282,22 +282,16 @@ def combining_candles_data(
 
 async def get_market_condition(
     client_redis: object,
+    pubsub: object,
     config_app: list,
+    currencies,
+    redis_channels,
+    resolutions,
     np: object,
 ) -> dict:
     """ """
     try:
 
-        # connecting to redis pubsub
-        pubsub: object = client_redis.pubsub()
-
-        # get tradable strategies
-        tradable_config_app = config_app["tradable"]
-
-        # get TRADABLE currencies
-        currencies = [o["spot"] for o in tradable_config_app][0]
-        # get redis channels
-        redis_channels: dict = config_app["redis_channels"][0]
         chart_update_channel: str = redis_channels["chart_update"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
 
@@ -312,7 +306,6 @@ async def get_market_condition(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        resolutions = [60, 15, 5]
         qty_candles = 5
         dim_sequence = 3
 
@@ -354,8 +347,6 @@ async def get_market_condition(
                             if instrument_name in o["instrument_name"]
                         ]
 
-                        result = []
-
                         candles_data = combining_candles_data(
                             np,
                             currencies,
@@ -368,6 +359,8 @@ async def get_market_condition(
                             [o["instrument_name"] for o in candles_data]
                         )
 
+
+                        result = []
                         for instrument_name in candles_instrument_name:
 
                             if (

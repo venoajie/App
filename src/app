@@ -96,8 +96,11 @@ async def main():
             decode_responses=True
             )
         
-        client_redis = aioredis.Redis.from_pool(pool)
-                
+        client_redis: object = aioredis.Redis.from_pool(pool)
+        
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
+        
         # parsing config file
         config_app = get_config(file_toml)
 
@@ -214,7 +217,11 @@ async def main():
             
             get_market_condition(
                 client_redis,
+                pubsub,
                 config_app,
+                currencies,
+                redis_channels,
+                resolutions,
                 np),
             
             
