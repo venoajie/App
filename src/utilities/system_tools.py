@@ -7,7 +7,6 @@ import signal
 import sys
 from functools import lru_cache, wraps
 from time import sleep
-from messaging.telegram_bot import telegram_bot_sendtext
 
 # https://python.plainenglish.io/five-python-wrappers-that-can-reduce-your-code-by-half-af775feb1d5
 
@@ -532,11 +531,6 @@ async def back_up_db(idle_time: int):
         except Exception as error:
         
             parse_error_message(error)
-
-            await telegram_bot_sendtext(
-                f"get_market_condition - {error}",
-                "general_error",
-            )
             
         await asyncio.sleep(idle_time)
     
