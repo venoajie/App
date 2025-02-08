@@ -12,6 +12,7 @@ from utilities.string_modification import (
     remove_list_elements,
     remove_redundant_elements,
 )
+from db_management.sqlite_management import     executing_query_with_return
 from utilities.system_tools import parse_error_message
 
 """
@@ -191,7 +192,7 @@ async def get_candles_data(
                 qty_candles,
                 resolution,
             )
-
+            
             result.append(
                 dict(
                     instrument_name=instrument_name,
@@ -301,8 +302,8 @@ async def get_market_condition(
         cached_candles_data_is_updated = True
         
         log.warning(f"cached_candles_data {cached_candles_data}")
-        
 
+        
         while cached_candles_data_is_updated:
 
             try:
@@ -322,12 +323,23 @@ async def get_market_condition(
                         tick_from_exchange = ohlc_from_exchange["tick"]
                         high_from_exchange = ohlc_from_exchange["high"]
                         low_from_exchange = ohlc_from_exchange["low"]
+                        
+                        currency = message_byte_data["currency"]
 
                         candles_data_instrument = [
                             o
                             for o in cached_candles_data
                             if instrument_name in o["instrument_name"]
                         ]
+
+                        table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
+                        
+                        ohlc_query = f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
+                        
+                        result_from_sqlite = executing_query_with_return(ohlc_query)
+
+                        log.debug(f" result_from_sqlite {result_from_sqlite}")
+
 
                         log.error(f" {instrument_name}")
                         log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")

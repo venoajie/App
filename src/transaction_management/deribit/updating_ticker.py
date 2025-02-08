@@ -2,7 +2,6 @@
 
 import asyncio
 
-from loguru import logger as log
 import orjson
 
 from db_management.redis_client import saving_result
