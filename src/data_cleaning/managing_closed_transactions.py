@@ -109,9 +109,9 @@ async def refill_db(
         o for o in my_trades_currency_active if o["label"] is None
     ]
 
-    log.debug(
-        f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}"
-    )
+    #    log.debug(
+    #        f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}"
+    #   )
 
     if my_trades_currency_active_with_blanks:
         column_trade: str = (

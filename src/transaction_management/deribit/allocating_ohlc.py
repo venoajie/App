@@ -23,6 +23,7 @@ async def last_tick_fr_sqlite(last_tick_query_ohlc1: str) -> int:
 
     return last_tick[0]["MAX (tick)"]
 
+
 async def updating_ohlc(
     client_redis: object,
     redis_channels: list,
@@ -198,11 +199,9 @@ async def inserting_open_interest(
         parse_error_message(error)
 
 
-
 def currency_inline_with_database_address(
     currency: str,
     database_address: str,
 ) -> bool:
 
     return currency.lower() in str(database_address)
-

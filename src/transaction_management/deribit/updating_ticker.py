@@ -210,5 +210,3 @@ def get_settlement_period(strategy_attributes: list) -> list:
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
-
-
