@@ -149,6 +149,16 @@ async def main():
         await asyncio.sleep(0.0005)
         
         """
+        cancelling_orders(
+                private_data,
+                modify_order_and_db,
+                currencies,
+                client_redis,
+                config_app,
+                redis_channels,
+                redis_keys,
+                strategy_attributes,
+                ),    
 
             
             hedging_spot(
@@ -175,17 +185,7 @@ async def main():
             #    config_app,
             #    ),
                         
-            cancelling_orders(
-                private_data,
-                modify_order_and_db,
-                currencies,
-                client_redis,
-                config_app,
-                redis_channels,
-                redis_keys,
-                strategy_attributes,
-                ),    
-
+    
             processing_orders(
                 modify_order_and_db,
                 client_redis,
