@@ -330,6 +330,8 @@ async def get_market_condition(
         )
 
         cached_candles_data_is_updated = True
+        
+        market_analytics_data = []
 
         while cached_candles_data_is_updated:
 
@@ -345,7 +347,7 @@ async def get_market_condition(
                     
                     log.debug (f"chart_low_high_tick_channel in message_channel {chart_low_high_tick_channel in message_channel}")
 
-                    if chart_low_high_tick_channel in message_channel:
+                    if chart_low_high_tick_channel in message_channel or not market_analytics_data:
 
                         instrument_name = message_byte_data["instrument_name"]
 
@@ -367,7 +369,7 @@ async def get_market_condition(
                             [o["instrument_name"] for o in candles_data]
                         )
 
-                        result = []
+                        market_analytics_data = []
                         for instrument_name in candles_instrument_name:
 
                             if instrument_name in message_byte_data["instrument_name"]:
@@ -478,7 +480,7 @@ async def get_market_condition(
                                     strong_bearish=strong_bearish,
                                 )
 
-                                result.append(pub_message)
+                                market_analytics_data.append(pub_message)
 
                             log.critical(f"result {result}")
                             await saving_and_publishing_result(
