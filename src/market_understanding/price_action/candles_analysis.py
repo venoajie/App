@@ -7,13 +7,12 @@ from loguru import logger as log
 # user defined formula
 from db_management.redis_client import saving_and_publishing_result, publishing_result
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.api_requests import get_ohlc_data
 from utilities.string_modification import (
     remove_apostrophes_from_json,
     remove_list_elements,
     remove_redundant_elements,
 )
-from db_management.sqlite_management import     executing_query_with_return
+from db_management.sqlite_management import executing_query_with_return
 from utilities.system_tools import parse_error_message
 
 """
@@ -95,13 +94,9 @@ def ohlc_to_candlestick(conversion_array):
 
     candlestick_data[4] = round(round(height, 5), 2)
 
-    candlestick_data[5] = 0 if body_size == 0 else (
-        round(
-            round(
-                body_size / height, 5
-                ), 2
-            ) > 70 / 100
-        ) * 1
+    candlestick_data[5] = (
+        0 if body_size == 0 else (round(round(body_size / height, 5), 2) > 70 / 100) * 1
+    )
 
     return candlestick_data
 
@@ -173,20 +168,20 @@ def candles_analysis(
     np_users_data = np.array(ohlc_without_ticks)
 
     np_data = np.array(
-        [tuple(user.values()) for user in np_users_data], 
+        [tuple(user.values()) for user in np_users_data],
         dtype=dtype,
-        )
+    )
 
     three_dim_sequence = my_generator_candle(
-        np, 
-        np_data[1:], 
+        np,
+        np_data[1:],
         dim_sequence,
-        )
+    )
 
     candles_analysis_result = analysis_based_on_length(
-        np, 
+        np,
         three_dim_sequence,
-        )
+    )
 
     return candles_analysis_result
 
@@ -205,11 +200,13 @@ async def get_candles_data(
         for resolution in resolutions:
 
             table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
-            
-            ohlc_query = f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
-            
+
+            ohlc_query = (
+                f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
+            )
+
             result_from_sqlite = await executing_query_with_return(ohlc_query)
-            
+
             ohlc = remove_apostrophes_from_json(o["data"] for o in result_from_sqlite)
 
             result.append(
@@ -248,7 +245,7 @@ def combining_candles_data(
                 for o in candles_per_instrument_name
                 if o["resolution"] == resolution
             ][0]
-            
+
             ohlc_without_volume = remove_list_elements(
                 candles_per_resolution,
                 "volume",
@@ -302,6 +299,7 @@ async def get_market_condition(
 
         chart_update_channel: str = redis_channels["chart_update"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
+        chart_low_high_tick_channel: str = redis_channels["chart_low_high_tick"]
 
         redis_keys: dict = config_app["redis_keys"][0]
         market_condition_keys: str = redis_keys["market_condition"]
@@ -309,6 +307,8 @@ async def get_market_condition(
         # prepare channels placeholders
         channels = [
             chart_update_channel,
+            market_analytics_channel,
+            chart_low_high_tick_channel,
         ]
 
         # subscribe to channels
@@ -322,9 +322,7 @@ async def get_market_condition(
             qty_candles,
             resolutions,
         )
-        
-        cached_candles_data_is_updated = True
-                
+
         candles_data = combining_candles_data(
             np,
             currencies,
@@ -332,7 +330,9 @@ async def get_market_condition(
             resolutions,
             dim_sequence,
         )
-        
+
+        cached_candles_data_is_updated = True
+
         while cached_candles_data_is_updated:
 
             try:
@@ -345,7 +345,7 @@ async def get_market_condition(
 
                     message_channel = message_byte["channel"]
 
-                    if chart_update_channel in message_channel:
+                    if chart_low_high_tick_channel in message_channel:
 
                         instrument_name = message_byte_data["instrument_name"]
 
@@ -367,14 +367,10 @@ async def get_market_condition(
                             [o["instrument_name"] for o in candles_data]
                         )
 
-
                         result = []
                         for instrument_name in candles_instrument_name:
 
-                            if (
-                                instrument_name
-                                in message_byte_data["instrument_name"]
-                            ):
+                            if instrument_name in message_byte_data["instrument_name"]:
 
                                 candles_data_instrument = [
                                     o
@@ -424,9 +420,7 @@ async def get_market_condition(
                                     [o["is_long_body"] for o in candle_15]
                                 )
 
-                                candle_60_long_body_more_than_2 = (
-                                    candle_60_is_long >= 2
-                                )
+                                candle_60_long_body_more_than_2 = candle_60_is_long >= 2
                                 candle_5_long_body_any = candle_5_is_long > 0
                                 candle_15_long_body_any = candle_15_is_long > 0
                                 candle_60_long_body_any = candle_60_is_long > 0
@@ -439,17 +433,10 @@ async def get_market_condition(
                                 strong_bullish, strong_bearish = False, False
 
                                 if candle_5_long_body_any:
-                                    weak_bullish = (
-                                        True if candle_5_type > 0 else False
-                                    )
-                                    weak_bearish = (
-                                        True if candle_5_type < 0 else False
-                                    )
+                                    weak_bullish = True if candle_5_type > 0 else False
+                                    weak_bearish = True if candle_5_type < 0 else False
 
-                                if (
-                                    candle_60_long_body_any
-                                    and candle_15_long_body_any
-                                ):
+                                if candle_60_long_body_any and candle_15_long_body_any:
                                     bullish = (
                                         True
                                         if weak_bullish and candle_15_type > 0
@@ -464,15 +451,13 @@ async def get_market_condition(
                                 if candle_60_long_body_more_than_2:
                                     strong_bullish = (
                                         True
-                                        if bullish
-                                        and candle_60_long_body_more_than_2
+                                        if bullish and candle_60_long_body_more_than_2
                                         else False
                                     )
 
                                     strong_bearish = (
                                         True
-                                        if bearish
-                                        and candle_60_long_body_more_than_2
+                                        if bearish and candle_60_long_body_more_than_2
                                         else False
                                     )
 
@@ -525,50 +510,3 @@ async def get_market_condition(
         asyncio.run(
             telegram_bot_sendtext(f"get_market_condition - {error}", "general_error")
         )
-
-
-
-
-def updating_cached_values(
-    cached_candles_data: list,
-    instrument_name: str,
-    resolution: int,
-    ohlc_tick_max: int,
-    key_to_update: str,
-    value_to_update: float,
-):
-    """ """
-    
-    log.debug(f" cached update {[
-        y
-        for y in [
-            x
-            for x in [
-                o
-                for o in [
-                    i
-                    for i in cached_candles_data
-                    if instrument_name in i["instrument_name"]
-                ]
-                if resolution == o["resolution"]
-            ][0]["ohlc"]
-        ]
-        if y["tick"] == ohlc_tick_max
-    ][0][(f"{key_to_update}")]} ")
-
-    [
-        y
-        for y in [
-            x
-            for x in [
-                o
-                for o in [
-                    i
-                    for i in cached_candles_data
-                    if instrument_name in i["instrument_name"]
-                ]
-                if resolution == o["resolution"]
-            ][0]["ohlc"]
-        ]
-        if y["tick"] == ohlc_tick_max
-    ][0][(f"{key_to_update}")] =  value_to_update

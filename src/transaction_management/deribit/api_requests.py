@@ -175,8 +175,8 @@ async def get_ohlc_data(
     instrument_name: str,
     resolution: int,
     qty_or_start_time_stamp: int,
+    provided_end_timestamp: bool = None,
     qty_as_start_time_stamp: bool = False,
-    end_timestamp_is_now: bool = None,
 ) -> list:
 
     # Set endpoint
@@ -184,8 +184,8 @@ async def get_ohlc_data(
         instrument_name,
         resolution,
         qty_or_start_time_stamp,
+        provided_end_timestamp,
         qty_as_start_time_stamp,
-        end_timestamp_is_now,
     )
 
     result = await send_requests_to_url(end_point)

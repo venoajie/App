@@ -510,30 +510,29 @@ def kill_process(process_name):
 
 
 async def back_up_db(idle_time: int):
-    
+
     from db_management.sqlite_management import back_up_db_sqlite
-    
-    extensions = ('.bak')
-    
+
+    extensions = ".bak"
+
     while True:
 
         folder_path = "databases/"
 
         try:
             file_list = os.listdir(folder_path)
-                        
+
             for currentFile in file_list:
-                #log.error(currentFile)
+                # log.error(currentFile)
                 if ".bak" in currentFile:
                     os.remove(f"{folder_path}{currentFile}")
-            await back_up_db_sqlite ()
-            
+            await back_up_db_sqlite()
+
         except Exception as error:
-        
+
             parse_error_message(error)
-            
+
         await asyncio.sleep(idle_time)
-    
 
 
 def main():

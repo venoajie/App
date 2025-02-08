@@ -72,27 +72,26 @@ async def clean_up_databases(idle_time) -> None:
     """ """
 
     while True:
-                    
-        tables = ["market_analytics_json", 
-                #"account_summary_json", 
-                "ohlc1_eth_perp_json", 
-                "ohlc1_btc_perp_json", 
-                "ohlc15_eth_perp_json", 
-                "ohlc15_btc_perp_json", 
-                #"ohlc30_eth_perp_json", 
-                "ohlc60_eth_perp_json",
-                #"ohlc3_eth_perp_json", 
-                #"ohlc3_btc_perp_json", 
-                "ohlc5_eth_perp_json", 
-                "ohlc5_btc_perp_json",]
-        
-        database: str = "databases/trading.sqlite3"  
+
+        tables = [
+            "market_analytics_json",
+            # "account_summary_json",
+            "ohlc1_eth_perp_json",
+            "ohlc1_btc_perp_json",
+            "ohlc15_eth_perp_json",
+            "ohlc15_btc_perp_json",
+            # "ohlc30_eth_perp_json",
+            "ohlc60_eth_perp_json",
+            # "ohlc3_eth_perp_json",
+            # "ohlc3_btc_perp_json",
+            "ohlc5_eth_perp_json",
+            "ohlc5_btc_perp_json",
+        ]
+
+        database: str = "databases/trading.sqlite3"
 
         for table in tables:
-                
-            await count_and_delete_ohlc_rows(
-                database,
-                table
-                )
-        
+
+            await count_and_delete_ohlc_rows(database, table)
+
         await asyncio.sleep(idle_time)

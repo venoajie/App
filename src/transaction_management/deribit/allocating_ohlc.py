@@ -6,15 +6,18 @@
 import asyncio
 import orjson
 
-from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.api_requests import get_ohlc_data
-from utilities.system_tools import parse_error_message
+from db_management.redis_client import publishing_result
 from db_management.sqlite_management import (
     executing_query_with_return,
     insert_tables,
     querying_arithmetic_operator,
     update_status_data,
 )
+from messaging.telegram_bot import telegram_bot_sendtext
+from transaction_management.deribit.api_requests import get_ohlc_data
+from utilities.string_modification import remove_apostrophes_from_json
+from utilities.system_tools import parse_error_message
+from loguru import logger as log
 
 
 async def last_tick_fr_sqlite(last_tick_query_ohlc1: str) -> int:
@@ -36,9 +39,13 @@ async def updating_ohlc(
         pubsub: object = client_redis.pubsub()
 
         chart_channel: str = redis_channels["chart_update"]
+        chart_low_high_tick_channel: str = redis_channels["chart_low_high_tick"]
 
         # prepare channels placeholders
-        channels = [chart_channel]
+        channels = [
+            chart_channel,
+            chart_low_high_tick_channel,
+        ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -94,45 +101,85 @@ async def updating_ohlc(
 
                         delta_time = end_timestamp - start_timestamp
 
-                        if delta_time != 0:
+                        pub_message = dict(
+                            instrument_name=instrument_name,
+                            resolution=resolution,
+                        )
 
-                            if resolution == "1D":
-                                delta_qty = delta_time / (one_minute * 60 * 24)
+                        if delta_time == 0:
 
-                            else:
-                                delta_qty = delta_time / (one_minute * int(resolution))
+                            # refilling current ohlc table with updated data
+                            await update_status_data(
+                                table_ohlc,
+                                "data",
+                                end_timestamp,
+                                WHERE_FILTER_TICK,
+                                data,
+                                "is",
+                            )
 
-                            if delta_qty == 0:
+                            table_ohlc = (
+                                f"ohlc{resolution}_{currency.lower()}_perp_json"
+                            )
 
-                                # refilling current ohlc table with updated data
-                                await update_status_data(
+                            ohlc_query = f"SELECT data FROM {table_ohlc} WHERE tick = {end_timestamp}"
+
+                            result_from_sqlite = await executing_query_with_return(
+                                ohlc_query
+                            )
+
+                            log.warning(f"result_from_sqlite {result_from_sqlite}")
+
+                            high_from_ws = data["high"]
+                            low_from_ws = data["low"]
+
+                            ohlc_from_sqlite = remove_apostrophes_from_json(
+                                o["data"] for o in result_from_sqlite
+                            )[0]
+
+                            log.warning(f"ohlc_from_sqlite {ohlc_from_sqlite}")
+                            log.info(f"data {data}")
+
+                            high_from_db = ohlc_from_sqlite["high"]
+                            low_from_db = ohlc_from_sqlite["low"]
+
+                            log.warning(
+                                f"high_from_ws > high_from_db or low_from_ws < low_from_db {high_from_ws > high_from_db or low_from_ws < low_from_db}"
+                            )
+
+                            if high_from_ws > high_from_db or low_from_ws < low_from_db:
+
+                                await publishing_result(
+                                    client_redis,
+                                    chart_low_high_tick_channel,
+                                    pub_message,
+                                )
+
+                        else:
+
+                            # catch up data through FIX
+                            result_all = await get_ohlc_data(
+                                instrument_name,
+                                resolution,
+                                start_timestamp,
+                                end_timestamp,
+                                False,
+                            )
+
+                            await publishing_result(
+                                client_redis,
+                                chart_low_high_tick_channel,
+                                pub_message,
+                            )
+
+                            for result in result_all:
+
+                                await insert_tables(
                                     table_ohlc,
-                                    "data",
-                                    start_timestamp,
-                                    WHERE_FILTER_TICK,
-                                    data,
-                                    "is",
+                                    result,
                                 )
 
-                            else:
-
-                                # catch up data through FIX
-                                result_all = await get_ohlc_data(
-                                    instrument_name,
-                                    resolution,
-                                    start_timestamp,
-                                    False,
-                                    end_timestamp,
-                                )
-
-                                for result in result_all:
-
-                                    await insert_tables(
-                                        table_ohlc,
-                                        result,
-                                    )
-
-                                is_updated = False
+                            is_updated = False
 
             except Exception as error:
 
