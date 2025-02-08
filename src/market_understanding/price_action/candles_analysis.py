@@ -9,6 +9,7 @@ from db_management.redis_client import saving_and_publishing_result, publishing_
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_ohlc_data
 from utilities.string_modification import (
+    remove_apostrophes_from_json,
     remove_list_elements,
     remove_redundant_elements,
 )
@@ -343,7 +344,7 @@ async def get_market_condition(
                             
                             result_from_sqlite = await executing_query_with_return(ohlc_query)
 
-                            log.debug(f" result_from_sqlite {result_from_sqlite}")
+                            log.debug(f" result_from_sqlite {remove_apostrophes_from_json(result_from_sqlite)}")
 
 
                             candles_data_resolution = [
