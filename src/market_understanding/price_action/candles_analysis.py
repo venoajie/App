@@ -188,12 +188,14 @@ async def get_candles_data(
 
         for resolution in resolutions:
 
-            ohlc = await get_ohlc_data(
-                instrument_name,
-                qty_candles,
-                resolution,
-            )
+            table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
             
+            ohlc_query = f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
+            
+            result_from_sqlite = await executing_query_with_return(ohlc_query)
+            
+            ohlc = remove_apostrophes_from_json(o["data"] for o in result_from_sqlite)
+
             result.append(
                 dict(
                     instrument_name=instrument_name,
@@ -294,16 +296,25 @@ async def get_market_condition(
         qty_candles = 5
         dim_sequence = 3
 
-        cached_candles_data = []#await get_candles_data(
-            #currencies,
-            #qty_candles,
-            #resolutions,
-        #)
+        cached_candles_data = await get_candles_data(
+            currencies,
+            qty_candles,
+            resolutions,
+        )
+        
+        log.info(f"cached_candles_data {cached_candles_data}")
 
         cached_candles_data_is_updated = True
         
         log.warning(f"cached_candles_data {cached_candles_data}")
 
+        candles_data = combining_candles_data(
+            np,
+            currencies,
+            cached_candles_data,
+            resolutions,
+            dim_sequence,
+        )
         
         while cached_candles_data_is_updated:
 
@@ -343,9 +354,8 @@ async def get_market_condition(
                             ohlc_query = f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
                             
                             result_from_sqlite = await executing_query_with_return(ohlc_query)
-
-                            log.debug(f" result_from_sqlite {remove_apostrophes_from_json(o["data"] for o in result_from_sqlite)}")
-
+                            
+                            ohlc = remove_apostrophes_from_json(o["data"] for o in result_from_sqlite)
 
                             candles_data_resolution = [
                                 o
@@ -365,270 +375,145 @@ async def get_market_condition(
 
                             if ohlc_resolution:
 
-                                ohlc_tick_max = max(
-                                    [o["tick"] for o in ohlc_resolution]
+                                # log.error(f" candles_data_instrument {candles_data_instrument}")
+
+                                candles_data = combining_candles_data(
+                                    np,
+                                    currencies,
+                                    cached_candles_data,
+                                    resolutions,
+                                    dim_sequence,
                                 )
 
-                                tick_delta = (
-                                    tick_from_exchange - ohlc_tick_max
-                                ) / 60000
-
-
-                                log.warning(
-                                    f" tick_from_exchange {tick_from_exchange} ohlc_tick_max {ohlc_tick_max} tick_delta {tick_delta} resolution {resolution} {tick_delta > resolution}"
+                                candles_instrument_name = remove_redundant_elements(
+                                    [o["instrument_name"] for o in candles_data]
                                 )
 
-                                # update all under resolution
-                                if tick_delta > resolution:
-
-                                    log.warning(
-                                        f" ohlc_resolution before {ohlc_resolution} {len(ohlc_resolution)} {[o["tick"] for o in ohlc_resolution]}"
-                                    )
-
-                                    log.critical(
-                                        f" tick_delta > resolution {tick_delta > resolution}"
-                                    )
-
-                                    updated_data = await get_ohlc_data(
-                                        instrument_name,
-                                        qty_candles,
-                                        resolution,
-                                    )
-
-                                    log.warning(f"updated_data {updated_data} {[o["tick"] for o in updated_data]} ")
-
-
-                                    result = [
-                                        o
-                                        for o in [
-                                            i
-                                            for i in [
-                                                y
-                                                for y in [
-                            x
-                            for x in cached_candles_data
-                            if instrument_name in x["instrument_name"]
-                        ]
-                                                if resolution == y["resolution"]
-                                            ]
-                                            if instrument_name in i["instrument_name"]
-                                        ][0]["ohlc"]
-                                    ]
-
-                                    log.debug(f"old data {result}")
-
-                                    for new_data in updated_data:
-                                        log.debug (f"new_data {new_data}")
-                                        new_data_tick = new_data["tick"]
-                                        log.debug (f"new_data_tick {new_data_tick}")
-                                        
-                                        new_data_tick_in_current_ohlc = [o for o in ohlc_resolution if o["tick"] == new_data_tick]
-                                        log.warning (f"new_data_tick_in_current_ohlc {new_data_tick_in_current_ohlc} {not new_data_tick_in_current_ohlc}")
-                                        if not new_data_tick_in_current_ohlc:
-                                            [
-                                        o
-                                        for o in [
-                                            i
-                                            for i in [
-                                                y
-                                                for y in [
-                            x
-                            for x in cached_candles_data
-                            if instrument_name in x["instrument_name"]
-                        ]
-                                                if resolution == y["resolution"]
-                                            ]
-                                            if instrument_name in i["instrument_name"]
-                                        ][0]["ohlc"]].append(new_data)
-                                            
-
-                                    log.warning(
-                                        f" ohlc_resolution after {ohlc_resolution} {len(ohlc_resolution)} {[o["tick"] for o in ohlc_resolution]}"
-                                    )
-                                    cached_candles_data_is_updated = False
-
-                                # partial update
-                                else:
-
-                                    ohlc_tick_max_elements = [
-                                        o
-                                        for o in ohlc_resolution
-                                        if o["tick"] == ohlc_tick_max
-                                    ][0]
-
-                                    ohlc_high = ohlc_tick_max_elements["high"]
-                                    ohlc_low = ohlc_tick_max_elements["low"]
-
-                                    if high_from_exchange > ohlc_high:
-
-                                        updating_cached_values(
-                                            cached_candles_data,
-                                            instrument_name,
-                                            resolution,
-                                            ohlc_tick_max,
-                                            "high",
-                                            high_from_exchange,
-                                        )
-
-                                        cached_candles_data_is_updated = False
-
-
-                                    if low_from_exchange < ohlc_low:
-
-                                        updating_cached_values(
-                                            cached_candles_data,
-                                            instrument_name,
-                                            resolution,
-                                            ohlc_tick_max,
-                                            "low",
-                                            low_from_exchange,
-                                        )
-
-                                        cached_candles_data_is_updated = False
-                                        
-                        result = []
-
-                        if cached_candles_data_is_updated:
-
-                            # log.error(f" candles_data_instrument {candles_data_instrument}")
-
-                            candles_data = combining_candles_data(
-                                np,
-                                currencies,
-                                cached_candles_data,
-                                resolutions,
-                                dim_sequence,
-                            )
-
-                            candles_instrument_name = remove_redundant_elements(
-                                [o["instrument_name"] for o in candles_data]
-                            )
-
-                            for instrument_name in candles_instrument_name:
-
-                                if (
-                                    instrument_name
-                                    in message_byte_data["instrument_name"]
-                                ):
-
-                                    candles_data_instrument = [
-                                        o
-                                        for o in candles_data
-                                        if instrument_name in o["instrument_name"]
-                                    ]
-
-                                    candle_60 = [
-                                        o["candles_analysis"]
-                                        for o in candles_data_instrument
-                                        if o["resolution"] == 60
-                                    ]
-
-                                    candle_60_type = np.sum(
-                                        [o["candle_type"] for o in candle_60]
-                                    )
-
-                                    candle_60_is_long = np.sum(
-                                        [o["is_long_body"] for o in candle_60]
-                                    )
-
-                                    candle_5 = [
-                                        o["candles_analysis"]
-                                        for o in candles_data_instrument
-                                        if o["resolution"] == 5
-                                    ]
-
-                                    candle_5_type = np.sum(
-                                        [o["candle_type"] for o in candle_5]
-                                    )
-
-                                    candle_5_is_long = np.sum(
-                                        [o["is_long_body"] for o in candle_5]
-                                    )
-
-                                    candle_15 = [
-                                        o["candles_analysis"]
-                                        for o in candles_data_instrument
-                                        if o["resolution"] == 15
-                                    ]
-
-                                    candle_15_type = np.sum(
-                                        [o["candle_type"] for o in candle_15]
-                                    )
-
-                                    candle_15_is_long = np.sum(
-                                        [o["is_long_body"] for o in candle_15]
-                                    )
-
-                                    candle_60_long_body_more_than_2 = (
-                                        candle_60_is_long >= 2
-                                    )
-                                    candle_5_long_body_any = candle_5_is_long > 0
-                                    candle_15_long_body_any = candle_15_is_long > 0
-                                    candle_60_long_body_any = candle_60_is_long > 0
-
-                                    candle_60_no_long = candle_60_is_long == 0
-
-                                    neutral = True
-                                    weak_bullish, weak_bearish = False, False
-                                    bullish, bearish = False, False
-                                    strong_bullish, strong_bearish = False, False
-
-                                    if candle_5_long_body_any:
-                                        weak_bullish = (
-                                            True if candle_5_type > 0 else False
-                                        )
-                                        weak_bearish = (
-                                            True if candle_5_type < 0 else False
-                                        )
+                                for instrument_name in candles_instrument_name:
 
                                     if (
-                                        candle_60_long_body_any
-                                        and candle_15_long_body_any
+                                        instrument_name
+                                        in message_byte_data["instrument_name"]
                                     ):
-                                        bullish = (
-                                            True
-                                            if weak_bullish and candle_15_type > 0
-                                            else False
-                                        )
-                                        bearish = (
-                                            True
-                                            if weak_bearish and candle_15_type < 0
-                                            else False
-                                        )
 
-                                    if candle_60_long_body_more_than_2:
-                                        strong_bullish = (
-                                            True
-                                            if bullish
-                                            and candle_60_long_body_more_than_2
-                                            else False
+                                        candles_data_instrument = [
+                                            o
+                                            for o in candles_data
+                                            if instrument_name in o["instrument_name"]
+                                        ]
+
+                                        candle_60 = [
+                                            o["candles_analysis"]
+                                            for o in candles_data_instrument
+                                            if o["resolution"] == 60
+                                        ]
+
+                                        candle_60_type = np.sum(
+                                            [o["candle_type"] for o in candle_60]
                                         )
 
-                                        strong_bearish = (
+                                        candle_60_is_long = np.sum(
+                                            [o["is_long_body"] for o in candle_60]
+                                        )
+
+                                        candle_5 = [
+                                            o["candles_analysis"]
+                                            for o in candles_data_instrument
+                                            if o["resolution"] == 5
+                                        ]
+
+                                        candle_5_type = np.sum(
+                                            [o["candle_type"] for o in candle_5]
+                                        )
+
+                                        candle_5_is_long = np.sum(
+                                            [o["is_long_body"] for o in candle_5]
+                                        )
+
+                                        candle_15 = [
+                                            o["candles_analysis"]
+                                            for o in candles_data_instrument
+                                            if o["resolution"] == 15
+                                        ]
+
+                                        candle_15_type = np.sum(
+                                            [o["candle_type"] for o in candle_15]
+                                        )
+
+                                        candle_15_is_long = np.sum(
+                                            [o["is_long_body"] for o in candle_15]
+                                        )
+
+                                        candle_60_long_body_more_than_2 = (
+                                            candle_60_is_long >= 2
+                                        )
+                                        candle_5_long_body_any = candle_5_is_long > 0
+                                        candle_15_long_body_any = candle_15_is_long > 0
+                                        candle_60_long_body_any = candle_60_is_long > 0
+
+                                        candle_60_no_long = candle_60_is_long == 0
+
+                                        neutral = True
+                                        weak_bullish, weak_bearish = False, False
+                                        bullish, bearish = False, False
+                                        strong_bullish, strong_bearish = False, False
+
+                                        if candle_5_long_body_any:
+                                            weak_bullish = (
+                                                True if candle_5_type > 0 else False
+                                            )
+                                            weak_bearish = (
+                                                True if candle_5_type < 0 else False
+                                            )
+
+                                        if (
+                                            candle_60_long_body_any
+                                            and candle_15_long_body_any
+                                        ):
+                                            bullish = (
+                                                True
+                                                if weak_bullish and candle_15_type > 0
+                                                else False
+                                            )
+                                            bearish = (
+                                                True
+                                                if weak_bearish and candle_15_type < 0
+                                                else False
+                                            )
+
+                                        if candle_60_long_body_more_than_2:
+                                            strong_bullish = (
+                                                True
+                                                if bullish
+                                                and candle_60_long_body_more_than_2
+                                                else False
+                                            )
+
+                                            strong_bearish = (
+                                                True
+                                                if bearish
+                                                and candle_60_long_body_more_than_2
+                                                else False
+                                            )
+
+                                        neutral = (
                                             True
-                                            if bearish
-                                            and candle_60_long_body_more_than_2
+                                            if not weak_bearish and not weak_bullish
                                             else False
                                         )
 
-                                    neutral = (
-                                        True
-                                        if not weak_bearish and not weak_bullish
-                                        else False
-                                    )
+                                        pub_message = dict(
+                                            instrument_name=instrument_name,
+                                            strong_bullish=strong_bullish,
+                                            bullish=bullish,
+                                            weak_bullish=weak_bullish,
+                                            neutral=neutral,
+                                            weak_bearish=weak_bearish,
+                                            bearish=bearish,
+                                            strong_bearish=strong_bearish,
+                                        )
 
-                                    pub_message = dict(
-                                        instrument_name=instrument_name,
-                                        strong_bullish=strong_bullish,
-                                        bullish=bullish,
-                                        weak_bullish=weak_bullish,
-                                        neutral=neutral,
-                                        weak_bearish=weak_bearish,
-                                        bearish=bearish,
-                                        strong_bearish=strong_bearish,
-                                    )
-
-                                    result.append(pub_message)
+                                        result.append(pub_message)
 
                                 # log.critical(f"result {result}")
                                 await saving_and_publishing_result(
