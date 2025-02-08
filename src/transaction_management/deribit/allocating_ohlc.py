@@ -62,7 +62,7 @@ async def updating_ohlc(
 
                 message_byte = await pubsub.get_message()
 
-                log.info(f"message_byte {message_byte}")
+#                log.info(f"message_byte {message_byte}")
 
                 if message_byte and message_byte["type"] == "message":
 
@@ -181,7 +181,7 @@ async def updating_ohlc(
                                     result,
                                 )
 
-                            is_updated = False
+#                            is_updated = False
 
             except Exception as error:
 
