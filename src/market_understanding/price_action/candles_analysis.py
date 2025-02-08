@@ -232,6 +232,8 @@ def combining_candles_data(
                 for o in candles_per_instrument_name
                 if o["resolution"] == resolution
             ][0]
+            
+            log.info (f"candles_per_resolution {candles_per_resolution}")
 
             ohlc_without_ticks = remove_list_elements(
                 candles_per_resolution,
@@ -302,8 +304,6 @@ async def get_market_condition(
             resolutions,
         )
         
-        log.info(f"cached_candles_data {cached_candles_data}")
-
         cached_candles_data_is_updated = True
         
         log.warning(f"cached_candles_data {cached_candles_data}")
@@ -315,6 +315,7 @@ async def get_market_condition(
             resolutions,
             dim_sequence,
         )
+        log.debug(f"candles_data {candles_data}")
         
         while cached_candles_data_is_updated:
 
