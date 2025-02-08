@@ -234,9 +234,13 @@ def combining_candles_data(
             ][0]
             
 
-            ohlc_without_ticks = remove_list_elements(
+            ohlc_without_cost = remove_list_elements(
                 candles_per_resolution,
-                ["tick","cost"],
+                "cost",
+            )
+            ohlc_without_ticks = remove_list_elements(
+                ohlc_without_cost,
+                "tick",
             )
 
             log.info (f"ohlc_without_ticks {ohlc_without_ticks}")
