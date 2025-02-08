@@ -82,8 +82,6 @@ async def main():
     # registering strategy config file    
     file_toml = "config_strategies.toml"
     
-    idle_time = 2
-
     try:
 
         private_data: object = SendApiRequest(sub_account_id)
@@ -109,9 +107,7 @@ async def main():
         # get TRADABLE currencies
         currencies: list = [o["spot"] for o in tradable_config_app][0]
 
-        cancellable_strategies = [
-            o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
-        ]
+        strategy_attributes = config_app["strategies"]
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
@@ -183,10 +179,12 @@ async def main():
             cancelling_orders(
                 private_data,
                 modify_order_and_db,
-                cancellable_strategies,
                 currencies,
                 client_redis,
-                config_app
+                config_app,
+                redis_channels,
+                redis_keys,
+                strategy_attributes,
                 ),    
 
             processing_orders(

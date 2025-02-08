@@ -56,9 +56,9 @@ async def caching_distributing_data(
     try:
 
         chart_channel: str = redis_channels["chart_update"]
-        receive_order_channel: str = redis_channels["receive_order"]        
+        receive_order_channel: str = redis_channels["receive_order"]
         ticker_channel: str = redis_channels["ticker_update"]
-        
+
         order_keys: str = redis_keys["orders"]
 
         cached_orders: list = await combining_order_data(private_data, currencies)

@@ -25,9 +25,9 @@ async def last_tick_fr_sqlite(last_tick_query_ohlc1: str) -> int:
 
 
 def currency_inline_with_database_address(
-    currency: str, 
+    currency: str,
     database_address: str,
-    ) -> bool:
+) -> bool:
 
     return currency.lower() in str(database_address)
 
@@ -56,9 +56,9 @@ async def updating_ohlc(
         one_minute = ONE_SECOND * 60
 
         WHERE_FILTER_TICK: str = "tick"
-        
+
         is_updated = True
-        
+
         start_timestamp = 0
 
         while is_updated:
@@ -76,7 +76,7 @@ async def updating_ohlc(
                     if chart_channel in message_channel:
 
                         data = message_byte_data["data"]
-                        
+
                         instrument_name = message_byte_data["instrument_name"]
 
                         currency = message_byte_data["currency"]
@@ -89,20 +89,20 @@ async def updating_ohlc(
 
                         last_tick_query_ohlc_resolution: str = (
                             querying_arithmetic_operator(
-                                WHERE_FILTER_TICK, 
+                                WHERE_FILTER_TICK,
                                 "MAX",
                                 table_ohlc,
                             )
                         )
-                        
-                        #need cached
-                        start_timestamp: int = await last_tick_fr_sqlite(
-                            last_tick_query_ohlc_resolution)
-                        
-                        delta_time = (end_timestamp - start_timestamp)
-                        
-                        if delta_time !=0:
 
+                        # need cached
+                        start_timestamp: int = await last_tick_fr_sqlite(
+                            last_tick_query_ohlc_resolution
+                        )
+
+                        delta_time = end_timestamp - start_timestamp
+
+                        if delta_time != 0:
 
                             if resolution == "1D":
                                 delta_qty = delta_time / (one_minute * 60 * 24)
@@ -111,8 +111,8 @@ async def updating_ohlc(
                                 delta_qty = delta_time / (one_minute * int(resolution))
 
                             if delta_qty == 0:
-                            
-                                # refilling current ohlc table with updated data    
+
+                                # refilling current ohlc table with updated data
                                 await update_status_data(
                                     table_ohlc,
                                     "data",
@@ -122,10 +122,9 @@ async def updating_ohlc(
                                     "is",
                                 )
 
-
                             else:
 
-                                # catch up data through FIX 
+                                # catch up data through FIX
                                 result_all = await get_ohlc_data(
                                     instrument_name,
                                     resolution,
@@ -133,16 +132,16 @@ async def updating_ohlc(
                                     False,
                                     end_timestamp,
                                 )
-                                
+
                                 for result in result_all:
-                                    
+
                                     await insert_tables(
                                         table_ohlc,
                                         result,
-                                        )
+                                    )
 
                                 is_updated = False
-                            
+
             except Exception as error:
 
                 parse_error_message(error)
@@ -157,7 +156,6 @@ async def updating_ohlc(
             finally:
                 await asyncio.sleep(0.01)
 
-
     except Exception as error:
 
         await telegram_bot_sendtext(
@@ -166,4 +164,3 @@ async def updating_ohlc(
         )
 
         parse_error_message(error)
-

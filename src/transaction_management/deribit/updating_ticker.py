@@ -268,7 +268,6 @@ def ohlc_end_point(
     return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_ticker}&resolution={resolution}&start_timestamp={start_timestamp}"
 
 
-
 async def inserting_open_interest(
     currency,
     WHERE_FILTER_TICK,

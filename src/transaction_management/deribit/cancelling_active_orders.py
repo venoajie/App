@@ -35,10 +35,12 @@ from utilities.system_tools import (
 async def cancelling_orders(
     private_data: object,
     modify_order_and_db: object,
-    cancellable_strategies: list,
     currencies: list,
     client_redis: object,
     config_app: list,
+    redis_channels: list,
+    redis_keys: list,
+    strategy_attributes,
 ) -> None:
     """ """
 
@@ -47,7 +49,9 @@ async def cancelling_orders(
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
-        strategy_attributes = config_app["strategies"]
+        cancellable_strategies = [
+            o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
+        ]
 
         relevant_tables = config_app["relevant_tables"][0]
 
@@ -85,13 +89,11 @@ async def cancelling_orders(
             currencies,
         )
 
-        redis_keys: dict = config_app["redis_keys"][0]
         ticker_keys: str = redis_keys["ticker"]
         orders_keys: str = redis_keys["orders"]
         market_condition_keys: str = redis_keys["market_condition"]
 
         # get redis channels
-        redis_channels: dict = config_app["redis_channels"][0]
         receive_order_channel: str = redis_channels["receive_order"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
         ticker_channel: str = redis_channels["ticker_update"]
