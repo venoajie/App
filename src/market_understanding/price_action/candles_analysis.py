@@ -482,13 +482,13 @@ async def get_market_condition(
 
                                 market_analytics_data.append(pub_message)
 
-                            log.critical(f"result {result}")
+                            log.critical(f"result {market_analytics_data}")
                             await saving_and_publishing_result(
                                 client_redis,
                                 market_analytics_channel,
                                 market_condition_keys,
-                                result,
-                                result,
+                                market_analytics_data,
+                                market_analytics_data,
                             )
 
             except Exception as error:
