@@ -62,6 +62,8 @@ async def updating_ohlc(
 
                 message_byte = await pubsub.get_message()
 
+                log.info(f"message_byte {message_byte}")
+
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
