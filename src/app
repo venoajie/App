@@ -225,9 +225,9 @@ async def main():
                 resolutions,
                 np),
             
-            back_up_db(60*10),
+            #back_up_db(60*10),
             
-            clean_up_databases(60)
+            #clean_up_databases(60)
             
                         )  
 
