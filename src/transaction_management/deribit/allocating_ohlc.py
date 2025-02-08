@@ -156,6 +156,9 @@ async def updating_ohlc(
                                     chart_low_high_tick_channel,
                                     pub_message,
                                 )
+                                
+                                #is_updated = False
+                                #break
 
                         else:
 
@@ -181,7 +184,8 @@ async def updating_ohlc(
                                     result,
                                 )
 
-#                            is_updated = False
+                            #is_updated = False
+                            #break
 
             except Exception as error:
 
