@@ -229,7 +229,6 @@ async def main():
             
             clean_up_databases(60)
             
-            
                         )  
 
         await queue.join()
