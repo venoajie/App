@@ -125,6 +125,7 @@ ENV/
 env.bak/
 venv.bak/
 .Identifier
+.lock
 
 # Spyder project settings
 .spyderproject
