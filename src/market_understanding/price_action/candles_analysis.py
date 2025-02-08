@@ -164,7 +164,11 @@ def candles_analysis(
         ("close", "f4"),
     ]
 
+    log.debug(f"ohlc_without_ticks {ohlc_without_ticks}")
     np_users_data = np.array(ohlc_without_ticks)
+    
+    log.warning(f"np_users_data {np_users_data}")
+
 
     np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
 
@@ -233,17 +237,16 @@ def combining_candles_data(
                 if o["resolution"] == resolution
             ][0]
             
-
             ohlc_without_cost = remove_list_elements(
                 candles_per_resolution,
                 "cost",
             )
+
             ohlc_without_ticks = remove_list_elements(
                 ohlc_without_cost,
                 "tick",
             )
 
-            log.info (f"ohlc_without_ticks {ohlc_without_ticks}")
             candles_analysis_result = candles_analysis(
                 np,
                 ohlc_without_ticks,
@@ -310,8 +313,7 @@ async def get_market_condition(
         
         cached_candles_data_is_updated = True
         
-        log.warning(f"cached_candles_data {cached_candles_data}")
-
+        
         candles_data = combining_candles_data(
             np,
             currencies,
