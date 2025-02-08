@@ -164,17 +164,23 @@ def candles_analysis(
         ("close", "f4"),
     ]
 
-    log.debug(f"ohlc_without_ticks {ohlc_without_ticks}")
     np_users_data = np.array(ohlc_without_ticks)
-    
-    log.warning(f"np_users_data {np_users_data}")
 
+    np_data = np.array(
+        [tuple(user.values()) for user in np_users_data], 
+        dtype=dtype,
+        )
 
-    np_data = np.array([tuple(user.values()) for user in np_users_data], dtype=dtype)
+    three_dim_sequence = my_generator_candle(
+        np, 
+        np_data[1:], 
+        dim_sequence,
+        )
 
-    three_dim_sequence = my_generator_candle(np, np_data[1:], dim_sequence)
-
-    candles_analysis_result = analysis_based_on_length(np, three_dim_sequence)
+    candles_analysis_result = analysis_based_on_length(
+        np, 
+        three_dim_sequence,
+        )
 
     return candles_analysis_result
 
@@ -358,6 +364,8 @@ async def get_market_condition(
 
                         log.error(f" {instrument_name}")
                         log.debug(f" ohlc_from_exchange {ohlc_from_exchange}")
+                        
+                        result = []
 
                         for resolution in resolutions:
 
