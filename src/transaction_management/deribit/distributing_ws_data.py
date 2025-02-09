@@ -115,13 +115,16 @@ async def caching_distributing_data(
                         log.debug (portfolio == [])
                         log.warning (len(portfolio) <2)
 
-                        if portfolio == [] or len(portfolio) <2: #2: qty of traded currencies 
+                        if portfolio == []: #2: qty of traded currencies 
                             portfolio.append (data)
                             
                         else:
                             data_currency = data["currency"]
                             portfolio_currency = [o for o in portfolio if data_currency in o["currency"]]
-                            portfolio.remove(portfolio_currency[0])
+                            
+                            if portfolio_currency:
+                                portfolio.remove(portfolio_currency[0])
+                            
                             portfolio.append(data)
                         
                         pub_message.update({"cached_portfolio": portfolio})
