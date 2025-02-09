@@ -100,9 +100,6 @@ async def main():
         
         client_redis: object = aioredis.Redis.from_pool(pool)
         
-        # connecting to redis pubsub
-        pubsub: object = client_redis.pubsub()
-        
         # parsing config file
         config_app = get_config(file_toml)
 

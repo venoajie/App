@@ -29,7 +29,6 @@ async def last_tick_fr_sqlite(last_tick_query_ohlc1: str) -> int:
 
 async def updating_ohlc(
     client_redis: object,
-    pubsub,
     redis_channels: list,
 ) -> None:
     """ """
