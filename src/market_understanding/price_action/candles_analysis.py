@@ -264,6 +264,8 @@ def traslate_candles_data_to_market_condition(
             for o in candles_data_instrument
             if o["resolution"] == 60
         ]
+        
+        log.info (f"candle_60 {candle_60}")
 
         candle_60_type = np.sum([o["candle_type"] for o in candle_60])
 
