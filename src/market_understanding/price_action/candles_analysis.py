@@ -354,7 +354,6 @@ def translate_candles_data_to_market_condition(
 
 async def get_market_condition(
     client_redis: object,
-    pubsub: object,
     config_app: list,
     currencies,
     redis_channels,
