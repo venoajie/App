@@ -419,7 +419,7 @@ async def get_market_condition(
                                     o["result"]
                                     for o in candles_data
                                     if instrument_name in o["instrument_name"]
-                                ]
+                                ][0]
                                 
                                 log.warning(f"candles_data_instrument {candles_data_instrument}")
 
