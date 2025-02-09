@@ -147,6 +147,7 @@ async def caching_distributing_data(
 
                     except:
                         resolution=message_channel.split(".")[3],
+                    log.critical(f"resolution {resolution}")
 
                     pub_message = dict(
                         data=data,
