@@ -217,31 +217,33 @@ async def combining_candles_data(
         instrument_name = f"{currency}-PERPETUAL"
         analysis_result = []
         for resolution in resolutions:
-
-            candles_per_resolution = await get_candles_data(
-                currency,
-                resolution,
-                qty_candles,
-                )
             
-            #log.info(f"candles_per_resolution {candles_per_resolution}")
+            if resolution !=1:
 
-            candles_analysis_result = candles_analysis(
-                np,
-                candles_per_resolution,
-                dim_sequence,
-            )
-            
-            log.info(f"candles_analysis_result {candles_analysis_result}")
+                candles_per_resolution = await get_candles_data(
+                    currency,
+                    resolution,
+                    qty_candles,
+                    )
+                
+                #log.info(f"candles_per_resolution {candles_per_resolution}")
 
-            #max_tick = max([o["tick"] for o in candles_per_resolution])
-
-            analysis_result.append(
-                dict(
-                    resolution=(resolution),
-                    candles_analysis=(candles_analysis_result),
+                candles_analysis_result = candles_analysis(
+                    np,
+                    candles_per_resolution,
+                    dim_sequence,
                 )
-            )
+                
+                log.info(f"candles_analysis_result {candles_analysis_result}")
+
+                #max_tick = max([o["tick"] for o in candles_per_resolution])
+
+                analysis_result.append(
+                    dict(
+                        resolution=(resolution),
+                        candles_analysis=(candles_analysis_result),
+                    )
+                )
         
         result.append(
             dict(
@@ -259,14 +261,14 @@ def traslate_candles_data_to_market_condition(
     """ """
     try:
 
-        log.info (f"candles_data_instrument {candles_data_instrument}")
+        #log.info (f"candles_data_instrument {candles_data_instrument}")
         candle_60 = [
             o["candles_analysis"]
             for o in candles_data_instrument
             if o["resolution"] == 60
         ]
         
-        log.info (f"candle_60 {candle_60}")
+        #log.info (f"candle_60 {candle_60}")
 
         candle_60_type = np.sum([o["candle_type"] for o in candle_60])
 
@@ -410,7 +412,7 @@ async def get_market_condition(
                             [o["instrument_name"] for o in candles_data]
                         )
 
-                        log.warning(f"candles_instrument_name {candles_instrument_name}")
+                        #log.warning(f"candles_instrument_name {candles_instrument_name}")
                         for instrument_name in candles_instrument_name:
 
                             if instrument_name in message_byte_data["instrument_name"]:

@@ -127,8 +127,6 @@ async def updating_ohlc(
                                     ohlc_query
                                 )
 
-                                #                           log.warning(f"result_from_sqlite {result_from_sqlite}")
-
                                 high_from_ws = data["high"]
                                 low_from_ws = data["low"]
 
@@ -142,7 +140,7 @@ async def updating_ohlc(
                                 if high_from_ws > high_from_db or low_from_ws < low_from_db:
 
                                     log.warning(f"ohlc_from_sqlite {ohlc_from_sqlite}")
-                                    log.info(f"resolution {resolution} data {data}")
+                                    log.info(f"resolution {resolution} resolution !=1 {resolution !=1} data {data}")
 
                                     log.warning(
                                         f"high_from_ws > high_from_db or low_from_ws < low_from_db {high_from_ws > high_from_db or low_from_ws < low_from_db}"
