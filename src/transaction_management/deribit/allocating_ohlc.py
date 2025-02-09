@@ -100,6 +100,7 @@ async def updating_ohlc(
 
                         pub_message = dict(
                             instrument_name=instrument_name,
+                            currency=currency,
                             resolution=resolution,
                         )
 
