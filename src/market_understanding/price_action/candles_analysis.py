@@ -153,7 +153,7 @@ def my_generator_candle(np: object, data: object, lookback: int) -> list:
 
 def candles_analysis(
     np: object,
-    ohlc_without_ticks: list,
+    candles_per_resolution: list,
     dim_sequence: int = 3,
 ):
     """ """
@@ -164,6 +164,22 @@ def candles_analysis(
         ("low", "f4"),
         ("close", "f4"),
     ]
+    
+    ohlc_without_volume = remove_list_elements(
+    candles_per_resolution,
+    "volume",
+)
+
+    ohlc_without_cost = remove_list_elements(
+        ohlc_without_volume,
+        "cost",
+    )
+
+    ohlc_without_ticks = remove_list_elements(
+        ohlc_without_cost,
+        "tick",
+    )
+
 
     np_users_data = np.array(ohlc_without_ticks)
 
@@ -187,44 +203,27 @@ def candles_analysis(
 
 
 async def get_candles_data(
-    currencies: list,
+    currency: str,
+    resolution: int,
     qty_candles: int,
-    resolutions: int,
 ):
     """ """
-    result = []
-    for currency in currencies:
 
-        instrument_name = f"{currency}-PERPETUAL"
+    table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
 
-        for resolution in resolutions:
+    ohlc_query = (
+        f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
+    )
 
-            table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
+    result_from_sqlite = await executing_query_with_return(ohlc_query)
 
-            ohlc_query = (
-                f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
-            )
+    return remove_apostrophes_from_json(o["data"] for o in result_from_sqlite)
 
-            result_from_sqlite = await executing_query_with_return(ohlc_query)
-
-            ohlc = remove_apostrophes_from_json(o["data"] for o in result_from_sqlite)
-
-            result.append(
-                dict(
-                    instrument_name=instrument_name,
-                    resolution=resolution,
-                    ohlc=ohlc,
-                )
-            )
-
-    return result
-
-
-def combining_candles_data(
+async def combining_candles_data(
     np: object,
     currencies: list,
-    candles_data: int,
     resolutions: int,
+    qty_candles: int,
     dim_sequence: int = 3,
 ):
     """ """
@@ -234,46 +233,31 @@ def combining_candles_data(
 
         instrument_name = f"{currency}-PERPETUAL"
 
-        candles_per_instrument_name = [
-            o for o in candles_data if o["instrument_name"] == instrument_name
-        ]
-
         for resolution in resolutions:
 
-            candles_per_resolution = [
-                o["ohlc"]
-                for o in candles_per_instrument_name
-                if o["resolution"] == resolution
-            ][0]
-
-            ohlc_without_volume = remove_list_elements(
-                candles_per_resolution,
-                "volume",
-            )
-
-            ohlc_without_cost = remove_list_elements(
-                ohlc_without_volume,
-                "cost",
-            )
-
-            ohlc_without_ticks = remove_list_elements(
-                ohlc_without_cost,
-                "tick",
-            )
+            candles_per_resolution = await get_candles_data(
+                currency,
+                resolution,
+                qty_candles,
+                )
+            
+            log.info(f"candles_per_resolution {candles_per_resolution}")
 
             candles_analysis_result = candles_analysis(
                 np,
-                ohlc_without_ticks,
+                candles_per_resolution,
                 dim_sequence,
             )
+            
+            log.info(f"candles_analysis_result {candles_analysis_result}")
 
-            max_tick = max([o["tick"] for o in candles_per_resolution])
+            #max_tick = max([o["tick"] for o in candles_per_resolution])
 
             result.append(
                 dict(
                     instrument_name=instrument_name,
                     resolution=(resolution),
-                    max_tick=(max_tick),
+                    #max_tick=(max_tick),
                     # ohlc = (ohlc),
                     # candles_summary = (three_dim_sequence),
                     candles_analysis=(candles_analysis_result),
@@ -407,13 +391,15 @@ async def get_market_condition(
             qty_candles,
             resolutions,
         )
+        
+        log.warning (f"cached_candles_data {cached_candles_data}")
 
         candles_data = combining_candles_data(
             np,
             currencies,
-            cached_candles_data,
             resolutions,
             dim_sequence,
+            qty_candles,
         )
 
         cached_candles_data_is_updated = True

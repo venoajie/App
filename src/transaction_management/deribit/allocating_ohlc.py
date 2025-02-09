@@ -114,43 +114,45 @@ async def updating_ohlc(
                                 data,
                                 "is",
                             )
+                            
+                            if resolution !=1:
 
-                            table_ohlc = (
-                                f"ohlc{resolution}_{currency.lower()}_perp_json"
-                            )
-
-                            ohlc_query = f"SELECT data FROM {table_ohlc} WHERE tick = {end_timestamp}"
-
-                            result_from_sqlite = await executing_query_with_return(
-                                ohlc_query
-                            )
-
-                            #                           log.warning(f"result_from_sqlite {result_from_sqlite}")
-
-                            high_from_ws = data["high"]
-                            low_from_ws = data["low"]
-
-                            ohlc_from_sqlite = remove_apostrophes_from_json(
-                                o["data"] for o in result_from_sqlite
-                            )[0]
-
-                            high_from_db = ohlc_from_sqlite["high"]
-                            low_from_db = ohlc_from_sqlite["low"]
-
-                            if high_from_ws > high_from_db or low_from_ws < low_from_db:
-
-                                log.warning(f"ohlc_from_sqlite {ohlc_from_sqlite}")
-                                log.info(f"resolution {resolution} data {data}")
-
-                                log.warning(
-                                    f"high_from_ws > high_from_db or low_from_ws < low_from_db {high_from_ws > high_from_db or low_from_ws < low_from_db}"
+                                table_ohlc = (
+                                    f"ohlc{resolution}_{currency.lower()}_perp_json"
                                 )
 
-                                await publishing_result(
-                                    client_redis,
-                                    chart_low_high_tick_channel,
-                                    pub_message,
+                                ohlc_query = f"SELECT data FROM {table_ohlc} WHERE tick = {end_timestamp}"
+
+                                result_from_sqlite = await executing_query_with_return(
+                                    ohlc_query
                                 )
+
+                                #                           log.warning(f"result_from_sqlite {result_from_sqlite}")
+
+                                high_from_ws = data["high"]
+                                low_from_ws = data["low"]
+
+                                ohlc_from_sqlite = remove_apostrophes_from_json(
+                                    o["data"] for o in result_from_sqlite
+                                )[0]
+
+                                high_from_db = ohlc_from_sqlite["high"]
+                                low_from_db = ohlc_from_sqlite["low"]
+
+                                if high_from_ws > high_from_db or low_from_ws < low_from_db:
+
+                                    log.warning(f"ohlc_from_sqlite {ohlc_from_sqlite}")
+                                    log.info(f"resolution {resolution} data {data}")
+
+                                    log.warning(
+                                        f"high_from_ws > high_from_db or low_from_ws < low_from_db {high_from_ws > high_from_db or low_from_ws < low_from_db}"
+                                    )
+
+                                    await publishing_result(
+                                        client_redis,
+                                        chart_low_high_tick_channel,
+                                        pub_message,
+                                    )
 
                                 # is_updated = False
                                 # break
