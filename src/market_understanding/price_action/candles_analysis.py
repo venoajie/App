@@ -201,11 +201,11 @@ async def get_candles_data(
     return ohlc_without_ticks
 
 
-def combining_candles_data(
+async def combining_candles_data(
     np: object,
-    candles_per_resolution,
     currencies: list,
     resolutions: int,
+    qty_candles: int,
     dim_sequence: int = 3,
 ):
     """ """
@@ -218,6 +218,12 @@ def combining_candles_data(
         for resolution in resolutions:
 
             if resolution != 1:
+
+                candles_per_resolution = await get_candles_data(
+                    currency,
+                    resolution,
+                    qty_candles,
+                )
 
                 # log.info(f"candles_per_resolution {candles_per_resolution}")
 
@@ -368,19 +374,13 @@ async def get_market_condition(
 
         qty_candles = 5
         dim_sequence = 3
-        
-        candles_per_resolution = [(await get_candles_data(currency,o,qty_candles)) for o in resolutions]
-        
-        log.debug (candles_per_resolution)
-        
-        
 
-        candles_data = combining_candles_data(
+        candles_data = await combining_candles_data(
             np,
-            candles_per_resolution,
             currencies,
             resolutions,
             dim_sequence,
+            qty_candles,
         )
 
         log.debug(f"candles_data {candles_data}")
@@ -431,6 +431,7 @@ async def get_market_condition(
                                         for o in candles_data
                                         if instrument_name in o["instrument_name"]
                                     ][0]
+
 
                                     pub_message = traslate_candles_data_to_market_condition(
                                         candles_data_instrument,
