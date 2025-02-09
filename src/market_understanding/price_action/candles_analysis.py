@@ -406,7 +406,7 @@ async def get_market_condition(
 
                         instrument_name = message_byte_data["instrument_name"]
                         
-                        log.warning(f"message_byte_data {message_byte_data}")
+#                        log.warning(f"message_byte_data {message_byte_data}")
 
                         candles_instrument_name = remove_redundant_elements(
                             [o["instrument_name"] for o in candles_data]
