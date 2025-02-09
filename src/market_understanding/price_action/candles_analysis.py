@@ -99,7 +99,8 @@ def my_generator_candle(
     arr = np.empty((1, lookback, parameters), int)
     
     log.warning (f"data  {data}")
-    log.info (f"arr  {arr} lookback  {lookback}")
+    log.info (f"arr  {arr} ")
+    log.info (f"parameters  {parameters} lookback  {lookback}")
 
     for a in range(len(data) - lookback):
 
@@ -386,8 +387,8 @@ async def get_market_condition(
             np,
             currencies,
             resolutions,
-            dim_sequence,
             qty_candles,
+            dim_sequence,
         )
 
         log.debug(f"candles_data {candles_data}")
