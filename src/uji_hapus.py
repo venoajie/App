@@ -11,6 +11,7 @@ from db_management.sqlite_management import (
     querying_table,
 )
 from utilities.string_modification import get_strings_before_character
+import numpy as np
 
 data = {"type": "user", "info": {"name": "Alice", "age": 30}}
 
@@ -487,3 +488,9 @@ log.warning(
         ][0]["ohlc"]
     ]
 )
+
+lookback = 3
+parameters = 6
+arr = np.empty((1, lookback, parameters))
+
+log.warning (f"arr  {arr}")
