@@ -137,26 +137,20 @@ async def caching_distributing_data(
                             pub_message,
                         )
                             
-                        result = []
-                        for currency in currencies:
-                                                    
-                            query_trades = (
-                                    f"SELECT * FROM  v_{currency.lower()}_trading_active"
+                        query_trades = (
+                                    f"SELECT * FROM  v_trading_all_active"
                                 )
     
-                            my_trades_currency_all_transactions: list = (
+                        my_trades_currency_all_transactions: list = (
                             await executing_query_with_return(query_trades)
                         )
-                            log.info (my_trades_currency_all_transactions)
-                            if my_trades_currency_all_transactions:
-                                for my_trades in my_trades_currency_all_transactions:
-                                    result.append(my_trades)
-
-                        pub_message.update({"my_trades": result})
+                        log.info (my_trades_currency_all_transactions)
+                        
+                        pub_message.update({"my_trades": my_trades_currency_all_transactions})
                         await publishing_result(
                             pipe,
                             my_trades_channel,
-                            result,
+                            my_trades_currency_all_transactions,
                         )
 
                         await update_db_pkl(
