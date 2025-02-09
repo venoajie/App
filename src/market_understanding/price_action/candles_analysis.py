@@ -435,6 +435,8 @@ async def get_market_condition(
                     if chart_low_high_tick_channel in message_channel:
 
                         instrument_name = message_byte_data["instrument_name"]
+                        
+                        log.warning(f"message_byte_data {message_byte_data}")
 
                         candles_data_instrument = [
                             o
