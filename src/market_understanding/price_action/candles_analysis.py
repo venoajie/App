@@ -62,6 +62,7 @@ def ohlc_to_candlestick(conversion_array):
     candlestick_data[5] = (
         0 if body_size == 0 else (round(round(body_size / height, 5), 2) > 70 / 100) * 1
     )
+    log.info(f"candlestick_data {candlestick_data}")
 
     return candlestick_data
 
@@ -159,7 +160,8 @@ def candles_analysis(
     avg_body_length = np.average(body_length)
     body_length_exceed_average = body_length > avg_body_length
     # print(candles_arrays)
-    # log.warning (f"candle_type {candle_type}")
+    log.warning (f"candles_arrays {candles_arrays}")
+    #log.warning (f"candle_type {candle_type}")
     # log.warning (f"wicks_up {wicks_up}")
     # log.warning (f"wicks_down {wicks_down}")
     # log.warning (f"body_size {body_size}")
