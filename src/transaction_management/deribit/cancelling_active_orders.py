@@ -143,6 +143,7 @@ async def cancelling_orders(
                             market_analytics_channel,
                             market_condition_keys,
                         )
+                        
                     if portfolio_channel in message_channel:
 
                         portfolio = (message_byte_data["cached_portfolio"])
@@ -159,7 +160,6 @@ async def cancelling_orders(
 
                         server_time = message_byte_data["server_time"]
 
-                    log.info(f"portfolio {portfolio}")
                     if (ticker_channel in message_channel 
                         and market_condition 
                         and portfolio):
