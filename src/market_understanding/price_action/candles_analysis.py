@@ -69,7 +69,7 @@ def ohlc_to_candlestick(conversion_array):
 
 def my_generator_candle(
     np: object,
-    data: object,
+    data: list,
     lookback: int,
 ) -> list:
     """_summary_
@@ -97,10 +97,13 @@ def my_generator_candle(
     )
 
     arr = np.empty((1, lookback, parameters), int)
+    
+    log.warning (f"data  {data}")
+    log.info (f"arr  {arr} lookback  {lookback}")
 
     for a in range(len(data) - lookback):
 
-        log.debug (f"data my_generator_candle {data} lookback {lookback}")
+        #log.debug (f"data my_generator_candle {data} lookback {lookback}")
 
         temp_list = []
         for candle in data[first_row : first_row + lookback]:
@@ -108,6 +111,7 @@ def my_generator_candle(
             converted_data = ohlc_to_candlestick(candle)
             log.info (f"converted_data  {converted_data} candle {candle}")
             temp_list.append(converted_data)
+            log.info (f"temp_list  {temp_list}")
         
         
         log.error (f"temp_list  {temp_list}")
