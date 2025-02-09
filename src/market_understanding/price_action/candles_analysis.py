@@ -165,22 +165,6 @@ def candles_analysis(
         ("close", "f4"),
     ]
     
-    ohlc_without_volume = remove_list_elements(
-    candles_per_resolution,
-    "volume",
-)
-
-    ohlc_without_cost = remove_list_elements(
-        ohlc_without_volume,
-        "cost",
-    )
-
-    ohlc_without_ticks = remove_list_elements(
-        ohlc_without_cost,
-        "tick",
-    )
-
-
     np_users_data = np.array(ohlc_without_ticks)
 
     np_data = np.array(
@@ -217,7 +201,22 @@ async def get_candles_data(
 
     result_from_sqlite = await executing_query_with_return(ohlc_query)
 
-    return remove_apostrophes_from_json(o["data"] for o in result_from_sqlite)
+    ohlc_without_volume = remove_list_elements(
+    remove_apostrophes_from_json(o["data"] for o in result_from_sqlite),
+    "volume",
+)
+
+    ohlc_without_cost = remove_list_elements(
+        ohlc_without_volume,
+        "cost",
+    )
+
+    ohlc_without_ticks = remove_list_elements(
+        ohlc_without_cost,
+        "tick",
+    )
+
+    return ohlc_without_ticks
 
 async def combining_candles_data(
     np: object,
