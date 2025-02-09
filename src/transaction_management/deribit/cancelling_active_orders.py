@@ -147,6 +147,8 @@ async def cancelling_orders(
 
                         log.critical (message_byte_data)
                         
+                        log.debug(reading_from_pkl_data("portfolio", currency)[0])
+                        
 
                     if receive_order_channel in message_channel:
 
