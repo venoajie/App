@@ -259,6 +259,7 @@ def traslate_candles_data_to_market_condition(
     """ """
     try:
 
+        log.info (f"candles_data_instrument {candles_data_instrument}")
         candle_60 = [
             o["candles_analysis"]
             for o in candles_data_instrument
