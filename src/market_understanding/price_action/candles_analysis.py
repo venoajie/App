@@ -26,6 +26,8 @@ def ohlc_to_candlestick(conversion_array):
 
     candlestick_data = [0, 0, 0, 0, 0, 0]
 
+    log.info(f"conversion_array {conversion_array}")
+
     open = conversion_array[0]
     high = conversion_array[1]
     low = conversion_array[2]
@@ -33,6 +35,9 @@ def ohlc_to_candlestick(conversion_array):
 
     body_size = abs(close - open)
     height = abs(high - low)
+    
+    log.debug(f"open {open} high {high} low {low} close {close}")
+    log.warning(f"body_size {body_size} height {height} close > open {close > open}")
 
     if close > open:
         candle_type = 1
@@ -255,14 +260,11 @@ def translate_candles_data_to_market_condition(
     """ """
     try:
 
-        # log.info (f"candles_data_instrument {candles_data_instrument}")
         candle_60 = [
             o["candles_analysis"]
             for o in candles_data_instrument
             if o["resolution"] == 60
         ]
-
-        # log.info (f"candle_60 {candle_60}")
 
         candle_60_type = np.sum([o["candle_type"] for o in candle_60])
 
@@ -360,7 +362,7 @@ async def get_market_condition(
 
         # prepare channels placeholders
         channels = [
-            market_analytics_channel,
+#            market_analytics_channel,
             chart_low_high_tick_channel,
         ]
 
@@ -380,11 +382,9 @@ async def get_market_condition(
 
         log.debug(f"candles_data {candles_data}")
 
-        cached_candles_data_is_updated = True
-
         market_analytics_data = []
 
-        while cached_candles_data_is_updated:
+        while True:
 
             try:
                 message_byte = await pubsub.get_message()
