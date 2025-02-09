@@ -393,6 +393,8 @@ async def get_market_condition(
             dim_sequence,
             qty_candles,
         )
+        
+        log.debug(f"candles_data {candles_data}")
 
         cached_candles_data_is_updated = True
 
