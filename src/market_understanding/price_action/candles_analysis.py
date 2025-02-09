@@ -22,46 +22,6 @@ https://www.dataleadsfuture.com/exploring-numexpr-a-powerful-engine-behind-panda
     """
 
 
-def analysis_based_on_length(
-    np: object,
-    data_per_resolution: int,
-):
-    """_summary_
-    https://www.tradingview.com/script/uuinZwsR-Big-Bar-Strategy/
-        Args:
-            tables (str, optional): _description_. Defaults to 'ohlc60_eth_perp_json'.
-
-        Returns:
-            _type_: _description_
-    """
-
-    candles_arrays = data_per_resolution  # [0]
-
-    candle_type = candles_arrays[-1, :, 0]  # (last_column_third_row)
-    wicks_up = candles_arrays[-1, :, 1]  # (last_column_third_row)
-    wicks_down = candles_arrays[-1, :, 2]  # (last_column_third_row)
-    body_size = candles_arrays[-1, :, 3]  # (last_column_third_row)
-    body_length = candles_arrays[-1, :, 4]  # (last_column_third_row)
-    is_long_body = candles_arrays[-1, :, 5]  # (last_column_third_row)
-    avg_body_length = np.average(body_length)
-    body_length_exceed_average = body_length > avg_body_length
-    # print(candles_arrays)
-    # log.warning (f"candle_type {candle_type}")
-    # log.warning (f"wicks_up {wicks_up}")
-    # log.warning (f"wicks_down {wicks_down}")
-    # log.warning (f"body_size {body_size}")
-    # log.warning (f"body_length {body_length}")
-    # log.warning (f"is_long_body {is_long_body}")
-    # log.warning (f" avg_body_length {avg_body_length}")
-    # log.warning (f" body_length_exceed_average {body_length_exceed_average}")
-
-    return dict(
-        candle_type=candle_type,
-        body_length_exceed_average=body_length_exceed_average,
-        is_long_body=(is_long_body),
-    )
-
-
 def ohlc_to_candlestick(conversion_array):
 
     candlestick_data = [0, 0, 0, 0, 0, 0]
@@ -156,7 +116,10 @@ def candles_analysis(
     ohlc_without_ticks: list,
     dim_sequence: int = 3,
 ):
-    """ """
+    """ 
+        https://www.tradingview.com/script/uuinZwsR-Big-Bar-Strategy/
+
+    """
 
     dtype = [
         ("open", "f4"),
@@ -172,18 +135,35 @@ def candles_analysis(
         dtype=dtype,
     )
 
-    three_dim_sequence = my_generator_candle(
+    candles_arrays = my_generator_candle(
         np,
         np_data[1:],
         dim_sequence,
     )
 
-    candles_analysis_result = analysis_based_on_length(
-        np,
-        three_dim_sequence,
-    )
+    candle_type = candles_arrays[-1, :, 0]  # (last_column_third_row)
+    wicks_up = candles_arrays[-1, :, 1]  # (last_column_third_row)
+    wicks_down = candles_arrays[-1, :, 2]  # (last_column_third_row)
+    body_size = candles_arrays[-1, :, 3]  # (last_column_third_row)
+    body_length = candles_arrays[-1, :, 4]  # (last_column_third_row)
+    is_long_body = candles_arrays[-1, :, 5]  # (last_column_third_row)
+    avg_body_length = np.average(body_length)
+    body_length_exceed_average = body_length > avg_body_length
+    # print(candles_arrays)
+    # log.warning (f"candle_type {candle_type}")
+    # log.warning (f"wicks_up {wicks_up}")
+    # log.warning (f"wicks_down {wicks_down}")
+    # log.warning (f"body_size {body_size}")
+    # log.warning (f"body_length {body_length}")
+    # log.warning (f"is_long_body {is_long_body}")
+    # log.warning (f" avg_body_length {avg_body_length}")
+    # log.warning (f" body_length_exceed_average {body_length_exceed_average}")
 
-    return candles_analysis_result
+    return dict(
+        candle_type=candle_type,
+        body_length_exceed_average=body_length_exceed_average,
+        is_long_body=(is_long_body),
+    )
 
 
 async def get_candles_data(
