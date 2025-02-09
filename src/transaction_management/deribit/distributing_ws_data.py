@@ -81,6 +81,9 @@ async def caching_distributing_data(
                 currency: str = extract_currency_from_text(message_channel)
 
                 currency_upper = currency.upper()
+                
+                log.error(f"message_channel {message_channel}")
+                log.debug(f"data {data}")
 
                 if "user.changes.any" in message_channel:
 
