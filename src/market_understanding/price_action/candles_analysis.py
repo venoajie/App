@@ -396,23 +396,23 @@ async def get_market_condition(
                 
                 log.error (f"market_analytics_data {market_analytics_data}")
 
-                if market_analytics_data:
+                message_byte = await pubsub.get_message()
 
-                    message_byte = await pubsub.get_message()
+                if message_byte and message_byte["type"] == "message":
 
-                    if message_byte and message_byte["type"] == "message":
+                    message_byte_data = orjson.loads(message_byte["data"])
 
-                        message_byte_data = orjson.loads(message_byte["data"])
+                    message_channel = message_byte["channel"]
 
-                        message_channel = message_byte["channel"]
+                    if chart_low_high_tick_channel in message_channel:
 
-                        if chart_low_high_tick_channel in message_channel:
+                        if market_analytics_data:
 
                             instrument_name = message_byte_data["instrument_name"]
                             
     #                        log.warning(f"message_byte_data {message_byte_data}")
                             
-                            log.debug (f"market_analytics_data {market_analytics_data}")
+#                            log.debug (f"market_analytics_data {market_analytics_data}")
 
                             if instrument_name in message_byte_data["instrument_name"]:
 
@@ -422,7 +422,7 @@ async def get_market_condition(
                                     if instrument_name in o["instrument_name"]
                                 ][0]
                                 
-                                log.warning(f"candles_data_instrument {candles_data_instrument}")
+#                                log.warning(f"candles_data_instrument {candles_data_instrument}")
 
                                 pub_message = traslate_candles_data_to_market_condition(
                                     candles_data_instrument,
@@ -430,46 +430,50 @@ async def get_market_condition(
                                 )
                                 
                                 market_analytics_data = [o for o in market_analytics_data if instrument_name not in o["instrument_name"]]
-                                log.error (f"market_analytics_data {market_analytics_data}")
+#                                log.error (f"market_analytics_data {market_analytics_data}")
+
+                                pub_message.update({"instrument_name": instrument_name})
+
+                                market_analytics_data.append(pub_message)
+                                
+                                cached_candles_data_is_updated = False
+                                
+                                break
+
+        #                                log.info (f"result {pub_message}")
+        #
+
+                        else:
+                    
+                            candles_instrument_name = remove_redundant_elements(
+                                [o["instrument_name"] for o in candles_data]
+                            )
+                            
+                            for instrument_name in candles_instrument_name:
+
+                                candles_data_instrument = [
+                                    o["result"]
+                                    for o in candles_data
+                                    if instrument_name in o["instrument_name"]
+                                ][0]
+                                
+                                pub_message = traslate_candles_data_to_market_condition(
+                                    candles_data_instrument,
+                                    np,
+                                )
 
                                 pub_message.update({"instrument_name": instrument_name})
 
                                 market_analytics_data.append(pub_message)
 
-                                log.info (f"result {pub_message}")
-
-
-                else:
-            
-                    candles_instrument_name = remove_redundant_elements(
-                        [o["instrument_name"] for o in candles_data]
-                    )
-                    
-                    for instrument_name in candles_instrument_name:
-
-                        candles_data_instrument = [
-                            o["result"]
-                            for o in candles_data
-                            if instrument_name in o["instrument_name"]
-                        ][0]
-                        
-                        pub_message = traslate_candles_data_to_market_condition(
-                            candles_data_instrument,
-                            np,
+                        log.critical(f"result {pub_message}")
+                        await saving_and_publishing_result(
+                            client_redis,
+                            market_analytics_channel,
+                            market_condition_keys,
+                            market_analytics_data,
+                            market_analytics_data,
                         )
-
-                        pub_message.update({"instrument_name": instrument_name})
-
-                        market_analytics_data.append(pub_message)
-
-                log.critical(f"result {pub_message}")
-                await saving_and_publishing_result(
-                    client_redis,
-                    market_analytics_channel,
-                    market_condition_keys,
-                    market_analytics_data,
-                    market_analytics_data,
-                )
 
             except Exception as error:
 
