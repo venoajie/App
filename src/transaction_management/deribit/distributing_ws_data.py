@@ -81,11 +81,8 @@ async def caching_distributing_data(
                 currency: str = extract_currency_from_text(message_channel)
 
                 currency_upper = currency.upper()
-                
-                log.error(f"message_channel {message_channel}")
-                log.debug(f"data {data}")
 
-                if "user.changes.any" in message_channel:
+                if "user." in message_channel:
 
                     log.warning(f"user.changes {data}")
 
@@ -96,35 +93,33 @@ async def caching_distributing_data(
                         currency=currency,
                     )
 
-                    if "user" in message_channel:
+                    if "changes.any" in message_channel:
 
-                        if "changes.any" in message_channel:
+                        await update_cached_orders(
+                            cached_orders,
+                            data,
+                        )
 
-                            await update_cached_orders(
-                                cached_orders,
-                                data,
-                            )
+                        await saving_and_publishing_result(
+                            pipe,
+                            receive_order_channel,
+                            order_keys,
+                            cached_orders,
+                            pub_message,
+                        )
 
-                            await saving_and_publishing_result(
-                                pipe,
-                                receive_order_channel,
-                                order_keys,
-                                cached_orders,
-                                pub_message,
-                            )
+                    if "portfolio" in message_channel:
 
-                        if "portfolio" in message_channel:
-
-                            await publishing_result(
-                                pipe,
-                                portfolio_channel,
-                                pub_message,
-                            )  
-                            await update_db_pkl(
-                                "portfolio",
-                                data,
-                                currency,
-                            )
+                        await publishing_result(
+                            pipe,
+                            portfolio_channel,
+                            pub_message,
+                        )  
+                        await update_db_pkl(
+                            "portfolio",
+                            data,
+                            currency,
+                        )
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
