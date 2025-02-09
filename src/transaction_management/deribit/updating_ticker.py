@@ -64,7 +64,6 @@ def combining_ticker_data(instruments_name: str) -> list:
 
 async def update_cached_ticker(
     client_redis: object,
-    pubsub: object,
     config_app: list,
 ) -> None:
     """_summary_
@@ -78,6 +77,9 @@ async def update_cached_ticker(
     """
 
     try:
+
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]

@@ -37,7 +37,6 @@ async def cancelling_orders(
     modify_order_and_db: object,
     currencies: list,
     client_redis: object,
-    pubsub: object,
     config_app: list,
     redis_channels: list,
     redis_keys: list,
@@ -46,6 +45,9 @@ async def cancelling_orders(
     """ """
 
     try:
+
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
 
         cancellable_strategies = [
             o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
@@ -139,8 +141,8 @@ async def cancelling_orders(
                             market_analytics_channel,
                             market_condition_keys,
                         )
-
-                        log.debug(market_condition_all)
+                        
+                        log.debug (market_condition_all)
 
                     if receive_order_channel in message_channel:
 
@@ -159,7 +161,7 @@ async def cancelling_orders(
                             ticker_channel,
                             ticker_keys,
                         )
-
+                        
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]

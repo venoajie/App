@@ -29,12 +29,15 @@ async def last_tick_fr_sqlite(last_tick_query_ohlc1: str) -> int:
 
 async def updating_ohlc(
     client_redis: object,
-    pubsub: object,
+    pubsub,
     redis_channels: list,
 ) -> None:
     """ """
 
     try:
+
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
 
         chart_channel: str = redis_channels["chart_update"]
         chart_low_high_tick_channel: str = redis_channels["chart_low_high_tick"]
