@@ -62,10 +62,10 @@ def ohlc_to_candlestick(conversion_array):
 
 
 def my_generator_candle(
-    np: object, 
+    np: object,
     data: object,
     lookback: int,
-    ) -> list:
+) -> list:
     """_summary_
         https://github.com/MikePapinski/DeepLearning/blob/master/PredictCandlestick/CandleSTick%20patterns%20prediction/JupyterResearch_0.1.ipynb
         https://mikepapinski.github.io/deep%20learning/machine%20learning/python/forex/2018/12/15/Predict-Candlestick-patterns-with-Keras-and-Forex-data.md.html
@@ -120,8 +120,8 @@ def candles_analysis(
     ohlc_without_ticks: list,
     dim_sequence: int = 3,
 ):
-    """ 
-        https://www.tradingview.com/script/uuinZwsR-Big-Bar-Strategy/
+    """
+    https://www.tradingview.com/script/uuinZwsR-Big-Bar-Strategy/
 
     """
 
@@ -131,7 +131,7 @@ def candles_analysis(
         ("low", "f4"),
         ("close", "f4"),
     ]
-    
+
     np_users_data = np.array(ohlc_without_ticks)
 
     np_data = np.array(
@@ -179,16 +179,14 @@ async def get_candles_data(
 
     table_ohlc = f"ohlc{resolution}_{currency.lower()}_perp_json"
 
-    ohlc_query = (
-        f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
-    )
+    ohlc_query = f"SELECT data FROM {table_ohlc} ORDER BY tick DESC LIMIT {qty_candles}"
 
     result_from_sqlite = await executing_query_with_return(ohlc_query)
 
     ohlc_without_volume = remove_list_elements(
-    remove_apostrophes_from_json(o["data"] for o in result_from_sqlite),
-    "volume",
-)
+        remove_apostrophes_from_json(o["data"] for o in result_from_sqlite),
+        "volume",
+    )
 
     ohlc_without_cost = remove_list_elements(
         ohlc_without_volume,
@@ -201,6 +199,7 @@ async def get_candles_data(
     )
 
     return ohlc_without_ticks
+
 
 async def combining_candles_data(
     np: object,
@@ -217,26 +216,26 @@ async def combining_candles_data(
         instrument_name = f"{currency}-PERPETUAL"
         analysis_result = []
         for resolution in resolutions:
-            
-            if resolution !=1:
+
+            if resolution != 1:
 
                 candles_per_resolution = await get_candles_data(
                     currency,
                     resolution,
                     qty_candles,
-                    )
-                
-                #log.info(f"candles_per_resolution {candles_per_resolution}")
+                )
+
+                # log.info(f"candles_per_resolution {candles_per_resolution}")
 
                 candles_analysis_result = candles_analysis(
                     np,
                     candles_per_resolution,
                     dim_sequence,
                 )
-                
+
                 log.info(f"candles_analysis_result {candles_analysis_result}")
 
-                #max_tick = max([o["tick"] for o in candles_per_resolution])
+                # max_tick = max([o["tick"] for o in candles_per_resolution])
 
                 analysis_result.append(
                     dict(
@@ -244,7 +243,7 @@ async def combining_candles_data(
                         candles_analysis=(candles_analysis_result),
                     )
                 )
-        
+
         result.append(
             dict(
                 instrument_name=instrument_name,
@@ -261,14 +260,14 @@ def traslate_candles_data_to_market_condition(
     """ """
     try:
 
-        #log.info (f"candles_data_instrument {candles_data_instrument}")
+        # log.info (f"candles_data_instrument {candles_data_instrument}")
         candle_60 = [
             o["candles_analysis"]
             for o in candles_data_instrument
             if o["resolution"] == 60
         ]
-        
-        #log.info (f"candle_60 {candle_60}")
+
+        # log.info (f"candle_60 {candle_60}")
 
         candle_60_type = np.sum([o["candle_type"] for o in candle_60])
 
@@ -383,7 +382,7 @@ async def get_market_condition(
             dim_sequence,
             qty_candles,
         )
-        
+
         log.debug(f"candles_data {candles_data}")
 
         cached_candles_data_is_updated = True
@@ -402,47 +401,70 @@ async def get_market_condition(
                     message_channel = message_byte["channel"]
 
                     if chart_low_high_tick_channel in message_channel:
-                
-                        log.error (f"market_analytics_data {market_analytics_data}")
 
+                        log.error(f"market_analytics_data {market_analytics_data}")
 
                         if market_analytics_data:
 
                             instrument_name = message_byte_data["instrument_name"]
 
-                            if instrument_name in message_byte_data["instrument_name"]:
+                            if instrument_name in message_byte_data["instrument_name"]:                                
+                                                    
+                                resolution = message_byte_data["resolution"]
+                                currency = message_byte_data["currency"]
+                                if resolution != 1:
 
-                                candles_data_instrument = [
-                                    o["result"]
-                                    for o in candles_data
-                                    if instrument_name in o["instrument_name"]
-                                ][0]
+                                    candles_per_resolution = await get_candles_data(
+                                        currency,
+                                        resolution,
+                                        qty_candles,
+                                    )
 
-                                pub_message = traslate_candles_data_to_market_condition(
-                                    candles_data_instrument,
-                                    np,
-                                )
-                                
-                                market_analytics_data = [o for o in market_analytics_data if instrument_name not in o["instrument_name"]]
+                                    candles_data_instrument = candles_analysis(
+                                        np,
+                                        candles_per_resolution,
+                                        dim_sequence,
+                                        )
+                                    
+                                    log.info(f"candles_data_instrument {candles_data_instrument}")
 
-                                pub_message.update({"instrument_name": instrument_name})
+                                    candles_data_instrument = [
+                                        o["result"]
+                                        for o in candles_data
+                                        if instrument_name in o["instrument_name"]
+                                    ][0]
 
-                                market_analytics_data.append(pub_message)
-                                log.critical(f"result {pub_message}")
-                                await saving_and_publishing_result(
-                                    client_redis,
-                                    market_analytics_channel,
-                                    market_condition_keys,
-                                    market_analytics_data,
-                                    market_analytics_data,
-                                )
+                                    log.critical(f"candles_data_instrument {candles_data_instrument}")
+
+                                    pub_message = traslate_candles_data_to_market_condition(
+                                        candles_data_instrument,
+                                        np,
+                                    )
+
+                                    market_analytics_data = [
+                                        o
+                                        for o in market_analytics_data
+                                        if instrument_name not in o["instrument_name"]
+                                    ]
+
+                                    pub_message.update({"instrument_name": instrument_name})
+
+                                    market_analytics_data.append(pub_message)
+
+                                    await saving_and_publishing_result(
+                                        client_redis,
+                                        market_analytics_channel,
+                                        market_condition_keys,
+                                        market_analytics_data,
+                                        market_analytics_data,
+                                    )
 
                         else:
-                    
+
                             candles_instrument_name = remove_redundant_elements(
                                 [o["instrument_name"] for o in candles_data]
                             )
-                            
+
                             for instrument_name in candles_instrument_name:
 
                                 candles_data_instrument = [
@@ -450,7 +472,7 @@ async def get_market_condition(
                                     for o in candles_data
                                     if instrument_name in o["instrument_name"]
                                 ][0]
-                                
+
                                 pub_message = traslate_candles_data_to_market_condition(
                                     candles_data_instrument,
                                     np,
@@ -460,14 +482,13 @@ async def get_market_condition(
 
                                 market_analytics_data.append(pub_message)
 
-                                log.critical(f"result {pub_message}")
-                                await saving_and_publishing_result(
-                                    client_redis,
-                                    market_analytics_channel,
-                                    market_condition_keys,
-                                    market_analytics_data,
-                                    market_analytics_data,
-                                )
+                            await saving_and_publishing_result(
+                                client_redis,
+                                market_analytics_channel,
+                                market_condition_keys,
+                                market_analytics_data,
+                                market_analytics_data,
+                            )
 
             except Exception as error:
 
@@ -490,4 +511,3 @@ async def get_market_condition(
         asyncio.run(
             telegram_bot_sendtext(f"get_market_condition - {error}", "general_error")
         )
-

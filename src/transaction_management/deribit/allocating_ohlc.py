@@ -114,8 +114,8 @@ async def updating_ohlc(
                                 data,
                                 "is",
                             )
-                            
-                            if resolution !=1:
+
+                            if resolution != 1:
 
                                 table_ohlc = (
                                     f"ohlc{resolution}_{currency.lower()}_perp_json"
@@ -137,14 +137,17 @@ async def updating_ohlc(
                                 high_from_db = ohlc_from_sqlite["high"]
                                 low_from_db = ohlc_from_sqlite["low"]
 
-                                if high_from_ws > high_from_db or low_from_ws < low_from_db:
+                                if (
+                                    high_from_ws > high_from_db
+                                    or low_from_ws < low_from_db
+                                ):
 
-                                    #log.warning(f"ohlc_from_sqlite {ohlc_from_sqlite}")
-                                    #log.info(f"resolution {resolution}  data {data}")
+                                    # log.warning(f"ohlc_from_sqlite {ohlc_from_sqlite}")
+                                    # log.info(f"resolution {resolution}  data {data}")
 
-                                    #log.warning(
+                                    # log.warning(
                                     #    f"high_from_ws > high_from_db or low_from_ws < low_from_db {high_from_ws > high_from_db or low_from_ws < low_from_db}"
-                                    #)
+                                    # )
 
                                     await publishing_result(
                                         client_redis,
