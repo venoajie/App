@@ -386,14 +386,6 @@ async def get_market_condition(
         qty_candles = 5
         dim_sequence = 3
 
-        cached_candles_data = await get_candles_data(
-            currencies,
-            qty_candles,
-            resolutions,
-        )
-        
-        log.warning (f"cached_candles_data {cached_candles_data}")
-
         candles_data = combining_candles_data(
             np,
             currencies,
