@@ -121,6 +121,8 @@ async def cancelling_orders(
         not_cancel = True
 
         market_condition = []
+        
+        portfolio = []
 
         while not_cancel:
 
@@ -145,11 +147,8 @@ async def cancelling_orders(
                         )
                     if portfolio_channel in message_channel:
 
-                        log.critical (message_byte_data)
+                        portfolio = (message_byte_data["data"])[0]
                         
-                        log.debug(reading_from_pkl_data("portfolio", currency)[0])
-                        
-
                     if receive_order_channel in message_channel:
 
                         cached_orders = await querying_data(
@@ -160,7 +159,10 @@ async def cancelling_orders(
 
                         server_time = message_byte_data["server_time"]
 
-                    if ticker_channel in message_channel and market_condition:
+                    log.info(f"portfolio {portfolio}")
+                    if (ticker_channel in message_channel 
+                        and market_condition 
+                        and portfolio):
 
                         cached_ticker_all = await querying_data(
                             client_redis,
@@ -179,9 +181,6 @@ async def cancelling_orders(
                         market_condition = [
                             o for o in market_condition_all if o["instrument_name"]
                         ]
-
-                        # get portfolio data
-                        portfolio = reading_from_pkl_data("portfolio", currency)[0]
 
                         equity: float = portfolio["equity"]
 
