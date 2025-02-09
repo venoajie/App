@@ -61,7 +61,11 @@ def ohlc_to_candlestick(conversion_array):
     return candlestick_data
 
 
-def my_generator_candle(np: object, data: object, lookback: int) -> list:
+def my_generator_candle(
+    np: object, 
+    data: object,
+    lookback: int,
+    ) -> list:
     """_summary_
         https://github.com/MikePapinski/DeepLearning/blob/master/PredictCandlestick/CandleSTick%20patterns%20prediction/JupyterResearch_0.1.ipynb
         https://mikepapinski.github.io/deep%20learning/machine%20learning/python/forex/2018/12/15/Predict-Candlestick-patterns-with-Keras-and-Forex-data.md.html
@@ -234,7 +238,6 @@ async def combining_candles_data(
 
             result.append(
                 dict(
-                    instrument_name=instrument_name,
                     resolution=(resolution),
                     #max_tick=(max_tick),
                     # ohlc = (ohlc),
@@ -242,6 +245,8 @@ async def combining_candles_data(
                     candles_analysis=(candles_analysis_result),
                 )
             )
+        
+        result.update({"instrument_name": instrument_name})
 
     return result
 
