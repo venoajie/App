@@ -407,13 +407,25 @@ async def get_market_condition(
                         instrument_name = message_byte_data["instrument_name"]
                         
 #                        log.warning(f"message_byte_data {message_byte_data}")
+                        
+                        log.debug (f"market_analytics_data {market_analytics_data}")
+                            
+                        if market_analytics_data == []:
+                            candles_instrument_name = remove_redundant_elements(
+                                [o["instrument_name"] for o in candles_data]
+                            )
+                            
+                            for instrument_name in candles_instrument_name:
 
-                        candles_instrument_name = remove_redundant_elements(
-                            [o["instrument_name"] for o in candles_data]
-                        )
+                                candles_data_instrument = [
+                                    o["result"]
+                                    for o in candles_data
+                                    if instrument_name in o["instrument_name"]
+                                ][0]
+                                
+                                log.debug (f"candles_data_instrument {candles_data_instrument}")
 
-                        #log.warning(f"candles_instrument_name {candles_instrument_name}")
-                        for instrument_name in candles_instrument_name:
+                        else:
 
                             if instrument_name in message_byte_data["instrument_name"]:
 
@@ -422,17 +434,17 @@ async def get_market_condition(
                                     for o in candles_data
                                     if instrument_name in o["instrument_name"]
                                 ][0]
-                                
-                                log.warning(f"candles_data_instrument {candles_data_instrument}")
+                            
+                            log.warning(f"candles_data_instrument {candles_data_instrument}")
 
-                                pub_message = traslate_candles_data_to_market_condition(
-                                    candles_data_instrument,
-                                    np,
-                                )
+                            pub_message = traslate_candles_data_to_market_condition(
+                                candles_data_instrument,
+                                np,
+                            )
 
-                                pub_message.update({"instrument_name": instrument_name})
+                            pub_message.update({"instrument_name": instrument_name})
 
-                                market_analytics_data.append(pub_message)
+                            market_analytics_data.append(pub_message)
 
                         log.critical(f"result {pub_message}")
                         await saving_and_publishing_result(
