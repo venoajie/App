@@ -11,6 +11,7 @@ from loguru import logger as log
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from db_management.redis_client import saving_and_publishing_result, publishing_result
+from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.managing_deribit import (
     currency_inline_with_database_address,
@@ -59,6 +60,7 @@ async def caching_distributing_data(
         receive_order_channel: str = redis_channels["receive_order"]
         ticker_channel: str = redis_channels["ticker_update"]
         portfolio_channel: str = redis_channels["portfolio"]
+        my_trades_channel: str = redis_channels["my_trades"]
 
 
         order_keys: str = redis_keys["orders"]
@@ -69,6 +71,8 @@ async def caching_distributing_data(
         server_time = 0
         
         portfolio = []
+        
+        
 
         while True:
 
@@ -96,26 +100,16 @@ async def caching_distributing_data(
                     )
 
                     if "changes.any" in message_channel:
-
+                        
                         await update_cached_orders(
                             cached_orders,
                             data,
                         )
 
-                        await saving_and_publishing_result(
-                            pipe,
-                            receive_order_channel,
-                            order_keys,
-                            cached_orders,
-                            pub_message,
-                        )
 
                     if "portfolio" in message_channel:
                         
-                        log.debug (portfolio == [])
-                        log.warning (len(portfolio) <2)
-
-                        if portfolio == []: #2: qty of traded currencies 
+                        if portfolio == []:
                             portfolio.append (data)
                             
                         else:
@@ -135,6 +129,37 @@ async def caching_distributing_data(
                             pub_message,
                         )
                             
+
+
+                        await saving_and_publishing_result(
+                            pipe,
+                            receive_order_channel,
+                            order_keys,
+                            cached_orders,
+                            pub_message,
+                        )
+                        
+                        result = []
+                        for currency in currencies:
+                                                    
+                            query_trades = (
+                                    f"SELECT * FROM  v_{currency.lower()}_trading_active"
+                                )
+    
+                            my_trades_currency_all_transactions: list = (
+                            await executing_query_with_return(query_trades)
+                        )
+                            if my_trades_currency_all_transactions:
+                                for my_trades in my_trades_currency_all_transactions:
+                                    result.append(my_trades)
+
+                        pub_message.update({"my_trades": result})
+                        await publishing_result(
+                            pipe,
+                            my_trades_channel,
+                            result,
+                        )
+
                         await update_db_pkl(
                             "portfolio",
                             data,

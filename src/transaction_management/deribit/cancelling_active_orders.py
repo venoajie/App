@@ -98,6 +98,8 @@ async def cancelling_orders(
         market_analytics_channel: str = redis_channels["market_analytics_update"]
         ticker_channel: str = redis_channels["ticker_update"]
         portfolio_channel: str = redis_channels["portfolio"]
+        my_trades_channel: str = redis_channels["my_trades"]
+
 
         # prepare channels placeholders
         channels = [
@@ -146,9 +148,13 @@ async def cancelling_orders(
                         
                     if portfolio_channel in message_channel:
 
-                        portfolio = (message_byte_data["cached_portfolio"])
+                        portfolio_all = (message_byte_data["cached_portfolio"])
                         
-                        log.error(portfolio)
+                    if my_trades_channel in message_channel:
+
+                        my_trades_active_all = (message_byte_data["cached_portfolio"])
+                        
+                        log.debug(my_trades_active_all)
                         
                     if receive_order_channel in message_channel:
 
@@ -181,6 +187,8 @@ async def cancelling_orders(
                         market_condition = [
                             o for o in market_condition_all if o["instrument_name"]
                         ]
+                        
+                        portfolio = [o for o in portfolio_all if currency_upper in o["currency"]][0]
 
                         equity: float = portfolio["equity"]
 
