@@ -170,7 +170,7 @@ def candles_analysis(
     )
 
 
-async def get_candles_data(
+async def get_and_clean_up_candles_data(
     currency: str,
     resolution: int,
     qty_candles: int,
@@ -219,23 +219,17 @@ async def combining_candles_data(
 
             if resolution != 1:
 
-                candles_per_resolution = await get_candles_data(
+                candles_per_resolution = await get_and_clean_up_candles_data(
                     currency,
                     resolution,
                     qty_candles,
                 )
-
-                # log.info(f"candles_per_resolution {candles_per_resolution}")
 
                 candles_analysis_result = candles_analysis(
                     np,
                     candles_per_resolution,
                     dim_sequence,
                 )
-
-                log.info(f"candles_analysis_result {candles_analysis_result}")
-
-                # max_tick = max([o["tick"] for o in candles_per_resolution])
 
                 analysis_result.append(
                     dict(
@@ -250,12 +244,13 @@ async def combining_candles_data(
                 result=(analysis_result),
             )
         )
+
     return result
 
 
-def traslate_candles_data_to_market_condition(
-    candles_data_instrument: list,
+def translate_candles_data_to_market_condition(
     np: object,
+    candles_data_instrument: list,
 ) -> dict:
     """ """
     try:
@@ -409,10 +404,12 @@ async def get_market_condition(
                             if instrument_name in message_byte_data["instrument_name"]:                                
                                                     
                                 resolution = message_byte_data["resolution"]
+
                                 currency = message_byte_data["currency"]
+
                                 if resolution != 1:
 
-                                    candles_per_resolution = await get_candles_data(
+                                    candles_per_resolution = await get_and_clean_up_candles_data(
                                         currency,
                                         resolution,
                                         qty_candles,
@@ -432,10 +429,9 @@ async def get_market_condition(
                                         if instrument_name in o["instrument_name"]
                                     ][0]
 
-
-                                    pub_message = traslate_candles_data_to_market_condition(
-                                        candles_data_instrument,
+                                    pub_message = translate_candles_data_to_market_condition(
                                         np,
+                                        candles_data_instrument,
                                     )
 
                                     market_analytics_data = [
@@ -470,9 +466,9 @@ async def get_market_condition(
                                     if instrument_name in o["instrument_name"]
                                 ][0]
 
-                                pub_message = traslate_candles_data_to_market_condition(
-                                    candles_data_instrument,
+                                pub_message = translate_candles_data_to_market_condition(
                                     np,
+                                    candles_data_instrument,
                                 )
 
                                 pub_message.update({"instrument_name": instrument_name})
