@@ -97,12 +97,14 @@ async def cancelling_orders(
         receive_order_channel: str = redis_channels["receive_order"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
         ticker_channel: str = redis_channels["ticker_update"]
+        portfolio_channel: str = redis_channels["portfolio"]
 
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
             receive_order_channel,
             ticker_channel,
+            portfolio_channel,
         ]
 
         # subscribe to channels
@@ -141,8 +143,10 @@ async def cancelling_orders(
                             market_analytics_channel,
                             market_condition_keys,
                         )
+                    if portfolio_channel in message_channel:
+
+                        log.critical (message_byte_data)
                         
-                        log.debug (market_condition_all)
 
                     if receive_order_channel in message_channel:
 

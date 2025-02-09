@@ -58,8 +58,11 @@ async def caching_distributing_data(
         chart_channel: str = redis_channels["chart_update"]
         receive_order_channel: str = redis_channels["receive_order"]
         ticker_channel: str = redis_channels["ticker_update"]
+        portfolio_channel: str = redis_channels["portfolio"]
+
 
         order_keys: str = redis_keys["orders"]
+        portfolio_keys: str = redis_keys["portfolio"]
 
         cached_orders: list = await combining_order_data(private_data, currencies)
 
@@ -83,6 +86,13 @@ async def caching_distributing_data(
 
                     log.warning(f"user.changes {data}")
 
+                    pub_message = dict(
+                        data=data,
+                        server_time=server_time,
+                        currency_upper=currency_upper,
+                        currency=currency,
+                    )
+
                     if "user" in message_channel:
 
                         if "changes.any" in message_channel:
@@ -92,28 +102,26 @@ async def caching_distributing_data(
                                 data,
                             )
 
-                            pub_message = dict(
-                                data=data,
-                                server_time=server_time,
-                                currency_upper=currency_upper,
-                                currency=currency,
+                            await saving_and_publishing_result(
+                                pipe,
+                                receive_order_channel,
+                                order_keys,
+                                cached_orders,
+                                pub_message,
                             )
 
                         if "portfolio" in message_channel:
 
+                            await publishing_result(
+                                pipe,
+                                portfolio_channel,
+                                pub_message,
+                            )  
                             await update_db_pkl(
                                 "portfolio",
                                 data,
                                 currency,
                             )
-
-                    await saving_and_publishing_result(
-                        pipe,
-                        receive_order_channel,
-                        order_keys,
-                        cached_orders,
-                        pub_message,
-                    )
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
