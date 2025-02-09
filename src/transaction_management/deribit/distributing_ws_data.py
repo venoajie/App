@@ -67,6 +67,8 @@ async def caching_distributing_data(
         cached_orders: list = await combining_order_data(private_data, currencies)
 
         server_time = 0
+        
+        portfolio = []
 
         while True:
 
@@ -110,17 +112,29 @@ async def caching_distributing_data(
 
                     if "portfolio" in message_channel:
 
+                        if portfolio == [] or len(portfolio) <2: #2: qty of traded currencies 
+                            portfolio.append (data)
+                            
+                        else:
+                            data_currency = data["currency"]
+                            portfolio_currency = [o for o in portfolio if data_currency in o["currency"]]
+                            portfolio.remove(portfolio_currency[0])
+                            portfolio.append(data)
+                        
+                        pub_message.update({"cached_portfolio": portfolio})
+
                         await publishing_result(
                             pipe,
                             portfolio_channel,
                             pub_message,
-                        )  
+                        )
+                            
                         await update_db_pkl(
                             "portfolio",
                             data,
                             currency,
                         )
-
+                          
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 
