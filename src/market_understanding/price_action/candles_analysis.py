@@ -215,7 +215,7 @@ async def combining_candles_data(
     for currency in currencies:
 
         instrument_name = f"{currency}-PERPETUAL"
-
+        analysis_result = []
         for resolution in resolutions:
 
             candles_per_resolution = await get_candles_data(
@@ -236,18 +236,19 @@ async def combining_candles_data(
 
             #max_tick = max([o["tick"] for o in candles_per_resolution])
 
-            result.append(
+            analysis_result.append(
                 dict(
                     resolution=(resolution),
-                    #max_tick=(max_tick),
-                    # ohlc = (ohlc),
-                    # candles_summary = (three_dim_sequence),
                     candles_analysis=(candles_analysis_result),
                 )
             )
         
-        result.update({"instrument_name": instrument_name})
-
+        result.append(
+            dict(
+                instrument_name=instrument_name,
+                result=(analysis_result),
+            )
+        )
     return result
 
 
