@@ -224,7 +224,7 @@ async def combining_candles_data(
                 qty_candles,
                 )
             
-            log.info(f"candles_per_resolution {candles_per_resolution}")
+            #log.info(f"candles_per_resolution {candles_per_resolution}")
 
             candles_analysis_result = candles_analysis(
                 np,
@@ -413,8 +413,8 @@ async def get_market_condition(
                             if instrument_name in message_byte_data["instrument_name"]:
 
                                 candles_data_instrument = [
-                                    o
-                                    for o in candles_data["result"]
+                                    o["result"]
+                                    for o in candles_data
                                     if instrument_name in o["instrument_name"]
                                 ]
                                 
