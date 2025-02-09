@@ -424,6 +424,16 @@ async def get_market_condition(
                                 ][0]
                                 
                                 log.debug (f"candles_data_instrument {candles_data_instrument}")
+                                    
+                                pub_message = traslate_candles_data_to_market_condition(
+                                    candles_data_instrument,
+                                    np,
+                                )
+
+                                pub_message.update({"instrument_name": instrument_name})
+
+                                market_analytics_data.append(pub_message)
+
 
                         else:
 
