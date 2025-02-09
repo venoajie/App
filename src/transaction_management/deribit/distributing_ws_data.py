@@ -100,7 +100,15 @@ async def caching_distributing_data(
                     )
 
                     if "changes.any" in message_channel:
-                        
+
+                        await saving_and_publishing_result(
+                            pipe,
+                            receive_order_channel,
+                            order_keys,
+                            cached_orders,
+                            pub_message,
+                        )
+                                                
                         await update_cached_orders(
                             cached_orders,
                             data,
@@ -129,16 +137,6 @@ async def caching_distributing_data(
                             pub_message,
                         )
                             
-
-
-                        await saving_and_publishing_result(
-                            pipe,
-                            receive_order_channel,
-                            order_keys,
-                            cached_orders,
-                            pub_message,
-                        )
-                        
                         result = []
                         for currency in currencies:
                                                     
@@ -149,6 +147,7 @@ async def caching_distributing_data(
                             my_trades_currency_all_transactions: list = (
                             await executing_query_with_return(query_trades)
                         )
+                            log.info (my_trades_currency_all_transactions)
                             if my_trades_currency_all_transactions:
                                 for my_trades in my_trades_currency_all_transactions:
                                     result.append(my_trades)
