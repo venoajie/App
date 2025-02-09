@@ -141,10 +141,16 @@ async def caching_distributing_data(
                 if "chart.trades" in message_channel:
 
                     log.info(f"message_channel {message_channel}")
+                    
+                    try:
+                        resolution=int(message_channel.split(".")[3])
+
+                    except:
+                        resolution=message_channel.split(".")[3],
 
                     pub_message = dict(
                         data=data,
-                        resolution=message_channel.split(".")[3],
+                        resolution=resolution,
                         currency=currency,
                         instrument_name=message_channel.split(".")[2],
                     )
