@@ -394,9 +394,9 @@ async def get_market_condition(
 
             try:
                 
-                log.debug (f"market_analytics_data {market_analytics_data}")
+                log.error (f"market_analytics_data {market_analytics_data}")
 
-                if market_analytics_data != []:
+                if market_analytics_data:
 
                     message_byte = await pubsub.get_message()
 
@@ -421,19 +421,22 @@ async def get_market_condition(
                                     for o in candles_data
                                     if instrument_name in o["instrument_name"]
                                 ][0]
-                            
-                            log.warning(f"candles_data_instrument {candles_data_instrument}")
+                                
+                                log.warning(f"candles_data_instrument {candles_data_instrument}")
 
-                            pub_message = traslate_candles_data_to_market_condition(
-                                candles_data_instrument,
-                                np,
-                            )
+                                pub_message = traslate_candles_data_to_market_condition(
+                                    candles_data_instrument,
+                                    np,
+                                )
+                                
+                                market_analytics_data = [o for o in market_analytics_data if instrument_name not in o["instrument_name"]]
+                                log.error (f"market_analytics_data {market_analytics_data}")
 
-                            pub_message.update({"instrument_name": instrument_name})
+                                pub_message.update({"instrument_name": instrument_name})
 
-                            market_analytics_data.append(pub_message)
-                            
-                            log.warning (f"result {pub_message}")
+                                market_analytics_data.append(pub_message)
+
+                                log.info (f"result {pub_message}")
 
 
                 else:
