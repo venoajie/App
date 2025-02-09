@@ -162,7 +162,6 @@ async def cancelling_orders(
                             ticker_keys,
                         )
                         
-                        log.debug (f"market_condition {market_condition}")
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]
