@@ -153,7 +153,7 @@ def my_generator_candle(np: object, data: object, lookback: int) -> list:
 
 def candles_analysis(
     np: object,
-    candles_per_resolution: list,
+    ohlc_without_ticks: list,
     dim_sequence: int = 3,
 ):
     """ """
