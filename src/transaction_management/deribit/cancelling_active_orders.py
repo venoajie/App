@@ -147,7 +147,7 @@ async def cancelling_orders(
                         )
                     if portfolio_channel in message_channel:
 
-                        portfolio = (message_byte_data["data"])[0]
+                        portfolio = (message_byte_data["data"])
                         
                     if receive_order_channel in message_channel:
 
