@@ -100,13 +100,13 @@ def my_generator_candle(
 
     for a in range(len(data) - lookback):
 
-        #        log.debug (f"data my_generator_candle {data} lookback {lookback}")
+        log.debug (f"data my_generator_candle {data} lookback {lookback}")
 
         temp_list = []
         for candle in data[first_row : first_row + lookback]:
 
             converted_data = ohlc_to_candlestick(candle)
-            # log.info (f"converted_data  {converted_data} candle {candle}")
+            log.info (f"converted_data  {converted_data} candle {candle}")
             temp_list.append(converted_data)
 
         temp_list2 = np.asarray(temp_list)
@@ -161,7 +161,7 @@ def candles_analysis(
     body_length_exceed_average = body_length > avg_body_length
     # print(candles_arrays)
     log.warning (f"candles_arrays {candles_arrays}")
-    #log.warning (f"candle_type {candle_type}")
+    log.error (f"candle_type {candle_type}")
     # log.warning (f"wicks_up {wicks_up}")
     # log.warning (f"wicks_down {wicks_down}")
     # log.warning (f"body_size {body_size}")
