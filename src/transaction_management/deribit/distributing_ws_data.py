@@ -111,6 +111,9 @@ async def caching_distributing_data(
                         )
 
                     if "portfolio" in message_channel:
+                        
+                        log.debug (portfolio == [])
+                        log.warning (len(portfolio) <2)
 
                         if portfolio == [] or len(portfolio) <2: #2: qty of traded currencies 
                             portfolio.append (data)

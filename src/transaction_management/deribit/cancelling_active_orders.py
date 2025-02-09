@@ -122,8 +122,6 @@ async def cancelling_orders(
 
         market_condition = []
         
-        portfolio = []
-
         while not_cancel:
 
             try:
@@ -148,6 +146,8 @@ async def cancelling_orders(
                     if portfolio_channel in message_channel:
 
                         portfolio = (message_byte_data["data"])
+                        
+                        log.error(portfolio)
                         
                     if receive_order_channel in message_channel:
 
