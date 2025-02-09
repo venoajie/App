@@ -61,7 +61,7 @@ async def updating_ohlc(
 
                 message_byte = await pubsub.get_message()
 
-#                log.info(f"message_byte {message_byte}")
+                #                log.info(f"message_byte {message_byte}")
 
                 if message_byte and message_byte["type"] == "message":
 
@@ -70,7 +70,7 @@ async def updating_ohlc(
                     message_channel = message_byte["channel"]
 
                     if chart_channel in message_channel:
-                        
+
                         data = message_byte_data["data"]
 
                         instrument_name = message_byte_data["instrument_name"]
@@ -125,7 +125,7 @@ async def updating_ohlc(
                                 ohlc_query
                             )
 
- #                           log.warning(f"result_from_sqlite {result_from_sqlite}")
+                            #                           log.warning(f"result_from_sqlite {result_from_sqlite}")
 
                             high_from_ws = data["high"]
                             low_from_ws = data["low"]
@@ -151,9 +151,9 @@ async def updating_ohlc(
                                     chart_low_high_tick_channel,
                                     pub_message,
                                 )
-                                
-                                #is_updated = False
-                                #break
+
+                                # is_updated = False
+                                # break
 
                         else:
 
@@ -179,8 +179,8 @@ async def updating_ohlc(
                                     result,
                                 )
 
-                            #is_updated = False
-                            #break
+                            # is_updated = False
+                            # break
 
             except Exception as error:
 

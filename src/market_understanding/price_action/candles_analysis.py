@@ -5,7 +5,7 @@ import orjson
 from loguru import logger as log
 
 # user defined formula
-from db_management.redis_client import saving_and_publishing_result, publishing_result
+from db_management.redis_client import saving_and_publishing_result
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.string_modification import (
     remove_apostrophes_from_json,
@@ -283,6 +283,93 @@ def combining_candles_data(
     return result
 
 
+def traslate_candles_data_to_market_condition(
+    candles_data_instrument: list,
+    np: object,
+) -> dict:
+    """ """
+    try:
+
+        candle_60 = [
+            o["candles_analysis"]
+            for o in candles_data_instrument
+            if o["resolution"] == 60
+        ]
+
+        candle_60_type = np.sum([o["candle_type"] for o in candle_60])
+
+        candle_60_is_long = np.sum([o["is_long_body"] for o in candle_60])
+
+        candle_5 = [
+            o["candles_analysis"]
+            for o in candles_data_instrument
+            if o["resolution"] == 5
+        ]
+
+        candle_5_type = np.sum([o["candle_type"] for o in candle_5])
+
+        candle_5_is_long = np.sum([o["is_long_body"] for o in candle_5])
+
+        candle_15 = [
+            o["candles_analysis"]
+            for o in candles_data_instrument
+            if o["resolution"] == 15
+        ]
+
+        candle_15_type = np.sum([o["candle_type"] for o in candle_15])
+
+        candle_15_is_long = np.sum([o["is_long_body"] for o in candle_15])
+
+        candle_60_long_body_more_than_2 = candle_60_is_long >= 2
+        candle_5_long_body_any = candle_5_is_long > 0
+        candle_15_long_body_any = candle_15_is_long > 0
+        candle_60_long_body_any = candle_60_is_long > 0
+
+        candle_60_no_long = candle_60_is_long == 0
+
+        neutral = True
+        weak_bullish, weak_bearish = False, False
+        bullish, bearish = False, False
+        strong_bullish, strong_bearish = False, False
+
+        if candle_5_long_body_any:
+            weak_bullish = True if candle_5_type > 0 else False
+            weak_bearish = True if candle_5_type < 0 else False
+
+        if candle_60_long_body_any and candle_15_long_body_any:
+            bullish = True if weak_bullish and candle_15_type > 0 else False
+            bearish = True if weak_bearish and candle_15_type < 0 else False
+
+        if candle_60_long_body_more_than_2:
+            strong_bullish = (
+                True if bullish and candle_60_long_body_more_than_2 else False
+            )
+
+            strong_bearish = (
+                True if bearish and candle_60_long_body_more_than_2 else False
+            )
+
+        neutral = True if not weak_bearish and not weak_bullish else False
+
+        return dict(
+            strong_bullish=strong_bullish,
+            bullish=bullish,
+            weak_bullish=weak_bullish,
+            neutral=neutral,
+            weak_bearish=weak_bearish,
+            bearish=bearish,
+            strong_bearish=strong_bearish,
+        )
+
+    except Exception as error:
+
+        parse_error_message(error)
+
+        asyncio.run(
+            telegram_bot_sendtext(f"get_market_condition - {error}", "general_error")
+        )
+
+
 async def get_market_condition(
     client_redis: object,
     config_app: list,
@@ -330,7 +417,7 @@ async def get_market_condition(
         )
 
         cached_candles_data_is_updated = True
-        
+
         market_analytics_data = []
 
         while cached_candles_data_is_updated:
@@ -344,10 +431,8 @@ async def get_market_condition(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
-                    
-                    log.debug (f"{message_byte_data} chart_low_high_tick_channel in message_channel {chart_low_high_tick_channel in message_channel}")
 
-                    if chart_low_high_tick_channel in message_channel or not market_analytics_data:
+                    if chart_low_high_tick_channel in message_channel:
 
                         instrument_name = message_byte_data["instrument_name"]
 
@@ -369,7 +454,6 @@ async def get_market_condition(
                             [o["instrument_name"] for o in candles_data]
                         )
 
-                        market_analytics_data = []
                         for instrument_name in candles_instrument_name:
 
                             if instrument_name in message_byte_data["instrument_name"]:
@@ -380,109 +464,16 @@ async def get_market_condition(
                                     if instrument_name in o["instrument_name"]
                                 ]
 
-                                candle_60 = [
-                                    o["candles_analysis"]
-                                    for o in candles_data_instrument
-                                    if o["resolution"] == 60
-                                ]
-
-                                candle_60_type = np.sum(
-                                    [o["candle_type"] for o in candle_60]
+                                pub_message = traslate_candles_data_to_market_condition(
+                                    candles_data_instrument,
+                                    np,
                                 )
 
-                                candle_60_is_long = np.sum(
-                                    [o["is_long_body"] for o in candle_60]
-                                )
-
-                                candle_5 = [
-                                    o["candles_analysis"]
-                                    for o in candles_data_instrument
-                                    if o["resolution"] == 5
-                                ]
-
-                                candle_5_type = np.sum(
-                                    [o["candle_type"] for o in candle_5]
-                                )
-
-                                candle_5_is_long = np.sum(
-                                    [o["is_long_body"] for o in candle_5]
-                                )
-
-                                candle_15 = [
-                                    o["candles_analysis"]
-                                    for o in candles_data_instrument
-                                    if o["resolution"] == 15
-                                ]
-
-                                candle_15_type = np.sum(
-                                    [o["candle_type"] for o in candle_15]
-                                )
-
-                                candle_15_is_long = np.sum(
-                                    [o["is_long_body"] for o in candle_15]
-                                )
-
-                                candle_60_long_body_more_than_2 = candle_60_is_long >= 2
-                                candle_5_long_body_any = candle_5_is_long > 0
-                                candle_15_long_body_any = candle_15_is_long > 0
-                                candle_60_long_body_any = candle_60_is_long > 0
-
-                                candle_60_no_long = candle_60_is_long == 0
-
-                                neutral = True
-                                weak_bullish, weak_bearish = False, False
-                                bullish, bearish = False, False
-                                strong_bullish, strong_bearish = False, False
-
-                                if candle_5_long_body_any:
-                                    weak_bullish = True if candle_5_type > 0 else False
-                                    weak_bearish = True if candle_5_type < 0 else False
-
-                                if candle_60_long_body_any and candle_15_long_body_any:
-                                    bullish = (
-                                        True
-                                        if weak_bullish and candle_15_type > 0
-                                        else False
-                                    )
-                                    bearish = (
-                                        True
-                                        if weak_bearish and candle_15_type < 0
-                                        else False
-                                    )
-
-                                if candle_60_long_body_more_than_2:
-                                    strong_bullish = (
-                                        True
-                                        if bullish and candle_60_long_body_more_than_2
-                                        else False
-                                    )
-
-                                    strong_bearish = (
-                                        True
-                                        if bearish and candle_60_long_body_more_than_2
-                                        else False
-                                    )
-
-                                neutral = (
-                                    True
-                                    if not weak_bearish and not weak_bullish
-                                    else False
-                                )
-
-                                pub_message = dict(
-                                    instrument_name=instrument_name,
-                                    strong_bullish=strong_bullish,
-                                    bullish=bullish,
-                                    weak_bullish=weak_bullish,
-                                    neutral=neutral,
-                                    weak_bearish=weak_bearish,
-                                    bearish=bearish,
-                                    strong_bearish=strong_bearish,
-                                )
+                                pub_message.update({"instrument_name": instrument_name})
 
                                 market_analytics_data.append(pub_message)
 
-                            log.critical(f"result {market_analytics_data}")
+                            log.critical(f"result {pub_message}")
                             await saving_and_publishing_result(
                                 client_redis,
                                 market_analytics_channel,
@@ -512,3 +503,4 @@ async def get_market_condition(
         asyncio.run(
             telegram_bot_sendtext(f"get_market_condition - {error}", "general_error")
         )
+
