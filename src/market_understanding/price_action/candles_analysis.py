@@ -436,10 +436,7 @@ async def get_market_condition(
 
                                 market_analytics_data.append(pub_message)
                                 
-                                cached_candles_data_is_updated = False
-                                
-                                break
-
+                    
         #                                log.info (f"result {pub_message}")
         #
 
