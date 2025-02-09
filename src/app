@@ -180,6 +180,8 @@ async def main():
                 modify_order_and_db,
                 currencies,
                 client_redis,
+                
+    pubsub,
                 config_app,
                 redis_channels,
                 redis_keys,
@@ -215,10 +217,12 @@ async def main():
 
             updating_ohlc(
                 client_redis,
+    pubsub,
                 redis_channels,),
             
             get_market_condition(
                 client_redis,
+    pubsub,
                 config_app,
                 currencies,
                 redis_channels,

@@ -37,6 +37,7 @@ async def cancelling_orders(
     modify_order_and_db: object,
     currencies: list,
     client_redis: object,
+    pubsub: object,
     config_app: list,
     redis_channels: list,
     redis_keys: list,
@@ -45,9 +46,6 @@ async def cancelling_orders(
     """ """
 
     try:
-
-        # connecting to redis pubsub
-        pubsub: object = client_redis.pubsub()
 
         cancellable_strategies = [
             o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True

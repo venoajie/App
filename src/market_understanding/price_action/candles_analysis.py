@@ -354,6 +354,7 @@ def translate_candles_data_to_market_condition(
 
 async def get_market_condition(
     client_redis: object,
+    pubsub: object,
     config_app: list,
     currencies,
     redis_channels,
@@ -362,9 +363,6 @@ async def get_market_condition(
 ) -> dict:
     """ """
     try:
-
-        # connecting to redis pubsub
-        pubsub: object = client_redis.pubsub()
 
         market_analytics_channel: str = redis_channels["market_analytics_update"]
         chart_low_high_tick_channel: str = redis_channels["chart_low_high_tick"]
@@ -464,7 +462,7 @@ async def get_market_condition(
                                         market_analytics_data,
                                     )
                                     
-                                    log.debug(f"market_analytics_data {market_analytics_data}")
+                                    #log.debug(f"market_analytics_data {market_analytics_data}")
 
                         else:
 
