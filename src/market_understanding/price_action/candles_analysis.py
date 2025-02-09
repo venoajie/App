@@ -261,6 +261,8 @@ def translate_candles_data_to_market_condition(
 ) -> dict:
     """ """
     try:
+        
+        log.info(f"translate_candles_data_to_market_condition {candles_data_instrument}")
 
         candle_60 = [
             o["candles_analysis"]
