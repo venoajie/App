@@ -493,4 +493,4 @@ lookback = 3
 parameters = 6
 arr = np.empty((1, lookback, parameters))
 
-log.warning (f"arr  {arr}")
+log.warning(f"arr  {arr}")
