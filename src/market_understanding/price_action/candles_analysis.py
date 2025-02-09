@@ -369,11 +369,11 @@ async def get_market_condition(
         qty_candles = 5
         dim_sequence = 3
         
-        candles_per_resolution = await get_candles_data(
-                    currency,
-                    resolution,
-                    qty_candles,
-                    )
+        candles_per_resolution = [(await get_candles_data(currency,o,qty_candles)) for o in resolutions]
+        
+        log.debug (candles_per_resolution)
+        
+        
 
         candles_data = combining_candles_data(
             np,
