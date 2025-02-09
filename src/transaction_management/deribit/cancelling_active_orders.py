@@ -118,7 +118,7 @@ async def cancelling_orders(
 
         not_cancel = True
 
-        market_condition = None
+        market_condition = []
 
         while not_cancel:
 
@@ -141,6 +141,8 @@ async def cancelling_orders(
                             market_analytics_channel,
                             market_condition_keys,
                         )
+                        
+                        log.debug (market_condition_all)
 
                     if receive_order_channel in message_channel:
 
@@ -159,7 +161,8 @@ async def cancelling_orders(
                             ticker_channel,
                             ticker_keys,
                         )
-
+                        
+                        log.debug (f"market_condition {market_condition}")
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]
