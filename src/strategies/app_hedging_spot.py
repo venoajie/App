@@ -149,6 +149,7 @@ async def hedging_spot(
                         )
 
                         market_condition_all = parsing_sqlite_json_output(market_condition_original)
+                        log.debug(market_condition_all)
 
                     if portfolio_channel in message_channel:
 
