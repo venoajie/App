@@ -181,8 +181,9 @@ async def cancelling_orders(
 
                         market_condition = [
                             o for o in market_condition_all if instrument_name_perpetual in o["instrument_name"]
-                        ]
+                        ][0]
 
+                        log.debug(market_condition)
                         portfolio = [
                             o for o in portfolio_all if currency_upper in o["currency"]
                         ][0]
