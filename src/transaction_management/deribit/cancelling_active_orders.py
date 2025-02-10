@@ -145,6 +145,7 @@ async def cancelling_orders(
                             market_analytics_channel,
                             market_condition_keys,
                         )
+                        log.debug(market_condition_original)
                         
                         market_condition_all = parsing_sqlite_json_output(market_condition_original)
                         
