@@ -127,6 +127,8 @@ async def hedging_spot(
 
         market_condition_all = []
 
+        portfolio_all = []
+
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
         while not_cancel:
@@ -174,7 +176,7 @@ async def hedging_spot(
                     if (
                         ticker_channel in message_channel
                         and market_condition_all
-                        and portfolio
+                        and portfolio_all
                     ):
 
                         currency_upper: str = currency.upper()

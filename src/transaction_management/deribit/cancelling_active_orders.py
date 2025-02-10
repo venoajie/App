@@ -124,6 +124,8 @@ async def cancelling_orders(
 
         market_condition_all = []
 
+        portfolio_all = []
+
         query_trades = f"SELECT * FROM  v_trading_all_active"
         while not_cancel:
 
@@ -172,7 +174,7 @@ async def cancelling_orders(
                     if (
                         ticker_channel in message_channel
                         and market_condition_all
-                        and portfolio
+                        and portfolio_all
                     ):
 
                         cached_ticker_all = await querying_data(

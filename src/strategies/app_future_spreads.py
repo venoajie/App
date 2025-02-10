@@ -109,6 +109,8 @@ async def future_spreads(
         not_cancel = True
 
         market_condition_all = []
+        
+        portfolio_all = []
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
@@ -157,7 +159,7 @@ async def future_spreads(
                     if (
                         ticker_channel in message_channel
                         and market_condition_all
-                        and portfolio
+                        and portfolio_all
                     ):
 
                         currency_lower: str = currency
