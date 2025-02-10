@@ -142,14 +142,8 @@ async def hedging_spot(
 
                     if market_analytics_channel in message_channel:
 
-                        market_condition_original = await querying_data(
-                            client_redis,
-                            market_analytics_channel,
-                            market_condition_keys,
-                        )
+                        market_condition_all = message_byte_data
 
-                        market_condition_all = parsing_redis_market_json_output(market_condition_original)
-                        log.debug(message_byte_data)
 
                     if portfolio_channel in message_channel:
 

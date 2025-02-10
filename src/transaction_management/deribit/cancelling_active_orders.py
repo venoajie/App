@@ -140,16 +140,8 @@ async def cancelling_orders(
 
                     if market_analytics_channel in message_channel:
 
-                        market_condition_original = await querying_data(
-                            client_redis,
-                            market_analytics_channel,
-                            market_condition_keys,
-                        )
-                        log.debug(market_condition_original)
-                        
-                        market_condition_all = parsing_redis_market_json_output(market_condition_original)
-                        
-                        log.debug(market_condition_all)
+                        market_condition_all = message_byte_data
+
 
                     if portfolio_channel in message_channel:
 
