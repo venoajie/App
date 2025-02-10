@@ -132,7 +132,7 @@ async def future_spreads(
                         )
 
                         market_condition_all = parsing_redis_market_json_output(market_condition_original)
-                        log.debug(market_condition_all)
+                        log.debug(message_byte_data)
 
                     if portfolio_channel in message_channel:
 
