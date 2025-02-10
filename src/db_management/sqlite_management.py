@@ -12,6 +12,7 @@ from messaging.telegram_bot import telegram_bot_sendtext as telegram_bot
 from utilities.string_modification import extract_currency_from_text
 
 
+
 def catch_error(error, idle: int = None) -> list:
     """ """
     from utilities import system_tools
@@ -493,6 +494,40 @@ def querying_based_on_currency_or_instrument_and_strategy(
     return tab
 
 
+async def executing_query_based_on_currency_or_instrument_and_strategy(
+    table: str,
+    currency_or_instrument,
+    strategy: str = "all",
+    status: str = "all",
+    columns: list = "standard",
+    limit: int = 0,
+    order: str = "id",
+) -> dict:
+    """
+    Provide execution template for querying summary of trading results from sqlite.
+    Consist of transaction label, size, and price only.
+    """
+
+    # get query
+    query = querying_based_on_currency_or_instrument_and_strategy(
+        table, currency_or_instrument, strategy, status, columns, limit, order
+    )
+
+    # execute query
+    result = await executing_query_with_return(query)
+
+    # log.critical (f"table {table} filter {filter}")
+    # log.info (f"result {result}")
+
+    # define none from queries result. If the result=None, return []
+    NONE_DATA: None = [0, None, []]
+
+    # log.error (f"table {query}")
+    # log.warning (f"result {result}")
+
+    return [] if not result else (result)
+
+
 async def executing_query_with_return(
     query_table,
     filter: str = None,
@@ -586,6 +621,7 @@ async def publishing_db_update(table_name: str) -> None:
             )
 
 
+
 async def back_up_db_sqlite():
 
     from datetime import datetime
@@ -599,3 +635,4 @@ async def back_up_db_sqlite():
         src.backup(dst)
     dst.close()
     src.close()
+
