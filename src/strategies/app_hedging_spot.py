@@ -40,8 +40,6 @@ from utilities.string_modification import (
 
 
 async def hedging_spot(
-    private_data: object,
-    modify_order_and_db: object,
     currencies: list,
     client_redis: object,
     config_app: list,
@@ -171,6 +169,9 @@ async def hedging_spot(
 
                         server_time = message_byte_data["server_time"]
 
+                    log.error(f" ticker_channel in message_channel {ticker_channel in message_channel}")
+                    log.warning(f" market_condition {market_condition}")
+                    log.debug(f" portfolio {portfolio}")
                     if (
                         ticker_channel in message_channel
                         and market_condition

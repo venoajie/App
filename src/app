@@ -203,8 +203,6 @@ async def main():
                 ),
             
             hedging_spot(
-                private_data,
-                modify_order_and_db,
                 currencies,
                 client_redis,
                 config_app,
