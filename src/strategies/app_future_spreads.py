@@ -92,6 +92,7 @@ async def future_spreads(
             receive_order_channel,
             ticker_channel,
             portfolio_channel,
+            my_trades_channel,
         ]
 
         # subscribe to channels

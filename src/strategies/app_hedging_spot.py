@@ -108,6 +108,8 @@ async def hedging_spot(
             receive_order_channel,
             ticker_channel,
             portfolio_channel,
+            my_trades_channel,
+
         ]
 
         # subscribe to channels
@@ -171,7 +173,7 @@ async def hedging_spot(
 
                     log.error(f" ticker_channel in message_channel {ticker_channel in message_channel}")
                     log.warning(f" market_condition {market_condition}")
-                    log.debug(f" portfolio {portfolio}")
+                    log.debug(f" portfolio {portfolio_all}")
                     if (
                         ticker_channel in message_channel
                         and market_condition

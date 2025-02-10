@@ -106,6 +106,7 @@ async def cancelling_orders(
             receive_order_channel,
             ticker_channel,
             portfolio_channel,
+            my_trades_channel,
         ]
 
         # subscribe to channels
