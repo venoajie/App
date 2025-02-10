@@ -115,8 +115,6 @@ async def update_cached_ticker(
 
         ticker_all = combining_ticker_data(instruments_name)
 
-        server_time = 0
-
         while True:
 
             try:

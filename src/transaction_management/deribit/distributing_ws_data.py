@@ -58,7 +58,7 @@ async def caching_distributing_data(
 
         chart_channel: str = redis_channels["chart_update"]
         receive_order_channel: str = redis_channels["receive_order"]
-        ticker_data_ticker_cached_channelchannel: str = redis_channels["ticker_update_data"]
+        ticker_data_channel: str = redis_channels["ticker_update_data"]
         portfolio_channel: str = redis_channels["portfolio"]
         my_trades_channel: str = redis_channels["my_trades"]
 
