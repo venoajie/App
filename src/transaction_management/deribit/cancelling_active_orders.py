@@ -215,12 +215,15 @@ async def cancelling_orders(
 
                         if sub_account:
 
-                            query_trades = (
-                                f"SELECT * FROM  v_{currency_lower}_trading_active"
-                            )
-
                             my_trades_currency_all_transactions: list = (
-                                await executing_query_with_return(query_trades)
+                                []
+                                if not my_trades_active_all
+                                else [
+                                    o
+                                    for o in my_trades_active_all
+                                    if currency_upper in o["instrument_name"]
+                                    
+                                ]
                             )
 
                             my_trades_currency_all: list = (

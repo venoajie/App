@@ -144,8 +144,6 @@ async def future_spreads(
                             query_trades
                         )
 
-                        log.debug(my_trades_active_all)
-
                     if receive_order_channel in message_channel:
 
                         cached_orders = await querying_data(
@@ -166,6 +164,8 @@ async def future_spreads(
 
                         currency_lower: str = currency
 
+                        instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
+                        
                         # get portfolio data
                         portfolio = [
                             o
@@ -197,12 +197,15 @@ async def future_spreads(
 
                         if sub_account:
 
-                            query_trades = (
-                                f"SELECT * FROM  v_{currency_lower}_trading_active"
-                            )
-
                             my_trades_currency_all_transactions: list = (
-                                await executing_query_with_return(query_trades)
+                                []
+                                if not my_trades_active_all
+                                else [
+                                    o
+                                    for o in my_trades_active_all
+                                    if currency_upper in o["instrument_name"]
+                                    
+                                ]
                             )
 
                             my_trades_currency_all: list = (
