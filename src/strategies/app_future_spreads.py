@@ -189,6 +189,7 @@ async def future_spreads(
 
                         # sub_account_orders = sub_account["open_orders"]
 
+                        log.debug(market_condition_all)
                         market_condition = [
                             o for o in market_condition_all if instrument_name_perpetual in o["instrument_name"]
                         ]
