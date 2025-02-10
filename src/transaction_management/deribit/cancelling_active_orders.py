@@ -96,7 +96,7 @@ async def cancelling_orders(
         # get redis channels
         receive_order_channel: str = redis_channels["receive_order"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
-        ticker_channel: str = redis_channels["ticker_update"]
+        ticker_cached_channel: str = redis_channels["ticker_update_cached"]
         portfolio_channel: str = redis_channels["portfolio"]
         my_trades_channel: str = redis_channels["my_trades"]
 
@@ -104,7 +104,7 @@ async def cancelling_orders(
         channels = [
             market_analytics_channel,
             receive_order_channel,
-            ticker_channel,
+            ticker_cached_channel,
             portfolio_channel,
             my_trades_channel,
         ]
@@ -112,13 +112,9 @@ async def cancelling_orders(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        server_time = 0
-
         cached_orders = []
 
-        currency = None
-
-        cached_ticker_all = None
+        cached_ticker_all = []
 
         not_cancel = True
 
@@ -159,8 +155,6 @@ async def cancelling_orders(
                             query_trades
                         )
 
-                        log.debug(my_trades_active_all)
-
                     if receive_order_channel in message_channel:
 
                         cached_orders = await querying_data(
@@ -172,16 +166,12 @@ async def cancelling_orders(
                         server_time = message_byte_data["server_time"]
 
                     if (
-                        ticker_channel in message_channel
+                        ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all
                     ):
 
-                        cached_ticker_all = await querying_data(
-                            client_redis,
-                            ticker_channel,
-                            ticker_keys,
-                        )
+                        cached_ticker_all = message_byte_data["data"]
 
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]

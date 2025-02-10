@@ -38,7 +38,8 @@ receive_order = "account.user_changes.order"
 my_trades = "account.user_changes.trades"
 portfolio = "account.portfolio"
 sending_order = "app.sending_order"
-ticker_update = "market.ticker"
+ticker_update_data = "market.ticker.data"
+ticker_update_cached = "market.ticker.cached"
 market_analytics_update = "market.analytics"
 
 

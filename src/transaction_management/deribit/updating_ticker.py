@@ -4,7 +4,7 @@ import asyncio
 
 import orjson
 
-from db_management.redis_client import saving_result
+from db_management.redis_client import saving_result,saving_and_publishing_result
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_tickers
 from transaction_management.deribit.allocating_ohlc import inserting_open_interest
@@ -101,18 +101,21 @@ async def update_cached_ticker(
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        ticker_channel: str = redis_channels["ticker_update"]
+        ticker_data_channel: str = redis_channels["ticker_update_data"]
+        ticker_cached_channel: str = redis_channels["ticker_update_cached"]
 
         redis_keys: dict = config_app["redis_keys"][0]
         ticker_keys: str = redis_keys["ticker"]
 
         # prepare channels placeholders
-        channels = [ticker_channel]
+        channels = [ticker_data_channel]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
         ticker_all = combining_ticker_data(instruments_name)
+
+        server_time = 0
 
         while True:
 
@@ -126,7 +129,7 @@ async def update_cached_ticker(
 
                     message_channel = message_byte["channel"]
 
-                    if ticker_channel in message_channel:
+                    if ticker_data_channel in message_channel:
 
                         data = message_byte_data["data"]
 
@@ -158,12 +161,24 @@ async def update_cached_ticker(
                                         if instrument_name in o["instrument_name"]
                                     ][0]["stats"][item] = data_orders_stat[item]
 
-                        await saving_result(
+
+                        pub_message = dict(
+                        data=ticker_all,
+                        server_time=message_byte_data["server_time"],
+                        instrument_name=instrument_name,
+                        currency_upper=message_byte_data["currency_upper"],
+                        currency=currency,
+                    )
+                        
+                        
+                        await saving_and_publishing_result(
                             client_redis,
-                            ticker_channel,
+                            ticker_cached_channel,
                             ticker_keys,
                             ticker_all,
+                            pub_message,
                         )
+
 
                         if "PERPETUAL" in instrument_name:
 
