@@ -125,7 +125,7 @@ async def hedging_spot(
 
         not_cancel = True
 
-        market_condition = []
+        market_condition_all = []
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
@@ -171,12 +171,9 @@ async def hedging_spot(
 
                         server_time = message_byte_data["server_time"]
 
-                    log.error(f" ticker_channel in message_channel {ticker_channel in message_channel}")
-                    log.warning(f" market_condition {market_condition}")
-                    log.debug(f" portfolio {portfolio_all}")
                     if (
                         ticker_channel in message_channel
-                        and market_condition
+                        and market_condition_all
                         and portfolio
                     ):
 
