@@ -209,7 +209,7 @@ async def hedging_spot(
                         # sub_account_orders = sub_account["open_orders"]
 
                         market_condition = [
-                            o for o in market_condition_all if o["instrument_name"]
+                            o for o in market_condition_all if instrument_name_perpetual in o["instrument_name"]
                         ]
 
                         if sub_account:
