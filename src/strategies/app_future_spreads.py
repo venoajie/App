@@ -32,6 +32,7 @@ from utilities.string_modification import (
 )
 from utilities.system_tools import (
     parse_error_message,
+    parsing_sqlite_json_output,
     provide_path_for_file,
 )
 
@@ -124,11 +125,13 @@ async def future_spreads(
 
                     if market_analytics_channel in message_channel:
 
-                        market_condition_all = await querying_data(
+                        market_condition_original = await querying_data(
                             client_redis,
                             market_analytics_channel,
                             market_condition_keys,
                         )
+
+                        market_condition_all = parsing_sqlite_json_output(market_condition_original)
 
                     if portfolio_channel in message_channel:
 

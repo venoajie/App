@@ -23,6 +23,7 @@ from db_management.redis_client import querying_data
 from utilities.pickling import read_data, replace_data
 
 from utilities.string_modification import (
+    parsing_sqlite_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -139,11 +140,13 @@ async def cancelling_orders(
 
                     if market_analytics_channel in message_channel:
 
-                        market_condition_all = await querying_data(
+                        market_condition_original = await querying_data(
                             client_redis,
                             market_analytics_channel,
                             market_condition_keys,
                         )
+                        
+                        market_condition_all = parsing_sqlite_json_output(market_condition_original)
 
                     if portfolio_channel in message_channel:
 

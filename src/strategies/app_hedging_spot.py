@@ -25,6 +25,7 @@ from utilities.number_modification import get_closest_value
 from utilities.pickling import read_data
 from utilities.string_modification import (
     parsing_label,
+    parsing_sqlite_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -141,11 +142,13 @@ async def hedging_spot(
 
                     if market_analytics_channel in message_channel:
 
-                        market_condition_all = await querying_data(
+                        market_condition_original = await querying_data(
                             client_redis,
                             market_analytics_channel,
                             market_condition_keys,
                         )
+
+                        market_condition_all = parsing_sqlite_json_output(market_condition_original)
 
                     if portfolio_channel in message_channel:
 
