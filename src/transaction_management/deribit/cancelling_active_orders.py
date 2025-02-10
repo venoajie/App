@@ -23,7 +23,7 @@ from db_management.redis_client import querying_data
 from utilities.pickling import read_data, replace_data
 
 from utilities.string_modification import (
-    parsing_sqlite_json_output,
+    parsing_redis_market_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -147,7 +147,7 @@ async def cancelling_orders(
                         )
                         log.debug(market_condition_original)
                         
-                        market_condition_all = parsing_sqlite_json_output(market_condition_original)
+                        market_condition_all = parsing_redis_market_json_output(market_condition_original)
                         
                         log.debug(market_condition_all)
 

@@ -27,7 +27,7 @@ from transaction_management.deribit.get_instrument_summary import (
 from utilities.pickling import read_data
 
 from utilities.string_modification import (
-    parsing_sqlite_json_output,
+    parsing_redis_market_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -131,7 +131,7 @@ async def future_spreads(
                             market_condition_keys,
                         )
 
-                        market_condition_all = parsing_sqlite_json_output(market_condition_original)
+                        market_condition_all = parsing_redis_market_json_output(market_condition_original)
                         log.debug(market_condition_all)
 
                     if portfolio_channel in message_channel:
