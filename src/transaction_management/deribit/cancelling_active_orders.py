@@ -40,7 +40,7 @@ async def cancelling_orders(
     config_app: list,
     redis_channels: list,
     redis_keys: list,
-    strategy_attributes,
+    strategy_attributes: list,
 ) -> None:
     """ """
 

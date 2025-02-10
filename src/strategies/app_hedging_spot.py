@@ -4,7 +4,6 @@
 import asyncio
 
 # installed
-import numpy as np
 import uvloop
 import orjson
 from loguru import logger as log
@@ -12,7 +11,7 @@ from loguru import logger as log
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from data_cleaning.reconciling_db import is_size_sub_account_and_my_trades_reconciled
-from db_management.redis_client import saving_and_publishing_result
+from db_management.redis_client import querying_data, saving_and_publishing_result
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.hedging.hedging_spot import (
@@ -34,20 +33,7 @@ from utilities.system_tools import (
     provide_path_for_file,
 )
 
-from market_understanding.price_action.candles_analysis import (
-    combining_candles_data,
-    get_market_condition,
-)
-from utilities.caching import (
-    combining_ticker_data as cached_ticker,
-    combining_order_data,
-    update_cached_orders,
-    update_cached_ticker,
-)
-
 from utilities.string_modification import (
-    convert_to_bytes,
-    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -55,8 +41,13 @@ from utilities.string_modification import (
 
 async def hedging_spot(
     private_data: object,
+    modify_order_and_db: object,
+    currencies: list,
     client_redis: object,
     config_app: list,
+    redis_channels: list,
+    redis_keys: list,
+    strategy_attributes: list,
 ) -> None:
     """ """
 
@@ -66,14 +57,6 @@ async def hedging_spot(
 
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
-
-        # get tradable strategies
-        tradable_config_app = config_app["tradable"]
-
-        # get tradable currencies
-        currencies = ([o["spot"] for o in tradable_config_app])[0]
-
-        strategy_attributes = config_app["strategies"]
 
         strategy_attributes_active = [
             o for o in strategy_attributes if o["is_active"] == True
@@ -109,24 +92,24 @@ async def hedging_spot(
 
         instrument_attributes_futures_all = futures_instruments["active_futures"]
 
-        redis_keys: dict = config_app["redis_keys"][0]
-        market_condition_keys: str = redis_keys["market_condition"]
-        order_keys: str = redis_keys["orders"]
         ticker_keys: str = redis_keys["ticker"]
+        orders_keys: str = redis_keys["orders"]
+        market_condition_keys: str = redis_keys["market_condition"]
 
         # get redis channels
-        redis_channels: dict = config_app["redis_channels"][0]
-        market_analytics_channel: str = redis_channels["market_analytics_update"]
         receive_order_channel: str = redis_channels["receive_order"]
-        sending_order_channel: str = redis_channels["sending_order"]
+        market_analytics_channel: str = redis_channels["market_analytics_update"]
         ticker_channel: str = redis_channels["ticker_update"]
+        portfolio_channel: str = redis_channels["portfolio"]
+        my_trades_channel: str = redis_channels["my_trades"]
+        sending_order_channel: str = redis_channels["sending_order"]
 
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
             receive_order_channel,
-            sending_order_channel,
             ticker_channel,
+            portfolio_channel,
         ]
 
         # subscribe to channels
@@ -140,11 +123,11 @@ async def hedging_spot(
 
         cached_ticker_all = None
 
-        chart_trade = False
-
         not_cancel = True
 
-        market_condition = None
+        market_condition = []
+
+        query_trades = f"SELECT * FROM  v_trading_all_active"
 
         while not_cancel:
 
@@ -160,56 +143,39 @@ async def hedging_spot(
 
                     if market_analytics_channel in message_channel:
 
-                        market_condition = orjson.loads(
-                            await client_redis.hget(
-                                market_condition_keys,
-                                market_analytics_channel,
-                            )
+                        market_condition_all = await querying_data(
+                            client_redis,
+                            market_analytics_channel,
+                            market_condition_keys,
                         )
+
+                    if portfolio_channel in message_channel:
+
+                        portfolio_all = message_byte_data["cached_portfolio"]
+
+                    if my_trades_channel in message_channel:
+
+                        my_trades_active_all = await executing_query_with_return(
+                            query_trades
+                        )
+
+                        log.debug(my_trades_active_all)
 
                     if receive_order_channel in message_channel:
 
-                        cached_orders = orjson.loads(
-                            await client_redis.hget(
-                                order_keys,
-                                receive_order_channel,
-                            )
+                        cached_orders = await querying_data(
+                            client_redis,
+                            receive_order_channel,
+                            orders_keys,
                         )
 
                         server_time = message_byte_data["server_time"]
 
-                    if ticker_channel in message_channel:
-                        cached_ticker_all = orjson.loads(
-                            await client_redis.hget(
-                                ticker_keys,
-                                ticker_channel,
-                            )
-                        )
-
-                        server_time = message_byte_data["server_time"]
-                        currency = message_byte_data["currency"]
-                        currency_upper = message_byte_data["currency_upper"]
-
-                    currency: str = extract_currency_from_text(message_channel)
-
-                    currency_upper = currency.upper()
-
-                    if "user.changes.any" in message_channel:
-
-                        log.warning(f"user.changes {message_data}")
-
-                        await update_cached_orders(
-                            cached_orders,
-                            message_data,
-                        )
-
-                    if b"ticker" in (message_byte["channel"]):
-
-                        cached_ticker_all = message["cached_ticker_all"]
-
-                        server_time = message["server_time"]
-
-                        currency: str = message["currency"]
+                    if (
+                        ticker_channel in message_channel
+                        and market_condition
+                        and portfolio
+                    ):
 
                         currency_upper: str = currency.upper()
 
@@ -221,7 +187,11 @@ async def hedging_spot(
                         if server_time != 0 and cached_ticker_all:
 
                             # get portfolio data
-                            portfolio = reading_from_pkl_data("portfolio", currency)[0]
+                            portfolio = [
+                                o
+                                for o in portfolio_all
+                                if currency_upper in o["currency"]
+                            ][0]
 
                             equity: float = portfolio["equity"]
 
@@ -241,7 +211,9 @@ async def hedging_spot(
 
                             # sub_account_orders = sub_account["open_orders"]
 
-                            market_condition = message["market_condition"]
+                            market_condition = [
+                                o for o in market_condition_all if o["instrument_name"]
+                            ]
 
                             if sub_account:
 

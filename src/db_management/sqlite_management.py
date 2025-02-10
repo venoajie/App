@@ -12,7 +12,6 @@ from messaging.telegram_bot import telegram_bot_sendtext as telegram_bot
 from utilities.string_modification import extract_currency_from_text
 
 
-
 def catch_error(error, idle: int = None) -> list:
     """ """
     from utilities import system_tools
@@ -610,8 +609,6 @@ async def publishing_db_update(table_name: str) -> None:
 
         my_trades_channel: str = redis_channels["my_trades"]
 
-        log.info(my_trades_currency_all_transactions)
-
         async with client_redis.pipeline() as pipe:
 
             await publishing_result(
@@ -619,7 +616,6 @@ async def publishing_db_update(table_name: str) -> None:
                 my_trades_channel,
                 my_trades_currency_all_transactions,
             )
-
 
 
 async def back_up_db_sqlite():
@@ -635,4 +631,3 @@ async def back_up_db_sqlite():
         src.backup(dst)
     dst.close()
     src.close()
-
