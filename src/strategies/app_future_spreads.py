@@ -27,12 +27,12 @@ from transaction_management.deribit.get_instrument_summary import (
 from utilities.pickling import read_data
 
 from utilities.string_modification import (
+    parsing_sqlite_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
 from utilities.system_tools import (
     parse_error_message,
-    parsing_sqlite_json_output,
     provide_path_for_file,
 )
 
