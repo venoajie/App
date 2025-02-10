@@ -69,7 +69,10 @@ async def db_ops(db_name: str = "databases/trading.sqlite3"):
         await conn.close()
 
 
-async def insert_tables(table_name: str, params: list | dict | str):
+async def insert_tables(
+    table_name: str,
+    params: list | dict | str,
+):
     """
     alternative insert format (safer):
     https://stackoverflow.com/questions/56910918/saving-json-data-to-sqlite-python
@@ -105,6 +108,10 @@ async def insert_tables(table_name: str, params: list | dict | str):
         await telegram_bot_sendtext(
             f"sqlite operation insert_tables, failed_order  {table_name} {error} "
         )
+
+    finally:
+
+        await publishing_db_update(table_name)
 
 
 async def querying_table(
@@ -179,21 +186,30 @@ async def deleting_row(
     """ """
 
     query_table = f"DELETE  FROM {table} WHERE  {filter} {operator}?"
-    log.debug(f"deleting_row {query_table}")
+    query_table_filter_none = f"DELETE FROM {table}"
 
     filter_val = (f"{filter_value}",)
+
+    if "LIKE" in operator:
+        filter_val = (f"""' %{filter_value}%' """,)
 
     try:
         async with aiosqlite.connect(database, isolation_level=None) as db:
 
             await db.execute("pragma journal_mode=wal;")
 
-            await db.execute(query_table, filter_val)
+            if filter == None:
+                await db.execute(query_table_filter_none)
+            else:
+                await db.execute(query_table, filter_val)
 
     except Exception as error:
-        log.critical(f"deleting_row {error}")
-        await telegram_bot_sendtext("sqlite operation", "failed_order")
+        log.critical(f"deleting_row {query_table} {error}")
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
+
+    finally:
+
+        await publishing_db_update(table)
 
 
 async def querying_duplicated_transactions(
@@ -214,8 +230,6 @@ async def querying_duplicated_transactions(
 
             async with db as cur:
 
-                #               await cur.execute('pragma journal_mode=wal;')
-                #
                 fetchall = await cur.fetchall()
 
                 head = map(lambda attr: attr[0], cur.description)
@@ -230,39 +244,6 @@ async def querying_duplicated_transactions(
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
     return 0 if (combine_result == [] or combine_result == None) else (combine_result)
-
-
-async def deleting_row(
-    table: str = "mytrades",
-    database: str = "databases/trading.sqlite3",
-    filter: str = None,
-    operator=None,
-    filter_value=None,
-) -> list:
-    """ """
-
-    query_table = f"DELETE  FROM {table} WHERE  {filter} {operator}?"
-    query_table_filter_none = f"DELETE FROM {table}"
-
-    filter_val = (f"{filter_value}",)
-
-    if "LIKE" in operator:
-        filter_val = (f"""' %{filter_value}%' """,)
-
-    try:
-        async with aiosqlite.connect(database, isolation_level=None) as db:
-
-            await db.execute("pragma journal_mode=wal;")
-
-            if filter == None:
-                await db.execute(query_table_filter_none)
-            else:
-                await db.execute(query_table, filter_val)
-
-    except Exception as error:
-        log.critical(f"deleting_row {query_table} {error}")
-        await telegram_bot_sendtext("sqlite operation", "failed_order")
-        await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
 
 async def add_additional_column(
@@ -295,21 +276,11 @@ async def add_additional_column(
         return None
 
 
-def querying_additional_params(table: str = "supporting_items_json") -> str:
-
-    return f"""SELECT JSON_EXTRACT (data, '$.label') AS label, JSON_EXTRACT (data, '$.take_profit')  AS take_profit FROM {table}"""
-
-
 def querying_last_open_interest_tick(
     last_tick: int, table: str = "ohlc1_eth_perp_json"
 ) -> str:
 
     return f"SELECT open_interest FROM {table} WHERE tick is {last_tick}"
-
-
-def querying_hedged_strategy(table: str = "my_trades_all_json") -> str:
-
-    return f"SELECT * from {table} where not (label LIKE '%value1%' or label LIKE '%value2%' or label LIKE'%value3%');"
 
 
 async def update_status_data(
@@ -361,6 +332,10 @@ async def update_status_data(
         await telegram_bot_sendtext("sqlite operation insert_tables", "failed_order")
         # await telegram_bot_sendtext(f"sqlite operation","failed_order")
 
+    finally:
+
+        await publishing_db_update(table)
+
 
 def querying_open_interest(
     price: float = "close",
@@ -400,18 +375,6 @@ def querying_arithmetic_operator(
 ) -> float:
 
     return f"SELECT {operator} ({item}) FROM {table}"
-
-
-def querying_label_and_size(table) -> str:
-    tab = f"SELECT instrument_name, label, amount_dir as amount, price, timestamp, order_id FROM {table}"
-
-    if "trade" in table:
-        tab = f"SELECT instrument_name, label, amount_dir as amount, price, has_closed_label, timestamp, order_id, trade_id FROM {table}"
-
-        if "closed" in table:
-            tab = f"SELECT instrument_name, label, amount_dir as amount, order_id, trade_id FROM {table}"
-
-    return tab
 
 
 # Generate SQL insert commands from data
@@ -530,40 +493,6 @@ def querying_based_on_currency_or_instrument_and_strategy(
     return tab
 
 
-async def executing_query_based_on_currency_or_instrument_and_strategy(
-    table: str,
-    currency_or_instrument,
-    strategy: str = "all",
-    status: str = "all",
-    columns: list = "standard",
-    limit: int = 0,
-    order: str = "id",
-) -> dict:
-    """
-    Provide execution template for querying summary of trading results from sqlite.
-    Consist of transaction label, size, and price only.
-    """
-
-    # get query
-    query = querying_based_on_currency_or_instrument_and_strategy(
-        table, currency_or_instrument, strategy, status, columns, limit, order
-    )
-
-    # execute query
-    result = await executing_query_with_return(query)
-
-    # log.critical (f"table {table} filter {filter}")
-    # log.info (f"result {result}")
-
-    # define none from queries result. If the result=None, return []
-    NONE_DATA: None = [0, None, []]
-
-    # log.error (f"table {query}")
-    # log.warning (f"result {result}")
-
-    return [] if not result else (result)
-
-
 async def executing_query_with_return(
     query_table,
     filter: str = None,
@@ -612,33 +541,49 @@ async def executing_query_with_return(
     return [] if not combine_result else (combine_result)
 
 
-def query_pd(table_name: str, field: str = None):
-    """
-    # fetch tickers from sqlite3 by pandas and transform them to dict
-    # https://medium.com/@sayahfares19/making-pandas-fly-6-pandas-best-practices-to-save-memory-energy-8d09e9d52488
-    # https://pythonspeed.com/articles/pandas-sql-chunking/
-    """
-    import pandas as pd
+async def publishing_db_update(table_name: str) -> None:
+    """ """
 
-    # Read sqlite query results into a pandas DataFrame
-    con = sqlite3.connect("databases/trading.sqlite3")
-    query_table = f"SELECT *  FROM {table_name}"
+    if "trade" in table_name or "order" in table_name:
 
-    if field != None:
-        query_table = f"SELECT {field}  FROM {table_name}"
+        import redis.asyncio as aioredis
 
-    # fetch all
-    result = pd.read_sql_query(query_table, con)
+        from utilities.system_tools import get_config_tomli
 
-    # transform dataframe to dict
-    result = result.to_dict("records")
+        from db_management.redis_client import publishing_result
 
-    result_cleaned = [o["data"] for o in result]
+        pool = aioredis.ConnectionPool.from_url(
+            "redis://localhost", port=6379, db=0, protocol=3, decode_responses=True
+        )
 
-    # close connection sqlite
-    con.close()
+        client_redis: object = aioredis.Redis.from_pool(pool)
 
-    return result_cleaned
+        # registering strategy config file
+        file_toml = "config_strategies.toml"
+
+        # parsing config file
+        config_app = get_config_tomli(file_toml)
+
+        query_trades = f"SELECT * FROM  v_trading_all_active"
+
+        my_trades_currency_all_transactions: list = await executing_query_with_return(
+            query_trades
+        )
+
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+
+        my_trades_channel: str = redis_channels["my_trades"]
+
+        log.info(my_trades_currency_all_transactions)
+
+        async with client_redis.pipeline() as pipe:
+
+            await publishing_result(
+                pipe,
+                my_trades_channel,
+                my_trades_currency_all_transactions,
+            )
 
 
 async def back_up_db_sqlite():
@@ -649,6 +594,7 @@ async def back_up_db_sqlite():
 
     src = sqlite3.connect("databases/trading.sqlite3")
     dst = sqlite3.connect(f"databases/trdg-{TIMESTAMP}.bak")
+
     with dst:
         src.backup(dst)
     dst.close()

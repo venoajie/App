@@ -26,7 +26,7 @@ def ohlc_to_candlestick(conversion_array):
 
     candlestick_data = [0, 0, 0, 0, 0, 0]
 
-    #log.info(f"conversion_array {conversion_array}")
+    # log.info(f"conversion_array {conversion_array}")
 
     open = conversion_array[0]
     high = conversion_array[1]
@@ -35,9 +35,9 @@ def ohlc_to_candlestick(conversion_array):
 
     body_size = abs(close - open)
     height = abs(high - low)
-    
-    #log.debug(f"open {open} high {high} low {low} close {close}")
-    #log.warning(f"body_size {body_size} height {height} close > open {close > open}")
+
+    # log.debug(f"open {open} high {high} low {low} close {close}")
+    # log.warning(f"body_size {body_size} height {height} close > open {close > open}")
 
     if close > open:
         candle_type = 1
@@ -62,7 +62,7 @@ def ohlc_to_candlestick(conversion_array):
     candlestick_data[5] = (
         0 if body_size == 0 else (round(round(body_size / height, 5), 2) > 70 / 100) * 1
     )
-    #log.info(f"candlestick_data {candlestick_data}")
+    # log.info(f"candlestick_data {candlestick_data}")
 
     return candlestick_data
 
@@ -98,32 +98,31 @@ def my_generator_candle(
 
     # generating placeholder for random value
     arr = np.empty((1, lookback, parameters), int)
-    
-    #log.warning (f"data  {data}")
-    #log.info (f"arr  {arr} ")
-    #log.info (f"parameters  {parameters} lookback  {lookback}")
+
+    # log.warning (f"data  {data}")
+    # log.info (f"arr  {arr} ")
+    # log.info (f"parameters  {parameters} lookback  {lookback}")
 
     for a in range(len(data) - lookback):
 
-        #log.debug (f"data my_generator_candle {data} lookback {lookback}")
+        # log.debug (f"data my_generator_candle {data} lookback {lookback}")
 
         temp_list = []
         for candle in data[first_row : first_row + lookback]:
 
             converted_data = ohlc_to_candlestick(candle)
-            #log.info (f"converted_data  {converted_data} candle {candle}")
+            # log.info (f"converted_data  {converted_data} candle {candle}")
             temp_list.append(converted_data)
-            #log.info (f"temp_list  {temp_list}")
-        
-        
-        #log.error (f"temp_list  {temp_list}")
+            # log.info (f"temp_list  {temp_list}")
+
+        # log.error (f"temp_list  {temp_list}")
         temp_list2 = np.asarray(temp_list)
         templist3 = [temp_list2]
         templist4 = np.asarray(templist3, dtype="f4")
-        #log.info (f"templist4  {templist4}")
-        #log.warning (f"arr  1 {arr}")
+        # log.info (f"templist4  {templist4}")
+        # log.warning (f"arr  1 {arr}")
         arr = np.append(arr, templist4, axis=0)
-        #log.warning (f"arr  2 {arr}")
+        # log.warning (f"arr  2 {arr}")
         first_row = first_row + 1
 
     return arr
@@ -168,8 +167,8 @@ def candles_analysis(
     avg_body_length = np.average(body_length)
     body_length_exceed_average = body_length > avg_body_length
     # print(candles_arrays)
-    #log.warning (f"candles_arrays {candles_arrays}")
-    #log.error (f"candle_type {candle_type}")
+    # log.warning (f"candles_arrays {candles_arrays}")
+    # log.error (f"candle_type {candle_type}")
     # log.warning (f"wicks_up {wicks_up}")
     # log.warning (f"wicks_down {wicks_down}")
     # log.warning (f"body_size {body_size}")
@@ -269,8 +268,8 @@ def translate_candles_data_to_market_condition(
 ) -> dict:
     """ """
     try:
-        
-        #log.info(f"translate_candles_data_to_market_condition {candles_data_instrument}")
+
+        # log.info(f"translate_candles_data_to_market_condition {candles_data_instrument}")
 
         candle_60 = [
             o["candles_analysis"]
@@ -374,7 +373,7 @@ async def get_market_condition(
 
         # prepare channels placeholders
         channels = [
-#            market_analytics_channel,
+            #            market_analytics_channel,
             chart_low_high_tick_channel,
         ]
 
@@ -392,7 +391,7 @@ async def get_market_condition(
             dim_sequence,
         )
 
-        #log.debug(f"candles_data {candles_data}")
+        # log.debug(f"candles_data {candles_data}")
 
         market_analytics_data = []
 
@@ -413,27 +412,29 @@ async def get_market_condition(
 
                             instrument_name = message_byte_data["instrument_name"]
 
-                            if instrument_name in message_byte_data["instrument_name"]:                                
-                                                    
+                            if instrument_name in message_byte_data["instrument_name"]:
+
                                 resolution = message_byte_data["resolution"]
 
                                 currency = message_byte_data["currency"]
 
                                 if resolution != 1:
 
-                                    candles_per_resolution = await get_and_clean_up_candles_data(
-                                        currency,
-                                        resolution,
-                                        qty_candles,
+                                    candles_per_resolution = (
+                                        await get_and_clean_up_candles_data(
+                                            currency,
+                                            resolution,
+                                            qty_candles,
+                                        )
                                     )
 
                                     candles_data_instrument = candles_analysis(
                                         np,
                                         candles_per_resolution,
                                         dim_sequence,
-                                        )
-                                    
-                                    #log.info(f"candles_data_instrument {candles_data_instrument}")
+                                    )
+
+                                    # log.info(f"candles_data_instrument {candles_data_instrument}")
 
                                     candles_data_instrument = [
                                         o["result"]
@@ -441,9 +442,11 @@ async def get_market_condition(
                                         if instrument_name in o["instrument_name"]
                                     ][0]
 
-                                    pub_message = translate_candles_data_to_market_condition(
-                                        np,
-                                        candles_data_instrument,
+                                    pub_message = (
+                                        translate_candles_data_to_market_condition(
+                                            np,
+                                            candles_data_instrument,
+                                        )
                                     )
 
                                     market_analytics_data = [
@@ -452,7 +455,9 @@ async def get_market_condition(
                                         if instrument_name not in o["instrument_name"]
                                     ]
 
-                                    pub_message.update({"instrument_name": instrument_name})
+                                    pub_message.update(
+                                        {"instrument_name": instrument_name}
+                                    )
 
                                     market_analytics_data.append(pub_message)
 
@@ -463,8 +468,8 @@ async def get_market_condition(
                                         market_analytics_data,
                                         market_analytics_data,
                                     )
-                                    
-                                    #log.debug(f"market_analytics_data {market_analytics_data}")
+
+                                    # log.debug(f"market_analytics_data {market_analytics_data}")
 
                         else:
 
@@ -480,9 +485,11 @@ async def get_market_condition(
                                     if instrument_name in o["instrument_name"]
                                 ][0]
 
-                                pub_message = translate_candles_data_to_market_condition(
-                                    np,
-                                    candles_data_instrument,
+                                pub_message = (
+                                    translate_candles_data_to_market_condition(
+                                        np,
+                                        candles_data_instrument,
+                                    )
                                 )
 
                                 pub_message.update({"instrument_name": instrument_name})

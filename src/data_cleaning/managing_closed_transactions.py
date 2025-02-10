@@ -340,13 +340,22 @@ async def closing_orphan_order(
 
 
 async def updating_status_closed_transactions(
-    closed_transaction: dict, where_filter: str, trade_table: str
+    closed_transaction: dict,
+    where_filter: str,
+    trade_table: str,
 ) -> None:
     """ """
     trade_id = closed_transaction[where_filter]
     # trade_tabel = f"my_trades_all_{currency.lower()}.json"
 
-    await update_status_data(trade_table, "is_open", where_filter, trade_id, 0, "=")
+    await update_status_data(
+        trade_table,
+        "is_open",
+        where_filter,
+        trade_id,
+        0,
+        "=",
+    )
 
 
 async def closing_one_to_one(
@@ -359,7 +368,9 @@ async def closing_one_to_one(
     for transaction in transaction_closed_under_the_same_label_int:
 
         await updating_status_closed_transactions(
-            transaction, where_filter, trade_table
+            transaction,
+            where_filter,
+            trade_table,
         )
 
 
@@ -447,7 +458,9 @@ async def closing_one_to_many(
 
 
 async def clean_up_closed_transactions(
-    currency: str, trade_table: str, transaction_all: list = None
+    currency: str,
+    trade_table: str,
+    transaction_all: list = None,
 ) -> None:
     """
     closed transactions: buy and sell in the same label id = 0. When flagged:

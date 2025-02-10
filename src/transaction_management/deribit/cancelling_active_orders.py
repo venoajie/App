@@ -100,7 +100,6 @@ async def cancelling_orders(
         portfolio_channel: str = redis_channels["portfolio"]
         my_trades_channel: str = redis_channels["my_trades"]
 
-
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
@@ -123,7 +122,8 @@ async def cancelling_orders(
         not_cancel = True
 
         market_condition = []
-        
+
+        query_trades = f"SELECT * FROM  v_trading_all_active"
         while not_cancel:
 
             try:
@@ -145,17 +145,19 @@ async def cancelling_orders(
                             market_analytics_channel,
                             market_condition_keys,
                         )
-                        
+
                     if portfolio_channel in message_channel:
 
-                        portfolio_all = (message_byte_data["cached_portfolio"])
-                        
+                        portfolio_all = message_byte_data["cached_portfolio"]
+
                     if my_trades_channel in message_channel:
 
-                        my_trades_active_all = (message_byte_data["cached_portfolio"])
-                        
+                        my_trades_active_all = await executing_query_with_return(
+                            query_trades
+                        )
+
                         log.debug(my_trades_active_all)
-                        
+
                     if receive_order_channel in message_channel:
 
                         cached_orders = await querying_data(
@@ -166,16 +168,18 @@ async def cancelling_orders(
 
                         server_time = message_byte_data["server_time"]
 
-                    if (ticker_channel in message_channel 
-                        and market_condition 
-                        and portfolio):
+                    if (
+                        ticker_channel in message_channel
+                        and market_condition
+                        and portfolio
+                    ):
 
                         cached_ticker_all = await querying_data(
                             client_redis,
                             ticker_channel,
                             ticker_keys,
                         )
-                        
+
                         server_time = message_byte_data["server_time"]
                         currency = message_byte_data["currency"]
                         currency_upper = message_byte_data["currency_upper"]
@@ -187,8 +191,10 @@ async def cancelling_orders(
                         market_condition = [
                             o for o in market_condition_all if o["instrument_name"]
                         ]
-                        
-                        portfolio = [o for o in portfolio_all if currency_upper in o["currency"]][0]
+
+                        portfolio = [
+                            o for o in portfolio_all if currency_upper in o["currency"]
+                        ][0]
 
                         equity: float = portfolio["equity"]
 

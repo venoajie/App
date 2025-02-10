@@ -32,7 +32,7 @@ from utilities.string_modification import (
     remove_redundant_elements,
 )
 from utilities.system_tools import (
-    async_raise_error_message,
+    parse_error_message,
     provide_path_for_file,
 )
 
@@ -72,7 +72,10 @@ async def update_instruments_per_currency(currency):
 
     my_path_instruments = provide_path_for_file("instruments", currency)
 
-    replace_data(my_path_instruments, instruments)
+    replace_data(
+        my_path_instruments,
+        instruments,
+    )
 
 
 async def update_instruments(idle_time: int):
@@ -96,7 +99,13 @@ async def update_instruments(idle_time: int):
             await asyncio.sleep(idle_time)
 
     except Exception as error:
-        await async_raise_error_message(error)
+
+        await telegram_bot_sendtext(
+            f"app data cleaning -reconciling size - {error}",
+            "general_error",
+        )
+
+        parse_error_message(error)
 
 
 async def reconciling_size(
@@ -316,20 +325,25 @@ async def reconciling_size(
                                 )
 
                                 await updating_delivered_instruments(
-                                    archive_db_table, my_trade_instrument
+                                    archive_db_table,
+                                    my_trade_instrument,
                                 )
 
                                 break
 
                     await clean_up_closed_transactions(
-                        currency, archive_db_table, my_trades_currency_active
+                        currency,
+                        archive_db_table,
+                        my_trades_currency_active,
                     )
 
             await asyncio.sleep(idle_time)
 
     except Exception as error:
-        await async_raise_error_message(error)
+
         await telegram_bot_sendtext(
-            error,
+            f"app data cleaning -reconciling size - {error}",
             "general_error",
         )
+
+        parse_error_message(error)

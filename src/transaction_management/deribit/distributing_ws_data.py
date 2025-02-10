@@ -62,17 +62,14 @@ async def caching_distributing_data(
         portfolio_channel: str = redis_channels["portfolio"]
         my_trades_channel: str = redis_channels["my_trades"]
 
-
         order_keys: str = redis_keys["orders"]
         portfolio_keys: str = redis_keys["portfolio"]
 
         cached_orders: list = await combining_order_data(private_data, currencies)
 
         server_time = 0
-        
+
         portfolio = []
-        
-        
 
         while True:
 
@@ -108,27 +105,28 @@ async def caching_distributing_data(
                             cached_orders,
                             pub_message,
                         )
-                                                
+
                         await update_cached_orders(
                             cached_orders,
                             data,
                         )
 
-
                     if "portfolio" in message_channel:
-                        
+
                         if portfolio == []:
-                            portfolio.append (data)
-                            
+                            portfolio.append(data)
+
                         else:
                             data_currency = data["currency"]
-                            portfolio_currency = [o for o in portfolio if data_currency in o["currency"]]
-                            
+                            portfolio_currency = [
+                                o for o in portfolio if data_currency in o["currency"]
+                            ]
+
                             if portfolio_currency:
                                 portfolio.remove(portfolio_currency[0])
-                            
+
                             portfolio.append(data)
-                        
+
                         pub_message.update({"cached_portfolio": portfolio})
 
                         await publishing_result(
@@ -136,17 +134,13 @@ async def caching_distributing_data(
                             portfolio_channel,
                             pub_message,
                         )
-                            
-                        query_trades = (
-                                    f"SELECT * FROM  v_trading_all_active"
-                                )
-    
+
+                        query_trades = f"SELECT * FROM  v_trading_all_active"
+
                         my_trades_currency_all_transactions: list = (
                             await executing_query_with_return(query_trades)
                         )
-                        log.info (my_trades_currency_all_transactions)
-                        
-                        pub_message.update({"my_trades": my_trades_currency_all_transactions})
+
                         await publishing_result(
                             pipe,
                             my_trades_channel,
@@ -158,7 +152,7 @@ async def caching_distributing_data(
                             data,
                             currency,
                         )
-                          
+
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 

@@ -570,3 +570,20 @@ def handle_ctrl_c() -> None:
     https://stackoverflow.com/questions/67866293/how-to-subscribe-to-multiple-websocket-streams-using-muiltiprocessing
     """
     signal.signal(signal.SIGINT, sys.exit(0))
+
+
+def get_config_tomli(file_name: str) -> list:
+    """ """
+    import tomli
+
+    config_path = provide_path_for_file(file_name)
+
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, "rb") as handle:
+                read = tomli.load(handle)
+                return read
+
+    except Exception as error:
+        parse_error_message(error)
+        return []
