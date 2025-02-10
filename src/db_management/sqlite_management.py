@@ -8,6 +8,7 @@ from contextlib import contextmanager
 import aiosqlite
 from loguru import logger as log
 
+from db_management.redis_client import publishing_specific_purposes
 from messaging.telegram_bot import telegram_bot_sendtext as telegram_bot
 from utilities.string_modification import extract_currency_from_text
 
@@ -111,7 +112,18 @@ async def insert_tables(
 
     finally:
 
-        await publishing_db_update(table_name)
+        if "trade" in table_name or "order" in table_name:
+
+            query_trades = f"SELECT * FROM  v_trading_all_active"
+
+            my_trades_currency_all_transactions: list = (
+                await executing_query_with_return(query_trades)
+            )
+
+            await publishing_specific_purposes(
+                "trading_update",
+                my_trades_currency_all_transactions,
+            )
 
 
 async def querying_table(
@@ -209,7 +221,18 @@ async def deleting_row(
 
     finally:
 
-        await publishing_db_update(table)
+        if "trade" in table or "order" in table:
+
+            query_trades = f"SELECT * FROM  v_trading_all_active"
+
+            my_trades_currency_all_transactions: list = (
+                await executing_query_with_return(query_trades)
+            )
+
+            await publishing_specific_purposes(
+                "trading_update",
+                my_trades_currency_all_transactions,
+            )
 
 
 async def querying_duplicated_transactions(
@@ -334,7 +357,18 @@ async def update_status_data(
 
     finally:
 
-        await publishing_db_update(table)
+        if "trade" in table or "order" in table:
+
+            query_trades = f"SELECT * FROM  v_trading_all_active"
+
+            my_trades_currency_all_transactions: list = (
+                await executing_query_with_return(query_trades)
+            )
+
+            await publishing_specific_purposes(
+                "trading_update",
+                my_trades_currency_all_transactions,
+            )
 
 
 def querying_open_interest(
@@ -573,49 +607,6 @@ async def executing_query_with_return(
         await telegram_bot_sendtext(f"sqlite operation-{query_table}", "failed_order")
 
     return [] if not combine_result else (combine_result)
-
-
-async def publishing_db_update(table_name: str) -> None:
-    """ """
-
-    if "trade" in table_name or "order" in table_name:
-
-        import redis.asyncio as aioredis
-
-        from utilities.system_tools import get_config_tomli
-
-        from db_management.redis_client import publishing_result
-
-        pool = aioredis.ConnectionPool.from_url(
-            "redis://localhost", port=6379, db=0, protocol=3, decode_responses=True
-        )
-
-        client_redis: object = aioredis.Redis.from_pool(pool)
-
-        # registering strategy config file
-        file_toml = "config_strategies.toml"
-
-        # parsing config file
-        config_app = get_config_tomli(file_toml)
-
-        query_trades = f"SELECT * FROM  v_trading_all_active"
-
-        my_trades_currency_all_transactions: list = await executing_query_with_return(
-            query_trades
-        )
-
-        # get redis channels
-        redis_channels: dict = config_app["redis_channels"][0]
-
-        my_trades_channel: str = redis_channels["my_trades"]
-
-        async with client_redis.pipeline() as pipe:
-
-            await publishing_result(
-                pipe,
-                my_trades_channel,
-                my_trades_currency_all_transactions,
-            )
 
 
 async def back_up_db_sqlite():

@@ -142,7 +142,6 @@ async def cancelling_orders(
 
                         market_condition_all = message_byte_data
 
-
                     if portfolio_channel in message_channel:
 
                         portfolio_all = message_byte_data["cached_portfolio"]
@@ -172,18 +171,22 @@ async def cancelling_orders(
                         cached_ticker_all = message_byte_data["data"]
 
                         server_time = message_byte_data["server_time"]
-                        currency = message_byte_data["currency"]
-                        currency_upper = message_byte_data["currency_upper"]
+
+                        currency, currency_upper = (
+                            message_byte_data["currency"],
+                            message_byte_data["currency_upper"],
+                        )
 
                         currency_lower: str = currency
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                         market_condition = [
-                            o for o in market_condition_all if instrument_name_perpetual in o["instrument_name"]
+                            o
+                            for o in market_condition_all
+                            if instrument_name_perpetual in o["instrument_name"]
                         ][0]
 
-                        log.debug(market_condition)
                         portfolio = [
                             o for o in portfolio_all if currency_upper in o["currency"]
                         ][0]
@@ -211,7 +214,6 @@ async def cancelling_orders(
                                     o
                                     for o in my_trades_active_all
                                     if currency_upper in o["instrument_name"]
-                                    
                                 ]
                             )
 

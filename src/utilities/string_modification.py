@@ -213,6 +213,7 @@ def parsing_sqlite_json_output(json_load: list) -> int:
     except:
         return []
 
+
 def parsing_redis_market_json_output(json_load: list) -> int:
     """
     parsing_sqlite_json_output
@@ -225,15 +226,14 @@ def parsing_redis_market_json_output(json_load: list) -> int:
     try:
 
         result_json = [
-            i.replace(":false", ":False")
-            .replace(":true", ":True")
-            for i in json_load
+            i.replace(":false", ":False").replace(":true", ":True") for i in json_load
         ]
         # print (f'result_json {[ast.literal_eval(str(i)) for i in result_json]}')
         return remove_apostrophes_from_json(result_json)
 
     except:
         return []
+
 
 def get_strings_before_character(
     label: str,

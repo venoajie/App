@@ -6,8 +6,8 @@ from dataclassy import dataclass, fields
 from loguru import logger as log
 
 # user defined formula
-from db_management.sqlite_management import deleting_row
 from db_management.sqlite_management import (
+    deleting_row,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
 )
 from db_management.sqlite_management import (
@@ -70,21 +70,36 @@ def first_tick_fr_sqlite_if_database_still_empty(count: int) -> int:
     return delta_some_days_ago
 
 
-async def update_db_pkl(path, data_orders, currency) -> None:
+async def update_db_pkl(
+    path,
+    data_orders,
+    currency,
+) -> None:
 
     my_path_portfolio = provide_path_for_file(path, currency)
 
-    if currency_inline_with_database_address(currency, my_path_portfolio):
+    if currency_inline_with_database_address(
+        currency,
+        my_path_portfolio,
+    ):
 
-        replace_data(my_path_portfolio, data_orders)
+        replace_data(
+            my_path_portfolio,
+            data_orders,
+        )
 
 
-def currency_inline_with_database_address(currency: str, database_address: str) -> bool:
+def currency_inline_with_database_address(
+    currency: str,
+    database_address: str,
+) -> bool:
     return currency.lower() in str(database_address)
 
 
 def extract_portfolio_per_id_and_currency(
-    sub_account_id: str, sub_accounts: list, currency: str
+    sub_account_id: str,
+    sub_accounts: list,
+    currency: str,
 ) -> list:
 
     portfolio_all = [o for o in sub_accounts if str(o["id"]) in sub_account_id][0][
@@ -104,7 +119,11 @@ class ModifyOrderDb(SendApiRequest):
         # Provide class object to access private get API
         self.private_data: str = SendApiRequest(self.sub_account_id)
 
-    async def cancel_by_order_id(self, order_db_table: str, open_order_id: str) -> None:
+    async def cancel_by_order_id(
+        self,
+        order_db_table: str,
+        open_order_id: str,
+    ) -> None:
 
         where_filter = f"order_id"
 
@@ -161,7 +180,10 @@ class ModifyOrderDb(SendApiRequest):
 
                     for order_id in open_orders_cancellables_id:
 
-                        await self.cancel_by_order_id(order_db_table, order_id)
+                        await self.cancel_by_order_id(
+                            order_db_table,
+                            order_id,
+                        )
 
         await self.resupply_sub_accountdb(currency.upper())
 
@@ -204,7 +226,10 @@ class ModifyOrderDb(SendApiRequest):
         # fetch data from exchange
         return await self.private_data.get_subaccounts_details(currency)
 
-    async def resupply_sub_accountdb(self, currency) -> None:
+    async def resupply_sub_accountdb(
+        self,
+        currency,
+    ) -> None:
 
         # resupply sub account db
         log.info(f"resupply {currency.upper()} sub account db-START")
@@ -212,7 +237,10 @@ class ModifyOrderDb(SendApiRequest):
 
         my_path_sub_account = provide_path_for_file("sub_accounts", currency)
 
-        replace_data(my_path_sub_account, sub_accounts)
+        replace_data(
+            my_path_sub_account,
+            sub_accounts,
+        )
 
         log.info(f"resupply {currency.upper()} sub account db-DONE")
 
@@ -289,7 +317,10 @@ class ModifyOrderDb(SendApiRequest):
 
         if instrument_name:
             await self.save_transaction_log_by_instrument(
-                currency, transaction_log_trading, instrument_name, count
+                currency,
+                transaction_log_trading,
+                instrument_name,
+                count,
             )
 
         else:
@@ -313,7 +344,11 @@ class ModifyOrderDb(SendApiRequest):
 
         log.info(f"resupply {currency.upper()} transaction_log-DONE")
 
-    async def if_cancel_is_true(self, order_db_table: str, order: dict) -> None:
+    async def if_cancel_is_true(
+        self,
+        order_db_table: str,
+        order: dict,
+    ) -> None:
         """ """
 
         if order["cancel_allowed"]:
@@ -358,7 +393,11 @@ class ModifyOrderDb(SendApiRequest):
                 # await asyncio.sleep(10)
 
     async def update_trades_from_exchange(
-        self, currency: str, archive_db_table, order_db_table, count: int = 5
+        self,
+        currency: str,
+        archive_db_table,
+        order_db_table,
+        count: int = 5,
     ) -> None:
         """ """
         trades_from_exchange = await self.private_data.get_user_trades_by_currency(
@@ -379,7 +418,11 @@ class ModifyOrderDb(SendApiRequest):
 
                     log.error(f"trades_from_exchange {trade}")
 
-                    await saving_traded_orders(trade, archive_db_table, order_db_table)
+                    await saving_traded_orders(
+                        trade,
+                        archive_db_table,
+                        order_db_table,
+                    )
 
     async def update_trades_from_exchange_based_on_latest_timestamp(
         self,
@@ -437,9 +480,17 @@ class ModifyOrderDb(SendApiRequest):
 
                     log.error(f"{trade}")
 
-                    await saving_traded_orders(trade, archive_db_table, order_db_table)
+                    await saving_traded_orders(
+                        trade,
+                        archive_db_table,
+                        order_db_table,
+                    )
 
-                    await saving_traded_orders(trade, trade_db_table, order_db_table)
+                    await saving_traded_orders(
+                        trade,
+                        trade_db_table,
+                        order_db_table,
+                    )
                 else:
 
                     trade_trd_id = trade["trade_id"]
@@ -455,11 +506,15 @@ class ModifyOrderDb(SendApiRequest):
                         log.debug(f"{trade_trd_id}")
 
                         await saving_traded_orders(
-                            trade, archive_db_table, order_db_table
+                            trade,
+                            archive_db_table,
+                            order_db_table,
                         )
 
                         await saving_traded_orders(
-                            trade, trade_db_table, order_db_table
+                            trade,
+                            trade_db_table,
+                            order_db_table,
                         )
 
     async def send_triple_orders(self, params) -> None:
@@ -559,7 +614,9 @@ class ModifyOrderDb(SendApiRequest):
                     if f"f{currency.upper()}-FS-" not in instrument_name:
 
                         await saving_traded_orders(
-                            trade, archive_db_table, order_db_table
+                            trade,
+                            archive_db_table,
+                            order_db_table,
                         )
 
             else:
@@ -613,7 +670,8 @@ class ModifyOrderDb(SendApiRequest):
                             await insert_tables(order_db_table, transaction_main)
 
                             await self.cancel_by_order_id(
-                                order_db_table, transaction_main["order_id"]
+                                order_db_table,
+                                transaction_main["order_id"],
                             )
 
                             await self.if_order_is_true(
@@ -622,7 +680,10 @@ class ModifyOrderDb(SendApiRequest):
                             )
 
                         else:
-                            await insert_tables(order_db_table, transaction_main)
+                            await insert_tables(
+                                order_db_table,
+                                transaction_main,
+                            )
 
                 else:
 
@@ -641,7 +702,11 @@ class ModifyOrderDb(SendApiRequest):
 
         await self.resupply_sub_accountdb(currency)
 
-        await update_db_pkl("positions", data_orders, currency)
+        await update_db_pkl(
+            "positions",
+            data_orders,
+            currency,
+        )
 
         log.info(f"update_user_changes-END")
 
@@ -661,7 +726,7 @@ class ModifyOrderDb(SendApiRequest):
         instrument_name = order["instrument_name"]
 
         currency = extract_currency_from_text(instrument_name)
-        log.critical("C")
+
         await self.resupply_sub_accountdb(currency)
 
         if trades:
@@ -670,22 +735,39 @@ class ModifyOrderDb(SendApiRequest):
 
                 if f"{currency.upper()}-FS-" not in instrument_name:
 
-                    await saving_traded_orders(trade, archive_db_table, order_db_table)
+                    await saving_traded_orders(
+                        trade,
+                        archive_db_table,
+                        order_db_table,
+                    )
 
         else:
 
             await self.saving_order(
-                non_checked_strategies, instrument_name, order, order_db_table
+                non_checked_strategies,
+                instrument_name,
+                order,
+                order_db_table,
             )
 
         await self.resupply_transaction_log(
-            currency, transaction_log_trading, archive_db_table
+            currency,
+            transaction_log_trading,
+            archive_db_table,
         )
 
-        await update_db_pkl("positions", data_orders, currency)
+        await update_db_pkl(
+            "positions",
+            data_orders,
+            currency,
+        )
 
     async def saving_order(
-        self, non_checked_strategies, instrument_name, order, order_db_table
+        self,
+        non_checked_strategies,
+        instrument_name,
+        order,
+        order_db_table,
     ) -> None:
 
         label = order["label"]
@@ -699,10 +781,16 @@ class ModifyOrderDb(SendApiRequest):
 
                 order_attributes = labelling_unlabelled_order(order)
 
-                await insert_tables(order_db_table, order)
+                await insert_tables(
+                    order_db_table,
+                    order,
+                )
 
                 if "OTO" not in order["order_id"]:
-                    await self.cancel_by_order_id(order_db_table, order_id)
+                    await self.cancel_by_order_id(
+                        order_db_table,
+                        order_id,
+                    )
 
                 await self.if_order_is_true(
                     non_checked_strategies,
@@ -716,7 +804,10 @@ class ModifyOrderDb(SendApiRequest):
 
             if label_and_side_consistent and label:
 
-                await saving_order_based_on_state(order_db_table, order)
+                await saving_order_based_on_state(
+                    order_db_table,
+                    order,
+                )
 
             # check if transaction has label. Provide one if not any
             if not label_and_side_consistent:
@@ -725,9 +816,15 @@ class ModifyOrderDb(SendApiRequest):
 
                     log.warning(f" not label_and_side_consistent {order} {order_state}")
 
-                    await insert_tables(order_db_table, order)
+                    await insert_tables(
+                        order_db_table,
+                        order,
+                    )
 
-                    await self.cancel_by_order_id(order_db_table, order_id)
+                    await self.cancel_by_order_id(
+                        order_db_table,
+                        order_id,
+                    )
 
 
 async def cancel_the_cancellables(
@@ -762,13 +859,19 @@ async def cancel_the_cancellables(
 
                 for order_id in open_orders_cancellables_id:
 
-                    await cancel_by_order_id(order_db_table, order_id)
+                    await cancel_by_order_id(
+                        order_db_table,
+                        order_id,
+                    )
 
     log.critical("D")
     # await self.resupply_sub_accountdb(currency.upper())
 
 
-async def cancel_by_order_id(order_db_table: str, open_order_id: str) -> None:
+async def cancel_by_order_id(
+    order_db_table: str,
+    open_order_id: str,
+) -> None:
 
     where_filter = f"order_id"
 

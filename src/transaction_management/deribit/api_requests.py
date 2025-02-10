@@ -1,6 +1,5 @@
 # built ins
 import asyncio
-from datetime import datetime
 from typing import Dict
 
 # import json, orjson
@@ -14,6 +13,7 @@ from loguru import logger as log
 
 # user defined formula
 from configuration import config, config_oci, id_numbering
+from db_management.redis_client import publishing_specific_purposes
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.time_modification import get_now_unix_time as get_now_unix
 from utilities.string_modification import (
@@ -414,7 +414,9 @@ class SendApiRequest:
         }
 
         user_trades = await private_connection(
-            self.sub_account_id, endpoint=endpoint, params=params
+            self.sub_account_id,
+            endpoint=endpoint,
+            params=params,
         )
 
         # log.warning(f"""user_trades {len(user_trades["result"]["trades"])} {[o["trade_id"] for o in user_trades["result"]["trades"]]}""")
@@ -482,7 +484,9 @@ class SendApiRequest:
         params = {"order_id": order_id}
 
         result = await private_connection(
-            self.sub_account_id, endpoint=endpoint, params=params
+            self.sub_account_id,
+            endpoint=endpoint,
+            params=params,
         )
         return result
 
@@ -498,11 +502,18 @@ class SendApiRequest:
             params=params,
         )
 
-        return result_sub_account["result"]
+        result = result_sub_account["result"]
+
+        await publishing_specific_purposes(
+            "sub_account_update",
+            result,
+        )
+
+        return result
 
 
 def get_api_end_point(
-    endpoint,
+    endpoint: str,
     parameters: dict = None,
 ) -> dict:
 
@@ -519,7 +530,6 @@ def get_api_end_point(
 
         params.update({"params": end_point_params})
 
-    log.debug(f"params {params}")
     return params
 
 
@@ -542,5 +552,8 @@ async def get_cancel_order_byOrderId(
 
     params = {"order_id": order_id}
 
-    result = await private_connection(endpoint=endpoint, params=params)
+    result = await private_connection(
+        endpoint=endpoint,
+        params=params,
+    )
     return result

@@ -8,16 +8,16 @@ import asyncio
 import uvloop
 from dataclassy import dataclass
 import orjson
-import redis.asyncio as redis
+
+import redis.asyncio as aioredis
+import json
+
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.system_tools import parse_error_message
-
-import redis.asyncio as aioredis
-import json
 
 
 class RedisPubSubManager:
@@ -231,4 +231,50 @@ async def querying_data(
         await telegram_bot_sendtext(
             f"redis qurying result - {error}",
             "general_error",
+        )
+
+
+async def publishing_specific_purposes(
+    purpose,
+    message,
+    redis_channels: list = None,
+    client_redis: object = None,
+) -> None:
+    """
+    purposes:
+    trading_update
+    sub_account_update
+    """
+
+    if not client_redis:
+        pool = aioredis.ConnectionPool.from_url(
+            "redis://localhost", port=6379, db=0, protocol=3, decode_responses=True
+        )
+        client_redis: object = aioredis.Redis.from_pool(pool)
+
+    if not redis_channels:
+
+        from utilities.system_tools import get_config_tomli
+
+        # registering strategy config file
+        file_toml = "config_strategies.toml"
+
+        # parsing config file
+        config_app = get_config_tomli(file_toml)
+
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+
+    if purpose == "trading_update":
+        channel: str = redis_channels["my_trades"]
+
+    if purpose == "sub_account_update":
+        channel: str = redis_channels["sub_account_update"]
+
+    async with client_redis.pipeline() as pipe:
+
+        await publishing_result(
+            pipe,
+            channel,
+            message,
         )

@@ -127,11 +127,24 @@ async def main():
         await asyncio.sleep(0.0005)
         
         """
-            
-            reconciling_size(
-                modify_order_and_db,
+                    
+            future_spreads(
+                currencies,
+                client_redis,
                 config_app,
-                idle_time),                
+                redis_channels,
+                redis_keys,
+                strategy_attributes,
+                ),
+            
+            hedging_spot(
+                currencies,
+                client_redis,
+                config_app,
+                redis_channels,
+                redis_keys,
+                strategy_attributes,
+                ),
       
             #scanning_volume()
                   
@@ -190,27 +203,13 @@ async def main():
                 redis_channels,
                 resolutions,
                 np),
-                    
-            future_spreads(
-                private_data,
+            
+            
+            reconciling_size(
                 modify_order_and_db,
-                currencies,
-                client_redis,
                 config_app,
-                redis_channels,
-                redis_keys,
-                strategy_attributes,
-                ),
-            
-            hedging_spot(
-                currencies,
-                client_redis,
-                config_app,
-                redis_channels,
-                redis_keys,
-                strategy_attributes,
-                ),
-            
+                idle_time),                
+
             back_up_db(60*10),
             
             clean_up_databases(60)

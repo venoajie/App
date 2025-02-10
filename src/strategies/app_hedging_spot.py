@@ -110,7 +110,6 @@ async def hedging_spot(
             ticker_cached_channel,
             portfolio_channel,
             my_trades_channel,
-
         ]
 
         # subscribe to channels
@@ -144,7 +143,6 @@ async def hedging_spot(
 
                         market_condition_all = message_byte_data
 
-
                     if portfolio_channel in message_channel:
 
                         portfolio_all = message_byte_data["cached_portfolio"]
@@ -172,8 +170,11 @@ async def hedging_spot(
                         cached_ticker_all = message_byte_data["data"]
 
                         server_time = message_byte_data["server_time"]
-                        currency = message_byte_data["currency"]
-                        currency_upper = message_byte_data["currency_upper"]
+
+                        currency, currency_upper = (
+                            message_byte_data["currency"],
+                            message_byte_data["currency_upper"],
+                        )
 
                         currency_lower: str = currency
 
@@ -183,9 +184,7 @@ async def hedging_spot(
 
                         # get portfolio data
                         portfolio = [
-                            o
-                            for o in portfolio_all
-                            if currency_upper in o["currency"]
+                            o for o in portfolio_all if currency_upper in o["currency"]
                         ][0]
 
                         equity: float = portfolio["equity"]
@@ -198,20 +197,17 @@ async def hedging_spot(
 
                         index_price = get_index(ticker_perpetual_instrument_name)
 
-                        sub_account = reading_from_pkl_data(
-                            "sub_accounts", currency
-                        )
+                        sub_account = reading_from_pkl_data("sub_accounts", currency)
 
                         sub_account = sub_account[0]
 
                         # sub_account_orders = sub_account["open_orders"]
 
                         market_condition = [
-                            o for o in market_condition_all if instrument_name_perpetual in o["instrument_name"]
+                            o
+                            for o in market_condition_all
+                            if instrument_name_perpetual in o["instrument_name"]
                         ][0]
-
-                        log.debug(market_condition)
-
 
                         if sub_account:
 
@@ -222,10 +218,8 @@ async def hedging_spot(
                                     o
                                     for o in my_trades_active_all
                                     if currency_upper in o["instrument_name"]
-                                    
                                 ]
                             )
-
 
                             my_trades_currency_all: list = (
                                 []
@@ -262,8 +256,7 @@ async def hedging_spot(
                             position_without_combo = [
                                 o
                                 for o in position
-                                if f"{currency_upper}-FS"
-                                not in o["instrument_name"]
+                                if f"{currency_upper}-FS" not in o["instrument_name"]
                             ]
 
                             size_perpetuals_reconciled = (
@@ -353,16 +346,12 @@ async def hedging_spot(
 
                                     instrument_attributes_futures_for_hedging = [
                                         o
-                                        for o in futures_instruments[
-                                            "active_futures"
-                                        ]
+                                        for o in futures_instruments["active_futures"]
                                         if o["settlement_period"] != "month"
                                         and o["kind"] == "future"
                                     ]
 
-                                    strong_bearish = market_condition[
-                                        "strong_bearish"
-                                    ]
+                                    strong_bearish = market_condition["strong_bearish"]
 
                                     bearish = market_condition["bearish"]
 
@@ -381,10 +370,12 @@ async def hedging_spot(
                                         "instrument_name"
                                     ]
 
-                                    size_future_reconciled = is_size_sub_account_and_my_trades_reconciled(
-                                        position_without_combo,
-                                        my_trades_currency_all,
-                                        instrument_name,
+                                    size_future_reconciled = (
+                                        is_size_sub_account_and_my_trades_reconciled(
+                                            position_without_combo,
+                                            my_trades_currency_all,
+                                            instrument_name,
+                                        )
                                     )
 
                                     instrument_time_left = (
@@ -429,11 +420,9 @@ async def hedging_spot(
                                         ):
                                             async with client_redis.pipeline() as pipe:
 
-                                                best_ask_prc: float = (
-                                                    instrument_ticker[
-                                                        "best_ask_price"
-                                                    ]
-                                                )
+                                                best_ask_prc: float = instrument_ticker[
+                                                    "best_ask_price"
+                                                ]
 
                                                 send_order: dict = await hedging.is_send_open_order_allowed(
                                                     non_checked_strategies,
@@ -468,22 +457,18 @@ async def hedging_spot(
 
                                                     # log.error (f"{orders_currency_strategy} ")
 
-                                                    for (
-                                                        status
-                                                    ) in status_transaction:
+                                                    for status in status_transaction:
 
                                                         my_trades_currency_strategy_status = [
                                                             o
                                                             for o in my_trades_currency_strategy
-                                                            if status
-                                                            in (o["label"])
+                                                            if status in (o["label"])
                                                         ]
 
                                                         orders_currency_strategy_label_contra_status = [
                                                             o
                                                             for o in orders_currency_strategy
-                                                            if status
-                                                            not in o["label"]
+                                                            if status not in o["label"]
                                                         ]
 
                                                         # log.error (f"{status} ")
@@ -492,9 +477,7 @@ async def hedging_spot(
 
                                                             transaction_instrument_name = remove_redundant_elements(
                                                                 [
-                                                                    o[
-                                                                        "instrument_name"
-                                                                    ]
+                                                                    o["instrument_name"]
                                                                     for o in my_trades_currency_strategy_status
                                                                 ]
                                                             )
@@ -532,8 +515,7 @@ async def hedging_spot(
                                                                     )
 
                                                                     if (
-                                                                        status
-                                                                        == "open"
+                                                                        status == "open"
                                                                         and my_trades_currency_contribute_to_hedging_sum
                                                                         <= 0
                                                                     ):

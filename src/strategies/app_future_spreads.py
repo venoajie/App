@@ -38,11 +38,8 @@ from utilities.system_tools import (
 
 
 async def future_spreads(
-    private_data: object,
-    modify_order_and_db: object,
     currencies: list,
     client_redis: object,
-    config_app: list,
     redis_channels: list,
     redis_keys: list,
     strategy_attributes: list,
@@ -75,9 +72,7 @@ async def future_spreads(
 
         instruments_name = futures_instruments["instruments_name"]
 
-        ticker_keys: str = redis_keys["ticker"]
         orders_keys: str = redis_keys["orders"]
-        market_condition_keys: str = redis_keys["market_condition"]
 
         # get redis channels
         receive_order_channel: str = redis_channels["receive_order"]
@@ -86,7 +81,7 @@ async def future_spreads(
         portfolio_channel: str = redis_channels["portfolio"]
         my_trades_channel: str = redis_channels["my_trades"]
         sending_order_channel: str = redis_channels["sending_order"]
-        
+
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
@@ -106,7 +101,7 @@ async def future_spreads(
         not_cancel = True
 
         market_condition_all = []
-        
+
         portfolio_all = []
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
@@ -154,18 +149,19 @@ async def future_spreads(
                         cached_ticker_all = message_byte_data["data"]
 
                         server_time = message_byte_data["server_time"]
-                        currency = message_byte_data["currency"]
-                        currency_upper = message_byte_data["currency_upper"]
+
+                        currency, currency_upper = (
+                            message_byte_data["currency"],
+                            message_byte_data["currency_upper"],
+                        )
 
                         currency_lower: str = currency
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
-                        
+
                         # get portfolio data
                         portfolio = [
-                            o
-                            for o in portfolio_all
-                            if currency_upper in o["currency"]
+                            o for o in portfolio_all if currency_upper in o["currency"]
                         ][0]
 
                         equity: float = portfolio["equity"]
@@ -178,19 +174,17 @@ async def future_spreads(
 
                         index_price = get_index(ticker_perpetual_instrument_name)
 
-                        sub_account = reading_from_pkl_data(
-                            "sub_accounts", currency
-                        )
+                        sub_account = reading_from_pkl_data("sub_accounts", currency)
 
                         sub_account = sub_account[0]
 
                         # sub_account_orders = sub_account["open_orders"]
 
                         market_condition = [
-                            o for o in market_condition_all if instrument_name_perpetual in o["instrument_name"]
+                            o
+                            for o in market_condition_all
+                            if instrument_name_perpetual in o["instrument_name"]
                         ][0]
-
-                        log.debug(market_condition)
 
                         if sub_account:
 
@@ -201,7 +195,6 @@ async def future_spreads(
                                     o
                                     for o in my_trades_active_all
                                     if currency_upper in o["instrument_name"]
-                                    
                                 ]
                             )
 
@@ -240,8 +233,7 @@ async def future_spreads(
                             position_without_combo = [
                                 o
                                 for o in position
-                                if f"{currency_upper}-FS"
-                                not in o["instrument_name"]
+                                if f"{currency_upper}-FS" not in o["instrument_name"]
                             ]
 
                             size_perpetuals_reconciled = (
@@ -309,7 +301,8 @@ async def future_spreads(
 
                                     async with client_redis.pipeline() as pipe:
 
-                                        extra = 3  # waiting minute before reorder  15 min
+                                        # waiting minute before reorder  15 min
+                                        extra = 3
 
                                         BASIC_TICKS_FOR_AVERAGE_MOVEMENT: int = (
                                             strategy_params[
@@ -388,8 +381,7 @@ async def future_spreads(
                                                 ][0]
 
                                                 instrument_time_left = (
-                                                    expiration_timestamp
-                                                    - server_time
+                                                    expiration_timestamp - server_time
                                                 ) / ONE_MINUTE
 
                                                 instrument_time_left_exceed_threshold = (
@@ -427,8 +419,7 @@ async def future_spreads(
                                                     else [
                                                         o
                                                         for o in future_control
-                                                        if instrument_name_future
-                                                        in o
+                                                        if instrument_name_future in o
                                                     ]
                                                 )
 
@@ -470,9 +461,7 @@ async def future_spreads(
                                                             market_condition,
                                                         )
 
-                                                        if send_order[
-                                                            "order_allowed"
-                                                        ]:
+                                                        if send_order["order_allowed"]:
 
                                                             await saving_and_publishing_result(
                                                                 pipe,
@@ -540,9 +529,7 @@ async def future_spreads(
                                                             THRESHOLD_MARKET_CONDITIONS_COMBO,
                                                         )
 
-                                                        if send_order[
-                                                            "order_allowed"
-                                                        ]:
+                                                        if send_order["order_allowed"]:
 
                                                             await saving_and_publishing_result(
                                                                 pipe,
@@ -572,8 +559,7 @@ async def future_spreads(
                                                 if sum_selected_transaction != 0:
 
                                                     if (
-                                                        len_selected_transaction
-                                                        == 1
+                                                        len_selected_transaction == 1
                                                         and "closed" not in label
                                                     ):
 
@@ -583,9 +569,7 @@ async def future_spreads(
 
                                                             for (
                                                                 transaction
-                                                            ) in (
-                                                                selected_transaction
-                                                            ):
+                                                            ) in selected_transaction:
 
                                                                 waiting_minute_before_ordering = (
                                                                     strategy_params[
@@ -690,14 +674,22 @@ def get_settlement_period(strategy_attributes) -> list:
     )
 
 
-def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
+def reading_from_pkl_data(
+    end_point,
+    currency,
+    status: str = None,
+) -> dict:
     """ """
 
     path: str = provide_path_for_file(end_point, currency, status)
+
     return read_data(path)
 
 
-def compute_notional_value(index_price: float, equity: float) -> float:
+def compute_notional_value(
+    index_price: float,
+    equity: float,
+) -> float:
     """ """
     return index_price * equity
 
