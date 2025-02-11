@@ -289,8 +289,8 @@ async def publishing_specific_purposes(
     if purpose == "sub_account_update":
         channel: str = redis_channels["sub_account_update"]
 
-    if purpose == "porfolio":
-        channel: str = redis_channels["porfolio"]
+    if purpose == "portfolio":
+        channel: str = redis_channels["portfolio"]
 
     async with client_redis.pipeline() as pipe:
 
