@@ -84,6 +84,9 @@ async def main():
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
         
+        # parsing config file
+        config_app = get_config_tomli(file_toml)
+        
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
@@ -114,9 +117,6 @@ async def main():
         [await pubsub.subscribe(o) for o in channels]
         
         message_in_byte = await pubsub.get_message()
-
-        # parsing config file
-        config_app = get_config_tomli(file_toml)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
