@@ -228,6 +228,7 @@ async def main():
                 config_app),
             
             update_cached_ticker(
+            message_in_byte,
                 client_redis,
                 config_app),
 

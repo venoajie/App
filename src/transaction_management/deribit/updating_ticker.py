@@ -62,7 +62,8 @@ def combining_ticker_data(instruments_name: str) -> list:
     return result
 
 
-async def update_cached_ticker(
+async def update_cached_ticker(            message_byte,
+
     client_redis: object,
     config_app: list,
 ) -> None:
@@ -119,7 +120,7 @@ async def update_cached_ticker(
 
             try:
 
-                message_byte = await pubsub.get_message()
+                #message_byte = await pubsub.get_message()
 
                 if message_byte and message_byte["type"] == "message":
 
@@ -130,6 +131,8 @@ async def update_cached_ticker(
                     if ticker_data_channel in message_channel:
 
                         data = message_byte_data["data"]
+                        
+                        print(data)
 
                         instrument_name = message_byte_data["instrument_name"]
 
