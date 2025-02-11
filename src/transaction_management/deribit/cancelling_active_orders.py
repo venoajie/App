@@ -228,6 +228,7 @@ async def cancelling_orders(
                                 ]
                             )
 
+                            log.error(f"currency_upper {currency_upper}")
                             log.error(f"cached_orders {cached_orders}")
                             orders_currency = (
                                 []
