@@ -90,7 +90,10 @@ def get_platform() -> str:
 
 
 def provide_path_for_file(
-    end_point: str, marker: str = None, status: str = None, method: str = None
+    end_point: str,
+    marker: str = None,
+    status: str = None,
+    method: str = None,
 ) -> str:
     """
 
@@ -115,12 +118,30 @@ def provide_path_for_file(
     exchange = None
 
     if bool(
-        [o for o in ["portfolio", "positions", "sub_accounts"] if (o in end_point)]
+        [
+            o
+            for o in [
+                "portfolio",
+                "positions",
+                "sub_accounts",
+            ]
+            if (o in end_point)
+        ]
     ):
         exchange: str = "deribit"
         sub_folder: str = f"databases/exchanges/{exchange}/portfolio"
 
-    if bool([o for o in ["orders", "myTrades", "my_trades"] if (o in end_point)]):
+    if bool(
+        [
+            o
+            for o in [
+                "orders",
+                "myTrades",
+                "my_trades",
+            ]
+            if (o in end_point)
+        ]
+    ):
         exchange: str = "deribit"
         sub_folder: str = f"databases/exchanges/{exchange}/transactions"
 
@@ -247,12 +268,20 @@ def is_current_file_running(script: str) -> bool:
 
 
 def reading_from_db_pickle(
-    end_point, instrument: str = None, status: str = None
+    end_point,
+    instrument: str = None,
+    status: str = None,
 ) -> float:
     """ """
     from utilities import pickling
 
-    return pickling.read_data(provide_path_for_file(end_point, instrument, status))
+    return pickling.read_data(
+        provide_path_for_file(
+            end_point,
+            instrument,
+            status,
+        )
+    )
 
 
 def sleep_and_restart_program(idle: float = None) -> None:
@@ -275,7 +304,11 @@ def sleep_and_restart_program(idle: float = None) -> None:
 
     print(f"restart")
     python = sys.executable
-    os.execl(python, python, *sys.argv)
+    os.execl(
+        python,
+        python,
+        *sys.argv,
+    )
 
 
 async def sleep_and_restart(idle: float = None) -> None:
@@ -315,7 +348,10 @@ def exception_handler(func):
     return wrapper
 
 
-def parse_error_message(error: str, message: str = None) -> str:
+def parse_error_message(
+    error: str,
+    message: str = None,
+) -> str:
     """
 
     Capture & emit error message
@@ -346,7 +382,11 @@ def parse_error_message(error: str, message: str = None) -> str:
     return info
 
 
-def raise_error_message(error: str, idle: float = None, message: str = None) -> None:
+def raise_error_message(
+    error: str,
+    idle: float = None,
+    message: str = None,
+) -> None:
     """
 
     Capture & emit error message
@@ -382,7 +422,9 @@ def raise_error_message(error: str, idle: float = None, message: str = None) -> 
 
 
 async def async_raise_error_message(
-    error: str, idle: float = None, message: str = None
+    error: str,
+    idle: float = None,
+    message: str = None,
 ) -> None:
     """
 

@@ -20,6 +20,7 @@ from utilities.caching import (
 from utilities.string_modification import extract_currency_from_text
 from utilities.system_tools import parse_error_message
 
+
 async def caching_distributing_data(
     private_data: object,
     client_redis: object,
@@ -39,7 +40,7 @@ async def caching_distributing_data(
         consumer: app data cleaning/size reconciliation
 
     sub_account_channel:
-    update method: websocket & REST
+    update method: REST
     + send messages that sub_account has changed
         sender: deribit API module
     + updating sub account cache at end user

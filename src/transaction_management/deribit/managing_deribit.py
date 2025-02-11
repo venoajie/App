@@ -189,9 +189,9 @@ class ModifyOrderDb(SendApiRequest):
         await self.resupply_sub_accountdb(currency.upper())
 
     async def get_sub_account(
-        self, 
+        self,
         currency,
-        ) -> list:
+    ) -> list:
         """
         Returns example:
          [
@@ -236,47 +236,40 @@ class ModifyOrderDb(SendApiRequest):
     ) -> None:
 
         # resupply sub account db
-        log.info(f"resupply {currency.upper()} sub account & portfolio db-START")
+        log.info(f"resupply {currency.upper()} sub account  db-START")
         sub_accounts = await self.get_sub_account(currency)
 
         my_path_sub_account = provide_path_for_file(
             "sub_accounts",
             currency,
-            )
-        
-        await self.resupply_portfolio(currency) 
+        )
 
         replace_data(
             my_path_sub_account,
             sub_accounts,
         )
 
-        log.info(f"resupply {currency.upper()} sub account & portfolio db-DONE")
+        log.info(f"resupply {currency.upper()} sub account db-DONE")
 
     async def resupply_portfolio(
-        self, 
+        self,
         currency,
-        ) -> None:
+    ) -> None:
 
         # fetch data from exchange
         sub_accounts = await self.private_data.get_subaccounts()
 
         portfolio = extract_portfolio_per_id_and_currency(
-            self.sub_account_id, 
-            sub_accounts, 
+            self.sub_account_id,
+            sub_accounts,
             currency,
-        )
-        
-        await publishing_specific_purposes(
-            "portfolio",
-            portfolio,
         )
 
         await update_db_pkl(
             "portfolio",
             portfolio,
             currency,
-            )
+        )
 
     async def save_transaction_log_by_instrument(
         self,
@@ -845,6 +838,7 @@ class ModifyOrderDb(SendApiRequest):
                         order_db_table,
                         order_id,
                     )
+
 
 async def cancel_the_cancellables(
     order_db_table: str,

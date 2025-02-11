@@ -61,9 +61,8 @@ async def saving_and_relabelling_orders(
         portfolio_channel: str = redis_channels["portfolio"]
         # prepare channels placeholders
         channels = [
-            receive_order_channel,     
+            receive_order_channel,
             portfolio_channel,
-
         ]
 
         # subscribe to channels
@@ -100,7 +99,6 @@ async def saving_and_relabelling_orders(
                                 currency_lower,
                                 False,
                             )
-
 
                         if portfolio_channel in message_channel:
 
@@ -155,4 +153,3 @@ async def update_db_pkl(
             my_path_portfolio,
             data_orders,
         )
-

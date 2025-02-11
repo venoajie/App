@@ -84,7 +84,6 @@ async def future_spreads(
         sub_account_channel: str = redis_channels["sub_account_update"]
         order_allowed_channel: str = redis_channels["is_order_allowed"]
 
-
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
@@ -93,7 +92,7 @@ async def future_spreads(
             portfolio_channel,
             my_trades_channel,
             sub_account_channel,
-            order_allowed_channel
+            order_allowed_channel,
         ]
 
         # subscribe to channels
@@ -110,7 +109,7 @@ async def future_spreads(
         portfolio_all = []
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
-        
+
         order_allowed = False
 
         while not_cancel:
@@ -157,7 +156,8 @@ async def future_spreads(
                             orders_keys,
                         )
 
-                    if (order_allowed
+                    if (
+                        order_allowed
                         and ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all

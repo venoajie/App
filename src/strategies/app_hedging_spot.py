@@ -127,7 +127,7 @@ async def hedging_spot(
         portfolio_all = []
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
-        
+
         order_allowed = False
 
         while not_cancel:
@@ -174,7 +174,8 @@ async def hedging_spot(
                             orders_keys,
                         )
 
-                    if (order_allowed
+                    if (
+                        order_allowed
                         and ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all

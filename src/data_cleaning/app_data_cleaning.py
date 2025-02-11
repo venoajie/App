@@ -161,7 +161,7 @@ async def reconciling_size(
         [await pubsub.subscribe(o) for o in channels]
 
         while True:
-            
+
             try:
 
                 message_byte = await pubsub.get_message()
@@ -192,7 +192,6 @@ async def reconciling_size(
                             orders_keys,
                         )
 
-
                     if sub_account_channel in message_channel:
 
                         cached_orders = await querying_data(
@@ -201,7 +200,8 @@ async def reconciling_size(
                             orders_keys,
                         )
 
-                    if (order_allowed
+                    if (
+                        order_allowed
                         and ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all
@@ -231,7 +231,9 @@ async def reconciling_size(
                             archive_db_table = f"my_trades_all_{currency_lower}_json"
 
                             query_trades = f"SELECT * FROM  v_{currency_lower}_trading"
-                            query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log"
+                            query_log = (
+                                f"SELECT * FROM  v_{currency_lower}_transaction_log"
+                            )
 
                             my_trades_currency_all_transactions: list = (
                                 await executing_query_with_return(query_trades)
@@ -243,16 +245,25 @@ async def reconciling_size(
                                 if o["is_open"] == 1
                             ]
 
-                            from_transaction_log = await executing_query_with_return(query_log)
+                            from_transaction_log = await executing_query_with_return(
+                                query_log
+                            )
 
                             sub_account_positions = sub_account["positions"]
 
-                            sub_account_positions_instrument = remove_redundant_elements(
-                                [o["instrument_name"] for o in sub_account_positions]
+                            sub_account_positions_instrument = (
+                                remove_redundant_elements(
+                                    [
+                                        o["instrument_name"]
+                                        for o in sub_account_positions
+                                    ]
+                                )
                             )
 
                             my_trades_currency_active_free_blanks = [
-                                o for o in my_trades_currency_active if o["label"] is not None
+                                o
+                                for o in my_trades_currency_active
+                                if o["label"] is not None
                             ]
 
                             # FROM sub account to other db's
@@ -277,7 +288,8 @@ async def reconciling_size(
                                             my_trades_instrument_name_archive = [
                                                 o
                                                 for o in my_trades_currency_all_transactions
-                                                if instrument_name in o["instrument_name"]
+                                                if instrument_name
+                                                in o["instrument_name"]
                                             ]
 
                                             if my_trades_instrument_name_archive:
@@ -302,7 +314,9 @@ async def reconciling_size(
 
                                                 timestamp_log = five_days_ago
 
-                                            log.critical(f"timestamp_log {timestamp_log}")
+                                            log.critical(
+                                                f"timestamp_log {timestamp_log}"
+                                            )
 
                                             await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp(
                                                 instrument_name,
@@ -314,7 +328,9 @@ async def reconciling_size(
                                                 1000,
                                             )
 
-                            settlement_periods = get_settlement_period(strategy_attributes)
+                            settlement_periods = get_settlement_period(
+                                strategy_attributes
+                            )
 
                             futures_instruments = await get_futures_instruments(
                                 currencies, settlement_periods
@@ -328,7 +344,9 @@ async def reconciling_size(
                                 "active_futures"
                             ]
 
-                            delta_time_expiration = min_expiration_timestamp - server_time
+                            delta_time_expiration = (
+                                min_expiration_timestamp - server_time
+                            )
 
                             expired_instrument_name = [
                                 o["instrument_name"]
@@ -347,7 +365,9 @@ async def reconciling_size(
                                         instrument_name,
                                     )
 
-                            my_trades_instruments = [o for o in my_trades_currency_active]
+                            my_trades_instruments = [
+                                o for o in my_trades_currency_active
+                            ]
                             my_trades_instruments_name = remove_redundant_elements(
                                 [o["instrument_name"] for o in my_trades_instruments]
                             )
@@ -375,8 +395,8 @@ async def reconciling_size(
                                     )
 
                                     query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log_type"
-                                    from_transaction_log = await executing_query_with_return(
-                                        query_log
+                                    from_transaction_log = (
+                                        await executing_query_with_return(query_log)
                                     )
 
                                     #! need to be completed to compute rl from instrument name
@@ -418,7 +438,6 @@ async def reconciling_size(
                                 archive_db_table,
                                 my_trades_currency_active,
                             )
-
 
             except Exception as error:
 

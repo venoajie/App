@@ -373,11 +373,10 @@ class SendApiRequest:
             endpoint=endpoint,
             params=params,
         )
-        
-        log.error(f"result_sub_account {result_sub_account}")
+
+        # log.error(f"result_sub_account {result_sub_account}")
 
         result = result_sub_account["result"]
-
 
         return result
 
@@ -396,15 +395,15 @@ class SendApiRequest:
             endpoint=endpoint,
             params=params,
         )
-        log.debug(f"result_sub_account_detail {result_sub_account}")
-        
+        # log.debug(f"result_sub_account_detail {result_sub_account}")
+
         result = result_sub_account["result"]
 
         await publishing_specific_purposes(
             "sub_account_update",
             result,
         )
-        
+
         return result
 
     async def get_user_trades_by_currency(
