@@ -190,6 +190,7 @@ async def reconciling_size(
                         
                         sub_account = [] if not sub_account else sub_account[0]
 
+                    log.error (message_byte_data)
                     server_time = message_byte_data["server_time"]
 
                     currency, currency_upper = (
