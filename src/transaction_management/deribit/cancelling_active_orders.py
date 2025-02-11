@@ -34,7 +34,6 @@ from utilities.system_tools import (
 
 
 async def cancelling_orders(
-    message_byte,
     private_data: object,
     modify_order_and_db: object,
     currencies: list,
@@ -131,8 +130,8 @@ async def cancelling_orders(
 
                 from loguru import logger as log
 
-                #message_byte = await pubsub.get_message()
-                
+                message_byte = await pubsub.get_message()
+
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])

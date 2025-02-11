@@ -84,14 +84,7 @@ async def main():
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
         
-        # parsing config file
-        config_app = get_config_tomli(file_toml)
         
-        # get redis channels
-        redis_channels: dict = config_app["redis_channels"][0]
-
-        redis_keys: dict = config_app["redis_keys"][0]
-                
         # get redis channels
         receive_order_channel: str = redis_channels["receive_order"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
@@ -101,15 +94,11 @@ async def main():
         sending_order_channel: str = redis_channels["sending_order"]
         sub_account_channel: str = redis_channels["sub_account_update"]
         order_allowed_channel: str = redis_channels["is_order_allowed"]
-        ticker_cached_channel: str = redis_channels["ticker_update_cached"]
-
 
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
-        ticker_cached_channel,
             receive_order_channel,
-        sending_order_channel,
             ticker_cached_channel,
             portfolio_channel,
             my_trades_channel,
@@ -120,7 +109,10 @@ async def main():
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
         
-        message_in_byte = asyncio.create_task( pubsub.get_message())
+        message_byte = await pubsub.get_message()
+
+        # parsing config file
+        config_app = get_config_tomli(file_toml)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
@@ -130,6 +122,11 @@ async def main():
 
         strategy_attributes = config_app["strategies"]
 
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+
+        redis_keys: dict = config_app["redis_keys"][0]
+        
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
@@ -192,9 +189,8 @@ async def main():
             producer_task, 
         
             saving_task,
-            message_in_byte,
+            
         cancelling_orders(
-            message_in_byte,
                 private_data,
                 modify_order_and_db,
                 currencies,
@@ -228,7 +224,6 @@ async def main():
                 config_app),
             
             update_cached_ticker(
-            message_in_byte,
                 client_redis,
                 config_app),
 
