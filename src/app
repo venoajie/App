@@ -101,11 +101,15 @@ async def main():
         sending_order_channel: str = redis_channels["sending_order"]
         sub_account_channel: str = redis_channels["sub_account_update"]
         order_allowed_channel: str = redis_channels["is_order_allowed"]
+        ticker_cached_channel: str = redis_channels["ticker_update_cached"]
+
 
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
+        ticker_cached_channel,
             receive_order_channel,
+        sending_order_channel,
             ticker_cached_channel,
             portfolio_channel,
             my_trades_channel,
@@ -190,6 +194,7 @@ async def main():
             saving_task,
             
         cancelling_orders(
+            message_in_byte,
                 private_data,
                 modify_order_and_db,
                 currencies,
