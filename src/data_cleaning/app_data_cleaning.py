@@ -153,6 +153,8 @@ async def reconciling_size(
         sub_account = []
 
         query_trades = (f"SELECT * FROM  v_trading_all_active")
+        
+        await asyncio.sleep(0.5)
 
         while True:
 
