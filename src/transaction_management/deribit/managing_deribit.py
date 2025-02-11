@@ -268,7 +268,7 @@ class ModifyOrderDb(SendApiRequest):
         )
         
         await publishing_specific_purposes(
-            "porfolio",
+            "portfolio",
             portfolio,
         )
 
