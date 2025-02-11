@@ -220,6 +220,8 @@ async def main():
             
             reconciling_size(
                 modify_order_and_db,
+                client_redis,
+                redis_channels,
                 config_app,),                
 
             back_up_db(60*10),
