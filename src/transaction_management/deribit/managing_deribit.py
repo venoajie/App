@@ -271,6 +271,7 @@ class ModifyOrderDb(SendApiRequest):
             "portfolio",
             portfolio,
         )
+        log.debug(portfolio)
 
         await update_db_pkl(
             "portfolio",
