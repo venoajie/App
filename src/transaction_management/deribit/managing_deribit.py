@@ -188,7 +188,10 @@ class ModifyOrderDb(SendApiRequest):
 
         await self.resupply_sub_accountdb(currency.upper())
 
-    async def get_sub_account(self, currency) -> list:
+    async def get_sub_account(
+        self, 
+        currency,
+        ) -> list:
         """
         Returns example:
          [
@@ -227,7 +230,7 @@ class ModifyOrderDb(SendApiRequest):
         # fetch data from exchange
         return await self.private_data.get_subaccounts_details(currency)
 
-    async def resupply_sub_accountdb_(
+    async def resupply_sub_accountdb(
         self,
         currency,
     ) -> None:
@@ -836,7 +839,6 @@ class ModifyOrderDb(SendApiRequest):
                         order_db_table,
                         order_id,
                     )
-
 
 async def cancel_the_cancellables(
     order_db_table: str,
