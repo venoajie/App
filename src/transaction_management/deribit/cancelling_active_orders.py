@@ -228,6 +228,7 @@ async def cancelling_orders(
                                 ]
                             )
 
+                            log.error(f"cached_orders {cached_orders}")
                             orders_currency = (
                                 []
                                 if not cached_orders
@@ -237,6 +238,8 @@ async def cancelling_orders(
                                     if currency_upper in o["instrument_name"]
                                 ]
                             )
+                            
+                            log.debug(f"orders_currency {orders_currency}")
 
                             position = [o for o in sub_account["positions"]]
 
