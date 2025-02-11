@@ -192,7 +192,7 @@ async def main():
             producer_task, 
         
             saving_task,
-            message_in_byte(),
+            message_in_byte,
         cancelling_orders(
             message_in_byte,
                 private_data,
