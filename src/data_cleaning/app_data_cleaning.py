@@ -186,6 +186,8 @@ async def reconciling_size(
 
                         sub_account = message_byte_data
                         
+                        log.warning (sub_account)
+                        
                         sub_account = [] if not sub_account else sub_account[0]
 
                     server_time = message_byte_data["server_time"]
@@ -211,6 +213,8 @@ async def reconciling_size(
                     from_transaction_log = await executing_query_with_return(
                         query_log
                     )
+          
+                    log.warning (sub_account)
 
                     sub_account_positions = sub_account["positions"]
                     
