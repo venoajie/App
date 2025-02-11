@@ -84,7 +84,11 @@ async def main():
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
         
-        
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+
+        redis_keys: dict = config_app["redis_keys"][0]
+                
         # get redis channels
         receive_order_channel: str = redis_channels["receive_order"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
@@ -122,11 +126,6 @@ async def main():
 
         strategy_attributes = config_app["strategies"]
 
-        # get redis channels
-        redis_channels: dict = config_app["redis_channels"][0]
-
-        redis_keys: dict = config_app["redis_keys"][0]
-        
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
