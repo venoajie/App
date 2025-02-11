@@ -81,36 +81,6 @@ async def main():
         
         client_redis: object = aioredis.Redis.from_pool(pool)
         
-        # connecting to redis pubsub
-        pubsub: object = client_redis.pubsub()
-        
-        
-        # get redis channels
-        receive_order_channel: str = redis_channels["receive_order"]
-        market_analytics_channel: str = redis_channels["market_analytics_update"]
-        ticker_cached_channel: str = redis_channels["ticker_update_cached"]
-        portfolio_channel: str = redis_channels["portfolio"]
-        my_trades_channel: str = redis_channels["my_trades"]
-        sending_order_channel: str = redis_channels["sending_order"]
-        sub_account_channel: str = redis_channels["sub_account_update"]
-        order_allowed_channel: str = redis_channels["is_order_allowed"]
-
-        # prepare channels placeholders
-        channels = [
-            market_analytics_channel,
-            receive_order_channel,
-            ticker_cached_channel,
-            portfolio_channel,
-            my_trades_channel,
-            sub_account_channel,
-            order_allowed_channel,
-        ]
-        
-        # subscribe to channels
-        [await pubsub.subscribe(o) for o in channels]
-        
-        message_byte = await pubsub.get_message()
-
         # parsing config file
         config_app = get_config_tomli(file_toml)
 
@@ -157,6 +127,11 @@ async def main():
         await asyncio.sleep(0.0005)
         
         """
+            
+            reconciling_size(
+                modify_order_and_db,
+                config_app,
+                idle_time),                
                     
             future_spreads(
                 currencies,
@@ -167,11 +142,6 @@ async def main():
                 strategy_attributes,
                 ),
             
-            reconciling_size(
-                modify_order_and_db,
-                config_app,
-                idle_time),                
-
             hedging_spot(
                 currencies,
                 client_redis,
@@ -238,7 +208,6 @@ async def main():
                 redis_channels,
                 resolutions,
                 np),
-            
             
             back_up_db(60*10),
             
