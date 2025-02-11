@@ -227,7 +227,7 @@ class ModifyOrderDb(SendApiRequest):
         # fetch data from exchange
         return await self.private_data.get_subaccounts_details(currency)
 
-    async def resupply_sub_accountdb(
+    async def resupply_sub_accountdb_(
         self,
         currency,
     ) -> None:
