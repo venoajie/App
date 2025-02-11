@@ -239,9 +239,12 @@ class ModifyOrderDb(SendApiRequest):
         log.info(f"resupply {currency.upper()} sub account & portfolio db-START")
         sub_accounts = await self.get_sub_account(currency)
 
-        my_path_sub_account = provide_path_for_file("sub_accounts", currency)
+        my_path_sub_account = provide_path_for_file(
+            "sub_accounts",
+            currency,
+            )
         
-        await self.resupply_sub_accountdb(currency) 
+        await self.resupply_portfolio(currency) 
 
         replace_data(
             my_path_sub_account,
@@ -250,7 +253,10 @@ class ModifyOrderDb(SendApiRequest):
 
         log.info(f"resupply {currency.upper()} sub account & portfolio db-DONE")
 
-    async def resupply_portfolio(self, currency) -> None:
+    async def resupply_portfolio(
+        self, 
+        currency,
+        ) -> None:
 
         # fetch data from exchange
         sub_accounts = await self.private_data.get_subaccounts()
