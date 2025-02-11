@@ -242,8 +242,25 @@ async def publishing_specific_purposes(
 ) -> None:
     """
     purposes:
-    trading_update
-    sub_account_update
+    + trading_update
+    + sub_account_update
+
+        my_trades_channel:
+        + send messages that "high probabilities" trade DB has changed
+            sender: redis publisher + sqlite insert, update & delete
+        + updating trading cache at end user
+            consumer: fut spread, hedging, cancelling
+        + checking data integrity
+            consumer: app data cleaning/size reconciliation
+
+        sub_account_channel:
+        + send messages that sub_account has changed
+            sender: deribit API module
+        + updating sub account cache at end user
+            consumer: fut spread, hedging, cancelling
+        + checking data integrity
+            consumer: app data cleaning/size reconciliation
+
     """
 
     if not client_redis:

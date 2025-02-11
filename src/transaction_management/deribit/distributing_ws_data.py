@@ -52,7 +52,37 @@ async def caching_distributing_data(
     redis_keys: list,
     queue_general: object,
 ) -> None:
-    """ """
+
+    """
+    my_trades_channel:
+    + send messages that "high probabilities" trade DB has changed
+        sender: redis publisher + sqlite insert, update & delete
+    + updating trading cache at end user
+        consumer: fut spread, hedging, cancelling
+    + checking data integrity
+        consumer: app data cleaning/size reconciliation
+
+    sub_account_channel:
+    + send messages that sub_account has changed
+        sender: deribit API module
+    + updating sub account cache at end user
+        consumer: fut spread, hedging, cancelling
+    + checking data integrity
+        consumer: app data cleaning/size reconciliation
+
+    sending_order_channel:
+    + send messages that an order has allowed to submit
+        sender: fut spread, hedging
+    + send order to deribit
+        consumer: processing order
+
+    is_order_allowed_channel:
+    + send messages that data has reconciled each other and order could be processed
+        sender: app data cleaning/size reconciliation, check double ids
+    + processing order
+        consumer: fut spread, hedging
+
+    """
 
     try:
 

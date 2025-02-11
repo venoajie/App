@@ -25,7 +25,6 @@ from utilities.number_modification import get_closest_value
 from utilities.pickling import read_data
 from utilities.string_modification import (
     parsing_label,
-    parsing_redis_market_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -91,9 +90,7 @@ async def hedging_spot(
 
         instrument_attributes_futures_all = futures_instruments["active_futures"]
 
-        ticker_keys: str = redis_keys["ticker"]
         orders_keys: str = redis_keys["orders"]
-        market_condition_keys: str = redis_keys["market_condition"]
 
         # get redis channels
         receive_order_channel: str = redis_channels["receive_order"]
@@ -102,6 +99,8 @@ async def hedging_spot(
         portfolio_channel: str = redis_channels["portfolio"]
         my_trades_channel: str = redis_channels["my_trades"]
         sending_order_channel: str = redis_channels["sending_order"]
+        sub_account_channel: str = redis_channels["sub_account_update"]
+        order_allowed_channel: str = redis_channels["is_order_allowed"]
 
         # prepare channels placeholders
         channels = [
@@ -110,6 +109,8 @@ async def hedging_spot(
             ticker_cached_channel,
             portfolio_channel,
             my_trades_channel,
+            sub_account_channel,
+            order_allowed_channel,
         ]
 
         # subscribe to channels
@@ -126,6 +127,8 @@ async def hedging_spot(
         portfolio_all = []
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
+        
+        order_allowed = False
 
         while not_cancel:
 
@@ -139,6 +142,10 @@ async def hedging_spot(
 
                     message_channel = message_byte["channel"]
 
+                    if order_allowed_channel in message_channel:
+
+                        order_allowed = message_byte_data
+
                     if market_analytics_channel in message_channel:
 
                         market_condition_all = message_byte_data
@@ -147,13 +154,19 @@ async def hedging_spot(
 
                         portfolio_all = message_byte_data["cached_portfolio"]
 
-                    if my_trades_channel in message_channel:
+                    if (
+                        my_trades_channel in message_channel
+                        or sub_account_channel in message_channel
+                    ):
 
                         my_trades_active_all = await executing_query_with_return(
                             query_trades
                         )
 
-                    if receive_order_channel in message_channel:
+                    if (
+                        receive_order_channel in message_channel
+                        or sub_account_channel in message_channel
+                    ):
 
                         cached_orders = await querying_data(
                             client_redis,
@@ -161,8 +174,8 @@ async def hedging_spot(
                             orders_keys,
                         )
 
-                    if (
-                        ticker_cached_channel in message_channel
+                    if (order_allowed
+                        and ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all
                     ):

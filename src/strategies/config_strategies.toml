@@ -42,6 +42,7 @@ sending_order = "app.sending_order"
 ticker_update_data = "market.ticker.data"
 ticker_update_cached = "market.ticker.cached"
 market_analytics_update = "market.analytics"
+is_order_allowed = "is_order_allowed"
 
 
 [[redis_keys]]
