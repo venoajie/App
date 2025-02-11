@@ -114,7 +114,7 @@ async def cancelling_orders(
 
         portfolio_all = []
 
-        query_trades = (f"SELECT * FROM  v_trading_all_active")
+        query_trades = (f" SELECT instrument_name, label, amount_dir as amount, price, side, timestamp, trade_id FROM my_trades_all_btc_json WHERE is_open = 1 UNION  SELECT instrument_name, label, amount_dir as amount, price, side, timestamp, trade_id FROM my_trades_all_eth_json  WHERE is_open = 1")
 
         while not_cancel:
 
