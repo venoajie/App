@@ -62,7 +62,7 @@ def combining_ticker_data(instruments_name: str) -> list:
     return result
 
 
-async def update_cached_ticker(            message_byte,
+async def update_cached_ticker(            message_in_byte,
 
     client_redis: object,
     config_app: list,
@@ -120,19 +120,19 @@ async def update_cached_ticker(            message_byte,
 
             try:
 
-                #message_byte = await pubsub.get_message()
+                message_byte = message_in_byte
 
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
+                        
+                    print(data)
 
                     message_channel = message_byte["channel"]
 
                     if ticker_data_channel in message_channel:
 
                         data = message_byte_data["data"]
-                        
-                        print(data)
 
                         instrument_name = message_byte_data["instrument_name"]
 
