@@ -13,6 +13,12 @@ from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.orders_management import saving_orders
 from utilities.system_tools import parse_error_message
 
+from transaction_management.deribit.managing_deribit import (
+    currency_inline_with_database_address,
+)
+from utilities.pickling import replace_data
+from utilities.system_tools import parse_error_message, provide_path_for_file
+
 
 async def saving_and_relabelling_orders(
     private_data: object,
@@ -52,10 +58,12 @@ async def saving_and_relabelling_orders(
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         receive_order_channel: str = redis_channels["receive_order"]
-
+        portfolio_channel: str = redis_channels["portfolio"]
         # prepare channels placeholders
         channels = [
-            receive_order_channel,
+            receive_order_channel,     
+            portfolio_channel,
+
         ]
 
         # subscribe to channels
@@ -77,12 +85,11 @@ async def saving_and_relabelling_orders(
 
                     try:
 
+                        data = message_byte_data["data"]
+
+                        currency_lower = message_byte_data["currency"]
+
                         if receive_order_channel in message_channel:
-
-                            data = message_byte_data["data"]
-
-                            currency_lower = message_byte_data["currency"]
-
                             await saving_orders(
                                 modify_order_and_db,
                                 private_data,
@@ -92,6 +99,15 @@ async def saving_and_relabelling_orders(
                                 order_db_table,
                                 currency_lower,
                                 False,
+                            )
+
+
+                        if portfolio_channel in message_channel:
+
+                            await update_db_pkl(
+                                "portfolio",
+                                data,
+                                currency_lower,
                             )
 
                     except Exception as error:
@@ -120,3 +136,23 @@ async def saving_and_relabelling_orders(
             f"capturing user changes - {error}",
             "general_error",
         )
+
+
+async def update_db_pkl(
+    path: str,
+    data_orders: dict,
+    currency: str,
+) -> None:
+
+    my_path_portfolio: str = provide_path_for_file(path, currency)
+
+    if currency_inline_with_database_address(
+        currency,
+        my_path_portfolio,
+    ):
+
+        replace_data(
+            my_path_portfolio,
+            data_orders,
+        )
+

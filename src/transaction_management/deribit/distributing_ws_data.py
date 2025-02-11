@@ -13,36 +13,12 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from db_management.redis_client import saving_and_publishing_result, publishing_result
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.managing_deribit import (
-    currency_inline_with_database_address,
-)
 from utilities.caching import (
     combining_order_data,
     update_cached_orders,
 )
-from utilities.pickling import replace_data
 from utilities.string_modification import extract_currency_from_text
-from utilities.system_tools import parse_error_message, provide_path_for_file
-
-
-async def update_db_pkl(
-    path: str,
-    data_orders: dict,
-    currency: str,
-) -> None:
-
-    my_path_portfolio: str = provide_path_for_file(path, currency)
-
-    if currency_inline_with_database_address(
-        currency,
-        my_path_portfolio,
-    ):
-
-        replace_data(
-            my_path_portfolio,
-            data_orders,
-        )
-
+from utilities.system_tools import parse_error_message
 
 async def caching_distributing_data(
     private_data: object,
@@ -63,6 +39,7 @@ async def caching_distributing_data(
         consumer: app data cleaning/size reconciliation
 
     sub_account_channel:
+    update method: websocket & REST
     + send messages that sub_account has changed
         sender: deribit API module
     + updating sub account cache at end user
@@ -93,7 +70,6 @@ async def caching_distributing_data(
         my_trades_channel: str = redis_channels["my_trades"]
 
         order_keys: str = redis_keys["orders"]
-        portfolio_keys: str = redis_keys["portfolio"]
 
         cached_orders: list = await combining_order_data(private_data, currencies)
 
@@ -175,12 +151,6 @@ async def caching_distributing_data(
                             pipe,
                             my_trades_channel,
                             my_trades_currency_all_transactions,
-                        )
-
-                        await update_db_pkl(
-                            "portfolio",
-                            data,
-                            currency,
                         )
 
                 instrument_name_future = (message_channel)[19:]

@@ -6,6 +6,7 @@ from dataclassy import dataclass, fields
 from loguru import logger as log
 
 # user defined formula
+from db_management.redis_client import publishing_specific_purposes
 from db_management.sqlite_management import (
     deleting_row,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
@@ -232,31 +233,41 @@ class ModifyOrderDb(SendApiRequest):
     ) -> None:
 
         # resupply sub account db
-        log.info(f"resupply {currency.upper()} sub account db-START")
+        log.info(f"resupply {currency.upper()} sub account & portfolio db-START")
         sub_accounts = await self.get_sub_account(currency)
 
         my_path_sub_account = provide_path_for_file("sub_accounts", currency)
+        
+        await self.resupply_sub_accountdb(currency) 
 
         replace_data(
             my_path_sub_account,
             sub_accounts,
         )
 
-        log.info(f"resupply {currency.upper()} sub account db-DONE")
+        log.info(f"resupply {currency.upper()} sub account & portfolio db-DONE")
 
     async def resupply_portfolio(self, currency) -> None:
 
-        log.info(f"resupply {currency.upper()} portfolio-START")
         # fetch data from exchange
         sub_accounts = await self.private_data.get_subaccounts()
 
         portfolio = extract_portfolio_per_id_and_currency(
-            self.sub_account_id, sub_accounts, currency
+            self.sub_account_id, 
+            sub_accounts, 
+            currency,
+        )
+        
+        await publishing_specific_purposes(
+            "porfolio",
+            portfolio,
         )
 
-        await update_db_pkl("portfolio", portfolio, currency)
-
-        log.info(f"resupply {currency.upper()} portfolio-DONE")
+        await update_db_pkl(
+            "portfolio",
+            portfolio,
+            currency,
+            )
 
     async def save_transaction_log_by_instrument(
         self,

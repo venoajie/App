@@ -242,8 +242,9 @@ async def publishing_specific_purposes(
 ) -> None:
     """
     purposes:
-    + trading_update
+    + porfolio
     + sub_account_update
+    + trading_update
 
         my_trades_channel:
         + send messages that "high probabilities" trade DB has changed
@@ -287,6 +288,9 @@ async def publishing_specific_purposes(
 
     if purpose == "sub_account_update":
         channel: str = redis_channels["sub_account_update"]
+
+    if purpose == "porfolio":
+        channel: str = redis_channels["porfolio"]
 
     async with client_redis.pipeline() as pipe:
 
