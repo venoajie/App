@@ -120,7 +120,7 @@ async def main():
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
         
-        message_in_byte = await pubsub.get_message()
+        message_in_byte = asyncio.create_task( pubsub.get_message())
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
@@ -192,7 +192,7 @@ async def main():
             producer_task, 
         
             saving_task,
-            
+            message_in_byte(),
         cancelling_orders(
             message_in_byte,
                 private_data,
