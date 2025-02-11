@@ -359,6 +359,28 @@ class SendApiRequest:
 
         return order_result
 
+    async def get_subaccounts(self) -> list:
+        """
+        portfolio
+        """
+        # Set endpoint
+        endpoint: str = "private/get_subaccounts"
+
+        params = {"with_portfolio": True}
+
+        result_sub_account = await private_connection(
+            self.sub_account_id,
+            endpoint=endpoint,
+            params=params,
+        )
+        
+        log.error(f"result_sub_account {result_sub_account}")
+
+        result = result_sub_account["result"]
+
+
+        return result
+
     async def get_subaccounts_details(
         self,
         currency: str,
@@ -374,6 +396,7 @@ class SendApiRequest:
             endpoint=endpoint,
             params=params,
         )
+        log.debug(f"result_sub_account_detail {result_sub_account}")
         
         result = result_sub_account["result"]
 
@@ -495,23 +518,6 @@ class SendApiRequest:
             endpoint=endpoint,
             params=params,
         )
-        return result
-
-    async def get_subaccounts(self) -> list:
-        # Set endpoint
-        endpoint: str = "private/get_subaccounts"
-
-        params = {"with_portfolio": True}
-
-        result_sub_account = await private_connection(
-            self.sub_account_id,
-            endpoint=endpoint,
-            params=params,
-        )
-
-        result = result_sub_account["result"]
-
-
         return result
 
 
