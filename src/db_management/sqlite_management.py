@@ -576,8 +576,6 @@ async def executing_query_with_return(
     """
 
     filter_val = (f"{filter_value}",)
-    
-    log.warning (f"querying_table {query_table} filter_val {filter_val}")
 
     combine_result = []
 

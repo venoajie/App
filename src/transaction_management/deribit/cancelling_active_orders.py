@@ -114,7 +114,7 @@ async def cancelling_orders(
 
         portfolio_all = []
 
-        query_trades = (f" SELECT instrument_name, label, amount_dir as amount, price, side, timestamp, trade_id FROM my_trades_all_btc_json WHERE is_open = 1 UNION  SELECT instrument_name, label, amount_dir as amount, price, side, timestamp, trade_id FROM my_trades_all_eth_json  WHERE is_open = 1")
+        query_trades = (f"SELECT * FROM  v_trading_all_active")
 
         while not_cancel:
 
@@ -152,11 +152,7 @@ async def cancelling_orders(
                         or sub_account_channel in message_channel
                     ):
 
-                        cached_orders = await querying_data(
-                            client_redis,
-                            receive_order_channel,
-                            orders_keys,
-                        )
+                        cached_orders = message_byte_data["cached_orders"]
 
                         server_time = message_byte_data["server_time"]
 

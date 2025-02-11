@@ -105,6 +105,13 @@ async def caching_distributing_data(
 
                     if "changes.any" in message_channel:
 
+                        await update_cached_orders(
+                            cached_orders,
+                            data,
+                        )
+                        
+                        pub_message.update({"cached_orders": cached_orders})
+                        
                         await saving_and_publishing_result(
                             pipe,
                             receive_order_channel,
@@ -113,10 +120,6 @@ async def caching_distributing_data(
                             pub_message,
                         )
 
-                        await update_cached_orders(
-                            cached_orders,
-                            data,
-                        )
 
                     if "portfolio" in message_channel:
 
