@@ -159,6 +159,10 @@ async def reconciling_size(
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
+        
+        sub_account = []
+
+        query_trades = (f"SELECT * FROM  v_trading_all_active")
 
         while True:
 
@@ -185,259 +189,230 @@ async def reconciling_size(
                         receive_order_channel in message_channel
                         or sub_account_channel in message_channel
                     ):
-
-                        cached_orders = await querying_data(
-                            client_redis,
-                            receive_order_channel,
-                            orders_keys,
-                        )
+                     
+                        cached_orders = message_byte_data["cached_orders"]
 
                     if sub_account_channel in message_channel:
 
-                        cached_orders = await querying_data(
-                            client_redis,
-                            receive_order_channel,
-                            orders_keys,
-                        )
-
-                    if (
-                        order_allowed
-                        and ticker_cached_channel in message_channel
-                        and market_condition_all
-                        and portfolio_all
-                    ):
-
-                        cached_ticker_all = message_byte_data["data"]
-
-                        server_time = message_byte_data["server_time"]
-
-                        currency, currency_upper = (
-                            message_byte_data["currency"],
-                            message_byte_data["currency_upper"],
-                        )
-
-                        currency_lower: str = currency
-
-                        server_time = get_now_unix_time()
-
-                        sub_account = reading_from_pkl_data("sub_accounts", currency)
-
+                        sub_account = message_byte_data
+                        
                         sub_account = [] if not sub_account else sub_account[0]
 
-                        if sub_account:
+                    server_time = message_byte_data["server_time"]
 
-                            currency_lower = currency.lower()
+                    currency, currency_upper = (
+                        message_byte_data["currency"],
+                        message_byte_data["currency_upper"],
+                    )
 
-                            archive_db_table = f"my_trades_all_{currency_lower}_json"
+                    currency_lower: str = currency
 
-                            query_trades = f"SELECT * FROM  v_{currency_lower}_trading"
-                            query_log = (
-                                f"SELECT * FROM  v_{currency_lower}_transaction_log"
-                            )
+                    archive_db_table = f"my_trades_all_{currency_lower}_json"
 
-                            my_trades_currency_all_transactions: list = (
-                                await executing_query_with_return(query_trades)
-                            )
+                    query_log = (
+                        f"SELECT * FROM  v_{currency_lower}_transaction_log"
+                    )
 
-                            my_trades_currency_active: list = [
-                                o
-                                for o in my_trades_currency_all_transactions
-                                if o["is_open"] == 1
-                            ]
+                    my_trades_currency_all_transactions: list = [
+                        o
+                        for o in my_trades_active_all
+                        if currency_upper in o["instrument_name"] ]
 
-                            from_transaction_log = await executing_query_with_return(
-                                query_log
-                            )
+                    from_transaction_log = await executing_query_with_return(
+                        query_log
+                    )
 
-                            sub_account_positions = sub_account["positions"]
+                    sub_account_positions = sub_account["positions"]
+                    
+                    log.warning (sub_account_positions)
 
-                            sub_account_positions_instrument = (
-                                remove_redundant_elements(
-                                    [
-                                        o["instrument_name"]
-                                        for o in sub_account_positions
-                                    ]
-                                )
-                            )
-
-                            my_trades_currency_active_free_blanks = [
-                                o
-                                for o in my_trades_currency_active
-                                if o["label"] is not None
-                            ]
-
-                            # FROM sub account to other db's
-                            if sub_account_positions_instrument:
-
-                                # sub account instruments
-                                for instrument_name in sub_account_positions_instrument:
-
-                                    # eliminating combo transactions as they're not recorded in the book
-                                    if "-FS-" not in instrument_name:
-
-                                        my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
-                                            instrument_name,
-                                            my_trades_currency_active,
-                                            sub_account,
-                                        )
-
-                                        if (
-                                            not my_trades_and_sub_account_size_reconciled_archive
-                                        ):
-
-                                            my_trades_instrument_name_archive = [
-                                                o
-                                                for o in my_trades_currency_all_transactions
-                                                if instrument_name
-                                                in o["instrument_name"]
-                                            ]
-
-                                            if my_trades_instrument_name_archive:
-
-                                                timestamp_log = min(
-                                                    [
-                                                        o["timestamp"]
-                                                        for o in my_trades_instrument_name_archive
-                                                    ]
-                                                )
-                                            else:
-
-                                                ONE_SECOND = 1000
-
-                                                one_minute = ONE_SECOND * 60
-
-                                                end_timestamp = get_now_unix_time()
-
-                                                five_days_ago = end_timestamp - (
-                                                    one_minute * 60 * 24 * 5
-                                                )
-
-                                                timestamp_log = five_days_ago
-
-                                            log.critical(
-                                                f"timestamp_log {timestamp_log}"
-                                            )
-
-                                            await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp(
-                                                instrument_name,
-                                                timestamp_log
-                                                - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
-                                                archive_db_table,
-                                                trade_db_table,
-                                                order_db_table,
-                                                1000,
-                                            )
-
-                            settlement_periods = get_settlement_period(
-                                strategy_attributes
-                            )
-
-                            futures_instruments = await get_futures_instruments(
-                                currencies, settlement_periods
-                            )
-
-                            min_expiration_timestamp = futures_instruments[
-                                "min_expiration_timestamp"
-                            ]
-
-                            instrument_attributes_futures_all = futures_instruments[
-                                "active_futures"
-                            ]
-
-                            delta_time_expiration = (
-                                min_expiration_timestamp - server_time
-                            )
-
-                            expired_instrument_name = [
+                    sub_account_positions_instrument = (
+                        remove_redundant_elements(
+                            [
                                 o["instrument_name"]
-                                for o in instrument_attributes_futures_all
-                                if o["expiration_timestamp"] == min_expiration_timestamp
+                                for o in sub_account_positions
                             ]
+                        )
+                    )
 
-                            for instrument_name in expired_instrument_name:
+                    my_trades_currency_active_free_blanks = [
+                        o
+                        for o in my_trades_currency_active
+                        if o["label"] is not None
+                    ]
 
-                                if delta_time_expiration < 0:
+                    # FROM sub account to other db's
+                    if sub_account_positions_instrument:
 
-                                    await update_instruments_per_currency(currency)
+                        # sub account instruments
+                        for instrument_name in sub_account_positions_instrument:
 
-                                    await updating_delivered_instruments(
-                                        archive_db_table,
-                                        instrument_name,
-                                    )
+                            # eliminating combo transactions as they're not recorded in the book
+                            if "-FS-" not in instrument_name:
 
-                            my_trades_instruments = [
-                                o for o in my_trades_currency_active
-                            ]
-                            my_trades_instruments_name = remove_redundant_elements(
-                                [o["instrument_name"] for o in my_trades_instruments]
-                            )
-
-                            for my_trade_instrument in my_trades_instruments_name:
-
-                                instrument_name_has_delivered = (
-                                    is_instrument_name_has_delivered(
-                                        my_trade_instrument,
-                                        instrument_attributes_futures_all,
-                                    )
+                                my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
+                                    instrument_name,
+                                    my_trades_currency_active,
+                                    sub_account,
                                 )
 
-                                if instrument_name_has_delivered:
+                                if (
+                                    not my_trades_and_sub_account_size_reconciled_archive
+                                ):
 
-                                    await updating_delivered_instruments(
-                                        archive_db_table,
-                                        my_trade_instrument,
-                                    )
-
-                                    await update_instruments_per_currency(currency)
-
-                                    log.debug(
-                                        f"instrument_name_has_delivered {my_trade_instrument} {instrument_name_has_delivered}"
-                                    )
-
-                                    query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log_type"
-                                    from_transaction_log = (
-                                        await executing_query_with_return(query_log)
-                                    )
-
-                                    #! need to be completed to compute rl from instrument name
-
-                                    from_transaction_log_instrument_name = [
+                                    my_trades_instrument_name_archive = [
                                         o
-                                        for o in from_transaction_log
-                                        if o["instrument_name"] == my_trade_instrument
+                                        for o in my_trades_currency_all_transactions
+                                        if instrument_name
+                                        in o["instrument_name"]
                                     ]
 
-                                    unrecorded_timestamp_from_transaction_log = (
-                                        get_unrecorded_trade_transactions(
-                                            "delivered",
-                                            my_trades_currency_all_transactions,
-                                            from_transaction_log_instrument_name,
+                                    if my_trades_instrument_name_archive:
+
+                                        timestamp_log = min(
+                                            [
+                                                o["timestamp"]
+                                                for o in my_trades_instrument_name_archive
+                                            ]
                                         )
+                                    else:
+
+                                        ONE_SECOND = 1000
+
+                                        one_minute = ONE_SECOND * 60
+
+                                        end_timestamp = get_now_unix_time()
+
+                                        five_days_ago = end_timestamp - (
+                                            one_minute * 60 * 24 * 5
+                                        )
+
+                                        timestamp_log = five_days_ago
+
+                                    log.critical(
+                                        f"timestamp_log {timestamp_log}"
                                     )
 
-                                    if unrecorded_timestamp_from_transaction_log:
+                                    await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp(
+                                        instrument_name,
+                                        timestamp_log
+                                        - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                                        archive_db_table,
+                                        trade_db_table,
+                                        order_db_table,
+                                        1000,
+                                    )
 
-                                        await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp(
-                                            my_trade_instrument,
-                                            unrecorded_timestamp_from_transaction_log
-                                            - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
-                                            archive_db_table,
-                                            trade_db_table,
-                                            5,
-                                        )
+                    settlement_periods = get_settlement_period(
+                        strategy_attributes
+                    )
 
-                                        await updating_delivered_instruments(
-                                            archive_db_table,
-                                            my_trade_instrument,
-                                        )
+                    futures_instruments = await get_futures_instruments(
+                        currencies, settlement_periods
+                    )
 
-                                        break
+                    min_expiration_timestamp = futures_instruments[
+                        "min_expiration_timestamp"
+                    ]
 
-                            await clean_up_closed_transactions(
-                                currency,
+                    instrument_attributes_futures_all = futures_instruments[
+                        "active_futures"
+                    ]
+
+                    delta_time_expiration = (
+                        min_expiration_timestamp - server_time
+                    )
+
+                    expired_instrument_name = [
+                        o["instrument_name"]
+                        for o in instrument_attributes_futures_all
+                        if o["expiration_timestamp"] == min_expiration_timestamp
+                    ]
+
+                    for instrument_name in expired_instrument_name:
+
+                        if delta_time_expiration < 0:
+
+                            await update_instruments_per_currency(currency)
+
+                            await updating_delivered_instruments(
                                 archive_db_table,
-                                my_trades_currency_active,
+                                instrument_name,
                             )
+
+                    my_trades_instruments = [
+                        o for o in my_trades_currency_active
+                    ]
+                    my_trades_instruments_name = remove_redundant_elements(
+                        [o["instrument_name"] for o in my_trades_instruments]
+                    )
+
+                    for my_trade_instrument in my_trades_instruments_name:
+
+                        instrument_name_has_delivered = (
+                            is_instrument_name_has_delivered(
+                                my_trade_instrument,
+                                instrument_attributes_futures_all,
+                            )
+                        )
+
+                        if instrument_name_has_delivered:
+
+                            await updating_delivered_instruments(
+                                archive_db_table,
+                                my_trade_instrument,
+                            )
+
+                            await update_instruments_per_currency(currency)
+
+                            log.debug(
+                                f"instrument_name_has_delivered {my_trade_instrument} {instrument_name_has_delivered}"
+                            )
+
+                            query_log = f"SELECT * FROM  v_{currency_lower}_transaction_log_type"
+                            from_transaction_log = (
+                                await executing_query_with_return(query_log)
+                            )
+
+                            #! need to be completed to compute rl from instrument name
+
+                            from_transaction_log_instrument_name = [
+                                o
+                                for o in from_transaction_log
+                                if o["instrument_name"] == my_trade_instrument
+                            ]
+
+                            unrecorded_timestamp_from_transaction_log = (
+                                get_unrecorded_trade_transactions(
+                                    "delivered",
+                                    my_trades_currency_all_transactions,
+                                    from_transaction_log_instrument_name,
+                                )
+                            )
+
+                            if unrecorded_timestamp_from_transaction_log:
+
+                                await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp(
+                                    my_trade_instrument,
+                                    unrecorded_timestamp_from_transaction_log
+                                    - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                                    archive_db_table,
+                                    trade_db_table,
+                                    5,
+                                )
+
+                                await updating_delivered_instruments(
+                                    archive_db_table,
+                                    my_trade_instrument,
+                                )
+
+                                break
+
+                    await clean_up_closed_transactions(
+                        currency,
+                        archive_db_table,
+                        my_trades_currency_active,
+                    )
 
             except Exception as error:
 

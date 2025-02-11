@@ -108,7 +108,7 @@ async def future_spreads(
 
         portfolio_all = []
 
-        query_trades = f"SELECT * FROM  v_trading_all_active"
+        query_trades = (f"SELECT * FROM  v_trading_all_active")
 
         order_allowed = False
 
@@ -150,11 +150,7 @@ async def future_spreads(
                         or sub_account_channel in message_channel
                     ):
 
-                        cached_orders = await querying_data(
-                            client_redis,
-                            receive_order_channel,
-                            orders_keys,
-                        )
+                        cached_orders = message_byte_data["cached_orders"]
 
                     if (
                         order_allowed
