@@ -132,6 +132,8 @@ async def cancelling_orders(
                 from loguru import logger as log
 
                 #message_byte = await pubsub.get_message()
+                
+                log.debug (message_byte)
 
                 if message_byte and message_byte["type"] == "message":
 
