@@ -576,18 +576,26 @@ async def executing_query_with_return(
     """
 
     filter_val = (f"{filter_value}",)
+    
+    log.warning (f"querying_table {query_table} filter_val {filter_val}")
 
     combine_result = []
 
     try:
-        async with aiosqlite.connect(database, isolation_level=None) as db:
+        async with aiosqlite.connect(
+            database, 
+            isolation_level=None,
+            ) as db:
 
             await db.execute("pragma journal_mode=wal;")
 
             db = (
                 db.execute(query_table)
                 if filter == None
-                else db.execute(query_table, filter_val)
+                else db.execute(
+                    query_table,
+                    filter_val,
+                    )
             )
 
             async with db as cur:
