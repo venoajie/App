@@ -222,6 +222,7 @@ async def main():
                 modify_order_and_db,
                 client_redis,
                 redis_channels,
+                strategy_attributes,
                 config_app,),                
 
             back_up_db(60*10),

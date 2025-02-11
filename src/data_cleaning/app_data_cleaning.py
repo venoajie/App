@@ -112,23 +112,14 @@ async def update_instruments(idle_time: int):
 async def reconciling_size(
     modify_order_and_db: object,
     client_redis: object,
+    redis_channels: list,
+    strategy_attributes: list,
     config_app: list,
-    redis_channels,
 ) -> None:
 
     try:
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
-
-        # get tradable strategies
-        tradable_config_app = config_app["tradable"]
-
-        # get tradable currencies
-        currencies = [o["spot"] for o in tradable_config_app][0]
-
-        # modify_order_and_db = ModifyOrderDb(sub_account_id)
-
-        strategy_attributes = config_app["strategies"]
 
         relevant_tables = config_app["relevant_tables"][0]
 
