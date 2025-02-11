@@ -114,7 +114,6 @@ async def reconciling_size(
     client_redis: object,
     config_app: list,
     redis_channels,
-    idle_time: int,
 ) -> None:
 
     try:
