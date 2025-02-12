@@ -253,9 +253,8 @@ async def reconciling_size(
                                             sub_account,
                                         )
                                         
-                                        log.warning (f" {instrument_name} my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
 
-                                        if False and (
+                                        if  (
                                             not my_trades_and_sub_account_size_reconciled
                                         ):
 
@@ -265,13 +264,14 @@ async def reconciling_size(
                                                 if instrument_name
                                                 in o["instrument_name"]
                                             ]
-
+                                            
+                                            log.warning (f" {instrument_name} my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
                                             if my_trades_instrument_name:
 
                                                 timestamp_log = min(
                                                     [
                                                         o["timestamp"]
-                                                        for o in my_trades_instrument_name_archive
+                                                        for o in my_trades_instrument_name
                                                     ]
                                                 )
                                             else:
@@ -340,7 +340,7 @@ async def reconciling_size(
                                     )
 
                             my_trades_instruments = [
-                                o for o in my_trades_currency_active
+                                o for o in my_trades_currency
                             ]
                             my_trades_instruments_name = remove_redundant_elements(
                                 [o["instrument_name"] for o in my_trades_instruments]
