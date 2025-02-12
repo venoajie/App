@@ -123,11 +123,11 @@ async def saving_and_relabelling_orders(
 
                                 sub_account_cached.append(data)
 
-                                await publishing_result(
-                                    client_redis,
-                                    sub_account_cached_channel,
-                                    sub_account_cached,
-                                )
+                            await publishing_result(
+                                client_redis,
+                                sub_account_cached_channel,
+                                sub_account_cached,
+                            )
 
                                 
                         if portfolio_channel in message_channel:
