@@ -263,6 +263,9 @@ async def publishing_specific_purposes(
             consumer: app data cleaning/size reconciliation
 
     """
+    from loguru import logger as log
+    log.critical (f"redis_channels {redis_channels} {purpose}")
+    log.error (f"message {message}")
 
     if not client_redis:
         pool = aioredis.ConnectionPool.from_url(
