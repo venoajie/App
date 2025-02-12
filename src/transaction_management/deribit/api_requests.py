@@ -398,13 +398,10 @@ class SendApiRequest:
             params=params,
         )
         
-        server_time=await get_server_time()
-        
         result = result_sub_account["result"]
         modified_result = []
         modified_result.append(
             dict(
-                server_time=server_time["result"],
                 currency=currency,
                 result=(result),
             )
