@@ -397,16 +397,21 @@ class SendApiRequest:
             endpoint=endpoint,
             params=params,
         )
+        
+        server_time=await get_server_time()
+        
+        log.debug(server_time)
 
         result = result_sub_account["result"]
         modified_result = []
         modified_result.append(
             dict(
+                server_time=server_time,
                 currency=currency,
                 result=(result),
             )
         )
-        
+        get_server_time
         await publishing_specific_purposes(
             "sub_account_update",
             modified_result,
