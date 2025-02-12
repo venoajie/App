@@ -395,7 +395,7 @@ class SendApiRequest:
             endpoint=endpoint,
             params=params,
         )
-        # log.debug(f"result_sub_account_detail {result_sub_account}")
+        log.debug(f"{endpoint} result_sub_account_detail {result_sub_account}")
 
         result = result_sub_account["result"]
 

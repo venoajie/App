@@ -264,8 +264,6 @@ async def publishing_specific_purposes(
 
     """
     from loguru import logger as log
-    log.critical (f"redis_channels {redis_channels} {purpose}")
-    log.error (f"message {message}")
 
     if not client_redis:
         pool = aioredis.ConnectionPool.from_url(
@@ -295,6 +293,9 @@ async def publishing_specific_purposes(
     if purpose == "portfolio_rest":
         channel: str = redis_channels["portfolio_rest"]
 
+    log.critical (f"redis_channels {redis_channels} {channel} {purpose}")
+    log.error (f"message {message}")
+    
     async with client_redis.pipeline() as pipe:
 
         await publishing_result(
