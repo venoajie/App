@@ -192,21 +192,20 @@ async def reconciling_size(
                     if sub_account_cached_channel in message_channel:
 
                         sub_account_all = message_byte_data
-                        log.warning (sub_account_all)
                         
                         server_time = get_now_unix()
                         
                         for currency in currencies:
                                             
                             currency_upper = currency.upper()
+
+                            currency_lower: str = currency.lower()
                             
                             sub_account = [o for o in sub_account_all if currency_upper in o["currency"]]
-                
-                            log.warning (sub_account)
-                            
+                                            
                             sub_account = [] if not sub_account else sub_account[0]
-
-                            currency_lower: str = currency
+                
+                            log.info (sub_account)
 
                             archive_db_table = f"my_trades_all_{currency_lower}_json"
 
