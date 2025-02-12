@@ -189,9 +189,7 @@ async def reconciling_size(
                     if sub_account_cached_channel in message_channel:
 
                         sub_account_all = message_byte_data
-                        
-                        log.warning (sub_account)
-                            
+                                                    
                         server_time = message_byte_data["server_time"]
 
                         currency, currency_upper = (
