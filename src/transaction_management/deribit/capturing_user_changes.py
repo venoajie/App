@@ -101,9 +101,7 @@ async def saving_and_relabelling_orders(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
-                    
-                    log.warning (message_channel)
-
+        
                     try:
 
                         data = message_byte_data["data"]
@@ -153,10 +151,7 @@ async def saving_and_relabelling_orders(
                                 sub_account_cached_channel,
                                 sub_account_cached,
                             )
-                            
-                            log.warning (sub_account_cached)
-                            log.debug (sub_account_cached_channel)
-
+                
                             await update_db_pkl(
                                 "portfolio",
                                 data,
