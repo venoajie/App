@@ -100,11 +100,6 @@ async def main():
             o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
         ]
 
-        for currency in currencies:
-            await modify_order_and_db.cancel_the_cancellables(
-                order_db_table, currency, cancellable_strategies
-            )
-
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
@@ -171,6 +166,7 @@ async def main():
         cancelling_orders(
                 private_data,
                 modify_order_and_db,
+                cancellable_strategies,
                 currencies,
                 client_redis,
                 config_app,

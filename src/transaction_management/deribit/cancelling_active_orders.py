@@ -36,6 +36,7 @@ from utilities.system_tools import (
 async def cancelling_orders(
     private_data: object,
     modify_order_and_db: object,
+    cancellable_strategies,
     currencies: list,
     client_redis: object,
     config_app: list,
@@ -105,6 +106,11 @@ async def cancelling_orders(
         [await pubsub.subscribe(o) for o in channels]
 
         cached_orders = []
+        for currency in currencies:
+            await modify_order_and_db.cancel_the_cancellables(
+                order_db_table, currency, cancellable_strategies
+            )
+
 
         cached_ticker_all = []
 
