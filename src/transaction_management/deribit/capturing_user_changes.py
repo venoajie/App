@@ -78,6 +78,8 @@ async def saving_and_relabelling_orders(
         sub_account_cached = []
 
         while not_cancel:
+            
+            from loguru import logger as log
 
             try:
 
@@ -88,6 +90,8 @@ async def saving_and_relabelling_orders(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
+                    
+                    log.warning (message_channel)
 
                     try:
 
@@ -123,6 +127,7 @@ async def saving_and_relabelling_orders(
 
                                 sub_account_cached.append(data)
 
+                            log.info(sub_account_cached)
                             await publishing_result(
                                 client_redis,
                                 sub_account_cached_channel,

@@ -293,9 +293,6 @@ async def publishing_specific_purposes(
 
     if purpose == "portfolio_rest":
         channel: str = redis_channels["portfolio_rest"]
-
-    log.critical (f"redis_channels {redis_channels} {channel} {purpose}")
-    log.error (f"message {message}")
     
     async with client_redis.pipeline() as pipe:
 
