@@ -44,10 +44,6 @@ async def private_connection(
     client_id: str = parse_dotenv(sub_account)["client_id"]
     client_secret: str = config_oci.get_oci_key(parse_dotenv(sub_account)["key_ocid"])
     
-    
-    log.debug(f"connection_url + endpoint {connection_url + endpoint} {payload}")
-
-
     async with aiohttp.ClientSession() as session:
         async with session.post(
             connection_url + endpoint,
@@ -399,9 +395,17 @@ class SendApiRequest:
             endpoint=endpoint,
             params=params,
         )
-        log.debug(f"{endpoint} result_sub_account_detail {result_sub_account}")
 
         result = result_sub_account["result"]
+        
+        result.append(
+            dict(
+                currency=currency,
+                result=(result),
+            )
+        )
+        
+        log.debug(f"result {result}")
 
         await publishing_specific_purposes(
             "sub_account_update",
