@@ -203,7 +203,7 @@ async def reconciling_size(
                             
                             sub_account = [o for o in sub_account_all if currency_upper in o["currency"]]
                                             
-                            sub_account = [] if not sub_account else sub_account[0]["result"]
+                            sub_account = [] if not sub_account else sub_account[0]["result"][0]
                 
                             log.info (sub_account)
 
