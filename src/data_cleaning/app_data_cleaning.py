@@ -154,8 +154,10 @@ async def reconciling_size(
 
         query_trades = (f"SELECT * FROM  v_trading_all_active")
         
-        await asyncio.sleep(0.5)
-
+        my_trades_active_all = await executing_query_with_return(
+                            query_trades
+                        )
+        
         while True:
 
             try:
@@ -192,7 +194,6 @@ async def reconciling_size(
                         
                         sub_account = [] if not sub_account else sub_account[0]
 
-                    log.error (message_byte_data)
                     server_time = message_byte_data["server_time"]
 
                     currency, currency_upper = (
