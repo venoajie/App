@@ -45,7 +45,7 @@ async def private_connection(
     client_secret: str = config_oci.get_oci_key(parse_dotenv(sub_account)["key_ocid"])
     
     
-    log.debug(f"connection_url + endpoint {connection_url + endpoint}")
+    log.debug(f"connection_url + endpoint {connection_url + endpoint} {payload}")
 
 
     async with aiohttp.ClientSession() as session:
