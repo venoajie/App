@@ -11,6 +11,8 @@ from data_cleaning.managing_closed_transactions import (
     clean_up_closed_transactions,
     get_unrecorded_trade_transactions,
 )
+from utilities.time_modification import get_now_unix_time as get_now_unix
+
 from data_cleaning.managing_delivered_transactions import (
     is_instrument_name_has_delivered,
     updating_delivered_instruments,
@@ -192,6 +194,8 @@ async def reconciling_size(
                         sub_account_all = message_byte_data
                         log.warning (sub_account_all)
                         
+                        server_time = get_now_unix()
+                        
                         for currency in currencies:
                                             
                             currency_upper = currency.upper()
@@ -201,9 +205,6 @@ async def reconciling_size(
                             log.warning (sub_account)
                             
                             sub_account = [] if not sub_account else sub_account[0]
-
-            
-                            server_time = sub_account["server_time"]
 
                             currency_lower: str = currency
 
