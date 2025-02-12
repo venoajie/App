@@ -105,7 +105,7 @@ async def cancelling_orders(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
         
-        await asyncio. sleep(.5)
+        await asyncio. sleep(5)
 
         cached_orders = []
         for currency in currencies:
