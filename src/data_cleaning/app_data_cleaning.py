@@ -205,15 +205,13 @@ async def reconciling_size(
                                             
                             sub_account = [] if not sub_account else sub_account[0]["result"][0]
                 
-                            log.info (sub_account)
-
                             archive_db_table = f"my_trades_all_{currency_lower}_json"
 
                             query_log = (
                                 f"SELECT * FROM  v_{currency_lower}_transaction_log"
                             )
 
-                            my_trades_currency_all_transactions: list = [
+                            my_trades_currency: list = [
                                 o
                                 for o in my_trades_active_all
                                 if currency_upper in o["instrument_name"] ]
@@ -223,8 +221,6 @@ async def reconciling_size(
                             )
                             sub_account_positions = sub_account["positions"]
                             
-                            log.warning (sub_account_positions)
-
                             sub_account_positions_instrument = (
                                 remove_redundant_elements(
                                     [
@@ -234,9 +230,11 @@ async def reconciling_size(
                                 )
                             )
 
-                            my_trades_currency_active_free_blanks = [
+                            
+
+                            my_trades_currency_free_blanks = [
                                 o
-                                for o in my_trades_currency_active
+                                for o in my_trades_currency
                                 if o["label"] is not None
                             ]
 
@@ -249,24 +247,26 @@ async def reconciling_size(
                                     # eliminating combo transactions as they're not recorded in the book
                                     if "-FS-" not in instrument_name:
 
-                                        my_trades_and_sub_account_size_reconciled_archive = is_my_trades_and_sub_account_size_reconciled_each_other(
+                                        my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
                                             instrument_name,
-                                            my_trades_currency_active,
+                                            my_trades_currency,
                                             sub_account,
                                         )
+                                        
+                                        log.warning (f" {instrument_name} my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
 
-                                        if (
-                                            not my_trades_and_sub_account_size_reconciled_archive
+                                        if False and (
+                                            not my_trades_and_sub_account_size_reconciled
                                         ):
 
-                                            my_trades_instrument_name_archive = [
+                                            my_trades_instrument_name = [
                                                 o
-                                                for o in my_trades_currency_all_transactions
+                                                for o in my_trades_currency
                                                 if instrument_name
                                                 in o["instrument_name"]
                                             ]
 
-                                            if my_trades_instrument_name_archive:
+                                            if my_trades_instrument_name:
 
                                                 timestamp_log = min(
                                                     [
@@ -410,7 +410,7 @@ async def reconciling_size(
                             await clean_up_closed_transactions(
                                 currency,
                                 archive_db_table,
-                                my_trades_currency_active,
+                                my_trades_currency,
                             )
 
             except Exception as error:
