@@ -153,6 +153,9 @@ async def saving_and_relabelling_orders(
                                 sub_account_cached_channel,
                                 sub_account_cached,
                             )
+                            
+                            log.warning (sub_account_cached)
+                            log.debug (sub_account_cached_channel)
 
                             await update_db_pkl(
                                 "portfolio",
