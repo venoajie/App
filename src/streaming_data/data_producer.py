@@ -183,17 +183,14 @@ class StreamingAccountData:
                                 operation="subscribe",
                                 ws_channel=ws,
                             )
-                            
-                                
+
                     for currency in currencies:
 
                         await modify_order_and_db.cancel_the_cancellables(
-                            order_db_table, 
-                            currency, 
+                            order_db_table,
+                            currency,
                             cancellable_strategies,
                         )
-
-
 
                     while True:
 

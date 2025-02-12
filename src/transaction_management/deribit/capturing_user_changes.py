@@ -63,7 +63,7 @@ async def saving_and_relabelling_orders(
         portfolio_channel: str = redis_channels["portfolio"]
         sub_account_update_channel: str = redis_channels["sub_account_update"]
         sub_account_cached_channel: str = redis_channels["sub_account_cached"]
-        
+
         # prepare channels placeholders
         channels = [
             receive_order_channel,
@@ -75,21 +75,20 @@ async def saving_and_relabelling_orders(
         [await pubsub.subscribe(o) for o in channels]
 
         not_cancel = True
-        
+
         sub_account_cached = []
 
         for currency in currencies:
             result = await private_data.get_subaccounts_details(currency)
             sub_account_cached.append(
-            dict(
-                currency=currency,
-                result=(result),
+                dict(
+                    currency=currency,
+                    result=(result),
+                )
             )
-        )
-
 
         while not_cancel:
-            
+
             from loguru import logger as log
 
             try:
@@ -101,7 +100,7 @@ async def saving_and_relabelling_orders(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
-        
+
                     try:
 
                         data = message_byte_data["data"]
@@ -121,18 +120,22 @@ async def saving_and_relabelling_orders(
                             )
 
                         if sub_account_update_channel in message_channel:
-                                
+
                             if sub_account_cached == []:
                                 sub_account_cached.append(data)
 
                             else:
                                 data_currency = data["currency"]
                                 sub_account_cached_currency = [
-                                    o for o in sub_account_cached if data_currency in o["currency"]
+                                    o
+                                    for o in sub_account_cached
+                                    if data_currency in o["currency"]
                                 ]
 
                                 if sub_account_cached_currency:
-                                    sub_account_cached_currency.remove(sub_account_cached_currency[0])
+                                    sub_account_cached_currency.remove(
+                                        sub_account_cached_currency[0]
+                                    )
 
                                 sub_account_cached.append(data)
 
@@ -143,7 +146,6 @@ async def saving_and_relabelling_orders(
                                 sub_account_cached,
                             )
 
-                                
                         if portfolio_channel in message_channel:
 
                             await publishing_result(
@@ -151,13 +153,13 @@ async def saving_and_relabelling_orders(
                                 sub_account_cached_channel,
                                 sub_account_cached,
                             )
-                
+
                             await update_db_pkl(
                                 "portfolio",
                                 data,
                                 currency_lower,
                             )
-                            
+
                     except Exception as error:
                         parse_error_message(error)
                         continue

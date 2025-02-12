@@ -581,9 +581,9 @@ async def executing_query_with_return(
 
     try:
         async with aiosqlite.connect(
-            database, 
+            database,
             isolation_level=None,
-            ) as db:
+        ) as db:
 
             await db.execute("pragma journal_mode=wal;")
 
@@ -593,7 +593,7 @@ async def executing_query_with_return(
                 else db.execute(
                     query_table,
                     filter_val,
-                    )
+                )
             )
 
             async with db as cur:

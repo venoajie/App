@@ -108,7 +108,7 @@ async def future_spreads(
 
         portfolio_all = []
 
-        query_trades = (f"SELECT * FROM  v_trading_all_active")
+        query_trades = f"SELECT * FROM  v_trading_all_active"
 
         order_allowed = False
 

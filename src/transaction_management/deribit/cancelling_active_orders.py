@@ -94,11 +94,11 @@ async def cancelling_orders(
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
-        
-        await asyncio. sleep(5)
+
+        await asyncio.sleep(5)
 
         cached_orders = []
-        
+
         cached_ticker_all = []
 
         not_cancel = True
@@ -107,8 +107,8 @@ async def cancelling_orders(
 
         portfolio_all = []
 
-        query_trades = (f"SELECT * FROM  v_trading_all_active")
-        
+        query_trades = f"SELECT * FROM  v_trading_all_active"
+
         while not_cancel:
 
             try:
@@ -131,16 +131,16 @@ async def cancelling_orders(
 
                         portfolio_all = message_byte_data["cached_portfolio"]
 
-                    if  my_trades_channel in message_channel:
+                    if my_trades_channel in message_channel:
 
                         my_trades_active_all = await executing_query_with_return(
                             query_trades
                         )
 
-                    if  receive_order_channel in message_channel:
+                    if receive_order_channel in message_channel:
 
                         cached_orders = message_byte_data["cached_orders"]
-                        
+
                     if (
                         ticker_cached_channel in message_channel
                         and market_condition_all
@@ -283,7 +283,7 @@ async def cancelling_orders(
 
                                                 break
 
-                                if  "hedgingSpot" in strategy:
+                                if "hedgingSpot" in strategy:
 
                                     max_position: int = notional * -1
 
