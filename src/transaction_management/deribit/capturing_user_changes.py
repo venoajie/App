@@ -11,6 +11,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.orders_management import saving_orders
+from db_management.redis_client import publishing_result
 from utilities.system_tools import parse_error_message
 
 from transaction_management.deribit.managing_deribit import (
@@ -59,9 +60,13 @@ async def saving_and_relabelling_orders(
         redis_channels: dict = config_app["redis_channels"][0]
         receive_order_channel: str = redis_channels["receive_order"]
         portfolio_channel: str = redis_channels["portfolio"]
+        sub_account_update_channel: str = redis_channels["sub_account_update"]
+        sub_account_cached_channel: str = redis_channels["sub_account_cached"]
+        
         # prepare channels placeholders
         channels = [
             receive_order_channel,
+            sub_account_update_channel,
             portfolio_channel,
         ]
 
@@ -69,6 +74,8 @@ async def saving_and_relabelling_orders(
         [await pubsub.subscribe(o) for o in channels]
 
         not_cancel = True
+        
+        sub_account_cached = []
 
         while not_cancel:
 
@@ -100,6 +107,29 @@ async def saving_and_relabelling_orders(
                                 False,
                             )
 
+                        if sub_account_update_channel in message_channel:
+                                
+                            if sub_account_cached == []:
+                                sub_account_cached.append(data)
+
+                            else:
+                                data_currency = data["currency"]
+                                sub_account_cached_currency = [
+                                    o for o in sub_account_cached if data_currency in o["currency"]
+                                ]
+
+                                if sub_account_cached_currency:
+                                    sub_account_cached_currency.remove(sub_account_cached_currency[0])
+
+                                sub_account_cached.append(data)
+
+                                await publishing_result(
+                                    client_redis,
+                                    sub_account_cached_channel,
+                                    sub_account_cached,
+                                )
+
+                                
                         if portfolio_channel in message_channel:
 
                             await update_db_pkl(
