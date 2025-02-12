@@ -388,7 +388,9 @@ class SendApiRequest:
         # Set endpoint
         endpoint: str = "private/get_subaccounts_details"
 
-        params = {"currency": currency, "with_open_orders": True}
+        params = {"currency": currency, 
+                  "with_open_orders": True,
+                  }
 
         result_sub_account = await private_connection(
             self.sub_account_id,
