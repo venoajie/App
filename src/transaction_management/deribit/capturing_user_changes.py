@@ -26,6 +26,7 @@ async def saving_and_relabelling_orders(
     modify_order_and_db: object,
     client_redis: object,
     config_app: list,
+    currencies,
 ):
     """ """
     try:
@@ -76,6 +77,16 @@ async def saving_and_relabelling_orders(
         not_cancel = True
         
         sub_account_cached = []
+
+        for currency in currencies:
+            result = await private_data.get_subaccounts_details(currency)
+            sub_account_cached.append(
+            dict(
+                currency=currency,
+                result=(result),
+            )
+        )
+
 
         while not_cancel:
             
@@ -137,12 +148,18 @@ async def saving_and_relabelling_orders(
                                 
                         if portfolio_channel in message_channel:
 
+                            await publishing_result(
+                                client_redis,
+                                sub_account_cached_channel,
+                                sub_account_cached,
+                            )
+
                             await update_db_pkl(
                                 "portfolio",
                                 data,
                                 currency_lower,
                             )
-
+                            
                     except Exception as error:
                         parse_error_message(error)
                         continue

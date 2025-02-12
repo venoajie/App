@@ -188,7 +188,8 @@ async def main():
                 private_data,
                 modify_order_and_db,
                 client_redis,
-                config_app,),
+                config_app,
+                currencies,),
     
             avoiding_double_ids(
                 modify_order_and_db,

@@ -108,12 +108,7 @@ async def cancelling_orders(
         await asyncio. sleep(5)
 
         cached_orders = []
-        for currency in currencies:
-            await modify_order_and_db.cancel_the_cancellables(
-                order_db_table, currency, cancellable_strategies
-            )
-
-
+        
         cached_ticker_all = []
 
         not_cancel = True
