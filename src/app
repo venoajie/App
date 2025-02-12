@@ -186,7 +186,8 @@ async def main():
                 modify_order_and_db,
                 client_redis,
                 config_app,
-                currencies,),
+                currencies,
+                strategy_attributes,),
     
             avoiding_double_ids(
                 modify_order_and_db,

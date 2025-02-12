@@ -27,14 +27,13 @@ async def saving_and_relabelling_orders(
     client_redis: object,
     config_app: list,
     currencies,
+    strategy_attributes,
 ):
     """ """
     try:
 
         # preparing redis connection
         pubsub = client_redis.pubsub()
-
-        strategy_attributes: list = config_app["strategies"]
 
         strategy_attributes_active: list = [
             o for o in strategy_attributes if o["is_active"] == True
@@ -89,8 +88,6 @@ async def saving_and_relabelling_orders(
 
         while not_cancel:
 
-            from loguru import logger as log
-
             try:
 
                 message_byte = await pubsub.get_message()
@@ -108,6 +105,7 @@ async def saving_and_relabelling_orders(
                         currency_lower = message_byte_data["currency"]
 
                         if receive_order_channel in message_channel:
+
                             await saving_orders(
                                 modify_order_and_db,
                                 private_data,
@@ -139,7 +137,6 @@ async def saving_and_relabelling_orders(
 
                                 sub_account_cached.append(data)
 
-                            log.info(sub_account_cached)
                             await publishing_result(
                                 client_redis,
                                 sub_account_cached_channel,

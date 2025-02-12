@@ -3,7 +3,7 @@
 # user defined formula
 from db_management.sqlite_management import deleting_row, insert_tables
 from strategies.basic_strategy import is_label_and_side_consistent
-
+from loguru import logger as log
 
 async def saving_traded_orders(
     trade: str,
@@ -244,7 +244,6 @@ async def saving_oto_order(
     non_checked_strategies,
     orders,
     order_db_table,
-    save_only: bool = True,
 ) -> None:
 
     len_oto_order_ids = len(orders[0]["oto_order_ids"])
@@ -345,12 +344,13 @@ async def saving_orders(
                     non_checked_strategies,
                     orders,
                     order_db_table,
-                    save_only,
                 )
 
             else:
 
                 for order in orders:
+                    
+                    log.info(f"order {order}")
 
                     if "OTO" not in order["order_id"]:
 
@@ -370,7 +370,6 @@ async def saving_orders(
                                 label,
                                 order_state,
                                 order_id,
-                                save_only,
                             )
 
                         else:
@@ -411,8 +410,9 @@ async def cancelling_and_relabelling(
     label,
     order_state,
     order_id,
-    save_only: bool = True,
 ) -> None:
+    
+    log.debug(f"order {order}")
 
     # no label
     if label == "":
