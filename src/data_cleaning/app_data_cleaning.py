@@ -135,9 +135,6 @@ async def reconciling_size(
         ticker_cached_channel: str = redis_channels["ticker_update_cached"]
         portfolio_channel: str = redis_channels["portfolio"]
         my_trades_channel: str = redis_channels["my_trades"]
-        sending_order_channel: str = redis_channels["sending_order"]
-
-        sub_account_update_channel: str = redis_channels["sub_account_update"]
         sub_account_cached_channel: str = redis_channels["sub_account_cached"]
         order_allowed_channel: str = redis_channels["is_order_allowed"]
 

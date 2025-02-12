@@ -263,7 +263,6 @@ async def publishing_specific_purposes(
             consumer: app data cleaning/size reconciliation
 
     """
-    from loguru import logger as log
 
     if not client_redis:
         pool = aioredis.ConnectionPool.from_url(
@@ -284,7 +283,6 @@ async def publishing_specific_purposes(
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
-    log.info (f" purpose {purpose}")
     if purpose == "trading_update":
         channel: str = redis_channels["my_trades"]
 

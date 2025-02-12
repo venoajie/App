@@ -167,14 +167,11 @@ async def main():
             saving_task,
             
         cancelling_orders(
-                private_data,
                 modify_order_and_db,
-                cancellable_strategies,
                 currencies,
                 client_redis,
                 config_app,
                 redis_channels,
-                redis_keys,
                 strategy_attributes,
                 ),    
 
