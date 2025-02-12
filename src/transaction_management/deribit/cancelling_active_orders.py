@@ -105,13 +105,6 @@ async def cancelling_orders(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        cached_orders = []
-        for currency in currencies:
-            await modify_order_and_db.cancel_the_cancellables(
-                order_db_table, currency, cancellable_strategies
-            )
-
-
         cached_ticker_all = []
 
         not_cancel = True

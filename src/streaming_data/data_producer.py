@@ -76,8 +76,11 @@ class StreamingAccountData:
 
     async def ws_manager(
         self,
+        modify_order_and_db: object,
         queue_general: object,
+        cancellable_strategies,
         currencies: list,
+        order_db_table,
         resolutions: list,
         strategy_attributes: list,
     ) -> None:
@@ -180,6 +183,17 @@ class StreamingAccountData:
                                 operation="subscribe",
                                 ws_channel=ws,
                             )
+                            
+                                
+                    for currency in currencies:
+
+                        await modify_order_and_db.cancel_the_cancellables(
+                            order_db_table, 
+                            currency, 
+                            cancellable_strategies,
+                        )
+
+
 
                     while True:
 
