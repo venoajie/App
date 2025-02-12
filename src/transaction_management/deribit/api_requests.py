@@ -399,19 +399,19 @@ class SendApiRequest:
         )
 
         result = result_sub_account["result"]
-        
-        result.append(
+        modified_result = []
+        modified_result.append(
             dict(
                 currency=currency,
                 result=(result),
             )
         )
         
-        log.debug(f"result {result}")
+        log.debug(f"result {modified_result}")
 
         await publishing_specific_purposes(
             "sub_account_update",
-            result,
+            modified_result,
         )
 
         return result
