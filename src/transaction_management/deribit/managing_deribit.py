@@ -6,7 +6,7 @@ from dataclassy import dataclass, fields
 from loguru import logger as log
 
 # user defined formula
-from db_management.redis_client import publishing_specific_purposes
+
 from db_management.sqlite_management import (
     deleting_row,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
@@ -379,7 +379,7 @@ class ModifyOrderDb(SendApiRequest):
     async def if_order_is_true(
         self,
         non_checked_strategies,
-        order,
+        order: dict,
     ) -> None:
         """ """
 
@@ -392,7 +392,8 @@ class ModifyOrderDb(SendApiRequest):
                 params = order
 
             label_and_side_consistent = is_label_and_side_consistent(
-                non_checked_strategies, params
+                non_checked_strategies, 
+                params,
             )
 
             if label_and_side_consistent:
@@ -414,7 +415,8 @@ class ModifyOrderDb(SendApiRequest):
     ) -> None:
         """ """
         trades_from_exchange = await self.private_data.get_user_trades_by_currency(
-            currency, count
+            currency, 
+            count,
         )
 
         if trades_from_exchange:
@@ -450,7 +452,9 @@ class ModifyOrderDb(SendApiRequest):
 
         trades_from_exchange = (
             await self.private_data.get_user_trades_by_instrument_and_time(
-                instrument_name, start_timestamp, count
+                instrument_name, 
+                start_timestamp,
+                count,
             )
         )
 
