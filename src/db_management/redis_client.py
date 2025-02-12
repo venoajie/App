@@ -284,6 +284,7 @@ async def publishing_specific_purposes(
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
+    log.info (f" purpose {purpose}")
     if purpose == "trading_update":
         channel: str = redis_channels["my_trades"]
 
