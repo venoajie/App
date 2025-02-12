@@ -407,8 +407,6 @@ class SendApiRequest:
             )
         )
         
-        log.debug(f"result {modified_result}")
-
         await publishing_specific_purposes(
             "sub_account_update",
             modified_result,

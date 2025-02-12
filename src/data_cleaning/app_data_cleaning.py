@@ -190,18 +190,23 @@ async def reconciling_size(
 
                     if sub_account_cached_channel in message_channel:
 
-                        sub_account = message_byte_data
+                        sub_account_all = message_byte_data
                         
                         log.warning (sub_account)
                         
-                        sub_account = [] if not sub_account else sub_account[0]
-
                     server_time = message_byte_data["server_time"]
 
                     currency, currency_upper = (
                         message_byte_data["currency"],
                         message_byte_data["currency_upper"],
                     )
+                    
+                    sub_account = [o for o in sub_account_all if currency_upper in o["currency"]]
+          
+                    log.warning (sub_account)
+                    
+                    sub_account = [] if not sub_account else sub_account[0]
+
 
                     currency_lower: str = currency
 
@@ -219,9 +224,6 @@ async def reconciling_size(
                     from_transaction_log = await executing_query_with_return(
                         query_log
                     )
-          
-                    log.warning (sub_account)
-
                     sub_account_positions = sub_account["positions"]
                     
                     log.warning (sub_account_positions)
