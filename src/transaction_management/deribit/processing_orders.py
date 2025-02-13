@@ -101,11 +101,11 @@ async def processing_orders(
 
                                     order_db_table = relevant_tables["orders_table"]
 
-                                    order = data_orders["order"]
-
                                     await modify_order_and_db.resupply_sub_accountdb(
                                         currency
                                     )
+                                    
+                                    print (f"data_orders {data_orders}")
 
                                     await saving_orders(
                                         modify_order_and_db,
