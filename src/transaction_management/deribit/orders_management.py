@@ -325,6 +325,8 @@ async def saving_orders(
     orders = data["orders"]
 
     if orders:
+        
+        log.info (f"orders {orders}")
 
         if trades:
 
@@ -359,7 +361,7 @@ async def saving_orders(
 
                 for order in orders:
 
-                    log.info(f"order {order}")
+                    log.debug(f"order {order}")
 
                     if "OTO" not in order["order_id"]:
 
