@@ -367,4 +367,3 @@ def get_index(ticker: dict) -> float:
         index_price = ticker["estimated_delivery_price"]
 
     return index_price
-

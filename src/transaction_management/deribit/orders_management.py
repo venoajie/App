@@ -3,8 +3,10 @@
 # user defined formula
 from db_management.sqlite_management import deleting_row, insert_tables
 from strategies.basic_strategy import is_label_and_side_consistent
-from loguru import logger as log
+
+# from loguru import logger as log
 from transaction_management.deribit.processing_orders import if_order_is_true
+
 
 async def saving_traded_orders(
     trade: str,
@@ -32,7 +34,7 @@ async def saving_traded_orders(
     )
 
     # record trading transaction
-    log.error (f"trade {trade}")
+    # log.error (f"trade {trade}")
     await insert_tables(
         trade_table,
         trade,
@@ -40,10 +42,13 @@ async def saving_traded_orders(
 
 
 async def saving_order_based_on_state(
-    order_table: str,
-    order: dict,
+    order_table: str, order: dict, db: str = "sqlite"
 ) -> None:
-    """_summary_
+    """
+    db: "sqlite"
+        "redis"
+
+    _summary_
 
     Args:
         trades (_type_): _description_
@@ -109,8 +114,8 @@ async def saving_order_based_on_state(
         )
 
     if order_state == "open":
-        
-        log.error (f"order {order}")
+
+        # log.error (f"order {order}")
         await insert_tables(
             order_table,
             order,
@@ -281,7 +286,7 @@ async def saving_oto_order(
             and "open" in transaction_main["order_state"]
         ):
 
-            log.error (f"transaction_main {transaction_main}")
+            # log.error (f"transaction_main {transaction_main}")
             await insert_tables(
                 order_db_table,
                 transaction_main,
@@ -303,7 +308,7 @@ async def saving_oto_order(
             )
 
         else:
-            log.error (f"transaction_main {transaction_main}")
+            # log.error (f"transaction_main {transaction_main}")
             await insert_tables(
                 order_db_table,
                 transaction_main,
@@ -326,8 +331,8 @@ async def saving_orders(
     orders = data["orders"]
 
     if orders:
-        
-        log.info (f"orders {orders}")
+
+        # log.info (f"orders {orders}")
 
         if trades:
 
@@ -362,7 +367,7 @@ async def saving_orders(
 
                 for order in orders:
 
-                    log.debug(f"order {order}")
+                    # log.debug(f"order {order}")
 
                     if "OTO" not in order["order_id"]:
 
@@ -391,8 +396,8 @@ async def saving_orders(
                             )
 
                             if label_and_side_consistent and label:
-                                
-                                log.debug(f"order {order}")
+
+                                # log.debug(f"order {order}")
 
                                 await saving_order_based_on_state(
                                     order_db_table,
@@ -411,7 +416,7 @@ async def saving_orders(
                                         order_id,
                                     )
 
-                                    log.error (f"order {order}")
+                                    # log.error (f"order {order}")
                                     await insert_tables(
                                         order_db_table,
                                         order,
@@ -429,30 +434,30 @@ async def cancelling_and_relabelling(
     order_id,
 ) -> None:
 
-    log.debug(f"label {label} order_state {order_state} order {order}")
+    # log.debug(f"label {label} order_state {order_state} order {order}")
 
     # no label
     if label == "":
-        
-        log.info(label == "")
+
+        # log.info(label == "")
 
         if "open" in order_state or "untriggered" in order_state:
 
             if "OTO" not in order["order_id"]:
 
-                log.error (f"order {order}")
+                # log.error (f"order {order}")
                 await insert_tables(
                     order_db_table,
                     order,
                 )
-            
+
                 await modify_order_and_db.cancel_by_order_id(
                     order_db_table,
                     order_id,
                 )
-                
+
             order_attributes = labelling_unlabelled_order(order)
-            log.warning (f"order_attributes {order_attributes}")
+            # log.warning (f"order_attributes {order_attributes}")
 
             await if_order_is_true(
                 private_data,

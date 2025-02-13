@@ -2,8 +2,6 @@
 
 import asyncio
 
-from loguru import logger as log
-
 from transaction_management.deribit.api_requests import get_tickers
 from utilities.pickling import read_data
 from utilities.system_tools import (

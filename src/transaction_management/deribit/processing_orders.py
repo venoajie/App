@@ -91,7 +91,6 @@ async def processing_orders(
         )
 
 
-
 async def if_order_is_true(
     private_data,
     non_checked_strategies,
