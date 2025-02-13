@@ -32,6 +32,7 @@ async def saving_traded_orders(
     )
 
     # record trading transaction
+    log.error (f"trade {trade}")
     await insert_tables(
         trade_table,
         trade,
@@ -108,6 +109,8 @@ async def saving_order_based_on_state(
         )
 
     if order_state == "open":
+        
+        log.error (f"order {order}")
         await insert_tables(
             order_table,
             order,
@@ -278,6 +281,7 @@ async def saving_oto_order(
             and "open" in transaction_main["order_state"]
         ):
 
+            log.error (f"transaction_main {transaction_main}")
             await insert_tables(
                 order_db_table,
                 transaction_main,
@@ -298,6 +302,7 @@ async def saving_oto_order(
             )
 
         else:
+            log.error (f"transaction_main {transaction_main}")
             await insert_tables(
                 order_db_table,
                 transaction_main,
@@ -400,6 +405,7 @@ async def saving_orders(
                                         order_id,
                                     )
 
+                                    log.error (f"order {order}")
                                     await insert_tables(
                                         order_db_table,
                                         order,
@@ -431,6 +437,7 @@ async def cancelling_and_relabelling(
 
             order_attributes = labelling_unlabelled_order(order)
 
+            log.error (f"order {order}")
             await insert_tables(
                 order_db_table,
                 order,

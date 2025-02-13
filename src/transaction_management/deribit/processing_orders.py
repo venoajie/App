@@ -56,10 +56,6 @@ async def processing_orders(
 
                     if sending_order_channel in message_channel:
 
-                        currency = message_byte_data["currency"]
-
-                        currency_lower = currency.lower()
-
                         if message_byte_data["order_allowed"]:
 
                             # get strategies that have not short/long attributes in the label
@@ -92,7 +88,9 @@ async def processing_orders(
                                     currency = extract_currency_from_text(
                                         instrument_name
                                     )
-
+                                    
+                                    currency_lower = currency.lower()
+                                    
                                     transaction_log_trading_table = (
                                         f"transaction_log_{currency.lower()}_json"
                                     )
@@ -103,15 +101,7 @@ async def processing_orders(
 
                                     order_db_table = relevant_tables["orders_table"]
 
-                                    trades = data_orders["trades"]
-
                                     order = data_orders["order"]
-
-                                    instrument_name = order["instrument_name"]
-
-                                    currency = extract_currency_from_text(
-                                        instrument_name
-                                    )
 
                                     await modify_order_and_db.resupply_sub_accountdb(
                                         currency
