@@ -429,10 +429,12 @@ async def cancelling_and_relabelling(
     order_id,
 ) -> None:
 
-    log.debug(f"order {order}")
+    log.debug(f"label {label} order_state {order_state} order {order}")
 
     # no label
     if label == "":
+        
+        log.info(label == "")
 
         if "open" in order_state or "untriggered" in order_state:
 
@@ -445,6 +447,7 @@ async def cancelling_and_relabelling(
             order_attributes = labelling_unlabelled_order(order)
 
             log.error (f"order {order}")
+            log.warning (f"order_attributes {order_attributes}")
             await insert_tables(
                 order_db_table,
                 order,
