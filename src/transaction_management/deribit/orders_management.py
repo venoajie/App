@@ -439,17 +439,18 @@ async def cancelling_and_relabelling(
         if "open" in order_state or "untriggered" in order_state:
 
             if "OTO" not in order["order_id"]:
+
+                log.error (f"order {order}")
+                await insert_tables(
+                    order_db_table,
+                    order,
+                )
+            
                 await modify_order_and_db.cancel_by_order_id(
                     order_db_table,
                     order_id,
                 )
-
-            log.error (f"order {order}")
-            await insert_tables(
-                order_db_table,
-                order,
-            )
-            
+                
             order_attributes = labelling_unlabelled_order(order)
             log.warning (f"order_attributes {order_attributes}")
 
