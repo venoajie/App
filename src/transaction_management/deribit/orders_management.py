@@ -296,7 +296,7 @@ async def saving_oto_order(
                 transaction_main["order_id"],
             )
 
-            await modify_order_and_db.if_order_is_true(
+            await if_order_is_true(
                 private_data,
                 non_checked_strategies,
                 order_attributes,
@@ -450,7 +450,7 @@ async def cancelling_and_relabelling(
                 order,
             )
 
-            await modify_order_and_db.if_order_is_true(
+            await if_order_is_true(
                 private_data,
                 non_checked_strategies,
                 order_attributes,
