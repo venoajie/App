@@ -177,11 +177,8 @@ async def main():
 
             processing_orders(
                 private_data,
-                modify_order_and_db,
                 client_redis,
-                cancellable_strategies,
                 redis_channels,
-                relevant_tables,
                 strategy_attributes,
                 ),
        

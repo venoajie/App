@@ -21,17 +21,11 @@ from transaction_management.deribit.api_requests import (
     SendApiRequest,
     get_cancel_order_byOrderId,
 )
-from transaction_management.deribit.orders_management import (
-    labelling_unlabelled_order,
-    labelling_unlabelled_order_oto,
-    saving_order_based_on_state,
-    saving_traded_orders,
-)
+from transaction_management.deribit.orders_management import saving_traded_orders
 from transaction_management.deribit.transaction_log import (
     saving_transaction_log,
 )
 from utilities.pickling import replace_data
-from utilities.string_modification import extract_currency_from_text
 from utilities.system_tools import provide_path_for_file
 
 
@@ -378,36 +372,6 @@ class ModifyOrderDb(SendApiRequest):
         await self.get_cancel_order_all()
 
         await deleting_row("orders_all_json")
-
-    async def if_order_is_true(
-        self,
-        non_checked_strategies,
-        order: dict,
-    ) -> None:
-        """ """
-
-        if order["order_allowed"]:
-
-            # get parameter orders
-            try:
-                params = order["order_parameters"]
-            except:
-                params = order
-
-            label_and_side_consistent = is_label_and_side_consistent(
-                non_checked_strategies,
-                params,
-            )
-
-            if label_and_side_consistent:
-                send_limit_result = await self.private_data.send_limit_order(params)
-
-                return send_limit_result
-                # await asyncio.sleep(10)
-            else:
-
-                return []
-                # await asyncio.sleep(10)
 
     async def update_trades_from_exchange(
         self,

@@ -4,7 +4,7 @@
 from db_management.sqlite_management import deleting_row, insert_tables
 from strategies.basic_strategy import is_label_and_side_consistent
 from loguru import logger as log
-
+from transaction_management.deribit.processing_orders import if_order_is_true
 
 async def saving_traded_orders(
     trade: str,
@@ -297,6 +297,7 @@ async def saving_oto_order(
             )
 
             await modify_order_and_db.if_order_is_true(
+                private_data,
                 non_checked_strategies,
                 order_attributes,
             )
@@ -374,6 +375,7 @@ async def saving_orders(
                         if label == "":
 
                             await cancelling_and_relabelling(
+                                private_data,
                                 modify_order_and_db,
                                 non_checked_strategies,
                                 order_db_table,
@@ -417,6 +419,7 @@ async def saving_orders(
 
 
 async def cancelling_and_relabelling(
+    private_data,
     modify_order_and_db,
     non_checked_strategies,
     order_db_table,
@@ -448,6 +451,7 @@ async def cancelling_and_relabelling(
             )
 
             await modify_order_and_db.if_order_is_true(
+                private_data,
                 non_checked_strategies,
                 order_attributes,
             )
