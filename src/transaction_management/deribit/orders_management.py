@@ -389,6 +389,8 @@ async def saving_orders(
                             )
 
                             if label_and_side_consistent and label:
+                                
+                                log.debug(f"order {order}")
 
                                 await saving_order_based_on_state(
                                     order_db_table,

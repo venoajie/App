@@ -104,8 +104,8 @@ async def processing_orders(
                                     await modify_order_and_db.resupply_sub_accountdb(
                                         currency
                                     )
-                                    
-                                    print (f"data_orders {data_orders}")
+                                    from loguru import logger as log
+                                    log.error (f"data_orders {data_orders}")
 
                                     await saving_orders(
                                         modify_order_and_db,

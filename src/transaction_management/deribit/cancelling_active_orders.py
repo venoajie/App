@@ -8,7 +8,7 @@ import uvloop
 
 # installed
 import orjson
-
+from loguru import logger as log
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from db_management.sqlite_management import executing_query_with_return
@@ -371,3 +371,75 @@ def get_index(ticker: dict) -> float:
         index_price = ticker["estimated_delivery_price"]
 
     return index_price
+
+
+
+async def cancel_by_order_id(
+    private_data,
+    order_db_table: str,
+    open_order_id: str,
+) -> None:
+
+    where_filter = f"order_id"
+
+    await deleting_row(
+        order_db_table,
+        "databases/trading.sqlite3",
+        where_filter,
+        "=",
+        open_order_id,
+    )
+
+    result = await private_data.get_cancel_order_byOrderId(open_order_id)
+
+    try:
+        if (result["error"]["message"]) == "not_open_order":
+            log.critical(f"CANCEL non-existing order_id {result} {open_order_id}")
+
+    except:
+
+        log.critical(f"""CANCEL_by_order_id {result["result"]} {open_order_id}""")
+
+        return result
+
+async def cancel_the_cancellables(
+    private_data,
+    modify_order_and_db,
+    order_db_table: str,
+    currency: str,
+    cancellable_strategies: list,
+    open_orders_sqlite: list = None,
+) -> None:
+
+    log.critical(f" cancel_the_cancellables {currency}")
+
+    where_filter = f"order_id"
+
+    column_list = "label", where_filter
+
+    if open_orders_sqlite is None:
+        open_orders_sqlite: list = await get_query(
+            "orders_all_json", currency.upper(), "all", "all", column_list
+        )
+
+    if open_orders_sqlite:
+
+        for strategy in cancellable_strategies:
+            open_orders_cancellables = [
+                o for o in open_orders_sqlite if strategy in o["label"]
+            ]
+
+            if open_orders_cancellables:
+                open_orders_cancellables_id = [
+                    o["order_id"] for o in open_orders_cancellables
+                ]
+
+                for order_id in open_orders_cancellables_id:
+
+                    await private_data .cancel_by_order_id(
+                        order_db_table,
+                        order_id,
+                    )
+
+    await modify_order_and_db.resupply_sub_accountdb(currency.upper())
+
