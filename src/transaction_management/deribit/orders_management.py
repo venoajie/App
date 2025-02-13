@@ -5,6 +5,7 @@ from db_management.sqlite_management import deleting_row, insert_tables
 from strategies.basic_strategy import is_label_and_side_consistent
 from loguru import logger as log
 
+
 async def saving_traded_orders(
     trade: str,
     trade_table: str,
@@ -16,8 +17,6 @@ async def saving_traded_orders(
         trades (_type_): _description_
         orders (_type_): _description_
     """
-
-    instrument_name = trade["instrument_name"]
 
     filter_trade = "order_id"
 
@@ -33,8 +32,10 @@ async def saving_traded_orders(
     )
 
     # record trading transaction
-    if "-FS-" not in instrument_name:
-        await insert_tables(trade_table, trade)
+    await insert_tables(
+        trade_table,
+        trade,
+    )
 
 
 async def saving_order_based_on_state(
@@ -107,7 +108,10 @@ async def saving_order_based_on_state(
         )
 
     if order_state == "open":
-        await insert_tables(order_table, order)
+        await insert_tables(
+            order_table,
+            order,
+        )
 
 
 def get_custom_label(transaction: list) -> str:
@@ -349,7 +353,7 @@ async def saving_orders(
             else:
 
                 for order in orders:
-                    
+
                     log.info(f"order {order}")
 
                     if "OTO" not in order["order_id"]:
@@ -411,7 +415,7 @@ async def cancelling_and_relabelling(
     order_state,
     order_id,
 ) -> None:
-    
+
     log.debug(f"order {order}")
 
     # no label
@@ -427,12 +431,12 @@ async def cancelling_and_relabelling(
 
             order_attributes = labelling_unlabelled_order(order)
 
-            await modify_order_and_db.if_order_is_true(
-                non_checked_strategies,
-                order_attributes,
-            )
-
             await insert_tables(
                 order_db_table,
                 order,
+            )
+
+            await modify_order_and_db.if_order_is_true(
+                non_checked_strategies,
+                order_attributes,
             )

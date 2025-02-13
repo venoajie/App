@@ -5,22 +5,22 @@
 import asyncio
 
 # installed
-import uvloop
 import orjson
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
+from transaction_management.deribit.orders_management import saving_orders
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.string_modification import extract_currency_from_text
-from utilities.system_tools import (
-    parse_error_message,
-)
+from utilities.system_tools import parse_error_message
 
 
 async def processing_orders(
+    private_data: object,
     modify_order_and_db: object,
     client_redis: object,
-    config_app: list,
+    cancellable_strategies,
+    redis_channels,
+    relevant_tables,
+    strategy_attributes: list,
 ) -> None:
     """ """
 
@@ -30,7 +30,6 @@ async def processing_orders(
         pubsub: object = client_redis.pubsub()
 
         # get redis channels
-        redis_channels: dict = config_app["redis_channels"][0]
         sending_order_channel: str = redis_channels["sending_order"]
 
         # prepare channels placeholders
@@ -59,9 +58,9 @@ async def processing_orders(
 
                         currency = message_byte_data["currency"]
 
-                        if message_byte_data["order_allowed"]:
+                        currency_lower = currency.lower()
 
-                            strategy_attributes = config_app["strategies"]
+                        if message_byte_data["order_allowed"]:
 
                             # get strategies that have not short/long attributes in the label
                             non_checked_strategies = [
@@ -102,16 +101,42 @@ async def processing_orders(
                                         f"my_trades_all_{currency.lower()}_json"
                                     )
 
-                                    relevant_tables = config_app["relevant_tables"][0]
-
                                     order_db_table = relevant_tables["orders_table"]
 
-                                    await modify_order_and_db.update_user_changes_non_ws(
+                                    trades = data_orders["trades"]
+
+                                    order = data_orders["order"]
+
+                                    instrument_name = order["instrument_name"]
+
+                                    currency = extract_currency_from_text(
+                                        instrument_name
+                                    )
+
+                                    await modify_order_and_db.resupply_sub_accountdb(
+                                        currency
+                                    )
+
+                                    await saving_orders(
+                                        modify_order_and_db,
+                                        private_data,
+                                        cancellable_strategies,
                                         non_checked_strategies,
                                         data_orders,
                                         order_db_table,
-                                        archive_db_table,
+                                        currency_lower,
+                                    )
+
+                                    await modify_order_and_db.resupply_transaction_log(
+                                        currency,
                                         transaction_log_trading_table,
+                                        archive_db_table,
+                                    )
+
+                                    await modify_order_and_db.update_db_pkl(
+                                        "positions",
+                                        data_orders,
+                                        currency,
                                     )
 
                                     """

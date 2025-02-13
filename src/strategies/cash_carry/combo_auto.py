@@ -362,7 +362,7 @@ class ComboAuto(BasicStrategy):
             self.strategy_label, self.strategy_parameters
         )
 
-        #log.critical(f"""delta  {self.delta} """)
+        # log.critical(f"""delta  {self.delta} """)
 
     async def is_send_open_order_allowed_auto_combo(
         self,

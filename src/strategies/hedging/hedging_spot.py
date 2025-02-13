@@ -310,9 +310,9 @@ class HedgingSpot(BasicStrategy):
             self.market_condition,
         )
 
-#        log.info(
-#            f" max_position {self.max_position} over_hedged_opening {self.over_hedged_opening}  over_hedged_closing {self.over_hedged_closing} sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy}"
-#        )
+    #        log.info(
+    #            f" max_position {self.max_position} over_hedged_opening {self.over_hedged_opening}  over_hedged_closing {self.over_hedged_closing} sum_my_trades_currency_strategy {self.sum_my_trades_currency_strategy}"
+    #        )
 
     def get_basic_params(self) -> dict:
         """ """
