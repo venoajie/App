@@ -444,14 +444,14 @@ async def cancelling_and_relabelling(
                     order_id,
                 )
 
-            order_attributes = labelling_unlabelled_order(order)
-
             log.error (f"order {order}")
-            log.warning (f"order_attributes {order_attributes}")
             await insert_tables(
                 order_db_table,
                 order,
             )
+            
+            order_attributes = labelling_unlabelled_order(order)
+            log.warning (f"order_attributes {order_attributes}")
 
             await if_order_is_true(
                 private_data,
