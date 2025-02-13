@@ -148,6 +148,15 @@ async def main():
                 strategy_attributes,
                 ),
             
+            
+            reconciling_size(
+                modify_order_and_db,
+                client_redis,
+                currencies,
+                redis_channels,
+                strategy_attributes,
+                config_app,),                
+
             hedging_spot(
                 currencies,
                 client_redis,
@@ -216,15 +225,6 @@ async def main():
                 resolutions,
                 np),
             
-            
-            reconciling_size(
-                modify_order_and_db,
-                client_redis,
-                currencies,
-                redis_channels,
-                strategy_attributes,
-                config_app,),                
-
             back_up_db(60*10),
             
             clean_up_databases(60)
