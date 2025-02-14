@@ -112,8 +112,6 @@ async def insert_tables(
 
     finally:
         
-        log.info (f"params {params} dict {isinstance(params, dict)}")
-
         if "trade" in table_name or "order" in table_name:
 
             query_trades = f"SELECT * FROM  v_trading_all_active"
