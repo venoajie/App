@@ -86,6 +86,18 @@ async def saving_and_relabelling_orders(
                 )
             )
 
+        notional = 0
+
+        equity = 0
+
+        index_price = 0
+
+        my_trades_currency_strategy = []
+
+        delta_all = 0
+
+        my_trades_currency_strategy = []
+
         while not_cancel:
 
             try:

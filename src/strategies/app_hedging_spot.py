@@ -107,7 +107,7 @@ async def hedging_spot(
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
         order_allowed = False
-
+        
         while not_cancel:
 
             try:
