@@ -151,8 +151,6 @@ async def hedging_spot(
 
                         cached_ticker_all = message_byte_data["data"]
                         
-                        log.warning(f"cached_ticker_all {cached_ticker_all}")
-
                         server_time = message_byte_data["server_time"]
 
                         currency, currency_upper = (
@@ -284,12 +282,7 @@ async def hedging_spot(
                                 ]
                             )
 
-                            log.info(
-                                f"orders_currency_strategy {len(orders_currency_strategy)}  {currency}"
-                            )
-                            log.info(f" {(orders_currency_strategy)} ")
-
-                            log.warning(f"strategy {strategy}-START")
+                            log.info(f" {currency} {len(orders_currency_strategy)}  {(orders_currency_strategy)} ")
 
                             instrument_attributes_futures_for_hedging = [
                                 o

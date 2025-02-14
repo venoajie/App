@@ -156,16 +156,7 @@ async def main():
         await asyncio.sleep(0.0005)
         
         """
-                    
-            future_spreads(
-                currencies,
-                client_redis,
-                config_app,
-                redis_channels,
-                redis_keys,
-                strategy_attributes,
-                ),
-
+                   
       
             #scanning_volume()
                   
@@ -175,6 +166,14 @@ async def main():
             producer_task, 
         
             saving_task,
+ 
+            future_spreads(
+                client_redis,
+                config_app,
+                futures_instruments,
+                redis_channels,
+                strategy_attributes,
+                ),
 
             hedging_spot(
                 client_redis,
