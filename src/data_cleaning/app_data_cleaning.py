@@ -296,9 +296,6 @@ async def reconciling_size(
                                                 )
                                             )
 
-                                            log.debug(trades_from_exchange)
-
-
                                             await update_trades_from_exchange_based_on_latest_timestamp(
                                                 trades_from_exchange,
                                                 instrument_name,
@@ -446,7 +443,8 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
 
     if trades_from_exchange:
 
-        log.error (f"my_trades_instrument_name {my_trades_instrument_name}")
+        log.error (f"trades_from_exchange {trades_from_exchange}")
+        log.debug (f"my_trades_instrument_name {my_trades_instrument_name}")
         
         trades_from_exchange_without_futures_combo = [
             o for o in trades_from_exchange if f"-FS-" not in o["instrument_name"]
@@ -456,7 +454,10 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
             f"size_futures_not_reconciled-{instrument_name}",
             "general_error",
         )
+        
         for trade in trades_from_exchange_without_futures_combo:
+            
+            log.warning (f"not my_trades_instrument_name {not my_trades_instrument_name}")
 
             if not my_trades_instrument_name:
 
@@ -492,6 +493,8 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
                     for o in my_trades_instrument_name
                     if trade_trd_id in o["trade_id"]
                 ]
+                
+                log.debug(f"trade_trd_id_not_in_archive {trade_trd_id_not_in_archive}")
 
                 if not trade_trd_id_not_in_archive:
 
