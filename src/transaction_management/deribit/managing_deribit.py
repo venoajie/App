@@ -406,7 +406,6 @@ class ModifyOrderDb(SendApiRequest):
                         order_db_table,
                     )
 
-
     async def send_triple_orders(self, params) -> None:
         """
         triple orders:

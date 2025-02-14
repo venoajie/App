@@ -60,7 +60,6 @@ def get_my_trades_size_per_instrument(
         else sum([o["amount"] for o in my_trades_instrument])
     )
 
-
     return 0 if not sum_my_trades_instrument else sum_my_trades_instrument
 
 

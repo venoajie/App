@@ -26,6 +26,10 @@ from streaming_data.data_producer import StreamingAccountData
 from transaction_management.deribit.api_requests import SendApiRequest
 from transaction_management.deribit.avoiding_double_ids import \
     avoiding_double_ids
+
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,
+)
 from market_understanding.price_action.candles_analysis import get_market_condition
 from transaction_management.deribit.allocating_ohlc import updating_ohlc
 from transaction_management.deribit.cancelling_active_orders import \
@@ -44,7 +48,10 @@ from utilities.system_tools import (
     get_config_tomli,
     parse_error_message, 
     )
-
+from utilities.string_modification import (
+    remove_double_brackets_in_list,
+    remove_redundant_elements,
+)
 
 def handle_ctrl_c(
     signum, 
@@ -99,6 +106,17 @@ async def main():
         cancellable_strategies = [
             o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
         ]
+        
+        settlement_periods = remove_redundant_elements(
+        remove_double_brackets_in_list(
+            [o["settlement_period"] for o in strategy_attributes]
+        )
+    )
+        
+        futures_instruments = await get_futures_instruments(
+            currencies,
+            settlement_periods,
+        )
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
@@ -148,14 +166,6 @@ async def main():
                 strategy_attributes,
                 ),
 
-            hedging_spot(
-                currencies,
-                client_redis,
-                config_app,
-                redis_channels,
-                redis_keys,
-                strategy_attributes,
-                ),
       
             #scanning_volume()
                   
@@ -165,7 +175,15 @@ async def main():
             producer_task, 
         
             saving_task,
-            
+
+            hedging_spot(
+                client_redis,
+                config_app,
+                futures_instruments,
+                redis_channels,
+                strategy_attributes,
+                ),
+                        
         cancelling_orders(
                 modify_order_and_db,
                 currencies,

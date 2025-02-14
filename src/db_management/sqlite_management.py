@@ -111,7 +111,7 @@ async def insert_tables(
         )
 
     finally:
-        
+
         if "trade" in table_name or "order" in table_name:
 
             query_trades = f"SELECT * FROM  v_trading_all_active"
