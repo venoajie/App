@@ -270,7 +270,7 @@ async def future_spreads(
                                 f"orders_currency_strategy {len (orders_currency_strategy)}"
                             )
 
-                            if  strategy in active_strategies:
+                            if  order_allowed:
 
                                 async with client_redis.pipeline() as pipe:
 
