@@ -6,13 +6,10 @@ import orjson
 
 from loguru import logger as log
 
-from configuration.label_numbering import get_now_unix_time
 from data_cleaning.managing_closed_transactions import (
     clean_up_closed_transactions,
     get_unrecorded_trade_transactions,
 )
-from utilities.time_modification import get_now_unix_time as get_now_unix
-
 from data_cleaning.managing_delivered_transactions import (
     is_instrument_name_has_delivered,
     updating_delivered_instruments,
@@ -26,9 +23,8 @@ from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,
 )
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
+from transaction_management.deribit.get_instrument_summary import get_futures_instruments
+from transaction_management.deribit.orders_management import saving_traded_orders
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
@@ -38,6 +34,8 @@ from utilities.system_tools import (
     parse_error_message,
     provide_path_for_file,
 )
+from utilities.time_modification import get_now_unix_time as get_now_unix
+
 
 
 def get_settlement_period(strategy_attributes: list) -> list:
@@ -112,7 +110,7 @@ async def update_instruments(idle_time: int):
 
 
 async def reconciling_size(
-    modify_order_and_db: object,
+    private_data: object,
     client_redis: object,
     currencies,
     redis_channels: list,
@@ -275,7 +273,7 @@ async def reconciling_size(
 
                                                 one_minute = ONE_SECOND * 60
 
-                                                end_timestamp = get_now_unix_time()
+                                                end_timestamp = get_now_unix()
 
                                                 five_days_ago = end_timestamp - (
                                                     one_minute * 60 * 24 * 5
@@ -287,14 +285,26 @@ async def reconciling_size(
                                                 f"timestamp_log {timestamp_log}"
                                             )
 
-                                            await modify_order_and_db.update_trades_from_exchange_based_on_latest_timestamp(
-                                                instrument_name,
-                                                timestamp_log
+
+                                            trades_from_exchange = (
+                                                await private_data.get_user_trades_by_instrument_and_time(
+                                                    instrument_name,
+                                                    timestamp_log
                                                 - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                                                
+                                                    1000,
+                                                )
+                                            )
+
+                                            log.debug(trades_from_exchange)
+
+
+                                            await update_trades_from_exchange_based_on_latest_timestamp(
+                                                trades_from_exchange,
+                                                instrument_name,
+                                                my_trades_instrument_name,
                                                 archive_db_table,
-                                                trade_db_table,
                                                 order_db_table,
-                                                1000,
                                             )
 
                             settlement_periods = get_settlement_period(
@@ -423,3 +433,72 @@ async def reconciling_size(
         )
 
         parse_error_message(error)
+
+
+async def update_trades_from_exchange_based_on_latest_timestamp(
+    trades_from_exchange,
+    instrument_name: str,
+    my_trades_instrument_name,
+    archive_db_table: str,
+    order_db_table: str,
+) -> None:
+    """ """
+
+    if trades_from_exchange:
+
+        log.error (f"my_trades_instrument_name {my_trades_instrument_name}")
+        
+        trades_from_exchange_without_futures_combo = [
+            o for o in trades_from_exchange if f"-FS-" not in o["instrument_name"]
+        ]
+
+        await telegram_bot_sendtext(
+            f"size_futures_not_reconciled-{instrument_name}",
+            "general_error",
+        )
+        for trade in trades_from_exchange_without_futures_combo:
+
+            if not my_trades_instrument_name:
+
+                from_exchange_timestamp = max(
+                    [
+                        o["timestamp"]
+                        for o in trades_from_exchange_without_futures_combo
+                    ]
+                )
+
+                trade_timestamp = [
+                    o
+                    for o in trades_from_exchange_without_futures_combo
+                    if o["timestamp"] == from_exchange_timestamp
+                ]
+
+                trade = trade_timestamp[0]
+
+                log.error(f"{trade}")
+
+                await saving_traded_orders(
+                    trade,
+                    archive_db_table,
+                    order_db_table,
+                )
+
+            else:
+
+                trade_trd_id = trade["trade_id"]
+
+                trade_trd_id_not_in_archive = [
+                    o
+                    for o in my_trades_instrument_name
+                    if trade_trd_id in o["trade_id"]
+                ]
+
+                if not trade_trd_id_not_in_archive:
+
+                    log.debug(f"{trade_trd_id}")
+
+                    await saving_traded_orders(
+                        trade,
+                        archive_db_table,
+                        order_db_table,
+                    )

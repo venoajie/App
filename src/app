@@ -218,7 +218,7 @@ async def main():
             
             
             reconciling_size(
-                modify_order_and_db,
+                private_data,
                 client_redis,
                 currencies,
                 redis_channels,
