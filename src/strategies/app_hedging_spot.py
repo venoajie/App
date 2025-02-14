@@ -150,6 +150,8 @@ async def hedging_spot(
                     ):
 
                         cached_ticker_all = message_byte_data["data"]
+                        
+                        log.warning(f"cached_ticker_all {cached_ticker_all}")
 
                         server_time = message_byte_data["server_time"]
 
