@@ -434,6 +434,18 @@ class ModifyOrderDb(SendApiRequest):
             my_trades_instrument_name_archive: list = await get_query(
                 archive_db_table, instrument_name, "all", "all", column_trade
             )
+            
+            log.warning (f"my_trades_instrument_name_archive {my_trades_instrument_name_archive}")
+            
+                
+            query_trades: str = f"SELECT * FROM  v_trading_all_active"
+
+            my_trades_active_all: list = await executing_query_with_return(query_trades)
+
+            my_trades_instrument_name_archive: list = [o for o in my_trades_active_all if instrument_name in o["instrument_name"]]
+
+            log.error (f"my_trades_instrument_name_archive {my_trades_instrument_name_archive}")
+            
 
             trades_from_exchange_without_futures_combo = [
                 o for o in trades_from_exchange if f"-FS-" not in o["instrument_name"]
