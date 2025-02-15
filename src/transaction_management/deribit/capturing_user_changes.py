@@ -113,6 +113,8 @@ async def saving_and_relabelling_orders(
                     message_channel = message_byte["channel"]
 
                     try:
+                        from loguru import logger as log
+                        log.info(message_byte_data)
 
                         data = message_byte_data["data"]
 
