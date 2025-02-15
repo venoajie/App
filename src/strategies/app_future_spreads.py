@@ -266,9 +266,9 @@ async def future_spreads(
                                 ]
                             )
 
-                            log.info(
-                                f"orders_currency_strategy {len (orders_currency_strategy)}"
-                            )
+                            #log.info(
+                            #    f"orders_currency_strategy {len (orders_currency_strategy)}"
+                            #)
 
                             if  order_allowed:
 

@@ -282,7 +282,7 @@ async def hedging_spot(
                                 ]
                             )
 
-                            log.info(f" {currency} {len(orders_currency_strategy)}  {(orders_currency_strategy)} ")
+                            #log.info(f" {currency} {len(orders_currency_strategy)}  {(orders_currency_strategy)} ")
 
                             instrument_attributes_futures_for_hedging = [
                                 o
