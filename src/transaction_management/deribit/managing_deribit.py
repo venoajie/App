@@ -16,7 +16,6 @@ from db_management.sqlite_management import (
     # insert_tables,
 )
 from messaging.telegram_bot import telegram_bot_sendtext
-from strategies.basic_strategy import is_label_and_side_consistent
 from transaction_management.deribit.api_requests import (
     SendApiRequest,
     get_cancel_order_byOrderId,

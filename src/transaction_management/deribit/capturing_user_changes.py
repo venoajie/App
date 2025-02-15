@@ -62,9 +62,11 @@ async def saving_and_relabelling_orders(
         portfolio_channel: str = redis_channels["portfolio"]
         sub_account_update_channel: str = redis_channels["sub_account_update"]
         sub_account_cached_channel: str = redis_channels["sub_account_cached"]
+        my_trades_channel: str = redis_channels["my_trades"]
 
         # prepare channels placeholders
         channels = [
+            my_trades_channel,
             receive_order_channel,
             sub_account_update_channel,
             portfolio_channel,
@@ -168,6 +170,12 @@ async def saving_and_relabelling_orders(
                                 data,
                                 currency_lower,
                             )
+
+                        if my_trades_channel in message_channel:
+                            
+                            await modify_order_and_db.resupply_sub_accountdb(currency_lower.upper())
+
+
 
                     except Exception as error:
                         parse_error_message(error)
