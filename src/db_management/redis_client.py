@@ -167,8 +167,7 @@ async def publishing_result(
     """ """
 
     try:
-        #print (f"channel {channel} message {message}")
-
+        
         # publishing message
         await client_redis.publish(
             channel,
@@ -295,6 +294,8 @@ async def publishing_specific_purposes(
 
     if purpose == "portfolio":
         channel: str = redis_channels["portfolio"]
+        
+        print (f"channel {channel} message {message}")
 
     async with client_redis.pipeline() as pipe:
         
