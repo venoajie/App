@@ -128,7 +128,7 @@ async def saving_and_relabelling_orders(
                         if receive_order_channel in message_channel:
 
                             currency_lower = message_byte_data["currency"]
-                            
+                            data_to_processs = data["data"]
                             log.info(f" data {data}")
 
                             await saving_orders(
@@ -136,13 +136,13 @@ async def saving_and_relabelling_orders(
                                 private_data,
                                 cancellable_strategies,
                                 non_checked_strategies,
-                                data,
+                                data_to_processs,
                                 order_db_table,
                                 currency_lower,
                                 False,
                             )
                             
-                            position = data["position"]
+                            position = data_to_processs["position"]
 
                             log.error(f" sub_acc before {sub_account_cached}")
                             log.info(f" position {position}")
