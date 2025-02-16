@@ -199,7 +199,7 @@ class StreamingAccountData:
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
                         
-                        print(f"message {message}")
+                        #print(f"message {message}")
 
 
                         if "id" in list(message):

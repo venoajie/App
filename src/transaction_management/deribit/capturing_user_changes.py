@@ -63,11 +63,13 @@ async def saving_and_relabelling_orders(
         sub_account_update_channel: str = redis_channels["sub_account_update"]
         sub_account_cached_channel: str = redis_channels["sub_account_cached"]
         my_trades_channel: str = redis_channels["my_trades"]
+        ticker_data_channel: str = redis_channels["ticker_update_data"]
 
         # prepare channels placeholders
         channels = [
             my_trades_channel,
             receive_order_channel,
+            ticker_data_channel,
             sub_account_update_channel,
             portfolio_channel,
         ]
