@@ -134,6 +134,8 @@ async def main():
         producer_task = asyncio.create_task(
             stream.ws_manager(
                 modify_order_and_db,
+                client_redis,
+                redis_channels,
                 queue,
                 cancellable_strategies,
                 currencies,

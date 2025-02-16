@@ -270,7 +270,11 @@ async def publishing_specific_purposes(
 
     if not client_redis:
         pool = aioredis.ConnectionPool.from_url(
-            "redis://localhost", port=6379, db=0, protocol=3, decode_responses=True
+            "redis://localhost",
+            port=6379, 
+            db=0, 
+            protocol=3,
+            decode_responses=True,
         )
         client_redis: object = aioredis.Redis.from_pool(pool)
 
