@@ -157,15 +157,6 @@ async def main():
                 )
             ) 
                    
-      
-            #scanning_volume()
-                  
-            """
-            
-        await asyncio.gather(
-            producer_task, 
-        
-            saving_task,
  
             future_spreads(
                 client_redis,
@@ -198,15 +189,6 @@ async def main():
                 redis_channels,
                 strategy_attributes,
                 ),
-       
-            saving_and_relabelling_orders(
-                private_data,
-                modify_order_and_db,
-                client_redis,
-                config_app,
-                currencies,
-                strategy_attributes,),
-    
             avoiding_double_ids(
                 modify_order_and_db,
                 client_redis,
@@ -241,6 +223,24 @@ async def main():
                 redis_channels,
                 strategy_attributes,
                 config_app,),                
+            
+            #scanning_volume()
+                  
+            """
+            
+        await asyncio.gather(
+            producer_task, 
+        
+        #    saving_task,
+ 
+            saving_and_relabelling_orders(
+                private_data,
+                modify_order_and_db,
+                client_redis,
+                config_app,
+                currencies,
+                strategy_attributes,),
+    
             
             back_up_db(60*10),
             
