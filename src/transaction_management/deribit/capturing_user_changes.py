@@ -105,8 +105,11 @@ async def saving_and_relabelling_orders(
         while not_cancel:
 
             try:
-
+                from loguru import logger as log
+                        
                 message_byte = await pubsub.get_message()
+                
+                log.debug(message_byte)
 
                 if (message_byte 
                     and message_byte["type"] == "message"):
@@ -116,8 +119,6 @@ async def saving_and_relabelling_orders(
                     message_channel = message_byte["channel"]
 
                     try:
-                        
-                        from loguru import logger as log
                         
                         log.warning(message_byte)
                         log.info(message_channel)
