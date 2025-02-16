@@ -232,7 +232,7 @@ async def main():
         await asyncio.gather(
             producer_task, 
         
-            saving_task,
+            #saving_task,
  
             saving_and_relabelling_orders(
                 private_data,

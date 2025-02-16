@@ -258,6 +258,9 @@ class StreamingAccountData:
                                         
                                         message_channel: str = message_params["channel"]
                                     
+                                            # queing message to dispatcher
+                                        await queue_general.put(message_params)
+
                                         instrument_name_future = (message_channel)[19:]
                                         if message_channel == f"incremental_ticker.{instrument_name_future}":
                                             
@@ -279,9 +282,6 @@ class StreamingAccountData:
                                                 message_params,
                                                 )
                                                 
-                                            # queing message to dispatcher
-                                        await queue_general.put(message_params)
-
                                     """
                                     message examples:
                                     
