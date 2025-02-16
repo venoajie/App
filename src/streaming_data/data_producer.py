@@ -249,7 +249,7 @@ class StreamingAccountData:
                                         
                                     await publishing_specific_purposes(
                                         "portfolio",
-                                        message_channel,
+                                        message_params,
                                         )
                                         
                                     # queing message to dispatcher
