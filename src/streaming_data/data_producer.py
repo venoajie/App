@@ -17,6 +17,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # user defined formula
 from configuration import config, config_oci, id_numbering
+from db_management.redis_client import saving_and_publishing_result, publishing_result
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import (
     get_currencies,
@@ -77,10 +78,12 @@ class StreamingAccountData:
     async def ws_manager(
         self,
         modify_order_and_db: object,
+        client_redis: object,
         queue_general: object,
         cancellable_strategies,
         currencies: list,
         order_db_table,
+        redis_channels,
         resolutions: list,
         strategy_attributes: list,
     ) -> None:
@@ -100,6 +103,10 @@ class StreamingAccountData:
                 all_exc_currencies = [
                     o["currency"] for o in get_currencies_all["result"]
                 ]
+
+                # get redis channels
+                receive_order_channel: str = redis_channels["receive_order"]
+                portfolio_channel: str = redis_channels["portfolio"]
 
                 for currency in all_exc_currencies:
 
@@ -241,8 +248,21 @@ class StreamingAccountData:
                             if message["method"] != "heartbeat":
 
                                 message_params: dict = message["params"]
+                                
+                                message_channel: str = message_params["channel"]
+                                
+                                async with client_redis.pipeline() as pipe:
 
-                                # queing message to dispatcher
+
+                                    if "portfolio" in message_channel:
+                                                    
+                                        await publishing_result(
+                                            pipe,
+                                            portfolio_channel,
+                                            message_params,
+                                        )
+                                        
+                                    # queing message to dispatcher
                                 await queue_general.put(message_params)
 
                                 """

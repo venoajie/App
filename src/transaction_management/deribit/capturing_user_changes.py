@@ -99,6 +99,8 @@ async def saving_and_relabelling_orders(
         delta_all = 0
 
         my_trades_currency_strategy = []
+        
+        cached_portfolio = []
 
         while not_cancel:
 
@@ -106,7 +108,8 @@ async def saving_and_relabelling_orders(
 
                 message_byte = await pubsub.get_message()
 
-                if message_byte and message_byte["type"] == "message":
+                if (message_byte 
+                    and message_byte["type"] == "message"):
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
@@ -169,10 +172,24 @@ async def saving_and_relabelling_orders(
 
                         if portfolio_channel in message_channel:
 
+                            if cached_portfolio == []:
+                                cached_portfolio.append(data)
+
+                            else:
+                                data_currency = data["currency"]
+                                portfolio_currency = [
+                                    o for o in cached_portfolio if data_currency in o["currency"]
+                                ]
+
+                                if portfolio_currency:
+                                    cached_portfolio.remove(portfolio_currency[0])
+
+                                cached_portfolio.append(data)
+
                             await publishing_result(
                                 client_redis,
                                 sub_account_cached_channel,
-                                sub_account_cached,
+                                cached_portfolio,
                             )
 
                             await update_db_pkl(

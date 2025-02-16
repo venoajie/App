@@ -143,11 +143,11 @@ async def caching_distributing_data(
 
                         log.error(f"portfolio {portfolio}")
 
-                        await publishing_result(
-                            pipe,
-                            portfolio_channel,
-                            pub_message,
-                        )
+                        #await publishing_result(
+                        #    pipe,
+                        #    portfolio_channel,
+                        #    data,
+                        #)
 
                         query_trades = f"SELECT * FROM  v_trading_all_active"
 

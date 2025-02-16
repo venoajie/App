@@ -458,39 +458,13 @@ cached_candles_data = [
         ],
     },
 ]
-
+import ast
 instrument_name = "BTC-PERPETUAL"
-resolution = 5
-[
-    i
-    for i in [
-        y
-        for y in [
-            o for o in cached_candles_data if instrument_name in o["instrument_name"]
-        ]
-        if resolution == y["resolution"]
-    ][0]["ohlc"]
-][0] = new_data
+json_load = {'type': 'message', 
+             'pattern': None, 
+             'channel': 'account.portfolio', 
+             'data': '{"data":{"total_initial_margin_usd":8.815679372,"futures_session_rpl":3.4e-7,"currency":"BTC","projected_initial_margin":0.00009028,"margin_model":"cross_pm","fee_balance":0.0,"options_pl":0.0,"total_equity_usd":271.160115578,"options_session_upl":0.0,"options_gamma_map":{},"available_withdrawal_funds":0.00216541,"margin_balance":0.00277679,"options_value":0.0,"session_upl":-6.3e-6,"balance":0.00220316,"options_vega_map":{},"delta_total_map":{"btc_usd":-0.002251049},"delta_total":-0.002251,"available_funds":0.00268651,"futures_session_upl":-6.3e-6,"futures_pl":-0.00001182,"projected_maintenance_margin":0.00004467,"equity":0.00219719,"spot_reserve":0.0,"options_delta":0.0,"locked_balance":0.0,"projected_delta_total":-0.002251,"additional_reserve":0.0,"options_gamma":0.0,"cross_collateral_enabled":true,"options_session_rpl":0.0,"options_vega":0.0,"portfolio_margining_enabled":true,"total_pl":-0.00001182,"total_delta_total_usd":-241.916854106,"total_margin_balance_usd":271.160115578,"initial_margin":0.00009028,"session_rpl":3.4e-7,"total_maintenance_margin_usd":4.362179370134827,"options_theta_map":{},"maintenance_margin":0.00004467,"options_theta":0.0},"server_time":0,"currency_upper":"BTC","currency":"btc","cached_portfolio":[{"total_initial_margin_usd":8.815679372,"futures_session_rpl":3.4e-7,"currency":"BTC","projected_initial_margin":0.00009028,"margin_model":"cross_pm","fee_balance":0.0,"options_pl":0.0,"total_equity_usd":271.160115578,"options_session_upl":0.0,"options_gamma_map":{},"available_withdrawal_funds":0.00216541,"margin_balance":0.00277679,"options_value":0.0,"session_upl":-6.3e-6,"balance":0.00220316,"options_vega_map":{},"delta_total_map":{"btc_usd":-0.002251049},"delta_total":-0.002251,"available_funds":0.00268651,"futures_session_upl":-6.3e-6,"futures_pl":-0.00001182,"projected_maintenance_margin":0.00004467,"equity":0.00219719,"spot_reserve":0.0,"options_delta":0.0,"locked_balance":0.0,"projected_delta_total":-0.002251,"additional_reserve":0.0,"options_gamma":0.0,"cross_collateral_enabled":true,"options_session_rpl":0.0,"options_vega":0.0,"portfolio_margining_enabled":true,"total_pl":-0.00001182,"total_delta_total_usd":-241.916854106,"total_margin_balance_usd":271.160115578,"initial_margin":0.00009028,"session_rpl":3.4e-7,"total_maintenance_margin_usd":4.362179370134827,"options_theta_map":{},"maintenance_margin":0.00004467,"options_theta":0.0}]}'}
 
-log.debug(cached_candles_data)
-
-log.warning(
-    [
-        i
-        for i in [
-            y
-            for y in [
-                o
-                for o in cached_candles_data
-                if instrument_name in o["instrument_name"]
-            ]
-            if resolution == y["resolution"]
-        ][0]["ohlc"]
-    ]
-)
-
-lookback = 3
-parameters = 6
-arr = np.empty((1, lookback, parameters))
-
-log.warning(f"arr  {arr}")
+log.debug([json_load])
+js = [json_load]
+log.info([ast.literal_eval(str(i)) for i in js])
