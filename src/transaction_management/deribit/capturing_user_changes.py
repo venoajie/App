@@ -113,7 +113,9 @@ async def saving_and_relabelling_orders(
 
                 if (message_byte 
                     and (message_byte["type"] == "message"
-                         or message_byte["type"] == "subscribe")):
+                         #or message_byte["type"] == "subscribe"
+                         )
+                    ):
                     
                     log.warning(message_byte)
 
