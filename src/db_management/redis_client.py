@@ -297,9 +297,6 @@ async def publishing_specific_purposes(
 
     async with client_redis.pipeline() as pipe:
         
-        print(f"channel {channel}")
-        print(f"message {message}")
-
         await publishing_result(
             pipe,
             channel,
