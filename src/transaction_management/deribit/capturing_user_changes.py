@@ -128,6 +128,8 @@ async def saving_and_relabelling_orders(
                         if receive_order_channel in message_channel:
 
                             currency_lower = message_byte_data["currency"]
+                            
+                            log.info(f" data {data}")
 
                             await saving_orders(
                                 modify_order_and_db,
