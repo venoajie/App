@@ -203,58 +203,58 @@ class StreamingAccountData:
                             cancellable_strategies,
                         )
 
-                    while True:
+                    async with client_redis.pipeline() as pipe:
 
-                        # Receive WebSocket messages
-                        message: bytes = await self.websocket_client.recv()
-                        message: dict = orjson.loads(message)
-                        
-                        print(f"message {message}")
+                        while True:
+
+                            # Receive WebSocket messages
+                            message: bytes = await self.websocket_client.recv()
+                            message: dict = orjson.loads(message)
+                            
+                            print(f"message {message}")
 
 
-                        if "id" in list(message):
-                            if message["id"] == 9929:
+                            if "id" in list(message):
+                                if message["id"] == 9929:
 
-                                if self.refresh_token is None:
-                                    print(
-                                        "Successfully authenticated WebSocket Connection"
+                                    if self.refresh_token is None:
+                                        print(
+                                            "Successfully authenticated WebSocket Connection"
+                                        )
+
+                                    else:
+                                        print(
+                                            "Successfully refreshed the authentication of the WebSocket Connection"
+                                        )
+
+                                    self.refresh_token = message["result"]["refresh_token"]
+
+                                    # Refresh Authentication well before the required datetime
+                                    if message["testnet"]:
+                                        expires_in: int = 300
+                                    else:
+                                        expires_in: int = (
+                                            message["result"]["expires_in"] - 240
+                                        )
+
+                                    now_utc: int = datetime.now(timezone.utc)
+
+                                    self.refresh_token_expiry_time = now_utc + timedelta(
+                                        seconds=expires_in
                                     )
 
-                                else:
-                                    print(
-                                        "Successfully refreshed the authentication of the WebSocket Connection"
-                                    )
+                                elif message["id"] == 8212:
+                                    # Avoid logging Heartbeat messages
+                                    continue
 
-                                self.refresh_token = message["result"]["refresh_token"]
+                            elif "method" in list(message):
+                                # Respond to Heartbeat Message
+                                if message["method"] == "heartbeat":
+                                    await self.heartbeat_response()
 
-                                # Refresh Authentication well before the required datetime
-                                if message["testnet"]:
-                                    expires_in: int = 300
-                                else:
-                                    expires_in: int = (
-                                        message["result"]["expires_in"] - 240
-                                    )
+                            if "params" in list(message):
 
-                                now_utc: int = datetime.now(timezone.utc)
-
-                                self.refresh_token_expiry_time = now_utc + timedelta(
-                                    seconds=expires_in
-                                )
-
-                            elif message["id"] == 8212:
-                                # Avoid logging Heartbeat messages
-                                continue
-
-                        elif "method" in list(message):
-                            # Respond to Heartbeat Message
-                            if message["method"] == "heartbeat":
-                                await self.heartbeat_response()
-
-                        if "params" in list(message):
-
-                            if message["method"] != "heartbeat":
-                                
-                                async with client_redis.pipeline() as pipe:
+                                if message["method"] != "heartbeat":
 
                                     message_params: dict = message["params"]
                                     
@@ -282,7 +282,7 @@ class StreamingAccountData:
                                             )
                                             
                                         # queing message to dispatcher
-                                    await queue_general.put(message_params)
+#                                    await queue_general.put(message_params)
 
                                 """
                                 message examples:
