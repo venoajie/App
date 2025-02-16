@@ -198,6 +198,9 @@ class StreamingAccountData:
                         # Receive WebSocket messages
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
+                        
+                        print(f"message {message}")
+
 
                         if "id" in list(message):
                             if message["id"] == 9929:
@@ -241,8 +244,6 @@ class StreamingAccountData:
 
                             if message["method"] != "heartbeat":
                                 
-                                print(message)
-
                                 message_params: dict = message["params"]
                                 
                                 message_channel: str = message_params["channel"]
