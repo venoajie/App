@@ -179,7 +179,7 @@ async def caching_distributing_data(
                                             False,
                                         )
                         
-                        position = data["position"]
+                        position = data["positions"]
 
                         log.error(f" sub_acc before {sub_account_cached}")
                         log.info(f" position {position}")
