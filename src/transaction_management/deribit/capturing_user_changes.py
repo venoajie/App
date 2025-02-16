@@ -128,9 +128,9 @@ async def saving_and_relabelling_orders(
                     try:
                         
                         log.warning(message_byte)
-                        log.info(message_channel)
 
                         data = orjson.loads(message_byte_data)#["data"]
+                        log.info(data)
 
                         currency_lower = message_byte_data["currency"]
 
