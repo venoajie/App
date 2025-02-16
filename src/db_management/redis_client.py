@@ -167,6 +167,10 @@ async def publishing_result(
     """ """
 
     try:
+
+        if channel == " account.portfolio":
+            from loguru import logger as log
+            log.debug (f"channel {channel} message {message}")
         
         # publishing message
         await client_redis.publish(
