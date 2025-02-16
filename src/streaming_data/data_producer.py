@@ -251,8 +251,9 @@ class StreamingAccountData:
                                 
                                 message_channel: str = message_params["channel"]
                                 
+                                print(message_channel)
+                                
                                 async with client_redis.pipeline() as pipe:
-
 
                                     if "portfolio" in message_channel:
                                                     

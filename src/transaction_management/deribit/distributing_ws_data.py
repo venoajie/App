@@ -120,7 +120,7 @@ async def caching_distributing_data(
                             pub_message,
                         )
 
-                    if "portfolio" in message_channel:
+                    if False and "portfolio" in message_channel:
 
                         log.info(f"portfolio {data}")
                         log.warning (f"portfolio-data {portfolio}")
