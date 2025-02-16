@@ -143,7 +143,6 @@ async def saving_and_relabelling_orders(
                             position = data["position"]
 
                             log.error(f" sub_acc before {sub_account_cached}")
-                            log.info(f" data {data}")
                             log.info(f" position {position}")
 
                             updating_sub_account(
