@@ -280,7 +280,7 @@ class StreamingAccountData:
                                                 )
                                                 
                                             # queing message to dispatcher
-    #                                    await queue_general.put(message_params)
+                                        await queue_general.put(message_params)
 
                                     """
                                     message examples:
