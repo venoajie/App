@@ -132,38 +132,7 @@ async def saving_and_relabelling_orders(
 
                         data = message_byte_data#["data"]
 
-                        #currency_lower = message_byte_data["currency"]
-
-                        if portfolio_channel in message_channel:
-
-                            log.info(f" data {data}")
-                            if cached_portfolio == []:
-                                cached_portfolio.append(data)
-
-                            else:
-                                data_currency = data["currency"]
-                                portfolio_currency = [
-                                    o for o in cached_portfolio if data_currency in o["currency"]
-                                ]
-
-                                if portfolio_currency:
-                                    cached_portfolio.remove(portfolio_currency[0])
-
-                                cached_portfolio.append(data)
-
-                            await publishing_result(
-                                client_redis,
-                                sub_account_cached_channel,
-                                cached_portfolio,
-                            )
-
-                            log.info(f" cached_portfolio {cached_portfolio}")
-                            await update_db_pkl(
-                                "portfolio",
-                                data,
-                                currency_lower,
-                            )
-
+                        currency_lower = message_byte_data["currency"]
 
                         if receive_order_channel in message_channel:
 

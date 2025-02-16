@@ -77,6 +77,8 @@ async def caching_distributing_data(
         server_time = 0
 
         portfolio = []
+        
+        notional_value = 0
 
         while True:
 
@@ -217,3 +219,27 @@ async def caching_distributing_data(
             f"saving result {error}",
             "general_error",
         )
+
+
+def compute_notional_value(
+    index_price: float,
+    equity: float,
+) -> float:
+    """ """
+    return index_price * equity
+
+
+def get_index(ticker: dict) -> float:
+
+    try:
+
+        index_price = ticker["index_price"]
+
+    except:
+
+        index_price = []
+
+    if index_price == []:
+        index_price = ticker["estimated_delivery_price"]
+
+    return index_price

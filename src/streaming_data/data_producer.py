@@ -17,8 +17,6 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # user defined formula
 from configuration import config, config_oci, id_numbering
-from db_management.redis_client import saving_and_publishing_result, publishing_result
-from db_management.redis_client import publishing_specific_purposes
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import (
     get_currencies,
@@ -104,13 +102,6 @@ class StreamingAccountData:
                 all_exc_currencies = [
                     o["currency"] for o in get_currencies_all["result"]
                 ]
-
-                chart_channel: str = redis_channels["chart_update"]
-                receive_order_channel: str = redis_channels["receive_order"]
-                ticker_data_channel: str = redis_channels["ticker_update_data"]
-                portfolio_channel: str = redis_channels["portfolio"]
-                my_trades_channel: str = redis_channels["my_trades"]
-
 
                 for currency in all_exc_currencies:
 
@@ -253,7 +244,7 @@ class StreamingAccountData:
 
                                     message_params: dict = message["params"]
                                     
-                                        # queing message to dispatcher
+                                    # queing message to dispatcher
                                     await queue_general.put(message_params)
 
                                     """
