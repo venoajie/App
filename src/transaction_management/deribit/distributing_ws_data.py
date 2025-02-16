@@ -120,7 +120,7 @@ async def caching_distributing_data(
                             pub_message,
                         )
 
-                    if False and "portfolio" in message_channel:
+                    if  "portfolio" in message_channel:
 
                         log.info(f"portfolio {data}")
                         log.warning (f"portfolio-data {portfolio}")
@@ -143,11 +143,11 @@ async def caching_distributing_data(
 
                         log.error(f"portfolio {portfolio}")
 
-                        #await publishing_result(
-                        #    pipe,
-                        #    portfolio_channel,
-                        #    data,
-                        #)
+                        await publishing_result(
+                            pipe,
+                            portfolio_channel,
+                            data,
+                        )
 
                         query_trades = f"SELECT * FROM  v_trading_all_active"
 
