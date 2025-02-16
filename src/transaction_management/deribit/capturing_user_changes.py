@@ -129,7 +129,7 @@ async def saving_and_relabelling_orders(
                         
                         log.warning(message_byte)
 
-                        data = (message_byte_data)["data"]
+                        data = (message_byte)["data"]
                         log.info(data)
 
                         currency_lower = message_byte_data["currency"]

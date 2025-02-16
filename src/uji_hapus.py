@@ -459,12 +459,20 @@ cached_candles_data = [
     },
 ]
 import ast
-instrument_name = "BTC-PERPETUAL"
-json_load = {'type': 'message', 
-             'pattern': None, 
-             'channel': 'account.portfolio', 
-             'data': '{"data":{"total_initial_margin_usd":8.815679372,"futures_session_rpl":3.4e-7,"currency":"BTC","projected_initial_margin":0.00009028,"margin_model":"cross_pm","fee_balance":0.0,"options_pl":0.0,"total_equity_usd":271.160115578,"options_session_upl":0.0,"options_gamma_map":{},"available_withdrawal_funds":0.00216541,"margin_balance":0.00277679,"options_value":0.0,"session_upl":-6.3e-6,"balance":0.00220316,"options_vega_map":{},"delta_total_map":{"btc_usd":-0.002251049},"delta_total":-0.002251,"available_funds":0.00268651,"futures_session_upl":-6.3e-6,"futures_pl":-0.00001182,"projected_maintenance_margin":0.00004467,"equity":0.00219719,"spot_reserve":0.0,"options_delta":0.0,"locked_balance":0.0,"projected_delta_total":-0.002251,"additional_reserve":0.0,"options_gamma":0.0,"cross_collateral_enabled":true,"options_session_rpl":0.0,"options_vega":0.0,"portfolio_margining_enabled":true,"total_pl":-0.00001182,"total_delta_total_usd":-241.916854106,"total_margin_balance_usd":271.160115578,"initial_margin":0.00009028,"session_rpl":3.4e-7,"total_maintenance_margin_usd":4.362179370134827,"options_theta_map":{},"maintenance_margin":0.00004467,"options_theta":0.0},"server_time":0,"currency_upper":"BTC","currency":"btc","cached_portfolio":[{"total_initial_margin_usd":8.815679372,"futures_session_rpl":3.4e-7,"currency":"BTC","projected_initial_margin":0.00009028,"margin_model":"cross_pm","fee_balance":0.0,"options_pl":0.0,"total_equity_usd":271.160115578,"options_session_upl":0.0,"options_gamma_map":{},"available_withdrawal_funds":0.00216541,"margin_balance":0.00277679,"options_value":0.0,"session_upl":-6.3e-6,"balance":0.00220316,"options_vega_map":{},"delta_total_map":{"btc_usd":-0.002251049},"delta_total":-0.002251,"available_funds":0.00268651,"futures_session_upl":-6.3e-6,"futures_pl":-0.00001182,"projected_maintenance_margin":0.00004467,"equity":0.00219719,"spot_reserve":0.0,"options_delta":0.0,"locked_balance":0.0,"projected_delta_total":-0.002251,"additional_reserve":0.0,"options_gamma":0.0,"cross_collateral_enabled":true,"options_session_rpl":0.0,"options_vega":0.0,"portfolio_margining_enabled":true,"total_pl":-0.00001182,"total_delta_total_usd":-241.916854106,"total_margin_balance_usd":271.160115578,"initial_margin":0.00009028,"session_rpl":3.4e-7,"total_maintenance_margin_usd":4.362179370134827,"options_theta_map":{},"maintenance_margin":0.00004467,"options_theta":0.0}]}'}
 
-log.debug([json_load])
-js = [json_load]
-log.info([ast.literal_eval(str(i)) for i in js])
+
+json_load =  {
+    'type': 'message', 
+    'pattern': None, 
+    'channel': 'market.ticker.data', 
+    'data': '{"server_time":1739699263756,"data":{"timestamp":1739699263756,"type":"change","index_price":97297.07,"instrument_name":"BTC-FS-27JUN25_PERP","min_price":2457.0,"max_price":3435.0,"mark_price":2945.99},"currency":"btc","instrument_name":"BTC-FS-27JUN25_PERP","currency_upper":"BTC"}'}
+
+log.warning(json_load["data"])
+
+instrument_name = "BTC-PERPETUAL"
+json_load = {
+    'type': 'message', 
+    'pattern': None,
+    'channel': 'account.portfolio', 
+    'data': '{"total_initial_margin_usd":17.75395715,"futures_session_rpl":0.0,"currency":"ETH","projected_initial_margin":0.006574,"margin_model":"cross_pm","fee_balance":0.0,"options_pl":0.0,"total_equity_usd":271.346028961,"options_session_upl":0.0,"options_gamma_map":{},"available_withdrawal_funds":0.01616,"margin_balance":0.100475,"options_value":0.0,"session_upl":-0.000018,"balance":0.016178,"options_vega_map":{},"delta_total_map":{"eth_usd":-0.008183268},"delta_total":-0.008183,"available_funds":0.093901,"futures_session_upl":-0.000018,"futures_pl":0.000141,"projected_maintenance_margin":0.005182,"equity":0.016161,"spot_reserve":0.0,"options_delta":0.0,"locked_balance":0.0,"projected_delta_total":-0.008183,"additional_reserve":0.0,"options_gamma":0.0,"cross_collateral_enabled":true,"options_session_rpl":0.0,"options_vega":0.0,"portfolio_margining_enabled":true,"total_pl":0.000141,"total_delta_total_usd":-141.996623735,"total_margin_balance_usd":271.346028961,"initial_margin":0.006574,"session_rpl":0.0,"total_maintenance_margin_usd":13.995753372861993,"options_theta_map":{},"maintenance_margin":0.005182,"options_theta":0.0}'}
+log.debug(json_load["data"])
