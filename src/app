@@ -142,6 +142,10 @@ async def main():
                 strategy_attributes)
             ) 
         
+        await asyncio.sleep(0.0005)
+        
+        """
+        
         saving_task = asyncio.create_task(
             caching_distributing_data(
                 private_data,
@@ -152,10 +156,6 @@ async def main():
                 queue,
                 )
             ) 
-        
-        await asyncio.sleep(0.0005)
-        
-        """
                    
       
             #scanning_volume()
