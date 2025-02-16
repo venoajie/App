@@ -95,7 +95,7 @@ async def caching_distributing_data(
                 currency_upper = currency.upper()
 
                 pub_message = dict(
-                    data,
+                    data=data,
                     server_time=server_time,
                     currency_upper=currency_upper,
                     currency=currency,
@@ -162,6 +162,7 @@ async def caching_distributing_data(
                     pub_message.update({"instrument_name": message_channel.split(".")[2]})
                     pub_message.update({"resolution": resolution})
                     
+
                     await publishing_result(
                         pipe,
                         chart_channel,
@@ -212,7 +213,6 @@ async def updating_portfolio(pipe: object,
                              ) -> None:
 
     log.warning (f"portfolio-data {portfolio}")
-    log.warning (f"pub_message {pub_message}")
 
     if portfolio == []:
         portfolio.append(pub_message["data"])
