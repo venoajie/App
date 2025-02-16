@@ -172,6 +172,7 @@ async def saving_and_relabelling_orders(
 
                         if portfolio_channel in message_channel:
 
+                            log.info(f" data {data}")
                             if cached_portfolio == []:
                                 cached_portfolio.append(data)
 
@@ -192,6 +193,7 @@ async def saving_and_relabelling_orders(
                                 cached_portfolio,
                             )
 
+                            log.info(f" cached_portfolio {cached_portfolio}")
                             await update_db_pkl(
                                 "portfolio",
                                 data,
