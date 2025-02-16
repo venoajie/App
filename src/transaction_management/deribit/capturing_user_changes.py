@@ -115,6 +115,9 @@ async def saving_and_relabelling_orders(
                     try:
                         
                         from loguru import logger as log
+                        
+                        log.warning(message_byte)
+                        log.info(message_channel)
 
                         data = message_byte_data["data"]
 
