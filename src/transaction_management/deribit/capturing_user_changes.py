@@ -112,7 +112,8 @@ async def saving_and_relabelling_orders(
                 log.debug(message_byte)
 
                 if (message_byte 
-                    and message_byte["type"] == "message"):
+                    and (message_byte["type"] == "message"
+                         or message_byte["type"] == "subscribe")):
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
