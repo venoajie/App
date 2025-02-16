@@ -95,7 +95,7 @@ async def caching_distributing_data(
                 currency_upper = currency.upper()
 
                 pub_message = dict(
-                    data=data,
+                    data,
                     server_time=server_time,
                     currency_upper=currency_upper,
                     currency=currency,
