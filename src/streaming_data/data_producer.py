@@ -78,12 +78,10 @@ class StreamingAccountData:
     async def ws_manager(
         self,
         modify_order_and_db: object,
-        client_redis: object,
         queue_general: object,
         cancellable_strategies,
         currencies: list,
         order_db_table,
-        redis_channels,
         resolutions: list,
         strategy_attributes: list,
     ) -> None:
@@ -103,10 +101,6 @@ class StreamingAccountData:
                 all_exc_currencies = [
                     o["currency"] for o in get_currencies_all["result"]
                 ]
-
-                # get redis channels
-                receive_order_channel: str = redis_channels["receive_order"]
-                portfolio_channel: str = redis_channels["portfolio"]
 
                 for currency in all_exc_currencies:
 
@@ -251,18 +245,12 @@ class StreamingAccountData:
                                 
                                 message_channel: str = message_params["channel"]
 
-                                async with client_redis.pipeline() as pipe:
-
-                                    if "user.portfolio." in message_channel:
+                                if "user.portfolio." in message_channel:
                                         
-                                        print(f"""{message_channel} {"user.portfolio." in message_channel} {"user.portfolio.btc" in message_channel}""")
-                                            
-                                        await publishing_specific_purposes(
-                                            "portfolio",
-                                            message_channel,
-            )
-                                        
-                                        print(message_params)
+                                    await publishing_specific_purposes(
+                                        "portfolio",
+                                        message_channel,
+                                        )
                                         
                                     # queing message to dispatcher
                                 await queue_general.put(message_params)
