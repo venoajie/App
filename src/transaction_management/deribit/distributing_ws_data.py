@@ -181,7 +181,7 @@ async def caching_distributing_data(
                         
                         position = data["positions"]
 
-                        log.error(f" sub_acc before {sub_account_cached}")
+                        log.error(f" sub_acc before {sub_account_cached} {list(sub_account_cached)}")
                         log.info(f" {currency_upper} position {position}")
 
                         updating_sub_account(
