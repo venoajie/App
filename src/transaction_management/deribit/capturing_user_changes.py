@@ -111,7 +111,7 @@ async def saving_and_relabelling_orders(
                         
                 message_byte = await pubsub.get_message()
                 
-                log.debug(message_byte)
+                #log.debug(message_byte)
 
                 if (message_byte 
                     and (message_byte["type"] == "message"
