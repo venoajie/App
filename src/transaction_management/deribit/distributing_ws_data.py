@@ -185,6 +185,7 @@ async def caching_distributing_data(
                         log.info(f" position {position}")
 
                         updating_sub_account(
+                            currency,
                             sub_account_cached,
                             position,
                         )
@@ -337,6 +338,7 @@ async def updating_portfolio(pipe: object,
     )
 
 def updating_sub_account(
+    currency,
     sub_account_cached: list,
     data: dict,
 ) -> None:
@@ -345,11 +347,10 @@ def updating_sub_account(
         sub_account_cached.append(data)
 
     else:
-        data_currency = data["currency"]
         sub_account_cached_currency = [
             o
             for o in sub_account_cached
-            if data_currency in o["currency"]
+            if currency in o["currency"]
         ]
 
         if sub_account_cached_currency:
