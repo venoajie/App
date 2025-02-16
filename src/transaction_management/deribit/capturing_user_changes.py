@@ -173,11 +173,11 @@ async def saving_and_relabelling_orders(
                                 sub_account_cached,
                             )
 
-                        
                         if my_trades_channel in message_channel:
-                            currency_lower = message_byte_data["currency"]
-
-
+                            
+                            currency_lower = [o["instrument_name"] for o in message_byte_data][0]
+                            
+                            log.info(currency_lower)
                             
                             await modify_order_and_db.resupply_sub_accountdb(currency_lower.upper())
 
