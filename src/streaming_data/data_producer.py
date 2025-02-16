@@ -254,13 +254,12 @@ class StreamingAccountData:
 
                             if message["method"] != "heartbeat":
                                 
-                                message_params: dict = message["params"]
-                                
-                                message_channel: str = message_params["channel"]
-                                
-                                
                                 async with client_redis.pipeline() as pipe:
 
+                                    message_params: dict = message["params"]
+                                    
+                                    message_channel: str = message_params["channel"]
+                                
                                     instrument_name_future = (message_channel)[19:]
                                     if message_channel == f"incremental_ticker.{instrument_name_future}":
                                         
@@ -282,8 +281,8 @@ class StreamingAccountData:
                                             message_params,
                                             )
                                             
-                                    # queing message to dispatcher
-                                await queue_general.put(message_params)
+                                        # queing message to dispatcher
+                                    await queue_general.put(message_params)
 
                                 """
                                 message examples:
