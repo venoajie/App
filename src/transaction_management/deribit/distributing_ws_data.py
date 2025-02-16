@@ -212,6 +212,7 @@ async def updating_portfolio(pipe: object,
                              ) -> None:
 
     log.warning (f"portfolio-data {portfolio}")
+    log.warning (f"pub_message {pub_message}")
 
     if portfolio == []:
         portfolio.append(pub_message["data"])
