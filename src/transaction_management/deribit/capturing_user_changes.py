@@ -175,6 +175,9 @@ async def saving_and_relabelling_orders(
 
                         
                         if my_trades_channel in message_channel:
+                            currency_lower = message_byte_data["currency"]
+
+
                             
                             await modify_order_and_db.resupply_sub_accountdb(currency_lower.upper())
 
