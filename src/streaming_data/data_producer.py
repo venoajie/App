@@ -247,6 +247,13 @@ class StreamingAccountData:
                                 message_params: dict = message["params"]
                                 
                                 message_channel: str = message_params["channel"]
+                                instrument_name_future = (message_channel)[19:]
+                                if message_channel == f"incremental_ticker.{instrument_name_future}":
+
+                                    await publishing_specific_purposes(
+                                        "ticker",
+                                        message_params,
+                                        )
 
                                 if "user.portfolio." in message_channel:
                                         
