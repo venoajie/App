@@ -19,7 +19,7 @@ from transaction_management.deribit.managing_deribit import (
 )
 from utilities.pickling import replace_data
 from utilities.system_tools import parse_error_message, provide_path_for_file
-
+from utilities.string_modification import extract_currency_from_text
 
 async def saving_and_relabelling_orders(
     private_data: object,
@@ -175,7 +175,8 @@ async def saving_and_relabelling_orders(
 
                         if my_trades_channel in message_channel:
                             
-                            currency_lower = [o["instrument_name"] for o in message_byte_data][0]
+                            
+                            currency_lower = extract_currency_from_text([o["instrument_name"] for o in message_byte_data][0])
                             
                             log.info(currency_lower)
                             
