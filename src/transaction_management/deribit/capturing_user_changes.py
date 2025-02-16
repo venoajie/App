@@ -132,7 +132,7 @@ async def saving_and_relabelling_orders(
 
                         data = message_byte_data#["data"]
 
-                        currency_lower = message_byte_data["currency"]
+                        #currency_lower = message_byte_data["currency"]
 
                         if portfolio_channel in message_channel:
 
