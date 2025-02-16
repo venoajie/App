@@ -251,7 +251,7 @@ class StreamingAccountData:
                                 
                                 message_channel: str = message_params["channel"]
                                 
-                                print(message_channel)
+                                print(f"""{message_channel} {"user.portfolio." in message_channel} {"user.portfolio.btc" in message_channel}""")
                                 
                                 async with client_redis.pipeline() as pipe:
 
