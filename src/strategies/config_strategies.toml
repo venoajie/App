@@ -32,6 +32,7 @@ transaction_log = "transaction_log"
 archive = "my_trades_all"
 
 [[redis_channels]]
+# naming convention: ws/fix channel + action + attributes
 chart_update = "market.chart.all"
 chart_low_high_tick = "market.chart.low_high_tick"
 receive_order = "account.user_changes.order"

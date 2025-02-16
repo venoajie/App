@@ -94,14 +94,16 @@ async def caching_distributing_data(
 
                 currency_upper = currency.upper()
 
+                pub_message = dict(
+                    data=data,
+                    server_time=server_time,
+                    currency_upper=currency_upper,
+                    currency=currency,
+                )
+                
                 if "user." in message_channel:
 
-                    pub_message = dict(
-                        data=data,
-                        server_time=server_time,
-                        currency_upper=currency_upper,
-                        currency=currency,
-                    )
+                    pub_message.update({"currency_upper": currency_upper})
 
                     if "changes.any" in message_channel:
                         
@@ -124,46 +126,12 @@ async def caching_distributing_data(
 
                     if  "portfolio" in message_channel:
 
-                        log.info(f"portfolio {data}")
-                        log.warning (f"portfolio-data {portfolio}")
-
-                        if portfolio == []:
-                            portfolio.append(data)
-
-                        else:
-                            data_currency = data["currency"]
-                            portfolio_currency = [
-                                o for o in portfolio if data_currency in o["currency"]
-                            ]
-
-                            if portfolio_currency:
-                                portfolio.remove(portfolio_currency[0])
-
-                            portfolio.append(data)
-
-                        pub_message.update({"cached_portfolio": portfolio})
-
-                        log.error(f"portfolio {portfolio}")
-
-                        await publishing_result(
-                            pipe,
-                            portfolio_channel,
-                            data,
-                        )
-
-                        query_trades = f"SELECT * FROM  v_trading_all_active"
-
-                        my_trades_currency_all_transactions: list = (
-                            await executing_query_with_return(query_trades)
-                        )
-                        
-                        log.error(my_trades_currency_all_transactions)
-
-                        await publishing_result(
-                            pipe,
-                            my_trades_channel,
-                            my_trades_currency_all_transactions,
-                        )
+                        await updating_portfolio(pipe,
+                                                 pub_message,
+                                                portfolio,
+                                                my_trades_channel,
+                                                portfolio_channel,
+                             )
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
@@ -174,13 +142,8 @@ async def caching_distributing_data(
                         else data["timestamp"]
                     )
 
-                    pub_message = dict(
-                        server_time=server_time,
-                        data=data,
-                        currency=currency,
-                        instrument_name=instrument_name_future,
-                        currency_upper=currency_upper,
-                    )
+                    pub_message.update({"instrument_name": instrument_name_future})
+                    pub_message.update({"currency_upper": currency_upper})
 
                     await publishing_result(
                         pipe,
@@ -196,13 +159,9 @@ async def caching_distributing_data(
                     except:
                         resolution = message_channel.split(".")[3]
 
-                    pub_message = dict(
-                        data=data,
-                        resolution=resolution,
-                        currency=currency,
-                        instrument_name=message_channel.split(".")[2],
-                    )
-
+                    pub_message.update({"instrument_name": message_channel.split(".")[2]})
+                    pub_message.update({"resolution": resolution})
+                    
                     await publishing_result(
                         pipe,
                         chart_channel,
@@ -243,3 +202,51 @@ def get_index(ticker: dict) -> float:
         index_price = ticker["estimated_delivery_price"]
 
     return index_price
+
+
+async def updating_portfolio(pipe: object,
+                             pub_message: dict,
+                             portfolio: list,
+                             my_trades_channel: str,
+                             portfolio_channel: str,
+                             ) -> None:
+
+    log.warning (f"portfolio-data {portfolio}")
+
+    if portfolio == []:
+        portfolio.append(pub_message["data"])
+
+    else:
+        data_currency = pub_message["data"]["currency"]
+        portfolio_currency = [
+            o for o in portfolio if data_currency in o["currency"]
+        ]
+
+        if portfolio_currency:
+            portfolio.remove(portfolio_currency[0])
+
+        portfolio.append(pub_message["data"])
+
+    pub_message.update({"cached_portfolio": portfolio})
+
+    log.error(f"portfolio {portfolio}")
+
+    await publishing_result(
+        pipe,
+        portfolio_channel,
+        pub_message["data"],
+    )
+
+    query_trades = f"SELECT * FROM  v_trading_all_active"
+
+    my_trades_currency_all_transactions: list = (
+        await executing_query_with_return(query_trades)
+    )
+    
+    log.error(my_trades_currency_all_transactions)
+
+    await publishing_result(
+        pipe,
+        my_trades_channel,
+        my_trades_currency_all_transactions,
+    )

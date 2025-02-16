@@ -117,8 +117,6 @@ async def saving_and_relabelling_orders(
                          )
                     ):
                     
-                    log.warning(message_byte)
-
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
@@ -174,11 +172,10 @@ async def saving_and_relabelling_orders(
                             )
 
                         if my_trades_channel in message_channel:
-                            
-                            
+                    
+                            log.warning(message_byte)
+        
                             currency_lower = extract_currency_from_text([o["instrument_name"] for o in message_byte_data][0])
-                            
-                            log.info(currency_lower)
                             
                             await modify_order_and_db.resupply_sub_accountdb(currency_lower.upper())
 
