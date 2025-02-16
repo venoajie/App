@@ -144,10 +144,6 @@ async def main():
                 strategy_attributes)
             ) 
               
-                   
-        await asyncio.sleep(0.0005)
-        
-        """
    
         saving_task = asyncio.create_task(
             caching_distributing_data(
@@ -159,6 +155,11 @@ async def main():
                 queue,
                 )
             ) 
+                        
+        await asyncio.sleep(0.0005)
+        
+        """
+   
             future_spreads(
                 client_redis,
                 config_app,
@@ -232,7 +233,7 @@ async def main():
         await asyncio.gather(
             producer_task, 
         
-            #saving_task,
+            saving_task,
  
             saving_and_relabelling_orders(
                 private_data,
