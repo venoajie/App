@@ -17,16 +17,21 @@ from utilities.caching import (
     combining_order_data,
     update_cached_orders,
 )
+
+from transaction_management.deribit.orders_management import saving_orders
 from utilities.string_modification import extract_currency_from_text
 from utilities.system_tools import parse_error_message
 
 
 async def caching_distributing_data(
     private_data: object,
+    modify_order_and_db,
     client_redis: object,
     currencies: list,
     redis_channels: list,
     redis_keys: list,
+    relevant_tables,
+    strategy_attributes,
     queue_general: object,
 ) -> None:
 
@@ -64,13 +69,47 @@ async def caching_distributing_data(
 
     try:
 
+        # preparing redis connection
+        pubsub = client_redis.pubsub()
+
+        strategy_attributes_active = [
+            o for o in strategy_attributes if o["is_active"] == True
+        ]
+
+        # get strategies that have not short/long attributes in the label
+        non_checked_strategies: list = [
+            o["strategy_label"]
+            for o in strategy_attributes_active
+            if o["non_checked_for_size_label_consistency"] == True
+        ]
+
+        cancellable_strategies: list = [
+            o["strategy_label"]
+            for o in strategy_attributes_active
+            if o["cancellable"] == True
+        ]
+
+        order_db_table: str = relevant_tables["orders_table"]
+
         chart_channel: str = redis_channels["chart_update"]
         receive_order_channel: str = redis_channels["receive_order"]
         ticker_data_channel: str = redis_channels["ticker_update_data"]
         portfolio_channel: str = redis_channels["portfolio"]
         my_trades_channel: str = redis_channels["my_trades"]
-
+        sub_account_cached_channel: str = redis_channels["sub_account_cached"]
+        sub_account_update_channel: str = redis_channels["sub_account_update"]
         order_keys: str = redis_keys["orders"]
+
+        # prepare channels placeholders
+        channels = [
+            my_trades_channel,
+            receive_order_channel,
+            portfolio_channel,
+        ]
+
+        # subscribe to channels
+        [await pubsub.subscribe(o) for o in channels]
+
 
         cached_orders: list = await combining_order_data(private_data, currencies)
 
@@ -79,6 +118,17 @@ async def caching_distributing_data(
         portfolio = []
         
         notional_value = 0
+
+        sub_account_cached = []
+
+        for currency in currencies:
+            result = await private_data.get_subaccounts_details(currency)
+            sub_account_cached.append(
+                dict(
+                    currency=currency,
+                    result=(result),
+                )
+            )
 
         while True:
 
@@ -114,14 +164,29 @@ async def caching_distributing_data(
                             data,
                         )
 
-                        pub_message.update({"cached_orders": cached_orders})
+                        currency_lower = currency.lower()
 
-                        await saving_and_publishing_result(
-                            pipe,
-                            receive_order_channel,
-                            order_keys,
-                            cached_orders,
-                            pub_message,
+                        pub_message.update({"cached_orders": cached_orders})
+                        
+                        await saving_orders(
+                                            modify_order_and_db,
+                                            private_data,
+                                            cancellable_strategies,
+                                            non_checked_strategies,
+                                            data,
+                                            order_db_table,
+                                            currency_lower,
+                                            False,
+                                        )
+                        
+                        position = data["position"]
+
+                        log.error(f" sub_acc before {sub_account_cached}")
+                        log.info(f" position {position}")
+
+                        updating_sub_account(
+                            sub_account_cached,
+                            position,
                         )
 
                     if  "portfolio" in message_channel:
@@ -168,6 +233,25 @@ async def caching_distributing_data(
                         chart_channel,
                         pub_message,
                     )
+
+                if sub_account_update_channel in message_channel:
+                    
+                    log.error(f" sub_acc before {sub_account_cached}")
+                    log.info(f" data {data}")
+
+                    updating_sub_account(
+                        sub_account_cached,
+                        data,
+                        )
+
+                    log.error(f" sub_acc AFTER {sub_account_cached}")
+
+                    await publishing_result(
+                        client_redis,
+                        sub_account_cached_channel,
+                        sub_account_cached,
+                    )
+
 
                 await pipe.execute()
 
@@ -251,3 +335,26 @@ async def updating_portfolio(pipe: object,
         my_trades_channel,
         my_trades_currency_all_transactions,
     )
+
+def updating_sub_account(
+    sub_account_cached: list,
+    data: dict,
+) -> None:
+
+    if sub_account_cached == []:
+        sub_account_cached.append(data)
+
+    else:
+        data_currency = data["currency"]
+        sub_account_cached_currency = [
+            o
+            for o in sub_account_cached
+            if data_currency in o["currency"]
+        ]
+
+        if sub_account_cached_currency:
+            sub_account_cached_currency.remove(
+                sub_account_cached_currency[0]
+            )
+
+        sub_account_cached.append(data)

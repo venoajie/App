@@ -39,36 +39,16 @@ async def saving_and_relabelling_orders(
             o for o in strategy_attributes if o["is_active"] == True
         ]
 
-        # get strategies that have not short/long attributes in the label
-        non_checked_strategies: list = [
-            o["strategy_label"]
-            for o in strategy_attributes_active
-            if o["non_checked_for_size_label_consistency"] == True
-        ]
-
-        cancellable_strategies: list = [
-            o["strategy_label"]
-            for o in strategy_attributes_active
-            if o["cancellable"] == True
-        ]
-
-        relevant_tables: dict = config_app["relevant_tables"][0]
-
-        order_db_table: str = relevant_tables["orders_table"]
-
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         receive_order_channel: str = redis_channels["receive_order"]
         portfolio_channel: str = redis_channels["portfolio"]
-        sub_account_update_channel: str = redis_channels["sub_account_update"]
-        sub_account_cached_channel: str = redis_channels["sub_account_cached"]
         my_trades_channel: str = redis_channels["my_trades"]
 
         # prepare channels placeholders
         channels = [
             my_trades_channel,
             receive_order_channel,
-            sub_account_update_channel,
             portfolio_channel,
         ]
 
@@ -132,47 +112,8 @@ async def saving_and_relabelling_orders(
                             data_to_processs = data["data"]
 
                             log.info(f" data_to_processs {data_to_processs}")
-                            await saving_orders(
-                                modify_order_and_db,
-                                private_data,
-                                cancellable_strategies,
-                                non_checked_strategies,
-                                data_to_processs,
-                                order_db_table,
-                                currency_lower,
-                                False,
-                            )
-                            
-                            position = data_to_processs["position"]
-
-                            log.error(f" sub_acc before {sub_account_cached}")
-                            log.info(f" position {position}")
-
-                            updating_sub_account(
-                                sub_account_cached,
-                                position,
-                                )
-
+             
                             log.error(f" sub_acc AFTER {sub_account_cached}")
-
-                        if sub_account_update_channel in message_channel:
-                            
-                            log.error(f" sub_acc before {sub_account_cached}")
-                            log.info(f" data {data}")
-
-                            updating_sub_account(
-                                sub_account_cached,
-                                data,
-                                )
-
-                            log.error(f" sub_acc AFTER {sub_account_cached}")
-
-                            await publishing_result(
-                                client_redis,
-                                sub_account_cached_channel,
-                                sub_account_cached,
-                            )
-
                         if my_trades_channel in message_channel:
                     
                             log.warning(message_byte)
@@ -229,26 +170,3 @@ async def update_db_pkl(
         )
 
 
-
-def updating_sub_account(
-    sub_account_cached: list,
-    data: dict,
-) -> None:
-
-    if sub_account_cached == []:
-        sub_account_cached.append(data)
-
-    else:
-        data_currency = data["currency"]
-        sub_account_cached_currency = [
-            o
-            for o in sub_account_cached
-            if data_currency in o["currency"]
-        ]
-
-        if sub_account_cached_currency:
-            sub_account_cached_currency.remove(
-                sub_account_cached_currency[0]
-            )
-
-        sub_account_cached.append(data)

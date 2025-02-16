@@ -148,10 +148,13 @@ async def main():
         saving_task = asyncio.create_task(
             caching_distributing_data(
                 private_data,
+                modify_order_and_db,
                 client_redis,
                 currencies,
                 redis_channels,
                 redis_keys,
+                relevant_tables,
+                strategy_attributes,
                 queue,
                 )
             ) 
