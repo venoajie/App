@@ -123,6 +123,7 @@ async def caching_distributing_data(
                     if "portfolio" in message_channel:
 
                         log.info(f"portfolio {data}")
+                        log.warning (f"portfolio-data {portfolio}")
 
                         if portfolio == []:
                             portfolio.append(data)
@@ -139,6 +140,8 @@ async def caching_distributing_data(
                             portfolio.append(data)
 
                         pub_message.update({"cached_portfolio": portfolio})
+
+                        log.error(f"portfolio {portfolio}")
 
                         await publishing_result(
                             pipe,
