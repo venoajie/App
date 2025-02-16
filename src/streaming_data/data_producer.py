@@ -263,6 +263,8 @@ class StreamingAccountData:
 
                                     instrument_name_future = (message_channel)[19:]
                                     if message_channel == f"incremental_ticker.{instrument_name_future}":
+                                        
+                                        print(ticker_data_channel)
 
                                         await publishing_result(
                                             pipe,
@@ -272,7 +274,9 @@ class StreamingAccountData:
 
                                     if "user.portfolio." in message_channel:
                                             
-                                        await publishing_specific_purposes(
+                                        print(ticker_data_channel)
+
+                                        await publishing_result(
                                             pipe,
                                             portfolio_channel,
                                             message_params,
