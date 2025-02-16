@@ -151,6 +151,8 @@ async def caching_distributing_data(
                         my_trades_currency_all_transactions: list = (
                             await executing_query_with_return(query_trades)
                         )
+                        
+                        log.error(my_trades_currency_all_transactions)
 
                         await publishing_result(
                             pipe,
