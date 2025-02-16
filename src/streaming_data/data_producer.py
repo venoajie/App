@@ -255,7 +255,7 @@ class StreamingAccountData:
                                 
                                 async with client_redis.pipeline() as pipe:
 
-                                    if "portfolio" in message_channel:
+                                    if "user.portfolio." in message_channel:
                                                     
                                         await publishing_result(
                                             pipe,
