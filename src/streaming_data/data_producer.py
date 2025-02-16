@@ -17,7 +17,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # user defined formula
 from configuration import config, config_oci, id_numbering
-from db_management.redis_client import saving_and_publishing_result, publishing_result
+from db_management.redis_client import publishing_specific_purposes
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import (
     get_currencies,
@@ -250,18 +250,19 @@ class StreamingAccountData:
                                 message_params: dict = message["params"]
                                 
                                 message_channel: str = message_params["channel"]
-                                
-                                print(f"""{message_channel} {"user.portfolio." in message_channel} {"user.portfolio.btc" in message_channel}""")
-                                
+
                                 async with client_redis.pipeline() as pipe:
 
                                     if "user.portfolio." in message_channel:
-                                                    
-                                        await publishing_result(
-                                            pipe,
-                                            portfolio_channel,
-                                            message_params,
-                                        )
+                                        
+                                        print(f"""{message_channel} {"user.portfolio." in message_channel} {"user.portfolio.btc" in message_channel}""")
+                                            
+                                        await publishing_specific_purposes(
+                                            "portfolio",
+                                            message_channel,
+            )
+                                        
+                                        print(message_params)
                                         
                                     # queing message to dispatcher
                                 await queue_general.put(message_params)

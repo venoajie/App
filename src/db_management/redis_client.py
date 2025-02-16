@@ -292,6 +292,9 @@ async def publishing_specific_purposes(
     if purpose == "portfolio_rest":
         channel: str = redis_channels["portfolio_rest"]
 
+    if purpose == "portfolio":
+        channel: str = redis_channels["portfolio"]
+
     async with client_redis.pipeline() as pipe:
 
         await publishing_result(
