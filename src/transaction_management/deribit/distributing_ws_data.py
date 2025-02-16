@@ -94,8 +94,6 @@ async def caching_distributing_data(
 
                 if "user." in message_channel:
 
-                    log.warning(f"user.changes {data}")
-
                     pub_message = dict(
                         data=data,
                         server_time=server_time,
@@ -104,6 +102,8 @@ async def caching_distributing_data(
                     )
 
                     if "changes.any" in message_channel:
+                        
+                        log.warning(f"user.changes {data}")
 
                         await update_cached_orders(
                             cached_orders,
@@ -121,6 +121,8 @@ async def caching_distributing_data(
                         )
 
                     if "portfolio" in message_channel:
+
+                        log.info(f"portfolio {data}")
 
                         if portfolio == []:
                             portfolio.append(data)

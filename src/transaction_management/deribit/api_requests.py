@@ -404,7 +404,7 @@ class SendApiRequest:
         modified_result.append(
             dict(
                 currency=currency,
-                result=(result),
+                data=result,
             )
         )
         get_server_time

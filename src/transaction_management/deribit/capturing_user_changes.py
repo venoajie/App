@@ -114,72 +114,74 @@ async def saving_and_relabelling_orders(
 
                     try:
                         
-                        try:
+                        from loguru import logger as log
+
+                        data = message_byte_data["data"]
+
+                        currency_lower = message_byte_data["currency"]
+
+                        if receive_order_channel in message_channel:
+
+                            await saving_orders(
+                                modify_order_and_db,
+                                private_data,
+                                cancellable_strategies,
+                                non_checked_strategies,
+                                data,
+                                order_db_table,
+                                currency_lower,
+                                False,
+                            )
                             
-                            # expected fail for information only channel
+                            position = data["position"]
 
-                            data = message_byte_data["data"]
+                            log.error(f" sub_acc before {sub_account_cached}")
+                            log.info(f" data {data}")
+                            log.info(f" position {position}")
 
-                            currency_lower = message_byte_data["currency"]
-
-                            if receive_order_channel in message_channel:
-
-                                await saving_orders(
-                                    modify_order_and_db,
-                                    private_data,
-                                    cancellable_strategies,
-                                    non_checked_strategies,
-                                    data,
-                                    order_db_table,
-                                    currency_lower,
-                                    False,
+                            updating_sub_account(
+                                sub_account_cached,
+                                position,
                                 )
 
-                            if sub_account_update_channel in message_channel:
+                            log.error(f" sub_acc AFTER {sub_account_cached}")
 
-                                if sub_account_cached == []:
-                                    sub_account_cached.append(data)
-
-                                else:
-                                    data_currency = data["currency"]
-                                    sub_account_cached_currency = [
-                                        o
-                                        for o in sub_account_cached
-                                        if data_currency in o["currency"]
-                                    ]
-
-                                    if sub_account_cached_currency:
-                                        sub_account_cached_currency.remove(
-                                            sub_account_cached_currency[0]
-                                        )
-
-                                    sub_account_cached.append(data)
-
-                                await publishing_result(
-                                    client_redis,
-                                    sub_account_cached_channel,
-                                    sub_account_cached,
-                                )
-
-                            if portfolio_channel in message_channel:
-
-                                await publishing_result(
-                                    client_redis,
-                                    sub_account_cached_channel,
-                                    sub_account_cached,
-                                )
-
-                                await update_db_pkl(
-                                    "portfolio",
-                                    data,
-                                    currency_lower,
-                                )
-
-                        except:
+                        if sub_account_update_channel in message_channel:
                             
-                            if my_trades_channel in message_channel:
-                                
-                                await modify_order_and_db.resupply_sub_accountdb(currency_lower.upper())
+                            log.error(f" sub_acc before {sub_account_cached}")
+                            log.info(f" data {data}")
+
+                            updating_sub_account(
+                                sub_account_cached,
+                                data,
+                                )
+
+                            log.error(f" sub_acc AFTER {sub_account_cached}")
+
+                            await publishing_result(
+                                client_redis,
+                                sub_account_cached_channel,
+                                sub_account_cached,
+                            )
+
+                        if portfolio_channel in message_channel:
+
+                            await publishing_result(
+                                client_redis,
+                                sub_account_cached_channel,
+                                sub_account_cached,
+                            )
+
+                            await update_db_pkl(
+                                "portfolio",
+                                data,
+                                currency_lower,
+                            )
+
+                        
+                        if my_trades_channel in message_channel:
+                            
+                            await modify_order_and_db.resupply_sub_accountdb(currency_lower.upper())
 
 
                     except Exception as error:
@@ -227,3 +229,28 @@ async def update_db_pkl(
             my_path_portfolio,
             data_orders,
         )
+
+
+
+def updating_sub_account(
+    sub_account_cached: list,
+    data: dict,
+) -> None:
+
+    if sub_account_cached == []:
+        sub_account_cached.append(data)
+
+    else:
+        data_currency = data["currency"]
+        sub_account_cached_currency = [
+            o
+            for o in sub_account_cached
+            if data_currency in o["currency"]
+        ]
+
+        if sub_account_cached_currency:
+            sub_account_cached_currency.remove(
+                sub_account_cached_currency[0]
+            )
+
+        sub_account_cached.append(data)
