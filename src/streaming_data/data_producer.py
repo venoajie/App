@@ -240,6 +240,8 @@ class StreamingAccountData:
                         if "params" in list(message):
 
                             if message["method"] != "heartbeat":
+                                
+                                print(message)
 
                                 message_params: dict = message["params"]
                                 
