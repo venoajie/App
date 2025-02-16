@@ -274,7 +274,7 @@ class StreamingAccountData:
                                             
                                         await publishing_specific_purposes(
                                             pipe,
-                                            portfolio_channel
+                                            portfolio_channel,
                                             message_params,
                                             )
                                             
