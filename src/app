@@ -83,8 +83,8 @@ async def main():
             port=6379, 
             db=0, 
             protocol=3, 
-            encoding="utf-8",
-            decode_responses=True
+            #encoding="utf-8",
+            #decode_responses=True
             )
         
         client_redis: object = aioredis.Redis.from_pool(pool)
