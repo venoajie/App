@@ -126,9 +126,9 @@ async def caching_distributing_data(
         sub_accounts= [await private_data.get_subaccounts_details(o) for o in currencies]
 
         for sub_account in sub_accounts:
-            result = await private_data.get_subaccounts_details(currency)
+            #result = await private_data.get_subaccounts_details(currency)
             
-            sub_account = result[0]
+            sub_account = sub_account[0]
             
             sub_account_orders = sub_account["open_orders"]            
             
