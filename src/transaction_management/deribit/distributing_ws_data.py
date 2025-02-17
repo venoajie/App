@@ -219,6 +219,7 @@ async def caching_distributing_data(
                         positions_updating_cached(
                         positions_cached,
                         positions[0],
+                        "rest",
                     )
 
 
