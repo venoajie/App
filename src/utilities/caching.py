@@ -171,11 +171,18 @@ def update_cached_orders(
 def positions_updating_cached(
     positions_cached: list,
     sub_account_data: list,
+    source: str = "ws",
 ):
     """
     """
+    
+    if source == "ws":
+        positions = sub_account_data["positions"]  
 
-    positions = sub_account_data["positions"]  
+    if source == "rest":
+
+        positions = sub_account_data
+
 
     if positions:
 

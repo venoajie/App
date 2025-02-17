@@ -204,8 +204,8 @@ async def caching_distributing_data(
                     
                     open_orders = [o["open_orders"] for o in result]
                     
-                    log.debug(result)
-                    
+                    log.error(f" positions_cached before {positions_cached}")
+
                     if open_orders:
                         update_cached_orders(
                         orders_cached,
@@ -215,14 +215,14 @@ async def caching_distributing_data(
                     
                     positions = [o["positions"] for o in result]
                     
-                    log.debug(result)
-                    
                     if positions:
                         positions_updating_cached(
                         positions_cached,
                         positions[0],
                     )
 
+
+                    log.error(f" positions_cached AFTER {positions_cached}")
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
