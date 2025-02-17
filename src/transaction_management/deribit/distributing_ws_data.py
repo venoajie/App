@@ -7,6 +7,7 @@ import asyncio
 import uvloop
 
 from loguru import logger as log
+import orjson
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -129,6 +130,8 @@ async def caching_distributing_data(
         while True:
 
             message_params: str = await queue_general.get()
+            
+            message_byte = await pubsub.get_message()
 
             async with client_redis.pipeline() as pipe:
 
@@ -186,29 +189,6 @@ async def caching_distributing_data(
                                             False,
                                         )
                         
-
-                if sub_account_update_channel in message_channel:
-                    
-                    log.error(f" positions_cached before {positions_cached}")
-                    log.info(f" data {data}")
-
-                    update_cached_orders(
-                        orders_cached,
-                        data,
-                    )
-                    
-                    positions_updating_cached(
-                        positions_cached,
-                        data,
-                    )
-
-                    log.error(f" positions_cached AFTER {positions_cached}")
-
-                    await publishing_result(
-                        client_redis,
-                        sub_account_cached_channel,
-                        sub_account_cached,
-                    )
                     
                 if  "portfolio" in message_channel:
                     
@@ -272,6 +252,42 @@ async def caching_distributing_data(
                         chart_channel,
                         pub_message,
                     )
+
+                if (message_byte 
+                    and (message_byte["type"] == "message"
+                            #or message_byte["type"] == "subscribe"
+                            )
+                    ):
+                    
+                    message_byte_data = orjson.loads(message_byte["data"])
+
+                    message_channel = message_byte["channel"]
+
+                    data = (message_byte)["data"]
+
+                    if sub_account_update_channel in message_channel:
+                        
+                        log.error(f" positions_cached before {positions_cached}")
+                        log.info(f" data {data}")
+
+                        update_cached_orders(
+                            orders_cached,
+                            data,
+                        )
+                        
+                        positions_updating_cached(
+                            positions_cached,
+                            data,
+                        )
+
+                        log.error(f" positions_cached AFTER {positions_cached}")
+
+                        await publishing_result(
+                            client_redis,
+                            sub_account_cached_channel,
+                            sub_account_cached,
+                        )
+
 
 
 
