@@ -105,6 +105,7 @@ async def caching_distributing_data(
         channels = [
             my_trades_channel,
             receive_order_channel,
+            sub_account_update_channel,
             portfolio_channel,
         ]
 
@@ -161,11 +162,15 @@ async def caching_distributing_data(
                             orders_cached,
                             data,
                         )
-                        
+                            
+                        log.error(f" positions_cached before {positions_cached}")
+
                         positions_updating_cached(
                             positions_cached,
                             data,
                         )
+    
+                        log.error(f" positions_cached AFTER {positions_cached}")
 
                         currency_lower = currency.lower()
 
@@ -183,6 +188,29 @@ async def caching_distributing_data(
                                         )
                         
 
+                if sub_account_update_channel in message_channel:
+                    
+                    log.error(f" positions_cached before {positions_cached}")
+                    log.info(f" data {data}")
+
+                    update_cached_orders(
+                        orders_cached,
+                        data,
+                    )
+                    
+                    positions_updating_cached(
+                        positions_cached,
+                        data,
+                    )
+
+                    log.error(f" positions_cached AFTER {positions_cached}")
+
+                    await publishing_result(
+                        client_redis,
+                        sub_account_cached_channel,
+                        sub_account_cached,
+                    )
+                    
                     if  "portfolio" in message_channel:
 
                         await updating_portfolio(pipe,
@@ -228,28 +256,6 @@ async def caching_distributing_data(
                         pub_message,
                     )
 
-                if sub_account_update_channel in message_channel:
-                    
-                    log.error(f" positions_cached before {positions_cached}")
-                    log.info(f" data {data}")
-
-                    update_cached_orders(
-                        orders_cached,
-                        data,
-                    )
-                    
-                    positions_updating_cached(
-                        positions_cached,
-                        data,
-                    )
-
-                    log.error(f" positions_cached AFTER {positions_cached}")
-
-                    await publishing_result(
-                        client_redis,
-                        sub_account_cached_channel,
-                        sub_account_cached,
-                    )
 
 
                 await pipe.execute()
