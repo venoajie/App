@@ -301,11 +301,9 @@ async def publishing_specific_purposes(
 
     if purpose == "ticker":
         channel: str = redis_channels["ticker_update_data"]
-        
-    async with client_redis.pipeline() as pipe:
-        
-        await publishing_result(
-            pipe,
-            channel,
-            message,
-        )
+    
+    await publishing_result(
+        client_redis,
+        channel,
+        message,
+    )
