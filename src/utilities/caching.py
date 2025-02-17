@@ -5,7 +5,6 @@ import asyncio
 from transaction_management.deribit.api_requests import get_tickers
 from utilities.pickling import read_data
 from utilities.system_tools import (
-    parse_error_message,
     provide_path_for_file,
 )
 
@@ -101,46 +100,9 @@ async def update_cached_ticker(
         # combining_order_data(currencies)
         log.debug(f"instrument_ticker after []-not ok {instrument_ticker}")
 
-
-# Using the LRUCache decorator function with a maximum cache size of 3
-async def combining_order_data(
-    private_data: object,
-    currencies: list,
-) -> list:
-    """ """
-
-    from utilities.pickling import replace_data
-
-    result = []
-    for currency in currencies:
-
-        sub_accounts = await private_data.get_subaccounts_details(currency)
-
-        my_path_sub_account = provide_path_for_file("sub_accounts", currency)
-
-        replace_data(
-            my_path_sub_account,
-            sub_accounts,
-        )
-
-        if sub_accounts:
-
-            sub_account = sub_accounts[0]
-
-            sub_account_orders = sub_account["open_orders"]
-
-            if sub_account_orders:
-
-                for order in sub_account_orders:
-
-                    result.append(order)
-
-    return result
-
-
-async def update_cached_orders(
-    queue_orders_all,
-    queue_orders,
+def update_cached_orders(
+    orders_all,
+    sub_account_data,
 ):
     """_summary_
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
@@ -152,58 +114,71 @@ async def update_cached_orders(
         _type_: _description_
     """
 
-    try:
+    orders = sub_account_data["orders"]
 
-        orders_all = queue_orders_all
+    trades = sub_account_data["trades"]
 
-        if queue_orders:
+    if orders:
 
-            orders = queue_orders["orders"]
+        if trades:
 
-            trades = queue_orders["trades"]
+            for trade in trades:
 
-            if orders:
+                order_id = trade["order_id"]
 
-                if trades:
+                selected_order = [
+                    o for o in orders_all if order_id in o["order_id"]
+                ]
 
-                    for trade in trades:
+                if selected_order:
 
-                        order_id = trade["order_id"]
+                    orders_all.remove(selected_order[0])
 
-                        selected_order = [
-                            o for o in orders_all if order_id in o["order_id"]
-                        ]
+        if orders:
 
-                        if selected_order:
+            for order in orders:
 
-                            orders_all.remove(selected_order[0])
+                order_state = order["order_state"]
 
-                if orders:
+                if order_state == "cancelled" or order_state == "filled":
 
-                    for order in orders:
+                    order_id = order["order_id"]
 
-                        # print(f"cached order {order}")
+                    selected_order = [
+                        o for o in orders_all if order_id in o["order_id"]
+                    ]
 
-                        order_state = order["order_state"]
+                    if selected_order:
 
-                        if order_state == "cancelled" or order_state == "filled":
+                        orders_all.remove(selected_order[0])
 
-                            order_id = order["order_id"]
+                else:
 
-                            selected_order = [
-                                o for o in orders_all if order_id in o["order_id"]
-                            ]
+                    orders_all.append(order)
 
-                            # print(f"caching selected_order {selected_order}")
 
-                            if selected_order:
+def positions_updating_cached(
+    positions_cached: list,
+    sub_account_data: list,
+):
+    """
+    """
 
-                                orders_all.remove(selected_order[0])
+    positions = sub_account_data["positions"]  
 
-                        else:
+    if positions:
 
-                            orders_all.append(order)
+        for position in positions:
 
-    except Exception as error:
+            position_instrument_name = position["instrument_name"]
 
-        parse_error_message(error)
+            selected_position = [
+                o for o in positions_cached if position_instrument_name in o["instrument_name"]
+            ]
+
+            if selected_position:
+
+                positions_cached.remove(selected_position[0])
+
+            positions_cached.append(position)
+

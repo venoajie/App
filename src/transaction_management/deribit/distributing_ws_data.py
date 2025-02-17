@@ -15,6 +15,7 @@ from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.caching import (
     combining_order_data,
+    positions_updating_cached,
     update_cached_orders,
 )
 
@@ -98,6 +99,7 @@ async def caching_distributing_data(
         my_trades_channel: str = redis_channels["my_trades"]
         sub_account_cached_channel: str = redis_channels["sub_account_cached"]
         sub_account_update_channel: str = redis_channels["sub_account_update"]
+        positions_update_channel: str = redis_channels["positions_update"]
         order_keys: str = redis_keys["orders"]
 
         # prepare channels placeholders
@@ -110,7 +112,6 @@ async def caching_distributing_data(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-
         server_time = 0
 
         portfolio = []
@@ -118,33 +119,12 @@ async def caching_distributing_data(
         notional_value = 0
 
         sub_account_cached = []
-        orders_cached = []
-        positions_cached = []
-
-        cached_orders: list = await combining_order_data(private_data, currencies)
         
+        # sub_account_combining
         sub_accounts= [await private_data.get_subaccounts_details(o) for o in currencies]
-
-        for sub_account in sub_accounts:
-            #result = await private_data.get_subaccounts_details(currency)
-            
-            sub_account = sub_account[0]
-            
-            sub_account_orders = sub_account["open_orders"]            
-            
-            if sub_account_orders:
-
-                for order in sub_account_orders:
-
-                    orders_cached.append(order)
-
-            sub_account_positions = sub_account["positions"]            
-            
-            if sub_account_positions:
-
-                for position in sub_account_positions:
-
-                    positions_cached.append(position)
+        sub_account_initial_cached = sub_account_combining(sub_accounts)
+        orders_cached = sub_account_initial_cached ["orders_cached"]
+        positions_cached = sub_account_initial_cached ["positions_cached"]
                 
         log.warning (f"positions_cached {positions_cached}")
         log.debug (f"orders_cached {orders_cached}")
@@ -178,14 +158,19 @@ async def caching_distributing_data(
                         
                         log.warning(f"user.changes {data}")
 
-                        await update_cached_orders(
-                            cached_orders,
+                        update_cached_orders(
+                            orders_cached,
+                            data,
+                        )
+                        
+                        positions_updating_cached(
+                            positions_cached,
                             data,
                         )
 
                         currency_lower = currency.lower()
 
-                        pub_message.update({"cached_orders": cached_orders})
+                        pub_message.update({"cached_orders": orders_cached})
                         
                         await saving_orders(
                                             modify_order_and_db,
@@ -198,17 +183,6 @@ async def caching_distributing_data(
                                             False,
                                         )
                         
-                        position = data["positions"]
-
-                        log.error(f" sub_acc before {sub_account_cached}")
-                        log.warning(f"{list(sub_account_cached)}")
-                        log.info(f" {currency_upper} position {position}")
-
-                        updating_sub_account(
-                            currency_upper,
-                            sub_account_cached,
-                            position,
-                        )
 
                     if  "portfolio" in message_channel:
 
@@ -257,15 +231,20 @@ async def caching_distributing_data(
 
                 if sub_account_update_channel in message_channel:
                     
-                    log.error(f" sub_acc before {sub_account_cached}")
+                    log.error(f" positions_cached before {positions_cached}")
                     log.info(f" data {data}")
 
-                    updating_sub_account(
-                        sub_account_cached,
+                    update_cached_orders(
+                        orders_cached,
                         data,
-                        )
+                    )
+                    
+                    positions_updating_cached(
+                        positions_cached,
+                        data,
+                    )
 
-                    log.error(f" sub_acc AFTER {sub_account_cached}")
+                    log.error(f" positions_cached AFTER {positions_cached}")
 
                     await publishing_result(
                         client_redis,
@@ -380,3 +359,37 @@ def updating_sub_account(
             )
 
         sub_account_cached.append(data)
+
+
+def sub_account_combining(
+    sub_accounts: list,
+) -> None:
+
+    orders_cached = []
+    positions_cached = []
+
+    for sub_account in sub_accounts:
+        #result = await private_data.get_subaccounts_details(currency)
+        
+        sub_account = sub_account[0]
+        
+        sub_account_orders = sub_account["open_orders"]            
+        
+        if sub_account_orders:
+
+            for order in sub_account_orders:
+
+                orders_cached.append(order)
+
+        sub_account_positions = sub_account["positions"]            
+        
+        if sub_account_positions:
+
+            for position in sub_account_positions:
+
+                positions_cached.append(position)
+
+    return dict(
+        orders_cached=orders_cached,
+        positions_cached=positions_cached,
+                )
