@@ -214,6 +214,8 @@ async def caching_distributing_data(
                     
                     result = await private_data.get_subaccounts_details(currency)
 
+                    log.critical ("BBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+
                     await publishing_specific_purposes(
                                 "sub_account_update",
                                 result,
@@ -224,6 +226,14 @@ async def caching_distributing_data(
                                             my_trades_channel,
                                             portfolio_channel,
                             )
+                    
+                    log.critical ("AAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
+                    await publishing_result(
+                        client_redis,
+                        sub_account_update_channel,
+                        result,
+                    )
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
