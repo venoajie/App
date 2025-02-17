@@ -131,7 +131,7 @@ async def caching_distributing_data(
 
             message_params: str = await queue_general.get()
             
-            message_byte = await pubsub.get_message().decode('utf-8')
+            message_byte = await pubsub.get_message()
 
             async with client_redis.pipeline() as pipe:
 
@@ -259,7 +259,7 @@ async def caching_distributing_data(
                             )
                     ):
                     
-                    message_byte_data = orjson.loads(message_byte["data"])
+                    message_byte = orjson.loads(message_byte)
 
                     message_channel = (message_byte["channel"])
 
