@@ -14,7 +14,6 @@ from db_management.redis_client import saving_and_publishing_result, publishing_
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.caching import (
-    combining_order_data,
     positions_updating_cached,
     update_cached_orders,
 )
