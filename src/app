@@ -83,7 +83,7 @@ async def main():
             port=6379, 
             db=0, 
             protocol=3, 
-            charset="utf-8",
+            encoding="utf-8",
             decode_responses=True
             )
         
