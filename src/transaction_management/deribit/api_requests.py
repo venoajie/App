@@ -400,17 +400,10 @@ class SendApiRequest:
         )
 
         result = result_sub_account["result"]
-        modified_result = []
-        modified_result.append(
-            dict(
-                currency=currency,
-                data=result,
-            )
-        )
-        get_server_time
+        
         await publishing_specific_purposes(
             "sub_account_update",
-            modified_result,
+            result,
         )
 
         return result
