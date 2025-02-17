@@ -191,17 +191,7 @@ async def caching_distributing_data(
                         
                     
                 if  "portfolio" in message_channel:
-                    
-                    from db_management.redis_client import publishing_specific_purposes
-                    
-                    result = await private_data.get_subaccounts_details(currency)
 
-                    log.critical ("BBBBBBBBBBBBBBBBBBBBBBBBBBBB")
-
-                    await publishing_specific_purposes(
-                                "sub_account_update",
-                                result,
-                            )
                     await updating_portfolio(pipe,
                                                 pub_message,
                                             portfolio,
@@ -209,13 +199,22 @@ async def caching_distributing_data(
                                             portfolio_channel,
                             )
                     
-                    log.critical ("AAAAAAAAAAAAAAAAAAAAAAAAAAA")
-
-                    await publishing_result(
-                        pipe,
-                        sub_account_update_channel,
-                        result,
+                    
+                    result = await private_data.get_subaccounts_details(currency)
+                    
+                    log.debug(result)
+                    
+                        
+                    update_cached_orders(
+                        orders_cached,
+                        open_orders,
                     )
+                    
+                    positions_updating_cached(
+                        positions_cached,
+                        data,
+                    )
+
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
@@ -252,58 +251,6 @@ async def caching_distributing_data(
                         chart_channel,
                         pub_message,
                     )
-
-                if (message_byte 
-                    and (message_byte["type"] == "message"
-                            #or message_byte["type"] == "subscribe"
-                            )
-                    ):
-                    
-                    #message = orjson.loads(message_byte)
-
-                    message_channel = message_byte["channel"]
-                    
-                    data = (message_byte["data"])
-
-                    if sub_account_update_channel in message_channel:
-                        result_json = [
-            i.replace(":false", ":False")
-            .replace(":true", ":True")
-            .replace(":null", ":None")
-            for i in data
-        ]
-
-                        log.info(f" data {result_json}")
-                        
-                        open_orders = parsing_sqlite_json_output(data["open_orders"])
-                        
-                        log.error(f" positions_cached before {positions_cached}")
-                        log.info(f" open_orders {open_orders}")
-                        
-                        positions = [o["positions"] for o in data][0]
-
-                        log.info(f" positions {positions}")
-                        
-                        
-                        update_cached_orders(
-                            orders_cached,
-                            open_orders,
-                        )
-                        
-                        positions_updating_cached(
-                            positions_cached,
-                            data,
-                        )
-
-                        log.error(f" positions_cached AFTER {positions_cached}")
-
-                        await publishing_result(
-                            client_redis,
-                            sub_account_cached_channel,
-                            sub_account_cached,
-                        )
-
-
 
 
                 await pipe.execute()
