@@ -101,10 +101,13 @@ async def update_cached_ticker(
         log.debug(f"instrument_ticker after []-not ok {instrument_ticker}")
 
 def update_cached_orders(
-    orders_all,
-    sub_account_data,
+    orders_all: list,
+    sub_account_data: dict,
+    source: str = "ws",
 ):
     """_summary_
+    
+    source: ws/rest
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
 
     Args:
@@ -113,10 +116,18 @@ def update_cached_orders(
     Returns:
         _type_: _description_
     """
+    
+    if source == "ws":
 
-    orders = sub_account_data["orders"]
+        orders = sub_account_data["orders"]
 
-    trades = sub_account_data["trades"]
+        trades = sub_account_data["trades"]
+
+    if source == "rest":
+
+        orders = sub_account_data["open_orders"]
+
+        trades = []
 
     if orders:
 
