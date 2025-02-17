@@ -126,9 +126,6 @@ async def caching_distributing_data(
         orders_cached = sub_account_initial_cached ["orders_cached"]
         positions_cached = sub_account_initial_cached ["positions_cached"]
                 
-        log.warning (f"positions_cached {positions_cached}")
-        log.debug (f"orders_cached {orders_cached}")
-
         while True:
 
             message_params: str = await queue_general.get()
@@ -211,14 +208,22 @@ async def caching_distributing_data(
                         sub_account_cached,
                     )
                     
-                    if  "portfolio" in message_channel:
+                if  "portfolio" in message_channel:
+                    
+                    from db_management.redis_client import publishing_specific_purposes
+                    
+                    result = await private_data.get_subaccounts_details(currency)
 
-                        await updating_portfolio(pipe,
-                                                 pub_message,
-                                                portfolio,
-                                                my_trades_channel,
-                                                portfolio_channel,
-                             )
+                    await publishing_specific_purposes(
+                                "sub_account_update",
+                                result,
+                            )
+                    await updating_portfolio(pipe,
+                                                pub_message,
+                                            portfolio,
+                                            my_trades_channel,
+                                            portfolio_channel,
+                            )
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
