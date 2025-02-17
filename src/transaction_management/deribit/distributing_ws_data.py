@@ -111,8 +111,6 @@ async def caching_distributing_data(
         [await pubsub.subscribe(o) for o in channels]
 
 
-        cached_orders: list = await combining_order_data(private_data, currencies)
-
         server_time = 0
 
         portfolio = []
@@ -120,11 +118,34 @@ async def caching_distributing_data(
         notional_value = 0
 
         sub_account_cached = []
+        orders_cached = []
+        positions_cached = []
+
+        cached_orders: list = await combining_order_data(private_data, currencies)
 
         for currency in currencies:
             result = await private_data.get_subaccounts_details(currency)
-            sub_account_cached.append(result)
-        
+            
+            sub_account = result[0]
+            
+            sub_account_orders = sub_account["open_orders"]            
+            
+            if sub_account_orders:
+
+                for order in sub_account_orders:
+
+                    orders_cached.append(order)
+
+            sub_account_positions = sub_account["positions"]            
+            
+            if sub_account_positions:
+
+                for position in sub_account_positions:
+
+                    positions_cached.append(position)
+                
+        log.warning (f"positions_cached {positions_cached}")
+        log.debug (f"orders_cached {orders_cached}")
         sub_account_cached = sub_account_cached[0]
 
         while True:
