@@ -125,7 +125,7 @@ def update_cached_orders(
 
     if source == "rest":
 
-        orders = sub_account_data["open_orders"]
+        orders = sub_account_data
 
         trades = []
 
