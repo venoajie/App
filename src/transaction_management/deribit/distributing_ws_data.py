@@ -263,7 +263,7 @@ async def caching_distributing_data(
 
                     message_channel = message_byte["channel"]
                     
-                    data = parsing_sqlite_json_output(message_byte["data"])
+                    data = (message_byte["data"])
 
                     if sub_account_update_channel in message_channel:
                         
