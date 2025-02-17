@@ -267,12 +267,10 @@ async def caching_distributing_data(
 
                     if sub_account_update_channel in message_channel:
                         
-                        log.error(f" positions_cached before {positions_cached}")
-                        log.info(f" data {data}")
+                        open_orders = parsing_sqlite_json_output(data["open_orders"])
                         
-                        orders = [o["open_orders"] for o in data][0]
-
-                        log.info(f" orders {orders}")
+                        log.error(f" positions_cached before {positions_cached}")
+                        log.info(f" open_orders {open_orders}")
                         
                         positions = [o["positions"] for o in data][0]
 
@@ -281,7 +279,7 @@ async def caching_distributing_data(
                         
                         update_cached_orders(
                             orders_cached,
-                            data,
+                            open_orders,
                         )
                         
                         positions_updating_cached(
