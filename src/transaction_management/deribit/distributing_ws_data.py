@@ -259,9 +259,11 @@ async def caching_distributing_data(
                             )
                     ):
                     
-                    message = orjson.loads(message_byte)
+                    #message = orjson.loads(message_byte)
 
                     message_channel = (message_byte["channel"]).decode() 
+                    
+                    log.debug(message_channel)
 
                     data = (message_byte["data"]).decode() 
 
