@@ -202,17 +202,24 @@ async def caching_distributing_data(
                     
                     result = await private_data.get_subaccounts_details(currency)
                     
+                    open_orders = [o["open_orders"] for o in result]
+                    
                     log.debug(result)
                     
-                        
-                    update_cached_orders(
+                    if open_orders:
+                        update_cached_orders(
                         orders_cached,
-                        open_orders,
+                        open_orders[0],
                     )
                     
-                    positions_updating_cached(
+                    positions = [o["positions"] for o in result]
+                    
+                    log.debug(result)
+                    
+                    if positions:
+                        positions_updating_cached(
                         positions_cached,
-                        data,
+                        positions[0],
                     )
 
 
