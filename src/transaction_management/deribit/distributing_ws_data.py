@@ -259,11 +259,11 @@ async def caching_distributing_data(
                             )
                     ):
                     
-                    message_byte = orjson.loads(message_byte)
+                    message = orjson.loads(message_byte)
 
-                    message_channel = (message_byte["channel"])
+                    message_channel = (message_byte["channel"]).decode() 
 
-                    data = (message_byte)["data"]
+                    data = (message_byte["data"]).decode() 
 
                     if sub_account_update_channel in message_channel:
                         
