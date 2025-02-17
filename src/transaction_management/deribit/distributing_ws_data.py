@@ -259,7 +259,7 @@ async def caching_distributing_data(
                             )
                     ):
                     
-                    message_byte_data = orjson.loads(message_byte["data"])
+                    message_byte_data = orjson.loads(message_byte["data"].decode('utf-8'))
 
                     message_channel = message_byte["channel"]
 
