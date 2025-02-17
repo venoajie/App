@@ -168,8 +168,6 @@ async def publishing_result(
 
     try:
         
-        print(channel)
-        
         # publishing message
         await client_redis.publish(
             channel,
