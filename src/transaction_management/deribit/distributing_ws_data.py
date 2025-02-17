@@ -269,7 +269,16 @@ async def caching_distributing_data(
                         
                         log.error(f" positions_cached before {positions_cached}")
                         log.info(f" data {data}")
+                        
+                        orders = [o["open_orders"] for o in data][0]
 
+                        log.info(f" orders {orders}")
+                        
+                        positions = [o["positions"] for o in data][0]
+
+                        log.info(f" positions {positions}")
+                        
+                        
                         update_cached_orders(
                             orders_cached,
                             data,
