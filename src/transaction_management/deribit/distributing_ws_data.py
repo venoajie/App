@@ -261,7 +261,7 @@ async def caching_distributing_data(
                     
                     #message = orjson.loads(message_byte)
 
-                    message_channel = (message_byte["channel"]).decode() 
+                    message_channel = message_byte["channel"]
                     
                     data = parsing_sqlite_json_output(message_byte["data"])
 
