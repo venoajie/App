@@ -20,7 +20,7 @@ from utilities.caching import (
 )
 
 from transaction_management.deribit.orders_management import saving_orders
-from utilities.string_modification import extract_currency_from_text
+from utilities.string_modification import extract_currency_from_text,parsing_sqlite_json_output
 from utilities.system_tools import parse_error_message
 
 
@@ -263,9 +263,7 @@ async def caching_distributing_data(
 
                     message_channel = (message_byte["channel"]).decode() 
                     
-                    log.debug(message_channel)
-
-                    data = (message_byte["data"]).decode() 
+                    data = parsing_sqlite_json_output(message_byte["data"])
 
                     if sub_account_update_channel in message_channel:
                         
