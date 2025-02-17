@@ -131,14 +131,10 @@ async def caching_distributing_data(
 
             message_params: str = await queue_general.get()
             
-            message_byte = await pubsub.get_message()
-
             async with client_redis.pipeline() as pipe:
 
                 data: dict = message_params["data"]
-                
-                log.debug(data)
-
+            
                 message_channel: str = message_params["channel"]
 
                 currency: str = extract_currency_from_text(message_channel)
