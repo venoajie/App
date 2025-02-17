@@ -123,9 +123,9 @@ async def caching_distributing_data(
 
         cached_orders: list = await combining_order_data(private_data, currencies)
         
-        log.info([await private_data.get_subaccounts_details(o) for o in currencies])
+        sub_accounts= [await private_data.get_subaccounts_details(o) for o in currencies]
 
-        for currency in currencies:
+        for sub_account in sub_accounts:
             result = await private_data.get_subaccounts_details(currency)
             
             sub_account = result[0]
