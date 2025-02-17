@@ -119,7 +119,7 @@ async def caching_distributing_data(
         
         notional_value = 0
 
-        sub_account_cached = []
+        data_summary = {}
         
         # sub_account_combining
         sub_accounts= [await private_data.get_subaccounts_details(o) for o in currencies]
@@ -147,7 +147,7 @@ async def caching_distributing_data(
                     currency_upper=currency_upper,
                     currency=currency,
                 )
-                
+        
                 if "user." in message_channel:
 
                     pub_message.update({"currency_upper": currency_upper})
@@ -161,14 +161,14 @@ async def caching_distributing_data(
                             data,
                         )
                             
-                        log.error(f" positions_cached before {positions_cached}")
+#                        log.error(f" positions_cached before {positions_cached}")
 
                         positions_updating_cached(
                             positions_cached,
                             data,
                         )
     
-                        log.error(f" positions_cached AFTER {positions_cached}")
+#                        log.error(f" positions_cached AFTER {positions_cached}")
 
                         currency_lower = currency.lower()
 
@@ -200,7 +200,7 @@ async def caching_distributing_data(
                     
                     open_orders = [o["open_orders"] for o in result]
                     
-                    log.error(f" positions_cached before {positions_cached}")
+#                    log.error(f" positions_cached before {positions_cached}")
 
                     if open_orders:
                         update_cached_orders(
@@ -219,7 +219,7 @@ async def caching_distributing_data(
                     )
 
 
-                    log.error(f" positions_cached AFTER {positions_cached}")
+#                    log.error(f" positions_cached AFTER {positions_cached}")
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
@@ -259,6 +259,29 @@ async def caching_distributing_data(
 
 
                 await pipe.execute()
+                                    
+            message_byte = await pubsub.get_message()
+            
+            #log.debug(message_byte)
+
+            if (message_byte 
+                and (message_byte["type"] == "message"
+                        #or message_byte["type"] == "subscribe"
+                        )
+                ):
+                
+                message_byte_data = orjson.loads(message_byte["data"])
+
+                log.warning(message_byte)
+
+                message_channel = message_byte["channel"]
+                if my_trades_channel in message_channel:
+            
+                    currency_lower = extract_currency_from_text([o["instrument_name"] for o in message_byte_data][0])
+                    
+                    await modify_order_and_db.resupply_sub_accountdb(currency_lower.upper())
+
+
 
     except Exception as error:
 

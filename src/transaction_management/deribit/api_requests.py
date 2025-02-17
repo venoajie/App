@@ -13,7 +13,6 @@ from loguru import logger as log
 
 # user defined formula
 from configuration import config, config_oci, id_numbering
-from db_management.redis_client import publishing_specific_purposes
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.time_modification import get_now_unix_time as get_now_unix
 from utilities.string_modification import (
@@ -21,7 +20,7 @@ from utilities.string_modification import (
 )
 
 
-def parse_dotenv(sub_account) -> dict:
+def parse_dotenv(sub_account: str) -> str:
     return config.main_dotenv(sub_account)
 
 
@@ -32,7 +31,10 @@ async def private_connection(
     connection_url: str = "https://www.deribit.com/api/v2/",
 ) -> None:
 
-    id = id_numbering.id(endpoint, endpoint)
+    id = id_numbering.id(
+        endpoint, 
+        endpoint,
+        )
 
     payload: Dict = {
         "jsonrpc": "2.0",
@@ -401,11 +403,6 @@ class SendApiRequest:
 
         result = result_sub_account["result"]
         
-        await publishing_specific_purposes(
-            "sub_account_update",
-            result,
-        )
-
         return result
 
     async def get_user_trades_by_currency(
