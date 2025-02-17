@@ -266,6 +266,14 @@ async def caching_distributing_data(
                     data = (message_byte["data"])
 
                     if sub_account_update_channel in message_channel:
+                        result_json = [
+            i.replace(":false", ":False")
+            .replace(":true", ":True")
+            .replace(":null", ":None")
+            for i in data
+        ]
+
+                        log.info(f" data {result_json}")
                         
                         open_orders = parsing_sqlite_json_output(data["open_orders"])
                         
