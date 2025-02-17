@@ -230,7 +230,7 @@ async def caching_distributing_data(
                     log.critical ("AAAAAAAAAAAAAAAAAAAAAAAAAAA")
 
                     await publishing_result(
-                        client_redis,
+                        pipe,
                         sub_account_update_channel,
                         result,
                     )
