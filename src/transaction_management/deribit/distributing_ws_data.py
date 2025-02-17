@@ -123,12 +123,7 @@ async def caching_distributing_data(
 
         for currency in currencies:
             result = await private_data.get_subaccounts_details(currency)
-            sub_account_cached.append(
-                dict(
-                    currency=currency,
-                    result=(result),
-                )
-            )
+            sub_account_cached.append(result)
 
         while True:
 
