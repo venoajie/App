@@ -300,6 +300,8 @@ async def caching_distributing_data(
                     if "PERPETUAL" in instrument_name_future:
 
                         WHERE_FILTER_TICK: str = "tick"
+                        
+                        resolution = 1
 
                         TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
 
