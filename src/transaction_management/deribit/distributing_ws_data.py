@@ -220,9 +220,9 @@ async def caching_distributing_data(
 
                     log.info(f" message_channel  {message_channel} {currency}")
 
-                    log.info(f" pub_message  {pub_message}")
-
                     result = await private_data.get_subaccounts_details(currency)
+
+                    log.info(f" result  {result}")
 
                     open_orders = [o["open_orders"] for o in result]
 
@@ -347,10 +347,14 @@ async def caching_distributing_data(
 
                 message_channel = message_byte["channel"]
                 if my_trades_channel in message_channel:
+                    
+                    log.error (f"message_channel {message_channel}")
 
                     currency_lower = extract_currency_from_text(
                         [o["instrument_name"] for o in message_byte_data][0]
                     )
+
+                    log.warning (f"currency_lower {currency_lower}")
 
                     await modify_order_and_db.resupply_sub_accountdb(
                         currency_lower.upper()
