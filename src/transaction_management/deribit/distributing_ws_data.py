@@ -14,14 +14,26 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from db_management.redis_client import saving_and_publishing_result, publishing_result
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
+from transaction_management.deribit.api_requests import get_tickers
+from transaction_management.deribit.allocating_ohlc import inserting_open_interest
+from transaction_management.deribit.get_instrument_summary import (
+    get_futures_instruments,
+)
+from transaction_management.deribit.orders_management import saving_orders
 from utilities.caching import (
     positions_updating_cached,
     update_cached_orders,
 )
-
-from transaction_management.deribit.orders_management import saving_orders
-from utilities.string_modification import extract_currency_from_text,parsing_sqlite_json_output
-from utilities.system_tools import parse_error_message
+from utilities.pickling import read_data
+from utilities.system_tools import (
+    parse_error_message,
+    provide_path_for_file,
+)
+from utilities.string_modification import (
+    extract_currency_from_text,
+    remove_double_brackets_in_list,
+    remove_redundant_elements,
+)
 
 
 async def caching_distributing_data(
@@ -102,6 +114,10 @@ async def caching_distributing_data(
         positions_update_channel: str = redis_channels["positions_update"]
         order_keys: str = redis_keys["orders"]
 
+        ticker_cached_channel: str = redis_channels["ticker_update_cached"]
+
+        ticker_keys: str = redis_keys["ticker"]
+        
         # prepare channels placeholders
         channels = [
             my_trades_channel,
@@ -120,6 +136,17 @@ async def caching_distributing_data(
         notional_value = 0
 
         data_summary = {}
+        
+        settlement_periods = get_settlement_period(strategy_attributes)
+
+        futures_instruments = await get_futures_instruments(
+            currencies, settlement_periods
+        )
+
+        instruments_name = futures_instruments["instruments_name"]
+
+        
+        ticker_all_cached = combining_ticker_data(instruments_name)
         
         # sub_account_combining
         sub_accounts= [await private_data.get_subaccounts_details(o) for o in currencies]
@@ -231,13 +258,61 @@ async def caching_distributing_data(
                     )
 
                     pub_message.update({"instrument_name": instrument_name_future})
-                    pub_message.update({"currency_upper": currency_upper})
+                    pub_message.update({"currency_upper": currency_upper})    
+                
+                    for item in data:
 
-                    await publishing_result(
-                        pipe,
-                        ticker_data_channel,
+                        if (
+                            "stats" not in item
+                            and "instrument_name" not in item
+                            and "type" not in item
+                        ):
+                            [
+                                o
+                                for o in ticker_all_cached
+                                if instrument_name_future in o["instrument_name"]
+                            ][0][item] = data[item]
+
+                        if "stats" in item:
+
+                            data_orders_stat = data[item]
+
+                            for item in data_orders_stat:
+                                [
+                                    o
+                                    for o in ticker_all_cached
+                                    if instrument_name_future in o["instrument_name"]
+                                ][0]["stats"][item] = data_orders_stat[item]
+
+                    pub_message = dict(
+                        data=ticker_all_cached,
+                        server_time=message_byte_data["server_time"],
+                        instrument_name=instrument_name_future,
+                        currency_upper=message_byte_data["currency_upper"],
+                        currency=currency,
+                    )
+
+                    await saving_and_publishing_result(
+                        client_redis,
+                        ticker_cached_channel,
+                        ticker_keys,
+                        ticker_all_cached,
                         pub_message,
                     )
+
+                    if "PERPETUAL" in instrument_name_future:
+
+                        WHERE_FILTER_TICK: str = "tick"
+
+                        TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
+
+                        await inserting_open_interest(
+                            currency,
+                            WHERE_FILTER_TICK,
+                            TABLE_OHLC1,
+                            data,
+                        )
+                    
 
                 if "chart.trades" in message_channel:
 
@@ -421,3 +496,54 @@ def sub_account_combining(
         orders_cached=orders_cached,
         positions_cached=positions_cached,
                 )
+
+
+
+def get_settlement_period(strategy_attributes: list) -> list:
+
+    return remove_redundant_elements(
+        remove_double_brackets_in_list(
+            [o["settlement_period"] for o in strategy_attributes]
+        )
+    )
+
+
+def combining_ticker_data(instruments_name: str) -> list:
+    """_summary_
+    https://blog.apify.com/python-cache-complete-guide/]
+    https://medium.com/@jodielovesmaths/memoization-in-python-using-cache-36b676cb21ef
+    data caching
+    https://medium.com/@ryan_forrester_/python-return-statement-complete-guide-138c80bcfdc7
+
+    Args:
+        instrument_ticker (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    result = []
+    for instrument_name in instruments_name:
+
+        result_instrument = reading_from_pkl_data("ticker", instrument_name)
+
+        if result_instrument:
+            result_instrument = result_instrument[0]
+
+        else:
+            result_instrument = get_tickers(instrument_name)
+        result.append(result_instrument)
+
+    return result
+
+
+
+def reading_from_pkl_data(
+    end_point: str,
+    currency: str,
+    status: str = None,
+) -> dict:
+    """ """
+
+    path: str = provide_path_for_file(end_point, currency, status)
+    return read_data(path)

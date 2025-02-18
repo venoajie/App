@@ -31,17 +31,12 @@ from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
 from market_understanding.price_action.candles_analysis import get_market_condition
-from transaction_management.deribit.allocating_ohlc import updating_ohlc
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
-from transaction_management.deribit.capturing_user_changes import \
-    saving_and_relabelling_orders
 from transaction_management.deribit.distributing_ws_data import caching_distributing_data
 from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from transaction_management.deribit.processing_orders import \
     processing_orders
-from transaction_management.deribit.updating_ticker import \
-    update_cached_ticker
 from utilities.system_tools import (
     SignalHandler,
     back_up_db,
@@ -179,48 +174,6 @@ async def main():
                 redis_channels,
                 strategy_attributes,
                 ),
-                        
-        cancelling_orders(
-                modify_order_and_db,
-                currencies,
-                client_redis,
-                config_app,
-                redis_channels,
-                strategy_attributes,
-                ),    
-
-            processing_orders(
-                private_data,
-                client_redis,
-                redis_channels,
-                strategy_attributes,
-                ),
-            avoiding_double_ids(
-                modify_order_and_db,
-                client_redis,
-                config_app,
-                ),
-       
-            relabelling_trades(
-                modify_order_and_db,
-                config_app),
-            
-            update_cached_ticker(
-                client_redis,
-                config_app),
-
-            updating_ohlc(
-                client_redis,
-                redis_channels,),
-            
-            get_market_condition(
-                client_redis,
-                config_app,
-                currencies,
-                redis_channels,
-                resolutions,
-                np),
-            
             
             reconciling_size(
                 private_data,
@@ -238,15 +191,42 @@ async def main():
             producer_task, 
         
             saving_task,
- 
-            saving_and_relabelling_orders(
+                        
+        cancelling_orders(
+                modify_order_and_db,
+                currencies,
+                client_redis,
+                config_app,
+                redis_channels,
+                strategy_attributes,
+                ),    
+
+            processing_orders(
                 private_data,
+                client_redis,
+                redis_channels,
+                strategy_attributes,
+                ),
+                
+            avoiding_double_ids(
                 modify_order_and_db,
                 client_redis,
                 config_app,
+                ),
+       
+            relabelling_trades(
+                modify_order_and_db,
+                config_app),
+            
+            
+            get_market_condition(
+                client_redis,
+                config_app,
                 currencies,
-                strategy_attributes,),
-    
+                redis_channels,
+                resolutions,
+                np),
+            
             
             back_up_db(60*10),
             
