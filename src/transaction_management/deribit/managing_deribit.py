@@ -21,9 +21,6 @@ from transaction_management.deribit.api_requests import (
     get_cancel_order_byOrderId,
 )
 from transaction_management.deribit.orders_management import saving_traded_orders
-from transaction_management.deribit.transaction_log import (
-    saving_transaction_log,
-)
 from utilities.pickling import replace_data
 from utilities.system_tools import provide_path_for_file
 
@@ -263,92 +260,6 @@ class ModifyOrderDb(SendApiRequest):
             portfolio,
             currency,
         )
-
-    async def save_transaction_log_by_instrument(
-        self,
-        currency: str,
-        transaction_log_trading: str,
-        instrument_name: str = None,
-        count: int = 1,
-    ) -> None:
-
-        where_filter = "timestamp"
-
-        first_tick_query = get_first_tick_query(
-            where_filter, transaction_log_trading, instrument_name, count
-        )
-
-        first_tick_query_result = await executing_query_with_return(first_tick_query)
-
-        if first_tick_query_result:
-
-            first_tick_fr_sqlite = first_tick_query_result[0]["MIN (timestamp)"]
-
-            if not first_tick_fr_sqlite:
-
-                first_tick_fr_sqlite = first_tick_fr_sqlite_if_database_still_empty(
-                    count
-                )
-
-            transaction_log = await self.private_data.get_transaction_log(
-                currency, first_tick_fr_sqlite, count
-            )
-
-            await asyncio.sleep(0.5)
-
-            if transaction_log:
-
-                transaction_log_instrument_name = [
-                    o
-                    for o in transaction_log
-                    if instrument_name in o["instrument_name"]
-                    and o["timestamp"] > first_tick_fr_sqlite
-                ]
-
-                await saving_transaction_log(
-                    transaction_log_trading,
-                    transaction_log_instrument_name,
-                    first_tick_fr_sqlite,
-                )
-
-    async def resupply_transaction_log(
-        self,
-        currency: str,
-        transaction_log_trading: str,
-        instrument_name: str = None,
-        count: int = 1,
-    ) -> None:
-        """ """
-        log.info(f"resupply {currency.upper()} transaction_log-START")
-
-        if instrument_name:
-            await self.save_transaction_log_by_instrument(
-                currency,
-                transaction_log_trading,
-                instrument_name,
-                count,
-            )
-
-        else:
-
-            column_list = (
-                "instrument_name",
-                "timestamp",
-            )
-            from_transaction_log = await get_query(
-                transaction_log_trading, currency, "all", "all", column_list
-            )
-
-            from_transaction_log_instrument = [
-                o["instrument_name"] for o in from_transaction_log
-            ]
-
-            for instrument_name in from_transaction_log_instrument:
-                self.save_transaction_log_by_instrument(
-                    currency, transaction_log_trading, instrument_name, count
-                )
-
-        log.info(f"resupply {currency.upper()} transaction_log-DONE")
 
     async def if_cancel_is_true(
         self,
