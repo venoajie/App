@@ -218,14 +218,9 @@ async def caching_distributing_data(
                         portfolio_channel,
                     )
 
-                    log.info(f" message_channel  {message_channel} {currency}")
-
                     result = await private_data.get_subaccounts_details(currency)
 
-                    log.info(f" result  {result}")
-
                     open_orders = [o["open_orders"] for o in result]
-
 
                     if open_orders:
                         update_cached_orders(
