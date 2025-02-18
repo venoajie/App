@@ -222,7 +222,8 @@ async def caching_distributing_data(
 
                     open_orders = [o["open_orders"] for o in result]
 
-                    #                    log.error(f" positions_cached before {positions_cached}")
+                    log.info(f" message_channel  {message_channel} {currency}")
+                    log.info(f" pub_message  {pub_message}")
 
                     if open_orders:
                         update_cached_orders(
