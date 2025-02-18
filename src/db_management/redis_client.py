@@ -287,8 +287,8 @@ async def publishing_specific_purposes(
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
-    if purpose == "my_trades":
-        channel: str = redis_channels["my_trades"]
+    #if purpose == "my_trades":
+    #    channel: str = redis_channels["my_trades"]
 
     if purpose == "sub_account_update":
         channel: str = redis_channels["sub_account_update"]
