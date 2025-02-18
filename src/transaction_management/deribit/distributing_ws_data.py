@@ -342,8 +342,6 @@ async def caching_distributing_data(
 
                 message_byte_data = orjson.loads(message_byte["data"])
 
-                log.warning(message_byte)
-
                 message_channel = message_byte["channel"]
                 if my_trades_channel in message_channel:
 
@@ -397,8 +395,6 @@ async def updating_portfolio(
     portfolio_channel: str,
 ) -> None:
 
-    log.warning(f"portfolio-data {portfolio}")
-
     if portfolio == []:
         portfolio.append(pub_message["data"])
 
@@ -412,8 +408,6 @@ async def updating_portfolio(
         portfolio.append(pub_message["data"])
 
     pub_message.update({"cached_portfolio": portfolio})
-
-    log.error(f"portfolio {portfolio}")
 
     await publishing_result(
         pipe,
