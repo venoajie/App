@@ -286,9 +286,9 @@ async def caching_distributing_data(
 
                     pub_message = dict(
                         data=ticker_all_cached,
-                        server_time=message_byte_data["server_time"],
+                        server_time=server_time,
                         instrument_name=instrument_name_future,
-                        currency_upper=message_byte_data["currency_upper"],
+                        currency_upper=currency_upper,
                         currency=currency,
                     )
 
