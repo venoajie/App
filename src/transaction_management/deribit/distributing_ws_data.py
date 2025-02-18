@@ -120,10 +120,7 @@ async def caching_distributing_data(
         
         # prepare channels placeholders
         channels = [
-            my_trades_channel,
-            receive_order_channel,
-            sub_account_update_channel,
-            portfolio_channel,
+            my_trades_channel
         ]
 
         # subscribe to channels
@@ -422,7 +419,7 @@ async def updating_portfolio(pipe: object,
     await publishing_result(
         pipe,
         portfolio_channel,
-        pub_message["data"],
+        pub_message,
     )
 
     query_trades = f"SELECT * FROM  v_trading_all_active"
