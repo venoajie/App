@@ -195,59 +195,59 @@ class StreamingAccountData:
                         )
 
                     while True:
-                        
-                            # Receive WebSocket messages
-                            message: bytes = await self.websocket_client.recv()
-                            message: dict = orjson.loads(message)
-                        
-                            if "id" in list(message):
-                                if message["id"] == 9929:
 
-                                    if self.refresh_token is None:
-                                        print(
-                                            "Successfully authenticated WebSocket Connection"
-                                        )
+                        # Receive WebSocket messages
+                        message: bytes = await self.websocket_client.recv()
+                        message: dict = orjson.loads(message)
 
-                                    else:
-                                        print(
-                                            "Successfully refreshed the authentication of the WebSocket Connection"
-                                        )
+                        if "id" in list(message):
+                            if message["id"] == 9929:
 
-                                    self.refresh_token = message["result"]["refresh_token"]
-
-                                    # Refresh Authentication well before the required datetime
-                                    if message["testnet"]:
-                                        expires_in: int = 300
-                                    else:
-                                        expires_in: int = (
-                                            message["result"]["expires_in"] - 240
-                                        )
-
-                                    now_utc: int = datetime.now(timezone.utc)
-
-                                    self.refresh_token_expiry_time = now_utc + timedelta(
-                                        seconds=expires_in
+                                if self.refresh_token is None:
+                                    print(
+                                        "Successfully authenticated WebSocket Connection"
                                     )
 
-                                elif message["id"] == 8212:
-                                    # Avoid logging Heartbeat messages
-                                    continue
+                                else:
+                                    print(
+                                        "Successfully refreshed the authentication of the WebSocket Connection"
+                                    )
 
-                            elif "method" in list(message):
-                                # Respond to Heartbeat Message
-                                if message["method"] == "heartbeat":
-                                    await self.heartbeat_response()
+                                self.refresh_token = message["result"]["refresh_token"]
 
-                            if "params" in list(message):
+                                # Refresh Authentication well before the required datetime
+                                if message["testnet"]:
+                                    expires_in: int = 300
+                                else:
+                                    expires_in: int = (
+                                        message["result"]["expires_in"] - 240
+                                    )
 
-                                if message["method"] != "heartbeat":
+                                now_utc: int = datetime.now(timezone.utc)
 
-                                    message_params: dict = message["params"]
-                                    
-                                    # queing message to dispatcher
-                                    await queue_general.put(message_params)
+                                self.refresh_token_expiry_time = now_utc + timedelta(
+                                    seconds=expires_in
+                                )
 
-                                    """
+                            elif message["id"] == 8212:
+                                # Avoid logging Heartbeat messages
+                                continue
+
+                        elif "method" in list(message):
+                            # Respond to Heartbeat Message
+                            if message["method"] == "heartbeat":
+                                await self.heartbeat_response()
+
+                        if "params" in list(message):
+
+                            if message["method"] != "heartbeat":
+
+                                message_params: dict = message["params"]
+
+                                # queing message to dispatcher
+                                await queue_general.put(message_params)
+
+                                """
                                     message examples:
                                     
                                     incremental_ticker = {

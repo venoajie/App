@@ -421,7 +421,7 @@ async def saving_orders(
                                         order_db_table,
                                         order,
                                     )
-    
+
 
 async def cancelling_and_relabelling(
     private_data,

@@ -167,7 +167,7 @@ async def publishing_result(
     """ """
 
     try:
-        
+
         # publishing message
         await client_redis.publish(
             channel,
@@ -267,8 +267,8 @@ async def publishing_specific_purposes(
     if not client_redis:
         pool = aioredis.ConnectionPool.from_url(
             "redis://localhost",
-            port=6379, 
-            db=0, 
+            port=6379,
+            db=0,
             protocol=3,
             decode_responses=True,
         )
@@ -301,7 +301,7 @@ async def publishing_specific_purposes(
 
     if purpose == "ticker":
         channel: str = redis_channels["ticker_update_data"]
-    
+
     await publishing_result(
         client_redis,
         channel,

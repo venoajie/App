@@ -219,7 +219,7 @@ def is_my_trades_and_sub_account_size_reconciled_each_other(
         )
 
         sub_account_size_instrument = get_sub_account_size_per_instrument(
-            instrument_name, 
+            instrument_name,
             sub_account,
         )
 
@@ -229,25 +229,27 @@ def is_my_trades_and_sub_account_size_reconciled_each_other(
         log.critical(
             f"{instrument_name} reconciled {reconciled} sub_account_size_instrument {sub_account_size_instrument} my_trades_size_instrument {my_trades_size_instrument}"
         )
-        
+
         log.info(sub_account)
-        
+
         sub_account_instrument = [
-            o for o in sub_account["positions"] if o["instrument_name"] == instrument_name
+            o
+            for o in sub_account["positions"]
+            if o["instrument_name"] == instrument_name
         ]
 
         log.debug(f" sub_account_instrument {sub_account_instrument}")
-        
+
         sub_account_size_instrument = [o["size"] for o in sub_account_instrument]
 
         log.warning(f" sub_account_size_instrument {sub_account_size_instrument}")
-        
+
         sub_account_size_instrument = (
             0 if sub_account_size_instrument == [] else sub_account_size_instrument[0]
         )
 
         log.debug(f" sub_account_size_instrument {sub_account_size_instrument}")
-        
+
     return reconciled
 
 

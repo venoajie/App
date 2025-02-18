@@ -32,9 +32,9 @@ async def private_connection(
 ) -> None:
 
     id = id_numbering.id(
-        endpoint, 
         endpoint,
-        )
+        endpoint,
+    )
 
     payload: Dict = {
         "jsonrpc": "2.0",
@@ -402,7 +402,7 @@ class SendApiRequest:
         )
 
         result = result_sub_account["result"]
-        
+
         return result
 
     async def get_user_trades_by_currency(

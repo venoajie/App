@@ -50,7 +50,6 @@ async def future_spreads(
 
     try:
 
-
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
@@ -158,7 +157,7 @@ async def future_spreads(
                         )
 
                         currency_lower: str = currency
-                        
+
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                         # get portfolio data
@@ -266,11 +265,11 @@ async def future_spreads(
                                 ]
                             )
 
-                            #log.info(
+                            # log.info(
                             #    f"orders_currency_strategy {len (orders_currency_strategy)}"
-                            #)
+                            # )
 
-                            if  order_allowed:
+                            if order_allowed:
 
                                 async with client_redis.pipeline() as pipe:
 
@@ -291,11 +290,9 @@ async def future_spreads(
                                     ]
 
                                     max_order_currency = 2
-                                    
-                                    instrument_name = transaction[
-                                                                    "instrument_name"
-                                                                ]
-                        
+
+                                    instrument_name = transaction["instrument_name"]
+
                                     random_instruments_name = sample(
                                         (
                                             [
@@ -319,8 +316,7 @@ async def future_spreads(
                                     )
 
                                     my_trades_currency_strategy_labels: list = [
-                                        o["label"]
-                                        for o in my_trades_currency_strategy
+                                        o["label"] for o in my_trades_currency_strategy
                                     ]
 
                                     # send combo orders
@@ -342,8 +338,7 @@ async def future_spreads(
 
                                         if (
                                             instrument_name_combo
-                                            and currency_upper
-                                            in instrument_name_combo
+                                            and currency_upper in instrument_name_combo
                                         ):
 
                                             instrument_name_future = (
@@ -458,9 +453,7 @@ async def future_spreads(
                                     #! closing active trades
                                     for label in labels:
 
-                                        label_integer: int = get_label_integer(
-                                            label
-                                        )
+                                        label_integer: int = get_label_integer(label)
                                         selected_transaction = [
                                             o
                                             for o in my_trades_currency_strategy
@@ -468,8 +461,7 @@ async def future_spreads(
                                         ]
 
                                         selected_transaction_amount = [
-                                            o["amount"]
-                                            for o in selected_transaction
+                                            o["amount"] for o in selected_transaction
                                         ]
                                         sum_selected_transaction = sum(
                                             selected_transaction_amount
@@ -479,10 +471,7 @@ async def future_spreads(
                                         )
 
                                         #! closing combo auto trading
-                                        if (
-                                            "Auto" in label
-                                            and len_cleaned_orders < 50
-                                        ):
+                                        if "Auto" in label and len_cleaned_orders < 50:
 
                                             if sum_selected_transaction == 0:
 
@@ -546,11 +535,9 @@ async def future_spreads(
                                                             * ONE_MINUTE
                                                         )
 
-                                                        timestamp: int = (
-                                                            transaction[
-                                                                "timestamp"
-                                                            ]
-                                                        )
+                                                        timestamp: int = transaction[
+                                                            "timestamp"
+                                                        ]
 
                                                         waiting_time_for_selected_transaction: (
                                                             bool
@@ -571,15 +558,12 @@ async def future_spreads(
                                                             o
                                                             for o in cached_ticker_all
                                                             if instrument_name
-                                                            in o[
-                                                                "instrument_name"
-                                                            ]
+                                                            in o["instrument_name"]
                                                         ]
 
                                                         if (
                                                             ticker_transaction
-                                                            and len_cleaned_orders
-                                                            < 50
+                                                            and len_cleaned_orders < 50
                                                         ):
 
                                                             TP_THRESHOLD = (
@@ -588,9 +572,7 @@ async def future_spreads(
                                                             )
 
                                                             send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                ticker_transaction[
-                                                                    0
-                                                                ],
+                                                                ticker_transaction[0],
                                                                 instrument_attributes_futures_all,
                                                                 TP_THRESHOLD,
                                                                 transaction,

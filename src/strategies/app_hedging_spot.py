@@ -107,7 +107,7 @@ async def hedging_spot(
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
         order_allowed = False
-        
+
         while not_cancel:
 
             try:
@@ -150,7 +150,7 @@ async def hedging_spot(
                     ):
 
                         cached_ticker_all = message_byte_data["data"]
-                        
+
                         server_time = message_byte_data["server_time"]
 
                         currency, currency_upper = (
@@ -282,7 +282,7 @@ async def hedging_spot(
                                 ]
                             )
 
-                            #log.info(f" {currency} {len(orders_currency_strategy)}  {(orders_currency_strategy)} ")
+                            # log.info(f" {currency} {len(orders_currency_strategy)}  {(orders_currency_strategy)} ")
 
                             instrument_attributes_futures_for_hedging = [
                                 o

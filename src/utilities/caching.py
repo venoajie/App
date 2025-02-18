@@ -100,13 +100,14 @@ async def update_cached_ticker(
         # combining_order_data(currencies)
         log.debug(f"instrument_ticker after []-not ok {instrument_ticker}")
 
+
 def update_cached_orders(
     orders_all: list,
     sub_account_data: dict,
     source: str = "ws",
 ):
     """_summary_
-    
+
     source: ws/rest
     https://stackoverflow.com/questions/73064997/update-values-in-a-list-of-dictionaries
 
@@ -116,7 +117,7 @@ def update_cached_orders(
     Returns:
         _type_: _description_
     """
-    
+
     if source == "ws":
 
         orders = sub_account_data["orders"]
@@ -137,9 +138,7 @@ def update_cached_orders(
 
                 order_id = trade["order_id"]
 
-                selected_order = [
-                    o for o in orders_all if order_id in o["order_id"]
-                ]
+                selected_order = [o for o in orders_all if order_id in o["order_id"]]
 
                 if selected_order:
 
@@ -173,16 +172,14 @@ def positions_updating_cached(
     sub_account_data: list,
     source: str = "ws",
 ):
-    """
-    """
-    
+    """ """
+
     if source == "ws":
-        positions = sub_account_data["positions"]  
+        positions = sub_account_data["positions"]
 
     if source == "rest":
 
         positions = sub_account_data
-
 
     if positions:
 
@@ -191,7 +188,9 @@ def positions_updating_cached(
             position_instrument_name = position["instrument_name"]
 
             selected_position = [
-                o for o in positions_cached if position_instrument_name in o["instrument_name"]
+                o
+                for o in positions_cached
+                if position_instrument_name in o["instrument_name"]
             ]
 
             if selected_position:
@@ -199,4 +198,3 @@ def positions_updating_cached(
                 positions_cached.remove(selected_position[0])
 
             positions_cached.append(position)
-
