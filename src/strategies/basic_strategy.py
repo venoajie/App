@@ -8,7 +8,6 @@ from dataclassy import dataclass
 from loguru import logger as log
 
 # user defined formula
-from db_management.sqlite_management import querying_table
 from utilities.string_modification import parsing_label
 
 
@@ -149,7 +148,10 @@ def delta(
     return last_price - prev_price
 
 
-def delta_pct(last_price: float, prev_price: float) -> float:
+def delta_pct(
+    last_price: float,
+    prev_price: float,
+) -> float:
     """ """
     return abs(delta(last_price, prev_price) / prev_price)
 
@@ -226,7 +228,10 @@ def price_plus_pct(
     pct_threshold: float,
 ) -> float:
 
-    return price + pct_price_in_usd(price, pct_threshold)
+    return price + pct_price_in_usd(
+        price,
+        pct_threshold,
+    )
 
 
 def price_minus_pct(
@@ -234,7 +239,10 @@ def price_minus_pct(
     pct_threshold: float,
 ) -> float:
 
-    return price - pct_price_in_usd(price, pct_threshold)
+    return price - pct_price_in_usd(
+        price,
+        pct_threshold,
+    )
 
 
 def is_transaction_price_minus_below_threshold(
@@ -310,7 +318,7 @@ def is_minimum_waiting_time_has_passed(
     )
 
 
-def get_max_time_stamp(result_strategy_label) -> int:
+def get_max_time_stamp(result_strategy_label: list) -> int:
     """ """
     return (
         []
@@ -319,7 +327,7 @@ def get_max_time_stamp(result_strategy_label) -> int:
     )
 
 
-def get_order_id_max_time_stamp(result_strategy_label) -> int:
+def get_order_id_max_time_stamp(result_strategy_label: list) -> int:
     """ """
     return (
         0
@@ -332,12 +340,12 @@ def get_order_id_max_time_stamp(result_strategy_label) -> int:
     )
 
 
-def get_transactions_len(result_strategy_label) -> int:
+def get_transactions_len(result_strategy_label: list) -> int:
     """ """
     return 0 if result_strategy_label == [] else len([o for o in result_strategy_label])
 
 
-def get_transactions_sum(result_strategy_label) -> int:
+def get_transactions_sum(result_strategy_label: list) -> int:
     """
     summing transaction under SAME strategy label
     """

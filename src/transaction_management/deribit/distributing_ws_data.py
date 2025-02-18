@@ -342,19 +342,26 @@ async def caching_distributing_data(
 
                 message_channel = message_byte["channel"]
                 if my_trades_channel in message_channel:
-                    
-                    log.error (f"message_channel {message_channel}")
-                    log.debug (f"message_byte_data {message_byte_data}")
 
-                    currency_lower = extract_currency_from_text(
-                        [o["instrument_name"] for o in message_byte_data][0]
-                    )
+                    result = await private_data.get_subaccounts_details(currency)
 
-                    log.warning (f"currency_lower {currency_lower}")
+                    open_orders = [o["open_orders"] for o in result]
 
-                    await modify_order_and_db.resupply_sub_accountdb(
-                        currency_lower.upper()
-                    )
+                    if open_orders:
+                        update_cached_orders(
+                            orders_cached,
+                            open_orders[0],
+                            "rest",
+                        )
+
+                    positions = [o["positions"] for o in result]
+
+                    if positions:
+                        positions_updating_cached(
+                            positions_cached,
+                            positions[0],
+                            "rest",
+                        )
 
     except Exception as error:
 
@@ -425,12 +432,6 @@ async def updating_portfolio(
     )
 
     log.error(my_trades_currency_all_transactions)
-
-    await publishing_result(
-        pipe,
-        my_trades_channel,
-        my_trades_currency_all_transactions,
-    )
 
 
 def updating_sub_account(
