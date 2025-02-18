@@ -349,6 +349,7 @@ async def caching_distributing_data(
                 if my_trades_channel in message_channel:
                     
                     log.error (f"message_channel {message_channel}")
+                    log.debug (f"message_byte_data {message_byte_data}")
 
                     currency_lower = extract_currency_from_text(
                         [o["instrument_name"] for o in message_byte_data][0]
