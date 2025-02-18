@@ -113,6 +113,8 @@ async def insert_tables(
     finally:
 
         if "trade" in table_name or "order" in table_name:
+            
+            log.info (f"table_name {table_name}")
 
             query_trades = f"SELECT * FROM  v_trading_all_active"
 
@@ -222,6 +224,8 @@ async def deleting_row(
     finally:
 
         if "trade" in table or "order" in table:
+
+            log.info (f"table_name {table}")
 
             query_trades = f"SELECT * FROM  v_trading_all_active"
 
@@ -358,6 +362,8 @@ async def update_status_data(
     finally:
 
         if "trade" in table or "order" in table:
+
+            log.info (f"table_name {table}")
 
             query_trades = f"SELECT * FROM  v_trading_all_active"
 
