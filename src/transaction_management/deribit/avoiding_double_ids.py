@@ -12,13 +12,15 @@ from loguru import logger as log
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from messaging.telegram_bot import telegram_bot_sendtext
-
+from transaction_management.deribit.cancelling_active_orders import (
+    cancel_by_order_id,
+)
 from utilities.string_modification import remove_redundant_elements
 from utilities.system_tools import parse_error_message
 
 
 async def avoiding_double_ids(
-    modify_order_and_db: object,
+    private_data: object,
     client_redis: object,
     config_app: list,
 ):
@@ -126,8 +128,10 @@ async def avoiding_double_ids(
                                             log.critical(f"double ids {label}")
                                             log.critical(orders)
 
-                                            await modify_order_and_db.cancel_by_order_id(
-                                                order_db_table, order["order_id"]
+                                            await cancel_by_order_id(
+                                                private_data,
+                                                order_db_table,
+                                                order["order_id"],
                                             )
 
                                             await telegram_bot_sendtext(

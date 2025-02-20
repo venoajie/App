@@ -6,6 +6,10 @@ from strategies.basic_strategy import is_label_and_side_consistent
 
 # from loguru import logger as log
 from transaction_management.deribit.processing_orders import if_order_is_true
+from transaction_management.deribit.cancelling_active_orders import (
+    cancel_by_order_id,
+    cancel_the_cancellables,
+)
 
 
 async def saving_traded_orders(
@@ -42,7 +46,9 @@ async def saving_traded_orders(
 
 
 async def saving_order_based_on_state(
-    order_table: str, order: dict, db: str = "sqlite"
+    order_table: str,
+    order: dict,
+    db: str = "sqlite",
 ) -> None:
     """
     db: "sqlite"
@@ -251,7 +257,6 @@ def labelling_unlabelled_order_oto(
 
 
 async def saving_oto_order(
-    modify_order_and_db,
     private_data,
     non_checked_strategies,
     orders,
@@ -296,7 +301,8 @@ async def saving_oto_order(
                 transaction_main, transaction_secondary
             )
 
-            await modify_order_and_db.cancel_by_order_id(
+            await cancel_by_order_id(
+                private_data,
                 order_db_table,
                 transaction_main["order_id"],
             )
@@ -316,13 +322,12 @@ async def saving_oto_order(
 
 
 async def saving_orders(
-    modify_order_and_db,
-    private_data,
-    cancellable_strategies,
-    non_checked_strategies,
-    data,
-    order_db_table,
-    currency_lower,
+    private_data: object,
+    cancellable_strategies: list,
+    non_checked_strategies: list,
+    data: dict,
+    order_db_table: list,
+    currency_lower: str,
     save_only: bool = True,
 ) -> None:
 
@@ -338,7 +343,8 @@ async def saving_orders(
 
             archive_db_table = f"my_trades_all_{currency_lower}_json"
 
-            await modify_order_and_db.cancel_the_cancellables(
+            await cancel_the_cancellables(
+                private_data,
                 order_db_table,
                 currency_lower,
                 cancellable_strategies,
@@ -356,7 +362,6 @@ async def saving_orders(
             if "oto_order_ids" in (orders[0]):
 
                 await saving_oto_order(
-                    modify_order_and_db,
                     private_data,
                     non_checked_strategies,
                     orders,
@@ -381,7 +386,6 @@ async def saving_orders(
 
                             await cancelling_and_relabelling(
                                 private_data,
-                                modify_order_and_db,
                                 non_checked_strategies,
                                 order_db_table,
                                 order,
@@ -411,7 +415,8 @@ async def saving_orders(
                                     order_state != "cancelled"
                                     or order_state != "filled"
                                 ):
-                                    await modify_order_and_db.cancel_by_order_id(
+                                    await cancel_by_order_id(
+                                        private_data,
                                         order_db_table,
                                         order_id,
                                     )
@@ -425,7 +430,6 @@ async def saving_orders(
 
 async def cancelling_and_relabelling(
     private_data,
-    modify_order_and_db,
     non_checked_strategies,
     order_db_table,
     order,
@@ -451,7 +455,8 @@ async def cancelling_and_relabelling(
                     order,
                 )
 
-                await modify_order_and_db.cancel_by_order_id(
+                await cancel_by_order_id(
+                    private_data,
                     order_db_table,
                     order_id,
                 )

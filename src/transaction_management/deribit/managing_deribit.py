@@ -6,16 +6,8 @@ from dataclassy import dataclass, fields
 from loguru import logger as log
 
 # user defined formula
-
-from db_management.sqlite_management import (
-    deleting_row,
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-)
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.api_requests import (
-    SendApiRequest,
-    get_cancel_order_byOrderId,
-)
+from transaction_management.deribit.api_requests import SendApiRequest
 from transaction_management.deribit.orders_management import saving_traded_orders
 from utilities.pickling import replace_data
 from utilities.system_tools import provide_path_for_file
@@ -106,72 +98,6 @@ class ModifyOrderDb(SendApiRequest):
         # Provide class object to access private get API
         self.private_data: str = SendApiRequest(self.sub_account_id)
 
-    async def cancel_by_order_id(
-        self,
-        order_db_table: str,
-        open_order_id: str,
-    ) -> None:
-
-        where_filter = f"order_id"
-
-        await deleting_row(
-            order_db_table,
-            "databases/trading.sqlite3",
-            where_filter,
-            "=",
-            open_order_id,
-        )
-
-        result = await self.private_data.get_cancel_order_byOrderId(open_order_id)
-
-        try:
-            if (result["error"]["message"]) == "not_open_order":
-                log.critical(f"CANCEL non-existing order_id {result} {open_order_id}")
-
-        except:
-
-            log.critical(f"""CANCEL_by_order_id {result["result"]} {open_order_id}""")
-
-            return result
-
-    async def cancel_the_cancellables(
-        self,
-        order_db_table: str,
-        currency: str,
-        cancellable_strategies: list,
-        open_orders_sqlite: list = None,
-    ) -> None:
-
-        log.critical(f" cancel_the_cancellables {currency}")
-
-        where_filter = f"order_id"
-
-        column_list = "label", where_filter
-
-        if open_orders_sqlite is None:
-            open_orders_sqlite: list = await get_query(
-                "orders_all_json", currency.upper(), "all", "all", column_list
-            )
-
-        if open_orders_sqlite:
-
-            for strategy in cancellable_strategies:
-                open_orders_cancellables = [
-                    o for o in open_orders_sqlite if strategy in o["label"]
-                ]
-
-                if open_orders_cancellables:
-                    open_orders_cancellables_id = [
-                        o["order_id"] for o in open_orders_cancellables
-                    ]
-
-                    for order_id in open_orders_cancellables_id:
-
-                        await self.cancel_by_order_id(
-                            order_db_table,
-                            order_id,
-                        )
-
     async def resupply_portfolio(
         self,
         currency,
@@ -191,28 +117,6 @@ class ModifyOrderDb(SendApiRequest):
             portfolio,
             currency,
         )
-
-    async def if_cancel_is_true(
-        self,
-        order_db_table: str,
-        order: dict,
-    ) -> None:
-        """ """
-
-        if order["cancel_allowed"]:
-
-            # get parameter orders
-            await self.cancel_by_order_id(
-                order_db_table,
-                order["cancel_id"],
-            )
-
-    async def cancel_all_orders(self) -> None:
-        """ """
-
-        await self.get_cancel_order_all()
-
-        await deleting_row("orders_all_json")
 
     async def update_trades_from_exchange(
         self,
@@ -247,7 +151,10 @@ class ModifyOrderDb(SendApiRequest):
                         order_db_table,
                     )
 
-    async def send_triple_orders(self, params) -> None:
+    async def send_triple_orders(
+        self, 
+        params,
+        ) -> None:
         """
         triple orders:
             1 limit order
@@ -313,69 +220,3 @@ class ModifyOrderDb(SendApiRequest):
             if "error" in order_result:
                 await self.get_cancel_order_byOrderId(order_result_id)
                 await telegram_bot_sendtext("combo order failed")
-
-
-async def cancel_the_cancellables(
-    order_db_table: str,
-    currency: str,
-    cancellable_strategies: list,
-    open_orders_sqlite: list = None,
-) -> None:
-
-    log.critical(f" cancel_the_cancellables")
-
-    where_filter = f"order_id"
-
-    column_list = "label", where_filter
-
-    if open_orders_sqlite is None:
-        open_orders_sqlite: list = await get_query(
-            "orders_all_json", currency.upper(), "all", "all", column_list
-        )
-
-    if open_orders_sqlite:
-
-        for strategy in cancellable_strategies:
-            open_orders_cancellables = [
-                o for o in open_orders_sqlite if strategy in o["label"]
-            ]
-
-            if open_orders_cancellables:
-                open_orders_cancellables_id = [
-                    o["order_id"] for o in open_orders_cancellables
-                ]
-
-                for order_id in open_orders_cancellables_id:
-
-                    await cancel_by_order_id(
-                        order_db_table,
-                        order_id,
-                    )
-
-
-async def cancel_by_order_id(
-    order_db_table: str,
-    open_order_id: str,
-) -> None:
-
-    where_filter = f"order_id"
-
-    await deleting_row(
-        order_db_table,
-        "databases/trading.sqlite3",
-        where_filter,
-        "=",
-        open_order_id,
-    )
-
-    result = await get_cancel_order_byOrderId(open_order_id)
-
-    try:
-        if (result["error"]["message"]) == "not_open_order":
-            log.critical(f"CANCEL non-existing order_id {result} {open_order_id}")
-
-    except:
-
-        log.critical(f"""CANCEL_by_order_id {result["result"]} {open_order_id}""")
-
-        return result

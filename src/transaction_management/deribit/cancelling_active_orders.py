@@ -6,8 +6,17 @@ import asyncio
 
 # installed
 import orjson
+from loguru import logger as log
 
-from db_management.sqlite_management import executing_query_with_return
+# user defined formula
+from db_management.sqlite_management import (
+    deleting_row,
+    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
+)
+
+from transaction_management.deribit.api_requests import (
+    get_cancel_order_byOrderId,
+)
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.cash_carry.combo_auto import ComboAuto
 from strategies.hedging.hedging_spot import HedgingSpot
@@ -27,7 +36,7 @@ from utilities.system_tools import (
 
 
 async def cancelling_orders(
-    modify_order_and_db: object,
+    private_data,
     currencies: list,
     client_redis: object,
     config_app: list,
@@ -129,9 +138,7 @@ async def cancelling_orders(
 
                     if my_trades_channel in message_channel:
 
-                        my_trades_active_all = await executing_query_with_return(
-                            query_trades
-                        )
+                        my_trades_active_all = await get_query(query_trades)
 
                     if receive_order_channel in message_channel:
 
@@ -270,7 +277,8 @@ async def cancelling_orders(
                                             )
 
                                             if cancel_allowed["cancel_allowed"]:
-                                                await modify_order_and_db.if_cancel_is_true(
+                                                await if_cancel_is_true(
+                                                    private_data,
                                                     order_db_table,
                                                     cancel_allowed,
                                                 )
@@ -303,7 +311,8 @@ async def cancelling_orders(
                                             )
 
                                             if cancel_allowed["cancel_allowed"]:
-                                                await modify_order_and_db.if_cancel_is_true(
+                                                await if_cancel_is_true(
+                                                    private_data,
                                                     order_db_table,
                                                     cancel_allowed,
                                                 )
@@ -367,3 +376,89 @@ def get_index(ticker: dict) -> float:
         index_price = ticker["estimated_delivery_price"]
 
     return index_price
+
+
+async def cancel_the_cancellables(
+    private_data,
+    order_db_table: str,
+    currency: str,
+    cancellable_strategies: list,
+    open_orders_sqlite: list = None,
+) -> None:
+
+    log.critical(f" cancel_the_cancellables {currency}")
+
+    where_filter = f"order_id"
+
+    column_list = "label", where_filter
+
+    if open_orders_sqlite is None:
+        open_orders_sqlite: list = await get_query(
+            "orders_all_json", currency.upper(), "all", "all", column_list
+        )
+
+    if open_orders_sqlite:
+
+        for strategy in cancellable_strategies:
+            open_orders_cancellables = [
+                o for o in open_orders_sqlite if strategy in o["label"]
+            ]
+
+            if open_orders_cancellables:
+                open_orders_cancellables_id = [
+                    o["order_id"] for o in open_orders_cancellables
+                ]
+
+                for order_id in open_orders_cancellables_id:
+
+                    await cancel_by_order_id(
+                        private_data,
+                        order_db_table,
+                        order_id,
+                    )
+
+
+async def cancel_by_order_id(
+    private_data,
+    order_db_table: str,
+    open_order_id: str,
+) -> None:
+
+    where_filter = f"order_id"
+
+    await deleting_row(
+        order_db_table,
+        "databases/trading.sqlite3",
+        where_filter,
+        "=",
+        open_order_id,
+    )
+
+    result = await get_cancel_order_byOrderId(private_data, open_order_id)
+
+    try:
+        if (result["error"]["message"]) == "not_open_order":
+            log.critical(f"CANCEL non-existing order_id {result} {open_order_id}")
+
+    except:
+
+        log.critical(f"""CANCEL_by_order_id {result["result"]} {open_order_id}""")
+
+        return result
+
+
+async def if_cancel_is_true(
+    private_data,
+    order_db_table: str,
+    order: dict,
+) -> None:
+    """ """
+
+    if order["cancel_allowed"]:
+
+        # get parameter orders
+        await cancel_by_order_id(
+            private_data,
+            order_db_table,
+            order["cancel_id"],
+        )

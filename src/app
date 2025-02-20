@@ -129,7 +129,7 @@ async def main():
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(
-                modify_order_and_db,
+                private_data,
                 client_redis,
                 redis_channels,
                 queue,
@@ -144,7 +144,6 @@ async def main():
         saving_task = asyncio.create_task(
             caching_distributing_data(
                 private_data,
-                modify_order_and_db,
                 client_redis,
                 currencies,
                 redis_channels,
@@ -193,12 +192,12 @@ async def main():
             saving_task,
                         
         cancelling_orders(
-                modify_order_and_db,
-                currencies,
-                client_redis,
-                config_app,
-                redis_channels,
-                strategy_attributes,
+            private_data,
+            currencies,
+            client_redis,
+            config_app,
+            redis_channels,
+            strategy_attributes,
                 ),    
 
             processing_orders(
@@ -209,13 +208,13 @@ async def main():
                 ),
                 
             avoiding_double_ids(
-                modify_order_and_db,
+                private_data,
                 client_redis,
                 config_app,
                 ),
        
             relabelling_trades(
-                modify_order_and_db,
+                private_data,
                 config_app),
             
             

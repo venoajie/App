@@ -121,7 +121,7 @@ async def insert_tables(
             )
 
             await publishing_specific_purposes(
-                "my_trades",
+                "sqlite_record_updating",
                 my_trades_currency_all_transactions,
             )
 
@@ -230,7 +230,7 @@ async def deleting_row(
             )
 
             await publishing_specific_purposes(
-                "my_trades",
+                "sqlite_record_updating",
                 my_trades_currency_all_transactions,
             )
 
@@ -366,7 +366,7 @@ async def update_status_data(
             )
 
             await publishing_specific_purposes(
-                "my_trades",
+                "sqlite_record_updating",
                 my_trades_currency_all_transactions,
             )
 

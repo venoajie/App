@@ -23,6 +23,10 @@ from transaction_management.deribit.api_requests import (
     get_end_point_result,
     get_instruments,
 )
+
+from transaction_management.deribit.cancelling_active_orders import (
+    cancel_the_cancellables,
+)
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
@@ -76,7 +80,7 @@ class StreamingAccountData:
 
     async def ws_manager(
         self,
-        modify_order_and_db: object,
+        private_data: object,
         client_redis: object,
         redis_channels,
         queue_general: object,
@@ -188,7 +192,8 @@ class StreamingAccountData:
 
                     for currency in currencies:
 
-                        await modify_order_and_db.cancel_the_cancellables(
+                        await cancel_the_cancellables(
+                            private_data,
                             order_db_table,
                             currency,
                             cancellable_strategies,

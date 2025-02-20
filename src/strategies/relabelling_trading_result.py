@@ -28,6 +28,10 @@ from transaction_management.deribit.get_instrument_summary import (
 from transaction_management.deribit.managing_deribit import (
     currency_inline_with_database_address,
 )
+
+from transaction_management.deribit.cancelling_active_orders import (
+    cancel_the_cancellables,
+)
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
     remove_double_brackets_in_list,
@@ -46,7 +50,7 @@ async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
 
 async def relabelling_trades(
-    modify_order_and_db: object,
+    private_data: object,
     config_app: list,
 ):
     """ """
@@ -207,7 +211,8 @@ async def relabelling_trades(
                                     if o["cancellable"] == True
                                 ]
 
-                                await modify_order_and_db.cancel_the_cancellables(
+                                await cancel_the_cancellables(
+                                    private_data,
                                     order_db_table,
                                     currency,
                                     cancellable_strategies,
@@ -260,7 +265,8 @@ async def relabelling_trades(
 
                                         log.debug("renaming combo Auto done")
 
-                                        await modify_order_and_db.cancel_the_cancellables(
+                                        await cancel_the_cancellables(
+                                            private_data,
                                             order_db_table,
                                             currency,
                                             cancellable_strategies,

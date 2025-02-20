@@ -287,20 +287,8 @@ async def publishing_specific_purposes(
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
-    # if purpose == "my_trades":
-    #    channel: str = redis_channels["my_trades"]
-
-    if purpose == "sub_account_update":
-        channel: str = redis_channels["sub_account_update"]
-
-    if purpose == "portfolio_rest":
-        channel: str = redis_channels["portfolio_rest"]
-
-    if purpose == "portfolio":
-        channel: str = redis_channels["portfolio"]
-
-    if purpose == "ticker":
-        channel: str = redis_channels["ticker_update_data"]
+    if purpose == "sqlite_record_updating":
+        channel: str = redis_channels["sqlite_record_updating"]
 
     await publishing_result(
         client_redis,
