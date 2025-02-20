@@ -512,7 +512,10 @@ def updating_sub_account(
             positions[0],
             "rest",
         )
+        
 
+    log.info (f"sub_account_cached {sub_account_cached}")
+    log.warning (f"data {data}")
     if sub_account_cached == []:
         sub_account_cached.append(data)
 
