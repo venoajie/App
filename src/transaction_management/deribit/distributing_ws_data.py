@@ -105,7 +105,7 @@ async def caching_distributing_data(
 
         chart_channel: str = redis_channels["chart_update"]
         portfolio_channel: str = redis_channels["portfolio"]
-        sub_account_cached_channel: str = redis_channels["sub_account_cached"]
+        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         sqlite_updating_channel: str = redis_channels["sqlite_record_updating"]
 
         ticker_update_channel: str = redis_channels["ticker_cache_updating"]
