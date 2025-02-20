@@ -158,6 +158,8 @@ async def caching_distributing_data(
 
             message_params: str = await queue_general.get()
 
+            message_byte = await pubsub.get_message()
+            
             async with client_redis.pipeline() as pipe:
 
                 data: dict = message_params["data"]
@@ -420,7 +422,7 @@ async def caching_distributing_data(
                         my_trades_active_all,
                     )
 
-            message_byte = await pubsub.get_message()
+            
 
     except Exception as error:
 
