@@ -494,28 +494,28 @@ def updating_sub_account(
     currency: list,
     data: dict,
 ) -> None:
+    
+    if subaccounts_details_result:
 
-    open_orders = [o["open_orders"] for o in subaccounts_details_result]
+        open_orders = [o["open_orders"] for o in subaccounts_details_result]
 
-    if open_orders:
-        update_cached_orders(
-            orders_cached,
-            open_orders[0],
-            "rest",
-        )
+        if open_orders:
+            update_cached_orders(
+                orders_cached,
+                open_orders[0],
+                "rest",
+            )
 
-    positions = [o["positions"] for o in subaccounts_details_result]
+        positions = [o["positions"] for o in subaccounts_details_result]
 
-    if positions:
-        positions_updating_cached(
-            positions_cached,
-            positions[0],
-            "rest",
-        )
-        
-
-    log.info (f"sub_account_cached {sub_account_cached}")
-    log.warning (f"data {data}")
+        if positions:
+            positions_updating_cached(
+                positions_cached,
+                positions[0],
+                "rest",
+            )
+            
+    """
     if sub_account_cached == []:
         sub_account_cached.append(data)
 
@@ -529,6 +529,8 @@ def updating_sub_account(
 
         sub_account_cached.append(data)
 
+    """
+    
 
 def sub_account_combining(
     sub_accounts: list,
