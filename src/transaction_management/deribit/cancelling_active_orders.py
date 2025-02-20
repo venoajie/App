@@ -82,16 +82,16 @@ async def cancelling_orders(
         )
 
         # get redis channels
-        receive_order_channel: str = redis_channels["receive_order"]
+        order_receiving_channel: str = redis_channels["order_receiving"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
-        ticker_cached_channel: str = redis_channels["ticker_update_cached"]
+        ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
         portfolio_channel: str = redis_channels["portfolio"]
-        my_trades_channel: str = redis_channels["my_trades"]
+        my_trades_channel: str = redis_channels["my_trades_cache_updating"]
 
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
-            receive_order_channel,
+            order_receiving_channel,
             ticker_cached_channel,
             portfolio_channel,
             my_trades_channel,
@@ -140,7 +140,7 @@ async def cancelling_orders(
 
                         my_trades_active_all = await get_query(query_trades)
 
-                    if receive_order_channel in message_channel:
+                    if order_receiving_channel in message_channel:
 
                         cached_orders = message_byte_data["cached_orders"]
 

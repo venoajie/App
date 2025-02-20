@@ -26,7 +26,7 @@ async def processing_orders(
         pubsub: object = client_redis.pubsub()
 
         # get redis channels
-        sending_order_channel: str = redis_channels["sending_order"]
+        sending_order_channel: str = redis_channels["order_rest"]
 
         # prepare channels placeholders
         channels = [
