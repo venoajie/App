@@ -136,10 +136,6 @@ async def cancelling_orders(
 
                         portfolio_all = message_byte_data["cached_portfolio"]
 
-                    if my_trades_channel in message_channel:
-
-                        my_trades_active_all = await get_query(query_trades)
-
                     if order_receiving_channel in message_channel:
 
                         cached_orders = message_byte_data["cached_orders"]
