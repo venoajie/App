@@ -150,32 +150,18 @@ class StreamingAccountData:
 
                         instrument_perpetual = f"{currency_upper}-PERPETUAL"
 
-                        ws_channel_currency = [
-                            f"user.portfolio.{currency}",
-                            f"user.changes.any.{currency_upper}.raw",
-                        ]
-
-                        for ws in ws_channel_currency:
-
-                            print(f"subscribe ws {ws}")
-
-                            # asyncio.create_task(
-                            await self.ws_operation(
-                                operation="subscribe", ws_channel=ws
-                            )
-                            
-
                         ws_resolutions = []
                         for resolution in resolutions:
                             
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
                             ws_resolutions.append(ws)
-
-                            
                         
                         print(f"ws_resolutions ws {ws_resolutions}")
 
                         # asyncio.create_task(
+                            
+                        ws_resolutions.append(f"user.portfolio.{currency}")
+                        ws_resolutions.append(f"user.changes.any.{currency_upper}.raw")
                         await self.ws_operation(
                             operation="subscribe", 
                             ws_channel=ws_resolutions[0],
@@ -486,17 +472,6 @@ class StreamingAccountData:
         }
 
         if "ws" in source:
-            
-            subscribe_index_message = { 
-        'jsonrpc': '2.0',
-        'id': id,
-        'method': 'public/subscribe',
-        'params': {"channels" : [
-                                f"deribit_price_index.btc_usd",
-                                f"ticker.BTC-28FEB25-97000-C.100ms",
-                                f"ticker.BTC_USDC.100ms"
-                                ]}
-    }
 
             extra_params: dict = dict(
                 id=id,
@@ -506,7 +481,6 @@ class StreamingAccountData:
             
 
             msg.update(extra_params)
-            print(f"msg {msg}")
 
             await self.websocket_client.send(json.dumps(msg))
 
