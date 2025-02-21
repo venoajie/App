@@ -6,11 +6,8 @@ from dataclassy import dataclass, fields
 from loguru import logger as log
 
 # user defined formula
-from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import SendApiRequest
 from transaction_management.deribit.orders_management import saving_traded_orders
-from utilities.pickling import replace_data
-from utilities.system_tools import provide_path_for_file
 
 
 def get_first_tick_query(
@@ -48,12 +45,12 @@ def first_tick_fr_sqlite_if_database_still_empty(count: int) -> int:
 
     return delta_some_days_ago
 
+
 def currency_inline_with_database_address(
     currency: str,
     database_address: str,
 ) -> bool:
     return currency.lower() in str(database_address)
-
 
 
 @dataclass(unsafe_hash=True, slots=True)

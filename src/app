@@ -71,8 +71,6 @@ async def main():
 
         private_data: object = SendApiRequest(sub_account_id)
 
-        modify_order_and_db: object = ModifyOrderDb(sub_account_id)
-        
         pool = aioredis.ConnectionPool.from_url(
             "redis://localhost", 
             port=6379, 
@@ -174,14 +172,6 @@ async def main():
                 strategy_attributes,
                 ),
             
-            reconciling_size(
-                private_data,
-                client_redis,
-                currencies,
-                redis_channels,
-                strategy_attributes,
-                config_app,),                
-            
             #scanning_volume()
                   
             """
@@ -190,16 +180,16 @@ async def main():
             producer_task, 
         
             saving_task,
-                        
-        cancelling_orders(
+            
+            cancelling_orders(
             private_data,
             currencies,
             client_redis,
             config_app,
             redis_channels,
             strategy_attributes,
-                ),    
-
+                ),   
+            
             processing_orders(
                 private_data,
                 client_redis,
@@ -226,6 +216,14 @@ async def main():
                 resolutions,
                 np),
             
+            
+            reconciling_size(
+                private_data,
+                client_redis,
+                currencies,
+                redis_channels,
+                strategy_attributes,
+                config_app,),                
             
             back_up_db(60*10),
             

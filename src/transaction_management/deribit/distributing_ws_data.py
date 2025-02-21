@@ -159,7 +159,7 @@ async def caching_distributing_data(
             message_params: str = await queue_general.get()
 
             message_byte = await pubsub.get_message()
-            
+
             async with client_redis.pipeline() as pipe:
 
                 data: dict = message_params["data"]
@@ -422,8 +422,6 @@ async def caching_distributing_data(
                         my_trades_active_all,
                     )
 
-            
-
     except Exception as error:
 
         parse_error_message(error)
@@ -494,7 +492,7 @@ def updating_sub_account(
     currency: list,
     data: dict,
 ) -> None:
-    
+
     if subaccounts_details_result:
 
         open_orders = [o["open_orders"] for o in subaccounts_details_result]
@@ -514,7 +512,7 @@ def updating_sub_account(
                 positions[0],
                 "rest",
             )
-            
+
     """
     if sub_account_cached == []:
         sub_account_cached.append(data)
@@ -530,7 +528,7 @@ def updating_sub_account(
         sub_account_cached.append(data)
 
     """
-    
+
 
 def sub_account_combining(
     sub_accounts: list,
