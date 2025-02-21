@@ -504,9 +504,9 @@ class StreamingAccountData:
                 params={"channels": [ws_channel]},
             )
             
-            print(msg)
 
             msg.update(extra_params)
+            print(f"msg {msg}")
 
             await self.websocket_client.send(json.dumps(msg))
 
