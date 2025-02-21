@@ -174,7 +174,7 @@ class StreamingAccountData:
 
                         for ws in ws_channel_instrument:
                             
-                            ws_resolutions.append(ws)
+                            ws_channel_instrument.append(ws)
 
 
                     for currency in currencies:
