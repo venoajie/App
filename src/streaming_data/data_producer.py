@@ -178,7 +178,7 @@ class StreamingAccountData:
                         # asyncio.create_task(
                         await self.ws_operation(
                             operation="subscribe", 
-                            ws_channel=ws_resolutions,
+                            ws_channel=ws_resolutions[0],
                         )
 
                     for instrument in instruments_name:
