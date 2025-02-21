@@ -155,13 +155,13 @@ class StreamingAccountData:
                             
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
                             ws_resolutions.append(ws)
-                        
-                        print(f"ws_resolutions ws {ws_resolutions}")
-
                         # asyncio.create_task(
                             
                         ws_resolutions.append(f"user.portfolio.{currency}")
                         ws_resolutions.append(f"user.changes.any.{currency_upper}.raw")
+                        
+                        print(f"ws_resolutions ws {ws_resolutions} {ws_resolutions[0]}")
+
                         await self.ws_operation(
                             operation="subscribe", 
                             ws_channel=ws_resolutions[0],
