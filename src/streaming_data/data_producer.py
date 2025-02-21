@@ -164,7 +164,7 @@ class StreamingAccountData:
 
                         await self.ws_operation(
                             operation="subscribe", 
-                            ws_channel=ws_resolutions[0],
+                            ws_channel=ws_resolutions,
                         )
 
                     for instrument in instruments_name:
