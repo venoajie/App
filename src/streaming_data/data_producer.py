@@ -179,7 +179,7 @@ class StreamingAccountData:
 
                             await self.ws_operation(
                                 operation="subscribe",
-                                ws_channel=ws,
+                                ws_channel=[ws],
                             )
 
                     for currency in currencies:
