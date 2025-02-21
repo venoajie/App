@@ -32,7 +32,7 @@ def get_sub_account_size_per_instrument(
     log.info (f"sub_account {sub_account}")
 
     sub_account_instrument = [
-        o for o in sub_account["positions"] if o["instrument_name"] == instrument_name
+        o for o in sub_account if o["instrument_name"] == instrument_name
     ]
 
     sub_account_size_instrument = [o["size"] for o in sub_account_instrument]
