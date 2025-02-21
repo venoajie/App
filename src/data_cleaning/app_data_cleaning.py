@@ -136,9 +136,14 @@ async def reconciling_size(
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         order_allowed_channel: str = redis_channels["order_is_allowed"]
-
+        positions_update_channel: str = redis_channels["position_cache_updating"]
+        order_update_channel: str = redis_channels["order_cache_updating"]
+        my_trades_channel: str = redis_channels["my_trades_cache_updating"]
+        
         # prepare channels placeholders
         channels = [
+            positions_update_channel,
+            order_update_channel,
             market_analytics_channel,
             order_receiving_channel,
             ticker_cached_channel,
@@ -179,11 +184,13 @@ async def reconciling_size(
 
                         cached_orders = message_byte_data["cached_orders"]
 
-                    if sub_account_cached_channel in message_channel:
+                    if (positions_update_channel in message_channel
+                        or order_update_channel in message_channel
+                        or my_trades_channel in message_channel):
 
                         sub_account_all = message_byte_data
                         
-                        log.info(sub_account_all)
+                        log.info(message_byte_data)
                         
                         sub_account_all_positions = sub_account_all["positions_cached"]
 
