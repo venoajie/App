@@ -503,6 +503,8 @@ class StreamingAccountData:
                 method=f"private/{operation}",
                 params={"channels": [ws_channel]},
             )
+            
+            print(msg)
 
             msg.update(extra_params)
 
