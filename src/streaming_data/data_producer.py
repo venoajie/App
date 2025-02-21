@@ -161,6 +161,7 @@ class StreamingAccountData:
                             ws_channel_currency.append(ws)
 
                         # asyncio.create_task(
+                        print(ws_channel_currency[0])
                         await self.ws_operation(
                             operation="subscribe", 
                             ws_channel=ws_channel_currency[0],
