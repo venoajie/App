@@ -430,7 +430,7 @@ async def cancel_by_order_id(
         open_order_id,
     )
 
-    result = await get_cancel_order_byOrderId(private_data, open_order_id)
+    result = await private_data.get_cancel_order_byOrderId(open_order_id)
 
     try:
         if (result["error"]["message"]) == "not_open_order":
