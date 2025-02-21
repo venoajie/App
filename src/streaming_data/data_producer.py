@@ -155,17 +155,11 @@ class StreamingAccountData:
                             f"user.changes.any.{currency_upper}.raw",
                         ]
 
+                        ws_resolutions = []
                         for ws in ws_channel_currency:
 
-                            print(f"subscribe ws {ws}")
-
-                            # asyncio.create_task(
-                            await self.ws_operation(
-                                operation="subscribe", ws_channel=ws
-                            )
+                            ws_resolutions.append(ws)
                             
-
-                        ws_resolutions = []
                         for resolution in resolutions:
                             
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
@@ -487,17 +481,6 @@ class StreamingAccountData:
 
         if "ws" in source:
             
-            subscribe_index_message = { 
-        'jsonrpc': '2.0',
-        'id': id,
-        'method': 'public/subscribe',
-        'params': {"channels" : [
-                                f"deribit_price_index.btc_usd",
-                                f"ticker.BTC-28FEB25-97000-C.100ms",
-                                f"ticker.BTC_USDC.100ms"
-                                ]}
-    }
-
             extra_params: dict = dict(
                 id=id,
                 method=f"private/{operation}",
