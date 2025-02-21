@@ -472,7 +472,7 @@ class StreamingAccountData:
             extra_params: dict = dict(
                 id=id,
                 method=f"private/{operation}",
-                params={"channels": [ws_channel]},
+                params={"channels": ws_channel},
             )
             
 
