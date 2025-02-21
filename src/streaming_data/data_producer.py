@@ -171,7 +171,7 @@ class StreamingAccountData:
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
                             ws_resolutions.append(ws)
 
-                            print(f"subscribe ws {ws}")
+                            
                         
                         print(f"ws_resolutions ws {ws_resolutions}")
 
@@ -210,6 +210,7 @@ class StreamingAccountData:
                         # Receive WebSocket messages
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
+                        print(f"subscribe  {message}")
 
                         if "id" in list(message):
                             if message["id"] == 9929:
