@@ -164,7 +164,7 @@ class StreamingAccountData:
                         print(f"ws_channel_currency[0] {ws_channel_currency}")
                         await self.ws_operation(
                             operation="subscribe", 
-                            ws_channel=ws_channel_currency[0],
+                            ws_channel=ws_channel_currency,
                         )
 
                     for instrument in instruments_name:
