@@ -163,17 +163,23 @@ class StreamingAccountData:
                             await self.ws_operation(
                                 operation="subscribe", ws_channel=ws
                             )
+                            
 
+                        ws_resolutions = []
                         for resolution in resolutions:
-
+                            
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
+                            ws_resolutions.append(ws)
 
                             print(f"subscribe ws {ws}")
+                        
+                        print(f"ws_resolutions ws {ws_resolutions}")
 
-                            # asyncio.create_task(
-                            await self.ws_operation(
-                                operation="subscribe", ws_channel=ws
-                            )
+                        # asyncio.create_task(
+                        await self.ws_operation(
+                            operation="subscribe", 
+                            ws_channel=ws_resolutions,
+                        )
 
                     for instrument in instruments_name:
 
@@ -459,7 +465,10 @@ class StreamingAccountData:
             await asyncio.sleep(150)
 
     async def ws_operation(
-        self, operation: str, ws_channel: str, source: str = "ws"
+        self, 
+        operation: str, 
+        ws_channel: str, 
+        source: str = "ws",
     ) -> None:
         """
         Requests `public/subscribe` or `public/unsubscribe`
@@ -476,6 +485,17 @@ class StreamingAccountData:
         }
 
         if "ws" in source:
+            
+            subscribe_index_message = { 
+        'jsonrpc': '2.0',
+        'id': id,
+        'method': 'public/subscribe',
+        'params': {"channels" : [
+                                f"deribit_price_index.btc_usd",
+                                f"ticker.BTC-28FEB25-97000-C.100ms",
+                                f"ticker.BTC_USDC.100ms"
+                                ]}
+    }
 
             extra_params: dict = dict(
                 id=id,
