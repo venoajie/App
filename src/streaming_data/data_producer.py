@@ -144,16 +144,20 @@ class StreamingAccountData:
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
 
+                    ws_channel_currency=[]
                     for currency in currencies:
 
                         currency_upper = currency.upper()
 
                         instrument_perpetual = f"{currency_upper}-PERPETUAL"
 
-                        ws_channel_currency = [
-                            f"user.portfolio.{currency}",
-                            f"user.changes.any.{currency_upper}.raw",
-                        ]
+                        #ws_channel_currency = [
+                        #    f"user.portfolio.{currency}",
+                        #    f"user.changes.any.{currency_upper}.raw",
+                        #]
+                        
+                        ws_channel_currency.append(f"user.portfolio.{currency}")
+                        ws_channel_currency.append(f"user.changes.any.{currency_upper}.raw")
                             
                         for resolution in resolutions:
                             
@@ -162,10 +166,6 @@ class StreamingAccountData:
 
                         # asyncio.create_task(
                         print(f"ws_channel_currency[0] {ws_channel_currency}")
-                        await self.ws_operation(
-                            operation="subscribe", 
-                            ws_channel=ws_channel_currency,
-                        )
 
                     for instrument in instruments_name:
 
@@ -178,6 +178,11 @@ class StreamingAccountData:
                             ws_channel_instrument.append(ws)
 
 
+                    await self.ws_operation(
+                        operation="subscribe", 
+                        ws_channel=ws_channel_currency,
+                    )
+                    
                     for currency in currencies:
 
                         await cancel_the_cancellables(
