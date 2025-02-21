@@ -28,6 +28,8 @@ def get_sub_account_size_per_instrument(
     sub_account: list,
 ) -> float:
     """ """
+    
+    log.info (f"sub_account {sub_account}")
 
     sub_account_instrument = [
         o for o in sub_account["positions"] if o["instrument_name"] == instrument_name
@@ -152,16 +154,15 @@ def is_transaction_log_and_sub_account_size_reconciled_each_other(
 ) -> bool:
     """ """
 
-    if sub_account:
 
-        current_position_log = get_transaction_log_position_per_instrument(
-            instrument_name,
-            from_transaction_log,
-        )
+    current_position_log = get_transaction_log_position_per_instrument(
+        instrument_name,
+        from_transaction_log,
+    )
 
-        sub_account_size_instrument = get_sub_account_size_per_instrument(
-            instrument_name, sub_account
-        )
+    sub_account_size_instrument = get_sub_account_size_per_instrument(
+        instrument_name, sub_account
+    )
 
     reconciled = current_position_log == sub_account_size_instrument
 
@@ -211,17 +212,15 @@ def is_my_trades_and_sub_account_size_reconciled_each_other(
 ) -> bool:
     """ """
 
-    if sub_account:
+    my_trades_size_instrument = get_my_trades_size_per_instrument(
+        instrument_name,
+        my_trades_currency,
+    )
 
-        my_trades_size_instrument = get_my_trades_size_per_instrument(
-            instrument_name,
-            my_trades_currency,
-        )
-
-        sub_account_size_instrument = get_sub_account_size_per_instrument(
-            instrument_name,
-            sub_account,
-        )
+    sub_account_size_instrument = get_sub_account_size_per_instrument(
+        instrument_name,
+        sub_account,
+    )
 
     reconciled = my_trades_size_instrument == sub_account_size_instrument
 
