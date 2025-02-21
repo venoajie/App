@@ -144,7 +144,7 @@ class StreamingAccountData:
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
 
-                    ws_resolutions = []
+                    ws_currencies = []
                     for currency in currencies:
 
                         currency_upper = currency.upper()
@@ -155,19 +155,20 @@ class StreamingAccountData:
                         for resolution in resolutions:
                             
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
-                            ws_resolutions.append(ws)
+                            ws_currencies.append(ws)
                         # asyncio.create_task(
                             
-                        ws_resolutions.append(f"user.portfolio.{currency}")
-                        ws_resolutions.append(f"user.changes.any.{currency_upper}.raw")
+                        ws_currencies.append(f"user.portfolio.{currency}")
+                        ws_currencies.append(f"user.changes.any.{currency_upper}.raw")
                         
-                        print(f"ws_resolutions ws {ws_resolutions} {ws_resolutions[0]}")
+                        print(f"ws_currencies ws {ws_currencies} {ws_currencies[0]}")
 
                     await self.ws_operation(
                         operation="subscribe", 
-                        ws_channel=ws_resolutions,
+                        ws_channel=ws_currencies,
                     )
 
+                    ws_instruments = []
                     for instrument in instruments_name:
 
                         ws_channel_instrument = [
@@ -175,11 +176,12 @@ class StreamingAccountData:
                         ]
 
                         for ws in ws_channel_instrument:
+                            ws_instruments.append(ws)
 
-                            await self.ws_operation(
-                                operation="subscribe",
-                                ws_channel=[ws],
-                            )
+                    await self.ws_operation(
+                        operation="subscribe",
+                        ws_channel=ws_instruments,
+                    )
 
                     for currency in currencies:
 
