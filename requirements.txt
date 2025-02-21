@@ -74,7 +74,7 @@ redis[hiredis]>=5.2.1
  aioredis>=2.0.1
  cffi==1.17.1
  circuitbreaker==2.0.0
- cryptography==44.0.1
+ cryptography>=41.0.5,<44
  oci==2.145.0
  pycparser==2.22
  pyopenssl==24.2.1
