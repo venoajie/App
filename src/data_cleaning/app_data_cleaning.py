@@ -184,8 +184,6 @@ async def reconciling_size(
 
                         positions_cached = message_byte_data
                         
-                        log.info(positions_cached)
-                        
                         positions_cached_instrument = (
                                 remove_redundant_elements(
                                     [
@@ -194,7 +192,6 @@ async def reconciling_size(
                                     ]
                                 )
                             )
-                        log.info(positions_cached_instrument)
                         
                         # FROM sub account to other db's
                         if positions_cached_instrument:
@@ -235,9 +232,6 @@ async def reconciling_size(
                                             in o["instrument_name"]
                                         ]
 
-                                        log.warning(
-                                            f" {instrument_name} my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}"
-                                        )
                                         if my_trades_instrument_name:
 
                                             timestamp_log = min(
@@ -246,7 +240,6 @@ async def reconciling_size(
                                                     for o in my_trades_instrument_name
                                                 ]
                                             )
-                                        else:
 
                                             ONE_SECOND = 1000
 
