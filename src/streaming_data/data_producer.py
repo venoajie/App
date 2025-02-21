@@ -144,6 +144,7 @@ class StreamingAccountData:
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
 
+                    ws_resolutions = []
                     for currency in currencies:
 
                         currency_upper = currency.upper()
@@ -155,7 +156,7 @@ class StreamingAccountData:
                             f"user.changes.any.{currency_upper}.raw",
                         ]
 
-                        ws_resolutions = []
+                        
                         for ws in ws_channel_currency:
 
                             ws_resolutions.append(ws)
@@ -165,16 +166,6 @@ class StreamingAccountData:
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
                             ws_resolutions.append(ws)
 
-                            
-                        
-                        print(f"ws_resolutions ws {ws_resolutions}")
-
-                        # asyncio.create_task(
-                        await self.ws_operation(
-                            operation="subscribe", 
-                            ws_channel=ws_resolutions[0],
-                        )
-
                     for instrument in instruments_name:
 
                         ws_channel_instrument = [
@@ -182,13 +173,14 @@ class StreamingAccountData:
                         ]
 
                         for ws in ws_channel_instrument:
+                            
+                            ws_resolutions.append(ws)
 
-                            print(f"subscribe ws {ws}")
-
-                            await self.ws_operation(
-                                operation="subscribe",
-                                ws_channel=ws,
-                            )
+                    # asyncio.create_task(
+                    await self.ws_operation(
+                        operation="subscribe", 
+                        ws_channel=ws_resolutions[0],
+                    )
 
                     for currency in currencies:
 
