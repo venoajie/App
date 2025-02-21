@@ -161,8 +161,6 @@ class StreamingAccountData:
                         ws_currencies.append(f"user.portfolio.{currency}")
                         ws_currencies.append(f"user.changes.any.{currency_upper}.raw")
                         
-                        print(f"ws_currencies ws {ws_currencies} {ws_currencies[0]}")
-
                     await self.ws_operation(
                         operation="subscribe", 
                         ws_channel=ws_currencies,
@@ -197,7 +195,6 @@ class StreamingAccountData:
                         # Receive WebSocket messages
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
-                        print(f"subscribe  {message}")
 
                         if "id" in list(message):
                             if message["id"] == 9929:
@@ -480,7 +477,6 @@ class StreamingAccountData:
                 params={"channels": ws_channel},
             )
             
-
             msg.update(extra_params)
 
             await self.websocket_client.send(json.dumps(msg))
