@@ -48,44 +48,12 @@ def first_tick_fr_sqlite_if_database_still_empty(count: int) -> int:
 
     return delta_some_days_ago
 
-
-async def update_db_pkl(
-    path,
-    data_orders,
-    currency,
-) -> None:
-
-    my_path_portfolio = provide_path_for_file(path, currency)
-
-    if currency_inline_with_database_address(
-        currency,
-        my_path_portfolio,
-    ):
-
-        replace_data(
-            my_path_portfolio,
-            data_orders,
-        )
-
-
 def currency_inline_with_database_address(
     currency: str,
     database_address: str,
 ) -> bool:
     return currency.lower() in str(database_address)
 
-
-def extract_portfolio_per_id_and_currency(
-    sub_account_id: str,
-    sub_accounts: list,
-    currency: str,
-) -> list:
-
-    portfolio_all = [o for o in sub_accounts if str(o["id"]) in sub_account_id][0][
-        "portfolio"
-    ]
-
-    return portfolio_all[f"{currency.lower()}"]
 
 
 @dataclass(unsafe_hash=True, slots=True)
@@ -150,73 +118,3 @@ class ModifyOrderDb(SendApiRequest):
                         archive_db_table,
                         order_db_table,
                     )
-
-    async def send_triple_orders(
-        self, 
-        params,
-        ) -> None:
-        """
-        triple orders:
-            1 limit order
-            1 SL market order
-            1 TP limit order
-        """
-
-        main_side = params["side"]
-        instrument = params["instrument_name"]
-        main_label = params["label_numbered"]
-        closed_label = params["label_closed_numbered"]
-        size = params["size"]
-        main_prc = params["entry_price"]
-        sl_prc = params["cut_loss_usd"]
-        tp_prc = params["take_profit_usd"]
-
-        order_result = await self.send_order(
-            main_side, instrument, size, main_label, main_prc
-        )
-
-        order_result_id = order_result["result"]["order"]["order_id"]
-
-        if "error" in order_result:
-            await self.get_cancel_order_byOrderId(order_result_id)
-            await telegram_bot_sendtext("combo order failed")
-
-        else:
-            if main_side == "buy":
-                closed_side = "sell"
-                trigger_prc = tp_prc - 1
-
-            if main_side == "sell":
-                closed_side = "buy"
-                trigger_prc = tp_prc + 1
-
-            order_result = await self.send_order(
-                closed_side,
-                instrument,
-                size,
-                closed_label,
-                None,
-                "stop_market",
-                sl_prc,
-            )
-
-            log.info(order_result)
-
-            if "error" in order_result:
-                await self.get_cancel_order_byOrderId(order_result_id)
-                await telegram_bot_sendtext("combo order failed")
-
-            order_result = await self.send_order(
-                closed_side,
-                instrument,
-                size,
-                closed_label,
-                tp_prc,
-                "take_limit",
-                trigger_prc,
-            )
-            log.info(order_result)
-
-            if "error" in order_result:
-                await self.get_cancel_order_byOrderId(order_result_id)
-                await telegram_bot_sendtext("combo order failed")
