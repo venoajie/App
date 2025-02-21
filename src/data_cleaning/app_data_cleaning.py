@@ -183,7 +183,7 @@ async def reconciling_size(
 
                         sub_account_all = message_byte_data
                         
-                        sub_account_all_positions = sub_account_all["positions"]
+                        sub_account_all_positions = sub_account_all["positions_cached"]
 
                         sub_account_all_orders = sub_account_all["orders_cached"]
 
