@@ -144,28 +144,42 @@ class StreamingAccountData:
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
 
-                    ws_channel_currency=[]
                     for currency in currencies:
 
                         currency_upper = currency.upper()
 
                         instrument_perpetual = f"{currency_upper}-PERPETUAL"
 
-                        #ws_channel_currency = [
-                        #    f"user.portfolio.{currency}",
-                        #    f"user.changes.any.{currency_upper}.raw",
-                        #]
-                        
-                        ws_channel_currency.append(f"user.portfolio.{currency}")
-                        ws_channel_currency.append(f"user.changes.any.{currency_upper}.raw")
+                        ws_channel_currency = [
+                            f"user.portfolio.{currency}",
+                            f"user.changes.any.{currency_upper}.raw",
+                        ]
+
+                        for ws in ws_channel_currency:
+
+                            print(f"subscribe ws {ws}")
+
+                            # asyncio.create_task(
+                            await self.ws_operation(
+                                operation="subscribe", ws_channel=ws
+                            )
                             
+
+                        ws_resolutions = []
                         for resolution in resolutions:
                             
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
-                            ws_channel_currency.append(ws)
+                            ws_resolutions.append(ws)
+
+                            
+                        
+                        print(f"ws_resolutions ws {ws_resolutions}")
 
                         # asyncio.create_task(
-                        print(f"ws_channel_currency[0] {ws_channel_currency}")
+                        await self.ws_operation(
+                            operation="subscribe", 
+                            ws_channel=ws_resolutions[0],
+                        )
 
                     for instrument in instruments_name:
 
@@ -174,15 +188,14 @@ class StreamingAccountData:
                         ]
 
                         for ws in ws_channel_instrument:
-                            
-                            ws_channel_instrument.append(ws)
 
+                            print(f"subscribe ws {ws}")
 
-                    await self.ws_operation(
-                        operation="subscribe", 
-                        ws_channel=ws_channel_currency,
-                    )
-                    
+                            await self.ws_operation(
+                                operation="subscribe",
+                                ws_channel=ws,
+                            )
+
                     for currency in currencies:
 
                         await cancel_the_cancellables(
@@ -474,10 +487,21 @@ class StreamingAccountData:
 
         if "ws" in source:
             
+            subscribe_index_message = { 
+        'jsonrpc': '2.0',
+        'id': id,
+        'method': 'public/subscribe',
+        'params': {"channels" : [
+                                f"deribit_price_index.btc_usd",
+                                f"ticker.BTC-28FEB25-97000-C.100ms",
+                                f"ticker.BTC_USDC.100ms"
+                                ]}
+    }
+
             extra_params: dict = dict(
                 id=id,
                 method=f"private/{operation}",
-                params={"channels": ws_channel},
+                params={"channels": [ws_channel]},
             )
             
 
