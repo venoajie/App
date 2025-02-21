@@ -161,11 +161,22 @@ class StreamingAccountData:
                             ws_channel_currency.append(ws)
 
                         # asyncio.create_task(
-                        print(f"ws_channel_currency[0] {ws_channel_currency[0]}")
+                        print(f"ws_channel_currency[0] {ws_channel_currency}")
                         await self.ws_operation(
                             operation="subscribe", 
                             ws_channel=ws_channel_currency[0],
                         )
+
+                    for instrument in instruments_name:
+
+                        ws_channel_instrument = [
+                            f"incremental_ticker.{instrument}",
+                        ]
+
+                        for ws in ws_channel_instrument:
+                            
+                            ws_channel_instrument.append(ws)
+
 
                     for currency in currencies:
 
