@@ -182,6 +182,10 @@ async def reconciling_size(
                     if sub_account_cached_channel in message_channel:
 
                         sub_account_all = message_byte_data
+                        
+                        sub_account_all_positions = sub_account_all["positions"]
+
+                        sub_account_all_orders = sub_account_all["orders_cached"]
 
                         server_time = get_now_unix()
 
@@ -190,17 +194,13 @@ async def reconciling_size(
                             currency_upper = currency.upper()
 
                             currency_lower: str = currency.lower()
-
-                            sub_account = [
+                            
+                            sub_account_positions = [] if  sub_account_all_positions == [] else [
                                 o
-                                for o in sub_account_all
-                                if currency_upper in o["currency"]
+                                for o in sub_account_all_positions
+                                if currency_upper in o["instrument_name"]
                             ]
-
-                            sub_account = (
-                                [] if not sub_account else sub_account[0]["result"][0]
-                            )
-
+                            
                             archive_db_table = f"my_trades_all_{currency_lower}_json"
 
                             query_log = (
@@ -216,7 +216,7 @@ async def reconciling_size(
                             from_transaction_log = await executing_query_with_return(
                                 query_log
                             )
-                            sub_account_positions = sub_account["positions"]
+                            
 
                             sub_account_positions_instrument = (
                                 remove_redundant_elements(
