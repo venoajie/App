@@ -144,13 +144,14 @@ class StreamingAccountData:
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
 
+                    ws_resolutions = []
                     for currency in currencies:
 
                         currency_upper = currency.upper()
 
                         instrument_perpetual = f"{currency_upper}-PERPETUAL"
 
-                        ws_resolutions = []
+                        
                         for resolution in resolutions:
                             
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
@@ -162,10 +163,10 @@ class StreamingAccountData:
                         
                         print(f"ws_resolutions ws {ws_resolutions} {ws_resolutions[0]}")
 
-                        await self.ws_operation(
-                            operation="subscribe", 
-                            ws_channel=ws_resolutions,
-                        )
+                    await self.ws_operation(
+                        operation="subscribe", 
+                        ws_channel=ws_resolutions,
+                    )
 
                     for instrument in instruments_name:
 
@@ -174,8 +175,6 @@ class StreamingAccountData:
                         ]
 
                         for ws in ws_channel_instrument:
-
-                            print(f"subscribe ws {ws}")
 
                             await self.ws_operation(
                                 operation="subscribe",
