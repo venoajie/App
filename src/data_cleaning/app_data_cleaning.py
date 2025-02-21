@@ -23,12 +23,10 @@ from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,
 )
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
 from transaction_management.deribit.orders_management import saving_traded_orders
 from utilities.pickling import read_data, replace_data
 from utilities.string_modification import (
+    extract_currency_from_text,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -128,6 +126,8 @@ async def reconciling_size(
         trade_db_table = relevant_tables["my_trades_table"]
 
         order_db_table = relevant_tables["orders_table"]
+
+        order_db_table = relevant_tables["orders_table"]
         # get redis channels
         order_receiving_channel: str = redis_channels["order_receiving"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
@@ -202,6 +202,12 @@ async def reconciling_size(
 
                             # sub account instruments
                             for instrument_name in positions_cached_instrument:
+                                
+                                currency: str = extract_currency_from_text(instrument_name)
+
+                                currency_lower = currency.lower()
+                                
+                                archive_db_table = f"my_trades_all_{currency_lower}_json"
 
                                 my_trades_currency: list = [
                                     o
