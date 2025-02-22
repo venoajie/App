@@ -210,7 +210,7 @@ async def reconciling_size(
                                 my_trades_currency_all = await executing_query_with_return(
                             query_trades_all
                         )
-                                log.info(f"my_trades_currency_all {my_trades_currency_all} {my_trades_currency_all[0]}")
+                                log.info(f"my_trades_currency_all {my_trades_currency_all} {my_trades_currency_all[0]["MIN (timestamp)"]}")
 
 
                                 my_trades_currency: list = [
