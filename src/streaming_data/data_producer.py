@@ -5,12 +5,13 @@
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
+from collections import defaultdict
 
+
+# installed
 import orjson
 import uvloop
 import websockets
-
-# installed
 from dataclassy import dataclass, fields
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -144,7 +145,7 @@ class StreamingAccountData:
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
 
-                    ws_currencies = []
+                    ws_currencies, ws_instruments = defaultdict(list)
                     for currency in currencies:
 
                         currency_upper = currency.upper()
@@ -166,7 +167,7 @@ class StreamingAccountData:
                         ws_channel=ws_currencies,
                     )
 
-                    ws_instruments = []
+                    #ws_instruments = defaultdict(list)
                     for instrument in instruments_name:
 
                         ws_channel_instrument = [
@@ -195,6 +196,8 @@ class StreamingAccountData:
                         # Receive WebSocket messages
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
+                        
+                        print(message)
 
                         if "id" in list(message):
                             if message["id"] == 9929:
