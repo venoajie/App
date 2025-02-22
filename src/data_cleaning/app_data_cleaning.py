@@ -205,7 +205,7 @@ async def reconciling_size(
                                 )
 
                                 
-                                query_trades_all = f"SELECT timestamp FROM  {archive_db_table} ORDER BY timestamp DESC LIMIT 10"
+                                query_trades_all = f"SELECT  MIN (timestamp)  FROM  {archive_db_table} ORDER BY timestamp DESC LIMIT 10"
                                 
                                 my_trades_currency_all = await executing_query_with_return(
                             query_trades_all

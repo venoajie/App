@@ -405,7 +405,9 @@ def querying_ohlc_closed(
 
 
 def querying_arithmetic_operator(
-    item: str, operator: str = "MAX", table: str = "ohlc1_eth_perp_json"
+    item: str,
+    operator: str = "MAX", 
+    table: str = "ohlc1_eth_perp_json",
 ) -> float:
 
     return f"SELECT {operator} ({item}) FROM {table}"
