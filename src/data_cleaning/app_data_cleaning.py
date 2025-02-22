@@ -220,6 +220,16 @@ async def reconciling_size(
                                                 - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
                                                 1000,
                                             )
+                                
+                                
+                                await update_trades_from_exchange_based_on_latest_timestamp(
+                                    trades_from_exchange,
+                                    instrument_name,
+                                    my_trades_instrument_name,
+                                    archive_db_table,
+                                    order_db_table,
+                                )
+
                                 log.warning(f"trades_from_exchange {trades_from_exchange}")
                                 
                                 my_trades_currency: list = [
