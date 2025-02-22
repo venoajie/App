@@ -207,12 +207,21 @@ async def reconciling_size(
                                 
                                 query_trades_all = f"SELECT  MIN (timestamp)  FROM  {archive_db_table} ORDER BY timestamp DESC LIMIT 10"
                                 
-                                my_trades_currency_all = await executing_query_with_return(
+                                last_10_timestamp_log = await executing_query_with_return(
                             query_trades_all
                         )
-                                log.info(f"my_trades_currency_all {my_trades_currency_all} {my_trades_currency_all[0]["MIN (timestamp)"]}")
+                                log.info(f"last_10_timestamp_log {last_10_timestamp_log}")
 
-
+                                timestamp_log = last_10_timestamp_log[0]["MIN (timestamp)"]
+                                
+                                trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
+                                                instrument_name,
+                                                timestamp_log
+                                                - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                                                1000,
+                                            )
+                                log.warning(f"trades_from_exchange {trades_from_exchange}")
+                                
                                 my_trades_currency: list = [
                                     o
                                     for o in my_trades_active_all
