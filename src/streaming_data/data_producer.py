@@ -145,7 +145,7 @@ class StreamingAccountData:
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
 
-                    ws_currencies, ws_instruments = defaultdict(list)
+                    ws_currencies = defaultdict(list)
                     for currency in currencies:
 
                         currency_upper = currency.upper()
@@ -167,7 +167,7 @@ class StreamingAccountData:
                         ws_channel=ws_currencies,
                     )
 
-                    #ws_instruments = defaultdict(list)
+                    ws_instruments = defaultdict(list)
                     for instrument in instruments_name:
 
                         ws_channel_instrument = [
