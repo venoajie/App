@@ -5,7 +5,6 @@
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
-from collections import defaultdict
 
 
 # installed
@@ -145,29 +144,28 @@ class StreamingAccountData:
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
 
-                    ws_currencies = defaultdict(list)
+                    ws_currencies = []
                     for currency in currencies:
 
                         currency_upper = currency.upper()
 
                         instrument_perpetual = f"{currency_upper}-PERPETUAL"
 
-                        
                         for resolution in resolutions:
-                            
+
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
                             ws_currencies.append(ws)
                         # asyncio.create_task(
-                            
+
                         ws_currencies.append(f"user.portfolio.{currency}")
                         ws_currencies.append(f"user.changes.any.{currency_upper}.raw")
-                        
+
                     await self.ws_operation(
-                        operation="subscribe", 
+                        operation="subscribe",
                         ws_channel=ws_currencies,
                     )
 
-                    ws_instruments = defaultdict(list)
+                    ws_instruments = []
                     for instrument in instruments_name:
 
                         ws_channel_instrument = [
@@ -196,8 +194,6 @@ class StreamingAccountData:
                         # Receive WebSocket messages
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
-                        
-                        print(message)
 
                         if "id" in list(message):
                             if message["id"] == 9929:
@@ -453,9 +449,9 @@ class StreamingAccountData:
             await asyncio.sleep(150)
 
     async def ws_operation(
-        self, 
-        operation: str, 
-        ws_channel: str, 
+        self,
+        operation: str,
+        ws_channel: str,
         source: str = "ws",
     ) -> None:
         """
@@ -479,7 +475,7 @@ class StreamingAccountData:
                 method=f"private/{operation}",
                 params={"channels": ws_channel},
             )
-            
+
             msg.update(extra_params)
 
             await self.websocket_client.send(json.dumps(msg))

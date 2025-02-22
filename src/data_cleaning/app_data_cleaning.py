@@ -139,7 +139,7 @@ async def reconciling_size(
         positions_update_channel: str = redis_channels["position_cache_updating"]
         order_update_channel: str = redis_channels["order_cache_updating"]
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
-        
+
         # prepare channels placeholders
         channels = [
             positions_update_channel,
@@ -180,38 +180,36 @@ async def reconciling_size(
                             query_trades
                         )
 
-                    if (positions_update_channel in message_channel):
+                    if positions_update_channel in message_channel:
 
                         positions_cached = message_byte_data
-                        
-                        positions_cached_instrument = (
-                                remove_redundant_elements(
-                                    [
-                                        o["instrument_name"]
-                                        for o in positions_cached
-                                    ]
-                                )
-                            )
-                        
+
+                        positions_cached_instrument = remove_redundant_elements(
+                            [o["instrument_name"] for o in positions_cached]
+                        )
+
                         # FROM sub account to other db's
                         if positions_cached_instrument:
-                            
 
                             # sub account instruments
                             for instrument_name in positions_cached_instrument:
-                                
-                                currency: str = extract_currency_from_text(instrument_name)
+
+                                currency: str = extract_currency_from_text(
+                                    instrument_name
+                                )
 
                                 currency_lower = currency.lower()
-                                
-                                archive_db_table = f"my_trades_all_{currency_lower}_json"
+
+                                archive_db_table = (
+                                    f"my_trades_all_{currency_lower}_json"
+                                )
 
                                 my_trades_currency: list = [
                                     o
                                     for o in my_trades_active_all
                                     if instrument_name in o["instrument_name"]
                                 ]
-                                
+
                                 # eliminating combo transactions as they're not recorded in the book
                                 if "-FS-" not in instrument_name:
 
@@ -221,15 +219,12 @@ async def reconciling_size(
                                         positions_cached,
                                     )
 
-                                    if (
-                                        not my_trades_and_sub_account_size_reconciled
-                                    ):
+                                    if not my_trades_and_sub_account_size_reconciled:
 
                                         my_trades_instrument_name = [
                                             o
                                             for o in my_trades_currency
-                                            if instrument_name
-                                            in o["instrument_name"]
+                                            if instrument_name in o["instrument_name"]
                                         ]
 
                                         if my_trades_instrument_name:

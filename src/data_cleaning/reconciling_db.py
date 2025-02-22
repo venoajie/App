@@ -28,7 +28,7 @@ def get_sub_account_size_per_instrument(
     sub_account: list,
 ) -> float:
     """ """
-    
+
     sub_account_instrument = [
         o for o in sub_account if o["instrument_name"] == instrument_name
     ]
@@ -151,7 +151,6 @@ def is_transaction_log_and_sub_account_size_reconciled_each_other(
     sub_account: list,
 ) -> bool:
     """ """
-
 
     current_position_log = get_transaction_log_position_per_instrument(
         instrument_name,
