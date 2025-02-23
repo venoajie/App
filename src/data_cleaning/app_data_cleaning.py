@@ -216,7 +216,11 @@ async def reconciling_size(
                                     )
                                 
                                   
-                                query_trades_all = f"SELECT instrument_name, amount_dir as aomunt, trade_id, label,  FROM  {archive_db_table} WHERE instrument_name LIKE '%{instrument_name}%' AND is_open = 1 "
+                                query_trades_all_basic = f"SELECT instrument_name, label, amount_dir as amount, trade_id  FROM  {archive_db_table}"
+                                  
+                                query_trades_all_where = f"WHERE instrument_name LIKE '%{instrument_name}%' AND is_open = 1"
+                                  
+                                query_trades_all = f"{query_trades_all_basic} {query_trades_all_where}"
                                 
                                 my_trades_instrument_name = await executing_query_with_return(query_trades_all)   
                      
