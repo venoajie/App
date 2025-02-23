@@ -204,15 +204,16 @@ async def reconciling_size(
                                     f"my_trades_all_{currency_lower}_json"
                                 )
 
-                                
-                                query_trades_all = f"SELECT  MIN (timestamp)  FROM  {archive_db_table} ORDER BY timestamp DESC LIMIT 10"
-                                
-                                last_10_timestamp_log = await executing_query_with_return(
-                            query_trades_all
-                        )
+                                query_trades_all = f"SELECT trade_id, timestamp  FROM  {archive_db_table} WHERE instrument_name LIKE '%{instrument_name}%' ORDER BY timestamp DESC LIMIT 10"
+                                  
+                                my_trades_instrument_name = await executing_query_with_return(query_trades_all)   
+
+                                log.info(f"trades_all {my_trades_instrument_name}")
+
+                                last_10_timestamp_log = [o["timestamp"] for  o in my_trades_instrument_name]
                                 log.info(f"last_10_timestamp_log {last_10_timestamp_log}")
 
-                                timestamp_log = last_10_timestamp_log[0]["MIN (timestamp)"]
+                                timestamp_log = min(last_10_timestamp_log)
                                 
                                 trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
                                                 instrument_name,
@@ -221,22 +222,13 @@ async def reconciling_size(
                                                 1000,
                                             )
 
-                                my_trades_instrument_name = [
-                                    o
-                                    for o in my_trades_currency
-                                    if instrument_name in o["instrument_name"]
-                                ]
-
-                                
-                                
-                                await update_trades_from_exchange_based_on_latest_timestamp(
+                                await agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                                     trades_from_exchange,
-                                    instrument_name,
                                     my_trades_instrument_name,
                                     archive_db_table,
                                     order_db_table,
-                                )
-
+                                    )
+                                
                                 log.warning(f"trades_from_exchange {trades_from_exchange}")
                                 
                                 my_trades_currency: list = [
@@ -399,3 +391,42 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
                         archive_db_table,
                         order_db_table,
                     )
+
+
+
+async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
+    trades_from_exchange,
+    my_trades_instrument_name,
+    archive_db_table: str,
+    order_db_table: str,
+) -> None:
+    """ """
+
+    if trades_from_exchange:
+
+        log.error(f"trades_from_exchange {trades_from_exchange}")
+        log.debug(f"my_trades_instrument_name {my_trades_instrument_name}")
+
+        trades_from_exchange_without_futures_combo = [
+            o for o in trades_from_exchange if f"-FS-" not in o["instrument_name"]
+        ]
+
+        for trade in trades_from_exchange_without_futures_combo:
+
+            trade_trd_id = trade["trade_id"]
+
+            trade_trd_id_not_in_archive = [
+                o
+                for o in my_trades_instrument_name
+                if trade_trd_id in o["trade_id"]
+            ]
+
+            if not trade_trd_id_not_in_archive:
+
+                log.debug(f"{trade_trd_id}")
+
+                await saving_traded_orders(
+                    trade,
+                    archive_db_table,
+                    order_db_table,
+                )
