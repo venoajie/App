@@ -458,7 +458,6 @@ async def closing_one_to_many(
 
 
 async def clean_up_closed_transactions(
-    currency: str,
     trade_table: str,
     transaction_all: list = None,
 ) -> None:
@@ -475,34 +474,6 @@ async def clean_up_closed_transactions(
     where_filter = f"trade_id"
 
     try:
-
-        if transaction_all is None:
-            column_list: str = (
-                "instrument_name",
-                "label",
-                "amount",
-                where_filter,
-                "is_open",
-            )
-
-            # querying tables
-            transaction_all: list = await get_query(
-                trade_table,
-                currency,
-                "all",
-                "all",
-                column_list,
-            )
-
-            transaction_all: list = [o for o in transaction_all if o["is_open"] == 1]
-
-        else:
-
-            if transaction_all:
-
-                transaction_all: list = [
-                    o for o in transaction_all if currency in o["instrument_name"]
-                ]
 
         # filtered transactions with closing labels
         if transaction_all:

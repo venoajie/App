@@ -545,7 +545,13 @@ async def executing_query_based_on_currency_or_instrument_and_strategy(
 
     # get query
     query = querying_based_on_currency_or_instrument_and_strategy(
-        table, currency_or_instrument, strategy, status, columns, limit, order
+        table, 
+        currency_or_instrument,
+        strategy, 
+        status, 
+        columns,
+        limit,
+        order,
     )
 
     # execute query

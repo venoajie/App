@@ -123,8 +123,6 @@ async def reconciling_size(
 
         relevant_tables = config_app["relevant_tables"][0]
 
-        trade_db_table = relevant_tables["my_trades_table"]
-
         order_db_table = relevant_tables["orders_table"]
 
         order_db_table = relevant_tables["orders_table"]
@@ -156,12 +154,6 @@ async def reconciling_size(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        sub_account_all = []
-
-        query_trades = f"SELECT * FROM  v_trading_all_active"
-
-        my_trades_active_all = await executing_query_with_return(query_trades)
-
         while True:
 
             try:
@@ -173,12 +165,6 @@ async def reconciling_size(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
-
-                    if my_trades_channel in message_channel:
-
-                        my_trades_active_all = await executing_query_with_return(
-                            query_trades
-                        )
 
                     if positions_update_channel in message_channel:
 
@@ -229,76 +215,15 @@ async def reconciling_size(
                                     order_db_table,
                                     )
                                 
-                                log.warning(f"trades_from_exchange {trades_from_exchange}")
+                                  
+                                query_trades_all = f"SELECT instrument_name, amount_dir as aomunt, trade_id, label,  FROM  {archive_db_table} WHERE instrument_name LIKE '%{instrument_name}%' AND is_open = 1 "
                                 
-                                my_trades_currency: list = [
-                                    o
-                                    for o in my_trades_active_all
-                                    if instrument_name in o["instrument_name"]
-                                ]
-
-                                # eliminating combo transactions as they're not recorded in the book
-                                if "-FS-" not in instrument_name:
-
-                                    my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
-                                        instrument_name,
-                                        my_trades_currency,
-                                        positions_cached,
-                                    )
-
-                                    if not my_trades_and_sub_account_size_reconciled:
-
-                                        my_trades_instrument_name = [
-                                            o
-                                            for o in my_trades_currency
-                                            if instrument_name in o["instrument_name"]
-                                        ]
-
-                                        if my_trades_instrument_name:
-
-                                            timestamp_log = min(
-                                                [
-                                                    o["timestamp"]
-                                                    for o in my_trades_instrument_name
-                                                ]
-                                            )
-
-                                            ONE_SECOND = 1000
-
-                                            one_minute = ONE_SECOND * 60
-
-                                            end_timestamp = get_now_unix()
-
-                                            five_days_ago = end_timestamp - (
-                                                one_minute * 60 * 24 * 5
-                                            )
-
-                                            timestamp_log = five_days_ago
-
-                                            log.critical(
-                                                f"timestamp_log {timestamp_log}"
-                                            )
-
-                                            trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
-                                                instrument_name,
-                                                timestamp_log
-                                                - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
-                                                1000,
-                                            )
-
-                                            await update_trades_from_exchange_based_on_latest_timestamp(
-                                                trades_from_exchange,
-                                                instrument_name,
-                                                my_trades_instrument_name,
-                                                archive_db_table,
-                                                order_db_table,
-                                            )
-
-                            await clean_up_closed_transactions(
-                                currency,
-                                archive_db_table,
-                                my_trades_currency,
-                            )
+                                my_trades_instrument_name = await executing_query_with_return(query_trades_all)   
+                     
+                                await clean_up_closed_transactions(
+                                    archive_db_table,
+                                    my_trades_instrument_name,
+                                )
 
             except Exception as error:
 
