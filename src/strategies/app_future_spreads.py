@@ -104,7 +104,7 @@ async def future_spreads(
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
-        order_allowed = False
+        order_allowed = 0
 
         while not_cancel:
 

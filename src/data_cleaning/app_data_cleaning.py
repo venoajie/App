@@ -127,32 +127,18 @@ async def reconciling_size(
 
         order_db_table = relevant_tables["orders_table"]
         # get redis channels
-        order_receiving_channel: str = redis_channels["order_receiving"]
-        market_analytics_channel: str = redis_channels["market_analytics_update"]
-        ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
-        portfolio_channel: str = redis_channels["portfolio"]
-        my_trades_channel: str = redis_channels["my_trades_cache_updating"]
-        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         order_allowed_channel: str = redis_channels["order_is_allowed"]
         positions_update_channel: str = redis_channels["position_cache_updating"]
-        order_update_channel: str = redis_channels["order_cache_updating"]
-        my_trades_channel: str = redis_channels["my_trades_cache_updating"]
-
+        
         # prepare channels placeholders
         channels = [
-            positions_update_channel,
-            order_update_channel,
-            market_analytics_channel,
-            order_receiving_channel,
-            ticker_cached_channel,
-            portfolio_channel,
-            my_trades_channel,
-            sub_account_cached_channel,
-            order_allowed_channel,
+            positions_update_channel
         ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
+        
+        order_allowed = 0
 
         while True:
 
@@ -173,6 +159,7 @@ async def reconciling_size(
                         positions_cached_instrument = remove_redundant_elements(
                             [o["instrument_name"] for o in positions_cached]
                         )
+
 
                         # FROM sub account to other db's
                         if positions_cached_instrument:
@@ -228,6 +215,57 @@ async def reconciling_size(
                                     archive_db_table,
                                     my_trades_instrument_name,
                                 )
+
+
+
+                                # eliminating combo transactions as they're not recorded in the book
+                                if "-FS-" not in instrument_name:
+
+                                    my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
+                                        instrument_name,
+                                        my_trades_instrument_name,
+                                        positions_cached,
+                                    )
+
+                                    if not my_trades_and_sub_account_size_reconciled:
+
+                                        timestamp_log = min(
+                                            [
+                                                o["timestamp"]
+                                                for o in my_trades_instrument_name
+                                            ]
+                                        )
+
+                                        ONE_SECOND = 1000
+
+                                        one_minute = ONE_SECOND * 60
+
+                                        end_timestamp = get_now_unix()
+
+                                        five_days_ago = end_timestamp - (
+                                            one_minute * 60 * 24 * 5
+                                        )
+
+                                        timestamp_log = five_days_ago
+
+                                        log.critical(
+                                            f"timestamp_log {timestamp_log}"
+                                        )
+
+                                        trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
+                                            instrument_name,
+                                            timestamp_log
+                                            - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                                            1000,
+                                        )
+
+                                        await update_trades_from_exchange_based_on_latest_timestamp(
+                                            trades_from_exchange,
+                                            instrument_name,
+                                            my_trades_instrument_name,
+                                            archive_db_table,
+                                            order_db_table,
+                                        )
 
             except Exception as error:
 
