@@ -264,6 +264,9 @@ async def every_update_on_position_channels(
                 instrument_name
             )
 
+            pub_message.update({"instrument_name": instrument_name})
+            pub_message.update({"currency": currency})
+    
             currency_lower = currency.lower()
             
             archive_db_table = (
@@ -318,9 +321,6 @@ async def every_update_on_position_channels(
                     positions_cached,
                 )
                         
-                pub_message.update({"instrument_name": instrument_name})
-                pub_message.update({"currency": currency})
-        
                 if not my_trades_and_sub_account_size_reconciled:
 
                     trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
@@ -343,6 +343,8 @@ async def every_update_on_position_channels(
                 else:
                     
                     order_allowed = 1
+                    
+                    pub_message.update({"order_allowed": order_allowed})
 
                 await clean_up_closed_transactions(
                     archive_db_table,
