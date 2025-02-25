@@ -271,21 +271,11 @@ async def every_update_on_position_channels(
 
     futures_instruments_name_not_in_positions_cached_instrument = [list(
         set(futures_instruments_name).difference(positions_cached_instrument)
-    )]
+    )][0]
 
     log.info(
         f"futures_instruments_name_not_in_positions_cached_instrument {futures_instruments_name_not_in_positions_cached_instrument}"
     )
-
-    futures_instruments_name_not_in_positions_cached_instrument = [list(
-        set(positions_cached_instrument).difference(futures_instruments_name)
-    )]
-
-    log.info(
-        f"futures_instruments_name_not_in_positions_cached_instrument {futures_instruments_name_not_in_positions_cached_instrument}"
-    )
-
-    futures_instruments_name_not_in_positions_cached_instrument = [o for o in futures_instruments_name if o not in positions_cached]
 
     pub_message = defaultdict()
 
