@@ -270,7 +270,7 @@ async def every_update_on_position_channels(
     log.debug(f"futures_instruments_name {futures_instruments_name}")
 
     futures_instruments_name_not_in_positions_cached_instrument = list(
-        set(positions_cached_instrument).difference(futures_instruments_name)
+        set(futures_instruments_name).difference(positions_cached_instrument)
     )
 
     log.info(
