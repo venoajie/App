@@ -43,15 +43,20 @@ async def reconciling_size(
 
         # get redis channels
         order_allowed_channel: str = redis_channels["order_is_allowed"]
-        positions_update_channel: str = redis_channels["position_cache_updating"]
+        positions_update_channel: str = redis_channels["position_cache_updating"]    
+        ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
+
         
         # prepare channels placeholders
         channels = [
             positions_update_channel,
+            ticker_cached_channel
         ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
+        
+        server_time = 0
         
         order_allowed = 0
 
@@ -60,13 +65,26 @@ async def reconciling_size(
             try:
 
                 message_byte = await pubsub.get_message()
-
+                        
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
 
+                    if ticker_cached_channel in message_channel:
+                        
+                        log.debug(server_time)
+   
+                        current_server_time = (
+                        message_byte_data["timestamp"] + server_time
+                        if server_time == 0
+                        else message_byte_data["timestamp"]
+                    )
+
+                        server_time = current_server_time
+                        log.error(server_time)
+   
                     if positions_update_channel in message_channel:
 
                         await every_update_on_position_channels(
