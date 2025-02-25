@@ -317,6 +317,8 @@ async def every_update_on_position_channels(
                 archive_db_table,
                 my_trades_instrument_name,
             )
+            
+            log.warning(f""" FS- not in instrument_name {instrument_name} {"-FS-" not in instrument_name}""")
 
             # eliminating combo transactions as they're not recorded in the book
             if "-FS-" not in instrument_name:
@@ -326,6 +328,7 @@ async def every_update_on_position_channels(
                     my_trades_instrument_name,
                     positions_cached,
                 )
+                log.warning(f"my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
                         
                 if  my_trades_and_sub_account_size_reconciled:
                    
