@@ -413,6 +413,8 @@ async def every_update_on_position_channels(
                         positions_cached,
                     )
                     
+                    log.debug(f"pub_message {pub_message}")
+                    
                     if my_trades_and_sub_account_size_reconciled:
                         
                         log.info(f"instrument_name {instrument_name}")
