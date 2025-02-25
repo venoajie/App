@@ -76,8 +76,10 @@ async def reconciling_size(
         min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]
 
         active_futures = futures_instruments["active_futures"]
+        all_instruments_name = futures_instruments["instruments_name"]
+        futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o["instrument_name"] ]
 
-        log.debug(active_futures)
+        log.debug(futures_instruments_name)
         
         while True:
 
