@@ -197,14 +197,16 @@ async def reconciling_size(
                                 currency: str = extract_currency_from_text(
                                     instrument_name
                                 )
-                                
+
                                 currency_lower = currency.lower()
 
-                                query_trades_all = f"SELECT * FROM  v_{currency_lower}_trading_all"
-                                
-                                my_trades_currency_all = await executing_query_with_return(
-                            query_trades_all
-                        )
+                                query_trades_all = (
+                                    f"SELECT * FROM  v_{currency_lower}_trading_all"
+                                )
+
+                                my_trades_currency_all = (
+                                    await executing_query_with_return(query_trades_all)
+                                )
 
                                 archive_db_table = (
                                     f"my_trades_all_{currency_lower}_json"

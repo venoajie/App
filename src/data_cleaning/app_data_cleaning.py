@@ -7,14 +7,15 @@ from collections import defaultdict
 
 from loguru import logger as log
 
-from data_cleaning.managing_closed_transactions import (
-    clean_up_closed_transactions
-)
+from data_cleaning.managing_closed_transactions import clean_up_closed_transactions
 from data_cleaning.reconciling_db import (
     is_my_trades_and_sub_account_size_reconciled_each_other,
 )
 from db_management.redis_client import publishing_result
-from db_management.sqlite_management import (executing_query_with_return, update_status_data)
+from db_management.sqlite_management import (
+    executing_query_with_return,
+    update_status_data,
+)
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.orders_management import saving_traded_orders
 from utilities.string_modification import (
@@ -51,59 +52,54 @@ async def reconciling_size(
 
         # get redis channels
         order_allowed_channel: str = redis_channels["order_is_allowed"]
-        positions_update_channel: str = redis_channels["position_cache_updating"]    
+        positions_update_channel: str = redis_channels["position_cache_updating"]
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
-        
+
         # prepare channels placeholders
-        channels = [
-            positions_update_channel,
-            ticker_cached_channel
-        ]
+        channels = [positions_update_channel, ticker_cached_channel]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
-        
+
         server_time = get_now_unix()
-        
+
         positions_cached = []
-        
+
         order_allowed = 0
 
         ONE_SECOND = 1000
 
         one_minute = ONE_SECOND * 60
-        
+
         min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]
 
         active_futures = futures_instruments["active_futures"]
         all_instruments_name = futures_instruments["instruments_name"]
 
-        futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o ]
+        futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
 
         while True:
 
             try:
 
                 message_byte = await pubsub.get_message()
-                        
+
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
 
-                    five_days_ago = server_time - (
-                        one_minute * 60 * 24 * 5
-                    )
+                    five_days_ago = server_time - (one_minute * 60 * 24 * 5)
 
-                    if ticker_cached_channel in message_channel:                        
+                    if ticker_cached_channel in message_channel:
 
                         exchange_server_time = message_byte_data["server_time"]
-                        
-                        delta_time = (exchange_server_time - server_time)/ONE_SECOND
-                        
+
+                        delta_time = (exchange_server_time - server_time) / ONE_SECOND
+
                         if delta_time > 1:
-                            
+
                             await every_update_on_position_channels(
                                 private_data,
                                 client_redis,
@@ -114,14 +110,14 @@ async def reconciling_size(
                                 order_db_table,
                                 order_allowed,
                                 five_days_ago,
-                                )
+                            )
 
                             server_time = exchange_server_time
-   
+
                     if positions_update_channel in message_channel:
-                        
+
                         positions_cached = message_byte_data
-                        
+
                         await every_update_on_position_channels(
                             private_data,
                             client_redis,
@@ -132,7 +128,7 @@ async def reconciling_size(
                             order_db_table,
                             order_allowed,
                             five_days_ago,
-                            )
+                        )
 
             except Exception as error:
 
@@ -215,6 +211,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
                         order_db_table,
                     )
 
+
 async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
     trades_from_exchange,
     my_trades_instrument_name,
@@ -234,9 +231,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
             trade_trd_id = trade["trade_id"]
 
             trade_trd_id_not_in_archive = [
-                o
-                for o in my_trades_instrument_name
-                if trade_trd_id in o["trade_id"]
+                o for o in my_trades_instrument_name if trade_trd_id in o["trade_id"]
             ]
 
             if not trade_trd_id_not_in_archive:
@@ -248,6 +243,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                     archive_db_table,
                     order_db_table,
                 )
+
 
 async def every_update_on_position_channels(
     private_data: object,
@@ -266,102 +262,116 @@ async def every_update_on_position_channels(
         [o["instrument_name"] for o in positions_cached]
     )
 
-    # eliminating combo transactions as they're not recorded in the book    
-    positions_cached_instrument = [o for o in positions_cached_all if "-FS-" not in o ]
-    
+    # eliminating combo transactions as they're not recorded in the book
+    positions_cached_instrument = [o for o in positions_cached_all if "-FS-" not in o]
+
     log.warning(f"positions_cached {positions_cached}")
     log.error(f"positions_cached_instrument {positions_cached_instrument}")
     log.debug(f"futures_instruments_name {futures_instruments_name}")
-    
-    futures_instruments_name_not_in_positions_cached_instrument = list(set(positions_cached_instrument).difference(futures_instruments_name))
-            
-    log.info(f"futures_instruments_name_not_in_positions_cached_instrument {futures_instruments_name_not_in_positions_cached_instrument}")
-    
+
+    futures_instruments_name_not_in_positions_cached_instrument = list(
+        set(positions_cached_instrument).difference(futures_instruments_name)
+    )
+
+    log.info(
+        f"futures_instruments_name_not_in_positions_cached_instrument {futures_instruments_name_not_in_positions_cached_instrument}"
+    )
+
     pub_message = defaultdict()
-    
+
     pub_message.update({"order_allowed": order_allowed})
-    
+
     # FROM sub account to other db's
     if positions_cached_instrument:
 
         # sub account instruments
         for instrument_name in positions_cached_instrument:
 
-            currency: str = extract_currency_from_text(
-                instrument_name
-            )
+            currency: str = extract_currency_from_text(instrument_name)
 
             pub_message.update({"instrument_name": instrument_name})
             pub_message.update({"currency": currency})
-    
+
             currency_lower = currency.lower()
-            
-            archive_db_table = (
-                f"my_trades_all_{currency_lower}_json"
+
+            archive_db_table = f"my_trades_all_{currency_lower}_json"
+
+            query_trades_all_basic = (
+                f"SELECT trade_id, timestamp  FROM  {archive_db_table}"
             )
-                
-            query_trades_all_basic = f"SELECT trade_id, timestamp  FROM  {archive_db_table}"
-                
+
             query_trades_all_where = f"WHERE instrument_name LIKE '%{instrument_name}%' ORDER BY timestamp DESC LIMIT 10"
-                
+
             query_trades_all = f"{query_trades_all_basic} {query_trades_all_where}"
 
-            my_trades_instrument_name = await executing_query_with_return(query_trades_all)   
+            my_trades_instrument_name = await executing_query_with_return(
+                query_trades_all
+            )
 
-            last_10_timestamp_log = [o["timestamp"] for  o in my_trades_instrument_name]
+            last_10_timestamp_log = [o["timestamp"] for o in my_trades_instrument_name]
 
             timestamp_log = min(last_10_timestamp_log)
-            
+
             trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
-                            instrument_name,
-                            timestamp_log
-                            - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
-                            1000,
-                        )
+                instrument_name,
+                timestamp_log
+                - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                1000,
+            )
 
             await agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                 trades_from_exchange,
                 my_trades_instrument_name,
                 archive_db_table,
                 order_db_table,
-                )
-                            
+            )
+
             query_trades_active_basic = f"SELECT instrument_name, label, amount_dir as amount, trade_id  FROM  {archive_db_table}"
-                
-            query_trades_active_where = f"WHERE instrument_name LIKE '%{instrument_name}%' AND is_open = 1"
-                
-            query_trades_active = f"{query_trades_active_basic} {query_trades_active_where}"
-            
-            my_trades_instrument_name = await executing_query_with_return(query_trades_active)   
-    
+
+            query_trades_active_where = (
+                f"WHERE instrument_name LIKE '%{instrument_name}%' AND is_open = 1"
+            )
+
+            query_trades_active = (
+                f"{query_trades_active_basic} {query_trades_active_where}"
+            )
+
+            my_trades_instrument_name = await executing_query_with_return(
+                query_trades_active
+            )
+
             await clean_up_closed_transactions(
                 archive_db_table,
                 my_trades_instrument_name,
-            )    
+            )
             log.info(f"my_trades_active {my_trades_instrument_name}")
             log.debug(f"positions_cached {positions_cached}")
 
-            my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
-                instrument_name,
-                my_trades_instrument_name,
-                positions_cached,
+            my_trades_and_sub_account_size_reconciled = (
+                is_my_trades_and_sub_account_size_reconciled_each_other(
+                    instrument_name,
+                    my_trades_instrument_name,
+                    positions_cached,
+                )
             )
-                    
-            if  my_trades_and_sub_account_size_reconciled:
-                
+
+            if my_trades_and_sub_account_size_reconciled:
+
                 order_allowed = 1
-                
+
                 pub_message.update({"order_allowed": order_allowed})
-                
+
                 order_allowed = 0
 
             else:
-                
-                trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
-                    instrument_name,
-                    five_days_ago,
-                    - 10,  # - x: arbitrary
-                    1000,
+
+                trades_from_exchange = (
+                    await private_data.get_user_trades_by_instrument_and_time(
+                        instrument_name,
+                        five_days_ago,
+                        -10,  # - x: arbitrary
+                        1000,
+                    )
                 )
 
                 await update_trades_from_exchange_based_on_latest_timestamp(
@@ -371,14 +381,16 @@ async def every_update_on_position_channels(
                     archive_db_table,
                     order_db_table,
                 )
-                
-                my_trades_instrument_name = await executing_query_with_return(query_trades_active)   
+
+                my_trades_instrument_name = await executing_query_with_return(
+                    query_trades_active
+                )
 
             await clean_up_closed_transactions(
                 archive_db_table,
                 my_trades_instrument_name,
             )
-                
+
         log.error(f"pub_message {pub_message}")
         await publishing_result(
             client_redis,
@@ -387,75 +399,83 @@ async def every_update_on_position_channels(
         )
 
     for currency in currencies:
-        
+
         currency_lower = currency.lower()
-        
-        archive_db_table = (
-                f"my_trades_all_{currency_lower}_json"
-            )
-    
+
+        archive_db_table = f"my_trades_all_{currency_lower}_json"
+
         query_trades_active_basic = f"SELECT instrument_name, label, amount_dir as amount, trade_id  FROM  {archive_db_table}"
-            
-        query_trades_active_where = f"WHERE instrument_name LIKE '%{currency}%' AND is_open = 1"
-            
-        query_trades_active_currency = f"{query_trades_active_basic} {query_trades_active_where}"
-                    
+
+        query_trades_active_where = (
+            f"WHERE instrument_name LIKE '%{currency}%' AND is_open = 1"
+        )
+
+        query_trades_active_currency = (
+            f"{query_trades_active_basic} {query_trades_active_where}"
+        )
+
         my_trades_active_currency = await executing_query_with_return(
-                            query_trades_active_currency
-                        )
-        
+            query_trades_active_currency
+        )
+
         my_trades_active_instrument = remove_redundant_elements(
-        [o["instrument_name"] for o in my_trades_active_currency]
-    )
-        
+            [o["instrument_name"] for o in my_trades_active_currency]
+        )
+
         if my_trades_active_instrument:
 
             # sub account instruments
             for instrument_name in my_trades_active_instrument:
-                
+
                 log.info(f"instrument_name {instrument_name}")
-                
-                currency: str = extract_currency_from_text(
-                instrument_name
-            )
+
+                currency: str = extract_currency_from_text(instrument_name)
 
                 pub_message.update({"instrument_name": instrument_name})
                 pub_message.update({"currency": currency})
-                
-                my_trades_active = [o for o in my_trades_active_currency if instrument_name in o["instrument_name"] ]
-                
+
+                my_trades_active = [
+                    o
+                    for o in my_trades_active_currency
+                    if instrument_name in o["instrument_name"]
+                ]
+
                 if my_trades_active:
-    
-                    my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
-                        instrument_name,
-                        my_trades_active,
-                        positions_cached,
+
+                    my_trades_and_sub_account_size_reconciled = (
+                        is_my_trades_and_sub_account_size_reconciled_each_other(
+                            instrument_name,
+                            my_trades_active,
+                            positions_cached,
+                        )
                     )
-                    
+
                     log.debug(f"pub_message {pub_message}")
-                    
+
                     if my_trades_and_sub_account_size_reconciled:
-                        
+
                         log.info(f"instrument_name {instrument_name}")
                         log.info(f"my_trades_active {my_trades_active}")
                         log.debug(f"positions_cached {positions_cached}")
 
                         order_allowed = 1
-                        
+
                         pub_message.update({"order_allowed": order_allowed})
-                        
+
                         order_allowed = 0
-                                                            
-                        sum_my_trades_active = sum([o["amount"] for o in my_trades_active])
-                        
+
+                        sum_my_trades_active = sum(
+                            [o["amount"] for o in my_trades_active]
+                        )
+
                         if sum_my_trades_active == 0:
-                            
+
                             where_filter = "trade_id"
-                            
+
                             for trade in my_trades_active:
-                                
-                                trade_id = trade ["trade_id"]
-                                                        
+
+                                trade_id = trade["trade_id"]
+
                                 await update_status_data(
                                     archive_db_table,
                                     "is_open",
@@ -464,17 +484,16 @@ async def every_update_on_position_channels(
                                     0,
                                     "=",
                                 )
-                   
-                    log.info(f"instrument_name {instrument_name}") 
+
+                    log.info(f"instrument_name {instrument_name}")
                     log.error(f"pub_message {pub_message}")
                     await publishing_result(
                         client_redis,
                         order_allowed_channel,
                         pub_message,
-                    )                    
-                        
+                    )
+
                     await clean_up_closed_transactions(
                         archive_db_table,
                         my_trades_active,
                     )
-        

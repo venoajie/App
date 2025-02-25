@@ -406,7 +406,7 @@ def querying_ohlc_closed(
 
 def querying_arithmetic_operator(
     item: str,
-    operator: str = "MAX", 
+    operator: str = "MAX",
     table: str = "ohlc1_eth_perp_json",
 ) -> float:
 
@@ -545,10 +545,10 @@ async def executing_query_based_on_currency_or_instrument_and_strategy(
 
     # get query
     query = querying_based_on_currency_or_instrument_and_strategy(
-        table, 
+        table,
         currency_or_instrument,
-        strategy, 
-        status, 
+        strategy,
+        status,
         columns,
         limit,
         order,
