@@ -56,9 +56,13 @@ async def reconciling_size(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
         
-        server_time = 0
+        server_time = get_now_unix()
         
         order_allowed = 0
+
+        ONE_SECOND = 1000
+
+        one_minute = ONE_SECOND * 60
 
         while True:
 
@@ -74,17 +78,22 @@ async def reconciling_size(
 
                     if ticker_cached_channel in message_channel:                        
                         log.debug(server_time)
-   
-                        current_server_time = (
-                        message_byte_data["server_time"] + server_time
-                        if server_time == 0
-                        else message_byte_data["server_time"]
-                    )
 
-                        server_time = current_server_time
-                        log.error(server_time)
+                        exchange_server_time = message_byte_data["server_time"]
+                        
+                        delta_time = (exchange_server_time - server_time)/ONE_SECOND
+                        log.critical(delta_time)
+                        
+                        if delta_time > 1:
+
+                            server_time = exchange_server_time
+                            log.error(server_time)
    
                     if positions_update_channel in message_channel:
+
+                        five_days_ago = server_time - (
+                            one_minute * 60 * 24 * 5
+                        )
 
                         await every_update_on_position_channels(
                             private_data,
@@ -93,6 +102,7 @@ async def reconciling_size(
                             message_byte_data,
                             order_db_table,
                             order_allowed,
+                            five_days_ago,
                             )
 
             except Exception as error:
@@ -218,6 +228,7 @@ async def every_update_on_position_channels(
     positions_cached: list,
     order_db_table: str,
     order_allowed: bool,
+    five_days_ago: int,
 ) -> None:
     """ """
 
@@ -291,29 +302,10 @@ async def every_update_on_position_channels(
 
                 if not my_trades_and_sub_account_size_reconciled:
 
-                    timestamp_log = min(
-                        [
-                            o["timestamp"]
-                            for o in my_trades_instrument_name
-                        ]
-                    )
-
-                    ONE_SECOND = 1000
-
-                    one_minute = ONE_SECOND * 60
-
-                    end_timestamp = get_now_unix()
-
-                    five_days_ago = end_timestamp - (
-                        one_minute * 60 * 24 * 5
-                    )
-
-                    timestamp_log = five_days_ago
-
                     trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
                         instrument_name,
-                        timestamp_log
-                        - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                        five_days_ago,
+                        - 10,  # - x: arbitrary
                         1000,
                     )
 
