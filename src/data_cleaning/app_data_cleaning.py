@@ -3,6 +3,7 @@
 
 import asyncio
 import orjson
+from collections import defaultdict
 
 from loguru import logger as log
 
@@ -248,7 +249,9 @@ async def every_update_on_position_channels(
     positions_cached_instrument = remove_redundant_elements(
         [o["instrument_name"] for o in positions_cached]
     )
-
+            
+    pub_message = defaultdict()
+    
     # FROM sub account to other db's
     if positions_cached_instrument:
 
@@ -312,7 +315,10 @@ async def every_update_on_position_channels(
                     my_trades_instrument_name,
                     positions_cached,
                 )
-
+                        
+                pub_message.update({"instrument_name": instrument_name})
+                pub_message.update({"currency": currency})
+        
                 if not my_trades_and_sub_account_size_reconciled:
 
                     trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
@@ -336,20 +342,32 @@ async def every_update_on_position_channels(
                     
                     order_allowed = 1
 
-                    pub_message = dict(
-                        instrument_name=instrument_name,
-                        order_allowed=order_allowed,
-                        currency=currency,
-                    )            
-                            
-                    await publishing_result(
-                        client_redis,
-                        order_allowed_channel,
-                        pub_message,
-                    )
-
                 await clean_up_closed_transactions(
                     archive_db_table,
                     my_trades_instrument_name,
                 )
             
+    else:
+            
+        query_trades_active  = f"SELECT * FROM  v_trading_all_active"
+        
+        my_trades_active_all = await executing_query_with_return(
+                            query_trades_active
+                        )
+    
+        pub_message.update({"instrument_name": None})
+        pub_message.update({"currency": None})
+                
+        if not my_trades_active_all:
+            
+            order_allowed = 1
+            
+            pub_message.update({"order_allowed": order_allowed})
+            
+    await publishing_result(
+        client_redis,
+        order_allowed_channel,
+        pub_message,
+    )
+    
+    log.critical (pub_message)
