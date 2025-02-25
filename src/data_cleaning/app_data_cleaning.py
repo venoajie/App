@@ -30,6 +30,7 @@ async def reconciling_size(
     client_redis: object,
     redis_channels: list,
     config_app: list,
+    futures_instruments: list,
 ) -> None:
 
     try:
@@ -71,6 +72,8 @@ async def reconciling_size(
         ONE_SECOND = 1000
 
         one_minute = ONE_SECOND * 60
+        
+        log.debug(futures_instruments)
 
         while True:
 

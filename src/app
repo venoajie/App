@@ -222,6 +222,7 @@ async def main():
                 client_redis,
                 redis_channels,
                 config_app,
+                futures_instruments,
                 ),                
             
             back_up_db(60*10),
