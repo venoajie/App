@@ -252,6 +252,8 @@ async def every_update_on_position_channels(
             
     pub_message = defaultdict()
     
+    pub_message.update({"order_allowed": order_allowed})
+    
     # FROM sub account to other db's
     if positions_cached_instrument:
 
