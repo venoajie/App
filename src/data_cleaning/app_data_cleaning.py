@@ -58,6 +58,8 @@ async def reconciling_size(
         
         server_time = get_now_unix()
         
+        positions_cached = []
+        
         order_allowed = 0
 
         ONE_SECOND = 1000
@@ -76,24 +78,35 @@ async def reconciling_size(
 
                     message_channel = message_byte["channel"]
 
+                    five_days_ago = server_time - (
+                        one_minute * 60 * 24 * 5
+                    )
+
                     if ticker_cached_channel in message_channel:                        
-                        log.debug(server_time)
 
                         exchange_server_time = message_byte_data["server_time"]
                         
                         delta_time = (exchange_server_time - server_time)/ONE_SECOND
-                        log.critical(delta_time)
                         
                         if delta_time > 1:
+                            
+                            log.debug(positions_cached)
+                            
+                            await every_update_on_position_channels(
+                                private_data,
+                                client_redis,
+                                order_allowed_channel,
+                                positions_cached,
+                                order_db_table,
+                                order_allowed,
+                                five_days_ago,
+                                )
 
                             server_time = exchange_server_time
-                            log.error(server_time)
    
                     if positions_update_channel in message_channel:
-
-                        five_days_ago = server_time - (
-                            one_minute * 60 * 24 * 5
-                        )
+                        
+                        positions_cached = message_byte_data
 
                         await every_update_on_position_channels(
                             private_data,
