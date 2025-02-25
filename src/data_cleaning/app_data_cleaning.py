@@ -113,8 +113,6 @@ async def reconciling_size(
                         
                         positions_cached = message_byte_data
                         
-                        log.info(f"message_byte_data {message_byte_data}")
-
                         await every_update_on_position_channels(
                             private_data,
                             client_redis,
@@ -262,7 +260,6 @@ async def every_update_on_position_channels(
     
     pub_message.update({"order_allowed": order_allowed})
     
-    log.warning(f"positions_cached_instrument {positions_cached_instrument}")
     # FROM sub account to other db's
     if positions_cached_instrument:
 
@@ -320,8 +317,6 @@ async def every_update_on_position_channels(
                 archive_db_table,
                 my_trades_instrument_name,
             )
-            
-            log.warning(f""" FS- not in instrument_name {instrument_name} {"-FS-" not in instrument_name}""")
 
             # eliminating combo transactions as they're not recorded in the book
             if "-FS-" not in instrument_name:
@@ -331,7 +326,6 @@ async def every_update_on_position_channels(
                     my_trades_instrument_name,
                     positions_cached,
                 )
-                log.warning(f"my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
                         
                 if  my_trades_and_sub_account_size_reconciled:
                    
@@ -369,6 +363,7 @@ async def every_update_on_position_channels(
                 order_allowed_channel,
                 pub_message,
             )
+
     for currency in currencies:
         
         currency_lower = currency.lower()
@@ -406,46 +401,47 @@ async def every_update_on_position_channels(
                 my_trades_active = [o for o in my_trades_active_currency if instrument_name in o["instrument_name"] ]
                 
                 if my_trades_active:
-                    
-                    sum_my_trades_active = sum([o["amount"] for o in my_trades_active])
-                    
-                    log.warning(f"my_trades_active {my_trades_active} {sum_my_trades_active}")
-                    
-                    if sum_my_trades_active == 0:
-                        
-                        where_filter = "trade_id"
-                        
-                        for trade in my_trades_active:
-                            
-                            trade_id = trade ["trade_id"]
-                                                    
-                            await update_status_data(
-                                archive_db_table,
-                                "is_open",
-                                where_filter,
-                                trade_id,
-                                0,
-                                "=",
-                            )
-
     
-                my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
-                    instrument_name,
-                    my_trades_active,
-                    positions_cached,
-                )
-                
-                log.warning(f"my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
-                        
-                if my_trades_and_sub_account_size_reconciled:
-
-                    order_allowed = 1
+                    my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
+                        instrument_name,
+                        my_trades_active,
+                        positions_cached,
+                    )
                     
-                    pub_message.update({"order_allowed": order_allowed})
-                
-                log.error(f"pub_message {pub_message}")
-                await publishing_result(
-                    client_redis,
-                    order_allowed_channel,
-                    pub_message,
-                )
+                    if my_trades_and_sub_account_size_reconciled:
+
+                        order_allowed = 1
+                        
+                        pub_message.update({"order_allowed": order_allowed})
+                                                            
+                        sum_my_trades_active = sum([o["amount"] for o in my_trades_active])
+                        
+                        if sum_my_trades_active == 0:
+                            
+                            where_filter = "trade_id"
+                            
+                            for trade in my_trades_active:
+                                
+                                trade_id = trade ["trade_id"]
+                                                        
+                                await update_status_data(
+                                    archive_db_table,
+                                    "is_open",
+                                    where_filter,
+                                    trade_id,
+                                    0,
+                                    "=",
+                                )
+                    
+                    log.error(f"pub_message {pub_message}")
+                    await publishing_result(
+                        client_redis,
+                        order_allowed_channel,
+                        pub_message,
+                    )                    
+                        
+                    await clean_up_closed_transactions(
+                        archive_db_table,
+                        my_trades_active,
+                    )
+        
