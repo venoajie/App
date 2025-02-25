@@ -356,8 +356,20 @@ async def every_update_on_position_channels(
                     archive_db_table,
                     my_trades_instrument_name,
                 )
-            
+                    
+            log.error(f"pub_message {pub_message}")
+            await publishing_result(
+                client_redis,
+                order_allowed_channel,
+                pub_message,
+            )
     for currency in currencies:
+        
+        currency_lower = currency.lower()
+        
+        archive_db_table = (
+                f"my_trades_all_{currency_lower}_json"
+            )
     
         query_trades_active_basic = f"SELECT instrument_name, label, amount_dir as amount, trade_id  FROM  {archive_db_table}"
             
@@ -422,11 +434,10 @@ async def every_update_on_position_channels(
                     order_allowed = 1
                     
                     pub_message.update({"order_allowed": order_allowed})
-            
-    log.error(f"pub_message {pub_message}")
-    await publishing_result(
-        client_redis,
-        order_allowed_channel,
-        pub_message,
-    )
-    
+                
+                log.error(f"pub_message {pub_message}")
+                await publishing_result(
+                    client_redis,
+                    order_allowed_channel,
+                    pub_message,
+                )
