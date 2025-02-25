@@ -423,6 +423,7 @@ async def every_update_on_position_channels(
                     
                     pub_message.update({"order_allowed": order_allowed})
             
+    log.error(f"pub_message {pub_message}")
     await publishing_result(
         client_redis,
         order_allowed_channel,
