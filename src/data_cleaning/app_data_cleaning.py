@@ -74,6 +74,7 @@ async def reconciling_size(
 
                     if ticker_cached_channel in message_channel:
                         
+                        log.debug(message_byte_data)
                         log.debug(server_time)
    
                         current_server_time = (
