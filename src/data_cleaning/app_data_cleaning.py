@@ -374,4 +374,4 @@ async def every_update_on_position_channels(
         pub_message,
     )
     
-    log.critical (pub_message)
+    log.critical (f"pub_message {pub_message} {pub_message["order_allowed"]}")
