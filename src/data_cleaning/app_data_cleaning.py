@@ -72,15 +72,13 @@ async def reconciling_size(
 
                     message_channel = message_byte["channel"]
 
-                    if ticker_cached_channel in message_channel:
-                        
-                        log.debug(message_byte_data)
+                    if ticker_cached_channel in message_channel:                        
                         log.debug(server_time)
    
                         current_server_time = (
-                        message_byte_data["timestamp"] + server_time
+                        message_byte_data["server_time"] + server_time
                         if server_time == 0
-                        else message_byte_data["timestamp"]
+                        else message_byte_data["server_time"]
                     )
 
                         server_time = current_server_time
