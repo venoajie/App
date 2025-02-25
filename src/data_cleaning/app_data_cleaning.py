@@ -77,7 +77,7 @@ async def reconciling_size(
 
         active_futures = futures_instruments["active_futures"]
         all_instruments_name = futures_instruments["instruments_name"]
-        futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o["instrument_name"] ]
+        futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
 
         log.debug(futures_instruments_name)
         
