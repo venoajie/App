@@ -320,6 +320,9 @@ async def every_update_on_position_channels(
 
             # eliminating combo transactions as they're not recorded in the book
             if "-FS-" not in instrument_name:
+        
+                log.info(f"my_trades_active {my_trades_instrument_name}")
+                log.debug(f"positions_cached {positions_cached}")
 
                 my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
                     instrument_name,
@@ -409,6 +412,9 @@ async def every_update_on_position_channels(
                     )
                     
                     if my_trades_and_sub_account_size_reconciled:
+                        
+                        log.info(f"my_trades_active {my_trades_active}")
+                        log.debug(f"positions_cached {positions_cached}")
 
                         order_allowed = 1
                         
