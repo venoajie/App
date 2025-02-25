@@ -260,6 +260,7 @@ async def every_update_on_position_channels(
     
     pub_message.update({"order_allowed": order_allowed})
     
+    log.warning(f"positions_cached_instrument {positions_cached_instrument}")
     # FROM sub account to other db's
     if positions_cached_instrument:
 
