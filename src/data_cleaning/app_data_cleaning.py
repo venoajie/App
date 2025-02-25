@@ -399,8 +399,6 @@ async def every_update_on_position_channels(
                 
                 my_trades_active = [o for o in my_trades_active_currency if instrument_name in o["instrument_name"] ]
                 
-                
-                        
                 if my_trades_active:
                     
                     sum_my_trades_active = sum([o["amount"] for o in my_trades_active])
@@ -430,6 +428,8 @@ async def every_update_on_position_channels(
                     my_trades_active,
                     positions_cached,
                 )
+                
+                log.warning(f"my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
                         
                 if my_trades_and_sub_account_size_reconciled:
 
