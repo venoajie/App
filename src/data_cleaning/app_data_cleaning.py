@@ -112,6 +112,8 @@ async def reconciling_size(
                     if positions_update_channel in message_channel:
                         
                         positions_cached = message_byte_data
+                        
+                        log.info(f"message_byte_data {message_byte_data}")
 
                         await every_update_on_position_channels(
                             private_data,
