@@ -288,17 +288,15 @@ async def caching_distributing_data(
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 
-                    log.info(data)
-                    log.debug(server_time)
+                    #extract server time from data
                     current_server_time = (
                         data["timestamp"] + server_time
                         if server_time == 0
                         else data["timestamp"]
                     )
-                    log.error(current_server_time)
                     
+                    # updating current server time
                     server_time = current_server_time if server_time < current_server_time else server_time
-                    log.warning(server_time)
                     
                     pub_message.update({"instrument_name": instrument_name_future})
                     pub_message.update({"currency_upper": currency_upper})
