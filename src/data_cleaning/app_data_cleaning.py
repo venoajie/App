@@ -73,8 +73,12 @@ async def reconciling_size(
 
         one_minute = ONE_SECOND * 60
         
-        log.debug(futures_instruments)
+        min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]
 
+        active_futures = futures_instruments["active_futures"]
+
+        log.debug(active_futures)
+        
         while True:
 
             try:
