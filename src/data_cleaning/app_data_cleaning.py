@@ -77,9 +77,10 @@ async def reconciling_size(
 
         active_futures = futures_instruments["active_futures"]
         all_instruments_name = futures_instruments["instruments_name"]
-        futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
 
-        log.debug(futures_instruments_name)
+        futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o ]
+
+        log.debug(active_futures)
         
         while True:
 
@@ -108,6 +109,7 @@ async def reconciling_size(
                             await every_update_on_position_channels(
                                 private_data,
                                 client_redis,
+                                futures_instruments_name,
                                 currencies,
                                 order_allowed_channel,
                                 positions_cached,
@@ -125,6 +127,7 @@ async def reconciling_size(
                         await every_update_on_position_channels(
                             private_data,
                             client_redis,
+                            futures_instruments_name,
                             currencies,
                             order_allowed_channel,
                             message_byte_data,
@@ -252,6 +255,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
 async def every_update_on_position_channels(
     private_data: object,
     client_redis: object,
+    futures_instruments_name,
     currencies: list,
     order_allowed_channel: str,
     positions_cached: list,
@@ -261,10 +265,20 @@ async def every_update_on_position_channels(
 ) -> None:
     """ """
 
-    positions_cached_instrument = remove_redundant_elements(
+    positions_cached_all = remove_redundant_elements(
         [o["instrument_name"] for o in positions_cached]
     )
+
+    # eliminating combo transactions as they're not recorded in the book    
+    positions_cached_instrument = [o for o in positions_cached_all if "-FS-" not in o ]
+    
+    log.error(f"positions_cached_instrument {positions_cached_instrument}")
+    log.debug(f"futures_instruments_name {futures_instruments_name}")
+    
+    futures_instruments_name_not_in_positions_cached_instrument = list(set(positions_cached_instrument).difference(futures_instruments_name))
             
+    log.info(f"futures_instruments_name_not_in_positions_cached_instrument {futures_instruments_name_not_in_positions_cached_instrument}")
+    
     pub_message = defaultdict()
     
     pub_message.update({"order_allowed": order_allowed})
@@ -325,56 +339,54 @@ async def every_update_on_position_channels(
             await clean_up_closed_transactions(
                 archive_db_table,
                 my_trades_instrument_name,
+            )    
+            log.info(f"my_trades_active {my_trades_instrument_name}")
+            log.debug(f"positions_cached {positions_cached}")
+
+            my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
+                instrument_name,
+                my_trades_instrument_name,
+                positions_cached,
             )
+                    
+            if  my_trades_and_sub_account_size_reconciled:
+                
+                order_allowed = 1
+                
+                pub_message.update({"order_allowed": order_allowed})
+                
+                order_allowed = 0
 
-            # eliminating combo transactions as they're not recorded in the book
-            if "-FS-" not in instrument_name:
-        
-                log.info(f"my_trades_active {my_trades_instrument_name}")
-                log.debug(f"positions_cached {positions_cached}")
+            else:
+                
+                trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
+                    instrument_name,
+                    five_days_ago,
+                    - 10,  # - x: arbitrary
+                    1000,
+                )
 
-                my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
+                await update_trades_from_exchange_based_on_latest_timestamp(
+                    trades_from_exchange,
                     instrument_name,
                     my_trades_instrument_name,
-                    positions_cached,
-                )
-                        
-                if  my_trades_and_sub_account_size_reconciled:
-                   
-                    order_allowed = 1
-                    
-                    pub_message.update({"order_allowed": order_allowed})
-
-                else:
-                    
-                    trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
-                        instrument_name,
-                        five_days_ago,
-                        - 10,  # - x: arbitrary
-                        1000,
-                    )
-
-                    await update_trades_from_exchange_based_on_latest_timestamp(
-                        trades_from_exchange,
-                        instrument_name,
-                        my_trades_instrument_name,
-                        archive_db_table,
-                        order_db_table,
-                    )
-                    
-                    my_trades_instrument_name = await executing_query_with_return(query_trades_active)   
-
-                await clean_up_closed_transactions(
                     archive_db_table,
-                    my_trades_instrument_name,
+                    order_db_table,
                 )
-                    
-            log.error(f"pub_message {pub_message}")
-            await publishing_result(
-                client_redis,
-                order_allowed_channel,
-                pub_message,
+                
+                my_trades_instrument_name = await executing_query_with_return(query_trades_active)   
+
+            await clean_up_closed_transactions(
+                archive_db_table,
+                my_trades_instrument_name,
             )
+                
+        log.error(f"pub_message {pub_message}")
+        await publishing_result(
+            client_redis,
+            order_allowed_channel,
+            pub_message,
+        )
 
     for currency in currencies:
         
@@ -433,6 +445,8 @@ async def every_update_on_position_channels(
                         order_allowed = 1
                         
                         pub_message.update({"order_allowed": order_allowed})
+                        
+                        order_allowed = 0
                                                             
                         sum_my_trades_active = sum([o["amount"] for o in my_trades_active])
                         
