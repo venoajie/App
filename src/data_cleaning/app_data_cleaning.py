@@ -80,8 +80,6 @@ async def reconciling_size(
 
         futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o ]
 
-        log.debug(active_futures)
-        
         while True:
 
             try:
@@ -251,7 +249,6 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                     order_db_table,
                 )
 
-
 async def every_update_on_position_channels(
     private_data: object,
     client_redis: object,
@@ -272,6 +269,7 @@ async def every_update_on_position_channels(
     # eliminating combo transactions as they're not recorded in the book    
     positions_cached_instrument = [o for o in positions_cached_all if "-FS-" not in o ]
     
+    log.warning(f"positions_cached {positions_cached}")
     log.error(f"positions_cached_instrument {positions_cached_instrument}")
     log.debug(f"futures_instruments_name {futures_instruments_name}")
     
