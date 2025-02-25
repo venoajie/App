@@ -297,7 +297,7 @@ async def caching_distributing_data(
                     )
                     log.error(current_server_time)
                     
-                    server_time = current_server_time if server_time < current_server_time else current_server_time
+                    server_time = current_server_time if server_time < current_server_time else server_time
                     log.warning(server_time)
                     
                     pub_message.update({"instrument_name": instrument_name_future})
