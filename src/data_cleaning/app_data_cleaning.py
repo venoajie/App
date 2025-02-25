@@ -394,6 +394,8 @@ async def every_update_on_position_channels(
             # sub account instruments
             for instrument_name in my_trades_active_instrument:
                 
+                log.info(f"instrument_name {instrument_name}")
+                
                 currency: str = extract_currency_from_text(
                 instrument_name
             )
@@ -413,6 +415,7 @@ async def every_update_on_position_channels(
                     
                     if my_trades_and_sub_account_size_reconciled:
                         
+                        log.info(f"instrument_name {instrument_name}")
                         log.info(f"my_trades_active {my_trades_active}")
                         log.debug(f"positions_cached {positions_cached}")
 
@@ -438,7 +441,8 @@ async def every_update_on_position_channels(
                                     0,
                                     "=",
                                 )
-                    
+                   
+                    log.info(f"instrument_name {instrument_name}") 
                     log.error(f"pub_message {pub_message}")
                     await publishing_result(
                         client_redis,
