@@ -278,8 +278,25 @@ async def every_update_on_position_channels(
     )
 
     pub_message = defaultdict()
+    
+    for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
+        order_allowed = 1
 
-    pub_message.update({"order_allowed": order_allowed})
+        currency: str = extract_currency_from_text(instrument_name)
+
+        pub_message.update({"instrument_name": instrument_name})
+        pub_message.update({"currency": currency})
+        
+        pub_message.update({"order_allowed": order_allowed})
+        log.warning(f"pub_message not_in_positions {pub_message}")
+
+        await publishing_result(
+            client_redis,
+            order_allowed_channel,
+            pub_message,
+        )
+
+        order_allowed = 0
 
     # FROM sub account to other db's
     if positions_cached_instrument:
