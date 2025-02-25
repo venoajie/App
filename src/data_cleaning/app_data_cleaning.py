@@ -14,7 +14,7 @@ from data_cleaning.reconciling_db import (
     is_my_trades_and_sub_account_size_reconciled_each_other,
 )
 from db_management.redis_client import publishing_result
-from db_management.sqlite_management import executing_query_with_return
+from db_management.sqlite_management import (executing_query_with_return, update_status_data)
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.orders_management import saving_traded_orders
 from utilities.string_modification import (
@@ -36,6 +36,12 @@ async def reconciling_size(
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
+        # get tradable strategies
+        tradable_config_app = config_app["tradable"]
+
+        # get TRADABLE currencies
+        currencies: list = [o["spot"] for o in tradable_config_app][0]
+
         relevant_tables = config_app["relevant_tables"][0]
 
         order_db_table = relevant_tables["orders_table"]
@@ -46,7 +52,6 @@ async def reconciling_size(
         order_allowed_channel: str = redis_channels["order_is_allowed"]
         positions_update_channel: str = redis_channels["position_cache_updating"]    
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
-
         
         # prepare channels placeholders
         channels = [
@@ -91,11 +96,10 @@ async def reconciling_size(
                         
                         if delta_time > 1:
                             
-                            log.debug(positions_cached)
-                            
                             await every_update_on_position_channels(
                                 private_data,
                                 client_redis,
+                                currencies,
                                 order_allowed_channel,
                                 positions_cached,
                                 order_db_table,
@@ -112,6 +116,7 @@ async def reconciling_size(
                         await every_update_on_position_channels(
                             private_data,
                             client_redis,
+                            currencies,
                             order_allowed_channel,
                             message_byte_data,
                             order_db_table,
@@ -139,9 +144,9 @@ async def reconciling_size(
 
 
 async def update_trades_from_exchange_based_on_latest_timestamp(
-    trades_from_exchange,
+    trades_from_exchange: list,
     instrument_name: str,
-    my_trades_instrument_name,
+    my_trades_instrument_name: list,
     archive_db_table: str,
     order_db_table: str,
 ) -> None:
@@ -238,6 +243,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
 async def every_update_on_position_channels(
     private_data: object,
     client_redis: object,
+    currencies: list,
     order_allowed_channel: str,
     positions_cached: list,
     order_db_table: str,
@@ -321,8 +327,14 @@ async def every_update_on_position_channels(
                     positions_cached,
                 )
                         
-                if not my_trades_and_sub_account_size_reconciled:
+                if  my_trades_and_sub_account_size_reconciled:
+                   
+                    order_allowed = 1
+                    
+                    pub_message.update({"order_allowed": order_allowed})
 
+                else:
+                    
                     trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
                         instrument_name,
                         five_days_ago,
@@ -340,33 +352,76 @@ async def every_update_on_position_channels(
                     
                     my_trades_instrument_name = await executing_query_with_return(query_trades_active)   
 
-                else:
-                    
-                    order_allowed = 1
-                    
-                    pub_message.update({"order_allowed": order_allowed})
-
                 await clean_up_closed_transactions(
                     archive_db_table,
                     my_trades_instrument_name,
                 )
             
-    else:
-            
-        query_trades_active  = f"SELECT * FROM  v_trading_all_active"
-        
-        my_trades_active_all = await executing_query_with_return(
-                            query_trades_active
-                        )
+    for currency in currencies:
     
-        pub_message.update({"instrument_name": None})
-        pub_message.update({"currency": None})
+        query_trades_active_basic = f"SELECT instrument_name, label, amount_dir as amount, trade_id  FROM  {archive_db_table}"
+            
+        query_trades_active_where = f"WHERE instrument_name LIKE '%{currency}%' AND is_open = 1"
+            
+        query_trades_active_currency = f"{query_trades_active_basic} {query_trades_active_where}"
+                    
+        my_trades_active_currency = await executing_query_with_return(
+                            query_trades_active_currency
+                        )
+        
+        my_trades_active_instrument = remove_redundant_elements(
+        [o["instrument_name"] for o in my_trades_active_currency]
+    )
+        
+        if my_trades_active_instrument:
+
+            # sub account instruments
+            for instrument_name in my_trades_active_instrument:
                 
-        if not my_trades_active_all:
-            
-            order_allowed = 1
-            
-            pub_message.update({"order_allowed": order_allowed})
+                currency: str = extract_currency_from_text(
+                instrument_name
+            )
+
+                pub_message.update({"instrument_name": instrument_name})
+                pub_message.update({"currency": currency})
+                
+                my_trades_active = [o for o in my_trades_active_currency if instrument_name in o["instrument_name"] ]
+                
+                log.warning(f"my_trades_active {my_trades_active}")
+                        
+                if my_trades_active:
+                    
+                    sum_my_trades_active = sum([o["amount"] for o in my_trades_active])
+                    
+                    if sum_my_trades_active == 0:
+                        
+                        where_filter = "trade_id"
+                        
+                        for trade in my_trades_active:
+                            
+                            trade_id = trade ["trade_id"]
+                                                    
+                            await update_status_data(
+                                archive_db_table,
+                                "is_open",
+                                where_filter,
+                                trade_id,
+                                0,
+                                "=",
+                            )
+
+    
+                my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
+                    instrument_name,
+                    my_trades_instrument_name,
+                    positions_cached,
+                )
+                        
+                if my_trades_and_sub_account_size_reconciled:
+
+                    order_allowed = 1
+                    
+                    pub_message.update({"order_allowed": order_allowed})
             
     await publishing_result(
         client_redis,
@@ -374,4 +429,3 @@ async def every_update_on_position_channels(
         pub_message,
     )
     
-    log.critical (f"pub_message {pub_message} {pub_message["order_allowed"]}")

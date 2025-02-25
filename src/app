@@ -221,7 +221,8 @@ async def main():
                 private_data,
                 client_redis,
                 redis_channels,
-                config_app,),                
+                config_app,
+                ),                
             
             back_up_db(60*10),
             
