@@ -302,6 +302,40 @@ async def rechecking_reconciliation_regularly(
 )
 
 
+async def allowing_order_for_instrument_not_in_sub_account(
+    client_redis: object,
+    order_allowed_channel: str,
+    futures_instruments_name_not_in_positions_cached_instrument: list,
+    order_allowed: bool,
+    pub_message: dict,
+) -> None:
+    """ """
+    
+    order_allowed = 1
+    
+    for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
+        
+        currency: str = extract_currency_from_text(instrument_name)
+
+        pub_message.update({"instrument_name": instrument_name})
+        pub_message.update({"currency": currency})
+
+        pub_message.update({"order_allowed": order_allowed})
+
+        log.warning(f"pub_message not_in_positions {pub_message}")
+
+        await publishing_result(
+            client_redis,
+            order_allowed_channel,
+            pub_message,
+        )
+                
+        pub_message.update({"order_allowed": 0})
+
+        log.debug(f"pub_message not_in_positions {pub_message}")
+
+
+
 async def rechecking_based_on_sub_account(
     private_data: object,
     client_redis: object,
@@ -430,6 +464,8 @@ async def rechecking_based_on_sub_account(
         
         pub_message.update({"order_allowed": 0})
 
+        log.debug(f"pub_message not_in_positions {pub_message}")
+
 
 
 async def rechecking_based_on_data_in_sqlite(
@@ -533,33 +569,5 @@ async def rechecking_based_on_data_in_sqlite(
                         my_trades_active,
                     )
 
-async def allowing_order_for_instrument_not_in_sub_account(
-    client_redis: object,
-    order_allowed_channel: str,
-    futures_instruments_name_not_in_positions_cached_instrument: list,
-    order_allowed: bool,
-    pub_message: dict,
-) -> None:
-    """ """
-    
-    order_allowed = 1
-    
-    for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
-        
-        currency: str = extract_currency_from_text(instrument_name)
 
-        pub_message.update({"instrument_name": instrument_name})
-        pub_message.update({"currency": currency})
-
-        pub_message.update({"order_allowed": order_allowed})
-
-        log.warning(f"pub_message not_in_positions {pub_message}")
-
-        await publishing_result(
-            client_redis,
-            order_allowed_channel,
-            pub_message,
-        )
-                
-        pub_message.update({"order_allowed": 0})
-
+                    log.debug(f"pub_message not_in_positions {pub_message}")
