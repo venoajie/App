@@ -118,13 +118,19 @@ async def reconciling_size(
 
                         positions_cached = message_byte_data
 
+                        await agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
+                            private_data,
+                            positions_cached,
+                            order_db_table,
+                        )
+
                         await rechecking_reconciliation_regularly(
                             private_data,
                             client_redis,
                             futures_instruments_name,
                             currencies,
                             order_allowed_channel,
-                            message_byte_data,
+                            positions_cached,
                             order_db_table,
                             order_allowed,
                             five_days_ago,
@@ -213,36 +219,74 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
 
 
 async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
-    trades_from_exchange,
-    my_trades_instrument_name,
-    archive_db_table: str,
+    private_data: object,
+    positions_cached_instrument: list,
     order_db_table: str,
 ) -> None:
     """ """
 
-    if trades_from_exchange:
+    # FROM sub account to other db's
+    if positions_cached_instrument:
 
-        trades_from_exchange_without_futures_combo = [
-            o for o in trades_from_exchange if f"-FS-" not in o["instrument_name"]
-        ]
+        # sub account instruments
+        for instrument_name in positions_cached_instrument:
 
-        for trade in trades_from_exchange_without_futures_combo:
+            currency: str = extract_currency_from_text(instrument_name)
 
-            trade_trd_id = trade["trade_id"]
+            currency_lower = currency.lower()
 
-            trade_trd_id_not_in_archive = [
-                o for o in my_trades_instrument_name if trade_trd_id in o["trade_id"]
-            ]
+            archive_db_table = f"my_trades_all_{currency_lower}_json"
 
-            if not trade_trd_id_not_in_archive:
+            query_trades_all_basic = (
+                f"SELECT trade_id, timestamp  FROM  {archive_db_table}"
+            )
 
-                log.debug(f"{trade_trd_id}")
+            query_trades_all_where = f"WHERE instrument_name LIKE '%{instrument_name}%' ORDER BY timestamp DESC LIMIT 10"
 
-                await saving_traded_orders(
-                    trade,
-                    archive_db_table,
-                    order_db_table,
-                )
+            query_trades_all = f"{query_trades_all_basic} {query_trades_all_where}"
+
+            my_trades_instrument_name = await executing_query_with_return(
+                query_trades_all
+            )
+
+            last_10_timestamp_log = [o["timestamp"] for o in my_trades_instrument_name]
+
+            timestamp_log = min(last_10_timestamp_log)
+
+            trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
+                instrument_name,
+                timestamp_log
+                - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                1000,
+            )
+
+            if trades_from_exchange:
+
+                trades_from_exchange_without_futures_combo = [
+                    o
+                    for o in trades_from_exchange
+                    if f"-FS-" not in o["instrument_name"]
+                ]
+
+                for trade in trades_from_exchange_without_futures_combo:
+
+                    trade_trd_id = trade["trade_id"]
+
+                    trade_trd_id_not_in_archive = [
+                        o
+                        for o in my_trades_instrument_name
+                        if trade_trd_id in o["trade_id"]
+                    ]
+
+                    if not trade_trd_id_not_in_archive:
+
+                        log.debug(f"{trade_trd_id}")
+
+                        await saving_traded_orders(
+                            trade,
+                            archive_db_table,
+                            order_db_table,
+                        )
 
 
 async def rechecking_reconciliation_regularly(
@@ -272,13 +316,13 @@ async def rechecking_reconciliation_regularly(
     pub_message = defaultdict()
 
     await allowing_order_for_instrument_not_in_sub_account(
-    client_redis,
-    order_allowed_channel,
-    futures_instruments_name_not_in_positions_cached_instrument,
-    order_allowed,
-    pub_message,
-)
-    
+        client_redis,
+        order_allowed_channel,
+        futures_instruments_name_not_in_positions_cached_instrument,
+        order_allowed,
+        pub_message,
+    )
+
     # FROM sub account to other db's
     await rechecking_based_on_sub_account(
         private_data,
@@ -293,13 +337,15 @@ async def rechecking_reconciliation_regularly(
     )
 
     await rechecking_based_on_data_in_sqlite(
-    currencies,
-    client_redis,
-    order_allowed_channel,
-    positions_cached,
-    order_allowed,
-    pub_message,
-)
+        private_data,
+        client_redis,
+        currencies,
+        order_allowed_channel,
+        positions_cached,
+        order_allowed,
+        pub_message,
+        order_db_table,
+    )
 
 
 async def allowing_order_for_instrument_not_in_sub_account(
@@ -310,11 +356,11 @@ async def allowing_order_for_instrument_not_in_sub_account(
     pub_message: dict,
 ) -> None:
     """ """
-    
+
     order_allowed = 1
-    
+
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
-        
+
         currency: str = extract_currency_from_text(instrument_name)
 
         pub_message.update({"instrument_name": instrument_name})
@@ -322,16 +368,13 @@ async def allowing_order_for_instrument_not_in_sub_account(
 
         pub_message.update({"order_allowed": order_allowed})
 
-        log.warning(f"pub_message not_in_positions {pub_message}")
-
         await publishing_result(
             client_redis,
             order_allowed_channel,
             pub_message,
         )
-                
-        pub_message.update({"order_allowed": 0})
 
+        pub_message.update({"order_allowed": 0})
 
 
 async def rechecking_based_on_sub_account(
@@ -355,42 +398,12 @@ async def rechecking_based_on_sub_account(
 
             currency: str = extract_currency_from_text(instrument_name)
 
-            pub_message.update({"instrument_name": instrument_name})
-            pub_message.update({"currency": currency})
-
             currency_lower = currency.lower()
 
             archive_db_table = f"my_trades_all_{currency_lower}_json"
 
-            query_trades_all_basic = (
-                f"SELECT trade_id, timestamp  FROM  {archive_db_table}"
-            )
-
-            query_trades_all_where = f"WHERE instrument_name LIKE '%{instrument_name}%' ORDER BY timestamp DESC LIMIT 10"
-
-            query_trades_all = f"{query_trades_all_basic} {query_trades_all_where}"
-
-            my_trades_instrument_name = await executing_query_with_return(
-                query_trades_all
-            )
-
-            last_10_timestamp_log = [o["timestamp"] for o in my_trades_instrument_name]
-
-            timestamp_log = min(last_10_timestamp_log)
-
-            trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
-                instrument_name,
-                timestamp_log
-                - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
-                1000,
-            )
-
-            await agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
-                trades_from_exchange,
-                my_trades_instrument_name,
-                archive_db_table,
-                order_db_table,
-            )
+            pub_message.update({"instrument_name": instrument_name})
+            pub_message.update({"currency": currency})
 
             query_trades_active_basic = f"SELECT instrument_name, label, amount_dir as amount, trade_id  FROM  {archive_db_table}"
 
@@ -427,6 +440,10 @@ async def rechecking_based_on_sub_account(
 
             else:
 
+                order_allowed = 0
+
+                pub_message.update({"order_allowed": order_allowed})
+
                 trades_from_exchange = (
                     await private_data.get_user_trades_by_instrument_and_time(
                         instrument_name,
@@ -448,28 +465,29 @@ async def rechecking_based_on_sub_account(
                     query_trades_active
                 )
 
-            await clean_up_closed_transactions(
-                archive_db_table,
-                my_trades_instrument_name,
-            )
+                await clean_up_closed_transactions(
+                    archive_db_table,
+                    my_trades_instrument_name,
+                )
 
-        log.error(f"pub_message {pub_message}")
         await publishing_result(
             client_redis,
             order_allowed_channel,
             pub_message,
         )
-        
+
         pub_message.update({"order_allowed": 0})
 
 
 async def rechecking_based_on_data_in_sqlite(
-    currencies: object,
+    private_data: object,
     client_redis: object,
+    currencies: list,
     order_allowed_channel: str,
     positions_cached: list,
     order_allowed: bool,
     pub_message: dict,
+    order_db_table: str,
 ) -> None:
     """ """
 
@@ -522,7 +540,7 @@ async def rechecking_based_on_data_in_sqlite(
                             positions_cached,
                         )
                     )
-                    
+
                     if my_trades_and_sub_account_size_reconciled:
 
                         order_allowed = 1
@@ -550,13 +568,18 @@ async def rechecking_based_on_data_in_sqlite(
                                     "=",
                                 )
 
-                    log.error(f"pub_message {pub_message}")
+                    else:
+
+                        order_allowed = 0
+
+                        pub_message.update({"order_allowed": order_allowed})
+
                     await publishing_result(
                         client_redis,
                         order_allowed_channel,
                         pub_message,
                     )
-                    
+
                     pub_message.update({"order_allowed": 0})
 
                     await clean_up_closed_transactions(
