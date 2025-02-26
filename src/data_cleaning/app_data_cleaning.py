@@ -496,7 +496,7 @@ async def rechecking_based_on_data_in_sqlite(
                 ]
 
 
-                log.info(f"instrument_name {instrument_name} order_allowed {order_allowed}")
+                log.info(f"instrument_name {instrument_name} order_allowed {order_allowed} pub_message {pub_message}")
 
                 if my_trades_active:
 
@@ -569,6 +569,7 @@ async def allowing_order_for_instrument_not_in_sub_account(
         pub_message.update({"currency": currency})
 
         pub_message.update({"order_allowed": order_allowed})
+
         log.warning(f"pub_message not_in_positions {pub_message}")
 
         await publishing_result(
