@@ -235,12 +235,8 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
     # FROM sub account to other db's
     if positions_cached_instrument:
         
-        log.debug(positions_cached_instrument)
-
         # sub account instruments
         for instrument_name in positions_cached_instrument:
-
-            log.debug(instrument_name)
 
             currency: str = extract_currency_from_text(instrument_name)
 
