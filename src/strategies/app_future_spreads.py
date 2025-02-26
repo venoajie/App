@@ -69,23 +69,23 @@ async def future_spreads(
         instrument_attributes_combo_all = futures_instruments["active_combo"]
 
         # get redis channels
-        receive_order_channel: str = redis_channels["receive_order"]
+        order_receiving_channel: str = redis_channels["order_receiving"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
-        ticker_cached_channel: str = redis_channels["ticker_update_cached"]
         portfolio_channel: str = redis_channels["portfolio"]
-        my_trades_channel: str = redis_channels["my_trades"]
+        my_trades_channel: str = redis_channels["my_trades_cache_updating"]
         sending_order_channel: str = redis_channels["sending_order"]
-        sub_account_channel: str = redis_channels["sub_account_update"]
-        order_allowed_channel: str = redis_channels["is_order_allowed"]
+        order_allowed_channel: str = redis_channels["order_is_allowed"]
+        positions_update_channel: str = redis_channels["position_cache_updating"]
+        ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
+
 
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
-            receive_order_channel,
+            order_receiving_channel,
             ticker_cached_channel,
             portfolio_channel,
             my_trades_channel,
-            sub_account_channel,
             order_allowed_channel,
         ]
 
@@ -119,8 +119,12 @@ async def future_spreads(
                     message_channel = message_byte["channel"]
 
                     if order_allowed_channel in message_channel:
+                        
+                        log.warning (f"order_allowed {order_allowed}")
 
-                        order_allowed = message_byte_data
+                        order_allowed = message_byte_data * order_allowed
+
+                        log.critical (f"order_allowed {order_allowed}")
 
                     if market_analytics_channel in message_channel:
 
@@ -136,12 +140,12 @@ async def future_spreads(
                             query_trades
                         )
 
-                    if receive_order_channel in message_channel:
+                    if order_receiving_channel in message_channel:
 
                         cached_orders = message_byte_data["cached_orders"]
 
-                    if (
-                        ticker_cached_channel in message_channel
+                    if (order_allowed
+                        and ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all
                         and strategy in active_strategies

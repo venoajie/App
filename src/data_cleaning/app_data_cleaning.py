@@ -344,14 +344,12 @@ async def rechecking_reconciliation_regularly(
     )
 
     await rechecking_based_on_data_in_sqlite(
-        private_data,
         client_redis,
         currencies,
         order_allowed_channel,
         positions_cached,
         order_allowed,
         pub_message,
-        order_db_table,
     )
 
 
@@ -487,14 +485,12 @@ async def rechecking_based_on_sub_account(
 
 
 async def rechecking_based_on_data_in_sqlite(
-    private_data: object,
     client_redis: object,
     currencies: list,
     order_allowed_channel: str,
     positions_cached: list,
     order_allowed: bool,
     pub_message: dict,
-    order_db_table: str,
 ) -> None:
     """ """
 
