@@ -279,8 +279,6 @@ async def rechecking_reconciliation_regularly(
 
     pub_message = defaultdict()
 
-    order_allowed = 1
-    
     await allowing_order_for_instrument_not_in_sub_account(
     client_redis,
     order_allowed_channel,
@@ -288,8 +286,7 @@ async def rechecking_reconciliation_regularly(
     order_allowed,
     pub_message,
 )
-    order_allowed = 0
-
+    
     # FROM sub account to other db's
     await rechecking_based_on_sub_account(
         private_data,
@@ -406,8 +403,6 @@ async def rechecking_based_on_sub_account(
 
                 pub_message.update({"order_allowed": order_allowed})
 
-                order_allowed = 0
-
             else:
 
                 trades_from_exchange = (
@@ -442,6 +437,8 @@ async def rechecking_based_on_sub_account(
             order_allowed_channel,
             pub_message,
         )
+        
+        pub_message.update({"order_allowed": 0})
 
 
 
@@ -516,8 +513,6 @@ async def rechecking_based_on_data_in_sqlite(
 
                         pub_message.update({"order_allowed": order_allowed})
 
-                        order_allowed = 0
-
                         sum_my_trades_active = sum(
                             [o["amount"] for o in my_trades_active]
                         )
@@ -546,6 +541,8 @@ async def rechecking_based_on_data_in_sqlite(
                         order_allowed_channel,
                         pub_message,
                     )
+                    
+                    pub_message.update({"order_allowed": 0})
 
                     await clean_up_closed_transactions(
                         archive_db_table,
@@ -560,7 +557,9 @@ async def allowing_order_for_instrument_not_in_sub_account(
     pub_message: dict,
 ) -> None:
     """ """
-
+    
+    order_allowed = 1
+    
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
         
         currency: str = extract_currency_from_text(instrument_name)
@@ -577,3 +576,6 @@ async def allowing_order_for_instrument_not_in_sub_account(
             order_allowed_channel,
             pub_message,
         )
+                
+        pub_message.update({"order_allowed": 0})
+
