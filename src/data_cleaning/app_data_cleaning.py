@@ -332,8 +332,6 @@ async def allowing_order_for_instrument_not_in_sub_account(
                 
         pub_message.update({"order_allowed": 0})
 
-        log.debug(f"pub_message not_in_positions {pub_message}")
-
 
 
 async def rechecking_based_on_sub_account(
@@ -464,9 +462,6 @@ async def rechecking_based_on_sub_account(
         
         pub_message.update({"order_allowed": 0})
 
-        log.debug(f"pub_message not_in_positions {pub_message}")
-
-
 
 async def rechecking_based_on_data_in_sqlite(
     currencies: object,
@@ -568,6 +563,3 @@ async def rechecking_based_on_data_in_sqlite(
                         archive_db_table,
                         my_trades_active,
                     )
-
-
-                    log.debug(f"pub_message not_in_positions {pub_message}")
