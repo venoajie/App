@@ -98,7 +98,7 @@ async def reconciling_size(
 
                         delta_time = (exchange_server_time - server_time) / ONE_SECOND
 
-                        if delta_time > 1:
+                        if delta_time > 5:
 
                             await rechecking_reconciliation_regularly(
                                 private_data,
@@ -265,17 +265,9 @@ async def rechecking_reconciliation_regularly(
     # eliminating combo transactions as they're not recorded in the book
     positions_cached_instrument = [o for o in positions_cached_all if "-FS-" not in o]
 
-    log.warning(f"positions_cached {positions_cached}")
-    log.error(f"positions_cached_instrument {positions_cached_instrument}")
-    log.debug(f"futures_instruments_name {futures_instruments_name}")
-
     futures_instruments_name_not_in_positions_cached_instrument = [
         list(set(futures_instruments_name).difference(positions_cached_instrument))
     ][0]
-
-    log.info(
-        f"futures_instruments_name_not_in_positions_cached_instrument {futures_instruments_name_not_in_positions_cached_instrument}"
-    )
 
     pub_message = defaultdict()
 
@@ -394,8 +386,6 @@ async def rechecking_based_on_sub_account(
                     positions_cached,
                 )
             )
-            
-            log.info(f"instrument_name {instrument_name} order_allowed {order_allowed} my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
 
             if my_trades_and_sub_account_size_reconciled:
 
@@ -492,9 +482,6 @@ async def rechecking_based_on_data_in_sqlite(
                     if instrument_name in o["instrument_name"]
                 ]
 
-
-                log.info(f"instrument_name {instrument_name} order_allowed {order_allowed} pub_message {pub_message}")
-
                 if my_trades_active:
 
                     my_trades_and_sub_account_size_reconciled = (
@@ -505,8 +492,6 @@ async def rechecking_based_on_data_in_sqlite(
                         )
                     )
                     
-                    log.info(f"my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
-
                     if my_trades_and_sub_account_size_reconciled:
 
                         order_allowed = 1
@@ -534,7 +519,6 @@ async def rechecking_based_on_data_in_sqlite(
                                     "=",
                                 )
 
-                    log.info(f"instrument_name {instrument_name}")
                     log.error(f"pub_message {pub_message}")
                     await publishing_result(
                         client_redis,
