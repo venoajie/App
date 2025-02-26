@@ -118,9 +118,16 @@ async def reconciling_size(
 
                         positions_cached = message_byte_data
 
+                        positions_cached_all = remove_redundant_elements(
+                            [o["instrument_name"] for o in positions_cached]
+                        )
+
+                        # eliminating combo transactions as they're not recorded in the book
+                        positions_cached_instrument = [o for o in positions_cached_all if "-FS-" not in o]
+
                         await agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                             private_data,
-                            positions_cached,
+                            positions_cached_instrument,
                             order_db_table,
                         )
 
