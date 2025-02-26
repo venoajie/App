@@ -397,6 +397,8 @@ async def rechecking_based_on_sub_account(
                     positions_cached,
                 )
             )
+            
+            log.info(f"instrument_name {instrument_name} order_allowed {order_allowed} my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
 
             if my_trades_and_sub_account_size_reconciled:
 
@@ -482,8 +484,6 @@ async def rechecking_based_on_data_in_sqlite(
             # sub account instruments
             for instrument_name in my_trades_active_instrument:
 
-                log.info(f"instrument_name {instrument_name}")
-
                 currency: str = extract_currency_from_text(instrument_name)
 
                 pub_message.update({"instrument_name": instrument_name})
@@ -495,6 +495,9 @@ async def rechecking_based_on_data_in_sqlite(
                     if instrument_name in o["instrument_name"]
                 ]
 
+
+                log.info(f"instrument_name {instrument_name} order_allowed {order_allowed}")
+
                 if my_trades_active:
 
                     my_trades_and_sub_account_size_reconciled = (
@@ -504,6 +507,8 @@ async def rechecking_based_on_data_in_sqlite(
                             positions_cached,
                         )
                     )
+                    
+                    log.info(f"my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
 
                     if my_trades_and_sub_account_size_reconciled:
 
