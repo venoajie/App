@@ -34,7 +34,6 @@ from market_understanding.price_action.candles_analysis import get_market_condit
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
 from transaction_management.deribit.distributing_ws_data import caching_distributing_data
-from transaction_management.deribit.managing_deribit import ModifyOrderDb
 from transaction_management.deribit.processing_orders import \
     processing_orders
 from utilities.system_tools import (
@@ -156,6 +155,15 @@ async def main():
         
         """
    
+            #scanning_volume()
+                  
+            """
+            
+        await asyncio.gather(
+            producer_task, 
+        
+            saving_task,
+   
             future_spreads(
                 client_redis,
                 config_app,
@@ -171,16 +179,7 @@ async def main():
                 redis_channels,
                 strategy_attributes,
                 ),
-            
-            #scanning_volume()
-                  
-            """
-            
-        await asyncio.gather(
-            producer_task, 
-        
-            saving_task,
-            
+                     
             cancelling_orders(
             private_data,
             currencies,
