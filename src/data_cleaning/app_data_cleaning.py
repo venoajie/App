@@ -100,7 +100,7 @@ async def reconciling_size(
 
                         if delta_time > 1:
 
-                            await every_update_on_position_channels(
+                            await rechecking_reconciliation_regularly(
                                 private_data,
                                 client_redis,
                                 futures_instruments_name,
@@ -118,7 +118,7 @@ async def reconciling_size(
 
                         positions_cached = message_byte_data
 
-                        await every_update_on_position_channels(
+                        await rechecking_reconciliation_regularly(
                             private_data,
                             client_redis,
                             futures_instruments_name,
@@ -245,7 +245,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                 )
 
 
-async def every_update_on_position_channels(
+async def rechecking_reconciliation_regularly(
     private_data: object,
     client_redis: object,
     futures_instruments_name,
@@ -269,34 +269,62 @@ async def every_update_on_position_channels(
     log.error(f"positions_cached_instrument {positions_cached_instrument}")
     log.debug(f"futures_instruments_name {futures_instruments_name}")
 
-    futures_instruments_name_not_in_positions_cached_instrument = [list(
-        set(futures_instruments_name).difference(positions_cached_instrument)
-    )][0]
+    futures_instruments_name_not_in_positions_cached_instrument = [
+        list(set(futures_instruments_name).difference(positions_cached_instrument))
+    ][0]
 
     log.info(
         f"futures_instruments_name_not_in_positions_cached_instrument {futures_instruments_name_not_in_positions_cached_instrument}"
     )
 
     pub_message = defaultdict()
+
+    order_allowed = 1
     
-    for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
-        order_allowed = 1
+    await allowing_order_for_instrument_not_in_sub_account(
+    client_redis,
+    order_allowed_channel,
+    futures_instruments_name_not_in_positions_cached_instrument,
+    order_allowed,
+    pub_message,
+)
+    order_allowed = 0
 
-        currency: str = extract_currency_from_text(instrument_name)
+    # FROM sub account to other db's
+    await rechecking_based_on_sub_account(
+        private_data,
+        client_redis,
+        order_allowed_channel,
+        positions_cached,
+        positions_cached_instrument,
+        order_db_table,
+        order_allowed,
+        pub_message,
+        five_days_ago,
+    )
 
-        pub_message.update({"instrument_name": instrument_name})
-        pub_message.update({"currency": currency})
-        
-        pub_message.update({"order_allowed": order_allowed})
-        log.warning(f"pub_message not_in_positions {pub_message}")
+    await rechecking_based_on_data_in_sqlite(
+    currencies,
+    client_redis,
+    order_allowed_channel,
+    positions_cached,
+    order_allowed,
+    pub_message,
+)
 
-        await publishing_result(
-            client_redis,
-            order_allowed_channel,
-            pub_message,
-        )
 
-        order_allowed = 0
+async def rechecking_based_on_sub_account(
+    private_data: object,
+    client_redis: object,
+    order_allowed_channel: str,
+    positions_cached: list,
+    positions_cached_instrument: list,
+    order_db_table: str,
+    order_allowed: bool,
+    pub_message: dict,
+    five_days_ago: int,
+) -> None:
+    """ """
 
     # FROM sub account to other db's
     if positions_cached_instrument:
@@ -361,8 +389,6 @@ async def every_update_on_position_channels(
                 archive_db_table,
                 my_trades_instrument_name,
             )
-            log.info(f"my_trades_active {my_trades_instrument_name}")
-            log.debug(f"positions_cached {positions_cached}")
 
             my_trades_and_sub_account_size_reconciled = (
                 is_my_trades_and_sub_account_size_reconciled_each_other(
@@ -414,6 +440,18 @@ async def every_update_on_position_channels(
             order_allowed_channel,
             pub_message,
         )
+
+
+
+async def rechecking_based_on_data_in_sqlite(
+    currencies: object,
+    client_redis: object,
+    order_allowed_channel: str,
+    positions_cached: list,
+    order_allowed: bool,
+    pub_message: dict,
+) -> None:
+    """ """
 
     for currency in currencies:
 
@@ -467,13 +505,7 @@ async def every_update_on_position_channels(
                         )
                     )
 
-                    log.debug(f"pub_message {pub_message}")
-
                     if my_trades_and_sub_account_size_reconciled:
-
-                        log.info(f"instrument_name {instrument_name}")
-                        log.info(f"my_trades_active {my_trades_active}")
-                        log.debug(f"positions_cached {positions_cached}")
 
                         order_allowed = 1
 
@@ -514,3 +546,28 @@ async def every_update_on_position_channels(
                         archive_db_table,
                         my_trades_active,
                     )
+
+async def allowing_order_for_instrument_not_in_sub_account(
+    client_redis: object,
+    order_allowed_channel: str,
+    futures_instruments_name_not_in_positions_cached_instrument: list,
+    order_allowed: bool,
+    pub_message: dict,
+) -> None:
+    """ """
+
+    for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
+        
+        currency: str = extract_currency_from_text(instrument_name)
+
+        pub_message.update({"instrument_name": instrument_name})
+        pub_message.update({"currency": currency})
+
+        pub_message.update({"order_allowed": order_allowed})
+        log.warning(f"pub_message not_in_positions {pub_message}")
+
+        await publishing_result(
+            client_redis,
+            order_allowed_channel,
+            pub_message,
+        )
