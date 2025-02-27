@@ -397,7 +397,7 @@ async def allowing_order_for_instrument_not_in_sub_account(
         log.debug (pub_message)
         log.error (combined_order_allowed)
         
-        order_allowed_updating_cached(
+        combined_order_allowed = order_allowed_updating_cached(
             combined_order_allowed,
             pub_message,
             )
@@ -701,3 +701,5 @@ def order_allowed_updating_cached(
 
 
     log.info(order_allowed_cached)
+    
+    return order_allowed_cached
