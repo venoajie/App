@@ -391,7 +391,7 @@ async def allowing_order_for_instrument_not_in_sub_account(
         
         pub_message.update({"size_is_reconciled": 0})
         
-    result = defaultdict()
+    result = {}
     result.update({"result": combined_order_allowed})
 
     await publishing_result(
@@ -510,7 +510,7 @@ async def rechecking_based_on_sub_account(
 
             pub_message.update({"size_is_reconciled": 0})
 
-        result = defaultdict()
+        result = {}
 
         result.update({"result": combined_order_allowed})
 
@@ -634,7 +634,7 @@ async def rechecking_based_on_data_in_sqlite(
                         my_trades_active,
                     )
 
-    result = defaultdict()
+    result = {}
 
     result.update({"result": combined_order_allowed})
 
