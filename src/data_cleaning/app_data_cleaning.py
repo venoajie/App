@@ -687,6 +687,7 @@ def order_allowed_updating_cached(
                 order_allowed_cached.remove(selected[0])
 
             order_allowed_cached.append(data)
+            
     else:
         log.debug(data)
         order_allowed_cached.append(data)
