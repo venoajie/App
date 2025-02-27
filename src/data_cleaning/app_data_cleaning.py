@@ -372,6 +372,7 @@ async def allowing_order_for_instrument_not_in_sub_account(
     """ """
 
     order_allowed = 1
+    log.info(combined_order_allowed)
 
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
 
@@ -391,6 +392,9 @@ async def allowing_order_for_instrument_not_in_sub_account(
         
     result = {}
     result.update({"result": combined_order_allowed})
+    
+    log.info(result)
+    log.warning(combined_order_allowed)
 
     await publishing_result(
         client_redis,
