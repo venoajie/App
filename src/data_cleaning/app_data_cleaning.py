@@ -651,6 +651,8 @@ def order_allowed_updating_cached(
 ):
     """ """
 
+    log.error(order_allowed_cached)
+
     if order_allowed_cached:
         
         log.debug(order_allowed_cached)
@@ -675,5 +677,8 @@ def order_allowed_updating_cached(
 
             order_allowed_cached.append(data)
     else:
+        log.debug(data)
         order_allowed_cached.append(data)
 
+
+    log.info(order_allowed_cached)
