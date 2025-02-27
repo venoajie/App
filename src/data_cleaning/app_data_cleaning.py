@@ -331,6 +331,8 @@ async def rechecking_reconciliation_regularly(
     ][0]
 
     pub_message = {}
+    
+    log.critical(combined_order_allowed)
 
     await allowing_order_for_instrument_not_in_sub_account(
         client_redis,
@@ -341,6 +343,8 @@ async def rechecking_reconciliation_regularly(
         pub_message,
         result,
     )
+
+    log.critical(combined_order_allowed)
 
     # FROM sub account to other db's
     await rechecking_based_on_sub_account(
