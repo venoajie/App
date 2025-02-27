@@ -155,15 +155,6 @@ async def main():
         
         """
    
-            #scanning_volume()
-                  
-            """
-            
-        await asyncio.gather(
-            producer_task, 
-        
-            saving_task,
-   
             future_spreads(
                 client_redis,
                 config_app,
@@ -179,7 +170,16 @@ async def main():
                 redis_channels,
                 strategy_attributes,
                 ),
-                     
+     
+            #scanning_volume()
+                  
+            """
+            
+        await asyncio.gather(
+            producer_task, 
+        
+            saving_task,
+                   
             cancelling_orders(
             private_data,
             currencies,
