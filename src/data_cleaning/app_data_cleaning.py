@@ -654,8 +654,12 @@ def order_allowed_updating_cached(
     """ """
 
     if order_allowed_cached:
+        
+        log.debug(order_allowed_cached)
 
         for allowable in order_allowed_cached:
+            
+            log.warning(allowable)
 
             instrument_name = allowable["instrument_name"]
 
@@ -664,6 +668,8 @@ def order_allowed_updating_cached(
                 for o in order_allowed_cached
                 if instrument_name in o["instrument_name"]
             ]
+
+            log.error(selected)
 
             if selected:
 
