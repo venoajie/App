@@ -3,7 +3,6 @@
 
 import asyncio
 import orjson
-from collections import defaultdict
 
 from loguru import logger as log
 
@@ -326,8 +325,7 @@ async def rechecking_reconciliation_regularly(
         list(set(futures_instruments_name).difference(positions_cached_instrument))
     ][0]
 
-    pub_message = defaultdict()
-    
+    pub_message = {}
 
     await allowing_order_for_instrument_not_in_sub_account(
         client_redis,
