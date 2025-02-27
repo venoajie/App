@@ -79,6 +79,8 @@ async def reconciling_size(
         all_instruments_name = futures_instruments["instruments_name"]
 
         futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
+        
+        result = {}
 
         while True:
 
@@ -113,6 +115,7 @@ async def reconciling_size(
                                 order_db_table,
                                 order_allowed,
                                 five_days_ago,
+                                result,
                             )
 
                             server_time = exchange_server_time
@@ -145,6 +148,7 @@ async def reconciling_size(
                             order_db_table,
                             order_allowed,
                             five_days_ago,
+                            result,
                         )
 
             except Exception as error:
@@ -311,6 +315,7 @@ async def rechecking_reconciliation_regularly(
     order_db_table: str,
     order_allowed: bool,
     five_days_ago: int,
+    result,
 ) -> None:
     """ """
 
@@ -334,6 +339,7 @@ async def rechecking_reconciliation_regularly(
         futures_instruments_name_not_in_positions_cached_instrument,
         order_allowed,
         pub_message,
+        result,
     )
 
     # FROM sub account to other db's
@@ -368,6 +374,7 @@ async def allowing_order_for_instrument_not_in_sub_account(
     futures_instruments_name_not_in_positions_cached_instrument: list,
     order_allowed: bool,
     pub_message: dict,
+    result: dict,
 ) -> None:
     """ """
 
