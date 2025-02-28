@@ -403,12 +403,13 @@ async def allowing_order_for_instrument_not_in_sub_account(
 
         log.warning(instrument_name)
         
-        log.info([
+    
+        log.critical([
             o
             for o in combined_order_allowed
             if instrument_name in o["instrument_name"]
-        ])
-        
+        ][0])
+                
         log.warning([
             o
             for o in combined_order_allowed
@@ -427,6 +428,12 @@ async def allowing_order_for_instrument_not_in_sub_account(
             if instrument_name in o["instrument_name"]
         ][0]["size_is_reconciled"] = order_allowed
     
+        log.critical([
+            o
+            for o in combined_order_allowed
+            if instrument_name in o["instrument_name"]
+        ][0])
+             
         
     result = {}
     result.update({"result": combined_order_allowed})
