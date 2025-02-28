@@ -101,7 +101,7 @@ async def reconciling_size(
             
             combined_order_allowed.append(result)
                 
-            log.debug(combined_order_allowed)
+        log.debug(combined_order_allowed)
                 
         while True:
 
