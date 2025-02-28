@@ -401,8 +401,6 @@ async def allowing_order_for_instrument_not_in_sub_account(
 
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
 
-        pub_message.update({"size_is_reconciled": order_allowed})
-        
         log.warning(instrument_name)
         
         log.info([
@@ -422,9 +420,7 @@ async def allowing_order_for_instrument_not_in_sub_account(
             for o in combined_order_allowed
             if instrument_name in o["instrument_name"]
         ][0]["size_is_reconciled"])
-        
-        log.error(order_allowed)
-        
+                
         [
             o
             for o in combined_order_allowed
@@ -435,7 +431,7 @@ async def allowing_order_for_instrument_not_in_sub_account(
     result = {}
     result.update({"result": combined_order_allowed})
     
-    log.info(result)
+    log.debug(result)
     
     await publishing_result(
         client_redis,
