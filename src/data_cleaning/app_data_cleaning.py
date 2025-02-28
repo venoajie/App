@@ -92,14 +92,18 @@ async def reconciling_size(
             result.update({"currency": currency})
             
             if "-FS-" in instrument_name:
-                result.update({"size_is_reconciled": 1})
+                size_is_reconciled= 1
                     
             else:
-                result.update({"size_is_reconciled": 0})
+                size_is_reconciled= 0
                 
+            order_allowed = dict(instrument_name=instrument_name,
+                                 currency=currency,
+                                 size_is_reconciled=size_is_reconciled
+                                 )
             log.warning(result)
             
-            combined_order_allowed.append(result)
+            combined_order_allowed.append(order_allowed)
                 
         log.debug(combined_order_allowed)
                 
