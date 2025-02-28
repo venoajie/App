@@ -348,19 +348,14 @@ async def rechecking_reconciliation_regularly(
         list(set(futures_instruments_name).difference(positions_cached_instrument))
     ][0]
 
-    pub_message = {}
-
     await allowing_order_for_instrument_not_in_sub_account(
         client_redis,
         combined_order_allowed,
         order_allowed_channel,
         futures_instruments_name_not_in_positions_cached_instrument,
         order_allowed,
-        pub_message,
         result,
     )
-
-    log.critical(combined_order_allowed)
 
     # FROM sub account to other db's
     await rechecking_based_on_sub_account(
@@ -372,7 +367,6 @@ async def rechecking_reconciliation_regularly(
         positions_cached_instrument,
         order_db_table,
         order_allowed,
-        pub_message,
         five_days_ago,
     )
 
@@ -383,7 +377,6 @@ async def rechecking_reconciliation_regularly(
         order_allowed_channel,
         positions_cached,
         order_allowed,
-        pub_message,
     )
 
 
@@ -393,7 +386,6 @@ async def allowing_order_for_instrument_not_in_sub_account(
     order_allowed_channel: str,
     futures_instruments_name_not_in_positions_cached_instrument: list,
     order_allowed: bool,
-    pub_message: dict,
     result: dict,
 ) -> None:
     """ """
@@ -408,8 +400,6 @@ async def allowing_order_for_instrument_not_in_sub_account(
 
     result = {}
     result.update({"result": combined_order_allowed})
-
-    log.debug(result)
 
     await publishing_result(
         client_redis,
@@ -427,7 +417,6 @@ async def rechecking_based_on_sub_account(
     positions_cached_instrument: list,
     order_db_table: str,
     order_allowed: bool,
-    pub_message: dict,
     five_days_ago: int,
 ) -> None:
     """ """
@@ -443,9 +432,6 @@ async def rechecking_based_on_sub_account(
             currency_lower = currency.lower()
 
             archive_db_table = f"my_trades_all_{currency_lower}_json"
-
-            pub_message.update({"instrument_name": instrument_name})
-            pub_message.update({"currency": currency})
 
             query_trades_active_basic = f"SELECT instrument_name, label, amount_dir as amount, trade_id  FROM  {archive_db_table}"
 
@@ -514,8 +500,6 @@ async def rechecking_based_on_sub_account(
                     my_trades_instrument_name,
                 )
 
-            pub_message.update({"size_is_reconciled": 0})
-
         result = {}
 
         result.update({"result": combined_order_allowed})
@@ -526,7 +510,6 @@ async def rechecking_based_on_sub_account(
             result,
         )
 
-        log.debug(result)
 
 
 async def rechecking_based_on_data_in_sqlite(
@@ -536,7 +519,6 @@ async def rechecking_based_on_data_in_sqlite(
     order_allowed_channel: str,
     positions_cached: list,
     order_allowed: bool,
-    pub_message: dict,
 ) -> None:
     """ """
 
@@ -568,11 +550,6 @@ async def rechecking_based_on_data_in_sqlite(
 
             # sub account instruments
             for instrument_name in my_trades_active_instrument:
-
-                currency: str = extract_currency_from_text(instrument_name)
-
-                pub_message.update({"instrument_name": instrument_name})
-                pub_message.update({"currency": currency})
 
                 my_trades_active = [
                     o
@@ -645,5 +622,3 @@ async def rechecking_based_on_data_in_sqlite(
         order_allowed_channel,
         result,
     )
-
-    log.error(result)
