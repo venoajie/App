@@ -88,10 +88,10 @@ async def reconciling_size(
             result.update({"instrument_name": instrument_name})
             result.update({"currency": currency})
             if "-FS-" in instrument_name:
-                result.update({"size_is_reconciled": 0})
+                result.update({"size_is_reconciled": 1})
                     
             else:
-                result.update({"size_is_reconciled": 1})
+                result.update({"size_is_reconciled": 0})
                 
             log.warning(result)
             combined_order_allowed.append(result)
