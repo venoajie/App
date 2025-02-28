@@ -480,12 +480,6 @@ async def rechecking_based_on_sub_account(
 
             else:
 
-                log.debug(
-                    positions_cached,)
-
-                log.warning(
-                    my_trades_instrument_name,
-                    )
                 order_allowed = 0
 
                 [
@@ -629,13 +623,6 @@ async def rechecking_based_on_data_in_sqlite(
 
                     else:
                         
-                        log.debug(
-                            positions_cached,)
-
-                        log.warning(
-                            my_trades_active,
-                            )
-
                         order_allowed = 0
 
                         [
