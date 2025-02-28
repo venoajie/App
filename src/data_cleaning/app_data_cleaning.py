@@ -690,6 +690,8 @@ def order_allowed_updating_cached(
 
         order_allowed_cached.append(data)
         
+        log.warning(order_allowed_cached)
+        
     else:
         log.debug(order_allowed_cached)
         order_allowed_cached.append(data)
