@@ -121,13 +121,7 @@ async def hedging_spot(
 
                     if order_allowed_channel in message_channel:
 
-                        log.warning(
-                            f"order_allowed {order_allowed} {message_byte_data}"
-                        )
-
-                        order_allowed = message_byte_data * order_allowed
-
-                        log.critical(f"order_allowed {order_allowed}")
+                        order_allowed = message_byte_data 
 
                     if market_analytics_channel in message_channel:
 
