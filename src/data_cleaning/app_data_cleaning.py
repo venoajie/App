@@ -80,16 +80,10 @@ async def reconciling_size(
         
         result = {}
         
-        log.info(all_instruments_name)
-
         combined_order_allowed = []        
         for instrument_name in all_instruments_name:
             
             currency: str = extract_currency_from_text(instrument_name)
-            
-            result.update({"instrument_name": instrument_name})
-            
-            result.update({"currency": currency})
             
             if "-FS-" in instrument_name:
                 size_is_reconciled= 1
@@ -98,14 +92,10 @@ async def reconciling_size(
                 size_is_reconciled= 0
                 
             order_allowed = dict(instrument_name=instrument_name,
+                                 size_is_reconciled=size_is_reconciled,
                                  currency=currency,
-                                 size_is_reconciled=size_is_reconciled
                                  )
-            log.warning(result)
-            
             combined_order_allowed.append(order_allowed)
-                
-        log.debug(combined_order_allowed)
                 
         while True:
 
