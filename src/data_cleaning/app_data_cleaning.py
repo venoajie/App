@@ -396,44 +396,14 @@ async def allowing_order_for_instrument_not_in_sub_account(
     """ """
 
     order_allowed = 1
-    log.info(combined_order_allowed)
-    log.warning(futures_instruments_name_not_in_positions_cached_instrument)
-
-    for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
-
-        log.warning(instrument_name)
-        
     
-        log.critical([
-            o
-            for o in combined_order_allowed
-            if instrument_name in o["instrument_name"]
-        ][0])
-                
-        log.warning([
-            o
-            for o in combined_order_allowed
-            if instrument_name in o["instrument_name"]
-        ][0])
-        
-        log.info([
-            o
-            for o in combined_order_allowed
-            if instrument_name in o["instrument_name"]
-        ][0]["size_is_reconciled"])
-                
+    for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
+     
         [
             o
             for o in combined_order_allowed
             if instrument_name in o["instrument_name"]
         ][0]["size_is_reconciled"] = order_allowed
-    
-        log.critical([
-            o
-            for o in combined_order_allowed
-            if instrument_name in o["instrument_name"]
-        ][0])
-             
         
     result = {}
     result.update({"result": combined_order_allowed})
@@ -491,11 +461,6 @@ async def rechecking_based_on_sub_account(
                 query_trades_active
             )
 
-            await clean_up_closed_transactions(
-                archive_db_table,
-                my_trades_instrument_name,
-            )
-
             my_trades_and_sub_account_size_reconciled = (
                 is_my_trades_and_sub_account_size_reconciled_each_other(
                     instrument_name,
@@ -507,24 +472,21 @@ async def rechecking_based_on_sub_account(
             if my_trades_and_sub_account_size_reconciled:
 
                 order_allowed = 1
-
-                pub_message.update({"size_is_reconciled": order_allowed})
-                
-                order_allowed_updating_cached(
-                    combined_order_allowed,
-                    pub_message,
-                    )
-
+                [
+            o
+            for o in combined_order_allowed
+            if instrument_name in o["instrument_name"]
+        ][0]["size_is_reconciled"] = order_allowed
+        
             else:
 
                 order_allowed = 0
 
-                pub_message.update({"size_is_reconciled": order_allowed})
-                
-                order_allowed_updating_cached(
-                    combined_order_allowed,
-                    pub_message,
-                    )
+                [
+            o
+            for o in combined_order_allowed
+            if instrument_name in o["instrument_name"]
+        ][0]["size_is_reconciled"] = order_allowed
 
                 trades_from_exchange = (
                     await private_data.get_user_trades_by_instrument_and_time(
@@ -631,13 +593,13 @@ async def rechecking_based_on_data_in_sqlite(
                     if my_trades_and_sub_account_size_reconciled:
 
                         order_allowed = 1
+                        
+                        [
+            o
+            for o in combined_order_allowed
+            if instrument_name in o["instrument_name"]
+        ][0]["size_is_reconciled"] = order_allowed
 
-                        pub_message.update({"size_is_reconciled": order_allowed})
-
-                        order_allowed_updating_cached(
-                            combined_order_allowed,
-                            pub_message,
-                            )
 
                         sum_my_trades_active = sum(
                             [o["amount"] for o in my_trades_active]
@@ -664,14 +626,11 @@ async def rechecking_based_on_data_in_sqlite(
 
                         order_allowed = 0
 
-                        pub_message.update({"size_is_reconciled": order_allowed})
-
-                        order_allowed_updating_cached(
-                            combined_order_allowed,
-                            pub_message,
-                            )
-
-                    pub_message.update({"size_is_reconciled": 0})
+                        [
+            o
+            for o in combined_order_allowed
+            if instrument_name in o["instrument_name"]
+        ][0]["size_is_reconciled"] = order_allowed
 
                     await clean_up_closed_transactions(
                         archive_db_table,
@@ -690,37 +649,3 @@ async def rechecking_based_on_data_in_sqlite(
     
     log.error(result)
 
-
-def order_allowed_updating_cached(
-    order_allowed_cached: list,
-    data: dict,
-):
-    """ """
-
-    log.error(order_allowed_cached)
-
-    if order_allowed_cached:
-        
-        instrument_name = data["instrument_name"]
-        
-        selected = [
-            o
-            for o in order_allowed_cached
-            if instrument_name in o["instrument_name"]
-        ]
-
-        log.error(selected)
-
-        if selected:
-
-            order_allowed_cached.remove(selected[0])
-
-        order_allowed_cached.append(data)
-        
-        log.warning(order_allowed_cached)
-        
-    else:
-        log.debug(order_allowed_cached)
-        order_allowed_cached.append(data)
-    log.info(order_allowed_cached)
-    
