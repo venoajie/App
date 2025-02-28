@@ -78,7 +78,6 @@ async def future_spreads(
         positions_update_channel: str = redis_channels["position_cache_updating"]
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
 
-
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
@@ -119,12 +118,14 @@ async def future_spreads(
                     message_channel = message_byte["channel"]
 
                     if order_allowed_channel in message_channel:
-                        
-                        log.warning (f"order_allowed {order_allowed} {message_byte_data}")
+
+                        log.warning(
+                            f"order_allowed {order_allowed} {message_byte_data}"
+                        )
 
                         order_allowed = message_byte_data * order_allowed
 
-                        log.critical (f"order_allowed {order_allowed}")
+                        log.critical(f"order_allowed {order_allowed}")
 
                     if market_analytics_channel in message_channel:
 
@@ -144,7 +145,8 @@ async def future_spreads(
 
                         cached_orders = message_byte_data["cached_orders"]
 
-                    if (order_allowed
+                    if (
+                        order_allowed
                         and ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all

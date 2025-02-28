@@ -73,30 +73,31 @@ async def reconciling_size(
         min_expiration_timestamp = futures_instruments["min_expiration_timestamp"]
 
         active_futures = futures_instruments["active_futures"]
-        
+
         all_instruments_name = futures_instruments["instruments_name"]
 
         futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
-        
+
         result = {}
-        
-        combined_order_allowed = []        
+
+        combined_order_allowed = []
         for instrument_name in all_instruments_name:
-            
+
             currency: str = extract_currency_from_text(instrument_name)
-            
+
             if "-FS-" in instrument_name:
-                size_is_reconciled= 1
-                    
+                size_is_reconciled = 1
+
             else:
-                size_is_reconciled= 0
-                
-            order_allowed = dict(instrument_name=instrument_name,
-                                 size_is_reconciled=size_is_reconciled,
-                                 currency=currency,
-                                 )
+                size_is_reconciled = 0
+
+            order_allowed = dict(
+                instrument_name=instrument_name,
+                size_is_reconciled=size_is_reconciled,
+                currency=currency,
+            )
             combined_order_allowed.append(order_allowed)
-                
+
         while True:
 
             try:
@@ -144,7 +145,9 @@ async def reconciling_size(
                         )
 
                         # eliminating combo transactions as they're not recorded in the book
-                        positions_cached_instrument = [o for o in positions_cached_all if "-FS-" not in o]
+                        positions_cached_instrument = [
+                            o for o in positions_cached_all if "-FS-" not in o
+                        ]
 
                         await agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                             private_data,
@@ -257,7 +260,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
 
     # FROM sub account to other db's
     if positions_cached_instrument:
-        
+
         # sub account instruments
         for instrument_name in positions_cached_instrument:
 
@@ -346,7 +349,7 @@ async def rechecking_reconciliation_regularly(
     ][0]
 
     pub_message = {}
-    
+
     await allowing_order_for_instrument_not_in_sub_account(
         client_redis,
         combined_order_allowed,
@@ -396,27 +399,24 @@ async def allowing_order_for_instrument_not_in_sub_account(
     """ """
 
     order_allowed = 1
-    
+
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
-     
-        [
-            o
-            for o in combined_order_allowed
-            if instrument_name in o["instrument_name"]
-        ][0]["size_is_reconciled"] = order_allowed
-        
+
+        [o for o in combined_order_allowed if instrument_name in o["instrument_name"]][
+            0
+        ]["size_is_reconciled"] = order_allowed
+
     result = {}
     result.update({"result": combined_order_allowed})
-    
+
     log.debug(result)
-    
+
     await publishing_result(
         client_redis,
         order_allowed_channel,
         result,
     )
-    
-      
+
 
 async def rechecking_based_on_sub_account(
     private_data: object,
@@ -473,20 +473,26 @@ async def rechecking_based_on_sub_account(
 
                 order_allowed = 1
                 [
-            o
-            for o in combined_order_allowed
-            if instrument_name in o["instrument_name"]
-        ][0]["size_is_reconciled"] = order_allowed
-        
+                    o
+                    for o in combined_order_allowed
+                    if instrument_name in o["instrument_name"]
+                ][0]["size_is_reconciled"] = order_allowed
+
             else:
 
+                log.debug(
+                    positions_cached,)
+
+                log.warning(
+                    my_trades_instrument_name,
+                    )
                 order_allowed = 0
 
                 [
-            o
-            for o in combined_order_allowed
-            if instrument_name in o["instrument_name"]
-        ][0]["size_is_reconciled"] = order_allowed
+                    o
+                    for o in combined_order_allowed
+                    if instrument_name in o["instrument_name"]
+                ][0]["size_is_reconciled"] = order_allowed
 
                 trades_from_exchange = (
                     await private_data.get_user_trades_by_instrument_and_time(
@@ -593,13 +599,12 @@ async def rechecking_based_on_data_in_sqlite(
                     if my_trades_and_sub_account_size_reconciled:
 
                         order_allowed = 1
-                        
-                        [
-            o
-            for o in combined_order_allowed
-            if instrument_name in o["instrument_name"]
-        ][0]["size_is_reconciled"] = order_allowed
 
+                        [
+                            o
+                            for o in combined_order_allowed
+                            if instrument_name in o["instrument_name"]
+                        ][0]["size_is_reconciled"] = order_allowed
 
                         sum_my_trades_active = sum(
                             [o["amount"] for o in my_trades_active]
@@ -623,14 +628,21 @@ async def rechecking_based_on_data_in_sqlite(
                                 )
 
                     else:
+                        
+                        log.debug(
+                            positions_cached,)
+
+                        log.warning(
+                            my_trades_active,
+                            )
 
                         order_allowed = 0
 
                         [
-            o
-            for o in combined_order_allowed
-            if instrument_name in o["instrument_name"]
-        ][0]["size_is_reconciled"] = order_allowed
+                            o
+                            for o in combined_order_allowed
+                            if instrument_name in o["instrument_name"]
+                        ][0]["size_is_reconciled"] = order_allowed
 
                     await clean_up_closed_transactions(
                         archive_db_table,
@@ -646,6 +658,5 @@ async def rechecking_based_on_data_in_sqlite(
         order_allowed_channel,
         result,
     )
-    
-    log.error(result)
 
+    log.error(result)

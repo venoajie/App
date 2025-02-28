@@ -121,11 +121,13 @@ async def hedging_spot(
 
                     if order_allowed_channel in message_channel:
 
-                        log.warning (f"order_allowed {order_allowed} {message_byte_data}")
+                        log.warning(
+                            f"order_allowed {order_allowed} {message_byte_data}"
+                        )
 
                         order_allowed = message_byte_data * order_allowed
 
-                        log.critical (f"order_allowed {order_allowed}")
+                        log.critical(f"order_allowed {order_allowed}")
 
                     if market_analytics_channel in message_channel:
 
@@ -145,13 +147,13 @@ async def hedging_spot(
 
                         cached_orders = message_byte_data["cached_orders"]
 
-                    if (order_allowed
+                    if (
+                        order_allowed
                         and ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all
                         and strategy in active_strategies
                     ):
-
 
                         cached_ticker_all = message_byte_data["data"]
 
