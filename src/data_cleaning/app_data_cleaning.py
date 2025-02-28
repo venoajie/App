@@ -77,7 +77,6 @@ async def reconciling_size(
         all_instruments_name = futures_instruments["instruments_name"]
 
         futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
-
         
         result = {}
 
@@ -91,6 +90,8 @@ async def reconciling_size(
                     
             else:
                 result.update({"size_is_reconciled": 1})
+                
+            combined_order_allowed.append(result)
                     
         while True:
 
