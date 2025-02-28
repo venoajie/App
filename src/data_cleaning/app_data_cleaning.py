@@ -66,8 +66,6 @@ async def reconciling_size(
 
         order_allowed = 0
 
-        combined_order_allowed = []
-
         ONE_SECOND = 1000
 
         one_minute = ONE_SECOND * 60
@@ -81,6 +79,8 @@ async def reconciling_size(
         futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
         
         result = {}
+
+        combined_order_allowed = []
 
         while True:
 
@@ -397,11 +397,28 @@ async def allowing_order_for_instrument_not_in_sub_account(
         log.debug (pub_message)
         log.error (combined_order_allowed)
         
-        combined_order_allowed = order_allowed_updating_cached(
-            combined_order_allowed,
-            pub_message,
-            )
-        
+        if combined_order_allowed:
+            
+            log.debug(combined_order_allowed)
+
+            selected = [
+                o
+                for o in combined_order_allowed
+                if instrument_name in o["instrument_name"]
+            ]
+
+            log.error(selected)
+
+            if selected:
+
+                combined_order_allowed.remove(selected[0])
+
+            combined_order_allowed.append(pub_message)
+            
+        else:
+            log.debug(pub_message)
+            combined_order_allowed.append(pub_message)
+
         pub_message.update({"size_is_reconciled": 0})
         
     result = {}
@@ -702,4 +719,3 @@ def order_allowed_updating_cached(
 
     log.info(order_allowed_cached)
     
-    return order_allowed_cached
