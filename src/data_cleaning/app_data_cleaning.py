@@ -397,10 +397,13 @@ async def allowing_order_for_instrument_not_in_sub_account(
 
     order_allowed = 1
     log.info(combined_order_allowed)
+    log.warning(futures_instruments_name_not_in_positions_cached_instrument)
 
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
 
         pub_message.update({"size_is_reconciled": order_allowed})
+        
+        log.warning(instrument_name)
         
         log.info([
             o
