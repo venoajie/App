@@ -77,11 +77,21 @@ async def reconciling_size(
         all_instruments_name = futures_instruments["instruments_name"]
 
         futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
+
         
         result = {}
 
-        combined_order_allowed = []
-
+        combined_order_allowed = []        
+        for instrument_name in futures_instruments_name:
+            currency: str = extract_currency_from_text(instrument_name)
+            result.update({"instrument_name": instrument_name})
+            result.update({"currency": currency})
+            if "-FS-" in instrument_name:
+                result.update({"size_is_reconciled": 0})
+                    
+            else:
+                result.update({"size_is_reconciled": 1})
+                    
         while True:
 
             try:
@@ -387,38 +397,26 @@ async def allowing_order_for_instrument_not_in_sub_account(
 
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
 
-        currency: str = extract_currency_from_text(instrument_name)
-
-        pub_message.update({"instrument_name": instrument_name})
-        pub_message.update({"currency": currency})
-
         pub_message.update({"size_is_reconciled": order_allowed})
         
-        log.debug (pub_message)
-        
-        log.error (combined_order_allowed)
-        
-        order_allowed_updating_cached(
-            combined_order_allowed,
-    pub_message,)
-        log.critical (combined_order_allowed)
-        
-        pub_message.update({"size_is_reconciled": 0})
+        [
+            o
+            for o in combined_order_allowed
+            if instrument_name in o["instrument_name"]
+        ][0]["size_is_reconciled"] = order_allowed
+    
         
     result = {}
     result.update({"result": combined_order_allowed})
     
     log.info(result)
-    log.warning(combined_order_allowed)
-
+    
     await publishing_result(
         client_redis,
         order_allowed_channel,
         result,
     )
     
-    log.info(result)
-
       
 
 async def rechecking_based_on_sub_account(
