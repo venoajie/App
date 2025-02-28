@@ -401,6 +401,7 @@ async def allowing_order_for_instrument_not_in_sub_account(
         order_allowed_updating_cached(
             combined_order_allowed,
     pub_message,)
+        log.critical (combined_order_allowed)
         
         pub_message.update({"size_is_reconciled": 0})
         
