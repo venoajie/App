@@ -395,30 +395,13 @@ async def allowing_order_for_instrument_not_in_sub_account(
         pub_message.update({"size_is_reconciled": order_allowed})
         
         log.debug (pub_message)
+        
         log.error (combined_order_allowed)
         
-        if combined_order_allowed:
-            
-            log.debug(combined_order_allowed)
-
-            selected = [
-                o
-                for o in combined_order_allowed
-                if instrument_name in o["instrument_name"]
-            ]
-
-            log.error(selected)
-
-            if selected:
-
-                combined_order_allowed.remove(selected[0])
-
-            combined_order_allowed.append(pub_message)
-            
-        else:
-            log.debug(pub_message)
-            combined_order_allowed.append(pub_message)
-
+        order_allowed_updating_cached(
+            combined_order_allowed,
+    pub_message,)
+        
         pub_message.update({"size_is_reconciled": 0})
         
     result = {}
@@ -690,32 +673,24 @@ def order_allowed_updating_cached(
 
     if order_allowed_cached:
         
-        log.debug(order_allowed_cached)
+        instrument_name = data["instrument_name"]
+        
+        selected = [
+            o
+            for o in order_allowed_cached
+            if instrument_name in o["instrument_name"]
+        ]
 
-        for allowable in order_allowed_cached:
-            
-            log.warning(allowable)
+        log.error(selected)
 
-            instrument_name = allowable["instrument_name"]
+        if selected:
 
-            selected = [
-                o
-                for o in order_allowed_cached
-                if instrument_name in o["instrument_name"]
-            ]
+            order_allowed_cached.remove(selected[0])
 
-            log.error(selected)
-
-            if selected:
-
-                order_allowed_cached.remove(selected[0])
-
-            order_allowed_cached.append(data)
-            
-    else:
-        log.debug(data)
         order_allowed_cached.append(data)
-
-
+        
+    else:
+        log.debug(order_allowed_cached)
+        order_allowed_cached.append(data)
     log.info(order_allowed_cached)
     
