@@ -347,8 +347,6 @@ async def rechecking_reconciliation_regularly(
 
     pub_message = {}
     
-    log.critical(combined_order_allowed)
-
     await allowing_order_for_instrument_not_in_sub_account(
         client_redis,
         combined_order_allowed,
@@ -403,6 +401,26 @@ async def allowing_order_for_instrument_not_in_sub_account(
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
 
         pub_message.update({"size_is_reconciled": order_allowed})
+        
+        log.info([
+            o
+            for o in combined_order_allowed
+            if instrument_name in o["instrument_name"]
+        ])
+        
+        log.warning([
+            o
+            for o in combined_order_allowed
+            if instrument_name in o["instrument_name"]
+        ][0])
+        
+        log.info([
+            o
+            for o in combined_order_allowed
+            if instrument_name in o["instrument_name"]
+        ][0]["size_is_reconciled"])
+        
+        log.error(order_allowed)
         
         [
             o
