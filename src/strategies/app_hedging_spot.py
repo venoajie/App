@@ -142,10 +142,6 @@ async def hedging_spot(
 
                         cached_orders = message_byte_data["cached_orders"]
 
-                    log.debug(f"ticker_cached_channel in message_channel {ticker_cached_channel in message_channel}")
-                    log.warning(f"market_condition_all {market_condition_all}")
-                    log.info(f"portfolio_all {portfolio_all}")
-                    log.debug(f"strategy in active_strategies {strategy in active_strategies}")
                     if (
                         ticker_cached_channel in message_channel
                         and market_condition_all
@@ -166,7 +162,9 @@ async def hedging_spot(
 
                         order_allowed_global = math.prod([o["size_is_reconciled"] for o in order_allowed if currency_lower in o["currency"]])
                         
-                        log.debug(order_allowed_global)
+
+                        log.debug(f"order_allowed_global {order_allowed_global}")
+                        
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                         archive_db_table: str = f"my_trades_all_{currency_lower}_json"
