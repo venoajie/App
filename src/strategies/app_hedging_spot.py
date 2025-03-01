@@ -150,8 +150,8 @@ async def hedging_spot(
 
                         cached_orders = message_byte_data["cached_orders"]
 
-                    if (
-                        ticker_cached_channel in message_channel
+                    if (allowed_instruments
+                        and ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all
                         and strategy in active_strategies

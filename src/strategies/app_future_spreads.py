@@ -123,6 +123,7 @@ async def future_spreads(
                     if order_allowed_channel in message_channel:
 
                         order_allowed = message_byte_data["result"]
+                        
                         allowed_instruments = [o for o in order_allowed if o["size_is_reconciled"] == 1]
                         
                     if market_analytics_channel in message_channel:
@@ -143,7 +144,8 @@ async def future_spreads(
 
                         cached_orders = message_byte_data["cached_orders"]
 
-                    if (ticker_cached_channel in message_channel
+                    if (allowed_instruments
+                        and ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all
                         and strategy in active_strategies
