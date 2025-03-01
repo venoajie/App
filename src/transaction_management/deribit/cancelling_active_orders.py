@@ -11,6 +11,7 @@ from loguru import logger as log
 # user defined formula
 from db_management.sqlite_management import (
     deleting_row,
+    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
     executing_query_with_return,
 )
 from transaction_management.deribit.api_requests import (
@@ -144,6 +145,8 @@ async def cancelling_orders(
                         my_trades_active_all = await executing_query_with_return(
                             query_trades
                         )
+
+
 
                     if (
                         ticker_cached_channel in message_channel
