@@ -299,8 +299,6 @@ async def future_spreads(
 
                                     max_order_currency = 2
 
-                                    instrument_name = transaction["instrument_name"]
-
                                     random_instruments_name = sample(
                                         (
                                             [
