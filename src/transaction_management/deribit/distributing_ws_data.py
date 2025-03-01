@@ -103,7 +103,7 @@ async def caching_distributing_data(
 
         order_db_table: str = relevant_tables["orders_table"]
 
-        chart_channel: str = redis_channels["chart_update"]
+        chart_low_high_tick_channel: str = redis_channels["chart_low_high_tick"]
         portfolio_channel: str = redis_channels["portfolio"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         sqlite_updating_channel: str = redis_channels["sqlite_record_updating"]
@@ -375,7 +375,7 @@ async def caching_distributing_data(
 
                     await publishing_result(
                         pipe,
-                        chart_channel,
+                        chart_low_high_tick_channel,
                         pub_message,
                     )
 
