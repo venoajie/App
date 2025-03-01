@@ -350,7 +350,7 @@ class ComboAuto(BasicStrategy):
     orders_currency_strategy: list
     server_time: int
     market_condition: list
-    my_trades_currency_strategy: list
+    my_trades_currency_strategy: list= None
     ticker_perpetual: dict = None
     delta: float = fields
     basic_params: object = fields

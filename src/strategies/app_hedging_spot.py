@@ -164,12 +164,8 @@ async def hedging_spot(
 
                         currency_lower: str = currency
                         
-
-                        log.error([o["size_is_reconciled"] for o in order_allowed if currency_lower in o["currency"]])
-
                         order_allowed_global = math.prod([o["size_is_reconciled"] for o in order_allowed if currency_lower in o["currency"]])
                         
-
                         log.debug(f"order_allowed_global {order_allowed_global}")
                         
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
