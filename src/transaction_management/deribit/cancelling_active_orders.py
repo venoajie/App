@@ -269,6 +269,7 @@ async def cancelling_orders(
                                         orders_currency_strategy,
                                         server_time,
                                         market_condition,
+                                        my_trades_currency_strategy,
                                     )
 
                                     if orders_currency_strategy:
