@@ -120,10 +120,6 @@ async def future_spreads(
 
                     if order_allowed_channel in message_channel:
 
-                        log.warning(
-                            f"order_allowed {order_allowed} {message_byte_data}"
-                        )
-
                         order_allowed = message_byte_data["result"]
                         
                     if market_analytics_channel in message_channel:
@@ -143,6 +139,11 @@ async def future_spreads(
                     if order_receiving_channel in message_channel:
 
                         cached_orders = message_byte_data["cached_orders"]
+
+                    log.debug(f"ticker_cached_channel in message_channel {ticker_cached_channel in message_channel}")
+                    log.warning(f"market_condition_all {market_condition_all}")
+                    log.info(f"portfolio_all {portfolio_all}")
+                    log.debug(f"strategy in active_strategies {strategy in active_strategies}")
 
                     if (ticker_cached_channel in message_channel
                         and market_condition_all

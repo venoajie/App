@@ -142,6 +142,10 @@ async def hedging_spot(
 
                         cached_orders = message_byte_data["cached_orders"]
 
+                    log.debug(f"ticker_cached_channel in message_channel {ticker_cached_channel in message_channel}")
+                    log.warning(f"market_condition_all {market_condition_all}")
+                    log.info(f"portfolio_all {portfolio_all}")
+                    log.debug(f"strategy in active_strategies {strategy in active_strategies}")
                     if (
                         ticker_cached_channel in message_channel
                         and market_condition_all
