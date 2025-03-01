@@ -2,6 +2,7 @@
 
 # built ins
 import asyncio
+import math
 from random import sample
 
 import orjson
@@ -123,7 +124,7 @@ async def future_spreads(
                             f"order_allowed {order_allowed} {message_byte_data}"
                         )
 
-                        order_allowed = message_byte_data 
+                        order_allowed = message_byte_data["result"]
                         
                     if market_analytics_channel in message_channel:
 
@@ -161,7 +162,11 @@ async def future_spreads(
                         )
 
                         currency_lower: str = currency
+                        
+                        order_allowed_global = math.prod([o["size_is_reconciled"] for o in order_allowed if currency_lower in o["currency"]])
 
+                        log.debug(order_allowed_global)
+                        
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                         # get portfolio data

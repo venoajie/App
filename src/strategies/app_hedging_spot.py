@@ -2,6 +2,7 @@
 
 # built ins
 import asyncio
+import math
 
 # installed
 import uvloop
@@ -121,7 +122,7 @@ async def hedging_spot(
 
                     if order_allowed_channel in message_channel:
 
-                        order_allowed = message_byte_data 
+                        order_allowed = message_byte_data["result"]
 
                     if market_analytics_channel in message_channel:
 
@@ -160,6 +161,9 @@ async def hedging_spot(
 
                         currency_lower: str = currency
 
+                        order_allowed_global = math.prod([o["size_is_reconciled"] for o in order_allowed if currency_lower in o["currency"]])
+                        
+                        log.debug(order_allowed_global)
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                         archive_db_table: str = f"my_trades_all_{currency_lower}_json"
