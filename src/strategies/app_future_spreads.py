@@ -144,9 +144,7 @@ async def future_spreads(
 
                         cached_orders = message_byte_data["cached_orders"]
 
-                    if (
-                        order_allowed
-                        and ticker_cached_channel in message_channel
+                    if (ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all
                         and strategy in active_strategies
