@@ -104,7 +104,9 @@ async def future_spreads(
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
-        order_allowed = 0
+        order_allowed = []
+        
+        allowed_instruments = []
 
         while not_cancel:
 
@@ -121,6 +123,7 @@ async def future_spreads(
                     if order_allowed_channel in message_channel:
 
                         order_allowed = message_byte_data["result"]
+                        allowed_instruments = [o for o in order_allowed if o["size_is_reconciled"] == 1]
                         
                     if market_analytics_channel in message_channel:
 
