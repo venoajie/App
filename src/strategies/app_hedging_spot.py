@@ -125,9 +125,13 @@ async def hedging_spot(
                     if order_allowed_channel in message_channel:
 
                         order_allowed = message_byte_data["result"]
+                        
+                        log.debug(f"order_allowed {order_allowed}")
 
                         allowed_instruments = [o for o in order_allowed if o["size_is_reconciled"] == 1]
                         
+                        log.warning(f"allowed_instruments {allowed_instruments}")
+
                     if market_analytics_channel in message_channel:
 
                         market_condition_all = message_byte_data
