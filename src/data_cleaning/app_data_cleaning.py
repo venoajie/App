@@ -282,6 +282,8 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
             my_trades_instrument_name = await executing_query_with_return(
                 query_trades_all
             )
+            
+            log.info(f"my_trades_instrument_name {my_trades_instrument_name}")
 
             last_10_timestamp_log = [o["timestamp"] for o in my_trades_instrument_name]
 

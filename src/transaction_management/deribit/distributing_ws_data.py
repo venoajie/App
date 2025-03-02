@@ -224,6 +224,7 @@ async def caching_distributing_data(
                             positions_update_channel,
                             positions_cached,
                         )
+                        log.warning(f"positions_update_channel {positions_update_channel}")
 
                         await publishing_result(
                             pipe,
@@ -231,6 +232,7 @@ async def caching_distributing_data(
                             orders_cached,
                         )
                         
+                        log.warning(f"order_update_channel {order_update_channel}")
                         log.error(f"orders_cached {orders_cached}")
                         log.info(f"data {data}")
 
@@ -239,6 +241,7 @@ async def caching_distributing_data(
                             my_trades_channel,
                             my_trades_active_all,
                         )
+                        log.warning(f"my_trades_channel {my_trades_channel}")
 
                 if "portfolio" in message_channel:
 
@@ -275,12 +278,14 @@ async def caching_distributing_data(
                         positions_update_channel,
                         positions_cached,
                     )
+                    log.warning(f"positions_update_channel {positions_update_channel}")
 
                     await publishing_result(
                         pipe,
                         order_update_channel,
                         orders_cached,
                     )
+                    log.warning(f"order_update_channel {order_update_channel}")
 
                     log.error(f"orders_cached {orders_cached}")
                     log.info(f"data {data}")
@@ -290,6 +295,7 @@ async def caching_distributing_data(
                         my_trades_channel,
                         my_trades_active_all,
                     )
+                    log.warning(f"my_trades_channel {my_trades_channel}")
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
