@@ -140,6 +140,8 @@ async def reconciling_size(
                     if positions_update_channel in message_channel:
 
                         positions_cached = message_byte_data
+                        
+                        log.info(positions_cached)
 
                         positions_cached_all = remove_redundant_elements(
                             [o["instrument_name"] for o in positions_cached]
@@ -459,6 +461,8 @@ async def rechecking_based_on_sub_account(
                     positions_cached,
                 )
             )
+            
+            log.critical(f"{instrument_name} my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
 
             if my_trades_and_sub_account_size_reconciled:
 
@@ -610,6 +614,8 @@ async def rechecking_based_on_data_in_sqlite(
                             positions_cached,
                         )
                     )
+                    
+                    log.critical(f"{instrument_name} my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
 
                     if my_trades_and_sub_account_size_reconciled:
 
