@@ -123,6 +123,8 @@ async def hedging_spot(
                     message_channel = message_byte["channel"]
 
                     if order_allowed_channel in message_channel:
+                        
+                        log.warning(message_byte_data)
 
                         order_allowed = message_byte_data["result"]
 
