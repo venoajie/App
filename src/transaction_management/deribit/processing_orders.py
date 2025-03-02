@@ -51,6 +51,9 @@ async def processing_orders(
                     message_channel = message_byte["channel"]
 
                     if sending_order_channel in message_channel:
+                        
+                        from loguru import logger as log
+                        log.debug(message_byte_data)
 
                         if message_byte_data["order_allowed"]:
 
