@@ -11,7 +11,7 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from db_management.redis_client import saving_and_publishing_result
+from db_management.redis_client import publishing_result, saving_and_publishing_result
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.hedging.hedging_spot import (
@@ -167,7 +167,7 @@ async def hedging_spot(
 
                         currency_lower: str = currency
 
-                        order_allowed_global = math.prod(
+                        size_is_reconciled_global = math.prod(
                             [
                                 o["size_is_reconciled"]
                                 for o in order_allowed
@@ -175,7 +175,7 @@ async def hedging_spot(
                             ]
                         )
 
-                        log.debug(f"order_allowed_global {order_allowed_global}")
+                        log.debug(f"size_is_reconciled_global {size_is_reconciled_global}")
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
@@ -376,7 +376,7 @@ async def hedging_spot(
                                     
                                     log.warning(f"send_order {send_order}")
 
-                                    if send_order["order_allowed"]:
+                                    if send_order["order_allowed"] and size_is_reconciled_global:
 
                                         await saving_and_publishing_result(
                                             pipe,
@@ -385,6 +385,14 @@ async def hedging_spot(
                                             None,
                                             send_order,
                                         )
+                                        
+                                                                            
+                                        await publishing_result(
+                                            client_redis,
+                                            order_allowed_channel,
+                                            send_order,
+                                        )
+
 
                                         # not_order = False
 

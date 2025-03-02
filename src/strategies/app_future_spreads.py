@@ -13,8 +13,7 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.reconciling_db import is_size_sub_account_and_my_trades_reconciled
-from db_management.redis_client import querying_data, saving_and_publishing_result
+from db_management.redis_client import publishing_result, saving_and_publishing_result
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.basic_strategy import get_label_integer
@@ -22,13 +21,9 @@ from strategies.cash_carry.combo_auto import (
     ComboAuto,
     check_if_minimum_waiting_time_has_passed,
 )
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
 from utilities.pickling import read_data
 
 from utilities.string_modification import (
-    parsing_redis_market_json_output,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
