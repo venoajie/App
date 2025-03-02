@@ -230,6 +230,9 @@ async def caching_distributing_data(
                             order_update_channel,
                             orders_cached,
                         )
+                        
+                        log.error(f"orders_cached {orders_cached}")
+                        log.info(f"data {data}")
 
                         await publishing_result(
                             pipe,
@@ -278,6 +281,9 @@ async def caching_distributing_data(
                         order_update_channel,
                         orders_cached,
                     )
+
+                    log.error(f"orders_cached {orders_cached}")
+                    log.info(f"data {data}")
 
                     await publishing_result(
                         pipe,
