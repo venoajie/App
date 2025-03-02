@@ -140,7 +140,7 @@ async def reconciling_size(
                     if positions_update_channel in message_channel:
 
                         positions_cached = message_byte_data
-                        
+
                         positions_cached_all = remove_redundant_elements(
                             [o["instrument_name"] for o in positions_cached]
                         )
@@ -289,8 +289,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
 
             trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
                 instrument_name,
-                timestamp_log
-                - 10,  # - x: arbitrary, timestamp in trade and transaction_log not always identical each other
+                timestamp_log,
                 1000,
             )
 
@@ -379,9 +378,8 @@ async def rechecking_reconciliation_regularly(
         order_allowed_channel,
         positions_cached,
         order_db_table,
-        order_allowed,   
+        order_allowed,
         five_days_ago,
-
     )
 
 
@@ -459,8 +457,6 @@ async def rechecking_based_on_sub_account(
                     positions_cached,
                 )
             )
-            
-            log.critical(f"{instrument_name} my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
 
             if my_trades_and_sub_account_size_reconciled:
 
@@ -501,23 +497,20 @@ async def rechecking_based_on_sub_account(
                     query_trades_active
                 )
 
-                my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
-                    instrument_name,
-                    my_trades_instrument_name,
-                    positions_cached,
+                my_trades_and_sub_account_size_reconciled = (
+                    is_my_trades_and_sub_account_size_reconciled_each_other(
+                        instrument_name,
+                        my_trades_instrument_name,
+                        positions_cached,
+                    )
                 )
-                
-                log.debug(f"my_trades_and_sub_account_size_reconciled{my_trades_and_sub_account_size_reconciled} {not my_trades_and_sub_account_size_reconciled}")
 
-                if not my_trades_and_sub_account_size_reconciled :
-                    
+                if not my_trades_and_sub_account_size_reconciled:
+
                     sub_account_size = get_sub_account_size_per_instrument(
                         instrument_name,
                         positions_cached,
                     )
-                    
-                    log.error(f"sub_account_size {sub_account_size}")
-                    log.error(f"my_trades_instrument_name {my_trades_instrument_name}")
 
                     if sub_account_size == 0:
 
@@ -554,14 +547,12 @@ async def rechecking_based_on_sub_account(
 
 async def rechecking_based_on_data_in_sqlite(
     private_data: object,
-
     client_redis: object,
     combined_order_allowed: list,
     currencies: list,
     order_allowed_channel: str,
     positions_cached: list,
-        order_db_table: str,
-
+    order_db_table: str,
     order_allowed: bool,
     five_days_ago: int,
 ) -> None:
@@ -611,8 +602,7 @@ async def rechecking_based_on_data_in_sqlite(
                             positions_cached,
                         )
                     )
-                    
-                    log.critical(f"{instrument_name} my_trades_and_sub_account_size_reconciled {my_trades_and_sub_account_size_reconciled}")
+
 
                     if my_trades_and_sub_account_size_reconciled:
 
@@ -663,13 +653,16 @@ async def rechecking_based_on_data_in_sqlite(
                             )
                         )
 
-
                         my_trades_currency = await executing_query_with_return(
                             query_trades_active_currency
                         )
-                        
-                        my_trades_instrument_name = [o for o in my_trades_currency if instrument_name in o["instrument_name"]]
-                        
+
+                        my_trades_instrument_name = [
+                            o
+                            for o in my_trades_currency
+                            if instrument_name in o["instrument_name"]
+                        ]
+
                         await update_trades_from_exchange_based_on_latest_timestamp(
                             trades_from_exchange,
                             instrument_name,
@@ -678,24 +671,20 @@ async def rechecking_based_on_data_in_sqlite(
                             order_db_table,
                         )
 
-
-                        my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
-                            instrument_name,
-                            my_trades_currency,
-                            positions_cached,
+                        my_trades_and_sub_account_size_reconciled = (
+                            is_my_trades_and_sub_account_size_reconciled_each_other(
+                                instrument_name,
+                                my_trades_currency,
+                                positions_cached,
+                            )
                         )
-                        
-                        log.debug(f"my_trades_and_sub_account_size_reconciled{my_trades_and_sub_account_size_reconciled} {not my_trades_and_sub_account_size_reconciled}")
 
-                        if not my_trades_and_sub_account_size_reconciled :
-                            
+                        if not my_trades_and_sub_account_size_reconciled:
+
                             sub_account_size = get_sub_account_size_per_instrument(
                                 instrument_name,
                                 positions_cached,
                             )
-                            
-                            log.error(f"sub_account_size {sub_account_size}")
-                            log.error(f"my_trades_instrument_name {my_trades_instrument_name}")
 
                             if sub_account_size == 0:
 
@@ -713,7 +702,7 @@ async def rechecking_based_on_data_in_sqlite(
                                         0,
                                         "=",
                                     )
-                                    
+
                     await clean_up_closed_transactions(
                         archive_db_table,
                         my_trades_active,
@@ -728,3 +717,4 @@ async def rechecking_based_on_data_in_sqlite(
         order_allowed_channel,
         result,
     )
+
