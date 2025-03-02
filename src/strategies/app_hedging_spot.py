@@ -298,8 +298,8 @@ async def hedging_spot(
                                     if strategy in (o["label"])
                                 ]
                             )
-
-                            # log.info(f" {currency} {len(orders_currency_strategy)}  {(orders_currency_strategy)} ")
+                            
+                            log.critical(f" {currency} {len(orders_currency_strategy)}  {(orders_currency_strategy)} ")
 
                             instrument_attributes_futures_for_hedging = [
                                 o
