@@ -141,8 +141,6 @@ async def reconciling_size(
 
                         positions_cached = message_byte_data
                         
-                        log.info(positions_cached)
-
                         positions_cached_all = remove_redundant_elements(
                             [o["instrument_name"] for o in positions_cached]
                         )
@@ -487,7 +485,6 @@ async def rechecking_based_on_sub_account(
                     await private_data.get_user_trades_by_instrument_and_time(
                         instrument_name,
                         five_days_ago,
-                        -10,  # - x: arbitrary
                         1000,
                     )
                 )
@@ -662,7 +659,6 @@ async def rechecking_based_on_data_in_sqlite(
                             await private_data.get_user_trades_by_instrument_and_time(
                                 instrument_name,
                                 five_days_ago,
-                                -10,  # - x: arbitrary
                                 1000,
                             )
                         )
