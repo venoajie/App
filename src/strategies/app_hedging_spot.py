@@ -80,6 +80,8 @@ async def hedging_spot(
         order_allowed_channel: str = redis_channels["order_is_allowed"]
         order_update_channel: str = redis_channels["order_cache_updating"]
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
+        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
+
 
         # prepare channels placeholders
         channels = [
@@ -89,6 +91,7 @@ async def hedging_spot(
             portfolio_channel,
             my_trades_channel,
             order_allowed_channel,
+            sub_account_cached_channel,
         ]
 
         # subscribe to channels
@@ -148,6 +151,20 @@ async def hedging_spot(
                             query_trades
                         )
 
+                        log.error(my_trades_active_all)
+                                                
+                    if sub_account_cached_channel in message_channel:
+                        log.debug(message_byte_data)
+                        log.info(message_byte_data["result"])
+                        sub_account = message_byte_data["result"][0]
+                        log.debug(sub_account)
+                    
+                        cached_orders = sub_account["open_orders"]
+                        log.error(cached_orders)
+
+                        my_trades_active_all = sub_account["my_trades"]
+                        log.debug(my_trades_active_all)
+                    
                     if order_update_channel in message_channel:
                         
                         log.error(f"order_receiving_channel {message_channel}")
