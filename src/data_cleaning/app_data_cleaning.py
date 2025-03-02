@@ -501,12 +501,18 @@ async def rechecking_based_on_sub_account(
                     my_trades_instrument_name,
                     positions_cached,
                 )
+                
+                log.debug(f"my_trades_and_sub_account_size_reconciled{my_trades_and_sub_account_size_reconciled} {not my_trades_and_sub_account_size_reconciled}")
 
                 if not my_trades_and_sub_account_size_reconciled :
+                    
                     sub_account_size = get_sub_account_size_per_instrument(
                         instrument_name,
                         positions_cached,
                     )
+                    
+                    log.error(f"sub_account_size {sub_account_size}")
+                    log.error(f"my_trades_instrument_name {my_trades_instrument_name}")
 
                     if sub_account_size == 0:
 
