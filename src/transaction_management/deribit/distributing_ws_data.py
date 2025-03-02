@@ -179,14 +179,6 @@ async def caching_distributing_data(
 
                 if "user." in message_channel:
 
-                    pub_message.update({"currency_upper": currency_upper})
-
-                    await publishing_result(
-                        pipe,
-                        sub_account_cached_channel,
-                        pub_message,
-                    )
-
                     if "changes.any" in message_channel:
 
                         log.warning(f"user.changes {data}")
@@ -203,8 +195,6 @@ async def caching_distributing_data(
 
                         currency_lower = currency.lower()
 
-                        pub_message.update({"cached_orders": orders_cached})
-
                         await saving_orders(
                             private_data,
                             cancellable_strategies,
@@ -219,28 +209,21 @@ async def caching_distributing_data(
                             query_trades
                         )
 
-                        await publishing_result(
-                            pipe,
-                            positions_update_channel,
-                            positions_cached,
-                        )
-                        log.warning(f"positions_update_channel {positions_update_channel}")
+                        result = {}
+
+                        result.update({"result": dict(positions=positions_cached,
+                                                    open_orders=orders_cached,
+                                                    my_trades=my_trades_active_all
+                                                    )})
+
+                        log.warning(f"result {result}")
 
                         await publishing_result(
                             pipe,
-                            order_update_channel,
-                            orders_cached,
+                            sub_account_cached_channel,
+                            result,
                         )
                         
-                        log.warning(f"order_update_channel {order_update_channel}")
-
-                        await publishing_result(
-                            pipe,
-                            my_trades_channel,
-                            my_trades_active_all,
-                        )
-                        log.warning(f"my_trades_channel {my_trades_channel}")
-
                 if "portfolio" in message_channel:
 
                     await updating_portfolio(
@@ -254,44 +237,31 @@ async def caching_distributing_data(
                         await private_data.get_subaccounts_details(currency)
                     )
 
-                    my_trades_active_all = await executing_query_with_return(
-                        query_trades
-                    )
-
                     updating_sub_account(
                         subaccounts_details_result,
-                        sub_account_cached,
                         orders_cached,
                         positions_cached,
-                        currency,
-                        data,
                     )
 
                     my_trades_active_all = await executing_query_with_return(
                         query_trades
                     )
+                    
+                    result = {}
+
+                    result.update({"result": dict(positions=positions_cached,
+                                                  open_orders=orders_cached,
+                                                  my_trades=my_trades_active_all
+                                                  )})
+
+                    log.warning(f"result {result}")
 
                     await publishing_result(
                         pipe,
-                        positions_update_channel,
-                        positions_cached,
+                        sub_account_cached_channel,
+                        result,
                     )
-                    log.warning(f"positions_update_channel {positions_update_channel}")
-
-                    await publishing_result(
-                        pipe,
-                        order_update_channel,
-                        orders_cached,
-                    )
-                    log.warning(f"order_update_channel {order_update_channel}")
-
-                    await publishing_result(
-                        pipe,
-                        my_trades_channel,
-                        my_trades_active_all,
-                    )
-                    log.warning(f"my_trades_channel {my_trades_channel}")
-
+                    
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
 
@@ -386,7 +356,7 @@ async def caching_distributing_data(
                         pub_message,
                     )
 
-                await pipe.execute()
+            await pipe.execute()
 
             if message_byte and (message_byte["type"] == "message"):
 
@@ -501,11 +471,8 @@ async def updating_portfolio(
 
 def updating_sub_account(
     subaccounts_details_result: list,
-    sub_account_cached: list,
     orders_cached: list,
     positions_cached: list,
-    currency: list,
-    data: dict,
 ) -> None:
 
     if subaccounts_details_result:
