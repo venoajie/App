@@ -496,13 +496,13 @@ async def rechecking_based_on_sub_account(
                     query_trades_active
                 )
 
-                is_my_trades_and_sub_account_size_reconciled_each_other(
+                my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
                     instrument_name,
                     my_trades_instrument_name,
                     positions_cached,
                 )
 
-                if not my_trades_and_sub_account_size_reconciled:
+                if not my_trades_and_sub_account_size_reconciled =:
                     sub_account_size = get_sub_account_size_per_instrument(
                         instrument_name,
                         positions_cached,
