@@ -146,8 +146,6 @@ async def cancelling_orders(
                             query_trades
                         )
 
-
-
                     if (
                         ticker_cached_channel in message_channel
                         and market_condition_all

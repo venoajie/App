@@ -20,7 +20,6 @@ from utilities.string_modification import (
     remove_redundant_elements,
     sorting_list,
 )
-from utilities.system_tools import sleep_and_restart
 
 
 def get_sub_account_size_per_instrument(

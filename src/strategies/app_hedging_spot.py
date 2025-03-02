@@ -107,7 +107,7 @@ async def hedging_spot(
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
         order_allowed = []
-        
+
         allowed_instruments = []
 
         while not_cancel:
@@ -126,7 +126,9 @@ async def hedging_spot(
 
                         order_allowed = message_byte_data["result"]
 
-                        allowed_instruments = [o for o in order_allowed if o["size_is_reconciled"] == 1]
+                        allowed_instruments = [
+                            o for o in order_allowed if o["size_is_reconciled"] == 1
+                        ]
 
                     if market_analytics_channel in message_channel:
 
@@ -146,7 +148,8 @@ async def hedging_spot(
 
                         cached_orders = message_byte_data["cached_orders"]
 
-                    if (allowed_instruments
+                    if (
+                        allowed_instruments
                         and ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all
@@ -163,11 +166,17 @@ async def hedging_spot(
                         )
 
                         currency_lower: str = currency
-                        
-                        order_allowed_global = math.prod([o["size_is_reconciled"] for o in order_allowed if currency_lower in o["currency"]])
-                        
+
+                        order_allowed_global = math.prod(
+                            [
+                                o["size_is_reconciled"]
+                                for o in order_allowed
+                                if currency_lower in o["currency"]
+                            ]
+                        )
+
                         log.debug(f"order_allowed_global {order_allowed_global}")
-                        
+
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                         archive_db_table: str = f"my_trades_all_{currency_lower}_json"

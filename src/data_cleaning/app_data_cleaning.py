@@ -8,6 +8,7 @@ from loguru import logger as log
 
 from data_cleaning.managing_closed_transactions import clean_up_closed_transactions
 from data_cleaning.reconciling_db import (
+    get_sub_account_size_per_instrument,
     is_my_trades_and_sub_account_size_reconciled_each_other,
 )
 from db_management.redis_client import publishing_result
@@ -495,6 +496,35 @@ async def rechecking_based_on_sub_account(
                     query_trades_active
                 )
 
+                is_my_trades_and_sub_account_size_reconciled_each_other(
+                    instrument_name,
+                    my_trades_instrument_name,
+                    positions_cached,
+                )
+
+                if not my_trades_and_sub_account_size_reconciled:
+                    sub_account_size = get_sub_account_size_per_instrument(
+                        instrument_name,
+                        positions_cached,
+                    )
+
+                    if sub_account_size == 0:
+
+                        where_filter = "trade_id"
+
+                        for trade in my_trades_instrument_name:
+
+                            trade_id = trade["trade_id"]
+
+                            await update_status_data(
+                                archive_db_table,
+                                "is_open",
+                                where_filter,
+                                trade_id,
+                                0,
+                                "=",
+                            )
+
                 await clean_up_closed_transactions(
                     archive_db_table,
                     my_trades_instrument_name,
@@ -509,7 +539,6 @@ async def rechecking_based_on_sub_account(
             order_allowed_channel,
             result,
         )
-
 
 
 async def rechecking_based_on_data_in_sqlite(
@@ -599,7 +628,7 @@ async def rechecking_based_on_data_in_sqlite(
                                 )
 
                     else:
-                        
+
                         order_allowed = 0
 
                         [
