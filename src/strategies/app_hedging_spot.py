@@ -388,7 +388,7 @@ async def hedging_spot(
 
                                         # not_order = False
 
-                                        break
+#                                        break
 
                                     status_transaction = [
                                         "open",
@@ -499,7 +499,7 @@ async def hedging_spot(
 
                                                                 # not_order = False
 
-                                                                break
+                                                                #break
 
                                                         if status == "closed":
 
@@ -545,7 +545,7 @@ async def hedging_spot(
                                                                 # not_order = False
                                                                 # )
 
-                                                                break
+                                                                #break
 
             except Exception as error:
 
