@@ -98,9 +98,6 @@ async def if_order_is_true(
 ) -> None:
     """ """
 
-    from loguru import logger as log
-    log.debug(order)
-
     if order["order_allowed"]:
 
         # get parameter orders

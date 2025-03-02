@@ -359,6 +359,7 @@ class SendApiRequest:
                                          (params: {params}"
             )
 
+        log.warning(f"order_result {order_result}")
         return order_result
 
     async def get_subaccounts(self) -> list:

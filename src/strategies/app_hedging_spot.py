@@ -146,7 +146,9 @@ async def hedging_spot(
                             query_trades
                         )
 
-                    if order_receiving_channel in message_channel:
+                    if positions_update_channel in message_channel:
+                        
+                        log.error(f"order_receiving_channel {message_channel}")
 
                         cached_orders = message_byte_data["cached_orders"]
 
@@ -229,6 +231,8 @@ async def hedging_spot(
                                 ]
                             ]
                         )
+                        
+                        log.debug(f"cached_orders {cached_orders}")
 
                         orders_currency = (
                             []
@@ -297,9 +301,10 @@ async def hedging_spot(
                                 else [
                                     o
                                     for o in orders_currency
-                                    if strategy in (o["label"])
+                                    if strategy in o["label"]
                                 ]
                             )
+                            log.info(f" {strategy} orders_currency {orders_currency}")
                             
                             log.critical(f" {currency} orders_currency_strategy {len(orders_currency_strategy)}  {(orders_currency_strategy)} ")
 
