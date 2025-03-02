@@ -78,7 +78,7 @@ async def hedging_spot(
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
         sending_order_channel: str = redis_channels["order_rest"]
         order_allowed_channel: str = redis_channels["order_is_allowed"]
-        order_update_channel: str = redis_channels["orders_cached"]
+        order_update_channel: str = redis_channels["order_cache_updating"]
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
 
         # prepare channels placeholders
