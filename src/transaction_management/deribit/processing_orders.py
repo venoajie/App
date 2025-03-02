@@ -52,9 +52,6 @@ async def processing_orders(
 
                     if sending_order_channel in message_channel:
                         
-                        from loguru import logger as log
-                        log.debug(message_byte_data)
-
                         if message_byte_data["order_allowed"]:
 
                             # get strategies that have not short/long attributes in the label
@@ -67,7 +64,7 @@ async def processing_orders(
                             await if_order_is_true(
                                 private_data,
                                 non_checked_strategies,
-                                message_byte_data["params"],
+                                message_byte_data,
                             )
 
             except Exception as error:
@@ -100,6 +97,9 @@ async def if_order_is_true(
     order: dict,
 ) -> None:
     """ """
+
+    from loguru import logger as log
+    log.debug(order)
 
     if order["order_allowed"]:
 
