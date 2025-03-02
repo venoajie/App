@@ -356,7 +356,7 @@ async def caching_distributing_data(
                         pub_message,
                     )
 
-            await pipe.execute()
+                await pipe.execute()
 
             if message_byte and (message_byte["type"] == "message"):
 
