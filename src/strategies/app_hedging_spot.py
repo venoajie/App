@@ -121,6 +121,8 @@ async def hedging_spot(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
+                    
+                    log.error(message_channel)
 
                     if order_allowed_channel in message_channel:
                         
