@@ -216,8 +216,6 @@ async def caching_distributing_data(
                                                     my_trades=my_trades_active_all
                                                     )})
 
-                        log.warning(f"result {result}")
-
                         await publishing_result(
                             pipe,
                             sub_account_cached_channel,
@@ -253,8 +251,6 @@ async def caching_distributing_data(
                                                   open_orders=orders_cached,
                                                   my_trades=my_trades_active_all
                                                   )})
-
-                    log.warning(f"result {result}")
 
                     await publishing_result(
                         pipe,
