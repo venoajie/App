@@ -293,8 +293,6 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                 1000,
             )
             
-            log.info(f"trades_from_exchange {trades_from_exchange}")
-
             if trades_from_exchange:
 
                 trades_from_exchange_without_futures_combo = [

@@ -373,6 +373,8 @@ async def hedging_spot(
                                             trade_db_table,
                                         )
                                     )
+                                    
+                                    log.warning(f"send_order {send_order}")
 
                                     if send_order["order_allowed"]:
 
