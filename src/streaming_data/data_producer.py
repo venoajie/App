@@ -183,14 +183,6 @@ class StreamingAccountData:
 
                     """
 
-
-                    ws =                         f"user.changes.any.any.raw"
-                    
-                    
-                    await self.ws_operation(
-                        operation="subscribe", ws_channel=ws
-                    )
-
                     for currency in currencies:
 
                         currency_upper = currency.upper()
@@ -199,6 +191,7 @@ class StreamingAccountData:
 
                         ws_channel_currency = [
                             f"user.portfolio.{currency}",
+                            f"user.changes.any.{currency_upper}.raw",
                         ]
 
                         for ws in ws_channel_currency:
@@ -242,7 +235,7 @@ class StreamingAccountData:
                         # Receive WebSocket messages
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
-                        print(message)
+                        
                         if "id" in list(message):
                             if message["id"] == 9929:
 
