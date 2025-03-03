@@ -198,10 +198,10 @@ class StreamingAccountData:
 
                             print(f"subscribe ws {ws}")
 
-                            # asyncio.create_task(
-                            await self.ws_operation(
+                            asyncio.create_task(
+                             self.ws_operation(
                                 operation="subscribe", ws_channel=ws
-                            )
+                            ))
 
                         for resolution in resolutions:
 
@@ -518,10 +518,9 @@ class StreamingAccountData:
             )
 
             msg.update(extra_params)
-            
-            if msg["params"]["channels"]:
-                await self.websocket_client.send(json.dumps(msg))
-                print(json.dumps(msg))
+
+            await self.websocket_client.send(json.dumps(msg))
+            print(json.dumps(msg))
 
         if "rest_api" in source:
 
