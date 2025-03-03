@@ -209,8 +209,6 @@ async def caching_distributing_data(
                             query_trades
                         )
                         
-                        log.debug(my_trades_active_all)
-
                         result = {}
 
                         result.update({"result": dict(positions=positions_cached,
@@ -247,8 +245,6 @@ async def caching_distributing_data(
                         query_trades
                     )
                     
-                    log.debug(my_trades_active_all)
-
                     result = {}
 
                     result.update({"result": dict(positions=positions_cached,

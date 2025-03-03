@@ -124,8 +124,6 @@ async def hedging_spot(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     message_channel = message_byte["channel"]
-                    
-                    log.error(message_channel)
 
                     if order_allowed_channel in message_channel:
                         
@@ -145,30 +143,14 @@ async def hedging_spot(
 
                         portfolio_all = message_byte_data["cached_portfolio"]
 
-                    if my_trades_channel in message_channel:
-
-                        my_trades_active_all = await executing_query_with_return(
-                            query_trades
-                        )
-
-                        log.error(my_trades_active_all)
-                                                
                     if sub_account_cached_channel in message_channel:
                         
                         sub_account = message_byte_data["result"]
                         #log.debug(sub_account)
                     
                         cached_orders = sub_account["open_orders"]
-                        log.error(cached_orders)
 
                         my_trades_active_all = sub_account["my_trades"]
-                        log.debug(my_trades_active_all)
-                    
-                    if order_update_channel in message_channel:
-                        
-                        log.error(f"order_receiving_channel {message_channel}")
-
-                        cached_orders = message_byte_data["cached_orders"]
 
                     if (
                         allowed_instruments
@@ -250,8 +232,6 @@ async def hedging_spot(
                             ]
                         )
                         
-                        log.debug(f"cached_orders {cached_orders}")
-
                         orders_currency = (
                             []
                             if not cached_orders

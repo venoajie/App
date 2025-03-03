@@ -137,30 +137,14 @@ async def cancelling_orders(
                     if portfolio_channel in message_channel:
 
                         portfolio_all = message_byte_data["cached_portfolio"]
-
-                    if order_receiving_channel in message_channel:
-
-                        cached_orders = message_byte_data["cached_orders"]
-                        log.error(cached_orders)
-
-                    if my_trades_channel in message_channel:
-
-                        my_trades_active_all = await executing_query_with_return(
-                            query_trades
-                        )
-                        
-                        log.error(my_trades_active_all)
                                                 
                     if sub_account_cached_channel in message_channel:
                         
                         sub_account = message_byte_data["result"]
-                        log.debug(sub_account)
                     
                         cached_orders = sub_account["open_orders"]
-                        log.error(cached_orders)
 
                         my_trades_active_all = sub_account["my_trades"]
-                        log.debug(my_trades_active_all)
                     
                     if (
                         ticker_cached_channel in message_channel
