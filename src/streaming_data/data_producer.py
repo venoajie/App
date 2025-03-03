@@ -140,7 +140,7 @@ class StreamingAccountData:
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
 
-                    ws_currencies = []
+                    ws_currencies = [f"user.changes.any.any.raw"]
                     for currency in currencies:
 
                         currency_upper = currency.upper()
@@ -154,8 +154,8 @@ class StreamingAccountData:
                         # asyncio.create_task(
 
                         ws_channel_currency = [
-                            f"user.portfolio.{currency}",
-                            f"user.changes.any.{currency_upper}.raw",
+                            f"user.portfolio.{currency}"
+                            
                         ]
                         
                         ws_currencies.extend(ws_channel_currency)
@@ -475,7 +475,7 @@ class StreamingAccountData:
             msg.update(extra_params)
             
             if msg["params"]["channels"]:
-                print(f"msg {msg}")
+
                 await self.websocket_client.send(json.dumps(msg))
                 print(json.dumps(msg))
 
