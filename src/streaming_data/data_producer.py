@@ -51,6 +51,10 @@ def get_settlement_period(strategy_attributes: list) -> list:
 class StreamingAccountData:
     """
 
+    +----------------------------------------------------------------------------------------------+
+    reference: https://github.com/ElliotP123/crypto-exchange-code-samples/blob/master/deribit/websockets/dbt-ws-authenticated-example.py
+    +----------------------------------------------------------------------------------------------+
+
     """
 
     sub_account_id: str
@@ -135,7 +139,7 @@ class StreamingAccountData:
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
-                    
+
                     """
                     
                     ws_currencies = []
@@ -183,6 +187,7 @@ class StreamingAccountData:
 
                     """
 
+
                     for currency in currencies:
 
                         currency_upper = currency.upper()
@@ -198,10 +203,10 @@ class StreamingAccountData:
 
                             print(f"subscribe ws {ws}")
 
-                            asyncio.create_task(
-                             self.ws_operation(
+                            # asyncio.create_task(
+                            await self.ws_operation(
                                 operation="subscribe", ws_channel=ws
-                            ))
+                            )
 
                         for resolution in resolutions:
 
@@ -229,13 +234,12 @@ class StreamingAccountData:
                                 ws_channel=ws,
                             )
 
-
                     while True:
 
                         # Receive WebSocket messages
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
-                        
+
                         if "id" in list(message):
                             if message["id"] == 9929:
 
@@ -518,9 +522,10 @@ class StreamingAccountData:
             )
 
             msg.update(extra_params)
+            
+            if msg["params"]["channels"]:
+                await self.websocket_client.send(json.dumps(msg))
 
-            await self.websocket_client.send(json.dumps(msg))
-            print(json.dumps(msg))
 
         if "rest_api" in source:
 
