@@ -5,7 +5,7 @@
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
-
+from loguru import logger as log
 
 # installed
 import orjson
