@@ -141,6 +141,10 @@ class StreamingAccountData:
                     self.loop.create_task(self.ws_refresh_auth())
 
                     ws_currencies = [f"user.changes.any.any.raw"]
+                    await self.ws_operation(
+                        operation="subscribe",
+                        ws_channel=ws_currencies,
+                    )
                     for currency in currencies:
 
                         currency_upper = currency.upper()
