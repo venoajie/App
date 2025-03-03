@@ -27,9 +27,13 @@ from transaction_management.deribit.api_requests import SendApiRequest
 from transaction_management.deribit.avoiding_double_ids import \
     avoiding_double_ids
 
+from transaction_management.deribit.cancelling_active_orders import (
+    cancel_the_cancellables,
+)
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
+
 from market_understanding.price_action.candles_analysis import get_market_condition
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
@@ -99,6 +103,15 @@ async def main():
         cancellable_strategies = [
             o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
         ]
+
+        for currency in currencies:
+
+            await cancel_the_cancellables(
+                private_data,
+                order_db_table,
+                currency,
+                cancellable_strategies,
+                        )
         
         settlement_periods = remove_redundant_elements(
         remove_double_brackets_in_list(

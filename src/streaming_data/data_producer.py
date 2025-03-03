@@ -23,10 +23,6 @@ from transaction_management.deribit.api_requests import (
     get_end_point_result,
     get_instruments,
 )
-
-from transaction_management.deribit.cancelling_active_orders import (
-    cancel_the_cancellables,
-)
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
@@ -160,6 +156,8 @@ class StreamingAccountData:
                         ws_currencies.append(f"user.portfolio.{currency}")
                         ws_currencies.append(f"user.changes.any.{currency_upper}.raw")
 
+                    from loguru import  logger as log
+                    log.critical(ws_currencies)
                     await self.ws_operation(
                         operation="subscribe",
                         ws_channel=ws_currencies,
@@ -180,20 +178,13 @@ class StreamingAccountData:
                         ws_channel=ws_instruments,
                     )
 
-                    for currency in currencies:
-
-                        await cancel_the_cancellables(
-                            private_data,
-                            order_db_table,
-                            currency,
-                            cancellable_strategies,
-                        )
-
                     while True:
 
                         # Receive WebSocket messages
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
+                        
+                        log.debug(message)
 
                         if "id" in list(message):
                             if message["id"] == 9929:
