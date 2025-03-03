@@ -529,7 +529,6 @@ class StreamingAccountData:
             
             if msg["params"]["channels"]:
                 await self.websocket_client.send(json.dumps(msg))
-                print(json.dumps(msg))
 
         if "rest_api" in source:
 
