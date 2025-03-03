@@ -241,8 +241,6 @@ class StreamingAccountData:
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
                         
-                        log.debug(message)
-
                         if "id" in list(message):
                             if message["id"] == 9929:
 
