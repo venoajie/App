@@ -175,8 +175,8 @@ class StreamingAccountData:
                             f"incremental_ticker.{instrument}",
                         ]
 
-                        for ws in ws_channel_instrument:
-                            ws_instruments.append(ws)
+                        #for ws in ws_channel_instrument:
+                        #    ws_instruments.append(ws)
 
                     await self.ws_operation(
                         operation="subscribe",
