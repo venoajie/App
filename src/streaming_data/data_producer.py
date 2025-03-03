@@ -5,7 +5,7 @@
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
-from loguru import logger as log
+
 
 # installed
 import orjson
@@ -139,6 +139,54 @@ class StreamingAccountData:
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
+                    
+                    """
+                    
+                    ws_currencies = []
+                    for currency in currencies:
+
+                        currency_upper = currency.upper()
+
+                        instrument_perpetual = f"{currency_upper}-PERPETUAL"
+
+                        for resolution in resolutions:
+
+                            ws = f"chart.trades.{instrument_perpetual}.{resolution}"
+                            #ws_currencies.append(ws)
+                        # asyncio.create_task(
+
+                        ws_channel_currency = [
+                            f"user.portfolio.{currency}",
+                            f"user.changes.any.{currency_upper}.raw",
+                        ]
+                        
+                        ws_currencies.extend(ws_channel_currency)
+                        #ws_currencies.append(f"user.changes.any.{currency_upper}.raw")
+                        
+                    from loguru import  logger as log
+                    log.critical(ws_currencies)
+                    await self.ws_operation(
+                        operation="subscribe",
+                        ws_channel=ws_currencies,
+                    )
+
+                    ws_instruments = []
+                    for instrument in instruments_name:
+
+                        ws_channel_instrument = [
+                            f"incremental_ticker.{instrument}",
+                        ]
+
+                        #for ws in ws_channel_instrument:
+                        #    ws_instruments.append(ws)
+
+                    await self.ws_operation(
+                        operation="subscribe",
+                        ws_channel=ws_instruments,
+                    )
+
+                    """
+
 
                     for currency in currencies:
 
@@ -186,10 +234,6 @@ class StreamingAccountData:
                                 ws_channel=ws,
                             )
 
-#                    await self.ws_operation(
-#                        operation="subscribe",
-##                        ws_channel=ws_instruments,
-#                    )
 
                     while True:
 
@@ -477,13 +521,12 @@ class StreamingAccountData:
             extra_params: dict = dict(
                 id=id,
                 method=f"private/{operation}",
-                params={"channels": [ws_channel]},
+                params={"channels": ws_channel},
             )
 
             msg.update(extra_params)
             
             if msg["params"]["channels"]:
-
                 await self.websocket_client.send(json.dumps(msg))
                 print(json.dumps(msg))
 
