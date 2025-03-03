@@ -150,7 +150,7 @@ class StreamingAccountData:
                         for resolution in resolutions:
 
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
-                            ws_currencies.append(ws)
+                            #ws_currencies.append(ws)
                         # asyncio.create_task(
 
                         ws_channel_currency = [
