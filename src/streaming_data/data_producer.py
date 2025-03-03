@@ -522,13 +522,14 @@ class StreamingAccountData:
             extra_params: dict = dict(
                 id=id,
                 method=f"private/{operation}",
-                params={"channels": ws_channel},
+                params={"channels": [ws_channel]},
             )
 
             msg.update(extra_params)
             
             if msg["params"]["channels"]:
                 await self.websocket_client.send(json.dumps(msg))
+                print(json.dumps(msg))
 
         if "rest_api" in source:
 
