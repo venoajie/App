@@ -176,6 +176,8 @@ async def caching_distributing_data(
                     currency_upper=currency_upper,
                     currency=currency,
                 )
+                
+                log.error(message_channel)
 
                 if "user." in message_channel:
 
