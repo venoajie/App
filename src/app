@@ -169,6 +169,15 @@ async def main():
         """
    
    
+
+            hedging_spot(
+                client_redis,
+                config_app,
+                futures_instruments,
+                redis_channels,
+                strategy_attributes,
+                ),
+            
             future_spreads(
                 client_redis,
                 config_app,
@@ -186,15 +195,6 @@ async def main():
         
             saving_task,
                    
-
-            hedging_spot(
-                client_redis,
-                config_app,
-                futures_instruments,
-                redis_channels,
-                strategy_attributes,
-                ),
-            
             cancelling_orders(
             private_data,
             currencies,
