@@ -51,10 +51,6 @@ def get_settlement_period(strategy_attributes: list) -> list:
 class StreamingAccountData:
     """
 
-    +----------------------------------------------------------------------------------------------+
-    reference: https://github.com/ElliotP123/crypto-exchange-code-samples/blob/master/deribit/websockets/dbt-ws-authenticated-example.py
-    +----------------------------------------------------------------------------------------------+
-
     """
 
     sub_account_id: str
@@ -188,6 +184,14 @@ class StreamingAccountData:
                     """
 
 
+                    ws = [
+                        f"user.changes.any.any.raw",
+                    ]
+                    
+                    await self.ws_operation(
+                        operation="subscribe", ws_channel=ws
+                    )
+
                     for currency in currencies:
 
                         currency_upper = currency.upper()
@@ -196,7 +200,6 @@ class StreamingAccountData:
 
                         ws_channel_currency = [
                             f"user.portfolio.{currency}",
-                            f"user.changes.any.{currency_upper}.raw",
                         ]
 
                         for ws in ws_channel_currency:
