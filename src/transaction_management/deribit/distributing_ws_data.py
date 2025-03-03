@@ -208,6 +208,8 @@ async def caching_distributing_data(
                         my_trades_active_all = await executing_query_with_return(
                             query_trades
                         )
+                        
+                        log.debug(my_trades_active_all)
 
                         result = {}
 
@@ -245,6 +247,8 @@ async def caching_distributing_data(
                         query_trades
                     )
                     
+                    log.debug(my_trades_active_all)
+
                     result = {}
 
                     result.update({"result": dict(positions=positions_cached,
@@ -385,22 +389,17 @@ async def caching_distributing_data(
                         query_trades
                     )
 
-                    await publishing_result(
-                        pipe,
-                        positions_update_channel,
-                        positions_cached,
-                    )
+                    result = {}
+
+                    result.update({"result": dict(positions=positions_cached,
+                                                  open_orders=orders_cached,
+                                                  my_trades=my_trades_active_all
+                                                  )})
 
                     await publishing_result(
                         pipe,
-                        order_update_channel,
-                        orders_cached,
-                    )
-
-                    await publishing_result(
-                        pipe,
-                        my_trades_channel,
-                        my_trades_active_all,
+                        sub_account_cached_channel,
+                        result,
                     )
 
     except Exception as error:

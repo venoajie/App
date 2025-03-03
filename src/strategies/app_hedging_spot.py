@@ -156,7 +156,7 @@ async def hedging_spot(
                     if sub_account_cached_channel in message_channel:
                         
                         sub_account = message_byte_data["result"]
-                        log.debug(sub_account)
+                        #log.debug(sub_account)
                     
                         cached_orders = sub_account["open_orders"]
                         log.error(cached_orders)
