@@ -154,7 +154,12 @@ class StreamingAccountData:
                         # asyncio.create_task(
 
                         ws_currencies.append(f"user.portfolio.{currency}")
-                        ws_currencies.append(f"user.changes.any.{currency_upper}.raw")
+                        #ws_currencies.append(f"user.changes.any.{currency_upper}.raw")
+                            
+                        await self.ws_operation(
+                            operation="subscribe",
+                            ws_channel=(f"user.changes.any.{currency_upper}.raw"),
+                        )
 
                     from loguru import  logger as log
                     log.critical(ws_currencies)
