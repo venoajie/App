@@ -140,52 +140,56 @@ class StreamingAccountData:
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
 
-                    ws_currencies = [f"user.changes.any.any.raw"]
-                    await self.ws_operation(
-                        operation="subscribe",
-                        ws_channel=ws_currencies,
-                    )
                     for currency in currencies:
 
                         currency_upper = currency.upper()
 
                         instrument_perpetual = f"{currency_upper}-PERPETUAL"
 
+                        ws_channel_currency = [
+                            f"user.portfolio.{currency}",
+                            f"user.changes.any.{currency_upper}.raw",
+                        ]
+
+                        for ws in ws_channel_currency:
+
+                            print(f"subscribe ws {ws}")
+
+                            # asyncio.create_task(
+                            await self.ws_operation(
+                                operation="subscribe", ws_channel=ws
+                            )
+
                         for resolution in resolutions:
 
                             ws = f"chart.trades.{instrument_perpetual}.{resolution}"
-                            #ws_currencies.append(ws)
-                        # asyncio.create_task(
 
-                        ws_channel_currency = [
-                            f"user.portfolio.{currency}"
-                            
-                        ]
-                        
-                        ws_currencies.extend(ws_channel_currency)
-                        #ws_currencies.append(f"user.changes.any.{currency_upper}.raw")
-                        
-                    from loguru import  logger as log
-                    log.critical(ws_currencies)
-                    await self.ws_operation(
-                        operation="subscribe",
-                        ws_channel=ws_currencies,
-                    )
+                            print(f"subscribe ws {ws}")
 
-                    ws_instruments = []
+                            # asyncio.create_task(
+                            await self.ws_operation(
+                                operation="subscribe", ws_channel=ws
+                            )
+
                     for instrument in instruments_name:
 
                         ws_channel_instrument = [
                             f"incremental_ticker.{instrument}",
                         ]
 
-                        #for ws in ws_channel_instrument:
-                        #    ws_instruments.append(ws)
+                        for ws in ws_channel_instrument:
 
-                    await self.ws_operation(
-                        operation="subscribe",
-                        ws_channel=ws_instruments,
-                    )
+                            print(f"subscribe ws {ws}")
+
+                            await self.ws_operation(
+                                operation="subscribe",
+                                ws_channel=ws,
+                            )
+
+#                    await self.ws_operation(
+#                        operation="subscribe",
+##                        ws_channel=ws_instruments,
+#                    )
 
                     while True:
 
