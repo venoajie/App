@@ -184,9 +184,8 @@ class StreamingAccountData:
                     """
 
 
-                    ws = [
-                        f"user.changes.any.any.raw",
-                    ]
+                    ws =                         f"user.changes.any.any.raw"
+                    
                     
                     await self.ws_operation(
                         operation="subscribe", ws_channel=ws
