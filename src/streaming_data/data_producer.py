@@ -19,33 +19,13 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from configuration import config, config_oci, id_numbering
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import (
-    get_currencies,
     get_end_point_result,
-    get_instruments,
 )
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
-from utilities.pickling import replace_data
-from utilities.string_modification import (
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-)
-from utilities.system_tools import parse_error_message, provide_path_for_file
+from utilities.system_tools import parse_error_message
 
 
 def parse_dotenv(sub_account: str) -> dict:
     return config.main_dotenv(sub_account)
-
-
-def get_settlement_period(strategy_attributes: list) -> list:
-
-    return remove_redundant_elements(
-        remove_double_brackets_in_list(
-            [o["settlement_period"] for o in strategy_attributes]
-        )
-    )
-
 
 @dataclass(unsafe_hash=True, slots=True)
 class StreamingAccountData:
@@ -80,11 +60,9 @@ class StreamingAccountData:
         client_redis: object,
         redis_channels,
         queue_general: object,
-        cancellable_strategies,
         currencies: list,
-        order_db_table,
+        futures_instruments,
         resolutions: list,
-        strategy_attributes: list,
     ) -> None:
 
         async with websockets.connect(
@@ -95,38 +73,7 @@ class StreamingAccountData:
         ) as self.websocket_client:
 
             try:
-
-                # get ALL traded currencies in deribit
-                get_currencies_all = await get_currencies()
-
-                all_exc_currencies = [
-                    o["currency"] for o in get_currencies_all["result"]
-                ]
-
-                for currency in all_exc_currencies:
-
-                    instruments = await get_instruments(currency)
-
-                    my_path_instruments = provide_path_for_file("instruments", currency)
-
-                    replace_data(
-                        my_path_instruments,
-                        instruments,
-                    )
-
-                my_path_cur = provide_path_for_file("currencies")
-
-                replace_data(
-                    my_path_cur,
-                    all_exc_currencies,
-                )
-
-                settlement_periods = get_settlement_period(strategy_attributes)
-
-                futures_instruments = await get_futures_instruments(
-                    currencies, settlement_periods
-                )
-
+                
                 instruments_name = futures_instruments["instruments_name"]
 
                 while True:
@@ -139,54 +86,6 @@ class StreamingAccountData:
 
                     # Start Authentication Refresh Task
                     self.loop.create_task(self.ws_refresh_auth())
-
-                    """
-                    
-                    ws_currencies = []
-                    for currency in currencies:
-
-                        currency_upper = currency.upper()
-
-                        instrument_perpetual = f"{currency_upper}-PERPETUAL"
-
-                        for resolution in resolutions:
-
-                            ws = f"chart.trades.{instrument_perpetual}.{resolution}"
-                            #ws_currencies.append(ws)
-                        # asyncio.create_task(
-
-                        ws_channel_currency = [
-                            f"user.portfolio.{currency}",
-                            f"user.changes.any.{currency_upper}.raw",
-                        ]
-                        
-                        ws_currencies.extend(ws_channel_currency)
-                        #ws_currencies.append(f"user.changes.any.{currency_upper}.raw")
-                        
-                    from loguru import  logger as log
-                    log.critical(ws_currencies)
-                    await self.ws_operation(
-                        operation="subscribe",
-                        ws_channel=ws_currencies,
-                    )
-
-                    ws_instruments = []
-                    for instrument in instruments_name:
-
-                        ws_channel_instrument = [
-                            f"incremental_ticker.{instrument}",
-                        ]
-
-                        #for ws in ws_channel_instrument:
-                        #    ws_instruments.append(ws)
-
-                    await self.ws_operation(
-                        operation="subscribe",
-                        ws_channel=ws_instruments,
-                    )
-
-                    """
-
 
                     for currency in currencies:
 
@@ -207,7 +106,6 @@ class StreamingAccountData:
                             await self.ws_operation(
                                 operation="subscribe", ws_channel=ws
                             )
-
 
                     ws_instruments = []
                     for instrument in instruments_name:

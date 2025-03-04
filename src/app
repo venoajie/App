@@ -23,7 +23,12 @@ from strategies.app_future_spreads import future_spreads
 from strategies.app_hedging_spot import hedging_spot
 from strategies.relabelling_trading_result import relabelling_trades
 from streaming_data.data_producer import StreamingAccountData
-from transaction_management.deribit.api_requests import SendApiRequest
+from transaction_management.deribit.api_requests import (
+    get_currencies,
+    get_end_point_result,
+    get_instruments,
+    SendApiRequest,
+)
 from transaction_management.deribit.avoiding_double_ids import \
     avoiding_double_ids
 
@@ -45,11 +50,15 @@ from utilities.system_tools import (
     back_up_db,
     get_config_tomli,
     parse_error_message, 
+    provide_path_for_file,
     )
 from utilities.string_modification import (
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
+from utilities.pickling import replace_data
+
+
 
 def handle_ctrl_c(
     signum, 
@@ -90,6 +99,31 @@ async def main():
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
+
+        # get ALL traded currencies in deribit
+        get_currencies_all = await get_currencies()
+
+        all_exc_currencies = [
+            o["currency"] for o in get_currencies_all["result"]
+        ]
+
+        for currency in all_exc_currencies:
+
+            instruments = await get_instruments(currency)
+
+            my_path_instruments = provide_path_for_file("instruments", currency)
+
+            replace_data(
+                my_path_instruments,
+                instruments,
+            )
+
+        my_path_cur = provide_path_for_file("currencies")
+
+        replace_data(
+            my_path_cur,
+            all_exc_currencies,
+        )
 
         # get TRADABLE currencies
         currencies: list = [o["spot"] for o in tradable_config_app][0]
@@ -143,11 +177,10 @@ async def main():
                 client_redis,
                 redis_channels,
                 queue,
-                cancellable_strategies,
                 currencies,
-                order_db_table,
+                futures_instruments,
                 resolutions,
-                strategy_attributes)
+)
             ) 
               
    
