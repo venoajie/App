@@ -177,11 +177,11 @@ async def caching_distributing_data(
                     currency=currency,
                 )
 
-                log.error(message_channel)
-
                 if "user." in message_channel:
 
-                    if "changes.any" in message_channel:
+                    if ("orders.any" in message_channel
+                    or"orders.any" in message_channel
+                    or "trades.any" in message_channel):
 
                         log.warning(f"user.changes {data}")
 
