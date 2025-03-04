@@ -97,6 +97,8 @@ class StreamingAccountData:
 
                     orders = f"user.orders.any.any.raw"
                     ws_instruments.append(orders)
+                    trades = f"user.trades.any.any.raw"
+                    ws_instruments.append(trades)
                     
                     for instrument in instruments_name:
 
@@ -174,6 +176,13 @@ class StreamingAccountData:
                             if message["method"] != "heartbeat":
 
                                 message_params: dict = message["params"]
+                                
+                                message_channel: str = message_params["channel"]
+                                
+                                if "user." in message_channel:
+                                    from loguru import logger as log
+                                    log.critical (message_channel)
+                                    log.info (message_params)
 
                                 # queing message to dispatcher
                                 await queue_general.put(message_params)
