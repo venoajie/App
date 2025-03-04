@@ -22,7 +22,9 @@ from transaction_management.deribit.api_requests import (
     get_end_point_result,
 )
 from utilities.system_tools import parse_error_message
-
+from utilities.string_modification import (
+    extract_currency_from_text,
+)
 
 def parse_dotenv(sub_account: str) -> dict:
     return config.main_dotenv(sub_account)
@@ -94,7 +96,7 @@ class StreamingAccountData:
                         instrument_perpetual = f"{currency_upper}-PERPETUAL"
 
                         ws_channel_currency = [
-                            f"user.portfolio.{currency}",
+                            #f"user.portfolio.{currency}",
                             f"user.changes.any.{currency_upper}.raw",
                         ]
 
@@ -111,6 +113,12 @@ class StreamingAccountData:
                     for instrument in instruments_name:
                         
                         if "PERPETUAL" in instrument:
+                            
+                            currency = extract_currency_from_text(instrument)
+                            portfolio = f"user.portfolio.{currency}"
+                            
+                            ws_instruments.append(portfolio)
+                            
                             for resolution in resolutions:
                                 ws_chart = f"chart.trades.{instrument_perpetual}.{resolution}"
                                 ws_instruments.append(ws_chart)
