@@ -219,6 +219,8 @@ class StreamingAccountData:
                                 operation="subscribe", ws_channel=ws
                             )
 
+
+                    ws_instruments = []
                     for instrument in instruments_name:
 
                         ws_channel_instrument = [
@@ -226,13 +228,14 @@ class StreamingAccountData:
                         ]
 
                         for ws in ws_channel_instrument:
+                            ws_instruments.append(ws)
 
-                            print(f"subscribe ws {ws}")
+                    await self.ws_operation(
+                        operation="subscribe",
+                        ws_channel=ws_instruments,
+                        source="ws-combination",
+                    )
 
-                            await self.ws_operation(
-                                operation="subscribe",
-                                ws_channel=ws,
-                            )
 
                     while True:
 
@@ -497,11 +500,16 @@ class StreamingAccountData:
         self,
         operation: str,
         ws_channel: str,
-        source: str = "ws",
+        source: str = "ws-single",
     ) -> None:
         """
         Requests `public/subscribe` or `public/unsubscribe`
         to DBT's API for the specific WebSocket Channel.
+        
+        source: 
+        ws-single
+        ws-combination
+        rest
         """
         sleep_time: int = 0.05
 
@@ -514,11 +522,14 @@ class StreamingAccountData:
         }
 
         if "ws" in source:
+            
+            if "single" in source:
+                ws_channel = [ws_channel]
 
             extra_params: dict = dict(
                 id=id,
                 method=f"private/{operation}",
-                params={"channels": [ws_channel]},
+                params={"channels": ws_channel},
             )
 
             msg.update(extra_params)
