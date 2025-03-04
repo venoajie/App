@@ -51,7 +51,7 @@ async def processing_orders(
                     message_channel = message_byte["channel"]
 
                     if sending_order_channel in message_channel:
-                        
+
                         if message_byte_data["order_allowed"]:
 
                             # get strategies that have not short/long attributes in the label

@@ -25,8 +25,10 @@ from utilities.string_modification import (
 )
 from utilities.system_tools import parse_error_message
 
+
 def parse_dotenv(sub_account: str) -> dict:
     return config.main_dotenv(sub_account)
+
 
 @dataclass(unsafe_hash=True, slots=True)
 class StreamingAccountData:
@@ -72,7 +74,7 @@ class StreamingAccountData:
         ) as self.websocket_client:
 
             try:
-                
+
                 instruments_name = futures_instruments["instruments_name"]
 
                 while True:
@@ -88,22 +90,22 @@ class StreamingAccountData:
 
                     ws_instruments = []
                     for instrument in instruments_name:
-                        
+
                         if "PERPETUAL" in instrument:
-                            
+
                             currency = extract_currency_from_text(instrument)
                             portfolio = f"user.portfolio.{currency}"
-                            
+
                             ws_instruments.append(portfolio)
-                            
+
                             user_changes = f"user.changes.any.{currency}.raw"
                             ws_instruments.append(user_changes)
-                            
+
                             for resolution in resolutions:
-                                
+
                                 ws_chart = f"chart.trades.{instrument}.{resolution}"
                                 ws_instruments.append(ws_chart)
-                            
+
                         incremental_ticker = f"incremental_ticker.{instrument}"
 
                         ws_instruments.append(incremental_ticker)
@@ -382,8 +384,8 @@ class StreamingAccountData:
         """
         Requests `public/subscribe` or `public/unsubscribe`
         to DBT's API for the specific WebSocket Channel.
-        
-        source: 
+
+        source:
         ws-single
         ws-combination
         rest
@@ -395,14 +397,14 @@ class StreamingAccountData:
         id = id_numbering.id(
             operation,
             ws_channel,
-            )
+        )
 
         msg: dict = {
             "jsonrpc": "2.0",
         }
 
         if "ws" in source:
-            
+
             if "single" in source:
                 ws_channel = [ws_channel]
 
@@ -413,10 +415,9 @@ class StreamingAccountData:
             )
 
             msg.update(extra_params)
-            
+
             if msg["params"]["channels"]:
                 await self.websocket_client.send(json.dumps(msg))
-
 
         if "rest_api" in source:
 

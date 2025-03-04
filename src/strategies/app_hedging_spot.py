@@ -82,7 +82,6 @@ async def hedging_spot(
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
 
-
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
@@ -126,7 +125,7 @@ async def hedging_spot(
                     message_channel = message_byte["channel"]
 
                     if order_allowed_channel in message_channel:
-                        
+
                         log.warning(message_byte_data)
 
                         order_allowed = message_byte_data["result"]
@@ -144,10 +143,10 @@ async def hedging_spot(
                         portfolio_all = message_byte_data["cached_portfolio"]
 
                     if sub_account_cached_channel in message_channel:
-                        
+
                         sub_account = message_byte_data["result"]
-                        #log.debug(sub_account)
-                    
+                        # log.debug(sub_account)
+
                         cached_orders = sub_account["open_orders"]
 
                         my_trades_active_all = sub_account["my_trades"]
@@ -179,7 +178,9 @@ async def hedging_spot(
                             ]
                         )
 
-                        log.debug(f"size_is_reconciled_global {size_is_reconciled_global}")
+                        log.debug(
+                            f"size_is_reconciled_global {size_is_reconciled_global}"
+                        )
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
@@ -231,7 +232,7 @@ async def hedging_spot(
                                 ]
                             ]
                         )
-                        
+
                         orders_currency = (
                             []
                             if not cached_orders
@@ -297,14 +298,14 @@ async def hedging_spot(
                                 []
                                 if not orders_currency
                                 else [
-                                    o
-                                    for o in orders_currency
-                                    if strategy in o["label"]
+                                    o for o in orders_currency if strategy in o["label"]
                                 ]
                             )
                             log.info(f" {strategy} orders_currency {orders_currency}")
-                            
-                            log.critical(f" {currency} orders_currency_strategy {len(orders_currency_strategy)}  {(orders_currency_strategy)} ")
+
+                            log.critical(
+                                f" {currency} orders_currency_strategy {len(orders_currency_strategy)}  {(orders_currency_strategy)} "
+                            )
 
                             instrument_attributes_futures_for_hedging = [
                                 o
@@ -377,21 +378,23 @@ async def hedging_spot(
                                         trade_db_table,
                                     )
                                 )
-                                
+
                                 log.warning(f"send_order {send_order}")
 
-                                if send_order["order_allowed"] and size_is_reconciled_global:
-                                                                        
+                                if (
+                                    send_order["order_allowed"]
+                                    and size_is_reconciled_global
+                                ):
+
                                     await publishing_result(
                                         client_redis,
                                         sending_order_channel,
                                         send_order,
                                     )
 
-
                                     # not_order = False
 
-#                                        break
+                                #                                        break
 
                                 status_transaction = [
                                     "open",
@@ -488,10 +491,8 @@ async def hedging_spot(
                                                             # orders_currency_strategy
                                                         )
 
-                                                        if send_order[
-                                                            "order_allowed"
-                                                        ]:
-                                                                                                                                                                
+                                                        if send_order["order_allowed"]:
+
                                                             await publishing_result(
                                                                 client_redis,
                                                                 sending_order_channel,
@@ -500,7 +501,7 @@ async def hedging_spot(
 
                                                             # not_order = False
 
-                                                            #break
+                                                            # break
 
                                                     if status == "closed":
 
@@ -531,20 +532,18 @@ async def hedging_spot(
                                                             # orders_currency_strategy
                                                         )
 
-                                                        if send_order[
-                                                            "order_allowed"
-                                                        ]:
-                                                                                            
+                                                        if send_order["order_allowed"]:
+
                                                             await publishing_result(
                                                                 client_redis,
                                                                 sending_order_channel,
                                                                 send_order,
                                                             )
-                                                            
-                                                                # not_order = False
-                                                                # )
 
-                                                                #break
+                                                            # not_order = False
+                                                            # )
+
+                                                            # break
 
             except Exception as error:
 

@@ -282,19 +282,21 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
             my_trades_instrument_name = await executing_query_with_return(
                 query_trades_all
             )
-            
+
             log.info(f"my_trades_instrument_name {my_trades_instrument_name}")
 
             last_10_timestamp_log = [o["timestamp"] for o in my_trades_instrument_name]
 
             timestamp_log = min(last_10_timestamp_log)
 
-            trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
-                instrument_name,
-                timestamp_log,
-                1000,
+            trades_from_exchange = (
+                await private_data.get_user_trades_by_instrument_and_time(
+                    instrument_name,
+                    timestamp_log,
+                    1000,
+                )
             )
-            
+
             if trades_from_exchange:
 
                 trades_from_exchange_without_futures_combo = [
@@ -605,7 +607,6 @@ async def rechecking_based_on_data_in_sqlite(
                         )
                     )
 
-
                     if my_trades_and_sub_account_size_reconciled:
 
                         order_allowed = 1
@@ -719,4 +720,3 @@ async def rechecking_based_on_data_in_sqlite(
         order_allowed_channel,
         result,
     )
-

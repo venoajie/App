@@ -137,15 +137,15 @@ async def cancelling_orders(
                     if portfolio_channel in message_channel:
 
                         portfolio_all = message_byte_data["cached_portfolio"]
-                                                
+
                     if sub_account_cached_channel in message_channel:
-                        
+
                         sub_account = message_byte_data["result"]
-                    
+
                         cached_orders = sub_account["open_orders"]
 
                         my_trades_active_all = sub_account["my_trades"]
-                    
+
                     if (
                         ticker_cached_channel in message_channel
                         and market_condition_all
