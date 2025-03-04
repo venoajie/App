@@ -121,6 +121,7 @@ def update_cached_orders(
     if source == "ws":
 
         try:
+
             orders = sub_account_data["orders"]
                         
             if orders:
@@ -160,7 +161,7 @@ def update_cached_orders(
                             orders_all.append(order)
         except:
 
-            orders = sub_account_data
+            order = sub_account_data
             
             order_state = order["order_state"]
 
