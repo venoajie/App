@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # built ins
@@ -89,6 +88,16 @@ class StreamingAccountData:
                     self.loop.create_task(self.ws_refresh_auth())
 
                     ws_instruments = []
+                    
+                    instrument_kinds = ["future, future_combo"]
+                    for kind in instrument_kinds:
+                            
+                        user_changes = f"user.changes.{kind}.any.raw"
+                        ws_instruments.append(user_changes)
+
+                    orders = f"user.orders.any.any.raw"
+                    ws_instruments.append(orders)
+                    
                     for instrument in instruments_name:
 
                         if "PERPETUAL" in instrument:
@@ -98,8 +107,8 @@ class StreamingAccountData:
 
                             ws_instruments.append(portfolio)
 
-                            user_changes = f"user.changes.any.{currency}.raw"
-                            ws_instruments.append(user_changes)
+                            #user_changes = f"user.changes.any.{currency}.raw"
+                            #ws_instruments.append(user_changes)
 
                             for resolution in resolutions:
 
