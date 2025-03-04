@@ -120,7 +120,65 @@ def update_cached_orders(
 
     if source == "ws":
 
-        orders = sub_account_data["orders"]
+        try:
+            orders = sub_account_data["orders"]
+                        
+            if orders:
+
+                if trades:
+
+                    for trade in trades:
+
+                        order_id = trade["order_id"]
+
+                        selected_order = [o for o in orders_all if order_id in o["order_id"]]
+
+                        if selected_order:
+
+                            orders_all.remove(selected_order[0])
+
+                if orders:
+
+                    for order in orders:
+
+                        order_state = order["order_state"]
+
+                        if order_state == "cancelled" or order_state == "filled":
+
+                            order_id = order["order_id"]
+
+                            selected_order = [
+                                o for o in orders_all if order_id in o["order_id"]
+                            ]
+
+                            if selected_order:
+
+                                orders_all.remove(selected_order[0])
+
+                        else:
+
+                            orders_all.append(order)
+        except:
+
+            orders = sub_account_data
+            
+            order_state = order["order_state"]
+
+            if order_state == "cancelled" or order_state == "filled":
+
+                order_id = order["order_id"]
+
+                selected_order = [
+                    o for o in orders_all if order_id in o["order_id"]
+                ]
+
+                if selected_order:
+
+                    orders_all.remove(selected_order[0])
+
+            else:
+
+                orders_all.append(order)
 
         trades = sub_account_data["trades"]
 
@@ -129,43 +187,6 @@ def update_cached_orders(
         orders = sub_account_data
 
         trades = []
-
-    if orders:
-
-        if trades:
-
-            for trade in trades:
-
-                order_id = trade["order_id"]
-
-                selected_order = [o for o in orders_all if order_id in o["order_id"]]
-
-                if selected_order:
-
-                    orders_all.remove(selected_order[0])
-
-        if orders:
-
-            for order in orders:
-
-                order_state = order["order_state"]
-
-                if order_state == "cancelled" or order_state == "filled":
-
-                    order_id = order["order_id"]
-
-                    selected_order = [
-                        o for o in orders_all if order_id in o["order_id"]
-                    ]
-
-                    if selected_order:
-
-                        orders_all.remove(selected_order[0])
-
-                else:
-
-                    orders_all.append(order)
-
 
 def positions_updating_cached(
     positions_cached: list,
