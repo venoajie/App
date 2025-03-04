@@ -180,31 +180,34 @@ async def caching_distributing_data(
                 if "user." in message_channel:
 
                     if ("orders.any" in message_channel
-                    or"orders.any" in message_channel
-                    or "trades.any" in message_channel):
+                    or "trades.any" in message_channel
+                    or "changes.any" in message_channel):
 
                         log.warning(f"user.changes {data}")
+                        
+                        if ("orders.any" in message_channel
+                    or "trades.any" in message_channel):
 
-                        update_cached_orders(
-                            orders_cached,
-                            data,
-                        )
+                            update_cached_orders(
+                                orders_cached,
+                                data,
+                            )
+                               
+                            currency_lower = currency.lower()
+
+                            await saving_orders(
+                                private_data,
+                                cancellable_strategies,
+                                non_checked_strategies,
+                                data,
+                                order_db_table,
+                                currency_lower,
+                                False,
+                            )
 
                         positions_updating_cached(
                             positions_cached,
                             data,
-                        )
-
-                        currency_lower = currency.lower()
-
-                        await saving_orders(
-                            private_data,
-                            cancellable_strategies,
-                            non_checked_strategies,
-                            data,
-                            order_db_table,
-                            currency_lower,
-                            False,
                         )
 
                         my_trades_active_all = await executing_query_with_return(
