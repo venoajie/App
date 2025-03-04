@@ -6,7 +6,6 @@ import asyncio
 import json
 from datetime import datetime, timedelta, timezone
 
-
 # installed
 import orjson
 import uvloop
@@ -21,10 +20,10 @@ from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import (
     get_end_point_result,
 )
-from utilities.system_tools import parse_error_message
 from utilities.string_modification import (
     extract_currency_from_text,
 )
+from utilities.system_tools import parse_error_message
 
 def parse_dotenv(sub_account: str) -> dict:
     return config.main_dotenv(sub_account)
@@ -58,11 +57,9 @@ class StreamingAccountData:
 
     async def ws_manager(
         self,
-        private_data: object,
         client_redis: object,
         redis_channels,
         queue_general: object,
-        currencies: list,
         futures_instruments,
         resolutions: list,
     ) -> None:
@@ -116,7 +113,6 @@ class StreamingAccountData:
                         ws_channel=ws_instruments,
                         source="ws-combination",
                     )
-
 
                     while True:
 
@@ -396,7 +392,10 @@ class StreamingAccountData:
 
         await asyncio.sleep(sleep_time)
 
-        id = id_numbering.id(operation, ws_channel)
+        id = id_numbering.id(
+            operation,
+            ws_channel,
+            )
 
         msg: dict = {
             "jsonrpc": "2.0",

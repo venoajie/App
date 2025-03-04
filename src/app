@@ -25,7 +25,6 @@ from strategies.relabelling_trading_result import relabelling_trades
 from streaming_data.data_producer import StreamingAccountData
 from transaction_management.deribit.api_requests import (
     get_currencies,
-    get_end_point_result,
     get_instruments,
     SendApiRequest,
 )
@@ -57,7 +56,6 @@ from utilities.string_modification import (
     remove_redundant_elements,
 )
 from utilities.pickling import replace_data
-
 
 
 def handle_ctrl_c(
@@ -173,17 +171,14 @@ async def main():
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(
-                private_data,
                 client_redis,
                 redis_channels,
                 queue,
-                currencies,
                 futures_instruments,
                 resolutions,
 )
             ) 
-              
-   
+                 
         saving_task = asyncio.create_task(
             caching_distributing_data(
                 private_data,
@@ -203,14 +198,6 @@ async def main():
    
    
 
-            hedging_spot(
-                client_redis,
-                config_app,
-                futures_instruments,
-                redis_channels,
-                strategy_attributes,
-                ),
-            
             future_spreads(
                 client_redis,
                 config_app,
@@ -227,7 +214,15 @@ async def main():
             producer_task, 
         
             saving_task,
-                   
+
+            hedging_spot(
+                client_redis,
+                config_app,
+                futures_instruments,
+                redis_channels,
+                strategy_attributes,
+                ),
+                               
             cancelling_orders(
             private_data,
             currencies,
