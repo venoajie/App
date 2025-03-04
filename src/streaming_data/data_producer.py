@@ -215,13 +215,19 @@ class StreamingAccountData:
                             print(f"subscribe ws {ws}")
 
                             # asyncio.create_task(
-                            await self.ws_operation(
-                                operation="subscribe", ws_channel=ws
-                            )
+                            #await self.ws_operation(
+                            #    operation="subscribe", ws_channel=ws
+                            #)
 
 
                     ws_instruments = []
                     for instrument in instruments_name:
+                        
+                        if "PERPETUAL" in instrument:
+                            for resolution in resolutions:
+                                ws_chart = f"chart.trades.{instrument_perpetual}.{resolution}"
+                                ws_instruments.append(ws_chart)
+                            
 
                         ws_channel_instrument = [
                             f"incremental_ticker.{instrument}",
