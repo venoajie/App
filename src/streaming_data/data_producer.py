@@ -107,12 +107,9 @@ class StreamingAccountData:
                                 ws_chart = f"chart.trades.{instrument}.{resolution}"
                                 ws_instruments.append(ws_chart)
                             
-                        ws_channel_instrument = [
-                            f"incremental_ticker.{instrument}",
-                        ]
+                        incremental_ticker = f"incremental_ticker.{instrument}"
 
-                        for ws in ws_channel_instrument:
-                            ws_instruments.append(ws)
+                        ws_instruments.append(incremental_ticker)
 
                     await self.ws_operation(
                         operation="subscribe",
