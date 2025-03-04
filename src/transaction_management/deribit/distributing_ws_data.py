@@ -12,14 +12,26 @@ import orjson
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from db_management.redis_client import saving_and_publishing_result, publishing_result
-from db_management.sqlite_management import executing_query_with_return
+from db_management.sqlite_management import executing_query_with_return, deleting_row, insert_tables
 from messaging.telegram_bot import telegram_bot_sendtext
+from strategies.basic_strategy import is_label_and_side_consistent
 from transaction_management.deribit.api_requests import get_tickers
 from transaction_management.deribit.allocating_ohlc import inserting_open_interest
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-from transaction_management.deribit.orders_management import saving_orders
+
+from transaction_management.deribit.cancelling_active_orders import (
+    cancel_by_order_id,
+    cancel_the_cancellables,
+)
+from transaction_management.deribit.orders_management import (
+    cancelling_and_relabelling,
+    saving_order_based_on_state,
+    saving_orders,
+    saving_oto_order,
+    saving_traded_orders,
+)
 from utilities.caching import (
     positions_updating_cached,
     update_cached_orders,
@@ -179,21 +191,107 @@ async def caching_distributing_data(
 
                 if "user." in message_channel:
 
-                    if ("orders.any" in message_channel
-                    or "trades.any" in message_channel
-                    or "changes.any" in message_channel):
+                    archive_db_table = f"my_trades_all_{currency_lower}_json"
+
+                    if (
+                        "orders.any" in message_channel
+                        or "trades.any" in message_channel
+                        or "changes.any" in message_channel
+                    ):
 
                         log.warning(f"user.changes {data}")
-                        
-                        if ("orders.any" in message_channel
-                    or "trades.any" in message_channel):
+
+                        if "trades.any" in message_channel:
+                            await cancel_the_cancellables(
+                                            private_data,
+                                            order_db_table,
+                                            currency_lower,
+                                            cancellable_strategies,
+                                        )
+                            await saving_traded_orders(
+                                data,
+                                archive_db_table,
+                                order_db_table,
+                            )
+
+                        if "orders.any" in message_channel:
 
                             update_cached_orders(
                                 orders_cached,
                                 data,
                             )
-                               
+
                             currency_lower = currency.lower()
+                
+                
+                            if "oto_order_ids" in data:
+
+                                await saving_oto_order(
+                                    private_data,
+                                    non_checked_strategies,
+                                    data,
+                                    order_db_table,
+                                )
+
+                            else:
+
+                                # log.debug(f"order {order}")
+
+                                if "OTO" not in data["order_id"]:
+
+                                    label = data["label"]
+
+                                    order_id = data["order_id"]
+                                    order_state = data["order_state"]
+
+                                    # no label
+                                    if label == "":
+
+                                        await cancelling_and_relabelling(
+                                            private_data,
+                                            non_checked_strategies,
+                                            order_db_table,
+                                            data,
+                                            label,
+                                            order_state,
+                                            order_id,
+                                        )
+
+                                    else:
+                                        label_and_side_consistent = is_label_and_side_consistent(
+                                            non_checked_strategies, data
+                                        )
+
+                                        if label_and_side_consistent and label:
+
+                                            # log.debug(f"order {order}")
+
+                                            await saving_order_based_on_state(
+                                                order_db_table,
+                                                data,
+                                            )
+
+                                        # check if transaction has label. Provide one if not any
+                                        if not label_and_side_consistent:
+
+                                            if (
+                                                order_state != "cancelled"
+                                                or order_state != "filled"
+                                            ):
+                                                await cancel_by_order_id(
+                                                    private_data,
+                                                    order_db_table,
+                                                    order_id,
+                                                )
+
+                                                # log.error (f"order {order}")
+                                                await insert_tables(
+                                                    order_db_table,
+                                                    data,
+                                                )
+
+                
+                
 
                             await saving_orders(
                                 private_data,
