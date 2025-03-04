@@ -123,6 +123,8 @@ def update_cached_orders(
         try:
 
             orders = sub_account_data["orders"]
+            
+            trades = sub_account_data["trades"]
                         
             if orders:
 
@@ -180,8 +182,6 @@ def update_cached_orders(
             else:
 
                 orders_all.append(order)
-
-        trades = sub_account_data["trades"]
 
     if source == "rest":
 
