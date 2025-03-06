@@ -389,6 +389,10 @@ class SendApiRequest:
     ) -> list:
 
         """
+        
+        currency= BTC/ETH
+        example= https://www.deribit.com/api/v2/private/get_subaccounts_details?currency=BTC&with_open_orders=true
+        
 
         result_sub_account["result"]
 

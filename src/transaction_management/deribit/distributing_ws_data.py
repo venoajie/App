@@ -202,11 +202,7 @@ async def caching_distributing_data(
                         else:
 
                             subaccounts_details_result = (
-                                await private_data.get_subaccounts_details(currency)
-                            )
-
-                            subaccounts_details_result = (
-                                await private_data.get_subaccounts_details(currency)
+                                await private_data.get_subaccounts_details(currency_upper)
                             )
 
                             updating_sub_account(
@@ -270,7 +266,7 @@ async def caching_distributing_data(
                     )
 
                     subaccounts_details_result = (
-                        await private_data.get_subaccounts_details(currency)
+                        await private_data.get_subaccounts_details(currency_upper)
                     )
 
                     updating_sub_account(
