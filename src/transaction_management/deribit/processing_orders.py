@@ -14,9 +14,6 @@ from transaction_management.deribit.cancelling_active_orders import (
     cancel_the_cancellables,
 )
 
-from transaction_management.deribit.orders_management import (
-    saving_traded_orders,
-)
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.system_tools import parse_error_message
 
