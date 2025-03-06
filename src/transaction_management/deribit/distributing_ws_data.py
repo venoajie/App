@@ -202,9 +202,13 @@ async def caching_distributing_data(
                             )
 
                         else:
+                            
+                            currency: str = extract_currency_from_text(data["instrument_name"])
+                            
+                            pub_message.update({"currency": currency})
 
                             subaccounts_details_result = (
-                                await private_data.get_subaccounts_details(currency_upper)
+                                await private_data.get_subaccounts_details(currency)
                             )
 
                             updating_sub_account(
@@ -215,13 +219,21 @@ async def caching_distributing_data(
 
                         if "orders.any" in message_channel:
 
+                            currency: str = extract_currency_from_text(data["instrument_name"])
+                            
+                            pub_message.update({"currency": currency})
+
+                            subaccounts_details_result = (
+                                await private_data.get_subaccounts_details(currency)
+                            )
+                            
                             update_cached_orders(
                                 orders_cached,
                                 data,
                             )
 
-                            currency_lower = currency.lower()
-
+#                            currency_lower = currency.lower()
+#
                             """
                             
                             await saving_orders(
