@@ -168,6 +168,8 @@ async def caching_distributing_data(
             async with client_redis.pipeline() as pipe:
 
                 data: dict = message_params["data"]
+                
+                log.debug(message_params)
 
                 message_channel: str = message_params["channel"]
 
