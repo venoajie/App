@@ -507,12 +507,16 @@ class SendApiRequest:
             "currency": currency,
             "with_open_orders": True,
         }
+        
+        log.debug(f"endpoint {endpoint} params {params}")
 
         result_sub_account = await private_connection(
             self.sub_account_id,
             endpoint=endpoint,
             params=params,
         )
+        
+        log.error(result_sub_account)
 
         return result_sub_account["result"]
 
