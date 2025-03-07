@@ -290,9 +290,6 @@ async def caching_distributing_data(
                         }
                     )
 
-                    
-                    log.debug(result)
-
                     await publishing_result(
                         pipe,
                         sub_account_cached_channel,
