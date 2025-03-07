@@ -216,7 +216,7 @@ async def caching_distributing_data(
                                 current_order=data,
                                 open_orders=orders_cached,
                                 currency=currency,
-                                currency_upper=currency_upper,
+                                currency_upper=currency.upper(),
                             )
                         }
                     )
@@ -224,7 +224,7 @@ async def caching_distributing_data(
                             await publishing_result(
                         pipe,
                         order_receiving_channel,
-                        result,
+                        [result],
                     )
                             
                             await publishing_result(
@@ -290,10 +290,11 @@ async def caching_distributing_data(
                         }
                     )
 
+                    
                     await publishing_result(
                         pipe,
                         sub_account_cached_channel,
-                        result,
+                        [result],
                     )
 
                 if "portfolio" in message_channel:
@@ -334,7 +335,7 @@ async def caching_distributing_data(
                     await publishing_result(
                         pipe,
                         sub_account_cached_channel,
-                        [result],
+                        result,
                     )
 
                 instrument_name_future = (message_channel)[19:]
