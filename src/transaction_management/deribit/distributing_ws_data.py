@@ -192,7 +192,7 @@ async def caching_distributing_data(
                         or "changes" in message_channel
                     ):
 
-                        log.warning(f"user.changes {data}")
+                        log.warning(message_channel)
 
                         if "orders.any" in message_channel:
 
@@ -210,12 +210,6 @@ async def caching_distributing_data(
                             )
                             
                             result = {}
-
-                            pub_message.update({"currency": currency})
-                            pub_message.update({"currency_upper": currency.upper()})
-                            pub_message.update({"open_orders": orders_cached})
-                            pub_message.update({"current_order": data})
-                            
                             result.update(
                         {
                             "result": dict(
@@ -230,7 +224,7 @@ async def caching_distributing_data(
                             await publishing_result(
                         pipe,
                         order_receiving_channel,
-                        pub_message,
+                        result,
                     )
                             
                             await publishing_result(
