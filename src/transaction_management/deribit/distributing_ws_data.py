@@ -337,7 +337,7 @@ async def caching_distributing_data(
                     await publishing_result(
                         pipe,
                         sub_account_cached_channel,
-                        result,
+                        [result],
                     )
 
                 instrument_name_future = (message_channel)[19:]
