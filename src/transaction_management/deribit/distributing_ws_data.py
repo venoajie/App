@@ -200,11 +200,6 @@ async def caching_distributing_data(
                                 data["instrument_name"]
                             )
 
-                            pub_message.update({"currency": currency})
-                            pub_message.update({"currency_upper": currency.upper()})
-                            pub_message.update({"open_orders": orders_cached})
-                            pub_message.update({"current_order": data})
-
                             subaccounts_details_result = (
                                 await private_data.get_subaccounts_details(currency)
                             )
@@ -213,6 +208,24 @@ async def caching_distributing_data(
                                 orders_cached,
                                 data,
                             )
+                            
+                            result = {}
+
+                            pub_message.update({"currency": currency})
+                            pub_message.update({"currency_upper": currency.upper()})
+                            pub_message.update({"open_orders": orders_cached})
+                            pub_message.update({"current_order": data})
+                            
+                            result.update(
+                        {
+                            "result": dict(
+                                current_order=data,
+                                open_orders=orders_cached,
+                                currency=currency,
+                                currency_upper=currency_upper,
+                            )
+                        }
+                    )
                             
                             await publishing_result(
                         pipe,
