@@ -201,6 +201,7 @@ async def caching_distributing_data(
                             )
 
                             pub_message.update({"currency": currency})
+                            pub_message.update({"currency_upper": currency.upper()})
 
                             subaccounts_details_result = (
                                 await private_data.get_subaccounts_details(currency)
@@ -269,8 +270,6 @@ async def caching_distributing_data(
                     )
 
                     result = {}
-                    
-                    log.debug(result)
 
                     result.update(
                         {
@@ -281,6 +280,9 @@ async def caching_distributing_data(
                             )
                         }
                     )
+
+                    
+                    log.debug(result)
 
                     await publishing_result(
                         pipe,

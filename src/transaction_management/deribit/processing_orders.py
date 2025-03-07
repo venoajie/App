@@ -65,6 +65,8 @@ async def processing_orders(
                     from loguru import logger as log
 
                     if "_receiving" in message_channel:
+                        
+                        log.debug(message_byte_data)
 
                         data = message_byte_data["data"]
 
