@@ -7,7 +7,7 @@ import asyncio
 # installed
 import orjson
 
-from db_management.sqlite_management import deleting_row,insert_tables
+from db_management.sqlite_management import deleting_row, insert_tables
 from strategies.basic_strategy import is_label_and_side_consistent
 from transaction_management.deribit.cancelling_active_orders import (
     cancel_by_order_id,
@@ -229,7 +229,6 @@ async def if_order_is_true(
 
             return []
             # await asyncio.sleep(10)
-
 
 
 async def cancelling_and_relabelling(
@@ -484,8 +483,8 @@ async def saving_order_based_on_state(
             order_table,
             order,
         )
-        
-        
+
+
 async def saving_traded_orders(
     trade: str,
     trade_table: str,

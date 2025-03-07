@@ -168,8 +168,6 @@ async def caching_distributing_data(
             async with client_redis.pipeline() as pipe:
 
                 data: dict = message_params["data"]
-                
-                log.debug(message_params)
 
                 message_channel: str = message_params["channel"]
 
@@ -187,12 +185,29 @@ async def caching_distributing_data(
                 if "user." in message_channel:
 
                     if (
-                        "orders.any" in message_channel
-                        or "trades.any" in message_channel
-                        or "changes.any" in message_channel
+                        "orders" in message_channel
+                        or "trades" in message_channel
+                        or "changes" in message_channel
                     ):
 
                         log.warning(f"user.changes {data}")
+
+                        if "orders.any" in message_channel:
+
+                            currency: str = extract_currency_from_text(
+                                data["instrument_name"]
+                            )
+
+                            pub_message.update({"currency": currency})
+
+                            subaccounts_details_result = (
+                                await private_data.get_subaccounts_details(currency)
+                            )
+
+                            update_cached_orders(
+                                orders_cached,
+                                data,
+                            )
 
                         if "changes.any" in message_channel:
 
@@ -202,9 +217,11 @@ async def caching_distributing_data(
                             )
 
                         else:
-                            
-                            currency: str = extract_currency_from_text(data["instrument_name"])
-                            
+
+                            currency: str = extract_currency_from_text(
+                                data["instrument_name"]
+                            )
+
                             pub_message.update({"currency": currency})
 
                             subaccounts_details_result = (
@@ -217,23 +234,8 @@ async def caching_distributing_data(
                                 positions_cached,
                             )
 
-                        if "orders.any" in message_channel:
-
-                            currency: str = extract_currency_from_text(data["instrument_name"])
-                            
-                            pub_message.update({"currency": currency})
-
-                            subaccounts_details_result = (
-                                await private_data.get_subaccounts_details(currency)
-                            )
-                            
-                            update_cached_orders(
-                                orders_cached,
-                                data,
-                            )
-
-#                            currency_lower = currency.lower()
-#
+                            #                            currency_lower = currency.lower()
+                            #
                             """
                             
                             await saving_orders(

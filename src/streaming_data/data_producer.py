@@ -31,13 +31,7 @@ def parse_dotenv(sub_account: str) -> dict:
 
 @dataclass(unsafe_hash=True, slots=True)
 class StreamingAccountData:
-    """
-
-    +----------------------------------------------------------------------------------------------+
-    reference: https://github.com/ElliotP123/crypto-exchange-code-samples/blob/master/deribit/websockets/dbt-ws-authenticated-example.py
-    +----------------------------------------------------------------------------------------------+
-
-    """
+    """ """
 
     sub_account_id: str
     client_id: str = fields
@@ -109,9 +103,6 @@ class StreamingAccountData:
 
                             ws_instruments.append(portfolio)
 
-                            # user_changes = f"user.changes.any.{currency}.raw"
-                            # ws_instruments.append(user_changes)
-
                             for resolution in resolutions:
 
                                 ws_chart = f"chart.trades.{instrument}.{resolution}"
@@ -176,14 +167,6 @@ class StreamingAccountData:
                             if message["method"] != "heartbeat":
 
                                 message_params: dict = message["params"]
-
-                                message_channel: str = message_params["channel"]
-
-                                if "user." in message_channel:
-                                    from loguru import logger as log
-
-                                    log.critical(message_channel)
-                                    log.info(message_params)
 
                                 # queing message to dispatcher
                                 await queue_general.put(message_params)
@@ -294,6 +277,8 @@ class StreamingAccountData:
 
     async def establish_heartbeat(self) -> None:
         """
+        reference: https://github.com/ElliotP123/crypto-exchange-code-samples/blob/master/deribit/websockets/dbt-ws-authenticated-example.py
+
         Requests DBT's `public/set_heartbeat` to
         establish a heartbeat connection.
         """

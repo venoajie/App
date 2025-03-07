@@ -389,10 +389,10 @@ class SendApiRequest:
     ) -> list:
 
         """
-        
+
         currency= BTC/ETH
         example= https://www.deribit.com/api/v2/private/get_subaccounts_details?currency=BTC&with_open_orders=true
-        
+
 
         result_sub_account["result"]
 
@@ -507,16 +507,12 @@ class SendApiRequest:
             "currency": currency,
             "with_open_orders": True,
         }
-        
-        log.debug(f"endpoint {endpoint} params {params}")
 
         result_sub_account = await private_connection(
             self.sub_account_id,
             endpoint=endpoint,
             params=params,
         )
-        
-        log.error(result_sub_account)
 
         return result_sub_account["result"]
 
