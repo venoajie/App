@@ -261,6 +261,12 @@ async def cancelling_orders(
                                         if strategy in (o["label"])
                                     ]
                                 )
+                                
+                                await cancelling_double_ids(
+                                    private_data,
+                                    order_db_table,
+                                    orders_currency_strategy,
+                                    )
 
                                 if "futureSpread" in strategy:
 
@@ -472,3 +478,44 @@ async def if_cancel_is_true(
             order_db_table,
             order["cancel_id"],
         )
+
+
+async def cancelling_double_ids(
+    private_data: object,
+    order_db_table: str,
+    orders_currency_strategy: list,
+) -> None:
+    """ """
+
+    if orders_currency_strategy:
+
+        outstanding_order_id: list = remove_redundant_elements(
+            [o["label"] for o in orders_currency_strategy]
+        )
+
+        for label in outstanding_order_id:
+
+            orders = [
+                o
+                for o in orders_currency_strategy
+                if label in o["label"]
+            ]
+
+            len_label = len(orders)
+
+            if len_label > 1:
+
+                for order in orders:
+                    log.critical(f"double ids {label}")
+                    log.critical(orders)
+
+                    await cancel_by_order_id(
+                        private_data,
+                        order_db_table,
+                        order["order_id"],
+                    )
+
+                    await telegram_bot_sendtext(
+                        f"avoiding double ids - {orders}",
+                        "general_error",
+                    )

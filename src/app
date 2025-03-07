@@ -240,13 +240,7 @@ async def main():
                 redis_channels,
                 strategy_attributes,
                 ),
-                
-            avoiding_double_ids(
-                private_data,
-                client_redis,
-                config_app,
-                ),
-       
+        
             relabelling_trades(
                 private_data,
                 config_app),
