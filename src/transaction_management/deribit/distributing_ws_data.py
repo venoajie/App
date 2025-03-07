@@ -250,27 +250,27 @@ async def caching_distributing_data(
 
                             """
 
-                        my_trades_active_all = await executing_query_with_return(
-                            query_trades
-                        )
+                    my_trades_active_all = await executing_query_with_return(
+                        query_trades
+                    )
 
-                        result = {}
+                    result = {}
 
-                        result.update(
-                            {
-                                "result": dict(
-                                    positions=positions_cached,
-                                    open_orders=orders_cached,
-                                    my_trades=my_trades_active_all,
-                                )
-                            }
-                        )
+                    result.update(
+                        {
+                            "result": dict(
+                                positions=positions_cached,
+                                open_orders=orders_cached,
+                                my_trades=my_trades_active_all,
+                            )
+                        }
+                    )
 
-                        await publishing_result(
-                            pipe,
-                            sub_account_cached_channel,
-                            result,
-                        )
+                    await publishing_result(
+                        pipe,
+                        sub_account_cached_channel,
+                        result,
+                    )
 
                 if "portfolio" in message_channel:
 
