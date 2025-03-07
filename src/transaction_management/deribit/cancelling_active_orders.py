@@ -146,7 +146,7 @@ async def cancelling_orders(
                         
                         result = message_byte_data["result"][0]
 
-                        cached_orders = result["open_orders"]
+                        my_trades_active_all = result["open_orders"]
 
                     if order_receiving_channel in message_channel:
 
