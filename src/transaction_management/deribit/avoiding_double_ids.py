@@ -76,6 +76,7 @@ async def avoiding_double_ids(
                     if message_byte["channel"] in message_channel:
                         
                         log.error(message_byte_data)
+                        log.critical(message_channel)
 
                         cached_orders = message_byte_data["open_orders"]
 
