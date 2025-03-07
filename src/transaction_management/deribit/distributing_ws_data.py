@@ -156,6 +156,8 @@ async def caching_distributing_data(
         sub_account_cached = sub_account_combining(sub_accounts)
         orders_cached = sub_account_cached["orders_cached"]
         positions_cached = sub_account_cached["positions_cached"]
+        order_receiving_channel: str = redis_channels["order_receiving"]
+        my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
@@ -208,6 +210,18 @@ async def caching_distributing_data(
                                 orders_cached,
                                 data,
                             )
+                            
+                            await publishing_result(
+                        pipe,
+                        order_receiving_channel,
+                        orders_cached,
+                    )
+                            
+                            await publishing_result(
+                        pipe,
+                        my_trade_receiving_channel,
+                        subaccounts_details_result,
+                    )
 
                         if "changes.any" in message_channel:
 
@@ -255,6 +269,8 @@ async def caching_distributing_data(
                     )
 
                     result = {}
+                    
+                    log.debug(result)
 
                     result.update(
                         {
