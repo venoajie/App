@@ -202,6 +202,8 @@ async def caching_distributing_data(
 
                             pub_message.update({"currency": currency})
                             pub_message.update({"currency_upper": currency.upper()})
+                            pub_message.update({"open_orders": orders_cached})
+                            pub_message.update({"current_order": data})
 
                             subaccounts_details_result = (
                                 await private_data.get_subaccounts_details(currency)
@@ -215,7 +217,7 @@ async def caching_distributing_data(
                             await publishing_result(
                         pipe,
                         order_receiving_channel,
-                        orders_cached,
+                        pub_message,
                     )
                             
                             await publishing_result(

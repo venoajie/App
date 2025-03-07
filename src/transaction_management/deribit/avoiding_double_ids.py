@@ -74,13 +74,10 @@ async def avoiding_double_ids(
                     message_channel = message_byte["channel"]
 
                     if message_byte["channel"] in message_channel:
+                        
+                        log.error(message_byte_data)
 
-                        cached_orders = orjson.loads(
-                            await client_redis.hget(
-                                orders_keys,
-                                order_receiving_channel,
-                            )
-                        )
+                        cached_orders = message_byte_data["open_orders"]
 
                         currency_upper = message_byte_data["currency_upper"]
 
