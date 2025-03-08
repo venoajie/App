@@ -167,6 +167,9 @@ async def publishing_result(
     """ """
 
     try:
+        
+        if "user" in channel:
+            print(f"publishing_result {channel}")
 
         # publishing message
         await client_redis.publish(

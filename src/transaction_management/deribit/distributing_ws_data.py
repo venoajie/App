@@ -214,6 +214,7 @@ async def caching_distributing_data(
                                 my_trade_receiving_channel,
                                 data,
                             )
+                            
                             currency: str = extract_currency_from_text(
                                 data[0]["instrument_name"]
                             )
