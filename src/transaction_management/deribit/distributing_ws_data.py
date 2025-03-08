@@ -212,6 +212,8 @@ async def caching_distributing_data(
                             data,
                         )
                             
+                            
+                        log.error(data)
                         currency: str = extract_currency_from_text(
                             data["instrument_name"]
                         )
