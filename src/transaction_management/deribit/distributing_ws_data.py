@@ -215,10 +215,13 @@ async def caching_distributing_data(
                                 data,
                             )
                             
-                            currency: str = extract_currency_from_text(
-                                data[0]["instrument_name"]
+                            for trade in data:
+                                
+                                update_cached_orders(
+                                orders_cached,
+                                trade,
                             )
-
+                                                        
                         if "orders" in message_channel:
 
                             currency: str = extract_currency_from_text(

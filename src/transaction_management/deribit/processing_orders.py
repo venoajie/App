@@ -102,7 +102,28 @@ async def processing_orders(
 
                     from loguru import logger as log
 
-                    if "order" in message_channel:
+                    if my_trade_receiving_channel in message_channel:
+
+                        
+                        for trade in data:
+                            
+                            currency_lower: str = trade["fee_currency"].lower()
+
+                            archive_db_table = f"my_trades_all_{currency_lower}_json"
+    
+                            await cancel_the_cancellables(
+                                private_data,
+                                order_db_table,
+                                currency_lower,
+                                cancellable_strategies,
+                        )   
+                            await saving_traded_orders(
+                            trade,
+                            archive_db_table,
+                            order_db_table,
+                        )
+
+                    if "sub_account" in message_channel:
                         
                         log.critical(message_channel)
 
@@ -112,27 +133,6 @@ async def processing_orders(
                         
                         log.debug(f"order {data}")
                         
-                        currency_lower: str = result["currency"].lower()
-
-                        archive_db_table = f"my_trades_all_{currency_lower}_json"
-
-                        if my_trade_receiving_channel in message_channel:
-
-                            await cancel_the_cancellables(
-                                private_data,
-                                order_db_table,
-                                currency_lower,
-                                cancellable_strategies,
-                            )
-                            
-                            for trade in data:
-                                
-                                await saving_traded_orders(
-                                data,
-                                archive_db_table,
-                                order_db_table,
-                            )
-
                         if order_update_channel in message_channel:
 
                             if "oto_order_ids" in data:
