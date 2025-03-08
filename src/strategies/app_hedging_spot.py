@@ -85,7 +85,7 @@ async def hedging_spot(
         # prepare channels placeholders
         channels = [
             market_analytics_channel,
-            order_receiving_channel,
+            order_update_channel,
             ticker_cached_channel,
             portfolio_channel,
             my_trades_channel,
@@ -150,6 +150,22 @@ async def hedging_spot(
                         cached_orders = sub_account["open_orders"]
 
                         my_trades_active_all = sub_account["my_trades"]
+
+                    if my_trades_channel in message_channel:
+
+                        log.error(message_byte_data)
+
+                        result = message_byte_data["result"][0]
+
+                        my_trades_active_all = result["open_orders"]
+
+                    if order_update_channel in message_channel:
+
+                        log.debug(message_byte_data)
+
+                        result = message_byte_data["result"][0]
+
+                        cached_orders = result["open_orders"]
 
                     if (
                         allowed_instruments

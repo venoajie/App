@@ -125,7 +125,11 @@ async def caching_distributing_data(
         ticker_keys: str = redis_keys["ticker"]
 
         # prepare channels placeholders
-        channels = [sqlite_updating_channel]
+        channels = [
+            my_trade_receiving_channel,
+            order_receiving_channel,
+            sqlite_updating_channel,
+        ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -194,50 +198,34 @@ async def caching_distributing_data(
 
                         log.warning(message_channel)
 
-                        if "orders.any" in message_channel:
-
-                            currency: str = extract_currency_from_text(
-                                data["instrument_name"]
-                            )
-
-                            subaccounts_details_result = (
-                                await private_data.get_subaccounts_details(currency)
-                            )
-
-                            update_cached_orders(
+                        if "changes" in message_channel:
+                            
+                            updating_sub_account(
+                                subaccounts_details_result,
                                 orders_cached,
-                                data,
-                            )
-                            
-                            result = {}
-                            result.update(
-                        {
-                            "result": dict(
-                                current_order=data,
-                                open_orders=orders_cached,
-                                currency=currency,
-                                currency_upper=currency.upper(),
-                            )
-                        }
-                    )
-                            
-                            await publishing_result(
-                        pipe,
-                        order_receiving_channel,
-                        [result],
-                    )
-                            
-                            await publishing_result(
-                        pipe,
-                        my_trade_receiving_channel,
-                        subaccounts_details_result,
-                    )
-
-                        if "changes.any" in message_channel:
-
-                            positions_updating_cached(
                                 positions_cached,
-                                data,
+                            )
+
+                            my_trades_active_all = await executing_query_with_return(
+                                query_trades
+                            )
+
+                            result = {}
+
+                            result.update(
+                                {
+                                    "result": dict(
+                                        positions=positions_cached,
+                                        open_orders=orders_cached,
+                                        my_trades=my_trades_active_all,
+                                    )
+                                }
+                            )
+
+                            await publishing_result(
+                                pipe,
+                                sub_account_cached_channel,
+                                result,
                             )
 
                         else:
@@ -246,56 +234,38 @@ async def caching_distributing_data(
                                 data["instrument_name"]
                             )
 
-                            pub_message.update({"currency": currency})
-
-                            subaccounts_details_result = (
-                                await private_data.get_subaccounts_details(currency)
-                            )
-
-                            updating_sub_account(
-                                subaccounts_details_result,
+                            update_cached_orders(
                                 orders_cached,
-                                positions_cached,
-                            )
-
-                            #                            currency_lower = currency.lower()
-                            #
-                            """
-                            
-                            await saving_orders(
-                                private_data,
-                                cancellable_strategies,
-                                non_checked_strategies,
                                 data,
-                                order_db_table,
-                                currency_lower,
-                                False,
                             )
 
-                            """
-
-                    my_trades_active_all = await executing_query_with_return(
-                        query_trades
-                    )
-
-                    result = {}
-
-                    result.update(
-                        {
-                            "result": dict(
-                                positions=positions_cached,
-                                open_orders=orders_cached,
-                                my_trades=my_trades_active_all,
+                            result = {}
+                            result.update(
+                                {
+                                    "result": dict(
+                                        current_order=data,
+                                        open_orders=orders_cached,
+                                        currency=currency,
+                                        currency_upper=currency.upper(),
+                                    )
+                                }
                             )
-                        }
-                    )
 
-                    
-                    await publishing_result(
-                        pipe,
-                        sub_account_cached_channel,
-                        [result],
-                    )
+                            await publishing_result(
+                                pipe,
+                                order_update_channel,
+                                [result],
+                            )
+
+                            my_trades_active_all = await executing_query_with_return(
+                                query_trades
+                            )
+
+                            await publishing_result(
+                                pipe,
+                                my_trades_channel,
+                                my_trades_active_all,
+                            )
 
                 if "portfolio" in message_channel:
 
@@ -438,50 +408,47 @@ async def caching_distributing_data(
 
                 # message_byte_data = orjson.loads(message_byte["data"])
 
+                log.debug([o for o in channels if o in message_channel])
+
                 message_channel = message_byte["channel"]
-                if sqlite_updating_channel in message_channel:
+                if (
+                    order_update_channel in message_channel
+                    or sqlite_updating_channel in message_channel
+                ):
+                    
+                    log.critical(message_channel)
 
-                    result = await private_data.get_subaccounts_details(currency)
+                    for currency in currencies:
 
-                    open_orders = [o["open_orders"] for o in result]
+                        result = await private_data.get_subaccounts_details(currency)
 
-                    if open_orders:
-                        update_cached_orders(
+                        updating_sub_account(
+                            result,
                             orders_cached,
-                            open_orders[0],
-                            "rest",
-                        )
-
-                    positions = [o["positions"] for o in result]
-
-                    if positions:
-                        positions_updating_cached(
                             positions_cached,
-                            positions[0],
-                            "rest",
                         )
 
-                    my_trades_active_all = await executing_query_with_return(
-                        query_trades
-                    )
+                        my_trades_active_all = await executing_query_with_return(
+                            query_trades
+                        )
 
-                    result = {}
+                        result = {}
 
-                    result.update(
-                        {
-                            "result": dict(
-                                positions=positions_cached,
-                                open_orders=orders_cached,
-                                my_trades=my_trades_active_all,
-                            )
-                        }
-                    )
+                        result.update(
+                            {
+                                "result": dict(
+                                    positions=positions_cached,
+                                    open_orders=orders_cached,
+                                    my_trades=my_trades_active_all,
+                                )
+                            }
+                        )
 
-                    await publishing_result(
-                        pipe,
-                        sub_account_cached_channel,
-                        result,
-                    )
+                        await publishing_result(
+                            client_redis,
+                            sub_account_cached_channel,
+                            result,
+                        )
 
     except Exception as error:
 
@@ -570,6 +537,9 @@ def updating_sub_account(
                 positions[0],
                 "rest",
             )
+            
+            
+            
 
     """
     if sub_account_cached == []:

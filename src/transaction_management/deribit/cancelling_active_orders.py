@@ -119,7 +119,7 @@ async def cancelling_orders(
         portfolio_all = []
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
-        
+
         my_trades_active_all = 0
 
         while not_cancel:
@@ -144,24 +144,34 @@ async def cancelling_orders(
 
                         portfolio_all = message_byte_data["cached_portfolio"]
 
-                    if my_trade_receiving_channel in message_channel:
+                    if sub_account_cached_channel in message_channel:
                         
+
+                        sub_account = message_byte_data["result"]
+                        log.warning(f"message_channel {sub_account}")
+
+                        cached_orders = sub_account["open_orders"]
+
+                        my_trades_active_all = sub_account["my_trades"]
+
+                    if my_trades_channel in message_channel:
+
                         log.error(message_byte_data)
-                        
+
                         result = message_byte_data["result"][0]
 
                         my_trades_active_all = result["open_orders"]
 
-                    if order_receiving_channel in message_channel:
+                    if order_update_channel in message_channel:
 
                         log.debug(message_byte_data)
-                        
+
                         result = message_byte_data["result"][0]
 
                         cached_orders = result["open_orders"]
 
-
-                    if (my_trades_active_all !=0
+                    if (
+                        my_trades_active_all != 0
                         and ticker_cached_channel in message_channel
                         and market_condition_all
                         and portfolio_all
@@ -267,12 +277,12 @@ async def cancelling_orders(
                                         if strategy in (o["label"])
                                     ]
                                 )
-                                
+
                                 await cancelling_double_ids(
                                     private_data,
                                     order_db_table,
                                     orders_currency_strategy,
-                                    )
+                                )
 
                                 if "futureSpread" in strategy:
 
@@ -501,11 +511,7 @@ async def cancelling_double_ids(
 
         for label in outstanding_order_id:
 
-            orders = [
-                o
-                for o in orders_currency_strategy
-                if label in o["label"]
-            ]
+            orders = [o for o in orders_currency_strategy if label in o["label"]]
 
             len_label = len(orders)
 

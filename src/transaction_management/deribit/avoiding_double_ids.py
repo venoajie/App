@@ -74,7 +74,7 @@ async def avoiding_double_ids(
                     message_channel = message_byte["channel"]
 
                     if order_receiving_channel in message_channel:
-                        
+
                         log.error(message_byte_data)
                         log.critical(message_channel)
 
