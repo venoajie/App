@@ -32,6 +32,17 @@ async def processing_orders(
 
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
+        
+        strategy_attributes_active = [
+            o for o in strategy_attributes if o["is_active"] == True
+        ]
+
+        # get strategies that have not short/long attributes in the label
+        non_checked_strategies = [
+            o["strategy_label"]
+            for o in strategy_attributes_active
+            if o["non_checked_for_size_label_consistency"] == True
+        ]
 
         # get redis channels
         order_rest_channel: str = redis_channels["order_rest"]
