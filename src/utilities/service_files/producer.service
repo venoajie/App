@@ -1,11 +1,11 @@
 [Unit]
-Description= running app service
+Description= running data producer service
 
 
 [Service]
 Type=simple
 Restart=always
-ExecStart=/home/ubuntu/App/.venv/bin/python3 /home/ubuntu/App/src/app
+ExecStart=/home/ubuntu/App/.venv/bin/python3 /home/ubuntu/App/src/app_producer
 WorkingDirectory=/home/ubuntu/App/src
 User=ubuntu
 StandardOutput=null
@@ -15,9 +15,9 @@ RestartSec=1
 WantedBy=multi-user.target
 
 
-sudo vim /etc/systemd/system/app.service
-sudo chmod +x /etc/systemd/system/app.service
+sudo vim /etc/systemd/system/producer.service
+sudo chmod +x /etc/systemd/system/producer.service
 sudo systemctl daemon-reload
-sudo systemctl enable app.service
-sudo systemctl start app.service
+sudo systemctl enable producer.service
+sudo systemctl start producer.service
  

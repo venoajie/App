@@ -219,7 +219,7 @@ async def processing_orders(
                     if (
                         order_update_channel in message_channel
                         or sqlite_updating_channel in message_channel
-                        or portfolio_channel
+                        or portfolio_channel in message_channel
                     ):
                         
                         log.critical(message_channel)
