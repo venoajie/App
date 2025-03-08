@@ -163,6 +163,15 @@ async def caching_distributing_data(
 
                     log.warning(message_channel)
 
+                    if "portfolio" in message_channel:
+
+                        await updating_portfolio(
+                            pipe,
+                            pub_message,
+                            portfolio,
+                            portfolio_channel,
+                        )
+                        
                     if "changes" in message_channel:
                         
                         updating_sub_account(
@@ -240,14 +249,6 @@ async def caching_distributing_data(
                             my_trades_active_all,
                         )
                         
-                if "portfolio" in message_channel:
-
-                    await updating_portfolio(
-                        pipe,
-                        pub_message,
-                        portfolio,
-                        portfolio_channel,
-                    )
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
