@@ -19,9 +19,6 @@ from transaction_management.deribit.allocating_ohlc import inserting_open_intere
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-from transaction_management.deribit.orders_management import (
-    saving_orders,
-)
 from utilities.caching import (
     positions_updating_cached,
     update_cached_orders,
@@ -402,52 +399,6 @@ async def caching_distributing_data(
                     )
 
                 await pipe.execute()
-
-            if message_byte and (message_byte["type"] == "message"):
-
-                # message_byte_data = orjson.loads(message_byte["data"])
-
-                log.debug([o for o in channels if o in message_channel])
-
-                message_channel = message_byte["channel"]
-                if (
-                    order_update_channel in message_channel
-                    or sqlite_updating_channel in message_channel
-                ):
-                    
-                    log.critical(message_channel)
-
-                    for currency in currencies:
-
-                        result = await private_data.get_subaccounts_details(currency)
-
-                        updating_sub_account(
-                            result,
-                            orders_cached,
-                            positions_cached,
-                        )
-
-                        my_trades_active_all = await executing_query_with_return(
-                            query_trades
-                        )
-
-                        result = {}
-
-                        result.update(
-                            {
-                                "result": dict(
-                                    positions=positions_cached,
-                                    open_orders=orders_cached,
-                                    my_trades=my_trades_active_all,
-                                )
-                            }
-                        )
-
-                        await publishing_result(
-                            client_redis,
-                            sub_account_cached_channel,
-                            result,
-                        )
 
     except Exception as error:
 

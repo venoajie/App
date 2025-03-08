@@ -7,7 +7,8 @@ import asyncio
 # installed
 import orjson
 
-from db_management.sqlite_management import deleting_row, insert_tables
+from db_management.sqlite_management import (deleting_row, executing_query_with_return,insert_tables)
+from db_management.redis_client import publishing_result
 from strategies.basic_strategy import is_label_and_side_consistent
 from transaction_management.deribit.cancelling_active_orders import (
     cancel_by_order_id,
@@ -17,11 +18,16 @@ from transaction_management.deribit.cancelling_active_orders import (
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.system_tools import parse_error_message
 
+from utilities.caching import (
+    positions_updating_cached,
+    update_cached_orders,
+)
 
 async def processing_orders(
     private_data: object,
     client_redis: object,
     cancellable_strategies: list,
+    currencies,
     order_db_table: str,
     redis_channels: list,
     strategy_attributes: list,
@@ -48,17 +54,33 @@ async def processing_orders(
         order_rest_channel: str = redis_channels["order_rest"]
         my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
         order_update_channel: str = redis_channels["order_cache_updating"]
+        sqlite_updating_channel: str = redis_channels["sqlite_record_updating"]
+        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
 
         # prepare channels placeholders
         channels = [
             order_rest_channel,
             order_update_channel,
+            sqlite_updating_channel,
+            sub_account_cached_channel,
         ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
         not_cancel = True
+        
+        query_trades = f"SELECT * FROM  v_trading_all_active"
+        
+                # sub_account_combining
+        sub_accounts = [
+            await private_data.get_subaccounts_details(o) for o in currencies
+        ]
+
+        sub_account_cached = sub_account_combining(sub_accounts)
+        orders_cached = sub_account_cached["orders_cached"]
+        positions_cached = sub_account_cached["positions_cached"]
+
 
         while not_cancel:
 
@@ -189,6 +211,46 @@ async def processing_orders(
                                 private_data,
                                 non_checked_strategies,
                                 message_byte_data,
+                            )
+
+
+                    if (
+                        order_update_channel in message_channel
+                        or sqlite_updating_channel in message_channel
+                    ):
+                        
+                        log.critical(message_channel)
+
+                        for currency in currencies:
+
+                            result = await private_data.get_subaccounts_details(currency)
+
+                            updating_sub_account(
+                                result,
+                                orders_cached,
+                                positions_cached,
+                            )
+
+                            my_trades_active_all = await executing_query_with_return(
+                                query_trades
+                            )
+
+                            result = {}
+
+                            result.update(
+                                {
+                                    "result": dict(
+                                        positions=positions_cached,
+                                        open_orders=orders_cached,
+                                        my_trades=my_trades_active_all,
+                                    )
+                                }
+                            )
+
+                            await publishing_result(
+                                client_redis,
+                                sub_account_cached_channel,
+                                result,
                             )
 
             except Exception as error:
@@ -592,3 +654,64 @@ async def saving_oto_order(
                 order_db_table,
                 transaction_main,
             )
+
+
+
+def updating_sub_account(
+    subaccounts_details_result: list,
+    orders_cached: list,
+    positions_cached: list,
+) -> None:
+
+    if subaccounts_details_result:
+
+        open_orders = [o["open_orders"] for o in subaccounts_details_result]
+
+        if open_orders:
+            update_cached_orders(
+                orders_cached,
+                open_orders[0],
+                "rest",
+            )
+
+        positions = [o["positions"] for o in subaccounts_details_result]
+
+        if positions:
+            positions_updating_cached(
+                positions_cached,
+                positions[0],
+                "rest",
+            )
+            
+def sub_account_combining(
+    sub_accounts: list,
+) -> None:
+
+    orders_cached = []
+    positions_cached = []
+
+    for sub_account in sub_accounts:
+        # result = await private_data.get_subaccounts_details(currency)
+
+        sub_account = sub_account[0]
+
+        sub_account_orders = sub_account["open_orders"]
+
+        if sub_account_orders:
+
+            for order in sub_account_orders:
+
+                orders_cached.append(order)
+
+        sub_account_positions = sub_account["positions"]
+
+        if sub_account_positions:
+
+            for position in sub_account_positions:
+
+                positions_cached.append(position)
+
+    return dict(
+        orders_cached=orders_cached,
+        positions_cached=positions_cached,
+    )
