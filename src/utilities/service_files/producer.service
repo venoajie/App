@@ -1,0 +1,23 @@
+[Unit]
+Description= running app service
+
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/home/ubuntu/App/.venv/bin/python3 /home/ubuntu/App/src/app
+WorkingDirectory=/home/ubuntu/App/src
+User=ubuntu
+StandardOutput=null
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+
+
+sudo vim /etc/systemd/system/app.service
+sudo chmod +x /etc/systemd/system/app.service
+sudo systemctl daemon-reload
+sudo systemctl enable app.service
+sudo systemctl start app.service
+ 

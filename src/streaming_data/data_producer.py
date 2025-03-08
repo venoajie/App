@@ -167,9 +167,7 @@ class StreamingAccountData:
                             if message["method"] != "heartbeat":
 
                                 message_params: dict = message["params"]
-                                from loguru import logger as log
-                                log.warning(message_params["channel"])
-
+                                
                                 # queing message to dispatcher
                                 await queue_general.put(message_params)
 
@@ -317,7 +315,6 @@ class StreamingAccountData:
 
         try:
             
-            print(f"heartbeat_response {json.dumps(msg)}")
             await self.websocket_client.send(json.dumps(msg))
             
         except Exception as error:
