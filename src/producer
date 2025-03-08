@@ -9,19 +9,14 @@ import sys
 
 # installed
 import uvloop
-from loguru import logger as log
-import numpy as np
 import redis.asyncio as aioredis
 #from redistimeseries.client import Client
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.app_data_cleaning import reconciling_size
 from data_cleaning.pruning_db import clean_up_databases
 from messaging.telegram_bot import telegram_bot_sendtext
-from strategies.app_future_spreads import future_spreads
-from strategies.app_hedging_spot import hedging_spot
-from strategies.relabelling_trading_result import relabelling_trades
+from streaming_data.data_producer import StreamingAccountData
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,
@@ -34,12 +29,7 @@ from transaction_management.deribit.cancelling_active_orders import (
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-
-from market_understanding.price_action.candles_analysis import get_market_condition
-from transaction_management.deribit.cancelling_active_orders import \
-    cancelling_orders
-from transaction_management.deribit.processing_orders import \
-    processing_orders
+from transaction_management.deribit.distributing_ws_data import caching_distributing_data
 from utilities.system_tools import (
     SignalHandler,
     back_up_db,
@@ -155,80 +145,47 @@ async def main():
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
+        redis_keys: dict = config_app["redis_keys"][0]
+        
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
 
         queue = Queue(maxsize=1)
+        
+        stream = StreamingAccountData(sub_account_id)
                 
-        await asyncio.sleep(0.0005)
-        
-        """
-   
-
-            hedging_spot(
+        producer_task = asyncio.create_task(
+            stream.ws_manager(
                 client_redis,
-                config_app,
-                futures_instruments,
                 redis_channels,
-                strategy_attributes,
-                ),
-                         
-
-            future_spreads(
-                client_redis,
-                config_app,
+                queue,
                 futures_instruments,
-                redis_channels,
-                strategy_attributes,
-                ),
-     
-            #scanning_volume()
-                  
-            """
-            
-        await asyncio.gather(
-         
-            cancelling_orders(
-            private_data,
-            currencies,
-            client_redis,
-            config_app,
-            redis_channels,
-            strategy_attributes,
-                ),   
-            
-            processing_orders(
+                resolutions,
+)
+            ) 
+                 
+        saving_task = asyncio.create_task(
+            caching_distributing_data(
                 private_data,
                 client_redis,
-                cancellable_strategies,
-                order_db_table,
-                redis_channels,
-                strategy_attributes,
-                ),
-        
-            relabelling_trades(
-                private_data,
-                config_app),
-            
-            
-            get_market_condition(
-                client_redis,
-                config_app,
                 currencies,
                 redis_channels,
-                resolutions,
-                np),
+                redis_keys,
+                relevant_tables,
+                strategy_attributes,
+                queue,
+                )
+            ) 
+                        
+        await asyncio.sleep(0.0005)
+        
             
-            
-            reconciling_size(
-                private_data,
-                client_redis,
-                redis_channels,
-                config_app,
-                futures_instruments,
-                ),                
-            
+        await asyncio.gather(
+            producer_task, 
+        
+            saving_task,
+         
             back_up_db(60*10),
             
             clean_up_databases(60)

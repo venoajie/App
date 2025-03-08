@@ -22,11 +22,14 @@ from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.app_future_spreads import future_spreads
 from strategies.app_hedging_spot import hedging_spot
 from strategies.relabelling_trading_result import relabelling_trades
+from streaming_data.data_producer import StreamingAccountData
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,
     SendApiRequest,
 )
+from transaction_management.deribit.avoiding_double_ids import \
+    avoiding_double_ids
 
 from transaction_management.deribit.cancelling_active_orders import (
     cancel_the_cancellables,
@@ -38,6 +41,7 @@ from transaction_management.deribit.get_instrument_summary import (
 from market_understanding.price_action.candles_analysis import get_market_condition
 from transaction_management.deribit.cancelling_active_orders import \
     cancelling_orders
+from transaction_management.deribit.distributing_ws_data import caching_distributing_data
 from transaction_management.deribit.processing_orders import \
     processing_orders
 from utilities.system_tools import (
@@ -155,12 +159,39 @@ async def main():
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
+        redis_keys: dict = config_app["redis_keys"][0]
+        
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
 
         queue = Queue(maxsize=1)
+        
+        stream = StreamingAccountData(sub_account_id)
                 
+        producer_task = asyncio.create_task(
+            stream.ws_manager(
+                client_redis,
+                redis_channels,
+                queue,
+                futures_instruments,
+                resolutions,
+)
+            ) 
+                 
+        saving_task = asyncio.create_task(
+            caching_distributing_data(
+                private_data,
+                client_redis,
+                currencies,
+                redis_channels,
+                redis_keys,
+                relevant_tables,
+                strategy_attributes,
+                queue,
+                )
+            ) 
+                        
         await asyncio.sleep(0.0005)
         
         """
@@ -188,6 +219,9 @@ async def main():
             """
             
         await asyncio.gather(
+            producer_task, 
+        
+            saving_task,
          
             cancelling_orders(
             private_data,
