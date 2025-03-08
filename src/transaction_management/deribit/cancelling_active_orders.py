@@ -155,11 +155,8 @@ async def cancelling_orders(
                     if my_trades_channel in message_channel:
 
                         log.info(message_byte_data)
-                        result = message_byte_data[0]["result"]
-
-                        log.error(result)
-
-                        my_trades_active_all = result["open_orders"]
+                        
+                        my_trades_active_all = message_byte_data
 
                     if order_update_channel in message_channel:
 
