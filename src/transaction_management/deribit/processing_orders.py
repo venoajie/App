@@ -103,6 +103,8 @@ async def processing_orders(
                     from loguru import logger as log
 
                     if "order" in message_channel:
+                        
+                        log.critical(message_channel)
 
                         result = message_byte_data[0]["result"]
 
@@ -125,7 +127,7 @@ async def processing_orders(
 
                             else:
 
-                                # log.debug(f"order {order}")
+                                log.debug(f"order {data}")
 
                                 if "OTO" not in data["order_id"]:
 
