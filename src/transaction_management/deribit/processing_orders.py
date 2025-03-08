@@ -127,11 +127,12 @@ async def processing_orders(
                         
                         log.critical(message_channel)
 
+                        log.debug(f"message_byte_data {message_byte_data}")
+
                         result = message_byte_data[0]["result"]
 
                         data = result["current_order"]
                         
-                        log.debug(f"order {data}")
                         
                         if order_update_channel in message_channel:
 
