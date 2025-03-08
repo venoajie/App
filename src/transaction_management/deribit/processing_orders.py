@@ -65,18 +65,19 @@ async def processing_orders(
                     from loguru import logger as log
 
                     if "order" in message_channel:
+                        
+                        result = message_byte_data[0]["result"]
 
-                        log.debug(message_byte_data)
+                        log.debug(result)
+                        log.critical(message_channel)
 
-                        data = message_byte_data["data"]
+                        data = result["current_order"]
 
-                        currency_lower: str = message_byte_data["currency"].lower()
+                        currency_lower: str = result["currency"].lower()
 
                         archive_db_table = f"my_trades_all_{currency_lower}_json"
 
                         if order_update_channel in message_channel:
-
-                            log.debug(message_byte_data)
 
                             if "oto_order_ids" in data:
 
