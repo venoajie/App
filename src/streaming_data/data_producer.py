@@ -272,8 +272,6 @@ class StreamingAccountData:
 
                 parse_error_message(error)
 
-            finally:
-
                 await telegram_bot_sendtext(
                     (f"""data producer - {error}"""),
                     "general_error",
@@ -300,8 +298,6 @@ class StreamingAccountData:
 
             parse_error_message(error)
 
-        finally:
-
             await telegram_bot_sendtext(
                 (f"""data producer establish_heartbeat - {error}"""),
                 "general_error",
@@ -327,8 +323,6 @@ class StreamingAccountData:
         except Exception as error:
 
             parse_error_message(error)
-
-        finally:
 
             await telegram_bot_sendtext(
                 (f"""data producer heartbeat_response - {error}"""),
@@ -358,7 +352,6 @@ class StreamingAccountData:
 
             parse_error_message(error)
 
-        finally:
             await telegram_bot_sendtext(
                 (f"""data producer - {error}"""),
                 "general_error",
