@@ -172,7 +172,7 @@ async def caching_distributing_data(
                             portfolio_channel,
                         )
                         
-                    if "changes" in message_channel:
+                    elif "changes" in message_channel:
                         
                         updating_sub_account(
                             data,
