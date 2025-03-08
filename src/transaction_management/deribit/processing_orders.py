@@ -54,6 +54,7 @@ async def processing_orders(
         order_rest_channel: str = redis_channels["order_rest"]
         my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
         order_update_channel: str = redis_channels["order_cache_updating"]
+        portfolio_channel: str = redis_channels["portfolio"]
         sqlite_updating_channel: str = redis_channels["sqlite_record_updating"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
 
@@ -61,6 +62,7 @@ async def processing_orders(
         channels = [
             order_rest_channel,
             order_update_channel,
+            portfolio_channel,
             sqlite_updating_channel,
             sub_account_cached_channel,
         ]
@@ -217,6 +219,7 @@ async def processing_orders(
                     if (
                         order_update_channel in message_channel
                         or sqlite_updating_channel in message_channel
+                        or portfolio_channel
                     ):
                         
                         log.critical(message_channel)
@@ -654,7 +657,6 @@ async def saving_oto_order(
                 order_db_table,
                 transaction_main,
             )
-
 
 
 def updating_sub_account(

@@ -15,6 +15,7 @@ from db_management.redis_client import saving_and_publishing_result, publishing_
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import get_tickers
+from transaction_management.deribit.processing_orders import updating_sub_account
 from transaction_management.deribit.allocating_ohlc import inserting_open_interest
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
@@ -87,35 +88,12 @@ async def caching_distributing_data(
             o for o in strategy_attributes if o["is_active"] == True
         ]
 
-        # get strategies that have not short/long attributes in the label
-        non_checked_strategies: list = [
-            o["strategy_label"]
-            for o in strategy_attributes_active
-            if o["non_checked_for_size_label_consistency"] == True
-        ]
-
-        cancellable_strategies: list = [
-            o["strategy_label"]
-            for o in strategy_attributes_active
-            if o["cancellable"] == True
-        ]
-
-        order_db_table: str = relevant_tables["orders_table"]
-
         chart_low_high_tick_channel: str = redis_channels["chart_low_high_tick"]
         portfolio_channel: str = redis_channels["portfolio"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         sqlite_updating_channel: str = redis_channels["sqlite_record_updating"]
-
-        ticker_update_channel: str = redis_channels["ticker_cache_updating"]
-        positions_update_channel: str = redis_channels["position_cache_updating"]
         order_update_channel: str = redis_channels["order_cache_updating"]
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
-
-        order_receiving_channel: str = redis_channels["order_receiving"]
-        my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
-
-        order_keys: str = redis_keys["orders"]
 
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
 
@@ -156,16 +134,12 @@ async def caching_distributing_data(
         sub_account_cached = sub_account_combining(sub_accounts)
         orders_cached = sub_account_cached["orders_cached"]
         positions_cached = sub_account_cached["positions_cached"]
-        order_receiving_channel: str = redis_channels["order_receiving"]
-        my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
         while True:
 
             message_params: str = await queue_general.get()
-
-            message_byte = await pubsub.get_message()
 
             async with client_redis.pipeline() as pipe:
 
@@ -197,7 +171,7 @@ async def caching_distributing_data(
                         if "changes" in message_channel:
                             
                             updating_sub_account(
-                                subaccounts_details_result,
+                                data,
                                 orders_cached,
                                 positions_cached,
                             )
@@ -270,38 +244,6 @@ async def caching_distributing_data(
                         pub_message,
                         portfolio,
                         portfolio_channel,
-                    )
-
-                    subaccounts_details_result = (
-                        await private_data.get_subaccounts_details(currency_upper)
-                    )
-
-                    updating_sub_account(
-                        subaccounts_details_result,
-                        orders_cached,
-                        positions_cached,
-                    )
-
-                    my_trades_active_all = await executing_query_with_return(
-                        query_trades
-                    )
-
-                    result = {}
-
-                    result.update(
-                        {
-                            "result": dict(
-                                positions=positions_cached,
-                                open_orders=orders_cached,
-                                my_trades=my_trades_active_all,
-                            )
-                        }
-                    )
-
-                    await publishing_result(
-                        pipe,
-                        sub_account_cached_channel,
-                        result,
                     )
 
                 instrument_name_future = (message_channel)[19:]
@@ -461,51 +403,6 @@ async def updating_portfolio(
         pub_message,
     )
 
-
-def updating_sub_account(
-    subaccounts_details_result: list,
-    orders_cached: list,
-    positions_cached: list,
-) -> None:
-
-    if subaccounts_details_result:
-
-        open_orders = [o["open_orders"] for o in subaccounts_details_result]
-
-        if open_orders:
-            update_cached_orders(
-                orders_cached,
-                open_orders[0],
-                "rest",
-            )
-
-        positions = [o["positions"] for o in subaccounts_details_result]
-
-        if positions:
-            positions_updating_cached(
-                positions_cached,
-                positions[0],
-                "rest",
-            )
-            
-            
-            
-
-    """
-    if sub_account_cached == []:
-        sub_account_cached.append(data)
-
-    else:
-        sub_account_cached_currency = [
-            o for o in sub_account_cached if currency in o["currency"]
-        ]
-
-        if sub_account_cached_currency:
-            sub_account_cached_currency.remove(sub_account_cached_currency[0])
-
-        sub_account_cached.append(data)
-
-    """
 
 
 def sub_account_combining(
