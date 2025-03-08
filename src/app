@@ -27,10 +27,10 @@ from transaction_management.deribit.api_requests import (
     get_instruments,
     SendApiRequest,
 )
-
 from transaction_management.deribit.cancelling_active_orders import (
     cancel_the_cancellables,
 )
+from transaction_management.deribit.distributing_ws_data import caching_distributing_data
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
@@ -155,12 +155,28 @@ async def main():
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
+        redis_keys: dict = config_app["redis_keys"][0]
+        
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
 
         queue = Queue(maxsize=1)
-                
+               
+        saving_task = asyncio.create_task(
+            caching_distributing_data(
+                private_data,
+                client_redis,
+                currencies,
+                redis_channels,
+                redis_keys,
+                relevant_tables,
+                strategy_attributes,
+                queue,
+                )
+            ) 
+                 
+                 
         await asyncio.sleep(0.0005)
         
         """

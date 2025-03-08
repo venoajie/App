@@ -29,7 +29,6 @@ from transaction_management.deribit.cancelling_active_orders import (
 from transaction_management.deribit.get_instrument_summary import (
     get_futures_instruments,
 )
-from transaction_management.deribit.distributing_ws_data import caching_distributing_data
 from utilities.system_tools import (
     SignalHandler,
     back_up_db,
@@ -145,8 +144,6 @@ async def main():
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
-        redis_keys: dict = config_app["redis_keys"][0]
-        
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
@@ -164,19 +161,6 @@ async def main():
                 resolutions,
 )
             ) 
-                 
-        saving_task = asyncio.create_task(
-            caching_distributing_data(
-                private_data,
-                client_redis,
-                currencies,
-                redis_channels,
-                redis_keys,
-                relevant_tables,
-                strategy_attributes,
-                queue,
-                )
-            ) 
                         
         await asyncio.sleep(0.0005)
         
@@ -184,8 +168,6 @@ async def main():
         await asyncio.gather(
             producer_task, 
         
-            saving_task,
-         
             back_up_db(60*10),
             
             clean_up_databases(60)
