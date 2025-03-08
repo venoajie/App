@@ -37,12 +37,12 @@ async def processing_orders(
         order_rest_channel: str = redis_channels["order_rest"]
         order_receiving_channel: str = redis_channels["order_receiving"]
         my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
+        order_update_channel: str = redis_channels["order_cache_updating"]
 
         # prepare channels placeholders
         channels = [
             order_rest_channel,
-            order_receiving_channel,
-            my_trade_receiving_channel,
+            order_update_channel,
         ]
 
         # subscribe to channels
@@ -64,7 +64,7 @@ async def processing_orders(
 
                     from loguru import logger as log
 
-                    if "_receiving" in message_channel:
+                    if "order" in message_channel:
 
                         log.debug(message_byte_data)
 
@@ -74,7 +74,7 @@ async def processing_orders(
 
                         archive_db_table = f"my_trades_all_{currency_lower}_json"
 
-                        if order_receiving_channel in message_channel:
+                        if order_update_channel in message_channel:
 
                             log.debug(message_byte_data)
 
