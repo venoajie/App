@@ -7,7 +7,11 @@ import asyncio
 # installed
 import orjson
 
-from db_management.sqlite_management import (deleting_row, executing_query_with_return,insert_tables)
+from db_management.sqlite_management import (
+    deleting_row,
+    executing_query_with_return,
+    insert_tables,
+)
 from db_management.redis_client import publishing_result
 from strategies.basic_strategy import is_label_and_side_consistent
 from transaction_management.deribit.cancelling_active_orders import (
@@ -22,6 +26,7 @@ from utilities.caching import (
     positions_updating_cached,
     update_cached_orders,
 )
+
 
 async def processing_orders(
     private_data: object,
@@ -38,7 +43,7 @@ async def processing_orders(
 
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
-        
+
         strategy_attributes_active = [
             o for o in strategy_attributes if o["is_active"] == True
         ]
@@ -71,10 +76,10 @@ async def processing_orders(
         [await pubsub.subscribe(o) for o in channels]
 
         not_cancel = True
-        
+
         query_trades = f"SELECT * FROM  v_trading_all_active"
-        
-                # sub_account_combining
+
+        # sub_account_combining
         sub_accounts = [
             await private_data.get_subaccounts_details(o) for o in currencies
         ]
@@ -82,7 +87,6 @@ async def processing_orders(
         sub_account_cached = sub_account_combining(sub_accounts)
         orders_cached = sub_account_cached["orders_cached"]
         positions_cached = sub_account_cached["positions_cached"]
-
 
         while not_cancel:
 
@@ -99,7 +103,7 @@ async def processing_orders(
                     from loguru import logger as log
 
                     if "order" in message_channel:
-                        
+
                         result = message_byte_data[0]["result"]
 
                         data = result["current_order"]
@@ -109,7 +113,7 @@ async def processing_orders(
                         archive_db_table = f"my_trades_all_{currency_lower}_json"
 
                         if order_update_channel in message_channel:
-                            
+
                             if "oto_order_ids" in data:
 
                                 await saving_oto_order(
@@ -202,18 +206,19 @@ async def processing_orders(
                                 message_byte_data,
                             )
 
-
                     if (
                         order_update_channel in message_channel
                         or sqlite_updating_channel in message_channel
                         or portfolio_channel in message_channel
                     ):
-                        
+
                         log.critical(message_channel)
 
                         for currency in currencies:
 
-                            result = await private_data.get_subaccounts_details(currency)
+                            result = await private_data.get_subaccounts_details(
+                                currency
+                            )
 
                             updating_sub_account(
                                 result,
@@ -671,7 +676,8 @@ def updating_sub_account(
                 positions[0],
                 "rest",
             )
-            
+
+
 def sub_account_combining(
     sub_accounts: list,
 ) -> None:

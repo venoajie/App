@@ -171,9 +171,9 @@ async def caching_distributing_data(
                             portfolio,
                             portfolio_channel,
                         )
-                        
+
                     elif "changes" in message_channel:
-                        
+
                         updating_sub_account(
                             data,
                             orders_cached,
@@ -204,24 +204,29 @@ async def caching_distributing_data(
 
                     else:
 
-                        if "trades" in message_channel:
-                            
-                            await publishing_result(
-                            pipe,
-                            my_trade_receiving_channel,
-                            data,
-                        )
-                            
-                            
                         log.error(data)
-                        currency: str = extract_currency_from_text(
-                            data["instrument_name"]
-                        )
 
-                        update_cached_orders(
-                            orders_cached,
-                            data,
-                        )
+                        if "trades" in message_channel:
+
+                            await publishing_result(
+                                pipe,
+                                my_trade_receiving_channel,
+                                data,
+                            )
+                            currency: str = extract_currency_from_text(
+                                data[0]["instrument_name"]
+                            )
+
+                        if "orders" in message_channel:
+
+                            currency: str = extract_currency_from_text(
+                                data["instrument_name"]
+                            )
+
+                            update_cached_orders(
+                                orders_cached,
+                                data,
+                            )
 
                         result = {}
                         result.update(
@@ -250,7 +255,6 @@ async def caching_distributing_data(
                             my_trades_channel,
                             my_trades_active_all,
                         )
-                        
 
                 instrument_name_future = (message_channel)[19:]
                 if message_channel == f"incremental_ticker.{instrument_name_future}":
@@ -408,7 +412,6 @@ async def updating_portfolio(
         portfolio_channel,
         pub_message,
     )
-
 
 
 def sub_account_combining(

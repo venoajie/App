@@ -167,7 +167,7 @@ class StreamingAccountData:
                             if message["method"] != "heartbeat":
 
                                 message_params: dict = message["params"]
-                                
+
                                 # queing message to dispatcher
                                 await queue_general.put(message_params)
 
@@ -314,9 +314,9 @@ class StreamingAccountData:
         }
 
         try:
-            
+
             await self.websocket_client.send(json.dumps(msg))
-            
+
         except Exception as error:
 
             parse_error_message(error)
