@@ -97,7 +97,7 @@ async def processing_orders(
                                 await saving_oto_order(
                                     private_data,
                                     non_checked_strategies,
-                                    data,
+                                    [data],
                                     order_db_table,
                                 )
 
