@@ -93,6 +93,7 @@ async def caching_distributing_data(
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         sqlite_updating_channel: str = redis_channels["sqlite_record_updating"]
         order_update_channel: str = redis_channels["order_cache_updating"]
+        my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
 
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
@@ -160,83 +161,85 @@ async def caching_distributing_data(
 
                 if "user." in message_channel:
 
-                    if (
-                        "orders" in message_channel
-                        or "trades" in message_channel
-                        or "changes" in message_channel
-                    ):
+                    log.warning(message_channel)
 
-                        log.warning(message_channel)
+                    if "changes" in message_channel:
+                        
+                        updating_sub_account(
+                            data,
+                            orders_cached,
+                            positions_cached,
+                        )
 
-                        if "changes" in message_channel:
+                        my_trades_active_all = await executing_query_with_return(
+                            query_trades
+                        )
+
+                        result = {}
+
+                        result.update(
+                            {
+                                "result": dict(
+                                    positions=positions_cached,
+                                    open_orders=orders_cached,
+                                    my_trades=my_trades_active_all,
+                                )
+                            }
+                        )
+
+                        await publishing_result(
+                            pipe,
+                            sub_account_cached_channel,
+                            result,
+                        )
+
+                    else:
+
+                        if "trades" in message_channel:
                             
-                            updating_sub_account(
-                                data,
-                                orders_cached,
-                                positions_cached,
-                            )
-
-                            my_trades_active_all = await executing_query_with_return(
-                                query_trades
-                            )
-
-                            result = {}
-
-                            result.update(
-                                {
-                                    "result": dict(
-                                        positions=positions_cached,
-                                        open_orders=orders_cached,
-                                        my_trades=my_trades_active_all,
-                                    )
-                                }
-                            )
-
                             await publishing_result(
-                                pipe,
-                                sub_account_cached_channel,
-                                result,
-                            )
+                            pipe,
+                            my_trade_receiving_channel,
+                            data,
+                        )
+                            
+                        currency: str = extract_currency_from_text(
+                            data["instrument_name"]
+                        )
 
-                        else:
+                        update_cached_orders(
+                            orders_cached,
+                            data,
+                        )
 
-                            currency: str = extract_currency_from_text(
-                                data["instrument_name"]
-                            )
+                        result = {}
+                        result.update(
+                            {
+                                "result": dict(
+                                    current_order=data,
+                                    open_orders=orders_cached,
+                                    currency=currency,
+                                    currency_upper=currency.upper(),
+                                )
+                            }
+                        )
 
-                            update_cached_orders(
-                                orders_cached,
-                                data,
-                            )
+                        await publishing_result(
+                            pipe,
+                            order_update_channel,
+                            [result],
+                        )
 
-                            result = {}
-                            result.update(
-                                {
-                                    "result": dict(
-                                        current_order=data,
-                                        open_orders=orders_cached,
-                                        currency=currency,
-                                        currency_upper=currency.upper(),
-                                    )
-                                }
-                            )
+                        my_trades_active_all = await executing_query_with_return(
+                            query_trades
+                        )
 
-                            await publishing_result(
-                                pipe,
-                                order_update_channel,
-                                [result],
-                            )
-
-                            my_trades_active_all = await executing_query_with_return(
-                                query_trades
-                            )
-
-                            await publishing_result(
-                                pipe,
-                                my_trades_channel,
-                                my_trades_active_all,
-                            )
-
+                        await publishing_result(
+                            pipe,
+                            my_trades_channel,
+                            my_trades_active_all,
+                        )
+                        
                 if "portfolio" in message_channel:
 
                     await updating_portfolio(

@@ -102,10 +102,7 @@ async def processing_orders(
                         
                         result = message_byte_data[0]["result"]
 
-                        log.critical(message_channel)
-
                         data = result["current_order"]
-                        log.debug(data)
 
                         currency_lower: str = result["currency"].lower()
 
@@ -113,8 +110,6 @@ async def processing_orders(
 
                         if order_update_channel in message_channel:
                             
-                            log.warning("oto_order_ids" in data)
-
                             if "oto_order_ids" in data:
 
                                 await saving_oto_order(
@@ -201,14 +196,6 @@ async def processing_orders(
                     if order_rest_channel in message_channel:
 
                         if message_byte_data["order_allowed"]:
-
-                            # get strategies that have not short/long attributes in the label
-                            non_checked_strategies = [
-                                o["strategy_label"]
-                                for o in strategy_attributes
-                                if o["non_checked_for_size_label_consistency"] == True
-                            ]
-
                             await if_order_is_true(
                                 private_data,
                                 non_checked_strategies,
