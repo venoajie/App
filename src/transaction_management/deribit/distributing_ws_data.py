@@ -126,8 +126,7 @@ async def caching_distributing_data(
 
         # prepare channels placeholders
         channels = [
-            my_trade_receiving_channel,
-            order_receiving_channel,
+            order_update_channel,
             sqlite_updating_channel,
         ]
 
