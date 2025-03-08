@@ -205,6 +205,7 @@ async def caching_distributing_data(
                     else:
 
                         log.error(data)
+                        log.error("trades" in message_channel)
 
                         if "trades" in message_channel:
 

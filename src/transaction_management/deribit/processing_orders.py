@@ -105,7 +105,9 @@ async def processing_orders(
                     if "order" in message_channel:
                         
                         log.critical(message_channel)
-
+                        
+                        log.debug(f"order {data}")
+                        
                         result = message_byte_data[0]["result"]
 
                         data = result["current_order"]
@@ -113,6 +115,23 @@ async def processing_orders(
                         currency_lower: str = result["currency"].lower()
 
                         archive_db_table = f"my_trades_all_{currency_lower}_json"
+
+                        if my_trade_receiving_channel in message_channel:
+
+                            await cancel_the_cancellables(
+                                private_data,
+                                order_db_table,
+                                currency_lower,
+                                cancellable_strategies,
+                            )
+                            
+                            for trade in data:
+                                
+                                await saving_traded_orders(
+                                data,
+                                archive_db_table,
+                                order_db_table,
+                            )
 
                         if order_update_channel in message_channel:
 
@@ -126,8 +145,6 @@ async def processing_orders(
                                 )
 
                             else:
-
-                                log.debug(f"order {data}")
 
                                 if "OTO" not in data["order_id"]:
 
@@ -183,21 +200,6 @@ async def processing_orders(
                                                     order_db_table,
                                                     data,
                                                 )
-
-                        if my_trade_receiving_channel in message_channel:
-
-                            await cancel_the_cancellables(
-                                private_data,
-                                order_db_table,
-                                currency_lower,
-                                cancellable_strategies,
-                            )
-
-                            await saving_traded_orders(
-                                data,
-                                archive_db_table,
-                                order_db_table,
-                            )
 
                     if order_rest_channel in message_channel:
 
