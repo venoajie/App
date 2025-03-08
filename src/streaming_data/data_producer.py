@@ -275,7 +275,7 @@ class StreamingAccountData:
             finally:
 
                 await telegram_bot_sendtext(
-                    f"data producer - {error}",
+                    (f"""data producer - {error}"""),
                     "general_error",
                 )
 
@@ -303,7 +303,7 @@ class StreamingAccountData:
         finally:
 
             await telegram_bot_sendtext(
-                f"data producer establish_heartbeat - {error}",
+                (f"""data producer establish_heartbeat - {error}"""),
                 "general_error",
             )
 
@@ -331,7 +331,7 @@ class StreamingAccountData:
         finally:
 
             await telegram_bot_sendtext(
-                f"data producer heartbeat_response - {error}",
+                (f"""data producer heartbeat_response - {error}"""),
                 "general_error",
             )
 
@@ -360,7 +360,7 @@ class StreamingAccountData:
 
         finally:
             await telegram_bot_sendtext(
-                f"data producer - {error}",
+                (f"""data producer - {error}"""),
                 "general_error",
             )
 
