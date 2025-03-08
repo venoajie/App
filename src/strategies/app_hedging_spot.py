@@ -72,7 +72,6 @@ async def hedging_spot(
         trade_db_table = relevant_tables["my_trades_table"]
 
         # get redis channels
-        order_receiving_channel: str = redis_channels["order_receiving"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
         portfolio_channel: str = redis_channels["portfolio"]
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]

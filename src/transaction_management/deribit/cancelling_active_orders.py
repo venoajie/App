@@ -146,9 +146,7 @@ async def cancelling_orders(
 
                     if sub_account_cached_channel in message_channel:
                         
-
                         sub_account = message_byte_data["result"]
-                        log.warning(f"message_channel {sub_account}")
 
                         cached_orders = sub_account["open_orders"]
 
@@ -158,7 +156,9 @@ async def cancelling_orders(
 
                         log.error(message_byte_data)
 
-                        result = message_byte_data["result"][0]
+                        log.info(message_byte_data[0])
+
+                        result = message_byte_data[0]["result"][0]
 
                         my_trades_active_all = result["open_orders"]
 
@@ -166,7 +166,9 @@ async def cancelling_orders(
 
                         log.debug(message_byte_data)
 
-                        result = message_byte_data["result"][0]
+                        log.info(message_byte_data[0])
+
+                        result = message_byte_data[0]["result"][0]
 
                         cached_orders = result["open_orders"]
 
