@@ -541,12 +541,8 @@ async def saving_oto_order(
     order_db_table,
 ) -> None:
 
-    len_oto_order_ids = len(orders[0]["oto_order_ids"])
-
+    print(f"saving_oto_order {orders}")
     transaction_main = [o for o in orders if "OTO" not in o["order_id"]][0]
-
-    if len_oto_order_ids == 1:
-        pass
 
     transaction_main_oto = transaction_main["oto_order_ids"][0]
 
