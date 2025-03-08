@@ -167,6 +167,8 @@ class StreamingAccountData:
                             if message["method"] != "heartbeat":
 
                                 message_params: dict = message["params"]
+                                from loguru import logger as log
+                                log.warning(message_params["channel"])
 
                                 # queing message to dispatcher
                                 await queue_general.put(message_params)
@@ -270,6 +272,8 @@ class StreamingAccountData:
 
                 parse_error_message(error)
 
+            finally:
+
                 await telegram_bot_sendtext(
                     f"data producer - {error}",
                     "general_error",
@@ -296,8 +300,10 @@ class StreamingAccountData:
 
             parse_error_message(error)
 
+        finally:
+
             await telegram_bot_sendtext(
-                f"data producer - {error}",
+                f"data producer establish_heartbeat - {error}",
                 "general_error",
             )
 
@@ -314,13 +320,18 @@ class StreamingAccountData:
         }
 
         try:
+            
+            print(f"heartbeat_response {json.dumps(msg)}")
             await self.websocket_client.send(json.dumps(msg))
+            
         except Exception as error:
 
             parse_error_message(error)
 
+        finally:
+
             await telegram_bot_sendtext(
-                f"data producer - {error}",
+                f"data producer heartbeat_response - {error}",
                 "general_error",
             )
 
@@ -347,6 +358,7 @@ class StreamingAccountData:
 
             parse_error_message(error)
 
+        finally:
             await telegram_bot_sendtext(
                 f"data producer - {error}",
                 "general_error",

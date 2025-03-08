@@ -46,7 +46,6 @@ async def processing_orders(
 
         # get redis channels
         order_rest_channel: str = redis_channels["order_rest"]
-        order_receiving_channel: str = redis_channels["order_receiving"]
         my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
         order_update_channel: str = redis_channels["order_cache_updating"]
 
