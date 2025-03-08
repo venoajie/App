@@ -168,6 +168,7 @@ async def publishing_result(
 
     try:
         
+        print(channel)
         if "user" in channel:
             print(f"publishing_result {channel}")
 
