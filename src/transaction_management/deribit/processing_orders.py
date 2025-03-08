@@ -105,13 +105,13 @@ async def processing_orders(
                     if "order" in message_channel:
                         
                         log.critical(message_channel)
-                        
-                        log.debug(f"order {data}")
-                        
+
                         result = message_byte_data[0]["result"]
 
                         data = result["current_order"]
-
+                        
+                        log.debug(f"order {data}")
+                        
                         currency_lower: str = result["currency"].lower()
 
                         archive_db_table = f"my_trades_all_{currency_lower}_json"
