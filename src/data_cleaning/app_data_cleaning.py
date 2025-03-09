@@ -108,6 +108,8 @@ async def reconciling_size(
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
+                    
+                    log.debug(message_byte_data)
 
                     message_channel = message_byte["channel"]
 
