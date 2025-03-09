@@ -104,7 +104,6 @@ async def processing_orders(
 
                     if my_trade_receiving_channel in message_channel:
 
-                        
                         for trade in data:
                             
                             currency_lower: str = trade["fee_currency"].lower()
@@ -123,85 +122,6 @@ async def processing_orders(
                             order_db_table,
                         )
 
-                    if "sub_account" in message_channel:
-                        
-                        log.critical(message_channel)
-
-                        log.debug(f"message_byte_data {message_byte_data}")
-
-                        result = message_byte_data[0]["result"]
-
-                        data = result["current_order"]
-                        
-                        
-                        if order_update_channel in message_channel:
-
-                            if "oto_order_ids" in data:
-
-                                await saving_oto_order(
-                                    private_data,
-                                    non_checked_strategies,
-                                    [data],
-                                    order_db_table,
-                                )
-
-                            else:
-
-                                if "OTO" not in data["order_id"]:
-
-                                    label = data["label"]
-
-                                    order_id = data["order_id"]
-                                    order_state = data["order_state"]
-
-                                    # no label
-                                    if label == "":
-
-                                        await cancelling_and_relabelling(
-                                            private_data,
-                                            non_checked_strategies,
-                                            order_db_table,
-                                            data,
-                                            label,
-                                            order_state,
-                                            order_id,
-                                        )
-
-                                    else:
-                                        label_and_side_consistent = (
-                                            is_label_and_side_consistent(
-                                                non_checked_strategies, data
-                                            )
-                                        )
-
-                                        if label_and_side_consistent and label:
-
-                                            # log.debug(f"order {order}")
-
-                                            await saving_order_based_on_state(
-                                                order_db_table,
-                                                data,
-                                            )
-
-                                        # check if transaction has label. Provide one if not any
-                                        if not label_and_side_consistent:
-
-                                            if (
-                                                order_state != "cancelled"
-                                                or order_state != "filled"
-                                            ):
-                                                await cancel_by_order_id(
-                                                    private_data,
-                                                    order_db_table,
-                                                    order_id,
-                                                )
-
-                                                # log.error (f"order {order}")
-                                                await insert_tables(
-                                                    order_db_table,
-                                                    data,
-                                                )
-
                     if order_rest_channel in message_channel:
 
                         if message_byte_data["order_allowed"]:
@@ -210,10 +130,99 @@ async def processing_orders(
                                 non_checked_strategies,
                                 message_byte_data,
                             )
+                            
+                    if order_update_channel in message_channel:
+                        
+                        log.critical(message_channel)
 
-                    if (
-                        order_update_channel in message_channel
-                        or sqlite_updating_channel in message_channel
+                        log.debug(f"message_byte_data {message_byte_data}")
+
+                        result = message_byte_data ["result"]
+
+                        data = result["current_order"]
+                        
+                        if "oto_order_ids" in data:
+
+                            await saving_oto_order(
+                                private_data,
+                                non_checked_strategies,
+                                [data],
+                                order_db_table,
+                            )
+
+                        else:
+
+                            if "OTO" not in data["order_id"]:
+
+                                label = data["label"]
+
+                                order_id = data["order_id"]
+                                order_state = data["order_state"]
+
+                                # no label
+                                if label == "":
+
+                                    await cancelling_and_relabelling(
+                                        private_data,
+                                        non_checked_strategies,
+                                        order_db_table,
+                                        data,
+                                        label,
+                                        order_state,
+                                        order_id,
+                                    )
+
+                                else:
+                                    label_and_side_consistent = (
+                                        is_label_and_side_consistent(
+                                            non_checked_strategies, data
+                                        )
+                                    )
+
+                                    if label_and_side_consistent and label:
+
+                                        # log.debug(f"order {order}")
+
+                                        await saving_order_based_on_state(
+                                            order_db_table,
+                                            data,
+                                        )
+
+                                    # check if transaction has label. Provide one if not any
+                                    if not label_and_side_consistent:
+
+                                        if (
+                                            order_state != "cancelled"
+                                            or order_state != "filled"
+                                        ):
+                                            await cancel_by_order_id(
+                                                private_data,
+                                                order_db_table,
+                                                order_id,
+                                            )
+
+                                            # log.error (f"order {order}")
+                                            await insert_tables(
+                                                order_db_table,
+                                                data,
+                                            )
+
+                        for currency in currencies:
+
+                            result = await private_data.get_subaccounts_details(
+                                currency
+                            )
+
+                            await updating_sub_account(
+                                client_redis,
+                                orders_cached,
+                                positions_cached,
+                                query_trades,
+                                result,
+                                sub_account_cached_channel,
+                            )
+
+                    if (sqlite_updating_channel in message_channel
                         or portfolio_channel in message_channel
                     ):
 
@@ -225,32 +234,14 @@ async def processing_orders(
                                 currency
                             )
 
-                            updating_sub_account(
-                                result,
+                            await updating_sub_account(
+                                client_redis,
                                 orders_cached,
                                 positions_cached,
-                            )
-
-                            my_trades_active_all = await executing_query_with_return(
-                                query_trades
-                            )
-
-                            result = {}
-
-                            result.update(
-                                {
-                                    "result": dict(
-                                        positions=positions_cached,
-                                        open_orders=orders_cached,
-                                        my_trades=my_trades_active_all,
-                                    )
-                                }
-                            )
-
-                            await publishing_result(
-                                client_redis,
-                                sub_account_cached_channel,
+                                query_trades,
                                 result,
+                                sub_account_cached_channel,
+                                
                             )
 
             except Exception as error:
@@ -656,11 +647,18 @@ async def saving_oto_order(
             )
 
 
-def updating_sub_account(
-    subaccounts_details_result: list,
+async def updating_sub_account(
+    client_redis: object,
     orders_cached: list,
     positions_cached: list,
+    query_trades: str,
+    subaccounts_details_result: list,
+        sub_account_cached_channel: str,
 ) -> None:
+    
+    from loguru import logger as log
+    
+    log.critical(subaccounts_details_result)
 
     if subaccounts_details_result:
 
@@ -681,6 +679,30 @@ def updating_sub_account(
                 positions[0],
                 "rest",
             )
+
+    my_trades_active_all = await executing_query_with_return(
+        query_trades
+    )
+
+    result = {}
+
+    result.update(
+        {
+            "result": dict(
+                positions=positions_cached,
+                open_orders=orders_cached,
+                my_trades=my_trades_active_all,
+            )
+        }
+    )
+
+    await publishing_result(
+        client_redis,
+        sub_account_cached_channel,
+        result,
+        )
+    
+    log.critical(subaccounts_details_result)
 
 
 def sub_account_combining(
