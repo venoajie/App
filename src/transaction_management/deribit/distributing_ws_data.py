@@ -232,15 +232,13 @@ async def caching_distributing_data(
 
                         result.params.channel = order_update_channel
                         log.info(result.params.channel)
-                        data_result = (
-                            {dict(
+                        data_result = dict(
                                     current_order=data,
                                     open_orders=orders_cached,
                                     currency=currency,
                                     currency_upper=currency.upper(),
                                 )
-                            }
-                        )
+                            
                         result.params.data = data_result
                         
                         log.info(result)
