@@ -110,7 +110,7 @@ async def reconciling_size(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
-                    params =  message_byte["params"]
+                    params =  message_byte_data["params"]
 
                     data =  params["data"]
                     
