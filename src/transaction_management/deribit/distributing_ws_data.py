@@ -174,32 +174,13 @@ async def caching_distributing_data(
 
                     elif "changes" in message_channel:
 
-                        updating_sub_account(
-                            data,
+                        await updating_sub_account(
+                            client_redis,
                             orders_cached,
                             positions_cached,
-                        )
-
-                        my_trades_active_all = await executing_query_with_return(
-                            query_trades
-                        )
-
-                        result = {}
-
-                        result.update(
-                            {
-                                "result": dict(
-                                    positions=positions_cached,
-                                    open_orders=orders_cached,
-                                    my_trades=my_trades_active_all,
-                                )
-                            }
-                        )
-
-                        await publishing_result(
-                            pipe,
-                            sub_account_cached_channel,
-                            result,
+                            query_trades,
+                            data,
+                            sub_account_cached_channel
                         )
 
                     else:
@@ -248,7 +229,7 @@ async def caching_distributing_data(
                         await publishing_result(
                             pipe,
                             order_update_channel,
-                            [result],
+                            result,
                         )
 
                         my_trades_active_all = await executing_query_with_return(
