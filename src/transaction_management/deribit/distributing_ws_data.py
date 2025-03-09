@@ -231,7 +231,7 @@ async def caching_distributing_data(
                             )
 
                         result.params.channel = order_update_channel
-                        result.params.data(
+                        result.params.data = (
                             {dict(
                                     current_order=data,
                                     open_orders=orders_cached,
@@ -242,6 +242,7 @@ async def caching_distributing_data(
                         )
                         
                         log.info(result)
+                        log.warning(result.params.channel)
                         
                         await publishing_result(
                             pipe,
