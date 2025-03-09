@@ -658,7 +658,7 @@ async def updating_sub_account(
     
     from loguru import logger as log
     
-    log.critical(subaccounts_details_result)
+    log.critical(sub_account_cached_channel)
 
     if subaccounts_details_result:
 
@@ -702,7 +702,7 @@ async def updating_sub_account(
         result,
         )
     
-    log.critical(subaccounts_details_result)
+    log.critical(sub_account_cached_channel)
 
 
 def sub_account_combining(
