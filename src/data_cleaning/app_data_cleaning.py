@@ -97,6 +97,7 @@ async def reconciling_size(
                 size_is_reconciled=size_is_reconciled,
                 currency=currency,
             )
+            
             combined_order_allowed.append(order_allowed)
 
         while True:
@@ -109,15 +110,19 @@ async def reconciling_size(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
-                    log.debug(message_byte_data)
+                    params =  message_byte["params"]
 
-                    message_channel = message_byte["channel"]
+                    data =  params["data"]
+                    
+                    log.debug(params)
+
+                    message_channel = params["channel"]
 
                     five_days_ago = server_time - (one_minute * 60 * 24 * 5)
 
                     if ticker_cached_channel in message_channel:
 
-                        exchange_server_time = message_byte_data["server_time"]
+                        exchange_server_time = data["server_time"]
 
                         delta_time = (exchange_server_time - server_time) / ONE_SECOND
 
@@ -141,7 +146,7 @@ async def reconciling_size(
 
                     if positions_update_channel in message_channel:
 
-                        positions_cached = message_byte_data
+                        positions_cached = data
 
                         positions_cached_all = remove_redundant_elements(
                             [o["instrument_name"] for o in positions_cached]
