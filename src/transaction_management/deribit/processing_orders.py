@@ -88,6 +88,13 @@ async def processing_orders(
         orders_cached = sub_account_cached["orders_cached"]
         positions_cached = sub_account_cached["positions_cached"]
 
+        result = {}
+        result.update({"params": {}})
+        result.update({"method": "subscription"})
+        result["params"].update({"data": None})
+        result["params"].update({"channel": None})
+        log.info(result)
+
         while not_cancel:
 
             try:

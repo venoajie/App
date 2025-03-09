@@ -60,3 +60,15 @@ candles_data = [
     ]
 ]
 log.info(candles_data[0])
+
+
+result = {}
+result.update({"params": {}})
+result.update({"method": "subscription"})
+log.info(result)
+
+result["params"].update({"data": None})
+result["params"].update({"channel": None})
+
+log.info(result)
+

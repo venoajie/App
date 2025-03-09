@@ -149,10 +149,13 @@ async def caching_distributing_data(
         positions_cached = sub_account_cached["positions_cached"]
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
-        
-        result = DictSchema()
-        result.params = DictSchema()
-        result.method = "subscription"
+                
+        result = {}
+        result.update({"params": {}})
+        result.update({"method": "subscription"})
+        result["params"].update({"data": None})
+        result["params"].update({"channel": None})
+        log.info(result)
 
         while True:
 
@@ -205,11 +208,14 @@ async def caching_distributing_data(
                         log.error("trades" in message_channel)
 
                         if "trades" in message_channel:
+                            
+                            result["params"].update({"channel": my_trade_receiving_channel})
+                            result["params"].update({"data": data})
 
                             await publishing_result(
                                 pipe,
                                 my_trade_receiving_channel,
-                                data,
+                                result,
                             )
                             
                             for trade in data:
@@ -230,20 +236,18 @@ async def caching_distributing_data(
                                 data,
                             )
 
-                        result.params.channel = order_update_channel
-                        log.info(result.params.channel)
-                        data_result = dict(
+                        result = {}
+                        
+                        data =  dict(
                                     current_order=data,
                                     open_orders=orders_cached,
                                     currency=currency,
                                     currency_upper=currency.upper(),
                                 )
-                            
-                        result.params.data = data_result
-                        
-                        log.info(result)
-                        log.warning(result.params.channel)
-                        
+
+                        result["params"].update({"channel": order_update_channel})
+                        result["params"].update({"data": data})
+
                         await publishing_result(
                             pipe,
                             order_update_channel,
@@ -254,11 +258,9 @@ async def caching_distributing_data(
                             query_trades
                         )
 
-                        result.params.channel.update = my_trades_channel
-                        result.params.data.update(my_trades_active_all)
-                        
-                        log.info(result)
-                        
+                        result["params"].update({"channel": my_trades_channel})
+                        result["params"].update({"data": my_trades_active_all})
+
                         await publishing_result(
                             pipe,
                             my_trades_channel,
@@ -317,12 +319,15 @@ async def caching_distributing_data(
                         currency=currency,
                     )
 
+                    result["params"].update({"channel": ticker_cached_channel})
+                    result["params"].update({"data": pub_message})
+
                     await saving_and_publishing_result(
                         client_redis,
                         ticker_cached_channel,
                         ticker_keys,
                         ticker_all_cached,
-                        pub_message,
+                        result,
                     )
 
                     if "PERPETUAL" in instrument_name_future:
@@ -353,10 +358,13 @@ async def caching_distributing_data(
                     )
                     pub_message.update({"resolution": resolution})
 
+                    result["params"].update({"channel": chart_low_high_tick_channel})
+                    result["params"].update({"data": pub_message})
+
                     await publishing_result(
                         pipe,
                         chart_low_high_tick_channel,
-                        pub_message,
+                        result,
                     )
 
                 await pipe.execute()

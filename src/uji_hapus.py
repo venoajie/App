@@ -794,8 +794,14 @@ sub_acc = [
     ],
 ]
 
-log.debug([o for o in sub_acc])
 
-log.warning(sub_acc[0]["currency"])
+from dataclasses import dataclass
+from datetime import date
 
-log.error([o for o in sub_acc if "BTC" in o["currency"]])
+@dataclass
+class DictSchema:
+    params: str =  None
+    method: str = "subscription"
+    
+result = DictSchema()
+log.debug(result)
