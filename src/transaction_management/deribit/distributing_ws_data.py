@@ -231,6 +231,7 @@ async def caching_distributing_data(
                             )
 
                         result.params.channel = order_update_channel
+                        log.info(result)
                         result.params.data = (
                             {dict(
                                     current_order=data,
