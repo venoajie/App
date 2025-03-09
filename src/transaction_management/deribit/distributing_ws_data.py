@@ -35,6 +35,18 @@ from utilities.string_modification import (
     remove_redundant_elements,
 )
 
+class DictSchema:
+    """
+    https://stackoverflow.com/questions/26745519/converting-dictionary-to-json
+    """
+    
+    def toJSON(self):
+        return orjson.dumps(
+            self, 
+            default=lambda o: o.__dict__,
+            sort_keys=False,
+            indent=4,
+            )
 
 async def caching_distributing_data(
     private_data: object,
@@ -137,6 +149,10 @@ async def caching_distributing_data(
         positions_cached = sub_account_cached["positions_cached"]
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
+        
+        result = DictSchema()
+        result.params = DictSchema()
+        result.method = "subscription"
 
         while True:
 
@@ -214,10 +230,9 @@ async def caching_distributing_data(
                                 data,
                             )
 
-                        result = {}
-                        result.update(
-                            {
-                                "result": dict(
+                        result.params.channel = order_update_channel
+                        result.params.data(
+                            {dict(
                                     current_order=data,
                                     open_orders=orders_cached,
                                     currency=currency,
@@ -225,7 +240,9 @@ async def caching_distributing_data(
                                 )
                             }
                         )
-
+                        
+                        log.info(result)
+                        
                         await publishing_result(
                             pipe,
                             order_update_channel,
@@ -236,6 +253,11 @@ async def caching_distributing_data(
                             query_trades
                         )
 
+                        result.params.channel.update = my_trades_channel
+                        result.params.data.update(my_trades_active_all)
+                        
+                        log.info(result)
+                        
                         await publishing_result(
                             pipe,
                             my_trades_channel,
