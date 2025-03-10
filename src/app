@@ -165,14 +165,6 @@ async def main():
         
         """
    
-
-            hedging_spot(
-                client_redis,
-                config_app,
-                futures_instruments,
-                redis_channels,
-                strategy_attributes,
-                ),
                          
 
             future_spreads(
@@ -229,10 +221,15 @@ async def main():
                 config_app,
                 futures_instruments,
                 ),                
-            
-            back_up_db(60*10),
-            
-            clean_up_databases(60)
+   
+
+            hedging_spot(
+                client_redis,
+                config_app,
+                futures_instruments,
+                redis_channels,
+                strategy_attributes,
+                ),
             
                         )  
 

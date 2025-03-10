@@ -180,8 +180,8 @@ async def main():
                         
         await asyncio.sleep(0.0005)
         
-            
         await asyncio.gather(
+            
             producer_task, 
         
             saving_task,
