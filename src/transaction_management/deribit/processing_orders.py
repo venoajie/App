@@ -101,7 +101,6 @@ async def processing_orders(
                     message_byte_data = orjson.loads(message_byte["data"])
                     
                     log.warning(message_byte)
-                    log.info(message_byte_data)
                     
                     params =  message_byte_data["params"]
                     
@@ -664,10 +663,6 @@ async def updating_sub_account(
     
     from loguru import logger as log
 
-    log.info(message_byte_data)
-    
-    log.critical(sub_account_cached_channel)
-
     if subaccounts_details_result:
 
         open_orders = [o["open_orders"] for o in subaccounts_details_result]
@@ -701,16 +696,12 @@ async def updating_sub_account(
     message_byte_data["params"].update({"channel": sub_account_cached_channel})
     message_byte_data["params"].update({"data": data})
     
-    log.debug(message_byte_data)
-
     await publishing_result(
         client_redis,
         sub_account_cached_channel,
         message_byte_data,
         )
     
-    log.critical(sub_account_cached_channel)
-
 
 def sub_account_combining(
     sub_accounts: list,
