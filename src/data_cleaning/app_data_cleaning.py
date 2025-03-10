@@ -114,8 +114,6 @@ async def reconciling_size(
 
                     data =  params["data"]
                     
-                    log.debug(params)
-
                     message_channel = params["channel"]
 
                     five_days_ago = server_time - (one_minute * 60 * 24 * 5)
@@ -139,7 +137,7 @@ async def reconciling_size(
                                 order_db_table,
                                 order_allowed,
                                 five_days_ago,
-                                result,
+                                message_byte_data,
                             )
 
                             server_time = exchange_server_time
@@ -174,7 +172,7 @@ async def reconciling_size(
                             order_db_table,
                             order_allowed,
                             five_days_ago,
-                            result,
+                            message_byte_data,
                         )
 
             except Exception as error:
@@ -412,8 +410,9 @@ async def allowing_order_for_instrument_not_in_sub_account(
             0
         ]["size_is_reconciled"] = order_allowed
 
-    result = {}
-    result.update({"result": combined_order_allowed})
+
+    result["params"].update({"channel": order_allowed_channel})
+    result["params"].update({"data": combined_order_allowed})
 
     await publishing_result(
         client_redis,
