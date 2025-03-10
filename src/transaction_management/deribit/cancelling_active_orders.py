@@ -152,6 +152,8 @@ async def cancelling_orders(
 
                         my_trades_active_all = data
 
+                        log.info(my_trades_active_all)
+
                     if order_update_channel in message_channel:
                     
                         cached_orders = data["open_orders"]
