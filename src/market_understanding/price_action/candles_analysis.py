@@ -405,7 +405,6 @@ async def get_market_condition(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     params =  message_byte_data["params"]
-
                     data =  params["data"]
                     
                     log.error(message_byte_data)
@@ -414,11 +413,13 @@ async def get_market_condition(
                     
                     message_channel = params["channel"]
                     
+                    message_channel = message_byte["channel"]
+
                     if chart_low_high_tick_channel in message_channel:
 
                         if market_analytics_data:
 
-                            instrument_name = params["instrument_name"]
+                            instrument_name = data["instrument_name"]
 
                             if instrument_name in data["instrument_name"]:
 
@@ -468,6 +469,8 @@ async def get_market_condition(
                                     )
 
                                     market_analytics_data.append(pub_message)
+                                    
+                                    log.error(market_analytics_data)
 
                                     await saving_and_publishing_result(
                                         client_redis,
