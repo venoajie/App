@@ -100,6 +100,7 @@ async def processing_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
+                    log.warning(message_byte)
                     log.info(message_byte_data)
                     
                     params =  message_byte_data["params"]
@@ -140,8 +141,6 @@ async def processing_orders(
                     if order_update_channel in message_channel:
                         
                         log.critical(message_channel)
-
-                        log.debug(f"data {data}")
 
                         data = data["current_order"]
                         

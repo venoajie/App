@@ -12,10 +12,6 @@ from loguru import logger as log
 from db_management.sqlite_management import (
     deleting_row,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-    executing_query_with_return,
-)
-from transaction_management.deribit.api_requests import (
-    get_cancel_order_byOrderId,
 )
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.cash_carry.combo_auto import ComboAuto
@@ -82,16 +78,12 @@ async def cancelling_orders(
         )
 
         # get redis channels
-        order_receiving_channel: str = redis_channels["order_receiving"]
         market_analytics_channel: str = redis_channels["market_analytics_update"]
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
         portfolio_channel: str = redis_channels["portfolio"]
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
         order_update_channel: str = redis_channels["order_cache_updating"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
-
-        order_receiving_channel: str = redis_channels["order_receiving"]
-        my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
 
         # prepare channels placeholders
         channels = [
@@ -117,8 +109,6 @@ async def cancelling_orders(
         market_condition_all = []
 
         portfolio_all = []
-
-        query_trades = f"SELECT * FROM  v_trading_all_active"
 
         my_trades_active_all = 0
 
@@ -179,8 +169,7 @@ async def cancelling_orders(
 
                         server_time = data["server_time"]
 
-                        currency, currency_upper = (
-                            data["currency"],
+                        currency_upper = (
                             data["currency_upper"],
                         )
 
