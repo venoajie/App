@@ -133,7 +133,7 @@ async def hedging_spot(
 
                         log.warning(data)
 
-                        order_allowed = message_byte_data["result"]
+                        order_allowed = data
 
                         allowed_instruments = [
                             o for o in order_allowed if o["size_is_reconciled"] == 1
