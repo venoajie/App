@@ -135,6 +135,8 @@ async def cancelling_orders(
                     if market_analytics_channel in message_channel:
 
                         market_condition_all = data
+                        
+                        log.info(market_condition_all)
 
                     if portfolio_channel in message_channel:
 
