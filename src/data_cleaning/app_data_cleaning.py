@@ -301,19 +301,21 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                 query_trades_all
             )
 
-            log.info(f"my_trades_instrument_name {my_trades_instrument_name}")
+            log.info(f"my_trades_instrument_name {instrument_name} {my_trades_instrument_name}")
 
-            last_10_timestamp_log = [o["timestamp"] for o in my_trades_instrument_name]
+            if my_trades_instrument_name:
+                
+                last_10_timestamp_log = [o["timestamp"] for o in my_trades_instrument_name]
 
-            timestamp_log = min(last_10_timestamp_log)
+                timestamp_log = min(last_10_timestamp_log)
 
-            trades_from_exchange = (
-                await private_data.get_user_trades_by_instrument_and_time(
-                    instrument_name,
-                    timestamp_log,
-                    1000,
+                trades_from_exchange = (
+                    await private_data.get_user_trades_by_instrument_and_time(
+                        instrument_name,
+                        timestamp_log,
+                        1000,
+                    )
                 )
-            )
 
             if trades_from_exchange:
 
