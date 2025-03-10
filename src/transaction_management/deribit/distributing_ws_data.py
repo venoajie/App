@@ -406,6 +406,8 @@ async def updating_portfolio(
     
     data =  params["data"]
     
+    log.data(result)
+
     if portfolio == []:
         portfolio.append(data["data"])
 
