@@ -174,7 +174,10 @@ def update_cached_orders(
             except:
                 order = sub_account_data
 
-            order_state = order["order_state"]
+            try:
+                order_state = order["order_state"]
+            except:
+                order_state = order["state"]
 
             if order_state == "cancelled" or order_state == "filled":
 
