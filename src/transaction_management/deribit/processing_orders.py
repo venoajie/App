@@ -139,11 +139,11 @@ async def processing_orders(
                         
                         log.critical(message_channel)
 
-                        log.debug(f"message_byte_data {message_byte_data}")
+                        log.debug(f"data {data}")
 
                         result = message_byte_data ["result"]
 
-                        data = result["current_order"]
+                        data = data["current_order"]
                         
                         if "oto_order_ids" in data:
 
