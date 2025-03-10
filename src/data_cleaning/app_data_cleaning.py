@@ -56,7 +56,9 @@ async def reconciling_size(
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
 
         # prepare channels placeholders
-        channels = [positions_update_channel, ticker_cached_channel]
+        channels = [
+            positions_update_channel, 
+            ticker_cached_channel,]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -80,6 +82,10 @@ async def reconciling_size(
         futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
 
         result = {}
+        result.update({"params": {}})
+        result.update({"method": "subscription"})
+        result["params"].update({"data": None})
+        result["params"].update({"channel": None})
 
         combined_order_allowed = []
         for instrument_name in all_instruments_name:
@@ -411,6 +417,7 @@ async def allowing_order_for_instrument_not_in_sub_account(
         ]["size_is_reconciled"] = order_allowed
 
 
+    log.info(result)
     await publishing_result(
         client_redis,
         order_allowed_channel,

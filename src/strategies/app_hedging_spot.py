@@ -121,7 +121,7 @@ async def hedging_spot(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
-                    log.error(message_byte_data)
+                    log.warning(message_byte_data)
 
                     params =  message_byte_data["params"]
                     
