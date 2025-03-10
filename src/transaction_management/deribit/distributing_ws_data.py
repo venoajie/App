@@ -142,7 +142,6 @@ async def caching_distributing_data(
         result.update({"method": "subscription"})
         result["params"].update({"data": None})
         result["params"].update({"channel": None})
-        log.info(result)
 
         while True:
 
@@ -174,6 +173,7 @@ async def caching_distributing_data(
                     if "portfolio" in message_channel:
                         
                         result["params"].update({"channel": portfolio_channel})
+                        result["params"].update({"data": pub_message})
                         
                         log.info(result)
 
@@ -404,7 +404,6 @@ async def updating_portfolio(
     portfolio_channel: str,
     result: dict,
 ) -> None:
-
 
     params =  result["params"]
     
