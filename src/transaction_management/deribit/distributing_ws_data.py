@@ -164,6 +164,8 @@ async def caching_distributing_data(
                     currency_upper=currency_upper,
                     currency=currency,
                 )
+                
+                log.info(pub_message)
 
                 if "user." in message_channel:
 
@@ -351,6 +353,8 @@ async def caching_distributing_data(
 
                     result["params"].update({"channel": chart_low_high_tick_channel})
                     result["params"].update({"data": pub_message})
+                    
+                    log.info(result)
 
                     await publishing_result(
                         pipe,
