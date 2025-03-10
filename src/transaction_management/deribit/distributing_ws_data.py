@@ -35,19 +35,6 @@ from utilities.string_modification import (
     remove_redundant_elements,
 )
 
-class DictSchema:
-    """
-    https://stackoverflow.com/questions/26745519/converting-dictionary-to-json
-    """
-    
-    def toJSON(self):
-        return orjson.dumps(
-            self, 
-            default=lambda o: o.__dict__,
-            sort_keys=False,
-            indent=4,
-            )
-
 async def caching_distributing_data(
     private_data: object,
     client_redis: object,

@@ -88,12 +88,6 @@ async def processing_orders(
         orders_cached = sub_account_cached["orders_cached"]
         positions_cached = sub_account_cached["positions_cached"]
 
-        result = {}
-        result.update({"params": {}})
-        result.update({"method": "subscription"})
-        result["params"].update({"data": None})
-        result["params"].update({"channel": None})
-
         while not_cancel:
 
             try:
@@ -104,7 +98,11 @@ async def processing_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message_channel = message_byte["channel"]
+                    params =  message_byte_data["params"]
+                    
+                    data =  params["data"]
+                    
+                    message_channel = params["channel"]
 
                     from loguru import logger as log
 
@@ -226,6 +224,7 @@ async def processing_orders(
                                 query_trades,
                                 result,
                                 sub_account_cached_channel,
+                                message_byte_data,
                             )
 
                     if (sqlite_updating_channel in message_channel
@@ -247,6 +246,7 @@ async def processing_orders(
                                 query_trades,
                                 result,
                                 sub_account_cached_channel,
+                                message_byte_data,
                                 
                             )
 
@@ -659,7 +659,8 @@ async def updating_sub_account(
     positions_cached: list,
     query_trades: str,
     subaccounts_details_result: list,
-        sub_account_cached_channel: str,
+    sub_account_cached_channel: str,
+    message_byte_data: dict,
 ) -> None:
     
     from loguru import logger as log
@@ -689,18 +690,15 @@ async def updating_sub_account(
     my_trades_active_all = await executing_query_with_return(
         query_trades
     )
-#! **********************************************************************************************************
-    result = {}
 
-    result.update(
-        {
-            "result": dict(
+    data =  dict(
                 positions=positions_cached,
                 open_orders=orders_cached,
                 my_trades=my_trades_active_all,
             )
-        }
-    )
+
+    message_byte_data["params"].update({"channel": sub_account_cached_channel})
+    message_byte_data["params"].update({"data": data})
 
     await publishing_result(
         client_redis,
