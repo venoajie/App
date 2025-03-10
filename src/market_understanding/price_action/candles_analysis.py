@@ -416,9 +416,9 @@ async def get_market_condition(
 
                         if market_analytics_data:
 
-                            instrument_name = data["instrument_name"]
+                            instrument_name = params["instrument_name"]
 
-                            if instrument_name in params["instrument_name"]:
+                            if instrument_name in data["instrument_name"]:
 
                                 resolution = data["resolution"]
 
