@@ -166,8 +166,6 @@ async def caching_distributing_data(
                 
                 if "user." in message_channel:
 
-                    log.warning(message_channel)
-
                     if "portfolio" in message_channel:
                         
                         result["params"].update({"channel": portfolio_channel})
