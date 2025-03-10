@@ -317,33 +317,33 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                     )
                 )
 
-            if trades_from_exchange:
+                if trades_from_exchange:
 
-                trades_from_exchange_without_futures_combo = [
-                    o
-                    for o in trades_from_exchange
-                    if f"-FS-" not in o["instrument_name"]
-                ]
-
-                for trade in trades_from_exchange_without_futures_combo:
-
-                    trade_trd_id = trade["trade_id"]
-
-                    trade_trd_id_not_in_archive = [
+                    trades_from_exchange_without_futures_combo = [
                         o
-                        for o in my_trades_instrument_name
-                        if trade_trd_id in o["trade_id"]
+                        for o in trades_from_exchange
+                        if f"-FS-" not in o["instrument_name"]
                     ]
 
-                    if not trade_trd_id_not_in_archive:
+                    for trade in trades_from_exchange_without_futures_combo:
 
-                        log.debug(f"{trade_trd_id}")
+                        trade_trd_id = trade["trade_id"]
 
-                        await saving_traded_orders(
-                            trade,
-                            archive_db_table,
-                            order_db_table,
-                        )
+                        trade_trd_id_not_in_archive = [
+                            o
+                            for o in my_trades_instrument_name
+                            if trade_trd_id in o["trade_id"]
+                        ]
+
+                        if not trade_trd_id_not_in_archive:
+
+                            log.debug(f"{trade_trd_id}")
+
+                            await saving_traded_orders(
+                                trade,
+                                archive_db_table,
+                                order_db_table,
+                            )
 
 
 async def rechecking_reconciliation_regularly(
