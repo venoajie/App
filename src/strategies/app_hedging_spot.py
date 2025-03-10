@@ -121,11 +121,15 @@ async def hedging_spot(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message_channel = message_byte["channel"]
+                    params =  message_byte_data["params"]
+                    
+                    data =  params["data"]
+                    
+                    message_channel = params["channel"]
 
                     if order_allowed_channel in message_channel:
 
-                        log.warning(message_byte_data)
+                        log.warning(data)
 
                         order_allowed = message_byte_data["result"]
 
@@ -135,32 +139,27 @@ async def hedging_spot(
 
                     if market_analytics_channel in message_channel:
 
-                        market_condition_all = message_byte_data
+                        market_condition_all = data
 
                     if portfolio_channel in message_channel:
 
-                        portfolio_all = message_byte_data["cached_portfolio"]
+                        portfolio_all = data["cached_portfolio"]
 
                     if sub_account_cached_channel in message_channel:
 
-                        sub_account = message_byte_data["result"]
-                        # log.debug(sub_account)
+                        cached_orders = data["open_orders"]
 
-                        cached_orders = sub_account["open_orders"]
+                        my_trades_active_all = data["my_trades"]
 
-                        my_trades_active_all = sub_account["my_trades"]
+                        my_trades_active_all = data["my_trades"]
 
                     if my_trades_channel in message_channel:
 
-                        log.error(message_byte_data)
-
-                        result = message_byte_data["result"][0]
-
-                        my_trades_active_all = result["open_orders"]
+                        my_trades_active_all = data
 
                     if order_update_channel in message_channel:
 
-                        log.debug(message_byte_data)
+                        log.debug(data)
 
                         result = message_byte_data["result"][0]
 

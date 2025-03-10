@@ -116,8 +116,6 @@ async def cancelling_orders(
 
             try:
 
-                from loguru import logger as log
-
                 message_byte = await pubsub.get_message()
 
                 if message_byte and message_byte["type"] == "message":
@@ -147,8 +145,6 @@ async def cancelling_orders(
                     if my_trades_channel in message_channel:
 
                         my_trades_active_all = data
-
-                        log.info(my_trades_active_all)
 
                     if order_update_channel in message_channel:
                     
