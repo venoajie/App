@@ -124,6 +124,7 @@ async def cancelling_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
+                    log.warning(message_byte)
                     log.debug(message_byte_data)
                     
                     params =  message_byte_data["params"]
@@ -151,11 +152,7 @@ async def cancelling_orders(
                         my_trades_active_all = data
 
                     if order_update_channel in message_channel:
-                        
-                        log.info(message_channel)
-
-                        log.info(data)
-
+                    
                         cached_orders = data["open_orders"]
 
                     if (
