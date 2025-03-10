@@ -404,19 +404,25 @@ async def get_market_condition(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message_channel = message_byte["channel"]
+                    params =  message_byte_data["params"]
 
+                    data =  params["data"]
+                    
+                    log.error(message_byte_data)
+                    
+                    message_channel = params["channel"]
+                    
                     if chart_low_high_tick_channel in message_channel:
 
                         if market_analytics_data:
 
-                            instrument_name = message_byte_data["instrument_name"]
+                            instrument_name = data["instrument_name"]
 
-                            if instrument_name in message_byte_data["instrument_name"]:
+                            if instrument_name in params["instrument_name"]:
 
-                                resolution = message_byte_data["resolution"]
+                                resolution = data["resolution"]
 
-                                currency = message_byte_data["currency"]
+                                currency = data["currency"]
 
                                 if resolution != 1:
 
