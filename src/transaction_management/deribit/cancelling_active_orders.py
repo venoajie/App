@@ -121,6 +121,8 @@ async def cancelling_orders(
                 message_byte = await pubsub.get_message()
 
                 if message_byte and message_byte["type"] == "message":
+                    
+                    log.warning(message_byte)
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
