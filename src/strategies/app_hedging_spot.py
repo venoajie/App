@@ -95,7 +95,6 @@ async def hedging_spot(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-
         cached_ticker_all = []
 
         not_cancel = True
@@ -109,10 +108,16 @@ async def hedging_spot(
         order_allowed = []
 
         allowed_instruments = []
-        
+
         my_trades_active_all = None
 
         cached_orders = None
+
+        result = {}
+        result.update({"params": {}})
+        result.update({"method": "subscription"})
+        result["params"].update({"data": None})
+        result["params"].update({"channel": None})
 
         while not_cancel:
 
@@ -124,10 +129,10 @@ async def hedging_spot(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    params =  message_byte_data["params"]
-                    
-                    data =  params["data"]
-                    
+                    params = message_byte_data["params"]
+
+                    data = params["data"]
+
                     message_channel = params["channel"]
 
                     if order_allowed_channel in message_channel:
@@ -170,9 +175,10 @@ async def hedging_spot(
                         and market_condition_all
                         and portfolio_all
                         and strategy in active_strategies
-                        and  my_trades_active_all is not None
-                        and  cached_orders is not None):
-                        
+                        and my_trades_active_all is not None
+                        and cached_orders is not None
+                    ):
+
                         cached_ticker_all = data["data"]
 
                         server_time = data["server_time"]
@@ -562,7 +568,7 @@ async def hedging_spot(
             except Exception as error:
 
                 parse_error_message(error)
-                
+
                 AAAAA
 
                 continue

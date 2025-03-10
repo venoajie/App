@@ -119,19 +119,19 @@ async def cancelling_orders(
                 message_byte = await pubsub.get_message()
 
                 if message_byte and message_byte["type"] == "message":
-                    
+
                     message_byte_data = orjson.loads(message_byte["data"])
-                    
-                    params =  message_byte_data["params"]
-                    
-                    data =  params["data"]
-                    
+
+                    params = message_byte_data["params"]
+
+                    data = params["data"]
+
                     message_channel = params["channel"]
 
                     if market_analytics_channel in message_channel:
 
                         market_condition_all = data
-                        
+
                     if portfolio_channel in message_channel:
 
                         portfolio_all = data["cached_portfolio"]
@@ -147,7 +147,7 @@ async def cancelling_orders(
                         my_trades_active_all = data
 
                     if order_update_channel in message_channel:
-                    
+
                         cached_orders = data["open_orders"]
 
                     if (
@@ -162,7 +162,7 @@ async def cancelling_orders(
                         server_time = data["server_time"]
 
                         currency_upper = data["currency_upper"]
-                    
+
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                         market_condition = [
@@ -338,7 +338,7 @@ async def cancelling_orders(
                 )
 
                 parse_error_message(error)
-                
+
                 continue
 
             finally:

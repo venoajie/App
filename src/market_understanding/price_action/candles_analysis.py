@@ -404,15 +404,17 @@ async def get_market_condition(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    params =  message_byte_data["params"]
-                    
-                    data =  params["data"]
-                    
+                    params = message_byte_data["params"]
+
+                    data = params["data"]
+
                     message_channel = params["channel"]
-                    
+
                     if chart_low_high_tick_channel in message_channel:
-                        
-                        message_byte_data["params"].update({"channel": market_analytics_channel})
+
+                        message_byte_data["params"].update(
+                            {"channel": market_analytics_channel}
+                        )
 
                         if market_analytics_data:
 
@@ -467,8 +469,10 @@ async def get_market_condition(
 
                                     market_analytics_data.append(pub_message)
 
-                                    message_byte_data["params"].update({"data": market_analytics_data})
-                                    
+                                    message_byte_data["params"].update(
+                                        {"data": market_analytics_data}
+                                    )
+
                                     await saving_and_publishing_result(
                                         client_redis,
                                         market_analytics_channel,
@@ -504,8 +508,10 @@ async def get_market_condition(
 
                                 market_analytics_data.append(pub_message)
 
-                            message_byte_data["params"].update({"data": market_analytics_data})
-                            
+                            message_byte_data["params"].update(
+                                {"data": market_analytics_data}
+                            )
+
                             await saving_and_publishing_result(
                                 client_redis,
                                 market_analytics_channel,

@@ -97,38 +97,32 @@ async def processing_orders(
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
-                    
-                    try:
-                        params =  message_byte_data["params"]
-                    
-                    except:
-                        print(f"message_byte {message_byte}")
-                        print(f"message_byte_data {message_byte_data}")
-                        
-                    
-                    data =  params["data"]
-                    
+
+                    params = message_byte_data["params"]
+
+                    data = params["data"]
+
                     message_channel = params["channel"]
 
                     if my_trade_receiving_channel in message_channel:
 
                         for trade in data:
-                            
+
                             currency_lower: str = trade["fee_currency"].lower()
 
                             archive_db_table = f"my_trades_all_{currency_lower}_json"
-    
+
                             await cancel_the_cancellables(
                                 private_data,
                                 order_db_table,
                                 currency_lower,
                                 cancellable_strategies,
-                        )   
+                            )
                             await saving_traded_orders(
-                            trade,
-                            archive_db_table,
-                            order_db_table,
-                        )
+                                trade,
+                                archive_db_table,
+                                order_db_table,
+                            )
 
                     if order_rest_channel in message_channel:
 
@@ -138,11 +132,11 @@ async def processing_orders(
                                 non_checked_strategies,
                                 message_byte_data,
                             )
-                            
+
                     if order_update_channel in message_channel:
 
                         data = data["current_order"]
-                        
+
                         if "oto_order_ids" in data:
 
                             await saving_oto_order(
@@ -225,7 +219,8 @@ async def processing_orders(
                                 message_byte_data,
                             )
 
-                    if (sqlite_updating_channel in message_channel
+                    if (
+                        sqlite_updating_channel in message_channel
                         or portfolio_channel in message_channel
                     ):
                         for currency in currencies:
@@ -242,7 +237,6 @@ async def processing_orders(
                                 result,
                                 sub_account_cached_channel,
                                 message_byte_data,
-                                
                             )
 
             except Exception as error:
@@ -678,25 +672,23 @@ async def updating_sub_account(
                 "rest",
             )
 
-    my_trades_active_all = await executing_query_with_return(
-        query_trades
-    )
+    my_trades_active_all = await executing_query_with_return(query_trades)
 
-    data =  dict(
-                positions=positions_cached,
-                open_orders=orders_cached,
-                my_trades=my_trades_active_all,
-            )
+    data = dict(
+        positions=positions_cached,
+        open_orders=orders_cached,
+        my_trades=my_trades_active_all,
+    )
 
     message_byte_data["params"].update({"channel": sub_account_cached_channel})
     message_byte_data["params"].update({"data": data})
-    
+
     await publishing_result(
         client_redis,
         sub_account_cached_channel,
         message_byte_data,
-        )
-    
+    )
+
 
 def sub_account_combining(
     sub_accounts: list,

@@ -71,4 +71,3 @@ result["params"].update({"data": None})
 result["params"].update({"channel": None})
 
 log.info(result)
-

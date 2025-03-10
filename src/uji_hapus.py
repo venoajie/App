@@ -798,10 +798,12 @@ sub_acc = [
 from dataclasses import dataclass
 from datetime import date
 
+
 @dataclass
 class DictSchema:
-    params: str =  None
+    params: str = None
     method: str = "subscription"
-    
+
+
 result = DictSchema()
 log.debug(result)

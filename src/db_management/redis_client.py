@@ -167,7 +167,7 @@ async def publishing_result(
     """ """
 
     try:
-        
+
         # publishing message
         await client_redis.publish(
             channel,

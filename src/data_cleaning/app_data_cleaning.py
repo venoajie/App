@@ -59,8 +59,9 @@ async def reconciling_size(
         # prepare channels placeholders
         channels = [
             positions_update_channel,
-            sub_account_cached_channel, 
-            ticker_cached_channel,]
+            sub_account_cached_channel,
+            ticker_cached_channel,
+        ]
 
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
@@ -105,7 +106,7 @@ async def reconciling_size(
                 size_is_reconciled=size_is_reconciled,
                 currency=currency,
             )
-            
+
             combined_order_allowed.append(order_allowed)
 
         while True:
@@ -117,11 +118,11 @@ async def reconciling_size(
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
-                    
-                    params =  message_byte_data["params"]
 
-                    data =  params["data"]
-                    
+                    params = message_byte_data["params"]
+
+                    data = params["data"]
+
                     message_channel = params["channel"]
 
                     five_days_ago = server_time - (one_minute * 60 * 24 * 5)
@@ -150,9 +151,10 @@ async def reconciling_size(
 
                             server_time = exchange_server_time
 
-                    if (positions_update_channel in message_channel 
-                        or sub_account_cached_channel in message_channel):
-
+                    if (
+                        positions_update_channel in message_channel
+                        or sub_account_cached_channel in message_channel
+                    ):
 
                         try:
                             positions_cached = data["positions"]
@@ -301,11 +303,15 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                 query_trades_all
             )
 
-            log.info(f"my_trades_instrument_name {instrument_name} {my_trades_instrument_name}")
+            log.info(
+                f"my_trades_instrument_name {instrument_name} {my_trades_instrument_name}"
+            )
 
             if my_trades_instrument_name:
-                
-                last_10_timestamp_log = [o["timestamp"] for o in my_trades_instrument_name]
+
+                last_10_timestamp_log = [
+                    o["timestamp"] for o in my_trades_instrument_name
+                ]
 
                 timestamp_log = min(last_10_timestamp_log)
 

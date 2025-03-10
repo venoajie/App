@@ -13,7 +13,7 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from db_management.redis_client import publishing_result, saving_and_publishing_result
+from db_management.redis_client import publishing_result
 from db_management.sqlite_management import executing_query_with_return
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.basic_strategy import get_label_integer
@@ -102,6 +102,12 @@ async def future_spreads(
         order_allowed = []
 
         allowed_instruments = []
+
+        result = {}
+        result.update({"params": {}})
+        result.update({"method": "subscription"})
+        result["params"].update({"data": None})
+        result["params"].update({"channel": None})
 
         while not_cancel:
 
@@ -438,12 +444,13 @@ async def future_spreads(
 
                                                     if send_order["order_allowed"]:
 
-                                                        await saving_and_publishing_result(
+                                                        result["params"].update({"channel": sending_order_channel})
+                                                        result["params"].update({"data": send_order})
+
+                                                        await publishing_result(
                                                             pipe,
                                                             sending_order_channel,
-                                                            None,
-                                                            None,
-                                                            send_order,
+                                                            result,
                                                         )
 
                                                         # not_order = False
@@ -499,13 +506,15 @@ async def future_spreads(
                                                     )
 
                                                     if send_order["order_allowed"]:
+                                                        
+                                                        result["params"].update({"channel": sending_order_channel})
+                                                        result["params"].update({"data": send_order})
 
-                                                        await saving_and_publishing_result(
+
+                                                        await publishing_result(
                                                             pipe,
                                                             sending_order_channel,
-                                                            None,
-                                                            None,
-                                                            send_order,
+                                                            result,
                                                         )
 
                                                         # not_order = False
@@ -593,13 +602,14 @@ async def future_spreads(
                                                             if send_order[
                                                                 "order_allowed"
                                                             ]:
+                                                                                                                                        
+                                                                result["params"].update({"channel": sending_order_channel})
+                                                                result["params"].update({"data": send_order})
 
-                                                                await saving_and_publishing_result(
+                                                                await publishing_result(
                                                                     pipe,
                                                                     sending_order_channel,
-                                                                    None,
-                                                                    None,
-                                                                    send_order,
+                                                                    result,
                                                                 )
 
                                                                 # not_order = False

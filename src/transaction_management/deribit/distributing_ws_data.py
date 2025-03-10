@@ -35,6 +35,7 @@ from utilities.string_modification import (
     remove_redundant_elements,
 )
 
+
 async def caching_distributing_data(
     private_data: object,
     client_redis: object,
@@ -136,7 +137,7 @@ async def caching_distributing_data(
         positions_cached = sub_account_cached["positions_cached"]
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
-                
+
         result = {}
         result.update({"params": {}})
         result.update({"method": "subscription"})
@@ -163,14 +164,14 @@ async def caching_distributing_data(
                     currency_upper=currency_upper,
                     currency=currency,
                 )
-                
+
                 if "user." in message_channel:
 
                     if "portfolio" in message_channel:
-                        
+
                         result["params"].update({"channel": portfolio_channel})
                         result["params"].update({"data": pub_message})
-                        
+
                         await updating_portfolio(
                             pipe,
                             portfolio,
@@ -186,7 +187,7 @@ async def caching_distributing_data(
                             positions_cached,
                             query_trades,
                             data,
-                            sub_account_cached_channel
+                            sub_account_cached_channel,
                         )
 
                     else:
@@ -194,39 +195,41 @@ async def caching_distributing_data(
                         result["params"].update({"data": data})
 
                         if "trades" in message_channel:
-                            
-                            result["params"].update({"channel": my_trade_receiving_channel})
-                            
+
+                            result["params"].update(
+                                {"channel": my_trade_receiving_channel}
+                            )
+
                             await publishing_result(
                                 pipe,
                                 my_trade_receiving_channel,
                                 result,
                             )
-                            
+
                             for trade in data:
-                                
+
                                 update_cached_orders(
-                                orders_cached,
-                                trade,
-                            )
-                                                        
+                                    orders_cached,
+                                    trade,
+                                )
+
                         if "orders" in message_channel:
 
                             currency: str = extract_currency_from_text(
                                 data["instrument_name"]
                             )
-                            
+
                             update_cached_orders(
                                 orders_cached,
                                 data,
                             )
 
-                        data =  dict(
-                                    current_order=data,
-                                    open_orders=orders_cached,
-                                    currency=currency,
-                                    currency_upper=currency.upper(),
-                                )
+                        data = dict(
+                            current_order=data,
+                            open_orders=orders_cached,
+                            currency=currency,
+                            currency_upper=currency.upper(),
+                        )
 
                         result["params"].update({"channel": order_update_channel})
                         result["params"].update({"data": data})
@@ -243,7 +246,7 @@ async def caching_distributing_data(
 
                         result["params"].update({"channel": my_trades_channel})
                         result["params"].update({"data": my_trades_active_all})
-                        
+
                         await publishing_result(
                             pipe,
                             my_trades_channel,
@@ -343,7 +346,7 @@ async def caching_distributing_data(
 
                     result["params"].update({"channel": chart_low_high_tick_channel})
                     result["params"].update({"data": pub_message})
-                    
+
                     await publishing_result(
                         pipe,
                         chart_low_high_tick_channel,
@@ -393,10 +396,10 @@ async def updating_portfolio(
     result: dict,
 ) -> None:
 
-    params =  result["params"]
-    
-    data =  params["data"]
-    
+    params = result["params"]
+
+    data = params["data"]
+
     if portfolio == []:
         portfolio.append(data["data"])
 
