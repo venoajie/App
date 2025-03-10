@@ -411,9 +411,6 @@ async def allowing_order_for_instrument_not_in_sub_account(
         ]["size_is_reconciled"] = order_allowed
 
 
-    result["params"].update({"channel": order_allowed_channel})
-    result["params"].update({"data": combined_order_allowed})
-
     await publishing_result(
         client_redis,
         order_allowed_channel,
