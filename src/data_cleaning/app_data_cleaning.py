@@ -143,7 +143,7 @@ async def reconciling_size(
                                 order_db_table,
                                 order_allowed,
                                 five_days_ago,
-                                message_byte_data,
+                                result,
                             )
 
                             server_time = exchange_server_time
@@ -178,7 +178,7 @@ async def reconciling_size(
                             order_db_table,
                             order_allowed,
                             five_days_ago,
-                            message_byte_data,
+                            result,
                         )
 
             except Exception as error:
@@ -383,6 +383,7 @@ async def rechecking_reconciliation_regularly(
         order_db_table,
         order_allowed,
         five_days_ago,
+        result,
     )
 
     await rechecking_based_on_data_in_sqlite(
@@ -395,6 +396,7 @@ async def rechecking_reconciliation_regularly(
         order_db_table,
         order_allowed,
         five_days_ago,
+        result,
     )
 
 
@@ -416,8 +418,11 @@ async def allowing_order_for_instrument_not_in_sub_account(
             0
         ]["size_is_reconciled"] = order_allowed
 
+    result["params"].update({"channel": order_allowed_channel})
+    result["params"].update({"data": combined_order_allowed})
 
-    log.info(result)
+    log.info(combined_order_allowed)
+
     await publishing_result(
         client_redis,
         order_allowed_channel,
@@ -435,6 +440,7 @@ async def rechecking_based_on_sub_account(
     order_db_table: str,
     order_allowed: bool,
     five_days_ago: int,
+    result: dict,
 ) -> None:
     """ """
 
@@ -548,9 +554,8 @@ async def rechecking_based_on_sub_account(
                     my_trades_instrument_name,
                 )
 
-        result = {}
-
-        result.update({"result": combined_order_allowed})
+        result["params"].update({"channel": order_allowed_channel})
+        result["params"].update({"data": combined_order_allowed})
 
         await publishing_result(
             client_redis,
@@ -569,6 +574,7 @@ async def rechecking_based_on_data_in_sqlite(
     order_db_table: str,
     order_allowed: bool,
     five_days_ago: int,
+    result: dict,
 ) -> None:
     """ """
 
@@ -721,9 +727,8 @@ async def rechecking_based_on_data_in_sqlite(
                         my_trades_active,
                     )
 
-    result = {}
-
-    result.update({"result": combined_order_allowed})
+    result["params"].update({"channel": order_allowed_channel})
+    result["params"].update({"data": combined_order_allowed})
 
     await publishing_result(
         client_redis,
