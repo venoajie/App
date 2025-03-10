@@ -120,8 +120,6 @@ async def hedging_spot(
                 if message_byte and message_byte["type"] == "message":
 
                     message_byte_data = orjson.loads(message_byte["data"])
-                    
-                    log.warning(message_byte_data)
 
                     params =  message_byte_data["params"]
                     
@@ -163,9 +161,7 @@ async def hedging_spot(
 
                         log.debug(data)
 
-                        result = message_byte_data["result"][0]
-
-                        cached_orders = result["open_orders"]
+                        cached_orders = data["open_orders"]
 
                     if (
                         allowed_instruments
@@ -174,10 +170,12 @@ async def hedging_spot(
                         and portfolio_all
                         and strategy in active_strategies
                     ):
+                        
+                        log.warning(data)
 
-                        cached_ticker_all = message_byte_data["data"]
+                        cached_ticker_all = data["data"]
 
-                        server_time = message_byte_data["server_time"]
+                        server_time = data["server_time"]
 
                         currency, currency_upper = (
                             message_byte_data["currency"],
