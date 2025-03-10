@@ -292,6 +292,7 @@ async def publishing_specific_purposes(
 
     if purpose == "sqlite_record_updating":
         channel: str = redis_channels["sqlite_record_updating"]
+        message["params"].update({"channel": channel})
 
     await publishing_result(
         client_redis,

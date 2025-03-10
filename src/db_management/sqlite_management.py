@@ -120,9 +120,14 @@ async def insert_tables(
                 await executing_query_with_return(query_trades)
             )
 
+            result = {}
+            result.update({"params": {}})
+            result.update({"method": "subscription"})
+            result["params"].update({"data": my_trades_currency_all_transactions})
+            
             await publishing_specific_purposes(
                 "sqlite_record_updating",
-                my_trades_currency_all_transactions,
+                result,
             )
 
 
@@ -229,9 +234,14 @@ async def deleting_row(
                 await executing_query_with_return(query_trades)
             )
 
+            result = {}
+            result.update({"params": {}})
+            result.update({"method": "subscription"})
+            result["params"].update({"data": my_trades_currency_all_transactions})
+            
             await publishing_specific_purposes(
                 "sqlite_record_updating",
-                my_trades_currency_all_transactions,
+                result,
             )
 
 
@@ -365,9 +375,14 @@ async def update_status_data(
                 await executing_query_with_return(query_trades)
             )
 
+            result = {}
+            result.update({"params": {}})
+            result.update({"method": "subscription"})
+            result["params"].update({"data": my_trades_currency_all_transactions})
+            
             await publishing_specific_purposes(
                 "sqlite_record_updating",
-                my_trades_currency_all_transactions,
+                result,
             )
 
 
