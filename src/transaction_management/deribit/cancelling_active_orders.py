@@ -134,6 +134,8 @@ async def cancelling_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
+                    log.debug(message_byte_data)
+                    
                     params =  message_byte_data["params"]
                     
                     data =  params["data"]

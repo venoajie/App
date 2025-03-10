@@ -252,7 +252,7 @@ async def caching_distributing_data(
                         await publishing_result(
                             pipe,
                             my_trades_channel,
-                            my_trades_active_all,
+                            result,
                         )
 
                 instrument_name_future = (message_channel)[19:]
