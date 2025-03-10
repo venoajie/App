@@ -164,8 +164,6 @@ async def caching_distributing_data(
                     currency=currency,
                 )
                 
-                log.info(pub_message)
-
                 if "user." in message_channel:
 
                     log.warning(message_channel)
@@ -175,8 +173,6 @@ async def caching_distributing_data(
                         result["params"].update({"channel": portfolio_channel})
                         result["params"].update({"data": pub_message})
                         
-                        log.info(result)
-
                         await updating_portfolio(
                             pipe,
                             portfolio,
@@ -425,8 +421,6 @@ async def updating_portfolio(
 
     result["params"]["data"].update({"cached_portfolio": portfolio})
     
-    log.error(result)
-
     await publishing_result(
         pipe,
         portfolio_channel,

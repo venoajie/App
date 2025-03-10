@@ -154,11 +154,9 @@ async def cancelling_orders(
 
                     if sub_account_cached_channel in message_channel:
 
-                        sub_account = data["result"]
+                        cached_orders = data["open_orders"]
 
-                        cached_orders = sub_account["open_orders"]
-
-                        my_trades_active_all = sub_account["my_trades"]
+                        my_trades_active_all = data["my_trades"]
 
                     if my_trades_channel in message_channel:
 
