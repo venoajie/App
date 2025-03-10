@@ -172,6 +172,8 @@ async def caching_distributing_data(
                     if "portfolio" in message_channel:
                         
                         result["params"].update({"channel": portfolio_channel})
+                        
+                        log.info(result)
 
                         await updating_portfolio(
                             pipe,

@@ -705,7 +705,7 @@ async def updating_sub_account(
     await publishing_result(
         client_redis,
         sub_account_cached_channel,
-        result,
+        message_byte_data,
         )
     
     log.critical(sub_account_cached_channel)
