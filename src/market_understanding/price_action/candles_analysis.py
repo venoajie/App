@@ -409,6 +409,8 @@ async def get_market_condition(
                     data =  params["data"]
                     
                     log.error(message_byte_data)
+                    log.debug(params)
+                    log.warning(data)
                     
                     message_channel = params["channel"]
                     
