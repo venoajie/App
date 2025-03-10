@@ -167,7 +167,7 @@ async def relabelling_trades(
                                 id,
                             )
 
-                            break
+#                            break
 
                     for strategy in active_strategies:
 
@@ -272,7 +272,7 @@ async def relabelling_trades(
                                             cancellable_strategies,
                                         )
 
-                                        break
+                                        #break
 
                                 #! renaming combo auto trading
                                 else:
@@ -296,7 +296,7 @@ async def relabelling_trades(
                                             "=",
                                         )
 
-                                        break
+                                        #break
 
                                     #! closing unpaired transactions
                                     else:
@@ -331,7 +331,7 @@ async def relabelling_trades(
                                                 "=",
                                             )
 
-                                            break
+                                            #break
 
                                         else:
 
