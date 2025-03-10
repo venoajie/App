@@ -98,7 +98,13 @@ async def processing_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
-                    params =  message_byte_data["params"]
+                    try:
+                        params =  message_byte_data["params"]
+                    
+                    except:
+                        print(f"message_byte {message_byte}")
+                        print(f"message_byte_data {message_byte_data}")
+                        
                     
                     data =  params["data"]
                     

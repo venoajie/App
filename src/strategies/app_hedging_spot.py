@@ -173,8 +173,6 @@ async def hedging_spot(
                         and  my_trades_active_all is not None
                         and  cached_orders is not None):
                         
-                        log.warning(data)
-
                         cached_ticker_all = data["data"]
 
                         server_time = data["server_time"]
