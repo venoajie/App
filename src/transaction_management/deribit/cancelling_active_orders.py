@@ -171,6 +171,8 @@ async def cancelling_orders(
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
                         
+                        log.debug(instrument_name_perpetual)
+                        
                         log.error([
                             o
                             for o in market_condition_all
