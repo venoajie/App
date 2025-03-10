@@ -664,6 +664,8 @@ async def updating_sub_account(
 ) -> None:
     
     from loguru import logger as log
+
+    log.info(message_byte_data)
     
     log.critical(sub_account_cached_channel)
 
@@ -699,6 +701,8 @@ async def updating_sub_account(
 
     message_byte_data["params"].update({"channel": sub_account_cached_channel})
     message_byte_data["params"].update({"data": data})
+    
+    log.debug(message_byte_data)
 
     await publishing_result(
         client_redis,

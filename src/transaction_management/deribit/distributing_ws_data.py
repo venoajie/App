@@ -195,12 +195,13 @@ async def caching_distributing_data(
 
                         log.error(data)
                         log.error("trades" in message_channel)
+                        
+                        result["params"].update({"data": data})
 
                         if "trades" in message_channel:
                             
                             result["params"].update({"channel": my_trade_receiving_channel})
-                            result["params"].update({"data": data})
-
+                            
                             await publishing_result(
                                 pipe,
                                 my_trade_receiving_channel,
@@ -219,7 +220,7 @@ async def caching_distributing_data(
                             currency: str = extract_currency_from_text(
                                 data["instrument_name"]
                             )
-
+                            
                             update_cached_orders(
                                 orders_cached,
                                 data,
