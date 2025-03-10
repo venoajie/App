@@ -300,10 +300,6 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                 query_trades_all
             )
 
-            log.info(
-                f"my_trades_instrument_name {instrument_name} {my_trades_instrument_name}"
-            )
-
             if my_trades_instrument_name:
 
                 last_10_timestamp_log = [
@@ -319,6 +315,10 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                         1000,
                     )
                 )
+                
+                log.info(
+                f"trades_from_exchange {instrument_name} {trades_from_exchange}"
+            )
 
                 if trades_from_exchange:
 
@@ -384,7 +384,6 @@ async def rechecking_reconciliation_regularly(
         result,
     )
 
-    # FROM sub account to other db's
     await rechecking_based_on_sub_account(
         private_data,
         client_redis,
@@ -432,8 +431,6 @@ async def allowing_order_for_instrument_not_in_sub_account(
 
     result["params"].update({"channel": order_allowed_channel})
     result["params"].update({"data": combined_order_allowed})
-
-    log.info(combined_order_allowed)
 
     await publishing_result(
         client_redis,
