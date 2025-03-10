@@ -100,6 +100,8 @@ async def processing_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
                     
+                    log.info(message_byte_data)
+                    
                     params =  message_byte_data["params"]
                     
                     data =  params["data"]
