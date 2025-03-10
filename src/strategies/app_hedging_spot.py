@@ -564,6 +564,8 @@ async def hedging_spot(
             except Exception as error:
 
                 parse_error_message(error)
+                
+                AAAAA
 
                 continue
 
