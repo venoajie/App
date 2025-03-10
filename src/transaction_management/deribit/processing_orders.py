@@ -93,7 +93,6 @@ async def processing_orders(
         result.update({"method": "subscription"})
         result["params"].update({"data": None})
         result["params"].update({"channel": None})
-        log.info(result)
 
         while not_cancel:
 
