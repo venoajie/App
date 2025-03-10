@@ -122,8 +122,6 @@ async def cancelling_orders(
 
                 if message_byte and message_byte["type"] == "message":
                     
-                    log.warning(message_byte["channel"])
-
                     message_byte_data = orjson.loads(message_byte["data"])
                     
                     params =  message_byte_data["params"]
@@ -168,9 +166,7 @@ async def cancelling_orders(
                         server_time = data["server_time"]
 
                         currency_upper = data["currency_upper"]
-                        
-                        log.critical(currency_upper)
-
+                    
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
                         market_condition = [
