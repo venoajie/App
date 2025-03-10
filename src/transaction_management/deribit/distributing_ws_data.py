@@ -170,12 +170,14 @@ async def caching_distributing_data(
                     log.warning(message_channel)
 
                     if "portfolio" in message_channel:
+                        
+                        result["params"].update({"channel": portfolio_channel})
 
                         await updating_portfolio(
                             pipe,
-                            pub_message,
                             portfolio,
                             portfolio_channel,
+                            result,
                         )
 
                     elif "changes" in message_channel:
@@ -392,29 +394,34 @@ def get_index(ticker: dict) -> float:
 
 async def updating_portfolio(
     pipe: object,
-    pub_message: dict,
     portfolio: list,
     portfolio_channel: str,
+    result: dict,
 ) -> None:
 
+
+    params =  result["params"]
+    
+    data =  params["data"]
+    
     if portfolio == []:
-        portfolio.append(pub_message["data"])
+        portfolio.append(data["data"])
 
     else:
-        data_currency = pub_message["data"]["currency"]
+        data_currency = data["data"]["currency"]
         portfolio_currency = [o for o in portfolio if data_currency in o["currency"]]
 
         if portfolio_currency:
             portfolio.remove(portfolio_currency[0])
 
-        portfolio.append(pub_message["data"])
+        portfolio.append(data["data"])
 
-    pub_message.update({"cached_portfolio": portfolio})
+    result["params"]["data"].update({"cached_portfolio": portfolio})
 
     await publishing_result(
         pipe,
         portfolio_channel,
-        pub_message,
+        result,
     )
 
 
