@@ -167,21 +167,11 @@ async def cancelling_orders(
 
                         server_time = data["server_time"]
 
-                        currency_upper = (
-                            data["currency_upper"],
-                        )
+                        currency_upper = data["currency_upper"],
                         
-                        log.error(data)
+                        log.critical(currency_upper)
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
-                        
-                        log.debug(instrument_name_perpetual)
-                        
-                        log.error([
-                            o
-                            for o in market_condition_all
-                            if instrument_name_perpetual in o["instrument_name"]
-                        ])
 
                         market_condition = [
                             o
