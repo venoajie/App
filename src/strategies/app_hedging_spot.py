@@ -95,7 +95,6 @@ async def hedging_spot(
         # subscribe to channels
         [await pubsub.subscribe(o) for o in channels]
 
-        cached_orders = []
 
         cached_ticker_all = []
 
@@ -110,6 +109,10 @@ async def hedging_spot(
         order_allowed = []
 
         allowed_instruments = []
+        
+        my_trades_active_all = None
+
+        cached_orders = None
 
         while not_cancel:
 
@@ -167,7 +170,8 @@ async def hedging_spot(
                         and market_condition_all
                         and portfolio_all
                         and strategy in active_strategies
-                    ):
+                        and  my_trades_active_all is not None
+                        and  cached_orders is not None):
                         
                         log.warning(data)
 
