@@ -248,6 +248,8 @@ async def caching_distributing_data(
 
                         result["params"].update({"channel": my_trades_channel})
                         result["params"].update({"data": my_trades_active_all})
+                        
+                        log.error(result)
 
                         await publishing_result(
                             pipe,
