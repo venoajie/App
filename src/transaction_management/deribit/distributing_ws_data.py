@@ -31,6 +31,7 @@ from utilities.system_tools import (
 )
 from utilities.string_modification import (
     extract_currency_from_text,
+    message_template,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -84,10 +85,6 @@ async def caching_distributing_data(
         # preparing redis connection
         pubsub = client_redis.pubsub()
 
-        strategy_attributes_active = [
-            o for o in strategy_attributes if o["is_active"] == True
-        ]
-
         chart_low_high_tick_channel: str = redis_channels["chart_low_high_tick"]
         portfolio_channel: str = redis_channels["portfolio"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
@@ -138,11 +135,7 @@ async def caching_distributing_data(
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
-        result = {}
-        result.update({"params": {}})
-        result.update({"method": "subscription"})
-        result["params"].update({"data": None})
-        result["params"].update({"channel": None})
+        result = message_template()
 
         while True:
 

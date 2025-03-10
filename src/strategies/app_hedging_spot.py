@@ -11,8 +11,7 @@ from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from db_management.redis_client import publishing_result, saving_and_publishing_result
-from db_management.sqlite_management import executing_query_with_return
+from db_management.redis_client import publishing_result
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.hedging.hedging_spot import (
     HedgingSpot,
@@ -21,6 +20,7 @@ from strategies.hedging.hedging_spot import (
 from utilities.number_modification import get_closest_value
 from utilities.pickling import read_data
 from utilities.string_modification import (
+    message_template,
     parsing_label,
     remove_redundant_elements,
 )
@@ -113,11 +113,7 @@ async def hedging_spot(
 
         cached_orders = None
 
-        result = {}
-        result.update({"params": {}})
-        result.update({"method": "subscription"})
-        result["params"].update({"data": None})
-        result["params"].update({"channel": None})
+        result = message_template()
 
         while not_cancel:
 
@@ -406,10 +402,15 @@ async def hedging_spot(
                                     and size_is_reconciled_global
                                 ):
 
+                                    result["params"].update(
+                                        {"channel": sending_order_channel}
+                                    )
+                                    result["params"].update({"data": send_order})
+
                                     await publishing_result(
                                         client_redis,
                                         sending_order_channel,
-                                        send_order,
+                                        result,
                                     )
 
                                     # not_order = False
@@ -513,10 +514,19 @@ async def hedging_spot(
 
                                                         if send_order["order_allowed"]:
 
+                                                            result["params"].update(
+                                                                {
+                                                                    "channel": sending_order_channel
+                                                                }
+                                                            )
+                                                            result["params"].update(
+                                                                {"data": send_order}
+                                                            )
+
                                                             await publishing_result(
                                                                 client_redis,
                                                                 sending_order_channel,
-                                                                send_order,
+                                                                result,
                                                             )
 
                                                             # not_order = False
@@ -554,10 +564,19 @@ async def hedging_spot(
 
                                                         if send_order["order_allowed"]:
 
+                                                            result["params"].update(
+                                                                {
+                                                                    "channel": sending_order_channel
+                                                                }
+                                                            )
+                                                            result["params"].update(
+                                                                {"data": send_order}
+                                                            )
+
                                                             await publishing_result(
                                                                 client_redis,
                                                                 sending_order_channel,
-                                                                send_order,
+                                                                result,
                                                             )
 
                                                             # not_order = False

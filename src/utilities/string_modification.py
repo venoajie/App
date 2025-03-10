@@ -505,3 +505,16 @@ def convert_to_bytes(input_string: str, encoding: str = "utf-8") -> bytes:
     except Exception as e:
         ("Error:", e)
         return None
+
+
+def message_template() -> str:
+
+    """ """
+
+    result = {}
+    result.update({"params": {}})
+    result.update({"method": "subscription"})
+    result["params"].update({"data": None})
+    result["params"].update({"channel": None})
+
+    return result

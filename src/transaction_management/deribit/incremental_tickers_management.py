@@ -1,14 +1,10 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # installed
 import asyncio
 
-from loguru import logger as log
-
-from market_understanding import futures_analysis
-
 # user defined formula
+from market_understanding import futures_analysis
 from utilities import pickling, system_tools
 
 

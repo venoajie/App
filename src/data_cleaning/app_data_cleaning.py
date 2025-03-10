@@ -20,6 +20,7 @@ from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.orders_management import saving_traded_orders
 from utilities.string_modification import (
     extract_currency_from_text,
+    message_template,
     remove_redundant_elements,
 )
 from utilities.system_tools import parse_error_message
@@ -84,11 +85,7 @@ async def reconciling_size(
 
         futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
 
-        result = {}
-        result.update({"params": {}})
-        result.update({"method": "subscription"})
-        result["params"].update({"data": None})
-        result["params"].update({"channel": None})
+        result = message_template()
 
         combined_order_allowed = []
         for instrument_name in all_instruments_name:

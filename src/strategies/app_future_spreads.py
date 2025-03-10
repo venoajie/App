@@ -24,6 +24,7 @@ from strategies.cash_carry.combo_auto import (
 from utilities.pickling import read_data
 
 from utilities.string_modification import (
+    message_template,
     remove_double_brackets_in_list,
     remove_redundant_elements,
 )
@@ -103,11 +104,7 @@ async def future_spreads(
 
         allowed_instruments = []
 
-        result = {}
-        result.update({"params": {}})
-        result.update({"method": "subscription"})
-        result["params"].update({"data": None})
-        result["params"].update({"channel": None})
+        result = message_template()
 
         while not_cancel:
 
@@ -444,8 +441,14 @@ async def future_spreads(
 
                                                     if send_order["order_allowed"]:
 
-                                                        result["params"].update({"channel": sending_order_channel})
-                                                        result["params"].update({"data": send_order})
+                                                        result["params"].update(
+                                                            {
+                                                                "channel": sending_order_channel
+                                                            }
+                                                        )
+                                                        result["params"].update(
+                                                            {"data": send_order}
+                                                        )
 
                                                         await publishing_result(
                                                             pipe,
@@ -506,10 +509,15 @@ async def future_spreads(
                                                     )
 
                                                     if send_order["order_allowed"]:
-                                                        
-                                                        result["params"].update({"channel": sending_order_channel})
-                                                        result["params"].update({"data": send_order})
 
+                                                        result["params"].update(
+                                                            {
+                                                                "channel": sending_order_channel
+                                                            }
+                                                        )
+                                                        result["params"].update(
+                                                            {"data": send_order}
+                                                        )
 
                                                         await publishing_result(
                                                             pipe,
@@ -602,9 +610,15 @@ async def future_spreads(
                                                             if send_order[
                                                                 "order_allowed"
                                                             ]:
-                                                                                                                                        
-                                                                result["params"].update({"channel": sending_order_channel})
-                                                                result["params"].update({"data": send_order})
+
+                                                                result["params"].update(
+                                                                    {
+                                                                        "channel": sending_order_channel
+                                                                    }
+                                                                )
+                                                                result["params"].update(
+                                                                    {"data": send_order}
+                                                                )
 
                                                                 await publishing_result(
                                                                     pipe,

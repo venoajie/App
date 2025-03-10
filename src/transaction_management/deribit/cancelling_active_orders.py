@@ -294,8 +294,6 @@ async def cancelling_orders(
 
                                                 not_cancel = False
 
-                                                break
-
                                 if "hedgingSpot" in strategy:
 
                                     max_position: int = notional * -1
@@ -327,8 +325,6 @@ async def cancelling_orders(
                                                 )
 
                                                 not_cancel = False
-
-                                                break
 
             except Exception as error:
 
