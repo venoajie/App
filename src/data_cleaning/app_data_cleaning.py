@@ -54,10 +54,12 @@ async def reconciling_size(
         order_allowed_channel: str = redis_channels["order_is_allowed"]
         positions_update_channel: str = redis_channels["position_cache_updating"]
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
+        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
 
         # prepare channels placeholders
         channels = [
-            positions_update_channel, 
+            positions_update_channel,
+            sub_account_cached_channel, 
             ticker_cached_channel,]
 
         # subscribe to channels
@@ -148,9 +150,14 @@ async def reconciling_size(
 
                             server_time = exchange_server_time
 
-                    if positions_update_channel in message_channel:
+                    if (positions_update_channel in message_channel 
+                        or sub_account_cached_channel in message_channel):
 
-                        positions_cached = data
+
+                        try:
+                            positions_cached = data["positions"]
+                        except:
+                            positions_cached = data
 
                         positions_cached_all = remove_redundant_elements(
                             [o["instrument_name"] for o in positions_cached]
