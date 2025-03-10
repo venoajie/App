@@ -350,8 +350,6 @@ async def caching_distributing_data(
                     result["params"].update({"channel": chart_low_high_tick_channel})
                     result["params"].update({"data": pub_message})
                     
-                    log.info(result)
-
                     await publishing_result(
                         pipe,
                         chart_low_high_tick_channel,
@@ -405,8 +403,6 @@ async def updating_portfolio(
     
     data =  params["data"]
     
-    log.warning(data)
-
     if portfolio == []:
         portfolio.append(data["data"])
 
@@ -421,6 +417,8 @@ async def updating_portfolio(
 
     result["params"]["data"].update({"cached_portfolio": portfolio})
     
+    log.warning(result)
+
     await publishing_result(
         pipe,
         portfolio_channel,
