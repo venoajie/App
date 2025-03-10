@@ -96,8 +96,6 @@ async def processing_orders(
 
                 if message_byte and message_byte["type"] == "message":
 
-                    from loguru import logger as log
-
                     message_byte_data = orjson.loads(message_byte["data"])
                     
                     params =  message_byte_data["params"]
@@ -136,8 +134,6 @@ async def processing_orders(
                             )
                             
                     if order_update_channel in message_channel:
-                        
-                        log.critical(message_channel)
 
                         data = data["current_order"]
                         
@@ -226,9 +222,6 @@ async def processing_orders(
                     if (sqlite_updating_channel in message_channel
                         or portfolio_channel in message_channel
                     ):
-
-                        log.critical(message_channel)
-
                         for currency in currencies:
 
                             result = await private_data.get_subaccounts_details(
@@ -658,8 +651,6 @@ async def updating_sub_account(
     sub_account_cached_channel: str,
     message_byte_data: dict,
 ) -> None:
-    
-    from loguru import logger as log
 
     if subaccounts_details_result:
 

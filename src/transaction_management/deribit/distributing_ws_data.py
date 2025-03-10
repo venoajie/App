@@ -193,9 +193,6 @@ async def caching_distributing_data(
 
                     else:
 
-                        log.error(data)
-                        log.error("trades" in message_channel)
-                        
                         result["params"].update({"data": data})
 
                         if "trades" in message_channel:
@@ -236,8 +233,6 @@ async def caching_distributing_data(
                         result["params"].update({"channel": order_update_channel})
                         result["params"].update({"data": data})
 
-                        log.warning(result)
-
                         await publishing_result(
                             pipe,
                             order_update_channel,
@@ -251,8 +246,6 @@ async def caching_distributing_data(
                         result["params"].update({"channel": my_trades_channel})
                         result["params"].update({"data": my_trades_active_all})
                         
-                        log.error(result)
-
                         await publishing_result(
                             pipe,
                             my_trades_channel,

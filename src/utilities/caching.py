@@ -165,7 +165,14 @@ def update_cached_orders(
                             orders_all.append(order)
         except:
 
-            order = sub_account_data
+            from loguru import logger as log
+            
+            log.debug(order)
+            try:
+                order = sub_account_data[0]
+
+            except:
+                order = sub_account_data
 
             order_state = order["order_state"]
 
