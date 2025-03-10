@@ -178,8 +178,8 @@ async def hedging_spot(
                         server_time = data["server_time"]
 
                         currency, currency_upper = (
-                            message_byte_data["currency"],
-                            message_byte_data["currency_upper"],
+                            data["currency"],
+                            data["currency_upper"],
                         )
 
                         currency_lower: str = currency
