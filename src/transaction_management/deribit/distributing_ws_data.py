@@ -236,6 +236,8 @@ async def caching_distributing_data(
                         result["params"].update({"channel": order_update_channel})
                         result["params"].update({"data": data})
 
+                        log.warning(result)
+
                         await publishing_result(
                             pipe,
                             order_update_channel,

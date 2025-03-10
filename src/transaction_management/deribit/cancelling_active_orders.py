@@ -136,8 +136,6 @@ async def cancelling_orders(
 
                         market_condition_all = data
                         
-                        log.info(market_condition_all)
-
                     if portfolio_channel in message_channel:
 
                         portfolio_all = data["cached_portfolio"]
