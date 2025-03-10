@@ -167,7 +167,7 @@ def update_cached_orders(
 
             from loguru import logger as log
             
-            log.debug(order)
+            log.debug(sub_account_data)
             try:
                 order = sub_account_data[0]
 
