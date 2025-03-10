@@ -225,8 +225,6 @@ async def caching_distributing_data(
                                 data,
                             )
 
-                        result = {}
-                        
                         data =  dict(
                                     current_order=data,
                                     open_orders=orders_cached,
