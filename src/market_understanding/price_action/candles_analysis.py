@@ -510,8 +510,8 @@ async def get_market_condition(
                                 client_redis,
                                 market_analytics_channel,
                                 market_condition_keys,
-                                market_analytics_data,
-                                market_analytics_data,
+                                message_byte_data,
+                                message_byte_data,
                             )
 
             except Exception as error:
