@@ -134,19 +134,23 @@ async def cancelling_orders(
 
                     message_byte_data = orjson.loads(message_byte["data"])
 
-                    message_channel = message_byte["channel"]
+                    params =  message_byte_data["params"]
+                    
+                    data =  params["data"]
+                    
+                    message_channel = params["channel"]
 
                     if market_analytics_channel in message_channel:
 
-                        market_condition_all = message_byte_data
+                        market_condition_all = data
 
                     if portfolio_channel in message_channel:
 
-                        portfolio_all = message_byte_data["cached_portfolio"]
+                        portfolio_all = data["cached_portfolio"]
 
                     if sub_account_cached_channel in message_channel:
 
-                        sub_account = message_byte_data["result"]
+                        sub_account = data["result"]
 
                         cached_orders = sub_account["open_orders"]
 
@@ -154,11 +158,11 @@ async def cancelling_orders(
 
                     if my_trades_channel in message_channel:
 
-                        my_trades_active_all = message_byte_data
+                        my_trades_active_all = data
 
                     if order_update_channel in message_channel:
 
-                        result = message_byte_data[0]["result"]
+                        result = data[0]["result"]
 
                         cached_orders = result["open_orders"]
 
@@ -169,13 +173,13 @@ async def cancelling_orders(
                         and portfolio_all
                     ):
 
-                        cached_ticker_all = message_byte_data["data"]
+                        cached_ticker_all = data["data"]
 
-                        server_time = message_byte_data["server_time"]
+                        server_time = data["server_time"]
 
                         currency, currency_upper = (
-                            message_byte_data["currency"],
-                            message_byte_data["currency_upper"],
+                            data["currency"],
+                            data["currency_upper"],
                         )
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"

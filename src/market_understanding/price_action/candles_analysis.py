@@ -469,8 +469,6 @@ async def get_market_condition(
 
                                     message_byte_data["params"].update({"data": market_analytics_data})
                                     
-                                    log.warning(message_byte_data)
-
                                     await saving_and_publishing_result(
                                         client_redis,
                                         market_analytics_channel,
@@ -505,7 +503,6 @@ async def get_market_condition(
                                 pub_message.update({"instrument_name": instrument_name})
 
                                 market_analytics_data.append(pub_message)
-
 
                             message_byte_data["params"].update({"data": market_analytics_data})
                             
