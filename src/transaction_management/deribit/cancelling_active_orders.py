@@ -167,7 +167,7 @@ async def cancelling_orders(
 
                         server_time = data["server_time"]
 
-                        currency_upper = data["currency_upper"],
+                        currency_upper = data["currency_upper"]
                         
                         log.critical(currency_upper)
 
