@@ -405,19 +405,14 @@ async def get_market_condition(
                     message_byte_data = orjson.loads(message_byte["data"])
 
                     params =  message_byte_data["params"]
-                    data =  params["data"]
                     
-                    log.error(message_byte_data)
-                    log.debug(params)
-                    log.warning(data)
+                    data =  params["data"]
                     
                     message_channel = params["channel"]
                     
-                    message_channel = message_byte["channel"]
-                    
-                    message_byte_data["params"].update({"channel": market_analytics_channel})
-                    
                     if chart_low_high_tick_channel in message_channel:
+                        
+                        message_byte_data["params"].update({"channel": market_analytics_channel})
 
                         if market_analytics_data:
 
