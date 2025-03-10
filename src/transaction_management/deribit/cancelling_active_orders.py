@@ -170,6 +170,8 @@ async def cancelling_orders(
                         currency_upper = (
                             data["currency_upper"],
                         )
+                        
+                        log.error(data)
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
                         
