@@ -122,6 +122,8 @@ async def reconciling_size(
             try:
 
                 message = await get_redis_message(pubsub)
+                
+                log.info(message)
 
                 data = message["data"]
 
