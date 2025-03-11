@@ -163,7 +163,6 @@ async def reconciling_size(
                         log.critical(message_channel)
 
                         try:
-                            log.debug(data)
                             positions_cached = data["positions"]
                             log.info(positions_cached)
                         except:
