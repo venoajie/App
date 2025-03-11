@@ -315,11 +315,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                         1000,
                     )
                 )
-                
-                log.info(
-                f"trades_from_exchange {instrument_name} {trades_from_exchange}"
-            )
-
+         
                 if trades_from_exchange:
 
                     trades_from_exchange_without_futures_combo = [
@@ -363,6 +359,9 @@ async def rechecking_reconciliation_regularly(
     result,
 ) -> None:
     """ """
+    
+    log.critical(positions_cached)
+    log.warning(positions_cached is not None)
 
     if positions_cached is not None:
 
