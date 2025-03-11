@@ -117,7 +117,7 @@ async def cancelling_orders(
 
             try:
 
-                message = await get_redis_message()
+                message = await get_redis_message(client_redis)
 
                 data = message["data"]
 

@@ -39,7 +39,7 @@ async def reconciling_size(
 
     try:
         # connecting to redis pubsub
-        pubsub: object = client_redis.pubsub()
+        pubsub: object = client_redis.pubsub(client_redis)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
@@ -121,7 +121,7 @@ async def reconciling_size(
 
             try:
 
-                message = await get_redis_message()
+                message = await get_redis_message(client_redis)
 
                 data = message["data"]
 
