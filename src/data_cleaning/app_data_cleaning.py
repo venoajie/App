@@ -56,9 +56,11 @@ async def reconciling_size(
         positions_update_channel: str = redis_channels["position_cache_updating"]
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
+        my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
 
         # prepare channels placeholders
         channels = [
+            my_trade_receiving_channel,
             positions_update_channel,
             sub_account_cached_channel,
             ticker_cached_channel,
@@ -70,8 +72,6 @@ async def reconciling_size(
         server_time = get_now_unix()
 
         positions_cached = []
-
-        order_allowed = 0
 
         ONE_SECOND = 1000
 
@@ -106,6 +106,7 @@ async def reconciling_size(
 
             combined_order_allowed.append(order_allowed)
 
+        log.error(f"combined_order_allowed {combined_order_allowed}")
         while True:
 
             try:
@@ -149,10 +150,13 @@ async def reconciling_size(
                             )
 
                             server_time = exchange_server_time
+                            
+                            log.warning(f"combined_order_allowed {combined_order_allowed}")
 
                     if (
                         positions_update_channel in message_channel
                         or sub_account_cached_channel in message_channel
+                        or my_trade_receiving_channel
                     ):
 
                         log.critical(message_channel)
@@ -190,6 +194,8 @@ async def reconciling_size(
                             five_days_ago,
                             result,
                         )
+                        
+                        log.debug(f"combined_order_allowed {combined_order_allowed}")
 
             except Exception as error:
 

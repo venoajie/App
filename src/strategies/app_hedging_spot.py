@@ -195,7 +195,7 @@ async def hedging_spot(
                         )
 
                         log.debug(
-                            f"size_is_reconciled_global {size_is_reconciled_global}"
+                            f"{currency_upper} size_is_reconciled_global {size_is_reconciled_global}"
                         )
 
                         instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
