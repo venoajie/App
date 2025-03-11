@@ -21,13 +21,18 @@ async def get_redis_message(pubsub: object) -> dict:
 
         if message_byte and message_byte["type"] == "message":
             
-            log.error(message_byte)
-
             message_byte_data = orjson.loads(message_byte["data"])
 
             params = message_byte_data["params"]
 
-            return (dict(data=params["data"], channel=params["channel"]))
+            log.error(params)
+
+            return (
+                dict(
+                    data=params["data"],
+                    channel=params["channel"],
+                    )
+                )
 
     except Exception as error:
 
