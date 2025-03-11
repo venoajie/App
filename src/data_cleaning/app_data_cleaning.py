@@ -69,7 +69,7 @@ async def reconciling_size(
 
         server_time = get_now_unix()
 
-        positions_cached = []
+        positions_cached = None
 
         order_allowed = 0
 
@@ -364,16 +364,22 @@ async def rechecking_reconciliation_regularly(
 ) -> None:
     """ """
 
-    positions_cached_all = remove_redundant_elements(
-        [o["instrument_name"] for o in positions_cached]
-    )
+    if positions_cached is not None:
 
-    # eliminating combo transactions as they're not recorded in the book
-    positions_cached_instrument = [o for o in positions_cached_all if "-FS-" not in o]
+        positions_cached_all = remove_redundant_elements(
+            [o["instrument_name"] for o in positions_cached]
+        )
 
-    futures_instruments_name_not_in_positions_cached_instrument = [
+        # eliminating combo transactions as they're not recorded in the book
+        positions_cached_instrument = [o for o in positions_cached_all if "-FS-" not in o]
+
+        futures_instruments_name_not_in_positions_cached_instrument = [
         list(set(futures_instruments_name).difference(positions_cached_instrument))
     ][0]
+
+
+    else:
+        futures_instruments_name_not_in_positions_cached_instrument = futures_instruments_name
 
     await allowing_order_for_instrument_not_in_sub_account(
         client_redis,
@@ -381,6 +387,7 @@ async def rechecking_reconciliation_regularly(
         order_allowed_channel,
         futures_instruments_name_not_in_positions_cached_instrument,
         order_allowed,
+        positions_cached,
         result,
     )
 
@@ -417,11 +424,16 @@ async def allowing_order_for_instrument_not_in_sub_account(
     order_allowed_channel: str,
     futures_instruments_name_not_in_positions_cached_instrument: list,
     order_allowed: bool,
+    positions_cached,
     result: dict,
 ) -> None:
     """ """
 
-    order_allowed = 1
+    if positions_cached is None:
+        order_allowed = 0
+
+    else:
+        order_allowed = 1
 
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
 
