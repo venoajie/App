@@ -122,12 +122,13 @@ async def reconciling_size(
             try:
 
                 message = await get_redis_message(pubsub)
+
+                message_channel = message["channel"]
                 
-                log.info(message)
+                log.info(message_channel)
 
                 data = message["data"]
 
-                message_channel = message["channel"]
 
                 five_days_ago = server_time - (one_minute * 60 * 24 * 5)
 
