@@ -10,7 +10,7 @@ from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.system_tools import parse_error_message
 
 
-async def get_message(client_redis: object) -> dict:
+async def get_redis_message(client_redis: object) -> dict:
     """ """
 
     try:
@@ -30,9 +30,9 @@ async def get_message(client_redis: object) -> dict:
 
     except Exception as error:
 
-        parse_error_message(f"procesing orders {error}")
+        parse_error_message(f"get_message redis {error}")
 
         await telegram_bot_sendtext(
-            f"processing order - {error}",
+            f"get_message redis - {error}",
             "general_error",
         )
