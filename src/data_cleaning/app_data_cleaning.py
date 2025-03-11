@@ -377,6 +377,32 @@ async def rechecking_reconciliation_regularly(
         list(set(futures_instruments_name).difference(positions_cached_instrument))
     ][0]
 
+        await rechecking_based_on_sub_account(
+            private_data,
+            client_redis,
+            combined_order_allowed,
+            order_allowed_channel,
+            positions_cached,
+            positions_cached_instrument,
+            order_db_table,
+            order_allowed,
+            five_days_ago,
+            result,
+        )
+
+        await rechecking_based_on_data_in_sqlite(
+            private_data,
+            client_redis,
+            combined_order_allowed,
+            currencies,
+            order_allowed_channel,
+            positions_cached,
+            order_db_table,
+            order_allowed,
+            five_days_ago,
+            result,
+        )
+
 
     else:
         futures_instruments_name_not_in_positions_cached_instrument = futures_instruments_name
@@ -388,32 +414,6 @@ async def rechecking_reconciliation_regularly(
         futures_instruments_name_not_in_positions_cached_instrument,
         order_allowed,
         positions_cached,
-        result,
-    )
-
-    await rechecking_based_on_sub_account(
-        private_data,
-        client_redis,
-        combined_order_allowed,
-        order_allowed_channel,
-        positions_cached,
-        positions_cached_instrument,
-        order_db_table,
-        order_allowed,
-        five_days_ago,
-        result,
-    )
-
-    await rechecking_based_on_data_in_sqlite(
-        private_data,
-        client_redis,
-        combined_order_allowed,
-        currencies,
-        order_allowed_channel,
-        positions_cached,
-        order_db_table,
-        order_allowed,
-        five_days_ago,
         result,
     )
 
