@@ -160,6 +160,7 @@ async def reconciling_size(
                     ):
 
                         log.critical(message_channel)
+                        log.info(positions_cached)
 
                         try:
                             positions_cached = data["positions"]
