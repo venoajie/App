@@ -443,6 +443,9 @@ async def allowing_order_for_instrument_not_in_sub_account(
 
     result["params"].update({"channel": order_allowed_channel})
     result["params"].update({"data": combined_order_allowed})
+    
+    log.warning(combined_order_allowed)
+    log.critical(order_allowed)
 
     await publishing_result(
         client_redis,
