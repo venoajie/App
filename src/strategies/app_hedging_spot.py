@@ -120,7 +120,7 @@ async def hedging_spot(
 
             try:
 
-                message = await get_redis_message(client_redis)
+                message = await get_redis_message(pubsub)
 
                 data = message["data"]
 

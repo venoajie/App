@@ -111,7 +111,7 @@ async def future_spreads(
 
             try:
 
-                message_byte = await pubsub.get_message(client_redis)
+                message_byte = await pubsub.get_message(pubsub)
 
                 if message_byte and message_byte["type"] == "message":
 

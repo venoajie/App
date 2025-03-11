@@ -10,14 +10,11 @@ from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.system_tools import parse_error_message
 
 
-async def get_redis_message(client_redis: object) -> dict:
+async def get_redis_message(pubsub: object) -> dict:
     """ """
 
     try:
-
-        # connecting to redis pubsub
-        pubsub: object = client_redis.pubsub()
-
+        
         message_byte = await pubsub.get_message()
 
         if message_byte and message_byte["type"] == "message":
