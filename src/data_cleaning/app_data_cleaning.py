@@ -129,6 +129,8 @@ async def reconciling_size(
                         exchange_server_time = data["server_time"]
 
                         delta_time = (exchange_server_time - server_time) / ONE_SECOND
+                        
+                        log.critical (positions_cached)
 
                         if delta_time > 5:
 
@@ -172,6 +174,8 @@ async def reconciling_size(
                             positions_cached_instrument,
                             order_db_table,
                         )
+
+                        log.critical (positions_cached)
 
                         await rechecking_reconciliation_regularly(
                             private_data,
