@@ -157,7 +157,7 @@ async def reconciling_size(
                     if (
                         positions_update_channel in message_channel
                         or sub_account_cached_channel in message_channel
-                        or my_trade_receiving_channel
+                        or my_trade_receiving_channel in message_channel
                     ):
 
                         log.critical(message_channel)
