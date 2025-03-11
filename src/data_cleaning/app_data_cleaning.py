@@ -167,7 +167,7 @@ async def reconciling_size(
                             positions_cached = data["positions"]
                             log.info(positions_cached)
                         except:
-                            positions_cached = data
+                            positions_cached = positions_cached
                             log.warning(positions_cached)
                         
                         positions_cached_all = remove_redundant_elements(
