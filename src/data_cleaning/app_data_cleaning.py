@@ -69,7 +69,7 @@ async def reconciling_size(
 
         server_time = get_now_unix()
 
-        positions_cached = None
+        positions_cached = []
 
         order_allowed = 0
 
@@ -125,14 +125,14 @@ async def reconciling_size(
                     five_days_ago = server_time - (one_minute * 60 * 24 * 5)
 
                     if ticker_cached_channel in message_channel:
+                        
+                        log.critical(message_channel)
 
                         exchange_server_time = data["server_time"]
 
                         delta_time = (exchange_server_time - server_time) / ONE_SECOND
-                        
-                        log.critical (positions_cached)
 
-                        if delta_time > 5 or positions_cached is None:
+                        if delta_time > 5:
 
                             await rechecking_reconciliation_regularly(
                                 private_data,
@@ -155,6 +155,8 @@ async def reconciling_size(
                         or sub_account_cached_channel in message_channel
                     ):
 
+                        log.critical(message_channel)
+
                         try:
                             positions_cached = data["positions"]
                         except:
@@ -174,8 +176,6 @@ async def reconciling_size(
                             positions_cached_instrument,
                             order_db_table,
                         )
-
-                        log.critical (positions_cached)
 
                         await rechecking_reconciliation_regularly(
                             private_data,
@@ -319,7 +319,11 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                         1000,
                     )
                 )
-         
+                
+                log.info(
+                f"trades_from_exchange {instrument_name} {trades_from_exchange}"
+            )
+
                 if trades_from_exchange:
 
                     trades_from_exchange_without_futures_combo = [
@@ -363,52 +367,17 @@ async def rechecking_reconciliation_regularly(
     result,
 ) -> None:
     """ """
-    
-    log.critical(positions_cached)
-    log.warning(positions_cached is not None)
 
-    if positions_cached is not None:
+    positions_cached_all = remove_redundant_elements(
+        [o["instrument_name"] for o in positions_cached]
+    )
 
-        positions_cached_all = remove_redundant_elements(
-            [o["instrument_name"] for o in positions_cached]
-        )
+    # eliminating combo transactions as they're not recorded in the book
+    positions_cached_instrument = [o for o in positions_cached_all if "-FS-" not in o]
 
-        # eliminating combo transactions as they're not recorded in the book
-        positions_cached_instrument = [o for o in positions_cached_all if "-FS-" not in o]
-
-        futures_instruments_name_not_in_positions_cached_instrument = [
+    futures_instruments_name_not_in_positions_cached_instrument = [
         list(set(futures_instruments_name).difference(positions_cached_instrument))
     ][0]
-
-        await rechecking_based_on_sub_account(
-            private_data,
-            client_redis,
-            combined_order_allowed,
-            order_allowed_channel,
-            positions_cached,
-            positions_cached_instrument,
-            order_db_table,
-            order_allowed,
-            five_days_ago,
-            result,
-        )
-
-        await rechecking_based_on_data_in_sqlite(
-            private_data,
-            client_redis,
-            combined_order_allowed,
-            currencies,
-            order_allowed_channel,
-            positions_cached,
-            order_db_table,
-            order_allowed,
-            five_days_ago,
-            result,
-        )
-
-
-    else:
-        futures_instruments_name_not_in_positions_cached_instrument = futures_instruments_name
 
     await allowing_order_for_instrument_not_in_sub_account(
         client_redis,
@@ -416,7 +385,32 @@ async def rechecking_reconciliation_regularly(
         order_allowed_channel,
         futures_instruments_name_not_in_positions_cached_instrument,
         order_allowed,
+        result,
+    )
+
+    await rechecking_based_on_sub_account(
+        private_data,
+        client_redis,
+        combined_order_allowed,
+        order_allowed_channel,
         positions_cached,
+        positions_cached_instrument,
+        order_db_table,
+        order_allowed,
+        five_days_ago,
+        result,
+    )
+
+    await rechecking_based_on_data_in_sqlite(
+        private_data,
+        client_redis,
+        combined_order_allowed,
+        currencies,
+        order_allowed_channel,
+        positions_cached,
+        order_db_table,
+        order_allowed,
+        five_days_ago,
         result,
     )
 
@@ -427,16 +421,11 @@ async def allowing_order_for_instrument_not_in_sub_account(
     order_allowed_channel: str,
     futures_instruments_name_not_in_positions_cached_instrument: list,
     order_allowed: bool,
-    positions_cached,
     result: dict,
 ) -> None:
     """ """
 
-    if positions_cached is None:
-        order_allowed = 0
-
-    else:
-        order_allowed = 1
+    order_allowed = 1
 
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
 
@@ -446,9 +435,8 @@ async def allowing_order_for_instrument_not_in_sub_account(
 
     result["params"].update({"channel": order_allowed_channel})
     result["params"].update({"data": combined_order_allowed})
-    
-    log.warning(combined_order_allowed)
-    log.critical(order_allowed)
+
+    log.info(combined_order_allowed)
 
     await publishing_result(
         client_redis,
