@@ -23,7 +23,7 @@ async def get_redis_message(pubsub: object) -> dict:
 
             params = message_byte_data["params"]
 
-            return (dict(data=params["data"], message_channel=params["channel"]),)
+            return (dict(data=params["data"], message_channel=params["channel"]))
 
     except Exception as error:
 
