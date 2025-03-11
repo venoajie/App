@@ -663,7 +663,11 @@ async def updating_sub_account(
                 "rest",
             )
 
+        from loguru import logger as log
+        
+        log.info(subaccounts_details_result)
         positions = [o["positions"] for o in subaccounts_details_result]
+        log.debug(positions)
 
         if positions:
             positions_updating_cached(
