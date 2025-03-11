@@ -136,24 +136,6 @@ async def main():
             o["currency"] for o in get_currencies_all["result"]
         ]
 
-        # sub_account_combining
-        sub_accounts = [
-            await private_data.get_subaccounts_details(o) for o in currencies
-        ]
-
-        sub_account_cached = sub_account_combining(sub_accounts)
-        
-        for currency in all_exc_currencies:
-
-            instruments = await get_instruments(currency)
-
-            my_path_instruments = provide_path_for_file("instruments", currency)
-
-            replace_data(
-                my_path_instruments,
-                instruments,
-            )
-
         my_path_cur = provide_path_for_file("currencies")
 
         replace_data(
@@ -173,6 +155,24 @@ async def main():
         cancellable_strategies = [
             o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
         ]
+
+        # sub_account_combining
+        sub_accounts = [
+            await private_data.get_subaccounts_details(o) for o in currencies
+        ]
+
+        sub_account_cached = sub_account_combining(sub_accounts)
+        
+        for currency in all_exc_currencies:
+
+            instruments = await get_instruments(currency)
+
+            my_path_instruments = provide_path_for_file("instruments", currency)
+
+            replace_data(
+                my_path_instruments,
+                instruments,
+            )
 
         for currency in currencies:
 
