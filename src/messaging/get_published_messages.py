@@ -21,7 +21,7 @@ async def get_redis_message(pubsub: object) -> dict:
 
         if message_byte and message_byte["type"] == "message":
             
-            log.error(message_byte_data)
+            log.error(message_byte)
 
             message_byte_data = orjson.loads(message_byte["data"])
 
