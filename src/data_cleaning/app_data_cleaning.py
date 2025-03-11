@@ -110,8 +110,6 @@ async def reconciling_size(
         result["params"].update({"channel": order_allowed_channel})
         result["params"].update({"data": combined_order_allowed})
 
-        log.error(f"combined_order_allowed {combined_order_allowed}")
-        
         await publishing_result(
             client_redis,
             order_allowed_channel,
@@ -137,8 +135,6 @@ async def reconciling_size(
                     five_days_ago = server_time - (one_minute * 60 * 24 * 5)
 
                     if ticker_cached_channel in message_channel:
-                        
-                        log.critical(message_channel)
 
                         exchange_server_time = data["server_time"]
 
@@ -162,22 +158,23 @@ async def reconciling_size(
 
                             server_time = exchange_server_time
                             
-                            log.warning(f"combined_order_allowed {combined_order_allowed}")
-
                     if (
                         positions_update_channel in message_channel
                         or sub_account_cached_channel in message_channel
                         or my_trade_receiving_channel in message_channel
                     ):
-
-                        log.critical(message_channel)
-
-                        try:
+                        
+                        if sub_account_cached_channel in message_channel:
                             positions_cached = data["positions"]
-                            log.info(positions_cached)
-                        except:
-                            positions_cached = positions_cached
-                            log.warning(positions_cached)
+
+                        else:
+                            try:
+                                positions_cached = data["positions"]
+
+                            except:
+                                log.info(data)
+                                positions_cached = positions_cached
+                                log.warning(positions_cached)
                         
                         positions_cached_all = remove_redundant_elements(
                             [o["instrument_name"] for o in positions_cached]
@@ -454,8 +451,6 @@ async def allowing_order_for_instrument_not_in_sub_account(
 
     result["params"].update({"channel": order_allowed_channel})
     result["params"].update({"data": combined_order_allowed})
-
-    log.info(combined_order_allowed)
 
     await publishing_result(
         client_redis,
