@@ -33,6 +33,7 @@ async def reconciling_size(
     redis_channels: list,
     config_app: list,
     futures_instruments: list,
+    sub_account_cached: list,
 ) -> None:
 
     try:
@@ -71,7 +72,7 @@ async def reconciling_size(
 
         server_time = get_now_unix()
 
-        positions_cached = []
+        positions_cached = sub_account_cached["positions_cached"]
 
         ONE_SECOND = 1000
 

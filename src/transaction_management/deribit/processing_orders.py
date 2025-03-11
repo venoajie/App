@@ -36,6 +36,7 @@ async def processing_orders(
     order_db_table: str,
     redis_channels: list,
     strategy_attributes: list,
+    sub_account_cached: list,
 ) -> None:
     """ """
 
@@ -80,11 +81,6 @@ async def processing_orders(
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
         # sub_account_combining
-        sub_accounts = [
-            await private_data.get_subaccounts_details(o) for o in currencies
-        ]
-
-        sub_account_cached = sub_account_combining(sub_accounts)
         orders_cached = sub_account_cached["orders_cached"]
         positions_cached = sub_account_cached["positions_cached"]
 
@@ -693,36 +689,3 @@ async def updating_sub_account(
         message_byte_data,
     )
 
-
-def sub_account_combining(
-    sub_accounts: list,
-) -> None:
-
-    orders_cached = []
-    positions_cached = []
-
-    for sub_account in sub_accounts:
-        # result = await private_data.get_subaccounts_details(currency)
-
-        sub_account = sub_account[0]
-
-        sub_account_orders = sub_account["open_orders"]
-
-        if sub_account_orders:
-
-            for order in sub_account_orders:
-
-                orders_cached.append(order)
-
-        sub_account_positions = sub_account["positions"]
-
-        if sub_account_positions:
-
-            for position in sub_account_positions:
-
-                positions_cached.append(position)
-
-    return dict(
-        orders_cached=orders_cached,
-        positions_cached=positions_cached,
-    )

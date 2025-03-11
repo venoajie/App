@@ -64,6 +64,41 @@ def handle_ctrl_c(
                   
 signal_handler = SignalHandler()
 
+
+def sub_account_combining(
+    sub_accounts: list,
+) -> None:
+
+    orders_cached = []
+    positions_cached = []
+
+    for sub_account in sub_accounts:
+        # result = await private_data.get_subaccounts_details(currency)
+
+        sub_account = sub_account[0]
+
+        sub_account_orders = sub_account["open_orders"]
+
+        if sub_account_orders:
+
+            for order in sub_account_orders:
+
+                orders_cached.append(order)
+
+        sub_account_positions = sub_account["positions"]
+
+        if sub_account_positions:
+
+            for position in sub_account_positions:
+
+                positions_cached.append(position)
+
+    return dict(
+        orders_cached=orders_cached,
+        positions_cached=positions_cached,
+    )
+
+
 async def main():
     """
     https://redis-py.readthedocs.io/en/stable/examples/asyncio_examples.html
@@ -101,6 +136,13 @@ async def main():
             o["currency"] for o in get_currencies_all["result"]
         ]
 
+        # sub_account_combining
+        sub_accounts = [
+            await private_data.get_subaccounts_details(o) for o in currencies
+        ]
+
+        sub_account_cached = sub_account_combining(sub_accounts)
+        
         for currency in all_exc_currencies:
 
             instruments = await get_instruments(currency)
@@ -198,6 +240,7 @@ async def main():
                 order_db_table,
                 redis_channels,
                 strategy_attributes,
+                sub_account_cached,
                 ),
         
             relabelling_trades(
@@ -220,6 +263,7 @@ async def main():
                 redis_channels,
                 config_app,
                 futures_instruments,
+                sub_account_cached,
                 ),                
    
 
