@@ -160,13 +160,15 @@ async def reconciling_size(
                     ):
 
                         log.critical(message_channel)
-                        log.info(positions_cached)
 
                         try:
+                            log.debug(data)
                             positions_cached = data["positions"]
+                            log.info(positions_cached)
                         except:
                             positions_cached = data
-
+                            log.warning(positions_cached)
+                        
                         positions_cached_all = remove_redundant_elements(
                             [o["instrument_name"] for o in positions_cached]
                         )
