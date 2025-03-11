@@ -132,7 +132,7 @@ async def reconciling_size(
                         
                         log.critical (positions_cached)
 
-                        if delta_time > 5:
+                        if delta_time > 5 or positions_cached is None:
 
                             await rechecking_reconciliation_regularly(
                                 private_data,
