@@ -107,7 +107,17 @@ async def reconciling_size(
 
             combined_order_allowed.append(order_allowed)
 
+        result["params"].update({"channel": order_allowed_channel})
+        result["params"].update({"data": combined_order_allowed})
+
         log.error(f"combined_order_allowed {combined_order_allowed}")
+        
+        await publishing_result(
+            client_redis,
+            order_allowed_channel,
+            result,
+        )
+        
         while True:
 
             try:
