@@ -15,6 +15,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from db_management.redis_client import publishing_result
 from db_management.sqlite_management import executing_query_with_return
+from messaging.get_published_messages import get_redis_message
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.basic_strategy import get_label_integer
 from strategies.cash_carry.combo_auto import (
