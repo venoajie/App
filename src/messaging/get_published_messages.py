@@ -25,7 +25,7 @@ async def get_redis_message(pubsub: object) -> dict:
 
             params = message_byte_data["params"]
 
-            log.error(params)
+            log.error(params["data"])
 
             return (
                 dict(
