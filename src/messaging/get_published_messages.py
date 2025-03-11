@@ -15,9 +15,13 @@ async def get_redis_message(pubsub: object) -> dict:
 
     try:
         
+        from loguru import logger as log
+        
         message_byte = await pubsub.get_message()
 
         if message_byte and message_byte["type"] == "message":
+            
+            log.error(message_byte_data)
 
             message_byte_data = orjson.loads(message_byte["data"])
 
