@@ -123,22 +123,70 @@ async def reconciling_size(
 
                 message = await get_redis_message(pubsub)
 
-                message_channel = message["channel"]
-                
-                log.info(message_channel)
+                if message:
 
-                data = message["data"]
+                    message_channel = message["channel"]
+                    
+                    data = message["data"]
 
+                    five_days_ago = server_time - (one_minute * 60 * 24 * 5)
 
-                five_days_ago = server_time - (one_minute * 60 * 24 * 5)
+                    if ticker_cached_channel in message_channel:
 
-                if ticker_cached_channel in message_channel:
+                        exchange_server_time = data["server_time"]
 
-                    exchange_server_time = data["server_time"]
+                        delta_time = (exchange_server_time - server_time) / ONE_SECOND
 
-                    delta_time = (exchange_server_time - server_time) / ONE_SECOND
+                        if delta_time > 5:
 
-                    if delta_time > 5:
+                            await rechecking_reconciliation_regularly(
+                                private_data,
+                                client_redis,
+                                combined_order_allowed,
+                                futures_instruments_name,
+                                currencies,
+                                order_allowed_channel,
+                                positions_cached,
+                                order_db_table,
+                                order_allowed,
+                                five_days_ago,
+                                result,
+                            )
+
+                            server_time = exchange_server_time
+
+                    if (
+                        positions_update_channel in message_channel
+                        or sub_account_cached_channel in message_channel
+                        or my_trade_receiving_channel in message_channel
+                    ):
+
+                        if sub_account_cached_channel in message_channel:
+                            positions_cached = data["positions"]
+
+                        else:
+                            try:
+                                positions_cached = data["positions"]
+
+                            except:
+                                log.info(data)
+                                positions_cached = positions_cached
+                                log.warning(positions_cached)
+
+                        positions_cached_all = remove_redundant_elements(
+                            [o["instrument_name"] for o in positions_cached]
+                        )
+
+                        # eliminating combo transactions as they're not recorded in the book
+                        positions_cached_instrument = [
+                            o for o in positions_cached_all if "-FS-" not in o
+                        ]
+
+                        await agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
+                            private_data,
+                            positions_cached_instrument,
+                            order_db_table,
+                        )
 
                         await rechecking_reconciliation_regularly(
                             private_data,
@@ -154,56 +202,7 @@ async def reconciling_size(
                             result,
                         )
 
-                        server_time = exchange_server_time
-
-                if (
-                    positions_update_channel in message_channel
-                    or sub_account_cached_channel in message_channel
-                    or my_trade_receiving_channel in message_channel
-                ):
-
-                    if sub_account_cached_channel in message_channel:
-                        positions_cached = data["positions"]
-
-                    else:
-                        try:
-                            positions_cached = data["positions"]
-
-                        except:
-                            log.info(data)
-                            positions_cached = positions_cached
-                            log.warning(positions_cached)
-
-                    positions_cached_all = remove_redundant_elements(
-                        [o["instrument_name"] for o in positions_cached]
-                    )
-
-                    # eliminating combo transactions as they're not recorded in the book
-                    positions_cached_instrument = [
-                        o for o in positions_cached_all if "-FS-" not in o
-                    ]
-
-                    await agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
-                        private_data,
-                        positions_cached_instrument,
-                        order_db_table,
-                    )
-
-                    await rechecking_reconciliation_regularly(
-                        private_data,
-                        client_redis,
-                        combined_order_allowed,
-                        futures_instruments_name,
-                        currencies,
-                        order_allowed_channel,
-                        positions_cached,
-                        order_db_table,
-                        order_allowed,
-                        five_days_ago,
-                        result,
-                    )
-
-                    log.debug(f"combined_order_allowed {combined_order_allowed}")
+                        log.debug(f"combined_order_allowed {combined_order_allowed}")
 
             except Exception as error:
 
