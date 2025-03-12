@@ -125,11 +125,11 @@ async def processing_orders(
 
                         log.warning(data)
 
-                        if message_byte_data["order_allowed"]:
+                        if data["order_allowed"]:
                             await if_order_is_true(
                                 private_data,
                                 non_checked_strategies,
-                                message_byte_data,
+                                data,
                             )
 
                     if order_update_channel in message_channel:
