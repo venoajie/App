@@ -16,6 +16,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from db_management.redis_client import publishing_result
 from db_management.sqlite_management import executing_query_with_return
 from messaging.get_published_messages import get_redis_message
+from messaging import subscribing_to_channels
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.basic_strategy import get_label_integer
 from strategies.cash_carry.combo_auto import (
@@ -48,6 +49,13 @@ async def future_spreads(
 
     try:
 
+        # subscribe to channels
+        await subscribing_to_channels.redis_channels(
+            pubsub,
+            redis_channels,
+            "future_spread",
+            )
+
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
@@ -75,20 +83,6 @@ async def future_spreads(
         order_allowed_channel: str = redis_channels["order_is_allowed"]
         positions_update_channel: str = redis_channels["position_cache_updating"]
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
-
-        # prepare channels placeholders
-        channels = [
-            market_analytics_channel,
-            order_receiving_channel,
-            ticker_cached_channel,
-            portfolio_channel,
-            my_trades_channel,
-            order_allowed_channel,
-        ]
-
-        # subscribe to channels
-        [await pubsub.subscribe(o) for o in channels]
-
         cached_orders = []
 
         cached_ticker_all = []

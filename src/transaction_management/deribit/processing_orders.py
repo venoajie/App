@@ -46,6 +46,13 @@ async def processing_orders(
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
+        # subscribe to channels
+        await subscribing_to_channels.redis_channels(
+            pubsub,
+            redis_channels,
+            "processing_orders",
+            )
+        
         strategy_attributes_active = [
             o for o in strategy_attributes if o["is_active"] == True
         ]
@@ -65,13 +72,6 @@ async def processing_orders(
         sqlite_updating_channel: str = redis_channels["sqlite_record_updating"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
 
-        # subscribe to channels
-        await subscribing_to_channels.redis_channels(
-            pubsub,
-            redis_channels,
-            "processing_orders",
-            )
-
         not_cancel = True
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
@@ -79,6 +79,8 @@ async def processing_orders(
         # sub_account_combining
         orders_cached = sub_account_cached["orders_cached"]
         positions_cached = sub_account_cached["positions_cached"]
+        
+        from loguru import logger as log
 
         while not_cancel:
 
@@ -97,6 +99,8 @@ async def processing_orders(
                     message_channel = params["channel"]
 
                     if my_trade_receiving_channel in message_channel:
+                        
+                        log.warning(data)
 
                         for trade in data:
 
@@ -110,6 +114,7 @@ async def processing_orders(
                                 currency_lower,
                                 cancellable_strategies,
                             )
+                            
                             await saving_traded_orders(
                                 trade,
                                 archive_db_table,
@@ -117,6 +122,8 @@ async def processing_orders(
                             )
 
                     if order_rest_channel in message_channel:
+
+                        log.warning(data)
 
                         if message_byte_data["order_allowed"]:
                             await if_order_is_true(

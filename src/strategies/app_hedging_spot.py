@@ -83,8 +83,6 @@ async def hedging_spot(
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
 
         # subscribe to channels
-
-        # subscribe to channels
         await subscribing_to_channels.redis_channels(
             pubsub,
             redis_channels,

@@ -14,6 +14,7 @@ from db_management.sqlite_management import (
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
 )
 from messaging.telegram_bot import telegram_bot_sendtext
+from messaging import subscribing_to_channels
 from strategies.cash_carry.combo_auto import ComboAuto
 from strategies.hedging.hedging_spot import HedgingSpot
 from transaction_management.deribit.get_instrument_summary import (
@@ -46,6 +47,13 @@ async def cancelling_orders(
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 
+        # subscribe to channels
+        await subscribing_to_channels.redis_channels(
+            pubsub,
+            redis_channels,
+            "cancelling_active_orders",
+            )
+        
         relevant_tables = config_app["relevant_tables"][0]
 
         order_db_table = relevant_tables["orders_table"]
@@ -84,19 +92,6 @@ async def cancelling_orders(
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
         order_update_channel: str = redis_channels["order_cache_updating"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
-
-        # prepare channels placeholders
-        channels = [
-            market_analytics_channel,
-            order_update_channel,
-            ticker_cached_channel,
-            portfolio_channel,
-            my_trades_channel,
-            sub_account_cached_channel,
-        ]
-
-        # subscribe to channels
-        [await pubsub.subscribe(o) for o in channels]
 
         await asyncio.sleep(5)
 

@@ -28,7 +28,9 @@ async def redis_channels(pubsub: object,
     my_trades_channel: str = redis_channels["my_trades_cache_updating"]
 
     try:
+        
         match purpose:
+            
             case "reconciling_size":
                 channels = [
             my_trade_receiving_channel,
@@ -44,7 +46,7 @@ async def redis_channels(pubsub: object,
             sqlite_updating_channel,
             sub_account_cached_channel,
         ]
-            case "hedging_spot":
+            case "hedging_spot" | "future_spread":
                 channels = [
             market_analytics_channel,
             order_update_channel,
@@ -54,14 +56,23 @@ async def redis_channels(pubsub: object,
             order_allowed_channel,
             sub_account_cached_channel,
         ]
+            case "cancelling_active_orders":
+                channels = [
+            market_analytics_channel,
+            order_update_channel,
+            ticker_cached_channel,
+            portfolio_channel,
+            my_trades_channel,
+            sub_account_cached_channel,
+        ]
          
         [await pubsub.subscribe(o) for o in channels]
             
     except Exception as error:
 
-        parse_error_message(f"get_message redis {error}")
+        parse_error_message(f"subscribe redis {error}")
 
         await telegram_bot_sendtext(
-            f"get_message redis - {error}",
+            f"subscribe redis - {error}",
             "general_error",
         )
