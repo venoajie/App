@@ -24,6 +24,8 @@ async def redis_channels(pubsub: object,
     portfolio_channel: str = redis_channels["portfolio"]
     sqlite_updating_channel: str = redis_channels["sqlite_record_updating"]
     sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
+    market_analytics_channel: str = redis_channels["market_analytics_update"]
+    my_trades_channel: str = redis_channels["my_trades_cache_updating"]
 
     try:
         match purpose:
@@ -40,6 +42,16 @@ async def redis_channels(pubsub: object,
             order_update_channel,
             portfolio_channel,
             sqlite_updating_channel,
+            sub_account_cached_channel,
+        ]
+            case "hedging_spot":
+                channels = [
+            market_analytics_channel,
+            order_update_channel,
+            ticker_cached_channel,
+            portfolio_channel,
+            my_trades_channel,
+            order_allowed_channel,
             sub_account_cached_channel,
         ]
          

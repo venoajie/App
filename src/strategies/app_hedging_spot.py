@@ -13,6 +13,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from db_management.redis_client import publishing_result
 from messaging.telegram_bot import telegram_bot_sendtext
+from messaging import subscribing_to_channels
 from strategies.hedging.hedging_spot import (
     HedgingSpot,
     modify_hedging_instrument,
@@ -81,19 +82,14 @@ async def hedging_spot(
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
 
-        # prepare channels placeholders
-        channels = [
-            market_analytics_channel,
-            order_update_channel,
-            ticker_cached_channel,
-            portfolio_channel,
-            my_trades_channel,
-            order_allowed_channel,
-            sub_account_cached_channel,
-        ]
+        # subscribe to channels
 
         # subscribe to channels
-        [await pubsub.subscribe(o) for o in channels]
+        await subscribing_to_channels.redis_channels(
+            pubsub,
+            redis_channels,
+            "hedging_spot",
+            )
 
         cached_ticker_all = []
 
