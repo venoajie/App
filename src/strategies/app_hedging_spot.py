@@ -12,7 +12,6 @@ from loguru import logger as log
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from db_management.redis_client import publishing_result
-from messaging.get_published_messages import get_redis_message
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.hedging.hedging_spot import (
     HedgingSpot,
@@ -120,13 +119,17 @@ async def hedging_spot(
 
             try:
 
-                message = await get_redis_message(pubsub)
+                message_byte = await pubsub.get_message()
 
-                if message:
+                if message_byte and message_byte["type"] == "message":
 
-                    message_channel = message["channel"]
-                    
-                    data = message["data"]
+                    message_byte_data = orjson.loads(message_byte["data"])
+
+                    params = message_byte_data["params"]
+
+                    data = params["data"]
+
+                    message_channel = params["channel"]
 
                     if order_allowed_channel in message_channel:
 
@@ -258,7 +261,9 @@ async def hedging_spot(
 
                         if index_price is not None and equity > 0:
                             my_trades_currency: list = [
-                                o for o in my_trades_currency_all if o["label"] is not None
+                                o
+                                for o in my_trades_currency_all
+                                if o["label"] is not None
                             ]
 
                             my_trades_currency_contribute_to_hedging = [
@@ -287,7 +292,9 @@ async def hedging_spot(
 
                             ONE_MINUTE = ONE_SECOND * 60
 
-                            notional: float = compute_notional_value(index_price, equity)
+                            notional: float = compute_notional_value(
+                                index_price, equity
+                            )
 
                             strategy_params = [
                                 o
@@ -296,13 +303,17 @@ async def hedging_spot(
                             ][0]
 
                             my_trades_currency_strategy = [
-                                o for o in my_trades_currency if strategy in (o["label"])
+                                o
+                                for o in my_trades_currency
+                                if strategy in (o["label"])
                             ]
 
                             orders_currency_strategy = (
                                 []
                                 if not orders_currency
-                                else [o for o in orders_currency if strategy in o["label"]]
+                                else [
+                                    o for o in orders_currency if strategy in o["label"]
+                                ]
                             )
                             log.info(f" {strategy} orders_currency {orders_currency}")
 
@@ -366,16 +377,20 @@ async def hedging_spot(
                                 and len_cleaned_orders < 50
                             ):
 
-                                best_ask_prc: float = instrument_ticker["best_ask_price"]
+                                best_ask_prc: float = instrument_ticker[
+                                    "best_ask_price"
+                                ]
 
-                                send_order: dict = await hedging.is_send_open_order_allowed(
-                                    non_checked_strategies,
-                                    instrument_name,
-                                    instrument_attributes_futures_for_hedging,
-                                    orders_currency_strategy,
-                                    best_ask_prc,
-                                    archive_db_table,
-                                    trade_db_table,
+                                send_order: dict = (
+                                    await hedging.is_send_open_order_allowed(
+                                        non_checked_strategies,
+                                        instrument_name,
+                                        instrument_attributes_futures_for_hedging,
+                                        orders_currency_strategy,
+                                        best_ask_prc,
+                                        archive_db_table,
+                                        trade_db_table,
+                                    )
                                 )
 
                                 log.warning(f"send_order {send_order}")
@@ -447,7 +462,9 @@ async def hedging_spot(
 
                                                 if instrument_ticker:
 
-                                                    instrument_ticker = instrument_ticker[0]
+                                                    instrument_ticker = (
+                                                        instrument_ticker[0]
+                                                    )
 
                                                     get_prices_in_label_transaction_main = [
                                                         o["price"]
@@ -480,7 +497,8 @@ async def hedging_spot(
                                                         nearest_transaction_to_index = [
                                                             o
                                                             for o in my_trades_currency_strategy_status
-                                                            if o["price"] == closest_price
+                                                            if o["price"]
+                                                            == closest_price
                                                         ]
 
                                                         send_closing_order: (
@@ -529,7 +547,8 @@ async def hedging_spot(
                                                         nearest_transaction_to_index = [
                                                             o
                                                             for o in my_trades_currency_strategy_status
-                                                            if o["price"] == closest_price
+                                                            if o["price"]
+                                                            == closest_price
                                                         ]
 
                                                         send_closing_order: (

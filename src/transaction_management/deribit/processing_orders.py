@@ -19,8 +19,8 @@ from transaction_management.deribit.cancelling_active_orders import (
     cancel_the_cancellables,
 )
 
-from messaging.get_published_messages import get_redis_message
 from messaging.telegram_bot import telegram_bot_sendtext
+from messaging import subscribing_to_channels
 from utilities.system_tools import parse_error_message
 
 from utilities.caching import (
@@ -65,17 +65,12 @@ async def processing_orders(
         sqlite_updating_channel: str = redis_channels["sqlite_record_updating"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
 
-        # prepare channels placeholders
-        channels = [
-            order_rest_channel,
-            order_update_channel,
-            portfolio_channel,
-            sqlite_updating_channel,
-            sub_account_cached_channel,
-        ]
-
         # subscribe to channels
-        [await pubsub.subscribe(o) for o in channels]
+        await subscribing_to_channels.redis_channels(
+            pubsub,
+            redis_channels,
+            "processing_orders",
+            )
 
         not_cancel = True
 
@@ -89,14 +84,17 @@ async def processing_orders(
 
             try:
 
-                message = await get_redis_message(pubsub)
+                message_byte = await pubsub.get_message()
 
-                if message:
+                if message_byte and message_byte["type"] == "message":
 
-                    message_channel = message["channel"]
-                    
-                    data = message["data"]
+                    message_byte_data = orjson.loads(message_byte["data"])
 
+                    params = message_byte_data["params"]
+
+                    data = params["data"]
+
+                    message_channel = params["channel"]
 
                     if my_trade_receiving_channel in message_channel:
 
@@ -199,7 +197,9 @@ async def processing_orders(
 
                         for currency in currencies:
 
-                            result = await private_data.get_subaccounts_details(currency)
+                            result = await private_data.get_subaccounts_details(
+                                currency
+                            )
 
                             await updating_sub_account(
                                 client_redis,
@@ -217,7 +217,9 @@ async def processing_orders(
                     ):
                         for currency in currencies:
 
-                            result = await private_data.get_subaccounts_details(currency)
+                            result = await private_data.get_subaccounts_details(
+                                currency
+                            )
 
                             await updating_sub_account(
                                 client_redis,
@@ -677,3 +679,4 @@ async def updating_sub_account(
         sub_account_cached_channel,
         message_byte_data,
     )
+

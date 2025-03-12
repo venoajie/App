@@ -13,7 +13,6 @@ from db_management.sqlite_management import (
     deleting_row,
     executing_query_based_on_currency_or_instrument_and_strategy as get_query,
 )
-from messaging.get_published_messages import get_redis_message
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.cash_carry.combo_auto import ComboAuto
 from strategies.hedging.hedging_spot import HedgingSpot
@@ -117,15 +116,17 @@ async def cancelling_orders(
 
             try:
 
-                message = await get_redis_message(pubsub)
+                message_byte = await pubsub.get_message()
 
-                if message:
-                    
-                    message_channel = message["channel"]
-                    
-                    log.warning(message_channel)
+                if message_byte and message_byte["type"] == "message":
 
-                    data = message["data"]
+                    message_byte_data = orjson.loads(message_byte["data"])
+
+                    params = message_byte_data["params"]
+
+                    data = params["data"]
+
+                    message_channel = params["channel"]
 
                     if market_analytics_channel in message_channel:
 
@@ -221,10 +222,14 @@ async def cancelling_orders(
                         if index_price is not None and equity > 0:
 
                             my_trades_currency: list = [
-                                o for o in my_trades_currency_all if o["label"] is not None
+                                o
+                                for o in my_trades_currency_all
+                                if o["label"] is not None
                             ]
 
-                            notional: float = compute_notional_value(index_price, equity)
+                            notional: float = compute_notional_value(
+                                index_price, equity
+                            )
 
                             for strategy in active_strategies:
 
@@ -306,12 +311,10 @@ async def cancelling_orders(
                                     if orders_currency_strategy:
 
                                         for order in orders_currency_strategy:
-                                            cancel_allowed: dict = (
-                                                await hedging.is_cancelling_orders_allowed(
-                                                    order,
-                                                    orders_currency_strategy,
-                                                    server_time,
-                                                )
+                                            cancel_allowed: dict = await hedging.is_cancelling_orders_allowed(
+                                                order,
+                                                orders_currency_strategy,
+                                                server_time,
                                             )
 
                                             if cancel_allowed["cancel_allowed"]:

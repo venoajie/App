@@ -16,8 +16,8 @@ from db_management.sqlite_management import (
     executing_query_with_return,
     update_status_data,
 )
-from messaging.get_published_messages import get_redis_message
 from messaging.telegram_bot import telegram_bot_sendtext
+from messaging import subscribing_to_channels
 from transaction_management.deribit.orders_management import saving_traded_orders
 from utilities.string_modification import (
     extract_currency_from_text,
@@ -60,16 +60,12 @@ async def reconciling_size(
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
 
-        # prepare channels placeholders
-        channels = [
-            my_trade_receiving_channel,
-            positions_update_channel,
-            sub_account_cached_channel,
-            ticker_cached_channel,
-        ]
-
         # subscribe to channels
-        [await pubsub.subscribe(o) for o in channels]
+        await subscribing_to_channels.redis_channels(
+            pubsub,
+            redis_channels,
+            "reconciling_size",
+            )
 
         server_time = get_now_unix()
 
@@ -116,18 +112,22 @@ async def reconciling_size(
             order_allowed_channel,
             result,
         )
-
+        
         while True:
 
             try:
 
-                message = await get_redis_message(pubsub)
+                message_byte = await pubsub.get_message()
 
-                if message:
+                if message_byte and message_byte["type"] == "message":
 
-                    message_channel = message["channel"]
-                    
-                    data = message["data"]
+                    message_byte_data = orjson.loads(message_byte["data"])
+
+                    params = message_byte_data["params"]
+
+                    data = params["data"]
+
+                    message_channel = params["channel"]
 
                     five_days_ago = server_time - (one_minute * 60 * 24 * 5)
 
@@ -154,13 +154,13 @@ async def reconciling_size(
                             )
 
                             server_time = exchange_server_time
-
+                            
                     if (
                         positions_update_channel in message_channel
                         or sub_account_cached_channel in message_channel
                         or my_trade_receiving_channel in message_channel
                     ):
-
+                        
                         if sub_account_cached_channel in message_channel:
                             positions_cached = data["positions"]
 
@@ -172,7 +172,7 @@ async def reconciling_size(
                                 log.info(data)
                                 positions_cached = positions_cached
                                 log.warning(positions_cached)
-
+                        
                         positions_cached_all = remove_redundant_elements(
                             [o["instrument_name"] for o in positions_cached]
                         )
@@ -201,7 +201,7 @@ async def reconciling_size(
                             five_days_ago,
                             result,
                         )
-
+                        
                         log.debug(f"combined_order_allowed {combined_order_allowed}")
 
             except Exception as error:
@@ -332,10 +332,10 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                         1000,
                     )
                 )
-
+                
                 log.info(
-                    f"trades_from_exchange {instrument_name} {trades_from_exchange}"
-                )
+                f"trades_from_exchange {instrument_name} {trades_from_exchange}"
+            )
 
                 if trades_from_exchange:
 
