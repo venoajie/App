@@ -52,8 +52,8 @@ async def cancelling_orders(
             pubsub,
             redis_channels,
             "cancelling_active_orders",
-            )
-        
+        )
+
         relevant_tables = config_app["relevant_tables"][0]
 
         order_db_table = relevant_tables["orders_table"]

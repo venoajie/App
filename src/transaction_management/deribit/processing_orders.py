@@ -51,8 +51,8 @@ async def processing_orders(
             pubsub,
             redis_channels,
             "processing_orders",
-            )
-        
+        )
+
         strategy_attributes_active = [
             o for o in strategy_attributes if o["is_active"] == True
         ]
@@ -79,9 +79,11 @@ async def processing_orders(
         # sub_account_combining
         orders_cached = sub_account_cached["orders_cached"]
         positions_cached = sub_account_cached["positions_cached"]
-        
-        ordered = []
-        
+
+        ordered_hedging = []
+
+        ordered_spread = []
+
         from loguru import logger as log
 
         while not_cancel:
@@ -101,7 +103,7 @@ async def processing_orders(
                     message_channel = params["channel"]
 
                     if my_trade_receiving_channel in message_channel:
-                        
+
                         log.warning(data)
 
                         for trade in data:
@@ -116,7 +118,7 @@ async def processing_orders(
                                 currency_lower,
                                 cancellable_strategies,
                             )
-                            
+
                             await saving_traded_orders(
                                 trade,
                                 archive_db_table,
@@ -128,7 +130,7 @@ async def processing_orders(
                         log.warning(data)
 
                         if data["order_allowed"]:
-                                    
+
                             await if_order_is_true(
                                 private_data,
                                 non_checked_strategies,
@@ -269,10 +271,7 @@ async def processing_orders(
 
 
 async def if_order_is_true(
-    private_data,
-    non_checked_strategies,
-    order: dict,
-    ordered: list
+    private_data, non_checked_strategies, order: dict, ordered: list
 ) -> None:
     """ """
 
@@ -291,7 +290,7 @@ async def if_order_is_true(
 
         if label_and_side_consistent:
             send_limit_result = await private_data.send_limit_order(params)
-            
+
             ordered.append(params)
 
             return send_limit_result
@@ -699,4 +698,3 @@ async def updating_sub_account(
         sub_account_cached_channel,
         message_byte_data,
     )
-

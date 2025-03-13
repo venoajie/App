@@ -14,25 +14,23 @@ async def get_redis_message(pubsub: object) -> dict:
     """ """
 
     try:
-        
+
         from loguru import logger as log
-        
+
         message_byte = await pubsub.get_message()
 
         if message_byte and message_byte["type"] == "message":
-            
+
             message_byte_data = orjson.loads(message_byte["data"])
 
             params = message_byte_data["params"]
 
             log.error(params["channel"])
 
-            return (
-                dict(
-                    data=params["data"],
-                    channel=params["channel"],
-                    )
-                )
+            return dict(
+                data=params["data"],
+                channel=params["channel"],
+            )
 
     except Exception as error:
 

@@ -54,7 +54,7 @@ async def future_spreads(
             pubsub,
             redis_channels,
             "future_spread",
-            )
+        )
 
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()

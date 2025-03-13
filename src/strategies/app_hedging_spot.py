@@ -87,7 +87,7 @@ async def hedging_spot(
             pubsub,
             redis_channels,
             "hedging_spot",
-            )
+        )
 
         cached_ticker_all = []
 
@@ -108,7 +108,7 @@ async def hedging_spot(
         cached_orders = None
 
         result = message_template()
-        
+
         ordered = []
 
         while not_cancel:
@@ -220,37 +220,23 @@ async def hedging_spot(
                         ][0]
 
                         my_trades_currency_all_transactions: list = (
-                            []
-                            if not my_trades_active_all
-                            else [
-                                o
-                                for o in my_trades_active_all
-                                if currency_upper in o["instrument_name"]
-                            ]
+                            get_transactions_under_same_currency(
+                                my_trades_active_all, currency_upper
+                            )
                         )
 
                         my_trades_currency_all: list = (
-                            []
-                            if my_trades_currency_all_transactions == 0
-                            else [
-                                o
-                                for o in my_trades_currency_all_transactions
-                                if o["instrument_name"]
-                                in [
-                                    o["instrument_name"]
-                                    for o in instrument_attributes_futures_all
-                                ]
-                            ]
+                            get_transactions_under_active_future_instruments(
+                                my_trades_currency_all_transactions,
+                                instrument_attributes_futures_all,
+                            )
                         )
+                        
+                        [o for o in ordered if o["label"] in ]
 
-                        orders_currency = (
-                            []
-                            if not cached_orders
-                            else [
-                                o
-                                for o in cached_orders
-                                if currency_upper in o["instrument_name"]
-                            ]
+                        orders_currency: list = get_transactions_under_same_currency(
+                            cached_orders,
+                            currency_upper,
                         )
 
                         len_cleaned_orders = len(orders_currency)
@@ -262,21 +248,10 @@ async def hedging_spot(
                                 if o["label"] is not None
                             ]
 
-                            my_trades_currency_contribute_to_hedging = [
-                                o
-                                for o in my_trades_currency
-                                if (parsing_label(o["label"])["main"])
-                                in contribute_to_hedging_strategies
-                            ]
-
-                            my_trades_currency_contribute_to_hedging_sum = (
-                                0
-                                if not my_trades_currency_contribute_to_hedging
-                                else sum(
-                                    [
-                                        o["amount"]
-                                        for o in my_trades_currency_contribute_to_hedging
-                                    ]
+                            my_trades_currency_contribute_to_hedging_sum: int = (
+                                get_sum_of_transactions_contribute_to_hedging(
+                                    my_trades_currency,
+                                    contribute_to_hedging_strategies,
                                 )
                             )
 
@@ -298,18 +273,18 @@ async def hedging_spot(
                                 if o["strategy_label"] == strategy
                             ][0]
 
-                            my_trades_currency_strategy = [
-                                o
-                                for o in my_trades_currency
-                                if strategy in (o["label"])
-                            ]
+                            my_trades_currency_strategy = (
+                                get_transactions_under_same_strategy(
+                                    my_trades_currency,
+                                    strategy,
+                                )
+                            )
 
                             orders_currency_strategy = (
-                                []
-                                if not orders_currency
-                                else [
-                                    o for o in orders_currency if strategy in o["label"]
-                                ]
+                                get_transactions_under_same_strategy(
+                                    orders_currency,
+                                    strategy,
+                                )
                             )
                             log.info(f" {strategy} orders_currency {orders_currency}")
 
@@ -342,16 +317,13 @@ async def hedging_spot(
                             instrument_name = instrument_ticker["instrument_name"]
 
                             instrument_time_left = (
-                                max(
-                                    [
-                                        o["expiration_timestamp"]
-                                        for o in instrument_attributes_futures_all
-                                        if o["instrument_name"] == instrument_name
-                                    ]
+                                get_instrument_time_left_before_expired(
+                                    instrument_attributes_futures_all,
+                                    instrument_name,
+                                    server_time,
+                                    ONE_MINUTE,
                                 )
-                                - server_time
-                            ) / ONE_MINUTE
-
+                            )
                             instrument_time_left_exceed_threshold = (
                                 instrument_time_left > INSTRUMENT_EXPIRATION_THRESHOLD
                             )
@@ -377,38 +349,37 @@ async def hedging_spot(
                                     "best_ask_price"
                                 ]
 
-                                send_order: dict = (
-                                    await hedging.is_send_open_order_allowed(
-                                        non_checked_strategies,
-                                        instrument_name,
-                                        instrument_attributes_futures_for_hedging,
-                                        orders_currency_strategy,
-                                        best_ask_prc,
-                                        archive_db_table,
-                                        trade_db_table,
+                                if size_is_reconciled_global:
+
+                                    send_order: dict = (
+                                        await hedging.is_send_open_order_allowed(
+                                            non_checked_strategies,
+                                            instrument_name,
+                                            instrument_attributes_futures_for_hedging,
+                                            orders_currency_strategy,
+                                            best_ask_prc,
+                                            archive_db_table,
+                                            trade_db_table,
+                                        )
                                     )
-                                )
 
-                                log.warning(f"send_order {send_order}")
+                                    log.warning(f"send_order {send_order}")
 
-                                if (
-                                    send_order["order_allowed"]
-                                    and size_is_reconciled_global
-                                ):
+                                    if send_order["order_allowed"]:
 
-                                    result["params"].update(
-                                        {"channel": sending_order_channel}
-                                    )
-                                    
-                                    ordered.append(send_order["order_parameters"])
-                                    
-                                    result["params"].update({"data": send_order})
+                                        result["params"].update(
+                                            {"channel": sending_order_channel}
+                                        )
 
-                                    await publishing_result(
-                                        client_redis,
-                                        sending_order_channel,
-                                        result,
-                                    )
+                                        ordered.append(send_order["order_parameters"])
+
+                                        result["params"].update({"data": send_order})
+
+                                        await publishing_result(
+                                            client_redis,
+                                            sending_order_channel,
+                                            result,
+                                        )
 
                                     # not_order = False
 
@@ -509,7 +480,9 @@ async def hedging_spot(
                                                             # orders_currency_strategy
                                                         )
 
-                                                        if send_closing_order["order_allowed"]:
+                                                        if send_closing_order[
+                                                            "order_allowed"
+                                                        ]:
 
                                                             result["params"].update(
                                                                 {
@@ -517,11 +490,16 @@ async def hedging_spot(
                                                                 }
                                                             )
                                                             result["params"].update(
-                                                                {"data": send_closing_order}
+                                                                {
+                                                                    "data": send_closing_order
+                                                                }
                                                             )
-                                                            
-                                                            ordered.append(send_closing_order["order_parameters"])
-                                    
+
+                                                            ordered.append(
+                                                                send_closing_order[
+                                                                    "order_parameters"
+                                                                ]
+                                                            )
 
                                                             await publishing_result(
                                                                 client_redis,
@@ -573,8 +551,12 @@ async def hedging_spot(
                                                                 {"data": send_order}
                                                             )
 
-                                                            ordered.append(send_closing_order["order_parameters"])
-                                    
+                                                            ordered.append(
+                                                                send_closing_order[
+                                                                    "order_parameters"
+                                                                ]
+                                                            )
+
                                                             await publishing_result(
                                                                 client_redis,
                                                                 sending_order_channel,
@@ -630,3 +612,90 @@ def get_index(ticker: dict) -> float:
         index_price = ticker["estimated_delivery_price"]
 
     return index_price
+
+
+def get_transactions_under_same_currency(
+    transactions: list,
+    currency_upper: str,
+) -> list:
+
+    return (
+        []
+        if not transactions
+        else [o for o in transactions if currency_upper in o["instrument_name"]]
+    )
+
+
+def get_transactions_under_same_strategy(
+    transactions: list,
+    strategy: str,
+) -> list:
+
+    return (
+        [] if not transactions else [o for o in transactions if strategy in o["label"]]
+    )
+
+
+def get_transactions_under_active_future_instruments(
+    my_trades_currency_all_transactions: list,
+    instrument_attributes_futures_all: list,
+) -> list:
+
+    return (
+        []
+        if my_trades_currency_all_transactions == 0
+        else [
+            o
+            for o in my_trades_currency_all_transactions
+            if o["instrument_name"]
+            in [o["instrument_name"] for o in instrument_attributes_futures_all]
+        ]
+    )
+
+
+def get_transactions_contribute_to_hedging(
+    my_trades_currency: list,
+    contribute_to_hedging_strategies: list,
+) -> list:
+
+    return [
+        o
+        for o in my_trades_currency
+        if (parsing_label(o["label"])["main"]) in contribute_to_hedging_strategies
+    ]
+
+
+def get_sum_of_transactions_contribute_to_hedging(
+    my_trades_currency: list,
+    contribute_to_hedging_strategies: list,
+) -> int:
+
+    my_trades_currency_contribute_to_hedging = get_transactions_contribute_to_hedging(
+        my_trades_currency,
+        contribute_to_hedging_strategies,
+    )
+
+    return (
+        0
+        if not my_trades_currency_contribute_to_hedging
+        else sum([o["amount"] for o in my_trades_currency_contribute_to_hedging])
+    )
+
+
+def get_instrument_time_left_before_expired(
+    instrument_attributes_futures_all: list,
+    instrument_name: str,
+    server_time: int,
+    basis_time: float,
+) -> list:
+
+    return (
+        max(
+            [
+                o["expiration_timestamp"]
+                for o in instrument_attributes_futures_all
+                if o["instrument_name"] == instrument_name
+            ]
+        )
+        - server_time
+    ) / basis_time
