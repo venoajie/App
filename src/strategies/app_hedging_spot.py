@@ -108,6 +108,8 @@ async def hedging_spot(
         cached_orders = None
 
         result = message_template()
+        
+        ordered = []
 
         while not_cancel:
 
@@ -397,6 +399,9 @@ async def hedging_spot(
                                     result["params"].update(
                                         {"channel": sending_order_channel}
                                     )
+                                    
+                                    ordered.append(send_order["order_parameters"])
+                                    
                                     result["params"].update({"data": send_order})
 
                                     await publishing_result(
@@ -504,7 +509,7 @@ async def hedging_spot(
                                                             # orders_currency_strategy
                                                         )
 
-                                                        if send_order["order_allowed"]:
+                                                        if send_closing_order["order_allowed"]:
 
                                                             result["params"].update(
                                                                 {
@@ -512,8 +517,11 @@ async def hedging_spot(
                                                                 }
                                                             )
                                                             result["params"].update(
-                                                                {"data": send_order}
+                                                                {"data": send_closing_order}
                                                             )
+                                                            
+                                                            ordered.append(send_closing_order["order_parameters"])
+                                    
 
                                                             await publishing_result(
                                                                 client_redis,
@@ -565,6 +573,8 @@ async def hedging_spot(
                                                                 {"data": send_order}
                                                             )
 
+                                                            ordered.append(send_closing_order["order_parameters"])
+                                    
                                                             await publishing_result(
                                                                 client_redis,
                                                                 sending_order_channel,

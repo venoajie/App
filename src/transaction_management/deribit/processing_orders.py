@@ -80,6 +80,8 @@ async def processing_orders(
         orders_cached = sub_account_cached["orders_cached"]
         positions_cached = sub_account_cached["positions_cached"]
         
+        ordered = []
+        
         from loguru import logger as log
 
         while not_cancel:
@@ -126,10 +128,12 @@ async def processing_orders(
                         log.warning(data)
 
                         if data["order_allowed"]:
+                                    
                             await if_order_is_true(
                                 private_data,
                                 non_checked_strategies,
                                 data,
+                                ordered,
                             )
 
                     if order_update_channel in message_channel:
@@ -143,6 +147,7 @@ async def processing_orders(
                                 non_checked_strategies,
                                 [data],
                                 order_db_table,
+                                ordered,
                             )
 
                         else:
@@ -165,6 +170,7 @@ async def processing_orders(
                                         label,
                                         order_state,
                                         order_id,
+                                        cancelling_and_relabelling,
                                     )
 
                                 else:
@@ -266,6 +272,7 @@ async def if_order_is_true(
     private_data,
     non_checked_strategies,
     order: dict,
+    ordered: list
 ) -> None:
     """ """
 
@@ -284,6 +291,8 @@ async def if_order_is_true(
 
         if label_and_side_consistent:
             send_limit_result = await private_data.send_limit_order(params)
+            
+            ordered.append(params)
 
             return send_limit_result
             # await asyncio.sleep(10)
@@ -301,6 +310,7 @@ async def cancelling_and_relabelling(
     label,
     order_state,
     order_id,
+    ordered,
 ) -> None:
 
     # log.debug(f"label {label} order_state {order_state} order {order}")
@@ -333,6 +343,7 @@ async def cancelling_and_relabelling(
                 private_data,
                 non_checked_strategies,
                 order_attributes,
+                ordered,
             )
 
 
@@ -581,10 +592,11 @@ async def saving_traded_orders(
 
 
 async def saving_oto_order(
-    private_data,
-    non_checked_strategies,
-    orders,
-    order_db_table,
+    private_data: object,
+    non_checked_strategies: list,
+    orders: list,
+    order_db_table: str,
+    ordered: list,
 ) -> None:
 
     print(f"saving_oto_order {orders}")
@@ -631,6 +643,7 @@ async def saving_oto_order(
                 private_data,
                 non_checked_strategies,
                 order_attributes,
+                ordered,
             )
 
         else:
