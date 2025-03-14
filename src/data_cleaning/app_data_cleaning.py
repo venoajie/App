@@ -509,7 +509,7 @@ async def rechecking_based_on_sub_account(
                 )
             )
             
-            log.critical(my_trades_and_sub_account_size_reconciled)
+            log.critical(f"{instrument_name} {my_trades_and_sub_account_size_reconciled}")
 
             if my_trades_and_sub_account_size_reconciled:
 
@@ -560,7 +560,7 @@ async def rechecking_based_on_sub_account(
                     )
                 )
                 
-                log.critical(my_trades_and_sub_account_size_reconciled)
+                log.critical(f"{instrument_name} {my_trades_and_sub_account_size_reconciled}")
 
                 if not my_trades_and_sub_account_size_reconciled:
                     
@@ -664,7 +664,7 @@ async def rechecking_based_on_data_in_sqlite(
                         )
                     )
                     
-                    log.critical(my_trades_and_sub_account_size_reconciled)
+                    log.critical(f"{instrument_name} {my_trades_and_sub_account_size_reconciled}")
 
                     if my_trades_and_sub_account_size_reconciled:
 
@@ -751,7 +751,7 @@ async def rechecking_based_on_data_in_sqlite(
                                 )
                             )
                             
-                            log.critical(my_trades_and_sub_account_size_reconciled)
+                            log.critical(f"{instrument_name} {my_trades_and_sub_account_size_reconciled}")
 
                             if not my_trades_and_sub_account_size_reconciled:
 
