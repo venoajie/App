@@ -324,7 +324,6 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
             )
             
             log.info(instrument_name)
-            log.info(my_trades_instrument_name)
             
             if my_trades_instrument_name:
                 log.critical(my_trades_instrument_name)
@@ -333,31 +332,6 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                     o["timestamp"] for o in my_trades_instrument_name
                 ]
 
-                log.info(
-                    f"last_10_timestamp_log {last_10_timestamp_log} "
-                )
-                timestamp_log = min(last_10_timestamp_log)
-
-                log.info(
-                    f"timestamp_log {timestamp_log} "
-                )
-                trades_from_exchange = (
-                    await private_data.get_user_trades_by_instrument_and_time(
-                        instrument_name,
-                        timestamp_log,
-                        1000,
-                    )
-                )
-
-                log.info(
-                    f"trades_from_exchange {instrument_name} {trades_from_exchange}"
-                )
-            try:
-
-                last_10_timestamp_log = [
-                    o["timestamp"] for o in my_trades_instrument_name
-                ]
-
                 timestamp_log = min(last_10_timestamp_log)
 
                 trades_from_exchange = (
@@ -366,10 +340,6 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                         timestamp_log,
                         1000,
                     )
-                )
-
-                log.info(
-                    f"trades_from_exchange {instrument_name} {trades_from_exchange}"
                 )
 
                 if trades_from_exchange:
@@ -399,9 +369,6 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                                 archive_db_table,
                                 order_db_table,
                             )
-
-            except:
-                pass
 
 
 async def rechecking_reconciliation_regularly(
@@ -552,6 +519,8 @@ async def rechecking_based_on_sub_account(
                 ][0]["size_is_reconciled"] = order_allowed
 
             else:
+                
+                log.critical(instrument_name)
 
                 order_allowed = 0
 
@@ -590,11 +559,15 @@ async def rechecking_based_on_sub_account(
                 )
 
                 if not my_trades_and_sub_account_size_reconciled:
+                    
+                    log.critical(instrument_name)
 
                     sub_account_size = get_sub_account_size_per_instrument(
                         instrument_name,
                         positions_cached,
                     )
+                    
+                    log.warning(sub_account_size)
 
                     if sub_account_size == 0:
 
