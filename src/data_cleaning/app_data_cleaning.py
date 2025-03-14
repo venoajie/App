@@ -316,9 +316,13 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                 query_trades_all
             )
             
+            log.info(instrument_name)
             log.info(my_trades_instrument_name)
-
+            
             if my_trades_instrument_name:
+                log.critical(my_trades_instrument_name)
+
+            try:
 
                 last_10_timestamp_log = [
                     o["timestamp"] for o in my_trades_instrument_name
@@ -365,6 +369,9 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
                                 archive_db_table,
                                 order_db_table,
                             )
+
+            except:
+                pass
 
 
 async def rechecking_reconciliation_regularly(
