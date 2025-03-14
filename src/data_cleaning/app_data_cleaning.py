@@ -232,6 +232,8 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
         trades_from_exchange_without_futures_combo = [
             o for o in trades_from_exchange if f"-FS-" not in o["instrument_name"]
         ]
+        
+        log.info(trades_from_exchange_without_futures_combo)
 
         await telegram_bot_sendtext(
             f"size_futures_not_reconciled-{instrument_name}",
@@ -529,6 +531,8 @@ async def rechecking_based_on_sub_account(
                         1000,
                     )
                 )
+                
+                log.critical(instrument_name)
 
                 await update_trades_from_exchange_based_on_latest_timestamp(
                     trades_from_exchange,
@@ -706,6 +710,8 @@ async def rechecking_based_on_data_in_sqlite(
                             for o in my_trades_currency
                             if instrument_name in o["instrument_name"]
                         ]
+                        
+                        log.critical(instrument_name)
 
                         await update_trades_from_exchange_based_on_latest_timestamp(
                             trades_from_exchange,
