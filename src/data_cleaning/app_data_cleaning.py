@@ -226,6 +226,9 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
     order_db_table: str,
 ) -> None:
     """ """
+    
+    log.critical(instrument_name)
+    log.warning(trades_from_exchange)
 
     if trades_from_exchange:
 
@@ -543,8 +546,6 @@ async def rechecking_based_on_sub_account(
                     )
                 )
                 
-                log.critical(instrument_name)
-
                 await update_trades_from_exchange_based_on_latest_timestamp(
                     trades_from_exchange,
                     instrument_name,
