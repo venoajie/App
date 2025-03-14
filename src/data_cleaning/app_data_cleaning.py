@@ -17,7 +17,7 @@ from db_management.sqlite_management import (
     update_status_data,
 )
 from messaging.telegram_bot import telegram_bot_sendtext
-from messaging import subscribing_to_channels
+from messaging import subscribing_to_channels, get_published_messages
 from transaction_management.deribit.orders_management import saving_traded_orders
 from utilities.string_modification import (
     extract_currency_from_text,
@@ -120,7 +120,7 @@ async def reconciling_size(
 
                 message_byte = await pubsub.get_message()
 
-                params = get_data_and_channel_from_message(message_byte)
+                params = await get_published_messages.get_redis_message(message_byte)
                 
                 data, message_channel = params["data"], params["channel"]
 

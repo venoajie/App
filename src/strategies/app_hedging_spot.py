@@ -13,7 +13,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from db_management.redis_client import publishing_result
 from messaging.telegram_bot import telegram_bot_sendtext
-from messaging import subscribing_to_channels
+from messaging import get_published_messages, subscribing_to_channels
 from strategies.hedging.hedging_spot import (
     HedgingSpot,
     modify_hedging_instrument,
@@ -140,7 +140,7 @@ async def hedging_spot(
 
                 message_byte = await pubsub.get_message()
                 
-                params = get_data_and_channel_from_message(message_byte)
+                params = await get_published_messages.get_redis_message(message_byte)
                 
                 data, message_channel = params["data"], params["channel"]
 
