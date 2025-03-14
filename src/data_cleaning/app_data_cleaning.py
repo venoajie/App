@@ -165,9 +165,8 @@ async def reconciling_size(
                             positions_cached = data["positions"]
 
                         except:
-                            log.info(data)
+
                             positions_cached = positions_cached
-                            log.warning(positions_cached)
 
                     positions_cached_all = remove_redundant_elements(
                         [o["instrument_name"] for o in positions_cached]
@@ -288,6 +287,8 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
     order_db_table: str,
 ) -> None:
     """ """
+    
+    log.info(positions_cached_instrument)
 
     # FROM sub account to other db's
     if positions_cached_instrument:
@@ -312,6 +313,8 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
             my_trades_instrument_name = await executing_query_with_return(
                 query_trades_all
             )
+            
+            log.info(my_trades_instrument_name)
 
             if my_trades_instrument_name:
 
