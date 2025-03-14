@@ -134,20 +134,14 @@ async def hedging_spot(
 
         ONE_MINUTE = ONE_SECOND * 60
         
-        data, message_channel = None ,  None
-        
         while not_cancel:
 
             try:
 
                 message_byte = await pubsub.get_message()
                 
-                log.warning(message_byte)
-
                 params = get_data_and_channel_from_message(message_byte)
                 
-                log.warning(params)
-
                 data, message_channel = params["data"], params["channel"]
 
                 if order_allowed_channel in message_channel:
@@ -676,14 +670,10 @@ def get_instrument_time_left_before_expired(
 
 def get_data_and_channel_from_message(message_byte: dict) -> dict:
     
-    log.debug(message_byte)
-
     if message_byte and message_byte["type"] == "message":
 
         message_byte_data = orjson.loads(message_byte["data"])
         
-        log.debug(message_byte_data)
-
         params = message_byte_data["params"]
 
         return dict(
