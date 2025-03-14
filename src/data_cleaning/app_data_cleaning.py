@@ -17,7 +17,7 @@ from db_management.sqlite_management import (
     update_status_data,
 )
 from messaging.telegram_bot import telegram_bot_sendtext
-from messaging import subscribing_to_channels, get_published_messages
+from messaging import get_published_messages,subscribing_to_channels
 from transaction_management.deribit.orders_management import saving_traded_orders
 from utilities.string_modification import (
     extract_currency_from_text,
@@ -758,23 +758,3 @@ async def rechecking_based_on_data_in_sqlite(
         result,
     )
 
-
-def get_data_and_channel_from_message(message_byte: dict) -> dict:
-    
-    if message_byte and message_byte["type"] == "message":
-
-        message_byte_data = orjson.loads(message_byte["data"])
-        
-        params = message_byte_data["params"]
-
-        return dict(
-            data=params["data"],
-            channel=params["channel"],
-        )
-
-    else:
-
-        return dict(
-            data=[],
-            channel=[],
-        )
