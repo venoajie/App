@@ -133,7 +133,9 @@ async def hedging_spot(
         ONE_SECOND = 1000
 
         ONE_MINUTE = ONE_SECOND * 60
-
+        
+        data, message_channel = None ,  None
+        
         while not_cancel:
 
             try:
@@ -148,7 +150,8 @@ async def hedging_spot(
                     
                     log.warning(message_byte)
 
-                data, message_channel = params["data"], params["channel"]
+                if message_byte:
+                    data, message_channel = params["data"], params["channel"]
 
                 if order_allowed_channel in message_channel:
 
