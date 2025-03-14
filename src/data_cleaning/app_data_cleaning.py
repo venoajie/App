@@ -722,77 +722,79 @@ async def rechecking_based_on_data_in_sqlite(
 
                         order_allowed = 0
                         
-                        log.info([
+                        order_instrument_name = [
                             o
                             for o in combined_order_allowed
-                            if instrument_name in o["instrument_name"]
-                        ])
-
-                        [
-                            o
-                            for o in combined_order_allowed
-                            if instrument_name in o["instrument_name"]
-                        ][0]["size_is_reconciled"] = order_allowed
-
-                        trades_from_exchange = (
-                            await private_data.get_user_trades_by_instrument_and_time(
-                                instrument_name,
-                                five_days_ago,
-                                1000,
-                            )
-                        )
-
-                        my_trades_currency = await executing_query_with_return(
-                            query_trades_active_currency
-                        )
-
-                        my_trades_instrument_name = [
-                            o
-                            for o in my_trades_currency
                             if instrument_name in o["instrument_name"]
                         ]
                         
-                        log.critical(instrument_name)
+                        if order_instrument_name:
 
-                        await update_trades_from_exchange_based_on_latest_timestamp(
-                            trades_from_exchange,
-                            instrument_name,
-                            my_trades_instrument_name,
-                            archive_db_table,
-                            order_db_table,
-                        )
+                            [
+                                o
+                                for o in combined_order_allowed
+                                if instrument_name in o["instrument_name"]
+                            ][0]["size_is_reconciled"] = order_allowed
 
-                        my_trades_and_sub_account_size_reconciled = (
-                            is_my_trades_and_sub_account_size_reconciled_each_other(
-                                instrument_name,
-                                my_trades_currency,
-                                positions_cached,
-                            )
-                        )
-
-                        if not my_trades_and_sub_account_size_reconciled:
-
-                            sub_account_size = get_sub_account_size_per_instrument(
-                                instrument_name,
-                                positions_cached,
+                            trades_from_exchange = (
+                                await private_data.get_user_trades_by_instrument_and_time(
+                                    instrument_name,
+                                    five_days_ago,
+                                    1000,
+                                )
                             )
 
-                            if sub_account_size == 0:
+                            my_trades_currency = await executing_query_with_return(
+                                query_trades_active_currency
+                            )
 
-                                where_filter = "trade_id"
+                            my_trades_instrument_name = [
+                                o
+                                for o in my_trades_currency
+                                if instrument_name in o["instrument_name"]
+                            ]
+                            
+                            log.critical(instrument_name)
 
-                                for trade in my_trades_instrument_name:
+                            await update_trades_from_exchange_based_on_latest_timestamp(
+                                trades_from_exchange,
+                                instrument_name,
+                                my_trades_instrument_name,
+                                archive_db_table,
+                                order_db_table,
+                            )
 
-                                    trade_id = trade["trade_id"]
+                            my_trades_and_sub_account_size_reconciled = (
+                                is_my_trades_and_sub_account_size_reconciled_each_other(
+                                    instrument_name,
+                                    my_trades_currency,
+                                    positions_cached,
+                                )
+                            )
 
-                                    await update_status_data(
-                                        archive_db_table,
-                                        "is_open",
-                                        where_filter,
-                                        trade_id,
-                                        0,
-                                        "=",
-                                    )
+                            if not my_trades_and_sub_account_size_reconciled:
+
+                                sub_account_size = get_sub_account_size_per_instrument(
+                                    instrument_name,
+                                    positions_cached,
+                                )
+
+                                if sub_account_size == 0:
+
+                                    where_filter = "trade_id"
+
+                                    for trade in my_trades_instrument_name:
+
+                                        trade_id = trade["trade_id"]
+
+                                        await update_status_data(
+                                            archive_db_table,
+                                            "is_open",
+                                            where_filter,
+                                            trade_id,
+                                            0,
+                                            "=",
+                                        )
 
                     await clean_up_closed_transactions(
                         archive_db_table,
