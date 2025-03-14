@@ -673,10 +673,14 @@ def get_instrument_time_left_before_expired(
 
 
 def get_data_and_channel_from_message(message_byte: dict) -> dict:
+    
+    log.debug(message_byte)
 
     if message_byte and message_byte["type"] == "message":
 
         message_byte_data = orjson.loads(message_byte["data"])
+        
+        log.debug(message_byte_data)
 
         params = message_byte_data["params"]
 
