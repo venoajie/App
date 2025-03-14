@@ -139,6 +139,8 @@ async def hedging_spot(
             try:
 
                 message_byte = await pubsub.get_message()
+                
+                log.warning(message_byte)
 
                 params = get_data_and_channel_from_message(message_byte)
                 
