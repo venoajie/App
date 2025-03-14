@@ -234,6 +234,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
         ]
         
         log.info(trades_from_exchange_without_futures_combo)
+        
 
         await telegram_bot_sendtext(
             f"size_futures_not_reconciled-{instrument_name}",
@@ -241,6 +242,9 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
         )
 
         for trade in trades_from_exchange_without_futures_combo:
+            
+            log.debug(trade)
+            log.warning(my_trades_instrument_name)
 
             if not my_trades_instrument_name:
 
