@@ -688,14 +688,14 @@ def get_data_and_channel_from_message(message_byte: dict) -> dict:
 
         return dict(
             data=params["data"],
-            message_channel=params["channel"],
+            channel=params["channel"],
         )
 
     else:
 
         return dict(
             data=[],
-            message_channel=[],
+            channel=[],
         )
 
 
