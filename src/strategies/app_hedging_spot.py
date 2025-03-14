@@ -146,12 +146,9 @@ async def hedging_spot(
 
                 params = get_data_and_channel_from_message(message_byte)
                 
-                if not params:
-                    
-                    log.warning(message_byte)
+                log.warning(params)
 
-                if message_byte:
-                    data, message_channel = params["data"], params["channel"]
+                data, message_channel = params["data"], params["channel"]
 
                 if order_allowed_channel in message_channel:
 
