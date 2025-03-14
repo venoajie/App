@@ -329,6 +329,29 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
             if my_trades_instrument_name:
                 log.critical(my_trades_instrument_name)
 
+                last_10_timestamp_log = [
+                    o["timestamp"] for o in my_trades_instrument_name
+                ]
+
+                log.info(
+                    f"last_10_timestamp_log {last_10_timestamp_log} "
+                )
+                timestamp_log = min(last_10_timestamp_log)
+
+                log.info(
+                    f"timestamp_log {timestamp_log} "
+                )
+                trades_from_exchange = (
+                    await private_data.get_user_trades_by_instrument_and_time(
+                        instrument_name,
+                        timestamp_log,
+                        1000,
+                    )
+                )
+
+                log.info(
+                    f"trades_from_exchange {instrument_name} {trades_from_exchange}"
+                )
             try:
 
                 last_10_timestamp_log = [
