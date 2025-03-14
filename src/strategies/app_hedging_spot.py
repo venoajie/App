@@ -694,6 +694,13 @@ def get_data_and_channel_from_message(message_byte: dict) -> dict:
             message_channel=params["channel"],
         )
 
+    else:
+
+        return dict(
+            data=[],
+            message_channel=[],
+        )
+
 
 def fetch_transactions_with_label_only(transactions: list) -> list:
 
