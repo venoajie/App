@@ -35,6 +35,7 @@ async def redis_channels(
             case "reconciling_size":
                 channels = [
                     my_trade_receiving_channel,
+                    portfolio_channel,
                     positions_update_channel,
                     sub_account_cached_channel,
                     ticker_cached_channel,
