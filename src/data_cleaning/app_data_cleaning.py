@@ -707,6 +707,9 @@ async def rechecking_based_on_data_in_sqlite(
                             if instrument_name in o["instrument_name"]
                         ]
                         
+                        log.info(f"{combined_order_allowed}")
+                        log.critical(f"{instrument_name} {order_instrument_name}")
+                        
                         if order_instrument_name:
 
                             [
