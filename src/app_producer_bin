@@ -16,7 +16,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from data_cleaning.pruning_db import clean_up_databases
 from messaging.telegram_bot import telegram_bot_sendtext
-from streaming_data.binance_top_movers import StreamingAccountData
+from streaming_data.binance_top_movers import StreamingTopMoversData
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,
@@ -153,7 +153,7 @@ async def main():
 
         queue = Queue(maxsize=1)
         
-        stream = StreamingAccountData(sub_account_id)
+        stream = StreamingTopMoversData(sub_account_id)
                 
         producer_task = asyncio.create_task(
             stream.ws_manager(
