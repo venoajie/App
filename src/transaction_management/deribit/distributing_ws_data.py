@@ -141,6 +141,8 @@ async def caching_distributing_data(
         while True:
 
             message_params: str = await queue_general.get()
+            
+            log.info(message_params)
 
             async with client_redis.pipeline() as pipe:
 
