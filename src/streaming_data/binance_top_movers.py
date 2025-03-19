@@ -60,6 +60,7 @@ class StreamingTopMoversData:
 
                 msg = {
         "method": "SUBSCRIBE",
+        "id": 1
     }
 
                 while True:
