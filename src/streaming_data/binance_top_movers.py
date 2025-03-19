@@ -58,14 +58,14 @@ class StreamingTopMoversData:
 
             try:
 
-                instruments_name = futures_instruments["instruments_name"]
-
-                while True:
-                    msg = subscribe_message = {
+                msg = subscribe_message = {
         "method": "SUBSCRIBE",
         "params": ["btcusdt@ticker"],
         "id": 1
     }
+
+                while True:
+                    
                     
                     await self.websocket_client.send(json.dumps(msg))
 
