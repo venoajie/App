@@ -146,9 +146,10 @@ async def caching_distributing_data(
 
             async with client_redis.pipeline() as pipe:
 
-                data: dict = message_params["data"]
-
                 try:
+                    
+                    data: dict = message_params["data"]
+                    
                     message_channel: str = message_params["channel"]
 
                     currency: str = extract_currency_from_text(message_channel)
@@ -163,14 +164,21 @@ async def caching_distributing_data(
                     )
 
                 except:
-                    message_channel: str = message_params["stream"]
                     
-                    log.warning(message_channel)
+                    try:
+                        data: dict = message_params["data"]
+                        
+                        message_channel: str = message_params["stream"]
+                        
+                        log.warning(message_channel)
 
-                    pub_message = dict(
-                        data=data,
-                    )
-                    log.debug(pub_message)
+                        pub_message = dict(
+                            data=data,
+                        )
+                        log.debug(pub_message)
+                    
+                    except:
+                        data: dict = message_params["result"]
                     
                 if "user." in message_channel:
 
