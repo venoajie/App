@@ -60,6 +60,7 @@ class StreamingTopMoversData:
 
                 msg = {
         "method": "SUBSCRIBE",
+        "params": ["btcusdt@ticker"],
         "id": 1
     }
 
