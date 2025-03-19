@@ -142,8 +142,6 @@ async def caching_distributing_data(
 
             message_params: str = await queue_general.get()
             
-            log.info(message_params)
-
             async with client_redis.pipeline() as pipe:
 
                 try:
@@ -358,9 +356,7 @@ async def caching_distributing_data(
                         data: dict = message_params["data"]
                         
                         message_channel: str = message_params["stream"]
-                        
-                        log.warning(message_channel)
-
+            
                         pub_message = dict(
                             data=data,
                         )
@@ -372,7 +368,7 @@ async def caching_distributing_data(
                     if "abnormaltradingnotices" in message_channel:
 
                         result["params"].update({"channel": abnormal_trading_notices})
-                        result["params"].update({"data": pub_message})
+                        result["params"].update(pub_message)
                         
                         log.debug(result)
 
