@@ -38,6 +38,7 @@ chart_low_high_tick = "market.chart.low_high_tick"
 ticker_update_data = "market.ticker.data"
 ticker_cache_updating = "market.ticker.cached"
 market_analytics_update = "market.analytics"
+abnormal_trading_notices = "market.abnormal_trading_notices"
 
 portfolio = "account.portfolio.ws"
 portfolio_rest = "account.portfolio.rest"
@@ -53,7 +54,6 @@ sub_account_cache_updating = "account.sub_account.cached_all"
 market_summary_updating = "others.summary.cached_all"
 account_summary_updating = "others.summary.cached_all"
 sqlite_record_updating = "others.sqlite_record_updating"
-
 
 [[redis_keys]]
 orders = "order"

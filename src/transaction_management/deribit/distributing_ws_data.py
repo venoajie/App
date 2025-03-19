@@ -92,6 +92,7 @@ async def caching_distributing_data(
         order_update_channel: str = redis_channels["order_cache_updating"]
         my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
+        abnormal_trading_notices: str = redis_channels["abnormal_trading_notices"]
 
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
 
@@ -145,19 +146,27 @@ async def caching_distributing_data(
 
                 data: dict = message_params["data"]
 
-                message_channel: str = message_params["channel"]
+                try:
+                    message_channel: str = message_params["channel"]
 
-                currency: str = extract_currency_from_text(message_channel)
+                    currency: str = extract_currency_from_text(message_channel)
 
-                currency_upper = currency.upper()
+                    currency_upper = currency.upper()
 
-                pub_message = dict(
-                    data=data,
-                    server_time=server_time,
-                    currency_upper=currency_upper,
-                    currency=currency,
-                )
+                    pub_message = dict(
+                        data=data,
+                        server_time=server_time,
+                        currency_upper=currency_upper,
+                        currency=currency,
+                    )
 
+                except:
+                    message_channel: str = message_params["stream"]
+
+                    pub_message = dict(
+                        data=data,
+                    )
+                    
                 if "user." in message_channel:
 
                     if "portfolio" in message_channel:
@@ -343,6 +352,19 @@ async def caching_distributing_data(
                     await publishing_result(
                         pipe,
                         chart_low_high_tick_channel,
+                        result,
+                    )
+
+                if "abnormaltradingnotices" in message_channel:
+
+                    result["params"].update({"channel": abnormal_trading_notices})
+                    result["params"].update({"data": pub_message})
+                    
+                    log.debug(result)
+
+                    await publishing_result(
+                        pipe,
+                        abnormal_trading_notices,
                         result,
                     )
 
