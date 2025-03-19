@@ -36,7 +36,7 @@ class StreamingTopMoversData:
     sub_account_id: str
     # Async Event Loop
     loop = asyncio.get_event_loop()
-    ws_connection_url: str = "wss://bstream.binance.com:9443/stream?streams=abnormaltradingnotices"
+    ws_connection_url: str = "wss://bstream.binance.com:443/stream?streams=abnormaltradingnotices"
     # Instance Variables
     websocket_client: websockets.WebSocketClientProtocol = None
     refresh_token: str = None
