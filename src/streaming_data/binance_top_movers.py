@@ -37,7 +37,6 @@ class StreamingTopMoversData:
     # Async Event Loop
     loop = asyncio.get_event_loop()
     ws_connection_url: str = "wss://bstream.binance.com:9443/stream?"
-#    ws_connection_url: str = "wss://bstream.binance.com:9443/stream?streams=abnormaltradingnotices"
     # Instance Variables
     websocket_client: websockets.WebSocketClientProtocol = None
     refresh_token: str = None
@@ -62,14 +61,19 @@ class StreamingTopMoversData:
                 msg = {
         "method": "SUBSCRIBE",
         "params": ["abnormaltradingnotices"],
-        #"streams": "abnormaltradingnotices",
         "id": 1
     }
 
                 while True:
                     
+                    ws_channel = ["abnormaltradingnotices"]
                     
-                    await self.websocket_client.send(json.dumps(msg))
+                    
+                    await self.ws_operation(
+                        operation="SUBSCRIBE",
+                        ws_channel=ws_channel,
+                        source="ws",
+                    )
 
                     while True:
 
@@ -245,51 +249,23 @@ class StreamingTopMoversData:
         self,
         operation: str,
         ws_channel: str,
-        source: str = "ws-single",
+        source: str = "ws",
     ) -> None:
         """
-        Requests `public/subscribe` or `public/unsubscribe`
-        to DBT's API for the specific WebSocket Channel.
-
-        source:
-        ws-single
-        ws-combination
-        rest
         """
         sleep_time: int = 0.05
 
         await asyncio.sleep(sleep_time)
 
-        id = id_numbering.id(
-            operation,
-            ws_channel,
-        )
+        id = 1
 
-        msg: dict = {
-            "jsonrpc": "2.0",
-        }
+        msg: dict = {}
 
         if "ws" in source:
-
-            if "single" in source:
-                ws_channel = [ws_channel]
-
             extra_params: dict = dict(
                 id=id,
-                method=f"private/{operation}",
-                params={"channels": ws_channel},
-            )
-
-            msg.update(extra_params)
-
-            if msg["params"]["channels"]:
-                await self.websocket_client.send(json.dumps(msg))
-
-        if "rest_api" in source:
-
-            extra_params: dict = await get_end_point_result(
-                operation,
-                ws_channel,
+                method=f"{operation}",
+                params=ws_channel,
             )
 
             msg.update(extra_params)
