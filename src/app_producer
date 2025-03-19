@@ -17,6 +17,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from data_cleaning.pruning_db import clean_up_databases
 from messaging.telegram_bot import telegram_bot_sendtext
 from streaming_data.data_producer import StreamingAccountData
+from streaming_data.data_producer_binance import StreamingDataBinance
 from transaction_management.deribit.api_requests import (
     get_currencies,
     get_instruments,
@@ -154,7 +155,8 @@ async def main():
         queue = Queue(maxsize=1)
         
         stream = StreamingAccountData(sub_account_id)
-                
+        stream_binance = StreamingDataBinance(sub_account_id)
+        
         producer_task = asyncio.create_task(
             stream.ws_manager(
                 client_redis,
@@ -162,6 +164,14 @@ async def main():
                 queue,
                 futures_instruments,
                 resolutions,
+)
+            ) 
+                
+        producer_task_binance = asyncio.create_task(
+            stream_binance.ws_manager(
+                client_redis,
+                redis_channels,
+                queue,
 )
             ) 
                  
@@ -183,6 +193,8 @@ async def main():
         await asyncio.gather(
             
             producer_task, 
+            
+            producer_task_binance,
         
             saving_task,
          

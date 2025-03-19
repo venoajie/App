@@ -16,9 +16,6 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 # user defined formula
 from configuration import config, id_numbering
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.api_requests import (
-    get_end_point_result,
-)
 from utilities.system_tools import parse_error_message
 
 
@@ -27,7 +24,7 @@ def parse_dotenv(sub_account: str) -> dict:
 
 
 @dataclass(unsafe_hash=True, slots=True)
-class StreamingTopMoversData:
+class StreamingDataBinance:
     """ 
     https://www.binance.com/en/support/faq/detail/18c97e8ab67a4e1b824edd590cae9f16
     
