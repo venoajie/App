@@ -58,10 +58,8 @@ class StreamingTopMoversData:
 
             try:
 
-                msg = subscribe_message = {
+                msg = {
         "method": "SUBSCRIBE",
-        "params": ["btcusdt@ticker"],
-        "id": 1
     }
 
                 while True:
