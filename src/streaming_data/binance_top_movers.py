@@ -14,13 +14,10 @@ from loguru import logger as log
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # user defined formula
-from configuration import config, config_oci, id_numbering
+from configuration import config, id_numbering
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import (
     get_end_point_result,
-)
-from utilities.string_modification import (
-    extract_currency_from_text,
 )
 from utilities.system_tools import parse_error_message
 
@@ -50,8 +47,6 @@ class StreamingTopMoversData:
         client_redis: object,
         redis_channels,
         queue_general: object,
-        futures_instruments,
-        resolutions: list,
     ) -> None:
 
         async with websockets.connect(
