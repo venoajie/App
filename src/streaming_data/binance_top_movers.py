@@ -61,7 +61,7 @@ class StreamingTopMoversData:
 
                 msg = {
         "method": "SUBSCRIBE",
-        "params": ["btcusdt@ticker"],
+        "params": ["abnormaltradingnotices"],
         #"streams": "abnormaltradingnotices",
         "id": 1
     }
