@@ -162,10 +162,13 @@ async def caching_distributing_data(
 
                 except:
                     message_channel: str = message_params["stream"]
+                    
+                    log.warning(message_channel)
 
                     pub_message = dict(
                         data=data,
                     )
+                    log.debug(pub_message)
                     
                 if "user." in message_channel:
 
