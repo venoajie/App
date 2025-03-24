@@ -575,6 +575,7 @@ async def saving_traded_orders(
     trade_to_db.update({"direction": trade_result["direction"]})
     trade_to_db.update({"trade_id": trade_result["trade_id"]})
     trade_to_db.update({"order_id": trade_result["order_id"]})
+    trade_to_db.update({"timestamp": trade_result["timestamp"]})
 
     try:
         trade_to_db.update({"label": trade_result["label"]})

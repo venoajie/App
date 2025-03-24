@@ -173,6 +173,15 @@ def ohlc_end_point(
     return f"{url}end_timestamp={end_timestamp}&instrument_name={instrument_name}&resolution={resolution}&start_timestamp={start_timestamp}"
 
 
+def get_end_point_based_on_side(side: str) -> str:
+
+        if side == "buy":
+            return "private/buy"
+
+        if side == "sell":
+            return "private/sell"
+
+
 async def get_ohlc_data(
     instrument_name: str,
     resolution: int,
@@ -240,31 +249,35 @@ class SendApiRequest:
 
         if otoco_config:
             params.update({"otoco_config": otoco_config})
+            
             if linked_order_type is not None:
                 params.update({"linked_order_type": linked_order_type})
             else:
                 params.update({"linked_order_type": "one_triggers_other"})
+            
             params.update({"trigger_fill_condition": "incremental"})
 
             log.debug(f"params otoco_config {params}")
 
         result = None
 
-        if side == "buy":
-            endpoint: str = "private/buy"
-
-        if side == "sell":
-            endpoint: str = "private/sell"
-
         if side is not None:
+            
+            endpoint: str = get_end_point_based_on_side(side)
+            
             result = await private_connection(
                 self.sub_account_id,
                 endpoint=endpoint,
                 params=params,
             )
+            
         return result
 
-    async def get_open_orders(self, kind: str, type: str) -> list:
+    async def get_open_orders(
+        self, 
+        kind: str,
+        type: str,
+        ) -> list:
 
         # Set endpoint
         endpoint: str = "private/get_open_orders"
@@ -376,12 +389,8 @@ class SendApiRequest:
             endpoint=endpoint,
             params=params,
         )
-
-        # log.error(f"result_sub_account {result_sub_account}")
-
-        result = result_sub_account["result"]
-
-        return result
+        
+        return result_sub_account["result"]
 
     async def get_subaccounts_details(
         self,
@@ -564,7 +573,6 @@ class SendApiRequest:
             params=params,
         )
 
-        # log.warning(f"""user_trades {len(user_trades["result"]["trades"])} {[o["trade_id"] for o in user_trades["result"]["trades"]]}""")
         return [] if user_trades == [] else user_trades["result"]["trades"]
 
     async def get_cancel_order_all(self):
@@ -633,6 +641,7 @@ class SendApiRequest:
             endpoint=endpoint,
             params=params,
         )
+
         return result
 
 
@@ -657,18 +666,8 @@ def get_api_end_point(
     return params
 
 
-async def get_end_point_result(
-    endpoint,
-    parameters: dict = None,
-) -> list:
-    # Set endpoint
-
-    result_endpoint = get_api_end_point(endpoint, parameters)
-    return result_endpoint  # ["result"]
-
-
 async def get_cancel_order_byOrderId(
-    private_connection,
+    private_connection: object,
     order_id: str,
 ) -> None:
     # Set endpoint
