@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import asyncio
@@ -6,26 +5,21 @@ import orjson
 
 from loguru import logger as log
 
-from data_cleaning.managing_closed_transactions import clean_up_closed_transactions
-from data_cleaning.reconciling_db import (
-    get_sub_account_size_per_instrument,
-    is_my_trades_and_sub_account_size_reconciled_each_other,
+from data_cleaning import managing_closed_transactions, reconciling_db
+from db_management import redis_client, sqlite_management as db_mgt
+from messaging import (
+    get_published_messages,
+    subscribing_to_channels,
+    telegram_bot_sendtext as tlgrm,
 )
-from db_management.redis_client import publishing_result
-from db_management.sqlite_management import (
-    executing_query_with_return,
-    update_status_data,
+from transaction_management.deribit.orders_management import (
+    orders_management as ord_mgt,
 )
-from messaging.telegram_bot import telegram_bot_sendtext
-from messaging import get_published_messages, subscribing_to_channels
-from transaction_management.deribit.orders_management import saving_traded_orders
-from utilities.string_modification import (
-    extract_currency_from_text,
-    message_template,
-    remove_redundant_elements,
+from utilities import (
+    string_modification as str_mod,
+    system_tools,
+    time_modification as time_mod,
 )
-from utilities.system_tools import parse_error_message
-from utilities.time_modification import get_now_unix_time as get_now_unix
 
 
 async def reconciling_size(
@@ -68,7 +62,7 @@ async def reconciling_size(
             "reconciling_size",
         )
 
-        server_time = get_now_unix()
+        server_time = time_mod.get_now_unix_time()
 
         positions_cached = sub_account_cached["positions_cached"]
 
@@ -84,12 +78,12 @@ async def reconciling_size(
 
         futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
 
-        result = message_template()
+        result = str_mod.message_template()
 
         combined_order_allowed = []
         for instrument_name in all_instruments_name:
 
-            currency: str = extract_currency_from_text(instrument_name)
+            currency: str = str_mod.extract_currency_from_text(instrument_name)
 
             if "-FS-" in instrument_name:
                 size_is_reconciled = 1
@@ -108,7 +102,7 @@ async def reconciling_size(
         result["params"].update({"channel": order_allowed_channel})
         result["params"].update({"data": combined_order_allowed})
 
-        await publishing_result(
+        await redis_client.publishing_result(
             client_redis,
             order_allowed_channel,
             result,
@@ -168,7 +162,7 @@ async def reconciling_size(
 
                             positions_cached = positions_cached
 
-                    positions_cached_all = remove_redundant_elements(
+                    positions_cached_all = str_mod.remove_redundant_elements(
                         [o["instrument_name"] for o in positions_cached]
                     )
 
@@ -201,7 +195,7 @@ async def reconciling_size(
 
             except Exception as error:
 
-                parse_error_message(error)
+                system_tools.parse_error_message(error)
 
                 continue
 
@@ -210,12 +204,12 @@ async def reconciling_size(
 
     except Exception as error:
 
-        await telegram_bot_sendtext(
+        await tlgrm.telegram_bot_sendtext_sendtext(
             f"app data cleaning -reconciling size - {error}",
             "general_error",
         )
 
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
 
 
 async def update_trades_from_exchange_based_on_latest_timestamp(
@@ -238,7 +232,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
 
         log.info(trades_from_exchange_without_futures_combo)
 
-        await telegram_bot_sendtext(
+        await tlgrm.telegram_bot_sendtext_sendtext(
             f"size_futures_not_reconciled-{instrument_name}",
             "general_error",
         )
@@ -262,7 +256,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
 
                 trade = trade_timestamp[0]
 
-                await saving_traded_orders(
+                await ord_mgt.saving_traded_orders(
                     trade,
                     archive_db_table,
                     order_db_table,
@@ -282,7 +276,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
 
                     log.debug(f"{trade_trd_id}")
 
-                    await saving_traded_orders(
+                    await ord_mgt.saving_traded_orders(
                         trade,
                         archive_db_table,
                         order_db_table,
@@ -304,7 +298,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
         # sub account instruments
         for instrument_name in positions_cached_instrument:
 
-            currency: str = extract_currency_from_text(instrument_name)
+            currency: str = str_mod.extract_currency_from_text(instrument_name)
 
             currency_lower = currency.lower()
 
@@ -318,7 +312,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
 
             query_trades_all = f"{query_trades_all_basic} {query_trades_all_where}"
 
-            my_trades_instrument_name = await executing_query_with_return(
+            my_trades_instrument_name = await db_mgt.executing_query_with_return(
                 query_trades_all
             )
 
@@ -363,7 +357,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
 
                             log.debug(f"{trade_trd_id}")
 
-                            await saving_traded_orders(
+                            await ord_mgt.saving_traded_orders(
                                 trade,
                                 archive_db_table,
                                 order_db_table,
@@ -385,7 +379,7 @@ async def rechecking_reconciliation_regularly(
 ) -> None:
     """ """
 
-    positions_cached_all = remove_redundant_elements(
+    positions_cached_all = str_mod.remove_redundant_elements(
         [o["instrument_name"] for o in positions_cached]
     )
 
@@ -453,7 +447,7 @@ async def allowing_order_for_instrument_not_in_sub_account(
     result["params"].update({"channel": order_allowed_channel})
     result["params"].update({"data": combined_order_allowed})
 
-    await publishing_result(
+    await redis_client.publishing_result(
         client_redis,
         order_allowed_channel,
         result,
@@ -480,7 +474,7 @@ async def rechecking_based_on_sub_account(
         # sub account instruments
         for instrument_name in positions_cached_instrument:
 
-            currency: str = extract_currency_from_text(instrument_name)
+            currency: str = str_mod.extract_currency_from_text(instrument_name)
 
             currency_lower = currency.lower()
 
@@ -496,7 +490,7 @@ async def rechecking_based_on_sub_account(
                 f"{query_trades_active_basic} {query_trades_active_where}"
             )
 
-            my_trades_instrument_name = await executing_query_with_return(
+            my_trades_instrument_name = await db_mgt.executing_query_with_return(
                 query_trades_active
             )
 
@@ -549,7 +543,7 @@ async def rechecking_based_on_sub_account(
                     order_db_table,
                 )
 
-                my_trades_instrument_name = await executing_query_with_return(
+                my_trades_instrument_name = await db_mgt.executing_query_with_return(
                     query_trades_active
                 )
 
@@ -569,7 +563,7 @@ async def rechecking_based_on_sub_account(
 
                     log.critical(instrument_name)
 
-                    sub_account_size = get_sub_account_size_per_instrument(
+                    sub_account_size = reconciling_db.reconciling_db.is_my_trades_and_sub_account_size_reconciled_each_other(
                         instrument_name,
                         positions_cached,
                     )
@@ -584,7 +578,7 @@ async def rechecking_based_on_sub_account(
 
                             trade_id = trade["trade_id"]
 
-                            await update_status_data(
+                            await db_mgt.update_status_data(
                                 archive_db_table,
                                 "is_open",
                                 where_filter,
@@ -593,7 +587,7 @@ async def rechecking_based_on_sub_account(
                                 "=",
                             )
 
-                await clean_up_closed_transactions(
+                await managing_closed_transactions.clean_up_closed_transactions(
                     archive_db_table,
                     my_trades_instrument_name,
                 )
@@ -601,7 +595,7 @@ async def rechecking_based_on_sub_account(
         result["params"].update({"channel": order_allowed_channel})
         result["params"].update({"data": combined_order_allowed})
 
-        await publishing_result(
+        await redis_client.publishing_result(
             client_redis,
             order_allowed_channel,
             result,
@@ -638,11 +632,11 @@ async def rechecking_based_on_data_in_sqlite(
             f"{query_trades_active_basic} {query_trades_active_where}"
         )
 
-        my_trades_active_currency = await executing_query_with_return(
+        my_trades_active_currency = await db_mgt.executing_query_with_return(
             query_trades_active_currency
         )
 
-        my_trades_active_instrument = remove_redundant_elements(
+        my_trades_active_instrument = str_mod.remove_redundant_elements(
             [o["instrument_name"] for o in my_trades_active_currency]
         )
 
@@ -693,7 +687,7 @@ async def rechecking_based_on_data_in_sqlite(
 
                                 trade_id = trade["trade_id"]
 
-                                await update_status_data(
+                                await db_mgt.update_status_data(
                                     archive_db_table,
                                     "is_open",
                                     where_filter,
@@ -729,8 +723,10 @@ async def rechecking_based_on_data_in_sqlite(
                                 1000,
                             )
 
-                            my_trades_currency = await executing_query_with_return(
-                                query_trades_active_currency
+                            my_trades_currency = (
+                                await db_mgt.executing_query_with_return(
+                                    query_trades_active_currency
+                                )
                             )
 
                             my_trades_instrument_name = [
@@ -763,7 +759,7 @@ async def rechecking_based_on_data_in_sqlite(
 
                             if not my_trades_and_sub_account_size_reconciled:
 
-                                sub_account_size = get_sub_account_size_per_instrument(
+                                sub_account_size = reconciling_db.reconciling_db.is_my_trades_and_sub_account_size_reconciled_each_other(
                                     instrument_name,
                                     positions_cached,
                                 )
@@ -776,7 +772,7 @@ async def rechecking_based_on_data_in_sqlite(
 
                                         trade_id = trade["trade_id"]
 
-                                        await update_status_data(
+                                        await db_mgt.update_status_data(
                                             archive_db_table,
                                             "is_open",
                                             where_filter,
@@ -785,7 +781,7 @@ async def rechecking_based_on_data_in_sqlite(
                                             "=",
                                         )
 
-                    await clean_up_closed_transactions(
+                    await managing_closed_transactions.clean_up_closed_transactions(
                         archive_db_table,
                         my_trades_active,
                     )
@@ -793,7 +789,7 @@ async def rechecking_based_on_data_in_sqlite(
     result["params"].update({"channel": order_allowed_channel})
     result["params"].update({"data": combined_order_allowed})
 
-    await publishing_result(
+    await redis_client.publishing_result(
         client_redis,
         order_allowed_channel,
         result,

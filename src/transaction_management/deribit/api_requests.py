@@ -175,11 +175,11 @@ def ohlc_end_point(
 
 def get_end_point_based_on_side(side: str) -> str:
 
-        if side == "buy":
-            return "private/buy"
+    if side == "buy":
+        return "private/buy"
 
-        if side == "sell":
-            return "private/sell"
+    if side == "sell":
+        return "private/sell"
 
 
 async def get_ohlc_data(
@@ -249,12 +249,12 @@ class SendApiRequest:
 
         if otoco_config:
             params.update({"otoco_config": otoco_config})
-            
+
             if linked_order_type is not None:
                 params.update({"linked_order_type": linked_order_type})
             else:
                 params.update({"linked_order_type": "one_triggers_other"})
-            
+
             params.update({"trigger_fill_condition": "incremental"})
 
             log.debug(f"params otoco_config {params}")
@@ -262,22 +262,22 @@ class SendApiRequest:
         result = None
 
         if side is not None:
-            
+
             endpoint: str = get_end_point_based_on_side(side)
-            
+
             result = await private_connection(
                 self.sub_account_id,
                 endpoint=endpoint,
                 params=params,
             )
-            
+
         return result
 
     async def get_open_orders(
-        self, 
+        self,
         kind: str,
         type: str,
-        ) -> list:
+    ) -> list:
 
         # Set endpoint
         endpoint: str = "private/get_open_orders"
@@ -389,7 +389,7 @@ class SendApiRequest:
             endpoint=endpoint,
             params=params,
         )
-        
+
         return result_sub_account["result"]
 
     async def get_subaccounts_details(
