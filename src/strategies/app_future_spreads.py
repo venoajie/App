@@ -16,11 +16,8 @@ from messaging import (
     subscribing_to_channels,
     telegram_bot_sendtext as tlgrm,
 )
-from strategies.basic_strategy import get_label_integer
-from strategies.cash_carry.combo_auto import (
-    ComboAuto,
-    check_if_minimum_waiting_time_has_passed,
-)
+from strategies import basic_strategy
+from strategies.cash_carry import combo_auto as combo
 from utilities import pickling, string_modification as str_mod, system_tools
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -303,7 +300,7 @@ async def future_spreads(
                                         max_order_currency,
                                     )
 
-                                    combo_auto = ComboAuto(
+                                    combo_auto = combo.ComboAuto(
                                         strategy,
                                         strategy_params,
                                         orders_currency_strategy,
@@ -458,7 +455,9 @@ async def future_spreads(
                                     #! closing active trades
                                     for label in labels:
 
-                                        label_integer: int = get_label_integer(label)
+                                        label_integer: int = (
+                                            basic_strategy.get_label_integer(label)
+                                        )
                                         selected_transaction = [
                                             o
                                             for o in my_trades_currency_strategy
@@ -554,7 +553,7 @@ async def future_spreads(
                                                         waiting_time_for_selected_transaction: (
                                                             bool
                                                         ) = (
-                                                            check_if_minimum_waiting_time_has_passed(
+                                                            combo.check_if_minimum_waiting_time_has_passed(
                                                                 waiting_minute_before_ordering,
                                                                 timestamp,
                                                                 server_time,
