@@ -17,7 +17,7 @@ from db_management.sqlite_management import (
     update_status_data,
 )
 from messaging.telegram_bot import telegram_bot_sendtext
-from messaging import get_published_messages,subscribing_to_channels
+from messaging import get_published_messages, subscribing_to_channels
 from transaction_management.deribit.orders_management import saving_traded_orders
 from utilities.string_modification import (
     extract_currency_from_text,
@@ -121,7 +121,7 @@ async def reconciling_size(
                 message_byte = await pubsub.get_message()
 
                 params = await get_published_messages.get_redis_message(message_byte)
-                
+
                 data, message_channel = params["data"], params["channel"]
 
                 five_days_ago = server_time - (one_minute * 60 * 24 * 5)
@@ -154,7 +154,7 @@ async def reconciling_size(
                     positions_update_channel in message_channel
                     or sub_account_cached_channel in message_channel
                     or my_trade_receiving_channel in message_channel
-                    or portfolio_channel  in message_channel
+                    or portfolio_channel in message_channel
                 ):
 
                     if sub_account_cached_channel in message_channel:
@@ -226,7 +226,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
     order_db_table: str,
 ) -> None:
     """ """
-    
+
     log.critical(instrument_name)
     log.warning(trades_from_exchange)
 
@@ -235,9 +235,8 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
         trades_from_exchange_without_futures_combo = [
             o for o in trades_from_exchange if f"-FS-" not in o["instrument_name"]
         ]
-        
+
         log.info(trades_from_exchange_without_futures_combo)
-        
 
         await telegram_bot_sendtext(
             f"size_futures_not_reconciled-{instrument_name}",
@@ -245,7 +244,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
         )
 
         for trade in trades_from_exchange_without_futures_combo:
-            
+
             log.debug(trade)
             log.warning(my_trades_instrument_name)
 
@@ -296,7 +295,7 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
     order_db_table: str,
 ) -> None:
     """ """
-    
+
     log.info(positions_cached_instrument)
 
     # FROM sub account to other db's
@@ -322,9 +321,9 @@ async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
             my_trades_instrument_name = await executing_query_with_return(
                 query_trades_all
             )
-            
+
             log.info(instrument_name)
-            
+
             if my_trades_instrument_name:
                 log.critical(my_trades_instrument_name)
 
@@ -508,8 +507,10 @@ async def rechecking_based_on_sub_account(
                     positions_cached,
                 )
             )
-            
-            log.critical(f"{instrument_name} {my_trades_and_sub_account_size_reconciled}")
+
+            log.critical(
+                f"{instrument_name} {my_trades_and_sub_account_size_reconciled}"
+            )
 
             if my_trades_and_sub_account_size_reconciled:
 
@@ -521,7 +522,7 @@ async def rechecking_based_on_sub_account(
                 ][0]["size_is_reconciled"] = order_allowed
 
             else:
-                
+
                 log.critical(instrument_name)
 
                 order_allowed = 0
@@ -539,7 +540,7 @@ async def rechecking_based_on_sub_account(
                         1000,
                     )
                 )
-                
+
                 await update_trades_from_exchange_based_on_latest_timestamp(
                     trades_from_exchange,
                     instrument_name,
@@ -559,18 +560,20 @@ async def rechecking_based_on_sub_account(
                         positions_cached,
                     )
                 )
-                
-                log.critical(f"{instrument_name} {my_trades_and_sub_account_size_reconciled}")
+
+                log.critical(
+                    f"{instrument_name} {my_trades_and_sub_account_size_reconciled}"
+                )
 
                 if not my_trades_and_sub_account_size_reconciled:
-                    
+
                     log.critical(instrument_name)
 
                     sub_account_size = get_sub_account_size_per_instrument(
                         instrument_name,
                         positions_cached,
                     )
-                    
+
                     log.warning(sub_account_size)
 
                     if sub_account_size == 0:
@@ -663,8 +666,10 @@ async def rechecking_based_on_data_in_sqlite(
                             positions_cached,
                         )
                     )
-                    
-                    log.critical(f"{instrument_name} {my_trades_and_sub_account_size_reconciled}")
+
+                    log.critical(
+                        f"{instrument_name} {my_trades_and_sub_account_size_reconciled}"
+                    )
 
                     if my_trades_and_sub_account_size_reconciled:
 
@@ -700,16 +705,16 @@ async def rechecking_based_on_data_in_sqlite(
                     else:
 
                         order_allowed = 0
-                        
+
                         order_instrument_name = [
                             o
                             for o in combined_order_allowed
                             if instrument_name in o["instrument_name"]
                         ]
-                        
+
                         log.info(f"{combined_order_allowed}")
                         log.critical(f"{instrument_name} {order_instrument_name}")
-                        
+
                         if order_instrument_name:
 
                             [
@@ -718,12 +723,10 @@ async def rechecking_based_on_data_in_sqlite(
                                 if instrument_name in o["instrument_name"]
                             ][0]["size_is_reconciled"] = order_allowed
 
-                            trades_from_exchange = (
-                                await private_data.get_user_trades_by_instrument_and_time(
-                                    instrument_name,
-                                    five_days_ago,
-                                    1000,
-                                )
+                            trades_from_exchange = await private_data.get_user_trades_by_instrument_and_time(
+                                instrument_name,
+                                five_days_ago,
+                                1000,
                             )
 
                             my_trades_currency = await executing_query_with_return(
@@ -735,7 +738,7 @@ async def rechecking_based_on_data_in_sqlite(
                                 for o in my_trades_currency
                                 if instrument_name in o["instrument_name"]
                             ]
-                            
+
                             log.critical(instrument_name)
 
                             await update_trades_from_exchange_based_on_latest_timestamp(
@@ -753,8 +756,10 @@ async def rechecking_based_on_data_in_sqlite(
                                     positions_cached,
                                 )
                             )
-                            
-                            log.critical(f"{instrument_name} {my_trades_and_sub_account_size_reconciled}")
+
+                            log.critical(
+                                f"{instrument_name} {my_trades_and_sub_account_size_reconciled}"
+                            )
 
                             if not my_trades_and_sub_account_size_reconciled:
 
@@ -793,4 +798,3 @@ async def rechecking_based_on_data_in_sqlite(
         order_allowed_channel,
         result,
     )
-

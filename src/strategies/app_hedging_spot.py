@@ -122,8 +122,8 @@ async def hedging_spot(
         ordered = []
 
         status_transaction = [
-            "open",#normal transactions
-            "closed", #abnormal transactions
+            "open",  # normal transactions
+            "closed",  # abnormal transactions
         ]
 
         ONE_PCT = 1 / 100
@@ -133,15 +133,15 @@ async def hedging_spot(
         ONE_SECOND = 1000
 
         ONE_MINUTE = ONE_SECOND * 60
-        
+
         while not_cancel:
 
             try:
 
                 message_byte = await pubsub.get_message()
-                
+
                 params = await get_published_messages.get_redis_message(message_byte)
-                
+
                 data, message_channel = params["data"], params["channel"]
 
                 if order_allowed_channel in message_channel:
@@ -309,19 +309,20 @@ async def hedging_spot(
                         )
 
                         log.info(f" {strategy} orders_currency {orders_currency}")
-                        
+
                         log.critical(
                             f" {currency} orders_currency_strategy {len(orders_currency_strategy)}  {(orders_currency_strategy)} "
                         )
 
-                        log.warning(f""" ordered {ordered} orders_currency_strategy {[o["label"] for o in orders_currency_strategy]}""")
-                        
+                        log.warning(
+                            f""" ordered {ordered} orders_currency_strategy {[o["label"] for o in orders_currency_strategy]}"""
+                        )
+
                         last_order_has_executed = is_order_has_executed(
-                            ordered,
-                            orders_currency_strategy
-    )
+                            ordered, orders_currency_strategy
+                        )
                         log.info(f" order_has_executed {last_order_has_executed}")
-                        
+
                         max_position: int = notional * -1
 
                         hedging = HedgingSpot(
@@ -430,7 +431,8 @@ async def hedging_spot(
                                                     f"my_trades_currency_contribute_to_hedging_sum {my_trades_currency_contribute_to_hedging_sum}"
                                                 )
 
-                                                if (not ordered 
+                                                if (
+                                                    not ordered
                                                     and status == "open"
                                                     and my_trades_currency_contribute_to_hedging_sum
                                                     <= 0
@@ -486,8 +488,7 @@ async def hedging_spot(
 
                                                         # break
 
-                                                if (not ordered 
-                                                    and status == "closed"):
+                                                if not ordered and status == "closed":
 
                                                     best_ask_prc: (
                                                         float
@@ -669,11 +670,11 @@ def get_instrument_time_left_before_expired(
 
 
 def get_data_and_channel_from_message(message_byte: dict) -> dict:
-    
+
     if message_byte and message_byte["type"] == "message":
 
         message_byte_data = orjson.loads(message_byte["data"])
-        
+
         params = message_byte_data["params"]
 
         return dict(
@@ -697,15 +698,18 @@ def fetch_transactions_with_label_only(transactions: list) -> list:
 def is_order_has_executed(
     ordered: list,
     orders_currency_strategy: list,
-    ) -> bool:
-    
-    order_has_executed = [o for o in ordered if o["label"] in [o["label"] for o in orders_currency_strategy]]
-    
+) -> bool:
+
+    order_has_executed = [
+        o
+        for o in ordered
+        if o["label"] in [o["label"] for o in orders_currency_strategy]
+    ]
+
     if order_has_executed:
         ordered = []
 
     return True if order_has_executed else False
-
 
 
 def get_nearest_transaction_to_index(

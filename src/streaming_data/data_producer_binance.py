@@ -3,31 +3,38 @@
 # built ins
 import asyncio
 import json
-from datetime import datetime, timedelta, timezone
+import time
+from datetime import datetime, timezone
 
 # installed
 import orjson
 import uvloop
 import websockets
-from dataclassy import dataclass, fields
+from dataclassy import dataclass
 from loguru import logger as log
+
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # user defined formula
-from configuration import config, id_numbering
+from configuration import config
 from messaging.telegram_bot import telegram_bot_sendtext
 from utilities.system_tools import parse_error_message
+from utilities.string_modification import hashing
 
 
 def parse_dotenv(sub_account: str) -> dict:
     return config.main_dotenv(sub_account)
 
 
+def get_timestamp():
+    return int(time.time() * 1000)
+
+
 @dataclass(unsafe_hash=True, slots=True)
 class StreamingDataBinance:
-    """ 
+    """
     https://www.binance.com/en/support/faq/detail/18c97e8ab67a4e1b824edd590cae9f16
-    
+
     """
 
     sub_account_id: str
@@ -55,16 +62,20 @@ class StreamingDataBinance:
 
             try:
 
+                timestamp = get_timestamp()
+
+                encoding_result = hashing(timestamp, self.client_id, self.client_secret)
+
                 msg = {
-        "method": "SUBSCRIBE",
-        "params": ["abnormaltradingnotices"],
-        "id": 1
-    }
+                    "method": "SUBSCRIBE",
+                    "params": ["abnormaltradingnotices"],
+                    "id": 1,
+                }
 
                 while True:
-                    
+
                     ws_channel = ["abnormaltradingnotices"]
-                    
+
                     await self.ws_operation(
                         operation="SUBSCRIBE",
                         ws_channel=ws_channel,
@@ -76,7 +87,7 @@ class StreamingDataBinance:
                         # Receive WebSocket messages
                         message: bytes = await self.websocket_client.recv()
                         message: dict = orjson.loads(message)
-                        
+
                         # queing message to dispatcher
                         await queue_general.put(message)
 
@@ -201,8 +212,7 @@ class StreamingDataBinance:
         ws_channel: str,
         source: str = "ws",
     ) -> None:
-        """
-        """
+        """ """
         sleep_time: int = 0.05
 
         await asyncio.sleep(sleep_time)

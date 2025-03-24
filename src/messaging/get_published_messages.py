@@ -6,15 +6,16 @@ import asyncio
 # installed
 import orjson
 
+
 async def get_redis_message(message_byte: bytes) -> dict:
     """ """
 
     try:
-    
+
         if message_byte and message_byte["type"] == "message":
 
             message_byte_data = orjson.loads(message_byte["data"])
-            
+
             params = message_byte_data["params"]
 
             return dict(

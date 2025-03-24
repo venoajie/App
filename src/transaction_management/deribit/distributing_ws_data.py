@@ -141,13 +141,13 @@ async def caching_distributing_data(
         while True:
 
             message_params: str = await queue_general.get()
-            
+
             async with client_redis.pipeline() as pipe:
 
                 try:
-                    
+
                     data: dict = message_params["data"]
-                    
+
                     message_channel: str = message_params["channel"]
 
                     currency: str = extract_currency_from_text(message_channel)
@@ -250,7 +250,10 @@ async def caching_distributing_data(
                             )
 
                     instrument_name_future = (message_channel)[19:]
-                    if message_channel == f"incremental_ticker.{instrument_name_future}":
+                    if (
+                        message_channel
+                        == f"incremental_ticker.{instrument_name_future}"
+                    ):
 
                         # extract server time from data
                         current_server_time = (
@@ -290,7 +293,8 @@ async def caching_distributing_data(
                                     [
                                         o
                                         for o in ticker_all_cached
-                                        if instrument_name_future in o["instrument_name"]
+                                        if instrument_name_future
+                                        in o["instrument_name"]
                                     ][0]["stats"][item] = data_orders_stat[item]
 
                         pub_message = dict(
@@ -340,7 +344,9 @@ async def caching_distributing_data(
                         )
                         pub_message.update({"resolution": resolution})
 
-                        result["params"].update({"channel": chart_low_high_tick_channel})
+                        result["params"].update(
+                            {"channel": chart_low_high_tick_channel}
+                        )
                         result["params"].update({"data": pub_message})
 
                         await publishing_result(
@@ -350,22 +356,24 @@ async def caching_distributing_data(
                         )
 
                 except:
-                    
+
                     try:
-                        
+
                         data: dict = message_params["data"]
-                        
+
                         message_channel: str = message_params["stream"]
-            
+
                         pub_message = dict(
                             data=data,
                         )
-                        
+
                         if "abnormaltradingnotices" in message_channel:
 
-                            result["params"].update({"channel": abnormal_trading_notices})
+                            result["params"].update(
+                                {"channel": abnormal_trading_notices}
+                            )
                             result["params"].update(pub_message)
-                            
+
                             log.debug(result)
 
                             await publishing_result(
@@ -373,11 +381,11 @@ async def caching_distributing_data(
                                 abnormal_trading_notices,
                                 result,
                             )
-                        
+
                     except:
-                        
+
                         data: dict = message_params["result"]
-                    
+
                 await pipe.execute()
 
     except Exception as error:

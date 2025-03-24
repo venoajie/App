@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # built ins
@@ -7,33 +6,19 @@ import asyncio
 # installed
 import orjson
 
-from db_management.sqlite_management import (
-    deleting_row,
-    executing_query_with_return,
-    insert_tables,
-)
-from db_management.redis_client import publishing_result
+from db_management import redis_client, sqlite_management as db_mgt
 from strategies.basic_strategy import is_label_and_side_consistent
-from transaction_management.deribit.cancelling_active_orders import (
-    cancel_by_order_id,
-    cancel_the_cancellables,
-)
-
+from transaction_management.deribit import cancelling_active_orders as cancel_order
 from messaging.telegram_bot import telegram_bot_sendtext
 from messaging import subscribing_to_channels
-from utilities.system_tools import parse_error_message
-
-from utilities.caching import (
-    positions_updating_cached,
-    update_cached_orders,
-)
+from utilities import caching, system_tools as tools
 
 
 async def processing_orders(
     private_data: object,
     client_redis: object,
     cancellable_strategies: list,
-    currencies,
+    currencies: list,
     order_db_table: str,
     redis_channels: list,
     strategy_attributes: list,
@@ -112,7 +97,7 @@ async def processing_orders(
 
                             archive_db_table = f"my_trades_all_{currency_lower}_json"
 
-                            await cancel_the_cancellables(
+                            await cancel_order.cancel_the_cancellables(
                                 private_data,
                                 order_db_table,
                                 currency_lower,
@@ -198,14 +183,14 @@ async def processing_orders(
                                             order_state != "cancelled"
                                             or order_state != "filled"
                                         ):
-                                            await cancel_by_order_id(
+                                            await cancel_order.cancel_by_order_id(
                                                 private_data,
                                                 order_db_table,
                                                 order_id,
                                             )
 
                                             # log.error (f"order {order}")
-                                            await insert_tables(
+                                            await db_mgt.insert_tables(
                                                 order_db_table,
                                                 data,
                                             )
@@ -248,7 +233,7 @@ async def processing_orders(
 
             except Exception as error:
 
-                parse_error_message(error)
+                tools.parse_error_message(error)
 
                 await telegram_bot_sendtext(
                     f"cancelling active orders - {error}",
@@ -262,7 +247,7 @@ async def processing_orders(
 
     except Exception as error:
 
-        parse_error_message(f"procesing orders {error}")
+        tools.parse_error_message(f"procesing orders {error}")
 
         await telegram_bot_sendtext(
             f"processing order - {error}",
@@ -324,12 +309,12 @@ async def cancelling_and_relabelling(
             if "OTO" not in order["order_id"]:
 
                 # log.error (f"order {order}")
-                await insert_tables(
+                await db_mgt.insert_tables(
                     order_db_table,
                     order,
                 )
 
-                await cancel_by_order_id(
+                await cancel_order.cancel_by_order_id(
                     private_data,
                     order_db_table,
                     order_id,
@@ -540,7 +525,7 @@ async def saving_order_based_on_state(
 
     if order_state == "cancelled" or order_state == "filled":
 
-        await deleting_row(
+        await db_mgt.deleting_row(
             order_table,
             "databases/trading.sqlite3",
             filter_trade,
@@ -551,14 +536,14 @@ async def saving_order_based_on_state(
     if order_state == "open":
 
         # log.error (f"order {order}")
-        await insert_tables(
+        await db_mgt.insert_tables(
             order_table,
             order,
         )
 
 
 async def saving_traded_orders(
-    trade: str,
+    trade_result: str,
     trade_table: str,
     order_db_table: str,
 ) -> None:
@@ -571,10 +556,10 @@ async def saving_traded_orders(
 
     filter_trade = "order_id"
 
-    order_id = trade[f"{filter_trade}"]
+    order_id = trade_result[f"{filter_trade}"]
 
     # remove respective transaction from order db
-    await deleting_row(
+    await db_mgt.deleting_row(
         order_db_table,
         "databases/trading.sqlite3",
         filter_trade,
@@ -582,11 +567,25 @@ async def saving_traded_orders(
         order_id,
     )
 
-    # record trading transaction
-    # log.error (f"trade {trade}")
-    await insert_tables(
+    trade_to_db = trade_template()
+
+    trade_to_db.update({"instrument_name": trade_result["instrument_name"]})
+    trade_to_db.update({"amount": trade_result["amount"]})
+    trade_to_db.update({"price": trade_result["price"]})
+    trade_to_db.update({"direction": trade_result["direction"]})
+    trade_to_db.update({"trade_id": trade_result["trade_id"]})
+    trade_to_db.update({"order_id": trade_result["order_id"]})
+
+    try:
+        trade_to_db.update({"label": trade_result["label"]})
+
+    except:
+
+        pass
+
+    await db_mgt.insert_tables(
         trade_table,
-        trade,
+        trade_to_db,
     )
 
 
@@ -623,7 +622,7 @@ async def saving_oto_order(
         ):
 
             # log.error (f"transaction_main {transaction_main}")
-            await insert_tables(
+            await db_mgt.insert_tables(
                 order_db_table,
                 transaction_main,
             )
@@ -632,7 +631,7 @@ async def saving_oto_order(
                 transaction_main, transaction_secondary
             )
 
-            await cancel_by_order_id(
+            await cancel_order.cancel_by_order_id(
                 private_data,
                 order_db_table,
                 transaction_main["order_id"],
@@ -647,7 +646,7 @@ async def saving_oto_order(
 
         else:
             # log.error (f"transaction_main {transaction_main}")
-            await insert_tables(
+            await db_mgt.insert_tables(
                 order_db_table,
                 transaction_main,
             )
@@ -668,7 +667,7 @@ async def updating_sub_account(
         open_orders = [o["open_orders"] for o in subaccounts_details_result]
 
         if open_orders:
-            update_cached_orders(
+            caching.update_cached_orders(
                 orders_cached,
                 open_orders[0],
                 "rest",
@@ -676,13 +675,13 @@ async def updating_sub_account(
         positions = [o["positions"] for o in subaccounts_details_result]
 
         if positions:
-            positions_updating_cached(
+            caching.positions_updating_cached(
                 positions_cached,
                 positions[0],
                 "rest",
             )
 
-    my_trades_active_all = await executing_query_with_return(query_trades)
+    my_trades_active_all = await db_mgt.executing_query_with_return(query_trades)
 
     data = dict(
         positions=positions_cached,
@@ -693,8 +692,31 @@ async def updating_sub_account(
     message_byte_data["params"].update({"channel": sub_account_cached_channel})
     message_byte_data["params"].update({"data": data})
 
-    await publishing_result(
+    await redis_client.publishing_result(
         client_redis,
         sub_account_cached_channel,
         message_byte_data,
+    )
+
+
+def trade_template() -> str:
+
+    """
+    combining result from websocket (user changes/trade)
+        and rest API (get_transaction_log)
+
+    """
+    return dict(
+        instrument_name=None,
+        #                 label=None, commented as label header is needed as identification for no label
+        amount=None,
+        price=None,
+        side=None,
+        direction=None,
+        position=None,
+        currency=None,
+        timestamp=None,
+        trade_id=None,
+        order_id=None,
+        user_seq=None,
     )
