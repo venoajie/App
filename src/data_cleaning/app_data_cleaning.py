@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
+# built ins
 import asyncio
-import orjson
 
+# installed
 from loguru import logger as log
 
+# user defined formulas
 from data_cleaning import managing_closed_transactions, reconciling_db
 from db_management import redis_client, sqlite_management as db_mgt
 from messaging import (
@@ -32,6 +34,7 @@ async def reconciling_size(
 ) -> None:
 
     try:
+
         # connecting to redis pubsub
         pubsub: object = client_redis.pubsub()
 

@@ -5,41 +5,31 @@ import asyncio
 import math
 from random import sample
 
+# installed
+from loguru import logger as log
 import orjson
 import uvloop
 
-# installed
-from loguru import logger as log
-
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
-from db_management.redis_client import publishing_result
-from db_management.sqlite_management import executing_query_with_return
-from messaging.get_published_messages import get_redis_message
-from messaging import subscribing_to_channels
-from messaging.telegram_bot import telegram_bot_sendtext
+# user defined formulas
+from db_management import redis_client, sqlite_management as db_mgt
+from messaging import (
+    subscribing_to_channels,
+    telegram_bot_sendtext as tlgrm,
+)
 from strategies.basic_strategy import get_label_integer
 from strategies.cash_carry.combo_auto import (
     ComboAuto,
     check_if_minimum_waiting_time_has_passed,
 )
-from utilities.pickling import read_data
+from utilities import pickling, string_modification as str_mod, system_tools
 
-from utilities.string_modification import (
-    message_template,
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,
-)
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 async def future_spreads(
     client_redis: object,
     config_app: list,
-    futures_instruments,
+    futures_instruments: list,
     redis_channels: list,
     strategy_attributes: list,
 ) -> None:
@@ -99,7 +89,7 @@ async def future_spreads(
 
         allowed_instruments = []
 
-        result = message_template()
+        result = str_mod.message_template()
 
         while not_cancel:
 
@@ -131,7 +121,7 @@ async def future_spreads(
 
                     if my_trades_channel in message_channel:
 
-                        my_trades_active_all = await executing_query_with_return(
+                        my_trades_active_all = await db_mgt.executing_query_with_return(
                             query_trades
                         )
 
@@ -445,7 +435,7 @@ async def future_spreads(
                                                             {"data": send_order}
                                                         )
 
-                                                        await publishing_result(
+                                                        await redis_client.publishing_result(
                                                             pipe,
                                                             sending_order_channel,
                                                             result,
@@ -459,7 +449,7 @@ async def future_spreads(
                                                 instrument_name_future
                                             )
                                     # get labels from active trades
-                                    labels = remove_redundant_elements(
+                                    labels = str_mod.remove_redundant_elements(
                                         my_trades_currency_strategy_labels
                                     )
 
@@ -514,7 +504,7 @@ async def future_spreads(
                                                             {"data": send_order}
                                                         )
 
-                                                        await publishing_result(
+                                                        await redis_client.publishing_result(
                                                             pipe,
                                                             sending_order_channel,
                                                             result,
@@ -615,7 +605,7 @@ async def future_spreads(
                                                                     {"data": send_order}
                                                                 )
 
-                                                                await publishing_result(
+                                                                await redis_client.publishing_result(
                                                                     pipe,
                                                                     sending_order_channel,
                                                                     result,
@@ -627,7 +617,7 @@ async def future_spreads(
 
             except Exception as error:
 
-                parse_error_message(error)
+                system_tools.parse_error_message(error)
 
                 continue
 
@@ -636,18 +626,18 @@ async def future_spreads(
 
     except Exception as error:
 
-        await telegram_bot_sendtext(
+        await tlgrm.telegram_bot_sendtext(
             f"app future spreads - {error}",
             "general_error",
         )
 
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
 
 
 def get_settlement_period(strategy_attributes) -> list:
 
-    return remove_redundant_elements(
-        remove_double_brackets_in_list(
+    return str_mod.remove_redundant_elements(
+        str_mod.remove_double_brackets_in_list(
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
@@ -660,9 +650,9 @@ def reading_from_pkl_data(
 ) -> dict:
     """ """
 
-    path: str = provide_path_for_file(end_point, currency, status)
+    path: str = system_tools.provide_path_for_file(end_point, currency, status)
 
-    return read_data(path)
+    return pickling.read_data(path)
 
 
 def compute_notional_value(
