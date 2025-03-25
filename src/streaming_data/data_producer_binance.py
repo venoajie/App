@@ -39,6 +39,7 @@ class StreamingDataBinance:
 
     sub_account_id: str
     client_id: str = fields
+    client_secret: str = fields
     # Async Event Loop
     loop = asyncio.get_event_loop()
     ws_connection_url: str = "wss://bstream.binance.com:9443/stream?"
