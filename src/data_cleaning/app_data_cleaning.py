@@ -766,7 +766,7 @@ async def rechecking_based_on_data_in_sqlite(
 
                             if not my_trades_and_sub_account_size_reconciled:
 
-                                sub_account_size = reconciling_db.is_my_trades_and_sub_account_size_reconciled_each_other(
+                                sub_account_size = reconciling_db.get_sub_account_size_per_instrument(
                                     instrument_name,
                                     positions_cached,
                                 )
