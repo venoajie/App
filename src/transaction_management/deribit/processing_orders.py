@@ -6,11 +6,12 @@ import asyncio
 # installed
 import orjson
 
+
+# user defined formula
 from db_management import redis_client, sqlite_management as db_mgt
 from strategies.basic_strategy import is_label_and_side_consistent
 from transaction_management.deribit import cancelling_active_orders as cancel_order
-from messaging.telegram_bot import telegram_bot_sendtext
-from messaging import subscribing_to_channels
+from messaging import telegram_bot as tlgrm, subscribing_to_channels
 from utilities import caching, system_tools as tools
 
 
@@ -235,7 +236,7 @@ async def processing_orders(
 
                 tools.parse_error_message(error)
 
-                await telegram_bot_sendtext(
+                await tlgrm.telegram_bot_sendtext(
                     f"cancelling active orders - {error}",
                     "general_error",
                 )
@@ -249,7 +250,7 @@ async def processing_orders(
 
         tools.parse_error_message(f"procesing orders {error}")
 
-        await telegram_bot_sendtext(
+        await tlgrm.telegram_bot_sendtext(
             f"processing order - {error}",
             "general_error",
         )

@@ -2,22 +2,17 @@
 import asyncio
 from typing import Dict
 
-# import json, orjson
+# installed
 import aiohttp
 import httpx
 from aiohttp.helpers import BasicAuth
-
-# installed
 from dataclassy import dataclass
 from loguru import logger as log
 
 # user defined formula
 from configuration import config, config_oci, id_numbering
-from messaging.telegram_bot import telegram_bot_sendtext
-from utilities.time_modification import get_now_unix_time as get_now_unix
-from utilities.string_modification import (
-    transform_nested_dict_to_list_ohlc,
-)
+from messaging import telegram_bot as tlgrm
+from utilities import string_modification as str_mod, time_modification as time_mod
 
 
 def parse_dotenv(sub_account: str) -> str:
@@ -110,7 +105,7 @@ async def send_requests_to_url(end_point: str) -> list:
 
     except Exception as error:
 
-        await telegram_bot_sendtext(
+        await tlgrm.telegram_bot_sendtext(
             f"error send_requests_to_url - {error} {end_point}",
             "general_error",
         )
@@ -156,7 +151,7 @@ def ohlc_end_point(
 
     url = f"https://deribit.com/api/v2/public/get_tradingview_chart_data?"
 
-    now_unix = get_now_unix()
+    now_unix = time_mod.get_now_unix_time()
 
     # start timestamp is provided
     start_timestamp = qty_or_start_time_stamp
@@ -201,7 +196,7 @@ async def get_ohlc_data(
 
     result = await send_requests_to_url(end_point)
 
-    return transform_nested_dict_to_list_ohlc(result)
+    return str_mod.transform_nested_dict_to_list_ohlc(result)
 
 
 @dataclass(unsafe_hash=True, slots=True)
@@ -366,7 +361,7 @@ class SendApiRequest:
             except:
                 data = message
 
-            await telegram_bot_sendtext(
+            await tlgrm.telegram_bot_sendtext(
                 f"message: {message}, \
                                          data: {data}, \
                                          (params: {params}"
@@ -558,7 +553,7 @@ class SendApiRequest:
         # Set endpoint
         endpoint: str = f"private/get_user_trades_by_instrument_and_time"
 
-        now_unix = get_now_unix()
+        now_unix = time_mod.get_now_unix_time()
 
         params = {
             "count": count,
@@ -592,12 +587,21 @@ class SendApiRequest:
 
     async def get_transaction_log(
         self,
-        currency,
+        currency: str,
         start_timestamp: int,
         count: int = 1000,
+        query: str = "trade",
     ) -> list:
 
-        now_unix = get_now_unix()
+        """
+        query:
+            trade, maker, taker, open, close, liquidation, buy, sell,
+            withdrawal, delivery, settlement, deposit, transfer,
+            option, future, correction, block_trade, swap
+
+        """
+
+        now_unix = time_mod.get_now_unix_time()
 
         # Set endpoint
         endpoint: str = f"private/get_transaction_log"
@@ -605,6 +609,7 @@ class SendApiRequest:
             "count": count,
             "currency": currency.upper(),
             "end_timestamp": now_unix,
+            "query": query,
             "start_timestamp": start_timestamp,
         }
 
@@ -623,7 +628,7 @@ class SendApiRequest:
 
             error = result_transaction_log_to_result["error"]
             message = error["message"]
-            await telegram_bot_sendtext(
+            await tlgrm.telegram_bot_sendtext(
                 f"transaction_log message: {message}, (params: {params})"
             )
 

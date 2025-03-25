@@ -14,7 +14,7 @@ import uvloop
 from db_management import redis_client, sqlite_management as db_mgt
 from messaging import (
     subscribing_to_channels,
-    telegram_bot_sendtext as tlgrm,
+    telegram_bot as tlgrm,
 )
 from strategies import basic_strategy
 from strategies.cash_carry import combo_auto as combo

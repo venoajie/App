@@ -12,7 +12,7 @@ from db_management import redis_client, sqlite_management as db_mgt
 from messaging import (
     get_published_messages,
     subscribing_to_channels,
-    telegram_bot_sendtext as tlgrm,
+    telegram_bot as tlgrm,
 )
 from transaction_management.deribit.orders_management import (
     orders_management as ord_mgt,
@@ -153,6 +153,18 @@ async def reconciling_size(
                     or my_trade_receiving_channel in message_channel
                     or portfolio_channel in message_channel
                 ):
+
+                    for currency in currencies:
+                        currency: str = str_mod.extract_currency_from_text(instrument_name)
+
+                        currency_lower = currency.lower()
+
+                        archive_db_table = f"my_trades_all_{currency_lower}_json"
+                                
+                        await inserting_transaction_log_data(
+                            private_data,
+                            archive_db_table,
+                            currency,)
 
                     if sub_account_cached_channel in message_channel:
                         positions_cached = data["positions"]
@@ -498,7 +510,7 @@ async def rechecking_based_on_sub_account(
             )
 
             my_trades_and_sub_account_size_reconciled = (
-                is_my_trades_and_sub_account_size_reconciled_each_other(
+                reconciling_db.is_my_trades_and_sub_account_size_reconciled_each_other(
                     instrument_name,
                     my_trades_instrument_name,
                     positions_cached,
@@ -550,12 +562,10 @@ async def rechecking_based_on_sub_account(
                     query_trades_active
                 )
 
-                my_trades_and_sub_account_size_reconciled = (
-                    is_my_trades_and_sub_account_size_reconciled_each_other(
-                        instrument_name,
-                        my_trades_instrument_name,
-                        positions_cached,
-                    )
+                my_trades_and_sub_account_size_reconciled = reconciling_db.is_my_trades_and_sub_account_size_reconciled_each_other(
+                    instrument_name,
+                    my_trades_instrument_name,
+                    positions_cached,
                 )
 
                 log.critical(
@@ -656,12 +666,10 @@ async def rechecking_based_on_data_in_sqlite(
 
                 if my_trades_active:
 
-                    my_trades_and_sub_account_size_reconciled = (
-                        is_my_trades_and_sub_account_size_reconciled_each_other(
-                            instrument_name,
-                            my_trades_active,
-                            positions_cached,
-                        )
+                    my_trades_and_sub_account_size_reconciled = reconciling_db.is_my_trades_and_sub_account_size_reconciled_each_other(
+                        instrument_name,
+                        my_trades_active,
+                        positions_cached,
                     )
 
                     log.critical(
@@ -748,12 +756,10 @@ async def rechecking_based_on_data_in_sqlite(
                                 order_db_table,
                             )
 
-                            my_trades_and_sub_account_size_reconciled = (
-                                is_my_trades_and_sub_account_size_reconciled_each_other(
-                                    instrument_name,
-                                    my_trades_currency,
-                                    positions_cached,
-                                )
+                            my_trades_and_sub_account_size_reconciled = reconciling_db.is_my_trades_and_sub_account_size_reconciled_each_other(
+                                instrument_name,
+                                my_trades_currency,
+                                positions_cached,
                             )
 
                             log.critical(
@@ -797,3 +803,61 @@ async def rechecking_based_on_data_in_sqlite(
         order_allowed_channel,
         result,
     )
+
+
+async def inserting_transaction_log_data(
+    private_data: object,
+    archive_db_table: str,
+    currency: str,
+) -> None:
+    """ """
+
+    query_trades_active_basic = f"SELECT instrument_name, user_seq, timestamp, trade_id  FROM  {archive_db_table}"
+
+    query_trades_active_where = f"WHERE instrument_name LIKE '%{currency}%'"
+
+    query_trades = f"{query_trades_active_basic} {query_trades_active_where}"
+
+    my_trades_currency = await db_mgt.executing_query_with_return(query_trades)
+
+    my_trades_currency_with_blanks_timestamp = [
+        o["timestamp"] for o in my_trades_currency if o["user_seq"] is None
+    ]
+    
+    log.debug(f"my_trades_currency_with_blanks_timestamp {my_trades_currency_with_blanks_timestamp}")
+
+    if my_trades_currency_with_blanks_timestamp:
+
+        min_timestamp = min(my_trades_currency_with_blanks_timestamp)-100000
+
+        transaction_log = await private_data.get_transaction_log(
+            currency,
+            min_timestamp,
+            100,
+            "trade",
+        )
+        
+    where_filter = f"trade_id"
+    
+    for transaction in transaction_log:
+        trade_id = transaction["trade_id"]
+        user_seq = transaction["user_seq"]
+        side = transaction["side"]
+        timestamp = transaction["timestamp"]
+        position = transaction["position"]
+
+        await db_mgt.update_status_data(
+            archive_db_table, "user_seq", where_filter, trade_id, user_seq, "="
+        )
+
+        await db_mgt.update_status_data(
+            archive_db_table, "side", where_filter, trade_id, side, "="
+        )
+
+        await db_mgt.update_status_data(
+            archive_db_table, "timestamp", where_filter, trade_id, timestamp, "="
+        )
+        
+        await db_mgt.update_status_data(
+            archive_db_table, "position", where_filter, trade_id, position, "="
+        )
