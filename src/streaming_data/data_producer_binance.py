@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 import orjson
 import uvloop
 import websockets
-from dataclassy import dataclass
+from dataclassy import dataclass, fields
 from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -38,6 +38,7 @@ class StreamingDataBinance:
     """
 
     sub_account_id: str
+    client_id: str = fields
     # Async Event Loop
     loop = asyncio.get_event_loop()
     ws_connection_url: str = "wss://bstream.binance.com:9443/stream?"
