@@ -834,28 +834,28 @@ async def inserting_transaction_log_data(
             100,
             "trade",
         )
+            
+        where_filter = f"trade_id"
         
-    where_filter = f"trade_id"
-    
-    for transaction in transaction_log:
-        trade_id = transaction["trade_id"]
-        user_seq = transaction["user_seq"]
-        side = transaction["side"]
-        timestamp = transaction["timestamp"]
-        position = transaction["position"]
+        for transaction in transaction_log:
+            trade_id = transaction["trade_id"]
+            user_seq = transaction["user_seq"]
+            side = transaction["side"]
+            timestamp = transaction["timestamp"]
+            position = transaction["position"]
 
-        await db_mgt.update_status_data(
-            archive_db_table, "user_seq", where_filter, trade_id, user_seq, "="
-        )
+            await db_mgt.update_status_data(
+                archive_db_table, "user_seq", where_filter, trade_id, user_seq, "="
+            )
 
-        await db_mgt.update_status_data(
-            archive_db_table, "side", where_filter, trade_id, side, "="
-        )
+            await db_mgt.update_status_data(
+                archive_db_table, "side", where_filter, trade_id, side, "="
+            )
 
-        await db_mgt.update_status_data(
-            archive_db_table, "timestamp", where_filter, trade_id, timestamp, "="
-        )
-        
-        await db_mgt.update_status_data(
-            archive_db_table, "position", where_filter, trade_id, position, "="
-        )
+            await db_mgt.update_status_data(
+                archive_db_table, "timestamp", where_filter, trade_id, timestamp, "="
+            )
+            
+            await db_mgt.update_status_data(
+                archive_db_table, "position", where_filter, trade_id, position, "="
+            )
