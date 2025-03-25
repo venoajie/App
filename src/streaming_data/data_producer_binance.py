@@ -64,9 +64,9 @@ class StreamingDataBinance:
 
             try:
 
-                timestamp = get_timestamp()
+                #timestamp = get_timestamp()
 
-                encoding_result = hashing(timestamp, self.client_id, self.client_secret)
+                #encoding_result = hashing(timestamp, self.client_id, self.client_secret)
 
                 msg = {
                     "method": "SUBSCRIBE",
