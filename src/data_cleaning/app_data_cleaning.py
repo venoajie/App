@@ -14,9 +14,7 @@ from messaging import (
     subscribing_to_channels,
     telegram_bot as tlgrm,
 )
-from transaction_management.deribit.orders_management import (
-    orders_management as ord_mgt,
-)
+from transaction_management.deribit import orders_management as ord_mgt
 from utilities import (
     string_modification as str_mod,
     system_tools,
