@@ -17,7 +17,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from configuration import config, config_oci, id_numbering
 from messaging.telegram_bot import telegram_bot_sendtext
 from transaction_management.deribit.api_requests import (
-    get_end_point_result,
+    get_api_end_point,
 )
 from utilities.string_modification import (
     extract_currency_from_text,
@@ -427,7 +427,7 @@ class StreamingAccountData:
 
         if "rest_api" in source:
 
-            extra_params: dict = await get_end_point_result(
+            extra_params: dict = await get_api_end_point(
                 operation,
                 ws_channel,
             )
