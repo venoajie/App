@@ -38,6 +38,7 @@ def get_duplicated_elements(data: list) -> list:
 
     Reference:
         https://www.geeksforgeeks.org/python-program-print-duplicates-list-integers/
+        https://medium.com/@ryan_forrester_/finding-duplicates-in-python-lists-a-complete-guide-6092b34ac375
 
     """
 

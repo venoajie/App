@@ -158,7 +158,7 @@ async def processing_orders(
                                         label,
                                         order_state,
                                         order_id,
-                                        cancelling_and_relabelling,
+                                        ordered,
                                     )
 
                                 else:
@@ -257,7 +257,10 @@ async def processing_orders(
 
 
 async def if_order_is_true(
-    private_data, non_checked_strategies, order: dict, ordered: list
+    private_data: object, 
+    non_checked_strategies: list, 
+    order: dict, 
+    ordered: list,
 ) -> None:
     """ """
 
@@ -265,18 +268,18 @@ async def if_order_is_true(
 
         # get parameter orders
         try:
-            params = order["order_parameters"]
+            params: dict = order["order_parameters"]
         except:
-            params = order
+            params: dict = order
 
-        label_and_side_consistent = is_label_and_side_consistent(
+        label_and_side_consistent: bool = is_label_and_side_consistent(
             non_checked_strategies,
             params,
         )
 
         if label_and_side_consistent:
             send_limit_result = await private_data.send_limit_order(params)
-
+#! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             ordered.append(params)
 
             return send_limit_result
@@ -700,6 +703,22 @@ async def updating_sub_account(
         message_byte_data,
     )
 
+
+def is_order_has_executed(
+    ordered: list,
+    orders_from_exchange: list,
+) -> bool:
+
+    order_has_executed = [
+        o
+        for o in ordered
+        if o["label"] in [o["label"] for o in orders_from_exchange]
+    ]
+
+    if order_has_executed:
+        ordered = []
+
+    return True if order_has_executed else False
 
 def trade_template() -> str:
 
