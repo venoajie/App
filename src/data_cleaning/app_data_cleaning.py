@@ -217,7 +217,7 @@ async def reconciling_size(
 
     except Exception as error:
 
-        await tlgrm.telegram_bot_sendtext_sendtext(
+        await tlgrm.telegram_bot_sendtext(
             f"app data cleaning -reconciling size - {error}",
             "general_error",
         )
@@ -245,7 +245,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
 
         log.info(trades_from_exchange_without_futures_combo)
 
-        await tlgrm.telegram_bot_sendtext_sendtext(
+        await tlgrm.telegram_bot_sendtext(
             f"size_futures_not_reconciled-{instrument_name}",
             "general_error",
         )
