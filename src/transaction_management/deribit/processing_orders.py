@@ -5,15 +5,14 @@ import asyncio
 
 # installed
 import orjson
-
+from loguru import logger as log
 
 # user defined formula
 from db_management import redis_client, sqlite_management as db_mgt
-from strategies.basic_strategy import is_label_and_side_consistent
+from messaging import subscribing_to_channels, telegram_bot as tlgrm
+from strategies import basic_strategy
 from transaction_management.deribit import cancelling_active_orders as cancel_order
-from messaging import telegram_bot as tlgrm, subscribing_to_channels
-from utilities import caching, system_tools as tools
-
+from utilities import caching, string_modification as str_mod, system_tools as tools
 
 async def processing_orders(
     private_data: object,
@@ -163,7 +162,7 @@ async def processing_orders(
 
                                 else:
                                     label_and_side_consistent = (
-                                        is_label_and_side_consistent(
+                                        basic_strategy.is_label_and_side_consistent(
                                             non_checked_strategies, data
                                         )
                                     )
@@ -272,17 +271,33 @@ async def if_order_is_true(
         except:
             params: dict = order
 
-        label_and_side_consistent: bool = is_label_and_side_consistent(
+        label_and_side_consistent: bool = basic_strategy.is_label_and_side_consistent(
             non_checked_strategies,
             params,
         )
 
         if label_and_side_consistent:
-            send_limit_result = await private_data.send_limit_order(params)
-#! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            ordered.append(params)
+            
+            label = str_mod.parsing_label(params["label"])["main"]
+            log.debug(f"label {label}")
+            label_has_order_id = [o["order_id"] for o in ordered if label in o["label"]]
+            log.debug(f"label_has_order_id {label_has_order_id}")
+            
+            if label_has_order_id:
+                ordered.remove(params)
+            
+            else:
+                if ordered == []:
+                    send_limit_result = await private_data.send_limit_order(params)
+                    
+                    return send_limit_result
+                
+                else:
+                    ordered.append(params)
+                    
+                    return []
 
-            return send_limit_result
+            
             # await asyncio.sleep(10)
         else:
 
