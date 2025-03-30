@@ -14,6 +14,7 @@ from strategies import basic_strategy
 from transaction_management.deribit import cancelling_active_orders as cancel_order
 from utilities import caching, string_modification as str_mod, system_tools as tools
 
+
 async def processing_orders(
     private_data: object,
     client_redis: object,
@@ -68,6 +69,8 @@ async def processing_orders(
         ordered_hedging = []
 
         ordered_spread = []
+        
+        ordered = []
 
         from loguru import logger as log
 
@@ -256,9 +259,9 @@ async def processing_orders(
 
 
 async def if_order_is_true(
-    private_data: object, 
-    non_checked_strategies: list, 
-    order: dict, 
+    private_data: object,
+    non_checked_strategies: list,
+    order: dict,
     ordered: list,
 ) -> None:
     """ """
@@ -277,27 +280,26 @@ async def if_order_is_true(
         )
 
         if label_and_side_consistent:
-            
+
             label = str_mod.parsing_label(params["label"])["main"]
             log.debug(f"label {label}")
             label_has_order_id = [o["order_id"] for o in ordered if label in o["label"]]
             log.debug(f"label_has_order_id {label_has_order_id}")
-            
+
             if label_has_order_id:
                 ordered.remove(params)
-            
+
             else:
                 if ordered == []:
                     send_limit_result = await private_data.send_limit_order(params)
-                    
+
                     return send_limit_result
-                
+
                 else:
                     ordered.append(params)
-                    
+
                     return []
 
-            
             # await asyncio.sleep(10)
         else:
 
@@ -725,15 +727,14 @@ def is_order_has_executed(
 ) -> bool:
 
     order_has_executed = [
-        o
-        for o in ordered
-        if o["label"] in [o["label"] for o in orders_from_exchange]
+        o for o in ordered if o["label"] in [o["label"] for o in orders_from_exchange]
     ]
 
     if order_has_executed:
         ordered = []
 
     return True if order_has_executed else False
+
 
 def trade_template() -> str:
 

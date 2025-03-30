@@ -153,16 +153,19 @@ async def reconciling_size(
                 ):
 
                     for currency in currencies:
-                        currency: str = str_mod.extract_currency_from_text(instrument_name)
+                        currency: str = str_mod.extract_currency_from_text(
+                            instrument_name
+                        )
 
                         currency_lower = currency.lower()
 
                         archive_db_table = f"my_trades_all_{currency_lower}_json"
-                                
+
                         await inserting_transaction_log_data(
                             private_data,
                             archive_db_table,
-                            currency,)
+                            currency,
+                        )
 
                     if sub_account_cached_channel in message_channel:
                         positions_cached = data["positions"]
@@ -766,9 +769,11 @@ async def rechecking_based_on_data_in_sqlite(
 
                             if not my_trades_and_sub_account_size_reconciled:
 
-                                sub_account_size = reconciling_db.get_sub_account_size_per_instrument(
-                                    instrument_name,
-                                    positions_cached,
+                                sub_account_size = (
+                                    reconciling_db.get_sub_account_size_per_instrument(
+                                        instrument_name,
+                                        positions_cached,
+                                    )
                                 )
 
                                 if sub_account_size == 0:
@@ -821,12 +826,14 @@ async def inserting_transaction_log_data(
     my_trades_currency_with_blanks_timestamp = [
         o["timestamp"] for o in my_trades_currency if o["user_seq"] is None
     ]
-    
-    log.debug(f"my_trades_currency_with_blanks_timestamp {my_trades_currency_with_blanks_timestamp}")
+
+    log.debug(
+        f"my_trades_currency_with_blanks_timestamp {my_trades_currency_with_blanks_timestamp}"
+    )
 
     if my_trades_currency_with_blanks_timestamp:
 
-        min_timestamp = min(my_trades_currency_with_blanks_timestamp)-100000
+        min_timestamp = min(my_trades_currency_with_blanks_timestamp) - 100000
 
         transaction_log = await private_data.get_transaction_log(
             currency,
@@ -834,9 +841,9 @@ async def inserting_transaction_log_data(
             100,
             "trade",
         )
-            
+
         where_filter = f"trade_id"
-        
+
         for transaction in transaction_log:
             trade_id = transaction["trade_id"]
             user_seq = transaction["user_seq"]
@@ -855,7 +862,7 @@ async def inserting_transaction_log_data(
             await db_mgt.update_status_data(
                 archive_db_table, "timestamp", where_filter, trade_id, timestamp, "="
             )
-            
+
             await db_mgt.update_status_data(
                 archive_db_table, "position", where_filter, trade_id, position, "="
             )

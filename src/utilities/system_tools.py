@@ -23,13 +23,15 @@ def get_ttl_hash(seconds=5):
     utime = datetime.datetime.now().timestamp()
     return round(utime / (seconds + 1))
 
+
 def convert_size(size_bytes):
     """Convert bytes to human readable format."""
-    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_bytes < 1024:
             return f"{size_bytes:.2f} {unit}"
         size_bytes /= 1024
     return f"{size_bytes:.2f} PB"
+
 
 def get_file_size():
     """A decorator for TTL cache functionality.
@@ -37,13 +39,14 @@ def get_file_size():
     https://medium.com/@ryan_forrester_/getting-file-sizes-in-python-a-complete-guide-01293aaa68ef
 
     Args:
-        
+
     """
     import os
 
     file_path = "error.log"
     size_bytes = convert_size(os.path.getsize(file_path))
     print(f"{file_path} file size: {size_bytes} bytes")
+
 
 def ttl_cache(ttl_seconds=5):
     """A decorator for TTL cache functionality.
