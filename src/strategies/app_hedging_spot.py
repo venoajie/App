@@ -151,6 +151,8 @@ async def hedging_spot(
                     allowed_instruments = [
                         o for o in order_allowed if o["size_is_reconciled"] == 1
                     ]
+                    
+                    log.info(f"allowed_instruments {allowed_instruments}")
 
                 if market_analytics_channel in message_channel:
 
@@ -176,6 +178,7 @@ async def hedging_spot(
 
                     cached_orders = data["open_orders"]
 
+                log.warning(f"cached_orders {cached_orders}")
                 if (
                     allowed_instruments
                     and ticker_cached_channel in message_channel
