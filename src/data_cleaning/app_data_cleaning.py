@@ -149,6 +149,9 @@ async def reconciling_size(
                                 )
                                             
                             where_filter = f"trade_id"
+                            
+                            currency_lower = currency.lower()
+                            archive_db_table = f"my_trades_all_{currency_lower}_json"
 
                             for transaction in transaction_log:
                                 trade_id = transaction["trade_id"]
