@@ -38,12 +38,11 @@ from utilities.string_modification import (
 
 
 async def caching_distributing_data(
-    private_data: object,
     client_redis: object,
     currencies: list,
+    initial_data: dict,
     redis_channels: list,
     redis_keys: list,
-    relevant_tables,
     strategy_attributes,
     queue_general: object,
 ) -> None:
@@ -125,12 +124,7 @@ async def caching_distributing_data(
 
         ticker_all_cached = combining_ticker_data(instruments_name)
 
-        # sub_account_combining
-        sub_accounts = [
-            await private_data.get_subaccounts_details(o) for o in currencies
-        ]
-
-        sub_account_cached = sub_account_combining(sub_accounts)
+        sub_account_cached = initial_data["sub_account_combined"]
         orders_cached = sub_account_cached["orders_cached"]
         positions_cached = sub_account_cached["positions_cached"]
 
@@ -451,40 +445,6 @@ async def updating_portfolio(
         pipe,
         portfolio_channel,
         result,
-    )
-
-
-def sub_account_combining(
-    sub_accounts: list,
-) -> None:
-
-    orders_cached = []
-    positions_cached = []
-
-    for sub_account in sub_accounts:
-        # result = await private_data.get_subaccounts_details(currency)
-
-        sub_account = sub_account[0]
-
-        sub_account_orders = sub_account["open_orders"]
-
-        if sub_account_orders:
-
-            for order in sub_account_orders:
-
-                orders_cached.append(order)
-
-        sub_account_positions = sub_account["positions"]
-
-        if sub_account_positions:
-
-            for position in sub_account_positions:
-
-                positions_cached.append(position)
-
-    return dict(
-        orders_cached=orders_cached,
-        positions_cached=positions_cached,
     )
 
 

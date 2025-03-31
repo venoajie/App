@@ -105,9 +105,9 @@ async def initial_procedures(
 
     except Exception as error:
 
-        system_tools.parse_error_message(f"starter refill db {error}")
+        system_tools.parse_error_message(f"starter initial_procedures {error}")
 
-        await tlgrm.telegram_bot_sendtext(f"starter refill db-{error}", "general_error")
+        await tlgrm.telegram_bot_sendtext(f"starter initial_procedures {error}", "general_error")
 
 
 async def refill_db(
@@ -149,3 +149,64 @@ async def refill_db(
             archive_db_table,
             result,
         )
+
+
+async def initial_data(
+    private_data: object,
+    currencies: list,
+) -> None:
+
+    try:
+
+
+        # sub_account_combining
+        sub_accounts = [
+            await private_data.get_subaccounts_details(o) for o in currencies
+        ]
+
+        return(
+            dict(
+                sub_account_combined = sub_account_combining(sub_accounts),
+                )
+            ) 
+        
+    except Exception as error:
+
+        system_tools.parse_error_message(f"starter refill db {error}")
+
+        await tlgrm.telegram_bot_sendtext(f"starter refill db-{error}", "general_error")
+
+
+
+def sub_account_combining(
+    sub_accounts: list,
+) -> None:
+
+    orders_cached = []
+    positions_cached = []
+
+    for sub_account in sub_accounts:
+        # result = await private_data.get_subaccounts_details(currency)
+
+        sub_account = sub_account[0]
+
+        sub_account_orders = sub_account["open_orders"]
+
+        if sub_account_orders:
+
+            for order in sub_account_orders:
+
+                orders_cached.append(order)
+
+        sub_account_positions = sub_account["positions"]
+
+        if sub_account_positions:
+
+            for position in sub_account_positions:
+
+                positions_cached.append(position)
+
+    return dict(
+        orders_cached=orders_cached,
+        positions_cached=positions_cached,
+    )

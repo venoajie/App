@@ -34,7 +34,8 @@ from utilities.system_tools import (
 async def hedging_spot(
     client_redis: object,
     config_app: list,
-    futures_instruments,
+    futures_instruments: list,
+    initial_data: dict,
     redis_channels: list,
     strategy_attributes: list,
 ) -> None:
@@ -115,7 +116,7 @@ async def hedging_spot(
 
         my_trades_active_all = None
 
-        cached_orders = None
+        cached_orders = initial_data["sub_account_combined"]
 
         result = message_template()
 

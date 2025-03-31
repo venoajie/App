@@ -72,6 +72,9 @@ async def main():
             config_app,
             )
         
+        initial_data = await starter.initial_data(private_data,
+                                                  currencies,)
+        
         settlement_periods = str_mod.remove_redundant_elements(
         str_mod.remove_double_brackets_in_list(
             [o["settlement_period"] for o in strategy_attributes]
@@ -117,12 +120,11 @@ async def main():
                  
         saving_task = asyncio.create_task(
             distributing_ws_data.caching_distributing_data(
-                private_data,
                 client_redis,
                 currencies,
+                initial_data,
                 redis_channels,
                 redis_keys,
-                relevant_tables,
                 strategy_attributes,
                 queue,
                 )
