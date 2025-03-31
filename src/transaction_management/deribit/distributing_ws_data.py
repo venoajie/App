@@ -161,6 +161,8 @@ async def caching_distributing_data(
 
                             result["params"].update({"channel": portfolio_channel})
                             result["params"].update({"data": pub_message})
+                            
+                            log.error(result)
 
                             await updating_portfolio(
                                 pipe,
