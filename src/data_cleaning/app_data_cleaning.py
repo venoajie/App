@@ -164,6 +164,10 @@ async def reconciling_size(
                                 result.update({"side": transaction["side"]})
                                 result.update({"timestamp": transaction["timestamp"]})
                                 result.update({"position": transaction["position"]})
+                                result.update({"amount": transaction["amount"]})
+                                result.update({"order_id": transaction["order_id"]})
+                                result.update({"price": transaction["price"]})
+                                result.update({"instrument_name": transaction["instrument_name"]})
                                 result.update({"label": None})
                                 
                                 log.info(result)
