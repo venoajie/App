@@ -129,8 +129,6 @@ async def reconciling_size(
 
                     delta_time = (exchange_server_time - server_time) / ONE_SECOND
                     
-                    log.critical(f"last_checked {last_checked} {last_checked == 0}")
-                    
                     if last_checked == 0:
                         
                         currency = data["currency"]
@@ -146,6 +144,8 @@ async def reconciling_size(
                         query_trades = f"{query_trades_active_basic} {query_trades_active_where}"
 
                         my_trades_currency = await db_mgt.executing_query_with_return(query_trades)
+                        
+                        log.critical(f"last_checked {last_checked} {last_checked == 0} {my_trades_currency}")
                         
                         if my_trades_currency == []:
 
