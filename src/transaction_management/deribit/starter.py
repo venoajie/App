@@ -3,24 +3,15 @@
 # built ins
 import asyncio
 
-# installed
-from loguru import logger as log
-
 # user defined formulas
-from db_management import redis_client, sqlite_management as db_mgt
-from messaging import (
-    get_published_messages,
-    subscribing_to_channels,
-    telegram_bot as tlgrm,
-)
+from db_management import sqlite_management as db_mgt
+from messaging import telegram_bot as tlgrm
 from transaction_management.deribit import (
     api_requests,
     cancelling_active_orders,
-    orders_management as ord_mgt,
 )
 from utilities import (
     pickling,
-    string_modification as str_mod,
     system_tools,
     time_modification as time_mod,
 )
@@ -55,8 +46,6 @@ async def initial_procedures(
         all_exc_currencies = [o["currency"] for o in get_currencies_all["result"]]
 
         server_time = time_mod.get_now_unix_time()
-
-        last_checked = 0
 
         ONE_SECOND = 1000
 
@@ -104,10 +93,6 @@ async def initial_procedures(
             )
 
             my_trades_currency = await db_mgt.executing_query_with_return(query_trades)
-
-            log.critical(
-                f"last_checked {last_checked} {last_checked == 0} {my_trades_currency}"
-            )
 
             if my_trades_currency == []:
 
@@ -159,8 +144,6 @@ async def refill_db(
         result.update({"instrument_name": transaction["instrument_name"]})
         result.update({"label": None})
         result.update({"direction": direction})
-
-        log.info(result)
 
         await db_mgt.insert_tables(
             archive_db_table,
