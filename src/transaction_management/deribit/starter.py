@@ -163,12 +163,16 @@ async def initial_data(
             await private_data.get_subaccounts_details(o) for o in currencies
         ]
         
+        # sub_account_combining
+        portfolio = await private_data.get_subaccounts()
+        
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
         return(
             dict(
                 sub_account_combined = sub_account_combining(sub_accounts),
                 my_trades_active_all = await db_mgt.executing_query_with_return(query_trades),
+                portfolio_all = portfolio,
                 )
             ) 
         

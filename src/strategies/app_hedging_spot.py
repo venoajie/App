@@ -117,6 +117,8 @@ async def hedging_spot(
         cached_orders = initial_data["sub_account_combined"]
 
         my_trades_active_all = initial_data["my_trades_active_all"]
+        
+        log.info(f"""{initial_data["portfolio_all"]}""")
 
         result = message_template()
 
