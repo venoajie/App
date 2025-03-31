@@ -155,12 +155,11 @@ async def reconciling_size(
                                     100,
                                     "trade",
                                 )
-                            
-                            log.info(transaction_log)
                                             
                             where_filter = f"trade_id"
                             
                             for transaction in transaction_log:
+                                log.info(transaction)
                                 trade_id = transaction["trade_id"]
                                 user_seq = transaction["user_seq"]
                                 side = transaction["side"]
