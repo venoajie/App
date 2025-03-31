@@ -65,7 +65,8 @@ async def main():
 
         strategy_attributes = config_app["strategies"]
 
-        relevant_tables = config_app["relevant_tables"][0]
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
 
         await starter.initial_procedures(
             private_data,
@@ -87,9 +88,6 @@ async def main():
             currencies,
             settlement_periods,
         )
-
-        # get redis channels
-        redis_channels: dict = config_app["redis_channels"][0]
 
         redis_keys: dict = config_app["redis_keys"][0]
         
