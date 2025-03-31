@@ -69,7 +69,7 @@ async def processing_orders(
         ordered_hedging = []
 
         ordered_spread = []
-        
+
         ordered = []
 
         from loguru import logger as log
@@ -282,6 +282,7 @@ async def if_order_is_true(
         if label_and_side_consistent:
 
             label = str_mod.parsing_label(params["label"])["main"]
+            log.warning(f"params {params}")
             log.debug(f"label {label}")
             label_has_order_id = [o["order_id"] for o in ordered if label in o["label"]]
             log.debug(f"label_has_order_id {label_has_order_id}")

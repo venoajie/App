@@ -65,6 +65,8 @@ async def reconciling_size(
 
         server_time = time_mod.get_now_unix_time()
 
+        last_checked = 0
+
         positions_cached = sub_account_cached["positions_cached"]
 
         ONE_SECOND = 1000
@@ -126,24 +128,72 @@ async def reconciling_size(
                     exchange_server_time = data["server_time"]
 
                     delta_time = (exchange_server_time - server_time) / ONE_SECOND
+                    
+                    if last_checked == 0:
+                        
+                        query_trades_active_basic = f"SELECT instrument_name, user_seq, timestamp, trade_id  FROM  {archive_db_table}"
 
-                    if delta_time > 5:
+                        query_trades_active_where = f"WHERE instrument_name LIKE '%{currency}%'"
 
-                        await rechecking_reconciliation_regularly(
-                            private_data,
-                            client_redis,
-                            combined_order_allowed,
-                            futures_instruments_name,
-                            currencies,
-                            order_allowed_channel,
-                            positions_cached,
-                            order_db_table,
-                            order_allowed,
-                            five_days_ago,
-                            result,
-                        )
+                        query_trades = f"{query_trades_active_basic} {query_trades_active_where}"
 
-                        server_time = exchange_server_time
+                        my_trades_currency = await db_mgt.executing_query_with_return(query_trades)
+                        
+                        if my_trades_currency == []:
+
+                            transaction_log = await private_data.get_transaction_log(
+                                    currency,
+                                    five_days_ago,
+                                    100,
+                                    "trade",
+                                )
+                                            
+                            where_filter = f"trade_id"
+
+                            for transaction in transaction_log:
+                                trade_id = transaction["trade_id"]
+                                user_seq = transaction["user_seq"]
+                                side = transaction["side"]
+                                timestamp = transaction["timestamp"]
+                                position = transaction["position"]
+
+                                await db_mgt.update_status_data(
+                                    archive_db_table, "user_seq", where_filter, trade_id, user_seq, "="
+                                )
+
+                                await db_mgt.update_status_data(
+                                    archive_db_table, "side", where_filter, trade_id, side, "="
+                                )
+
+                                await db_mgt.update_status_data(
+                                    archive_db_table, "timestamp", where_filter, trade_id, timestamp, "="
+                                )
+
+                                await db_mgt.update_status_data(
+                                    archive_db_table, "position", where_filter, trade_id, position, "="
+                                )
+                            
+                            last_checked = exchange_server_time
+
+                    else:
+                    
+                        if delta_time > 5:
+
+                            await rechecking_reconciliation_regularly(
+                                private_data,
+                                client_redis,
+                                combined_order_allowed,
+                                futures_instruments_name,
+                                currencies,
+                                order_allowed_channel,
+                                positions_cached,
+                                order_db_table,
+                                order_allowed,
+                                five_days_ago,
+                                result,
+                            )
+
+                            server_time = exchange_server_time
 
                 if (
                     positions_update_channel in message_channel
@@ -577,9 +627,11 @@ async def rechecking_based_on_sub_account(
 
                     log.critical(instrument_name)
 
-                    sub_account_size = reconciling_db.get_sub_account_size_per_instrument(
-                        instrument_name,
-                        positions_cached,
+                    sub_account_size = (
+                        reconciling_db.get_sub_account_size_per_instrument(
+                            instrument_name,
+                            positions_cached,
+                        )
                     )
 
                     log.warning(sub_account_size)
@@ -822,47 +874,50 @@ async def inserting_transaction_log_data(
     query_trades = f"{query_trades_active_basic} {query_trades_active_where}"
 
     my_trades_currency = await db_mgt.executing_query_with_return(query_trades)
+    
+    if my_trades_currency:
 
-    my_trades_currency_with_blanks_timestamp = [
-        o["timestamp"] for o in my_trades_currency if o["user_seq"] is None
-    ]
+        my_trades_currency_with_blanks_timestamp = [
+            o["timestamp"] for o in my_trades_currency if o["user_seq"] is None
+        ]
 
-    log.debug(
-        f"my_trades_currency_with_blanks_timestamp {my_trades_currency_with_blanks_timestamp}"
-    )
-
-    if my_trades_currency_with_blanks_timestamp:
-
-        min_timestamp = min(my_trades_currency_with_blanks_timestamp) - 100000
-
-        transaction_log = await private_data.get_transaction_log(
-            currency,
-            min_timestamp,
-            100,
-            "trade",
+        log.debug(
+            f"my_trades_currency_with_blanks_timestamp {my_trades_currency_with_blanks_timestamp}"
         )
 
-        where_filter = f"trade_id"
+        if my_trades_currency_with_blanks_timestamp:
 
-        for transaction in transaction_log:
-            trade_id = transaction["trade_id"]
-            user_seq = transaction["user_seq"]
-            side = transaction["side"]
-            timestamp = transaction["timestamp"]
-            position = transaction["position"]
+            min_timestamp = min(my_trades_currency_with_blanks_timestamp) - 100000
 
-            await db_mgt.update_status_data(
-                archive_db_table, "user_seq", where_filter, trade_id, user_seq, "="
+            transaction_log = await private_data.get_transaction_log(
+                currency,
+                min_timestamp,
+                100,
+                "trade",
             )
 
-            await db_mgt.update_status_data(
-                archive_db_table, "side", where_filter, trade_id, side, "="
-            )
+            where_filter = f"trade_id"
 
-            await db_mgt.update_status_data(
-                archive_db_table, "timestamp", where_filter, trade_id, timestamp, "="
-            )
+            for transaction in transaction_log:
+                trade_id = transaction["trade_id"]
+                user_seq = transaction["user_seq"]
+                side = transaction["side"]
+                timestamp = transaction["timestamp"]
+                position = transaction["position"]
 
-            await db_mgt.update_status_data(
-                archive_db_table, "position", where_filter, trade_id, position, "="
-            )
+                await db_mgt.update_status_data(
+                    archive_db_table, "user_seq", where_filter, trade_id, user_seq, "="
+                )
+
+                await db_mgt.update_status_data(
+                    archive_db_table, "side", where_filter, trade_id, side, "="
+                )
+
+                await db_mgt.update_status_data(
+                    archive_db_table, "timestamp", where_filter, trade_id, timestamp, "="
+                )
+
+                await db_mgt.update_status_data(
+                    archive_db_table, "position", where_filter, trade_id, position, "="
+                )
+        
