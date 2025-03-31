@@ -114,9 +114,9 @@ async def hedging_spot(
 
         allowed_instruments = []
 
-        my_trades_active_all = None
-
         cached_orders = initial_data["sub_account_combined"]
+
+        my_trades_active_all = initial_data["my_trades_active_all"]
 
         result = message_template()
 
@@ -185,8 +185,6 @@ async def hedging_spot(
                     and market_condition_all
                     and portfolio_all
                     and strategy in active_strategies
-                    and my_trades_active_all is not None
-                    and cached_orders is not None
                 ):
 
                     # fetch details from message

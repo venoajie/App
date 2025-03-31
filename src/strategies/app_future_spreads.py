@@ -74,6 +74,8 @@ async def future_spreads(
 
         cached_orders = initial_data["sub_account_combined"]
 
+        my_trades_active_all = initial_data["my_trades_active_all"]
+
         cached_ticker_all = []
 
         not_cancel = True
