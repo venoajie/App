@@ -155,33 +155,24 @@ async def reconciling_size(
                                     100,
                                     "trade",
                                 )
-                                            
-                            where_filter = f"trade_id"
-                            
+                                           
                             for transaction in transaction_log:
-                                log.info(transaction)
-                                trade_id = transaction["trade_id"]
-                                user_seq = transaction["user_seq"]
-                                side = transaction["side"]
-                                timestamp = transaction["timestamp"]
-                                position = transaction["position"]
-
-                                await db_mgt.update_status_data(
-                                    archive_db_table, "user_seq", where_filter, trade_id, user_seq, "="
-                                )
-
-                                await db_mgt.update_status_data(
-                                    archive_db_table, "side", where_filter, trade_id, side, "="
-                                )
-
-                                await db_mgt.update_status_data(
-                                    archive_db_table, "timestamp", where_filter, trade_id, timestamp, "="
-                                )
-
-                                await db_mgt.update_status_data(
-                                    archive_db_table, "position", where_filter, trade_id, position, "="
-                                )
-                            
+                                result = {}
+                                
+                                result.update({"trade_id": transaction["trade_id"]})
+                                result.update({"user_seq": transaction["user_seq"]})
+                                result.update({"side": transaction["side"]})
+                                result.update({"timestamp": transaction["timestamp"]})
+                                result.update({"position": transaction["position"]})
+                                result.update({"label": None})
+                                
+                                log.info(result)
+                                
+                                await db_mgt.insert_tables(
+                                    archive_db_table, 
+                                    result,
+                                    )
+                                
                             last_checked = exchange_server_time
 
                     else:
