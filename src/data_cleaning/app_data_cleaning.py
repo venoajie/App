@@ -178,21 +178,6 @@ async def reconciling_size(
 
                             positions_cached = positions_cached
 
-                    positions_cached_all = str_mod.remove_redundant_elements(
-                        [o["instrument_name"] for o in positions_cached]
-                    )
-
-                    # eliminating combo transactions as they're not recorded in the book
-                    positions_cached_instrument = [
-                        o for o in positions_cached_all if "-FS-" not in o
-                    ]
-
-                    await agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
-                        private_data,
-                        positions_cached_instrument,
-                        order_db_table,
-                    )
-
                     await rechecking_reconciliation_regularly(
                         private_data,
                         client_redis,
@@ -206,8 +191,6 @@ async def reconciling_size(
                         five_days_ago,
                         result,
                     )
-
-                    log.debug(f"combined_order_allowed {combined_order_allowed}")
 
             except Exception as error:
 
@@ -299,87 +282,6 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
                     )
 
 
-async def agreeing_trades_from_exchange_to_db_based_on_latest_timestamp(
-    private_data: object,
-    positions_cached_instrument: list,
-    order_db_table: str,
-) -> None:
-    """ """
-
-    log.info(positions_cached_instrument)
-
-    # FROM sub account to other db's
-    if positions_cached_instrument:
-
-        # sub account instruments
-        for instrument_name in positions_cached_instrument:
-
-            currency: str = str_mod.extract_currency_from_text(instrument_name)
-
-            currency_lower = currency.lower()
-
-            archive_db_table = f"my_trades_all_{currency_lower}_json"
-
-            query_trades_all_basic = (
-                f"SELECT trade_id, timestamp  FROM  {archive_db_table}"
-            )
-
-            query_trades_all_where = f"WHERE instrument_name LIKE '%{instrument_name}%' ORDER BY timestamp DESC LIMIT 10"
-
-            query_trades_all = f"{query_trades_all_basic} {query_trades_all_where}"
-
-            my_trades_instrument_name = await db_mgt.executing_query_with_return(
-                query_trades_all
-            )
-
-            log.info(instrument_name)
-
-            if my_trades_instrument_name:
-                log.critical(my_trades_instrument_name)
-
-                last_10_timestamp_log = [
-                    o["timestamp"] for o in my_trades_instrument_name
-                ]
-
-                timestamp_log = min(last_10_timestamp_log)
-
-                trades_from_exchange = (
-                    await private_data.get_user_trades_by_instrument_and_time(
-                        instrument_name,
-                        timestamp_log,
-                        1000,
-                    )
-                )
-
-                if trades_from_exchange:
-
-                    trades_from_exchange_without_futures_combo = [
-                        o
-                        for o in trades_from_exchange
-                        if f"-FS-" not in o["instrument_name"]
-                    ]
-
-                    for trade in trades_from_exchange_without_futures_combo:
-
-                        trade_trd_id = trade["trade_id"]
-
-                        trade_trd_id_not_in_archive = [
-                            o
-                            for o in my_trades_instrument_name
-                            if trade_trd_id in o["trade_id"]
-                        ]
-
-                        if not trade_trd_id_not_in_archive:
-
-                            log.debug(f"{trade_trd_id}")
-
-                            await ord_mgt.saving_traded_orders(
-                                trade,
-                                archive_db_table,
-                                order_db_table,
-                            )
-
-
 async def rechecking_reconciliation_regularly(
     private_data: object,
     client_redis: object,
@@ -453,8 +355,6 @@ async def allowing_order_for_instrument_not_in_sub_account(
     """ """
 
     order_allowed = 1
-
-    log.warning(f"result {result}")
 
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
 
@@ -829,17 +729,17 @@ async def inserting_transaction_log_data(
 
     if my_trades_currency:
 
-        my_trades_currency_with_blanks_timestamp = [
+        my_trades_currency_with_blanks_user_seq = [
             o["timestamp"] for o in my_trades_currency if o["user_seq"] is None
         ]
 
         log.debug(
-            f"my_trades_currency_with_blanks_timestamp {my_trades_currency_with_blanks_timestamp}"
+            f"my_trades_currency_with_blanks_user_seq {my_trades_currency_with_blanks_user_seq}"
         )
 
-        if my_trades_currency_with_blanks_timestamp:
+        if my_trades_currency_with_blanks_user_seq:
 
-            min_timestamp = min(my_trades_currency_with_blanks_timestamp) - 100000
+            min_timestamp = min(my_trades_currency_with_blanks_user_seq) - 100000
 
             transaction_log = await private_data.get_transaction_log(
                 currency,
@@ -851,6 +751,7 @@ async def inserting_transaction_log_data(
             where_filter = f"trade_id"
 
             for transaction in transaction_log:
+
                 trade_id = transaction["trade_id"]
                 user_seq = transaction["user_seq"]
                 side = transaction["side"]

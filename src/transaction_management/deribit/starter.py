@@ -120,7 +120,7 @@ async def refill_db(
     transaction_log = await private_data.get_transaction_log(
         currency,
         five_days_ago,
-        100,
+        1000,
         "trade",
     )
 

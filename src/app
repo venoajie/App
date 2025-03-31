@@ -9,49 +9,15 @@ import sys
 
 # installed
 import uvloop
-from loguru import logger as log
-import numpy as np
 import redis.asyncio as aioredis
 #from redistimeseries.client import Client
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.app_data_cleaning import reconciling_size
-from data_cleaning.pruning_db import clean_up_databases
 from messaging.telegram_bot import telegram_bot_sendtext
-from strategies.app_future_spreads import future_spreads
-from strategies.app_hedging_spot import hedging_spot
-from strategies.relabelling_trading_result import relabelling_trades
-from transaction_management.deribit.api_requests import (
-    get_currencies,
-    get_instruments,
-    SendApiRequest,
-)
-
-from transaction_management.deribit.cancelling_active_orders import (
-    cancel_the_cancellables,
-)
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
-
-from market_understanding.price_action.candles_analysis import get_market_condition
-from transaction_management.deribit.cancelling_active_orders import \
-    cancelling_orders
-from transaction_management.deribit.processing_orders import \
-    processing_orders
-from utilities.system_tools import (
-    SignalHandler,
-    back_up_db,
-    get_config_tomli,
-    parse_error_message, 
-    provide_path_for_file,
-    )
-from utilities.string_modification import (
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-)
-from utilities.pickling import replace_data
+from strategies import app_future_spreads, app_hedging_spot
+from transaction_management.deribit import api_requests, get_instrument_summary,  starter
+from utilities import  string_modification as str_mod, system_tools
 
 
 def handle_ctrl_c(
@@ -62,42 +28,7 @@ def handle_ctrl_c(
     sys.exit(0)
     
                   
-signal_handler = SignalHandler()
-
-
-def sub_account_combining(
-    sub_accounts: list,
-) -> None:
-
-    orders_cached = []
-    positions_cached = []
-
-    for sub_account in sub_accounts:
-        # result = await private_data.get_subaccounts_details(currency)
-
-        sub_account = sub_account[0]
-
-        sub_account_orders = sub_account["open_orders"]
-
-        if sub_account_orders:
-
-            for order in sub_account_orders:
-
-                orders_cached.append(order)
-
-        sub_account_positions = sub_account["positions"]
-
-        if sub_account_positions:
-
-            for position in sub_account_positions:
-
-                positions_cached.append(position)
-
-    return dict(
-        orders_cached=orders_cached,
-        positions_cached=positions_cached,
-    )
-
+signal_handler = system_tools.SignalHandler()
 
 async def main():
     """
@@ -110,7 +41,7 @@ async def main():
     
     try:
 
-        private_data: object = SendApiRequest(sub_account_id)
+        private_data: object = api_requests.SendApiRequest(sub_account_id)
 
         pool = aioredis.ConnectionPool.from_url(
             "redis://localhost", 
@@ -124,80 +55,34 @@ async def main():
         client_redis: object = aioredis.Redis.from_pool(pool)
         
         # parsing config file
-        config_app = get_config_tomli(file_toml)
+        config_app = system_tools.get_config_tomli(file_toml)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
-
-        # get ALL traded currencies in deribit
-        get_currencies_all = await get_currencies()
-
-        all_exc_currencies = [
-            o["currency"] for o in get_currencies_all["result"]
-        ]
-
-        my_path_cur = provide_path_for_file("currencies")
-
-        replace_data(
-            my_path_cur,
-            all_exc_currencies,
-        )
 
         # get TRADABLE currencies
         currencies: list = [o["spot"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
 
-        relevant_tables = config_app["relevant_tables"][0]
-
-        order_db_table = relevant_tables["orders_table"]
-
-        cancellable_strategies = [
-            o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
-        ]
-
-        # sub_account_combining
-        sub_accounts = [
-            await private_data.get_subaccounts_details(o) for o in currencies
-        ]
-
-        sub_account_cached = sub_account_combining(sub_accounts)
-        
-        for currency in all_exc_currencies:
-
-            instruments = await get_instruments(currency)
-
-            my_path_instruments = provide_path_for_file("instruments", currency)
-
-            replace_data(
-                my_path_instruments,
-                instruments,
+        await starter.initial_procedures(
+            private_data,
+            config_app,
             )
-
-        for currency in currencies:
-
-            await cancel_the_cancellables(
-                private_data,
-                order_db_table,
-                currency,
-                cancellable_strategies,
-                        )
         
-        settlement_periods = remove_redundant_elements(
-        remove_double_brackets_in_list(
+        settlement_periods = str_mod.remove_redundant_elements(
+        str_mod.remove_double_brackets_in_list(
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
         
-        futures_instruments = await get_futures_instruments(
+        futures_instruments = await get_instrument_summary.get_futures_instruments(
             currencies,
             settlement_periods,
         )
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-
-        resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
 
@@ -207,67 +92,19 @@ async def main():
         
         """
    
-                         
-
-            future_spreads(
+            app_future_spreads.future_spreads(
                 client_redis,
                 config_app,
                 futures_instruments,
                 redis_channels,
                 strategy_attributes,
                 ),
-     
-            #scanning_volume()
                   
             """
             
         await asyncio.gather(
          
-            cancelling_orders(
-            private_data,
-            currencies,
-            client_redis,
-            config_app,
-            redis_channels,
-            strategy_attributes,
-                ),   
-            
-            processing_orders(
-                private_data,
-                client_redis,
-                cancellable_strategies,
-                currencies,
-                order_db_table,
-                redis_channels,
-                strategy_attributes,
-                sub_account_cached,
-                ),
-        
-            relabelling_trades(
-                private_data,
-                config_app),
-            
-            
-            get_market_condition(
-                client_redis,
-                config_app,
-                currencies,
-                redis_channels,
-                resolutions,
-                np),
-            
-            
-            reconciling_size(
-                private_data,
-                client_redis,
-                redis_channels,
-                config_app,
-                futures_instruments,
-                sub_account_cached,
-                ),                
-   
-
-            hedging_spot(
+            app_hedging_spot.hedging_spot(
                 client_redis,
                 config_app,
                 futures_instruments,
@@ -281,7 +118,7 @@ async def main():
 
     except Exception as error:
         
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
         await telegram_bot_sendtext (
             f"app-{error}",
             "general_error"
@@ -302,7 +139,7 @@ if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main())
         
     except Exception as error:
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
         
         asyncio.run(telegram_bot_sendtext (
             error,

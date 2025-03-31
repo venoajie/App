@@ -18,26 +18,9 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from data_cleaning.app_data_cleaning import reconciling_size
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.relabelling_trading_result import relabelling_trades
-from transaction_management.deribit import starter
-from transaction_management.deribit.api_requests import SendApiRequest
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
-
+from transaction_management.deribit import api_requests, cancelling_active_orders,get_instrument_summary, processing_orders, starter
 from market_understanding.price_action.candles_analysis import get_market_condition
-from transaction_management.deribit.cancelling_active_orders import \
-    cancelling_orders
-from transaction_management.deribit.processing_orders import \
-    processing_orders
-from utilities.system_tools import (
-    SignalHandler,
-    get_config_tomli,
-    parse_error_message, 
-    )
-from utilities.string_modification import (
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-)
+from utilities import string_modification as str_mod, system_tools
 
 
 def handle_ctrl_c(
@@ -48,12 +31,12 @@ def handle_ctrl_c(
     sys.exit(0)
     
                   
-signal_handler = SignalHandler()
+signal_handler = system_tools.SignalHandler()
 
 
 def sub_account_combining(
     sub_accounts: list,
-) -> None:
+) -> dict:
 
     orders_cached = []
     positions_cached = []
@@ -95,7 +78,7 @@ async def main():
     
     try:
 
-        private_data: object = SendApiRequest(sub_account_id)
+        private_data: object = api_requests.SendApiRequest(sub_account_id)
 
         pool = aioredis.ConnectionPool.from_url(
             "redis://localhost", 
@@ -109,7 +92,7 @@ async def main():
         client_redis: object = aioredis.Redis.from_pool(pool)
         
         # parsing config file
-        config_app = get_config_tomli(file_toml)
+        config_app = system_tools.get_config_tomli(file_toml)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
@@ -139,13 +122,13 @@ async def main():
             config_app,
             )
         
-        settlement_periods = remove_redundant_elements(
-        remove_double_brackets_in_list(
+        settlement_periods = str_mod.remove_redundant_elements(
+        str_mod.remove_double_brackets_in_list(
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
         
-        futures_instruments = await get_futures_instruments(
+        futures_instruments = await get_instrument_summary.get_futures_instruments(
             currencies,
             settlement_periods,
         )
@@ -163,7 +146,7 @@ async def main():
             
         await asyncio.gather(
          
-            cancelling_orders(
+            cancelling_active_orders.cancelling_orders(
             private_data,
             currencies,
             client_redis,
@@ -172,7 +155,7 @@ async def main():
             strategy_attributes,
                 ),   
             
-            processing_orders(
+            processing_orders.processing_orders(
                 private_data,
                 client_redis,
                 cancellable_strategies,
@@ -186,7 +169,6 @@ async def main():
             relabelling_trades(
                 private_data,
                 config_app),
-            
             
             get_market_condition(
                 client_redis,
@@ -211,7 +193,7 @@ async def main():
 
     except Exception as error:
         
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
         await telegram_bot_sendtext (
             f"app-{error}",
             "general_error"
@@ -232,7 +214,7 @@ if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main())
         
     except Exception as error:
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
         
         asyncio.run(telegram_bot_sendtext (
             error,
