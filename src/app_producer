@@ -14,36 +14,12 @@ import redis.asyncio as aioredis
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.pruning_db import clean_up_databases
-from messaging.telegram_bot import telegram_bot_sendtext
+from data_cleaning import pruning_db
+from messaging import telegram_bot as tlgrm
 from streaming_data.data_producer import StreamingAccountData
 from streaming_data.data_producer_binance import StreamingDataBinance
-from transaction_management.deribit.api_requests import (
-    get_currencies,
-    get_instruments,
-    SendApiRequest,
-)
-
-from transaction_management.deribit.cancelling_active_orders import (
-    cancel_the_cancellables,
-)
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
-from transaction_management.deribit.distributing_ws_data import caching_distributing_data
-from utilities.system_tools import (
-    SignalHandler,
-    back_up_db,
-    get_config_tomli,
-    parse_error_message, 
-    provide_path_for_file,
-    )
-from utilities.string_modification import (
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-)
-from utilities.pickling import replace_data
-
+from transaction_management.deribit import api_requests, distributing_ws_data, get_instrument_summary,starter
+from utilities import string_modification as str_mod, system_tools
 
 def handle_ctrl_c(
     signum, 
@@ -51,9 +27,8 @@ def handle_ctrl_c(
     )->None:
     
     sys.exit(0)
-    
                   
-signal_handler = SignalHandler()
+signal_handler = system_tools.SignalHandler()
 
 async def main():
     """
@@ -66,7 +41,7 @@ async def main():
     
     try:
 
-        private_data: object = SendApiRequest(sub_account_id)
+        private_data: object = api_requests.SendApiRequest(sub_account_id)
 
         pool = aioredis.ConnectionPool.from_url(
             "redis://localhost", 
@@ -80,35 +55,10 @@ async def main():
         client_redis: object = aioredis.Redis.from_pool(pool)
         
         # parsing config file
-        config_app = get_config_tomli(file_toml)
+        config_app = system_tools.get_config_tomli(file_toml)
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
-
-        # get ALL traded currencies in deribit
-        get_currencies_all = await get_currencies()
-
-        all_exc_currencies = [
-            o["currency"] for o in get_currencies_all["result"]
-        ]
-
-        for currency in all_exc_currencies:
-
-            instruments = await get_instruments(currency)
-
-            my_path_instruments = provide_path_for_file("instruments", currency)
-
-            replace_data(
-                my_path_instruments,
-                instruments,
-            )
-
-        my_path_cur = provide_path_for_file("currencies")
-
-        replace_data(
-            my_path_cur,
-            all_exc_currencies,
-        )
 
         # get TRADABLE currencies
         currencies: list = [o["spot"] for o in tradable_config_app][0]
@@ -117,28 +67,18 @@ async def main():
 
         relevant_tables = config_app["relevant_tables"][0]
 
-        order_db_table = relevant_tables["orders_table"]
-
-        cancellable_strategies = [
-            o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
-        ]
-
-        for currency in currencies:
-
-            await cancel_the_cancellables(
-                private_data,
-                order_db_table,
-                currency,
-                cancellable_strategies,
-                        )
+        await starter.initial_procedures(
+            private_data,
+            config_app,
+            )
         
-        settlement_periods = remove_redundant_elements(
-        remove_double_brackets_in_list(
+        settlement_periods = str_mod.remove_redundant_elements(
+        str_mod.remove_double_brackets_in_list(
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
         
-        futures_instruments = await get_futures_instruments(
+        futures_instruments = await get_instrument_summary.get_futures_instruments(
             currencies,
             settlement_periods,
         )
@@ -176,7 +116,7 @@ async def main():
             ) 
                  
         saving_task = asyncio.create_task(
-            caching_distributing_data(
+            distributing_ws_data.caching_distributing_data(
                 private_data,
                 client_redis,
                 currencies,
@@ -198,9 +138,9 @@ async def main():
         
             saving_task,
          
-            back_up_db(60*10),
+            system_tools.back_up_db(60*10),
             
-            clean_up_databases(60)
+            pruning_db.clean_up_databases(60)
             
                         )  
 
@@ -208,8 +148,8 @@ async def main():
 
     except Exception as error:
         
-        parse_error_message(error)
-        await telegram_bot_sendtext (
+        system_tools.parse_error_message(error)
+        await tlgrm.telegram_bot_sendtext (
             f"app-{error}",
             "general_error"
             )
@@ -229,9 +169,9 @@ if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main())
         
     except Exception as error:
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
         
-        asyncio.run(telegram_bot_sendtext (
+        asyncio.run(tlgrm.telegram_bot_sendtext (
             error,
             "general_error"
             ))

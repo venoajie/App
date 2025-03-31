@@ -126,7 +126,7 @@ async def reconciling_size(
                     exchange_server_time = data["server_time"]
 
                     delta_time = (exchange_server_time - server_time) / ONE_SECOND
-                
+
                     if delta_time > 5:
 
                         await rechecking_reconciliation_regularly(
@@ -453,7 +453,7 @@ async def allowing_order_for_instrument_not_in_sub_account(
     """ """
 
     order_allowed = 1
-    
+
     log.warning(f"result {result}")
 
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
@@ -826,7 +826,7 @@ async def inserting_transaction_log_data(
     query_trades = f"{query_trades_active_basic} {query_trades_active_where}"
 
     my_trades_currency = await db_mgt.executing_query_with_return(query_trades)
-    
+
     if my_trades_currency:
 
         my_trades_currency_with_blanks_timestamp = [
@@ -866,10 +866,14 @@ async def inserting_transaction_log_data(
                 )
 
                 await db_mgt.update_status_data(
-                    archive_db_table, "timestamp", where_filter, trade_id, timestamp, "="
+                    archive_db_table,
+                    "timestamp",
+                    where_filter,
+                    trade_id,
+                    timestamp,
+                    "=",
                 )
 
                 await db_mgt.update_status_data(
                     archive_db_table, "position", where_filter, trade_id, position, "="
                 )
-        
