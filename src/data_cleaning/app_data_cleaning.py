@@ -129,6 +129,8 @@ async def reconciling_size(
 
                     delta_time = (exchange_server_time - server_time) / ONE_SECOND
                     
+                    log.critical(f"last_checked {last_checked} {last_checked == 0}")
+                    
                     if last_checked == 0:
                         
                         currency = data["currency"]
