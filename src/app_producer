@@ -73,7 +73,9 @@ async def main():
             )
         
         initial_data = await starter.initial_data(private_data,
-                                                  currencies,)
+                                                  currencies,
+                                                  redis_channels,
+                                                  )
         
         settlement_periods = str_mod.remove_redundant_elements(
         str_mod.remove_double_brackets_in_list(

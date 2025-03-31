@@ -117,7 +117,7 @@ async def hedging_spot(
         cached_orders = initial_data["sub_account_combined"]
 
         my_trades_active_all = initial_data["my_trades_active_all"]
-        
+
         log.info(f"""{initial_data["portfolio_all"]}""")
 
         result = message_template()
@@ -154,7 +154,7 @@ async def hedging_spot(
                     allowed_instruments = [
                         o for o in order_allowed if o["size_is_reconciled"] == 1
                     ]
-                    
+
                     log.info(f"allowed_instruments {allowed_instruments}")
 
                 if market_analytics_channel in message_channel:

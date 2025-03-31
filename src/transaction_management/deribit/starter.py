@@ -12,6 +12,7 @@ from transaction_management.deribit import (
 )
 from utilities import (
     pickling,
+    string_modification as str_mod,
     system_tools,
     time_modification as time_mod,
 )
@@ -107,7 +108,9 @@ async def initial_procedures(
 
         system_tools.parse_error_message(f"starter initial_procedures {error}")
 
-        await tlgrm.telegram_bot_sendtext(f"starter initial_procedures {error}", "general_error")
+        await tlgrm.telegram_bot_sendtext(
+            f"starter initial_procedures {error}", "general_error"
+        )
 
 
 async def refill_db(
@@ -154,6 +157,7 @@ async def refill_db(
 async def initial_data(
     private_data: object,
     currencies: list,
+    redis_channels: dict,
 ) -> None:
 
     try:
@@ -162,20 +166,40 @@ async def initial_data(
         sub_accounts = [
             await private_data.get_subaccounts_details(o) for o in currencies
         ]
-        
-        # sub_account_combining
-        portfolio = await private_data.get_subaccounts()
-        
+
+        portfolio_channel: str = redis_channels["portfolio"]
+        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
+        my_trades_channel: str = redis_channels["my_trades_cache_updating"]
+
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
-        return(
-            dict(
-                sub_account_combined = sub_account_combining(sub_accounts),
-                my_trades_active_all = await db_mgt.executing_query_with_return(query_trades),
-                portfolio_all = [o["portfolio"] for o in portfolio if o["type"]=="subaccount"][0],
-                )
-            ) 
-        
+        my_trades_active_from_db = await db_mgt.executing_query_with_return(
+            query_trades
+        )
+
+        result = str_mod.message_template()
+
+        # get portfolio from exchg
+        portfolio_from_exchg = await private_data.get_subaccounts()
+
+        return dict(
+            sub_account_combined=sub_account_combining(
+                result,
+                sub_account_cached_channel,
+                sub_accounts,
+            ),
+            my_trades_active_all=my_trades_active_combining(
+                my_trades_active_from_db,
+                my_trades_channel,
+                result,
+            ),
+            portfolio_all=portfolio_combining(
+                portfolio_from_exchg,
+                portfolio_channel,
+                result,
+            ),
+        )
+
     except Exception as error:
 
         system_tools.parse_error_message(f"starter refill db {error}")
@@ -183,10 +207,37 @@ async def initial_data(
         await tlgrm.telegram_bot_sendtext(f"starter refill db-{error}", "general_error")
 
 
+def portfolio_combining(
+    portfolio_all: list,
+    portfolio_channel: str,
+    result_template: dict,
+) -> dict:
+
+    portfolio = [o["portfolio"] for o in portfolio_all if o["type"] == "subaccount"][0]
+
+    result_template["params"].update({"data": portfolio})
+    result_template["params"].update({"channel": portfolio_channel})
+
+    return result_template
+
+
+def my_trades_active_combining(
+    my_trades_active_all: list,
+    my_trades_channel: str,
+    result_template: dict,
+) -> dict:
+
+    result_template["params"].update({"data": my_trades_active_all})
+    result_template["params"].update({"channel": my_trades_channel})
+
+    return result_template
+
 
 def sub_account_combining(
+    result_template: dict,
+    sub_account_cached_channel: str,
     sub_accounts: list,
-) -> None:
+) -> dict:
 
     orders_cached = []
     positions_cached = []
@@ -212,7 +263,12 @@ def sub_account_combining(
 
                 positions_cached.append(position)
 
-    return dict(
+    sub_account = dict(
         orders_cached=orders_cached,
         positions_cached=positions_cached,
     )
+
+    result_template["params"].update({"data": sub_account})
+    result_template["params"].update({"channel": sub_account_cached_channel})
+
+    return result_template
