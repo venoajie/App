@@ -99,6 +99,7 @@ async def main():
                 client_redis,
                 config_app,
                 futures_instruments,
+                initial_data,
                 redis_channels,
                 strategy_attributes,
                 ),

@@ -27,6 +27,7 @@ async def future_spreads(
     client_redis: object,
     config_app: list,
     futures_instruments: list,
+    initial_data: dict,
     redis_channels: list,
     strategy_attributes: list,
 ) -> None:
@@ -70,7 +71,8 @@ async def future_spreads(
         order_allowed_channel: str = redis_channels["order_is_allowed"]
         positions_update_channel: str = redis_channels["position_cache_updating"]
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
-        cached_orders = []
+
+        cached_orders = initial_data["sub_account_combined"]
 
         cached_ticker_all = []
 
