@@ -159,6 +159,12 @@ async def reconciling_size(
                             for transaction in transaction_log:
                                 result = {}
                                 
+                                if "sell" in transaction["side"]:
+                                    direction = "sell"
+                                
+                                if "buy" in transaction["side"] :
+                                    direction = "buy"
+                                
                                 result.update({"trade_id": transaction["trade_id"]})
                                 result.update({"user_seq": transaction["user_seq"]})
                                 result.update({"side": transaction["side"]})
@@ -169,6 +175,7 @@ async def reconciling_size(
                                 result.update({"price": transaction["price"]})
                                 result.update({"instrument_name": transaction["instrument_name"]})
                                 result.update({"label": None})
+                                result.update({"direction": direction})
                                 
                                 log.info(result)
                                 
