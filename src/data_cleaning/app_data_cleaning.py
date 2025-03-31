@@ -131,6 +131,12 @@ async def reconciling_size(
                     
                     if last_checked == 0:
                         
+                        currency = data["currency"]
+                    
+                        currency_lower = currency.lower()
+                        
+                        archive_db_table = f"my_trades_all_{currency_lower}_json"
+
                         query_trades_active_basic = f"SELECT instrument_name, user_seq, timestamp, trade_id  FROM  {archive_db_table}"
 
                         query_trades_active_where = f"WHERE instrument_name LIKE '%{currency}%'"
@@ -150,9 +156,6 @@ async def reconciling_size(
                                             
                             where_filter = f"trade_id"
                             
-                            currency_lower = currency.lower()
-                            archive_db_table = f"my_trades_all_{currency_lower}_json"
-
                             for transaction in transaction_log:
                                 trade_id = transaction["trade_id"]
                                 user_seq = transaction["user_seq"]
