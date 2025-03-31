@@ -65,8 +65,6 @@ async def reconciling_size(
 
         server_time = time_mod.get_now_unix_time()
 
-        last_checked = 0
-
         positions_cached = sub_account_cached["positions_cached"]
 
         ONE_SECOND = 1000
@@ -128,83 +126,24 @@ async def reconciling_size(
                     exchange_server_time = data["server_time"]
 
                     delta_time = (exchange_server_time - server_time) / ONE_SECOND
-                    
-                    if last_checked == 0:
-                        
-                        currency = data["currency"]
-                    
-                        currency_lower = currency.lower()
-                        
-                        archive_db_table = f"my_trades_all_{currency_lower}_json"
+                
+                    if delta_time > 5:
 
-                        query_trades_active_basic = f"SELECT instrument_name, user_seq, timestamp, trade_id  FROM  {archive_db_table}"
+                        await rechecking_reconciliation_regularly(
+                            private_data,
+                            client_redis,
+                            combined_order_allowed,
+                            futures_instruments_name,
+                            currencies,
+                            order_allowed_channel,
+                            positions_cached,
+                            order_db_table,
+                            order_allowed,
+                            five_days_ago,
+                            result,
+                        )
 
-                        query_trades_active_where = f"WHERE instrument_name LIKE '%{currency}%'"
-
-                        query_trades = f"{query_trades_active_basic} {query_trades_active_where}"
-
-                        my_trades_currency = await db_mgt.executing_query_with_return(query_trades)
-                        
-                        log.critical(f"last_checked {last_checked} {last_checked == 0} {my_trades_currency}")
-                        
-                        if my_trades_currency == []:
-
-                            transaction_log = await private_data.get_transaction_log(
-                                    currency,
-                                    five_days_ago,
-                                    100,
-                                    "trade",
-                                )
-                                           
-                            for transaction in transaction_log:
-                                result = {}
-                                
-                                if "sell" in transaction["side"]:
-                                    direction = "sell"
-                                
-                                if "buy" in transaction["side"] :
-                                    direction = "buy"
-                                
-                                result.update({"trade_id": transaction["trade_id"]})
-                                result.update({"user_seq": transaction["user_seq"]})
-                                result.update({"side": transaction["side"]})
-                                result.update({"timestamp": transaction["timestamp"]})
-                                result.update({"position": transaction["position"]})
-                                result.update({"amount": transaction["amount"]})
-                                result.update({"order_id": transaction["order_id"]})
-                                result.update({"price": transaction["price"]})
-                                result.update({"instrument_name": transaction["instrument_name"]})
-                                result.update({"label": None})
-                                result.update({"direction": direction})
-                                
-                                log.info(result)
-                                
-                                await db_mgt.insert_tables(
-                                    archive_db_table, 
-                                    result,
-                                    )
-                                
-                            last_checked = exchange_server_time
-
-                    else:
-                    
-                        if delta_time > 5:
-
-                            await rechecking_reconciliation_regularly(
-                                private_data,
-                                client_redis,
-                                combined_order_allowed,
-                                futures_instruments_name,
-                                currencies,
-                                order_allowed_channel,
-                                positions_cached,
-                                order_db_table,
-                                order_allowed,
-                                five_days_ago,
-                                result,
-                            )
-
-                            server_time = exchange_server_time
+                        server_time = exchange_server_time
 
                 if (
                     positions_update_channel in message_channel
@@ -514,6 +453,8 @@ async def allowing_order_for_instrument_not_in_sub_account(
     """ """
 
     order_allowed = 1
+    
+    log.warning(f"result {result}")
 
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
 
