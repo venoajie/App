@@ -106,8 +106,6 @@ async def hedging_spot(
 
         market_condition_all = []
 
-        portfolio_all = []
-
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
         order_allowed = []
@@ -118,7 +116,7 @@ async def hedging_spot(
 
         my_trades_active_all = initial_data["my_trades_active_all"]
 
-        log.info(f"""{initial_data["portfolio_all"]}""")
+        portfolio_all = initial_data["portfolio_all"]
 
         result = message_template()
 
