@@ -172,7 +172,7 @@ async def initial_data(
             dict(
                 sub_account_combined = sub_account_combining(sub_accounts),
                 my_trades_active_all = await db_mgt.executing_query_with_return(query_trades),
-                portfolio_all = portfolio[0]["portfolio"],
+                portfolio_all = [o["portfolio"] for o in portfolio][0],
                 )
             ) 
         
