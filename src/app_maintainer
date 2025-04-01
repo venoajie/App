@@ -15,8 +15,6 @@ import redis.asyncio as aioredis
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-
-from db_management import sqlite_management as db_mgt
 from data_cleaning.app_data_cleaning import reconciling_size
 from messaging.telegram_bot import telegram_bot_sendtext
 from strategies.relabelling_trading_result import relabelling_trades
@@ -130,12 +128,8 @@ async def main():
             private_data,
             config_app,
             )
-
         
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
-        order_allowed_channel: str = redis_channels["order_is_allowed"]
-        portfolio_channel: str = redis_channels["portfolio"]
-        my_trades_channel: str = redis_channels["my_trades_cache_updating"]
         
         result_template = str_mod.message_template()
 
@@ -153,37 +147,6 @@ async def main():
         )
         
         log.info(initial_data_subaccount)
-
-        all_instruments_name = futures_instruments["instruments_name"]
-        
-        initial_data_order_allowed = starter.is_order_allowed_combining(
-            all_instruments_name,
-            order_allowed_channel,
-            result_template,
-        )
-                
-        query_trades = f"SELECT * FROM  v_trading_all_active"
-
-        my_trades_active_from_db = await db_mgt.executing_query_with_return(
-            query_trades
-        )
-        
-        initial_data_my_trades_active = starter.my_trades_active_combining(
-            my_trades_active_from_db,
-            my_trades_channel,
-            result_template,
-        )
-
-
-        # get portfolio from exchg
-        portfolio_from_exchg = await private_data.get_subaccounts()
-
-        initial_data_portfolio = starter.portfolio_combining(
-            portfolio_from_exchg,
-            portfolio_channel,
-            result_template,
-        )
-
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
@@ -199,8 +162,6 @@ async def main():
             currencies,
             client_redis,
             config_app,
-            initial_data_my_trades_active,
-            initial_data_portfolio,
             initial_data_subaccount,
             redis_channels,
             strategy_attributes,
@@ -211,6 +172,7 @@ async def main():
                 client_redis,
                 cancellable_strategies,
                 currencies,
+                initial_data_subaccount,
                 order_db_table,
                 redis_channels,
                 strategy_attributes,
@@ -235,7 +197,6 @@ async def main():
                 redis_channels,
                 config_app,
                 initial_data_subaccount,
-                initial_data_order_allowed,
                 futures_instruments,
                 ),                    
                         )  

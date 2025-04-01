@@ -14,7 +14,7 @@ from messaging import (
     subscribing_to_channels,
     telegram_bot as tlgrm,
 )
-from transaction_management.deribit import orders_management as ord_mgt
+from transaction_management.deribit import orders_management as ord_mgt, starter
 from utilities import (
     string_modification as str_mod,
     system_tools,
@@ -28,7 +28,6 @@ async def reconciling_size(
     redis_channels: list,
     config_app: list,
     initial_data_subaccount: dict,
-    initial_data_order_allowed: dict,
     futures_instruments: list,
 ) -> None:
 
@@ -78,7 +77,14 @@ async def reconciling_size(
 
         futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
 
+        result_template = str_mod.message_template()
+
         result = str_mod.message_template()
+        initial_data_order_allowed = starter.is_order_allowed_combining(
+            all_instruments_name,
+            order_allowed_channel,
+            result_template,
+        )
         
         combined_order_allowed = initial_data_order_allowed["params"]["data"]
 

@@ -5,40 +5,22 @@
 import asyncio
 
 # installed
-import orjson
 from loguru import logger as log
 
 # user defined formula
-from db_management.sqlite_management import (
-    deleting_row,
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-)
-from messaging.telegram_bot import telegram_bot_sendtext
-from messaging import get_published_messages, subscribing_to_channels
+
+from db_management import sqlite_management as db_mgt
+from messaging import get_published_messages, subscribing_to_channels, telegram_bot as tlgrm
 from strategies.cash_carry.combo_auto import ComboAuto
 from strategies.hedging.hedging_spot import HedgingSpot
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
-)
-from utilities.pickling import replace_data
-
-from utilities.string_modification import (
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,
-)
-
+from transaction_management.deribit import get_instrument_summary,starter
+from utilities import string_modification as str_mod, system_tools
 
 async def cancelling_orders(
     private_data,
     currencies: list,
     client_redis: object,
     config_app: list,
-    initial_data_my_trades_active: dict,
-    initial_data_portfolio: dict,
     initial_data_subaccount: dict,
     redis_channels: list,
     strategy_attributes: list,
@@ -73,7 +55,7 @@ async def cancelling_orders(
 
         settlement_periods = get_settlement_period(strategy_attributes)
 
-        futures_instruments = await get_futures_instruments(
+        futures_instruments = await get_instrument_summary.get_futures_instruments(
             currencies,
             settlement_periods,
         )
@@ -99,6 +81,30 @@ async def cancelling_orders(
         sub_account_cached = sub_account_cached_params["data"]
 
         cached_orders = sub_account_cached["orders_cached"]
+                
+        query_trades = f"SELECT * FROM  v_trading_all_active"
+        
+        result_template = str_mod.message_template()
+
+        my_trades_active_from_db = await db_mgt.executing_query_with_return(
+            query_trades
+        )
+        
+        initial_data_my_trades_active = starter.my_trades_active_combining(
+            my_trades_active_from_db,
+            my_trades_channel,
+            result_template,
+        )
+
+
+        # get portfolio from exchg
+        portfolio_from_exchg = await private_data.get_subaccounts()
+
+        initial_data_portfolio = starter.portfolio_combining(
+            portfolio_from_exchg,
+            portfolio_channel,
+            result_template,
+        )
 
         my_trades_active_all = initial_data_my_trades_active["params"]["data"]
 
@@ -311,12 +317,12 @@ async def cancelling_orders(
 
             except Exception as error:
 
-                await telegram_bot_sendtext(
+                await tlgrm.telegram_bot_sendtext(
                     f"cancelling active orders - {error}",
                     "general_error",
                 )
 
-                parse_error_message(error)
+                system_tools.parse_error_message(error)
 
                 continue
 
@@ -325,18 +331,18 @@ async def cancelling_orders(
 
     except Exception as error:
 
-        await telegram_bot_sendtext(
+        await tlgrm.telegram_bot_sendtext(
             f"cancelling active orders - {error}",
             "general_error",
         )
 
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
 
 
 def get_settlement_period(strategy_attributes) -> list:
 
-    return remove_redundant_elements(
-        remove_double_brackets_in_list(
+    return str_mod.remove_redundant_elements(
+        str_mod.remove_double_brackets_in_list(
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
@@ -381,7 +387,7 @@ async def cancel_the_cancellables(
     column_list = "label", where_filter
 
     if open_orders_sqlite is None:
-        open_orders_sqlite: list = await get_query(
+        open_orders_sqlite: list = await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
             "orders_all_json", currency.upper(), "all", "all", column_list
         )
 
@@ -414,7 +420,7 @@ async def cancel_by_order_id(
 
     where_filter = f"order_id"
 
-    await deleting_row(
+    await db_mgt.deleting_row(
         order_db_table,
         "databases/trading.sqlite3",
         where_filter,
@@ -483,7 +489,7 @@ async def cancelling_double_ids(
                         order["order_id"],
                     )
 
-                    await telegram_bot_sendtext(
+                    await tlgrm.telegram_bot_sendtext(
                         f"avoiding double ids - {orders}",
                         "general_error",
                     )
