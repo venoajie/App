@@ -205,14 +205,18 @@ async def initial_data(
             result_template,
         )
 
+        log.warning(is_order_allowed_combining(
+            all_instruments_name,
+            order_allowed_channel,
+            result_template,
+        ))
+
         sub_account_combined = sub_account_combining(
             sub_accounts,
             sub_account_cached_channel,
             result_template,
         )
         
-        log.warning(combined_order_allowed)
-
         return dict(
             sub_account_combined_all=sub_account_combined,
             combined_order_allowed_all=combined_order_allowed,
