@@ -131,15 +131,7 @@ async def main():
             config_app,
             )
 
-        initial_data = await starter.initial_data(private_data,
-                                                  currencies,
-                                                  futures_instruments,
-                                                  redis_channels,
-                                                  )
-        
         from loguru import logger as log
-        log.info(initial_data)
-
         
         # sub_account_combining
         sub_accounts = [
@@ -159,6 +151,9 @@ async def main():
             result_template,
         )
         
+        log.info(initial_data_subaccount)
+
+
         all_instruments_name = futures_instruments["instruments_name"]
         
         initial_data_order_allowed = starter.is_order_allowed_combining(
