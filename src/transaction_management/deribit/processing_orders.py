@@ -66,6 +66,7 @@ async def processing_orders(
 
         sub_account_cached = sub_account_cached_params["data"]
         
+        from loguru import logger as log
         log.error(sub_account_cached)
 
         orders_cached = sub_account_cached["orders_cached"]

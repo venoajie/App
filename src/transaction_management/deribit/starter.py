@@ -220,8 +220,6 @@ def sub_account_combining(
         result_template["params"].update({"data": sub_account})
         result_template["params"].update({"channel": sub_account_cached_channel})
         
-        log.debug(result_template)
-
         return result_template
 
     except:
