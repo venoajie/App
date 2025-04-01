@@ -277,7 +277,7 @@ def sub_account_combining(
 
                     orders_cached.append(order)
 
-            log.debug(orders_cached)
+            
             
             sub_account_positions = sub_account["positions"]
 
@@ -291,9 +291,12 @@ def sub_account_combining(
             orders_cached=orders_cached,
             positions_cached=positions_cached,
         )
+        
+        log.debug(sub_account)
 
         result_template["params"].update({"data": sub_account})
         result_template["params"].update({"channel": sub_account_cached_channel})
+        log.warning(result_template)
 
         return result_template
     
