@@ -62,9 +62,7 @@ async def processing_orders(
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
-        init_data = initial_data["params"]["data"]
-
-        sub_account_cached = init_data["sub_account_combined"]
+        sub_account_cached = initial_data["sub_account_combined"]
 
         orders_cached = sub_account_cached["orders_cached"]
 
