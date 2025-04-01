@@ -187,13 +187,13 @@ async def initial_data(
             await private_data.get_subaccounts_details(o) for o in currencies
         ]
 
-        my_trades_active_all = my_trades_active_combining(
+        my_trades_active = my_trades_active_combining(
             my_trades_active_from_db,
             my_trades_channel,
             result_template,
         )
 
-        portfolio_all = portfolio_combining(
+        portfolio = portfolio_combining(
             portfolio_from_exchg,
             portfolio_channel,
             result_template,
@@ -205,19 +205,17 @@ async def initial_data(
             result_template,
         )
 
-        sub_account_combined_all = sub_account_combining(
+        sub_account_combined = sub_account_combining(
             sub_accounts,
             sub_account_cached_channel,
             result_template,
         )
         
-        log.warning(sub_account_combined_all)
-        
         combined_result = dict(
-            sub_account_combined=sub_account_combined_all,
-            combined_order_allowed=combined_order_allowed,
-            my_trades_active_all=my_trades_active_all,
-            portfolio_all=portfolio_all,
+            sub_account_combined_all=sub_account_combined,
+            combined_order_allowed_all=combined_order_allowed,
+            my_trades_active_all=my_trades_active,
+            portfolio_all=portfolio,
         )
         
         log.error(combined_result)
