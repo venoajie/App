@@ -112,13 +112,15 @@ async def hedging_spot(
 
         allowed_instruments = []
 
-        sub_account_cached = initial_data["sub_account_combined"]
+        sub_account_cached_params = initial_data["sub_account_combined_all"]["params"]
+
+        sub_account_cached = sub_account_cached_params["data"]
 
         cached_orders = sub_account_cached["orders_cached"]
 
-        my_trades_active_all = initial_data["my_trades_active_all"]
+        my_trades_active_all = initial_data["my_trades_active_all"]["params"]["data"]
 
-        portfolio_all = initial_data["portfolio_all"]
+        portfolio_all = initial_data["portfolio_all"]["params"]["data"]
 
         result = message_template()
 

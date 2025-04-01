@@ -210,14 +210,14 @@ async def initial_data(
             sub_account_cached_channel,
             result_template,
         )
-        
+
         combined_result = dict(
             sub_account_combined_all=sub_account_combined,
             combined_order_allowed_all=combined_order_allowed,
             my_trades_active_all=my_trades_active,
             portfolio_all=portfolio,
         )
-        
+
         return combined_result
 
     except Exception as error:

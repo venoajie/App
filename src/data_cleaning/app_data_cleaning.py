@@ -79,11 +79,14 @@ async def reconciling_size(
 
         result = str_mod.message_template()
 
-        init_data = initial_data["params"]["data"]
+        combined_order_allowed = initial_data["combined_order_allowed"]["params"][
+            "data"
+        ]
 
-        combined_order_allowed = init_data["combined_order_allowed"]
+        sub_account_cached_params = initial_data["sub_account_combined_all"]["params"]
 
-        sub_account_cached = init_data["sub_account_combined"]
+        sub_account_cached = sub_account_cached_params["data"]
+
         positions_cached = sub_account_cached["positions_cached"]
 
         await redis_client.publishing_result(
