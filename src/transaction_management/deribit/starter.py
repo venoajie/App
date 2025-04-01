@@ -214,10 +214,10 @@ async def initial_data(
         )
         
         return [
-            sub_account_combined,
-            combined_order_allowed,
-            my_trades_active,
-            portfolio
+            [sub_account_combined],
+            [combined_order_allowed],
+            [my_trades_active],
+            [portfolio]
         ]
 
     except Exception as error:
