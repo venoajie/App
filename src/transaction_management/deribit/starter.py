@@ -258,10 +258,12 @@ def sub_account_combining(
     try:
         
         log.warning(sub_accounts)
+        
+        log.info([o for o in sub_accounts if "open_orders" in o])
 
         for sub_account in sub_accounts:
             
-            log.info(sub_account)
+            
             # result = await private_data.get_subaccounts_details(currency)
 
             sub_account = sub_account[0]
