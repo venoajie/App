@@ -162,11 +162,6 @@ async def initial_data(
 
     try:
 
-        # sub_account_combining
-        sub_accounts = [
-            await private_data.get_subaccounts_details(o) for o in currencies
-        ]
-
         portfolio_channel: str = redis_channels["portfolio"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
@@ -181,6 +176,16 @@ async def initial_data(
 
         # get portfolio from exchg
         portfolio_from_exchg = await private_data.get_subaccounts()
+
+        # sub_account_combining
+        sub_accounts = [
+            await private_data.get_subaccounts_details(o) for o in currencies
+        ]
+        from loguru import logger as log
+        log.error(sub_accounts)
+
+        log.debug(portfolio_from_exchg)
+
 
         return dict(
             sub_account_combined=sub_account_combining(
