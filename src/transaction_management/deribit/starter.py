@@ -265,16 +265,20 @@ def sub_account_combining(
 
             sub_account = sub_account[0]
             
-            log.info(sub_account)
 
             sub_account_orders = sub_account["open_orders"]
+            log.info(sub_account_orders)
 
             if sub_account_orders:
 
                 for order in sub_account_orders:
+                    
+                    log.error(order)
 
                     orders_cached.append(order)
 
+            log.debug(orders_cached)
+            
             sub_account_positions = sub_account["positions"]
 
             if sub_account_positions:
