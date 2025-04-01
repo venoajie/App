@@ -212,11 +212,13 @@ async def initial_data(
         )
         
         combined_result = dict(
-            combined_order_allowed=combined_order_allowed,
             sub_account_combined=sub_account_combined,
+            combined_order_allowed=combined_order_allowed,
             my_trades_active_all=my_trades_active_all,
             portfolio_all=portfolio_all,
         )
+        
+        log.error(combined_result)
 
         return combined_result
 
