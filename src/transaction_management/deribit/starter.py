@@ -173,7 +173,7 @@ async def initial_data(
             query_trades
         )
 
-        result = str_mod.message_template()
+        result_template = str_mod.message_template()
 
         # get portfolio from exchg
         portfolio_from_exchg = await private_data.get_subaccounts()
@@ -183,26 +183,26 @@ async def initial_data(
             await private_data.get_subaccounts_details(o) for o in currencies
         ]
         
-        sub_account_combined=sub_account_combining(
+        sub_account_combined = sub_account_combining(
                 sub_accounts,
                 sub_account_cached_channel,
-                result,
+                result_template,
             )
         
+        log.error(f"sub_account_combined {sub_account_combined}")
+
         my_trades_active_all=my_trades_active_combining(
                 my_trades_active_from_db,
                 my_trades_channel,
-                result,
+                result_template,
             )
         
         portfolio_all=portfolio_combining(
                 portfolio_from_exchg,
                 portfolio_channel,
-                result,
+                result_template,
             )
         
-        log.error(sub_account_combined)
-
         combined_result = dict(
             sub_account_combined=sub_account_combined,
             my_trades_active_all=my_trades_active_all,
@@ -257,8 +257,6 @@ def sub_account_combining(
     
     try:
         
-        log.warning(sub_accounts)
-        
         for sub_account in sub_accounts:
             
             # result = await private_data.get_subaccounts_details(currency)
@@ -286,11 +284,10 @@ def sub_account_combining(
             positions_cached=positions_cached,
         )
         
-        
-
         result_template["params"].update({"data": sub_account})
         result_template["params"].update({"channel": sub_account_cached_channel})
-        log.warning(result_template)
+        
+        log.warning(f"result_template {result_template}")
 
         return result_template
     
