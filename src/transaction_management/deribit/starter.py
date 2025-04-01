@@ -203,14 +203,14 @@ async def initial_data(
         
         log.error(sub_account_combined)
 
-        log.debug(my_trades_active_all)
-        
         combined_result = dict(
             sub_account_combined=sub_account_combined,
             my_trades_active_all=my_trades_active_all,
             portfolio_all=portfolio_all,
         )
 
+        log.debug(combined_result)
+        
         return combined_result
 
     except Exception as error:
@@ -265,19 +265,13 @@ def sub_account_combining(
 
             sub_account = sub_account[0]
             
-
             sub_account_orders = sub_account["open_orders"]
-            log.info(sub_account_orders)
-
+            
             if sub_account_orders:
 
                 for order in sub_account_orders:
-                    
-                    log.error(order)
 
-                    orders_cached.append(order)
-
-            
+                    orders_cached.append(order)            
             
             sub_account_positions = sub_account["positions"]
 
@@ -292,7 +286,7 @@ def sub_account_combining(
             positions_cached=positions_cached,
         )
         
-        log.debug(sub_account)
+        
 
         result_template["params"].update({"data": sub_account})
         result_template["params"].update({"channel": sub_account_cached_channel})
