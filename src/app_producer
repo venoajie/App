@@ -83,13 +83,22 @@ async def main():
             private_data,
             config_app,
             )
-                
-        initial_data = await starter.initial_data(private_data,
-                                                  currencies,
-                                                  futures_instruments,
-                                                  redis_channels,
-                                                  )
         
+        # sub_account_combining
+        sub_accounts = [
+            await private_data.get_subaccounts_details(o) for o in currencies
+        ]
+        
+        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
+        
+        result_template = str_mod.message_template()
+        
+        initial_data_subaccount = starter.sub_account_combining(
+            sub_accounts,
+            sub_account_cached_channel,
+            result_template,
+        )
+                
         redis_keys: dict = config_app["redis_keys"][0]
         
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
@@ -123,7 +132,7 @@ async def main():
             distributing_ws_data.caching_distributing_data(
                 client_redis,
                 currencies,
-                initial_data,
+                initial_data_subaccount,
                 redis_channels,
                 redis_keys,
                 strategy_attributes,
