@@ -181,29 +181,38 @@ async def initial_data(
         sub_accounts = [
             await private_data.get_subaccounts_details(o) for o in currencies
         ]
-        from loguru import logger as log
-        log.error(sub_accounts)
-
-        log.debug(portfolio_from_exchg)
-
-
-        return dict(
-            sub_account_combined=sub_account_combining(
-                result,
-                sub_account_cached_channel,
+        
+        sub_account_combined=sub_account_combining(
                 sub_accounts,
-            ),
-            my_trades_active_all=my_trades_active_combining(
+                sub_account_cached_channel,
+                result,
+            )
+        
+        my_trades_active_all=my_trades_active_combining(
                 my_trades_active_from_db,
                 my_trades_channel,
                 result,
-            ),
-            portfolio_all=portfolio_combining(
+            )
+        
+        portfolio_all=portfolio_combining(
                 portfolio_from_exchg,
                 portfolio_channel,
                 result,
-            ),
+            )
+
+
+        from loguru import logger as log
+        log.error(sub_account_combined)
+
+        log.debug(my_trades_active_all)
+        
+        combined_result = dict(
+            sub_account_combined=sub_account_combined,
+            my_trades_active_all=my_trades_active_all,
+            portfolio_all=portfolio_all,
         )
+
+        return combined_result
 
     except Exception as error:
 
@@ -239,9 +248,9 @@ def my_trades_active_combining(
 
 
 def sub_account_combining(
-    result_template: dict,
-    sub_account_cached_channel: str,
     sub_accounts: list,
+    sub_account_cached_channel: str,
+    result_template: dict,
 ) -> dict:
 
     orders_cached = []
