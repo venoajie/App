@@ -124,7 +124,7 @@ async def reconciling_size(
                             order_allowed_channel,
                             positions_cached,
                             order_db_table,
-                            order_allowed,
+                            combined_order_allowed,
                             five_days_ago,
                             result,
                         )
@@ -139,10 +139,7 @@ async def reconciling_size(
                 ):
 
                     for currency in currencies:
-                        currency: str = str_mod.extract_currency_from_text(
-                            instrument_name
-                        )
-
+                        
                         currency_lower = currency.lower()
 
                         archive_db_table = f"my_trades_all_{currency_lower}_json"
@@ -173,7 +170,7 @@ async def reconciling_size(
                         order_allowed_channel,
                         positions_cached,
                         order_db_table,
-                        order_allowed,
+                        combined_order_allowed,
                         five_days_ago,
                         result,
                     )
