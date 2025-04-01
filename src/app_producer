@@ -68,12 +68,6 @@ async def main():
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
 
-        await starter.initial_procedures(
-            private_data,
-            config_app,
-            )
-        
-        
         settlement_periods = str_mod.remove_redundant_elements(
         str_mod.remove_double_brackets_in_list(
             [o["settlement_period"] for o in strategy_attributes]
@@ -85,6 +79,11 @@ async def main():
             settlement_periods,
         )
 
+        await starter.initial_procedures(
+            private_data,
+            config_app,
+            )
+                
         initial_data = await starter.initial_data(private_data,
                                                   currencies,
                                                   futures_instruments,

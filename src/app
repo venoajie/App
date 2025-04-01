@@ -67,11 +67,6 @@ async def main():
         currencies: list = [o["spot"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
-
-        await starter.initial_procedures(
-            private_data,
-            config_app,
-            )
         
         settlement_periods = str_mod.remove_redundant_elements(
         str_mod.remove_double_brackets_in_list(
@@ -84,6 +79,11 @@ async def main():
             settlement_periods,
         )
 
+        await starter.initial_procedures(
+            private_data,
+            config_app,
+            )
+        
         initial_data = await starter.initial_data(private_data,
                                                   currencies,
                                                   futures_instruments,
