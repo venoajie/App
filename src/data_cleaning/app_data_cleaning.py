@@ -78,6 +78,8 @@ async def reconciling_size(
         futures_instruments_name = [o for o in all_instruments_name if "-FS-" not in o]
 
         result = str_mod.message_template()
+        
+        log.info(initial_data["combined_order_allowed_all"])
 
         combined_order_allowed = initial_data["combined_order_allowed_all"]["params"][
             "data"
