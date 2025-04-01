@@ -246,34 +246,48 @@ def sub_account_combining(
 
     orders_cached = []
     positions_cached = []
+    
+    try:
 
-    for sub_account in sub_accounts:
-        # result = await private_data.get_subaccounts_details(currency)
+        for sub_account in sub_accounts[0]:
+            # result = await private_data.get_subaccounts_details(currency)
 
-        sub_account = sub_account[0]
+            sub_account = sub_account[0]
 
-        sub_account_orders = sub_account["open_orders"]
+            sub_account_orders = sub_account["open_orders"]
 
-        if sub_account_orders:
+            if sub_account_orders:
 
-            for order in sub_account_orders:
+                for order in sub_account_orders:
 
-                orders_cached.append(order)
+                    orders_cached.append(order)
 
-        sub_account_positions = sub_account["positions"]
+            sub_account_positions = sub_account["positions"]
 
-        if sub_account_positions:
+            if sub_account_positions:
 
-            for position in sub_account_positions:
+                for position in sub_account_positions:
 
-                positions_cached.append(position)
+                    positions_cached.append(position)
 
-    sub_account = dict(
-        orders_cached=orders_cached,
-        positions_cached=positions_cached,
-    )
+        sub_account = dict(
+            orders_cached=orders_cached,
+            positions_cached=positions_cached,
+        )
 
-    result_template["params"].update({"data": sub_account})
-    result_template["params"].update({"channel": sub_account_cached_channel})
+        result_template["params"].update({"data": sub_account})
+        result_template["params"].update({"channel": sub_account_cached_channel})
 
-    return result_template
+        return result_template
+    
+    except:
+
+        sub_account = dict(
+            orders_cached=[],
+            positions_cached=[],
+        )
+
+        result_template["params"].update({"data": sub_account})
+        result_template["params"].update({"channel": sub_account_cached_channel})
+
+        return result_template
