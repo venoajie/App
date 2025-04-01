@@ -110,17 +110,16 @@ async def main():
             o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
         ]
 
-        # sub_account_combining
-        sub_accounts = [
-            await private_data.get_subaccounts_details(o) for o in currencies
-        ]
-
-        sub_account_cached = sub_account_combining(sub_accounts)
-        
         await starter.initial_procedures(
             private_data,
             config_app,
             )
+
+        initial_data = await starter.initial_data(private_data,
+                                                  currencies,
+                                                  futures_instruments,
+                                                  redis_channels,
+                                                  )
         
         settlement_periods = str_mod.remove_redundant_elements(
         str_mod.remove_double_brackets_in_list(
@@ -151,6 +150,7 @@ async def main():
             currencies,
             client_redis,
             config_app,
+            initial_data,
             redis_channels,
             strategy_attributes,
                 ),   
@@ -160,10 +160,10 @@ async def main():
                 client_redis,
                 cancellable_strategies,
                 currencies,
+                initial_data,
                 order_db_table,
                 redis_channels,
                 strategy_attributes,
-                sub_account_cached,
                 ),
         
             relabelling_trades(
@@ -184,8 +184,8 @@ async def main():
                 client_redis,
                 redis_channels,
                 config_app,
+                initial_data,
                 futures_instruments,
-                sub_account_cached,
                 ),                    
                         )  
 

@@ -27,8 +27,8 @@ async def reconciling_size(
     client_redis: object,
     redis_channels: list,
     config_app: list,
+    initial_data: dict,
     futures_instruments: list,
-    sub_account_cached: list,
 ) -> None:
 
     try:
@@ -65,8 +65,6 @@ async def reconciling_size(
 
         server_time = time_mod.get_now_unix_time()
 
-        positions_cached = sub_account_cached["positions_cached"]
-
         ONE_SECOND = 1000
 
         one_minute = ONE_SECOND * 60
@@ -81,27 +79,12 @@ async def reconciling_size(
 
         result = str_mod.message_template()
 
-        combined_order_allowed = []
-        for instrument_name in all_instruments_name:
+        init_data = initial_data["params"]["data"]
 
-            currency: str = str_mod.extract_currency_from_text(instrument_name)
+        combined_order_allowed = init_data["combined_order_allowed"]
 
-            if "-FS-" in instrument_name:
-                size_is_reconciled = 1
-
-            else:
-                size_is_reconciled = 0
-
-            order_allowed = dict(
-                instrument_name=instrument_name,
-                size_is_reconciled=size_is_reconciled,
-                currency=currency,
-            )
-
-            combined_order_allowed.append(order_allowed)
-
-        result["params"].update({"channel": order_allowed_channel})
-        result["params"].update({"data": combined_order_allowed})
+        sub_account_cached = init_data["sub_account_combined"]
+        positions_cached = sub_account_cached["positions_cached"]
 
         await redis_client.publishing_result(
             client_redis,

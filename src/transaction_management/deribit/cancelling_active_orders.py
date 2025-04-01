@@ -37,6 +37,7 @@ async def cancelling_orders(
     currencies: list,
     client_redis: object,
     config_app: list,
+    initial_data: dict,
     redis_channels: list,
     strategy_attributes: list,
 ) -> None:
@@ -77,14 +78,6 @@ async def cancelling_orders(
 
         instrument_attributes_futures_all = futures_instruments["active_futures"]
 
-        # filling currencies attributes
-        my_path_cur = provide_path_for_file("currencies")
-
-        replace_data(
-            my_path_cur,
-            currencies,
-        )
-
         # get redis channels
         market_analytics_channel: str = redis_channels["market_analytics_update"]
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
@@ -95,17 +88,21 @@ async def cancelling_orders(
 
         await asyncio.sleep(5)
 
-        cached_orders = []
-
         cached_ticker_all = []
 
         not_cancel = True
 
+        init_data = initial_data["params"]["data"]
+
+        sub_account_cached = init_data["sub_account_combined"]
+
+        cached_orders = sub_account_cached["orders_cached"]
+
+        my_trades_active_all = sub_account_cached["my_trades_active_all"]
+
+        portfolio_all = sub_account_cached["portfolio_all"]
+
         market_condition_all = []
-
-        portfolio_all = []
-
-        my_trades_active_all = 0
 
         while not_cancel:
 
@@ -141,12 +138,7 @@ async def cancelling_orders(
 
                     cached_orders = data["open_orders"]
 
-                if (
-                    my_trades_active_all != 0
-                    and ticker_cached_channel in message_channel
-                    and market_condition_all
-                    and portfolio_all
-                ):
+                if ticker_cached_channel in message_channel and market_condition_all:
 
                     cached_ticker_all = data["data"]
 

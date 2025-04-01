@@ -158,6 +158,7 @@ async def refill_db(
 async def initial_data(
     private_data: object,
     currencies: list,
+    futures_instruments: list,
     redis_channels: dict,
 ) -> None:
 
@@ -166,12 +167,15 @@ async def initial_data(
         portfolio_channel: str = redis_channels["portfolio"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
+        order_allowed_channel: str = redis_channels["order_is_allowed"]
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
         my_trades_active_from_db = await db_mgt.executing_query_with_return(
             query_trades
         )
+
+        all_instruments_name = futures_instruments["instruments_name"]
 
         result_template = str_mod.message_template()
 
@@ -182,35 +186,40 @@ async def initial_data(
         sub_accounts = [
             await private_data.get_subaccounts_details(o) for o in currencies
         ]
-        
-        sub_account_combined = sub_account_combining(
-                sub_accounts,
-                sub_account_cached_channel,
-                result_template,
-            )
-        
-        log.error(f"sub_account_combined {sub_account_combined}")
 
-        my_trades_active_all=my_trades_active_combining(
-                my_trades_active_from_db,
-                my_trades_channel,
-                result_template,
-            )
-        
-        portfolio_all=portfolio_combining(
-                portfolio_from_exchg,
-                portfolio_channel,
-                result_template,
-            )
+        sub_account_combined = sub_account_combining(
+            sub_accounts,
+            sub_account_cached_channel,
+            result_template,
+        )
+
+        my_trades_active_all = my_trades_active_combining(
+            my_trades_active_from_db,
+            my_trades_channel,
+            result_template,
+        )
+
+        portfolio_all = portfolio_combining(
+            portfolio_from_exchg,
+            portfolio_channel,
+            result_template,
+        )
+
+        combined_order_allowed = is_order_allowed_combining(
+            all_instruments_name,
+            order_allowed_channel,
+            result_template,
+        )
         
         combined_result = dict(
+            combined_order_allowed=combined_order_allowed,
             sub_account_combined=sub_account_combined,
             my_trades_active_all=my_trades_active_all,
             portfolio_all=portfolio_all,
         )
 
         log.debug(combined_result)
-        
+
         return combined_result
 
     except Exception as error:
@@ -254,23 +263,21 @@ def sub_account_combining(
 
     orders_cached = []
     positions_cached = []
-    
+
     try:
-        
+
         for sub_account in sub_accounts:
-            
-            # result = await private_data.get_subaccounts_details(currency)
 
             sub_account = sub_account[0]
-            
+
             sub_account_orders = sub_account["open_orders"]
-            
+
             if sub_account_orders:
 
                 for order in sub_account_orders:
 
-                    orders_cached.append(order)            
-            
+                    orders_cached.append(order)
+
             sub_account_positions = sub_account["positions"]
 
             if sub_account_positions:
@@ -283,14 +290,12 @@ def sub_account_combining(
             orders_cached=orders_cached,
             positions_cached=positions_cached,
         )
-        
+
         result_template["params"].update({"data": sub_account})
         result_template["params"].update({"channel": sub_account_cached_channel})
-        
-        log.warning(f"result_template {result_template}")
 
         return result_template
-    
+
     except:
 
         sub_account = dict(
@@ -302,3 +307,34 @@ def sub_account_combining(
         result_template["params"].update({"channel": sub_account_cached_channel})
 
         return result_template
+
+
+def is_order_allowed_combining(
+    all_instruments_name: list,
+    order_allowed_channel: str,
+    result_template: dict,
+) -> dict:
+
+    combined_order_allowed = []
+    for instrument_name in all_instruments_name:
+
+        currency: str = str_mod.extract_currency_from_text(instrument_name)
+
+        if "-FS-" in instrument_name:
+            size_is_reconciled = 1
+
+        else:
+            size_is_reconciled = 0
+
+        order_allowed = dict(
+            instrument_name=instrument_name,
+            size_is_reconciled=size_is_reconciled,
+            currency=currency,
+        )
+
+        combined_order_allowed.append(order_allowed)
+
+    result_template["params"].update({"data": combined_order_allowed})
+    result_template["params"].update({"channel": order_allowed_channel})
+
+    return result_template

@@ -73,10 +73,6 @@ async def main():
             config_app,
             )
         
-        initial_data = await starter.initial_data(private_data,
-                                                  currencies,
-                                                  redis_channels,
-                                                  )
         
         settlement_periods = str_mod.remove_redundant_elements(
         str_mod.remove_double_brackets_in_list(
@@ -89,6 +85,12 @@ async def main():
             settlement_periods,
         )
 
+        initial_data = await starter.initial_data(private_data,
+                                                  currencies,
+                                                  futures_instruments,
+                                                  redis_channels,
+                                                  )
+        
         redis_keys: dict = config_app["redis_keys"][0]
         
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]

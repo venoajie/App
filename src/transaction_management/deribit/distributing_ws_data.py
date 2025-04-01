@@ -123,16 +123,13 @@ async def caching_distributing_data(
         instruments_name = futures_instruments["instruments_name"]
 
         ticker_all_cached = combining_ticker_data(instruments_name)
-        
+
         init_data = initial_data["params"]["data"]
 
         sub_account_cached = init_data["sub_account_combined"]
-        
-        log.warning(init_data)
-        log.debug(sub_account_cached)
-        
+
         orders_cached = sub_account_cached["orders_cached"]
-        
+
         positions_cached = sub_account_cached["positions_cached"]
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
