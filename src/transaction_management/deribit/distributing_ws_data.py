@@ -125,7 +125,11 @@ async def caching_distributing_data(
         ticker_all_cached = combining_ticker_data(instruments_name)
 
         sub_account_cached = initial_data["sub_account_combined"]
+        
+        log.debug(sub_account_cached)
+        
         orders_cached = sub_account_cached["orders_cached"]
+        
         positions_cached = sub_account_cached["positions_cached"]
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
