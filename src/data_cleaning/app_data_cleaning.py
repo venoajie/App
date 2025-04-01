@@ -79,7 +79,7 @@ async def reconciling_size(
 
         result = str_mod.message_template()
         
-        log.info(initial_data["combined_order_allowed_all"])
+        log.info(initial_data)
 
         combined_order_allowed = initial_data["combined_order_allowed_all"]["params"][
             "data"
