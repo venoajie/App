@@ -205,6 +205,7 @@ async def initial_data(
             result_template,
         )
 
+        log.debug(combined_order_allowed)
         log.warning(is_order_allowed_combining(
             all_instruments_name,
             order_allowed_channel,
