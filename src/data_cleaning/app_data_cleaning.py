@@ -339,9 +339,9 @@ async def allowing_order_for_instrument_not_in_sub_account(
     
     log.debug(combined_order_allowed)
 
-    log.warning([o for o in combined_order_allowed if instrument_name in o["instrument_name"]])
-
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
+        
+        log.warning([o for o in combined_order_allowed if instrument_name in o["instrument_name"]])
 
         [o for o in combined_order_allowed if instrument_name in o["instrument_name"]][
             0
