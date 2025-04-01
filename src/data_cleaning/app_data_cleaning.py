@@ -307,7 +307,6 @@ async def rechecking_reconciliation_regularly(
         positions_cached,
         positions_cached_instrument,
         order_db_table,
-        order_allowed,
         five_days_ago,
         result,
     )
@@ -320,7 +319,6 @@ async def rechecking_reconciliation_regularly(
         order_allowed_channel,
         positions_cached,
         order_db_table,
-        order_allowed,
         five_days_ago,
         result,
     )
@@ -337,12 +335,8 @@ async def allowing_order_for_instrument_not_in_sub_account(
 
     order_allowed = 1
     
-    log.debug(combined_order_allowed)
-
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
-        
-        log.warning([o for o in combined_order_allowed if instrument_name in o["instrument_name"]])
-
+    
         [o for o in combined_order_allowed if instrument_name in o["instrument_name"]][
             0
         ]["size_is_reconciled"] = order_allowed
@@ -365,7 +359,6 @@ async def rechecking_based_on_sub_account(
     positions_cached: list,
     positions_cached_instrument: list,
     order_db_table: str,
-    order_allowed: bool,
     five_days_ago: int,
     result: dict,
 ) -> None:
@@ -513,7 +506,6 @@ async def rechecking_based_on_data_in_sqlite(
     order_allowed_channel: str,
     positions_cached: list,
     order_db_table: str,
-    order_allowed: bool,
     five_days_ago: int,
     result: dict,
 ) -> None:
