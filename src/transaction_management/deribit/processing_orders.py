@@ -11,7 +11,7 @@ from loguru import logger as log
 from db_management import redis_client, sqlite_management as db_mgt
 from messaging import subscribing_to_channels, telegram_bot as tlgrm
 from strategies import basic_strategy
-from transaction_management.deribit import cancelling_active_orders as cancel_order
+from transaction_management.deribit import cancelling_active_orders as cancel_order, starter
 from utilities import caching, string_modification as str_mod, system_tools as tools
 
 
@@ -20,7 +20,6 @@ async def processing_orders(
     client_redis: object,
     cancellable_strategies: list,
     currencies: list,
-    initial_data_subaccount: dict,
     order_db_table: str,
     redis_channels: list,
     strategy_attributes: list,
@@ -62,6 +61,20 @@ async def processing_orders(
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
+        # sub_account_combining
+        sub_accounts = [
+            await private_data.get_subaccounts_details(o) for o in currencies
+        ]        
+        
+        result_template = str_mod.message_template()
+
+        initial_data_subaccount = starter.sub_account_combining(
+            sub_accounts,
+            sub_account_cached_channel,
+            result_template,
+        )
+        
+        
         sub_account_cached_params = initial_data_subaccount["params"]
 
         sub_account_cached = sub_account_cached_params["data"]

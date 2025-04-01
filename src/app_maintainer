@@ -131,12 +131,6 @@ async def main():
             config_app,
             )
 
-        from loguru import logger as log
-        
-        # sub_account_combining
-        sub_accounts = [
-            await private_data.get_subaccounts_details(o) for o in currencies
-        ]
         
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         order_allowed_channel: str = redis_channels["order_is_allowed"]
@@ -144,6 +138,13 @@ async def main():
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
         
         result_template = str_mod.message_template()
+
+        from loguru import logger as log
+        
+        # sub_account_combining
+        sub_accounts = [
+            await private_data.get_subaccounts_details(o) for o in currencies
+        ]        
         
         initial_data_subaccount = starter.sub_account_combining(
             sub_accounts,
@@ -152,7 +153,6 @@ async def main():
         )
         
         log.info(initial_data_subaccount)
-
 
         all_instruments_name = futures_instruments["instruments_name"]
         
@@ -211,7 +211,6 @@ async def main():
                 client_redis,
                 cancellable_strategies,
                 currencies,
-                initial_data_subaccount,
                 order_db_table,
                 redis_channels,
                 strategy_attributes,
