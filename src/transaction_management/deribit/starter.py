@@ -218,8 +218,6 @@ async def initial_data(
             portfolio_all=portfolio,
         )
         
-        log.error(combined_result)
-
         return combined_result
 
     except Exception as error:

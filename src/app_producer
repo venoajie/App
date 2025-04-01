@@ -91,9 +91,6 @@ async def main():
                                                   redis_channels,
                                                   )
         
-        from loguru import logger as log
-        log.info(initial_data)
-        
         redis_keys: dict = config_app["redis_keys"][0]
         
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
