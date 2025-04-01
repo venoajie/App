@@ -296,7 +296,6 @@ async def rechecking_reconciliation_regularly(
         combined_order_allowed,
         order_allowed_channel,
         futures_instruments_name_not_in_positions_cached_instrument,
-        order_allowed,
         result,
     )
 
@@ -332,7 +331,6 @@ async def allowing_order_for_instrument_not_in_sub_account(
     combined_order_allowed: list,
     order_allowed_channel: str,
     futures_instruments_name_not_in_positions_cached_instrument: list,
-    order_allowed: bool,
     result: dict,
 ) -> None:
     """ """
