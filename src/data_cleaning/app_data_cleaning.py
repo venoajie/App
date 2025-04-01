@@ -124,7 +124,6 @@ async def reconciling_size(
                             order_allowed_channel,
                             positions_cached,
                             order_db_table,
-                            combined_order_allowed,
                             five_days_ago,
                             result,
                         )
@@ -170,7 +169,6 @@ async def reconciling_size(
                         order_allowed_channel,
                         positions_cached,
                         order_db_table,
-                        combined_order_allowed,
                         five_days_ago,
                         result,
                     )
@@ -274,7 +272,6 @@ async def rechecking_reconciliation_regularly(
     order_allowed_channel: str,
     positions_cached: list,
     order_db_table: str,
-    order_allowed: bool,
     five_days_ago: int,
     result,
 ) -> None:
