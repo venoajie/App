@@ -256,6 +256,8 @@ def sub_account_combining(
     positions_cached = []
     
     try:
+        
+        log.warning(sub_accounts)
 
         for sub_account in sub_accounts:
             
