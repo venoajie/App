@@ -213,12 +213,12 @@ async def initial_data(
             result_template,
         )
         
-        return dict(
+        return [
             sub_account_combined,
             combined_order_allowed,
             my_trades_active,
-            portfolio,
-        )
+            portfolio
+        ]
 
     except Exception as error:
 
