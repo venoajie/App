@@ -206,12 +206,7 @@ async def initial_data(
         )
 
         log.debug(combined_order_allowed)
-        log.warning(is_order_allowed_combining(
-            all_instruments_name,
-            order_allowed_channel,
-            result_template,
-        ))
-
+        
         sub_account_combined = sub_account_combining(
             sub_accounts,
             sub_account_cached_channel,
