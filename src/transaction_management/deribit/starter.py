@@ -210,6 +210,8 @@ async def initial_data(
             sub_account_cached_channel,
             result_template,
         )
+        
+        log.warning(combined_order_allowed)
 
         return dict(
             sub_account_combined_all=sub_account_combined,
