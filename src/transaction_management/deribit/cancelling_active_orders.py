@@ -37,7 +37,9 @@ async def cancelling_orders(
     currencies: list,
     client_redis: object,
     config_app: list,
-    initial_data: dict,
+    initial_data_my_trades_active: dict,
+    initial_data_portfolio: dict,
+    initial_data_subaccount: dict,
     redis_channels: list,
     strategy_attributes: list,
 ) -> None:
@@ -92,15 +94,15 @@ async def cancelling_orders(
 
         not_cancel = True
 
-        sub_account_cached_params = initial_data["sub_account_combined_all"]["params"]
+        sub_account_cached_params = initial_data_subaccount["params"]
 
         sub_account_cached = sub_account_cached_params["data"]
 
         cached_orders = sub_account_cached["orders_cached"]
 
-        my_trades_active_all = initial_data["my_trades_active_all"]["params"]["data"]
+        my_trades_active_all = initial_data_my_trades_active["params"]["data"]
 
-        portfolio_all = initial_data["portfolio_all"]["params"]["data"]
+        portfolio_all = initial_data_portfolio["params"]["data"]
 
         market_condition_all = []
 

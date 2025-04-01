@@ -206,19 +206,24 @@ async def initial_data(
         )
 
         log.debug(combined_order_allowed)
-        
+        log.warning(is_order_allowed_combining(
+            all_instruments_name,
+            order_allowed_channel,
+            result_template,
+        ))
+
         sub_account_combined = sub_account_combining(
             sub_accounts,
             sub_account_cached_channel,
             result_template,
         )
         
-        return [
-            [sub_account_combined],
-            [combined_order_allowed],
-            [my_trades_active],
-            [portfolio]
-        ]
+        return dict(
+            sub_account_combined_all=sub_account_combined,
+            combined_order_allowed_all=combined_order_allowed,
+            my_trades_active_all=my_trades_active,
+            portfolio_all=portfolio,
+        )
 
     except Exception as error:
 

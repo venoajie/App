@@ -27,7 +27,8 @@ async def reconciling_size(
     client_redis: object,
     redis_channels: list,
     config_app: list,
-    initial_data: dict,
+    initial_data_subaccount: dict,
+    initial_data_order_allowed: dict,
     futures_instruments: list,
 ) -> None:
 
@@ -79,13 +80,9 @@ async def reconciling_size(
 
         result = str_mod.message_template()
         
-        combined_order_allowed = initial_data["combined_order_allowed_all"]["params"][
-            "data"
-        ]
+        combined_order_allowed = initial_data_order_allowed["params"]["data"]
 
-        sub_account_cached_params = initial_data["sub_account_combined_all"]["params"]
-
-        sub_account_cached = sub_account_cached_params["data"]
+        sub_account_cached = initial_data_subaccount["params"]["data"]
 
         positions_cached = sub_account_cached["positions_cached"]
 

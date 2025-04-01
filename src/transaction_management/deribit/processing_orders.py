@@ -20,7 +20,7 @@ async def processing_orders(
     client_redis: object,
     cancellable_strategies: list,
     currencies: list,
-    initial_data: dict,
+    initial_data_subaccount: dict,
     order_db_table: str,
     redis_channels: list,
     strategy_attributes: list,
@@ -62,7 +62,7 @@ async def processing_orders(
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
-        sub_account_cached_params = initial_data["sub_account_combined_all"]["params"]
+        sub_account_cached_params = initial_data_subaccount["params"]
 
         sub_account_cached = sub_account_cached_params["data"]
 

@@ -40,7 +40,7 @@ from utilities.string_modification import (
 async def caching_distributing_data(
     client_redis: object,
     currencies: list,
-    initial_data: dict,
+    initial_data_subaccount: dict,
     redis_channels: list,
     redis_keys: list,
     strategy_attributes,
@@ -124,7 +124,7 @@ async def caching_distributing_data(
 
         ticker_all_cached = combining_ticker_data(instruments_name)
 
-        sub_account_cached_params = initial_data["params"]
+        sub_account_cached_params = initial_data_subaccount["params"]
 
         sub_account_cached = sub_account_cached_params["data"]
 
