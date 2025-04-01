@@ -339,7 +339,5 @@ def is_order_allowed_combining(
 
     result_template["params"].update({"data": combined_order_allowed})
     result_template["params"].update({"channel": order_allowed_channel})
-    
-    log.error(result_template)
 
     return result_template
