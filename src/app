@@ -79,6 +79,9 @@ async def main():
             settlement_periods,
         )
 
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+
         await starter.initial_procedures(
             private_data,
             config_app,
@@ -90,9 +93,6 @@ async def main():
                                                   redis_channels,
                                                   )
         
-        # get redis channels
-        redis_channels: dict = config_app["redis_channels"][0]
-
         strategy_attributes = config_app["strategies"]
 
         queue = Queue(maxsize=1)
