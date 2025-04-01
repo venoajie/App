@@ -126,6 +126,7 @@ async def caching_distributing_data(
 
         sub_account_cached = initial_data["sub_account_combined"]
         
+        log.warning(initial_data)
         log.debug(sub_account_cached)
         
         orders_cached = sub_account_cached["orders_cached"]
