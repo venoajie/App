@@ -2,6 +2,7 @@
 
 # built ins
 import asyncio
+from loguru import logger as log
 
 # user defined formulas
 from db_management import sqlite_management as db_mgt
@@ -199,9 +200,7 @@ async def initial_data(
                 portfolio_channel,
                 result,
             )
-
-
-        from loguru import logger as log
+        
         log.error(sub_account_combined)
 
         log.debug(my_trades_active_all)
@@ -258,7 +257,9 @@ def sub_account_combining(
     
     try:
 
-        for sub_account in sub_accounts[0]:
+        for sub_account in sub_accounts:
+            
+            log.info(sub_account)
             # result = await private_data.get_subaccounts_details(currency)
 
             sub_account = sub_account[0]
