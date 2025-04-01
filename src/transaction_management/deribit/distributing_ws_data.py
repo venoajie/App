@@ -123,6 +123,8 @@ async def caching_distributing_data(
         instruments_name = futures_instruments["instruments_name"]
 
         ticker_all_cached = combining_ticker_data(instruments_name)
+        
+        log.info(initial_data)
 
         init_data = initial_data["params"]["data"]
 
