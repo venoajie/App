@@ -172,8 +172,9 @@ async def cancelling_orders(
                     log.info(portfolio_all)
 
                     portfolio = [
-                        o for o in portfolio_all if currency_lower == o["currency"]
+                        o for o in portfolio_all if currency_upper == o["currency"].upper()
                     ][0]
+                    #! need to update currency to upper from starter
 
                     equity: float = portfolio["equity"]
 
