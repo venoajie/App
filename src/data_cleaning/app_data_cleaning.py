@@ -710,7 +710,6 @@ async def inserting_transaction_log_data(
             o["timestamp"] for o in my_trades_currency if o["user_seq"] is None
         ]
 
-
         if my_trades_currency_with_blanks_user_seq:
 
             min_timestamp = min(my_trades_currency_with_blanks_user_seq) - 100000
@@ -730,6 +729,9 @@ async def inserting_transaction_log_data(
             log.warning(
             f"transaction_log {transaction_log}"
         )
+            log.info([
+            o for o in my_trades_currency if o["user_seq"] is None
+        ])
             for transaction in transaction_log:
 
                 trade_id = transaction["trade_id"]
