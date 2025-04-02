@@ -445,8 +445,6 @@ async def updating_portfolio(
 
     result["params"]["data"].update({"cached_portfolio": portfolio})
     
-    log.warning(result)
-
     await publishing_result(
         pipe,
         portfolio_channel,
