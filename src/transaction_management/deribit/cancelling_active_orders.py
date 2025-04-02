@@ -97,9 +97,6 @@ async def cancelling_orders(
         )
 
         my_trades_active_all = initial_data_my_trades_active["params"]["data"]
-        
-        log.warning(initial_data_my_trades_active)
-
 
         # get portfolio from exchg
         portfolio_from_exchg = await private_data.get_subaccounts()
@@ -109,8 +106,6 @@ async def cancelling_orders(
             portfolio_channel,
             result_template,
         )
-
-        log.error(my_trades_active_all)
 
         portfolio_all = initial_data_portfolio["params"]["data"]
 
@@ -181,9 +176,6 @@ async def cancelling_orders(
                     ][0]
 
                     index_price = get_index(ticker_perpetual_instrument_name)
-
-                    log.critical(currency_upper)
-                    log.debug(my_trades_active_all)
 
                     my_trades_currency_all_transactions: list = (
                         []
@@ -476,7 +468,7 @@ async def cancelling_double_ids(
 
     if orders_currency_strategy:
 
-        outstanding_order_id: list = remove_redundant_elements(
+        outstanding_order_id: list = str_mod.remove_redundant_elements(
             [o["label"] for o in orders_currency_strategy]
         )
 
