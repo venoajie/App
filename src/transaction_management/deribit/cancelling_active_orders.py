@@ -167,7 +167,7 @@ async def cancelling_orders(
                     log.debug(portfolio_all)
 
                     portfolio = [
-                        o for o in portfolio_all if currency_lower in o["currency"]
+                        o for o in portfolio_all if currency_lower == o["currency"]
                     ][0]
                     
                     log.warning(portfolio)
