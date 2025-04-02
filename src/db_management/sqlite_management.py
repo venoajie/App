@@ -80,6 +80,8 @@ async def insert_tables(
 
     """
     try:
+        
+        log.critical(f"insert_tables params   {params}")
 
         async with aiosqlite.connect(
             "databases/trading.sqlite3", isolation_level=None

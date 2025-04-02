@@ -758,5 +758,10 @@ async def inserting_transaction_log_data(
                 )
 
                 await db_mgt.update_status_data(
-                    archive_db_table, "position", where_filter, trade_id, position, "="
+                    archive_db_table, 
+                    "position",
+                    where_filter,
+                    trade_id,
+                    position,
+                    "=",
                 )
