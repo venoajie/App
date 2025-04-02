@@ -95,6 +95,8 @@ async def cancelling_orders(
             my_trades_channel,
             result_template,
         )
+
+        my_trades_active_all = initial_data_my_trades_active["params"]["data"]
         
         log.warning(initial_data_my_trades_active)
 
@@ -107,8 +109,6 @@ async def cancelling_orders(
             portfolio_channel,
             result_template,
         )
-
-        my_trades_active_all = initial_data_my_trades_active["params"]["data"]
 
         log.error(my_trades_active_all)
 
