@@ -132,77 +132,79 @@ async def processing_orders(
 
                     if order_update_channel in message_channel:
 
-                        data = data["current_order"]
+                        data_all = data["current_order"]
+                        
+                        log.debug(data_all)
+                        
+                        for data in data_all:
 
-                        if "oto_order_ids" in data:
+                            if "oto_order_ids" in data:
 
-                            await saving_oto_order(
-                                private_data,
-                                non_checked_strategies,
-                                [data],
-                                order_db_table,
-                                ordered,
-                            )
+                                await saving_oto_order(
+                                    private_data,
+                                    non_checked_strategies,
+                                    [data],
+                                    order_db_table,
+                                    ordered,
+                                )
 
-                        else:
-                            
-                            log.debug(data)
+                            else:
+                                
+                                if "OTO" not in data["order_id"]:
 
-                            if "OTO" not in data["order_id"]:
+                                    label = data["label"]
 
-                                label = data["label"]
+                                    order_id = data["order_id"]
+                                    order_state = data["order_state"]
 
-                                order_id = data["order_id"]
-                                order_state = data["order_state"]
+                                    # no label
+                                    if label == "":
 
-                                # no label
-                                if label == "":
-
-                                    await cancelling_and_relabelling(
-                                        private_data,
-                                        non_checked_strategies,
-                                        order_db_table,
-                                        data,
-                                        label,
-                                        order_state,
-                                        order_id,
-                                        ordered,
-                                    )
-
-                                else:
-                                    label_and_side_consistent = (
-                                        basic_strategy.is_label_and_side_consistent(
-                                            non_checked_strategies, data
-                                        )
-                                    )
-
-                                    if label_and_side_consistent and label:
-
-                                        # log.debug(f"order {order}")
-
-                                        await saving_order_based_on_state(
+                                        await cancelling_and_relabelling(
+                                            private_data,
+                                            non_checked_strategies,
                                             order_db_table,
                                             data,
+                                            label,
+                                            order_state,
+                                            order_id,
+                                            ordered,
                                         )
 
-                                    # check if transaction has label. Provide one if not any
-                                    if not label_and_side_consistent:
-
-                                        if (
-                                            order_state != "cancelled"
-                                            or order_state != "filled"
-                                        ):
-                                            await cancel_order.cancel_by_order_id(
-                                                private_data,
-                                                order_db_table,
-                                                order_id,
+                                    else:
+                                        label_and_side_consistent = (
+                                            basic_strategy.is_label_and_side_consistent(
+                                                non_checked_strategies, data
                                             )
+                                        )
 
-                                            # log.error (f"order {order}")
-                                            await db_mgt.insert_tables(
+                                        if label_and_side_consistent and label:
+
+                                            # log.debug(f"order {order}")
+
+                                            await saving_order_based_on_state(
                                                 order_db_table,
                                                 data,
                                             )
+
+                                        # check if transaction has label. Provide one if not any
+                                        if not label_and_side_consistent:
+
+                                            if (
+                                                order_state != "cancelled"
+                                                or order_state != "filled"
+                                            ):
+                                                await cancel_order.cancel_by_order_id(
+                                                    private_data,
+                                                    order_db_table,
+                                                    order_id,
+                                                )
+
+                                                # log.error (f"order {order}")
+                                                await db_mgt.insert_tables(
+                                                    order_db_table,
+                                                    data,
+                                                )
 
                         for currency in currencies:
 
