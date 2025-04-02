@@ -710,9 +710,6 @@ async def inserting_transaction_log_data(
             o["timestamp"] for o in my_trades_currency if o["user_seq"] is None
         ]
 
-        log.debug(
-            f"my_trades_currency_with_blanks_user_seq {my_trades_currency_with_blanks_user_seq}"
-        )
 
         if my_trades_currency_with_blanks_user_seq:
 
@@ -727,6 +724,12 @@ async def inserting_transaction_log_data(
 
             where_filter = f"trade_id"
 
+            log.debug(
+            f"my_trades_currency_with_blanks_user_seq {my_trades_currency_with_blanks_user_seq}"
+        )
+            log.warning(
+            f"transaction_log {transaction_log}"
+        )
             for transaction in transaction_log:
 
                 trade_id = transaction["trade_id"]
