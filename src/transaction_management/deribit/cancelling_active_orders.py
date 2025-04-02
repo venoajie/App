@@ -10,11 +10,16 @@ from loguru import logger as log
 # user defined formula
 
 from db_management import sqlite_management as db_mgt
-from messaging import get_published_messages, subscribing_to_channels, telegram_bot as tlgrm
+from messaging import (
+    get_published_messages,
+    subscribing_to_channels,
+    telegram_bot as tlgrm,
+)
 from strategies.cash_carry.combo_auto import ComboAuto
 from strategies.hedging.hedging_spot import HedgingSpot
-from transaction_management.deribit import get_instrument_summary,starter
+from transaction_management.deribit import get_instrument_summary, starter
 from utilities import string_modification as str_mod, system_tools
+
 
 async def cancelling_orders(
     private_data,
@@ -81,15 +86,15 @@ async def cancelling_orders(
         sub_account_cached = sub_account_cached_params["data"]
 
         cached_orders = sub_account_cached["orders_cached"]
-                
+
         query_trades = f"SELECT * FROM  v_trading_all_active"
-        
+
         result_template = str_mod.message_template()
 
         my_trades_active_from_db = await db_mgt.executing_query_with_return(
             query_trades
         )
-        
+
         initial_data_my_trades_active = starter.my_trades_active_combining(
             my_trades_active_from_db,
             my_trades_channel,
@@ -152,7 +157,7 @@ async def cancelling_orders(
                     server_time = data["server_time"]
 
                     currency_upper = data["currency_upper"]
-                    
+
                     currency_lower = currency_upper.lower()
 
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
@@ -162,11 +167,11 @@ async def cancelling_orders(
                         for o in market_condition_all
                         if instrument_name_perpetual in o["instrument_name"]
                     ][0]
-                    
+
                     portfolio = [
                         o for o in portfolio_all if currency_lower == o["currency"]
                     ][0]
-                    
+
                     equity: float = portfolio["equity"]
 
                     ticker_perpetual_instrument_name = [
@@ -186,7 +191,7 @@ async def cancelling_orders(
                             if currency_upper in o["instrument_name"]
                         ]
                     )
-                    
+
                     my_trades_currency_all: list = (
                         []
                         if my_trades_currency_all_transactions == 0
@@ -388,8 +393,10 @@ async def cancel_the_cancellables(
     column_list = "label", where_filter
 
     if open_orders_sqlite is None:
-        open_orders_sqlite: list = await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
-            "orders_all_json", currency.upper(), "all", "all", column_list
+        open_orders_sqlite: list = (
+            await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
+                "orders_all_json", currency.upper(), "all", "all", column_list
+            )
         )
 
     if open_orders_sqlite:

@@ -221,7 +221,7 @@ async def hedging_spot(
                     portfolio = [
                         o for o in portfolio_all if currency_lower == o["currency"]
                     ][0]
-                    
+
                     equity: float = portfolio["equity"]
 
                     ticker_perpetual_instrument_name = [

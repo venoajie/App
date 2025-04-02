@@ -85,7 +85,7 @@ async def reconciling_size(
             order_allowed_channel,
             result_template,
         )
-        
+
         combined_order_allowed = initial_data_order_allowed["params"]["data"]
 
         sub_account_cached = initial_data_subaccount["params"]["data"]
@@ -141,7 +141,7 @@ async def reconciling_size(
                 ):
 
                     for currency in currencies:
-                        
+
                         currency_lower = currency.lower()
 
                         archive_db_table = f"my_trades_all_{currency_lower}_json"
@@ -334,9 +334,9 @@ async def allowing_order_for_instrument_not_in_sub_account(
     """ """
 
     order_allowed = 1
-    
+
     for instrument_name in futures_instruments_name_not_in_positions_cached_instrument:
-    
+
         [o for o in combined_order_allowed if instrument_name in o["instrument_name"]][
             0
         ]["size_is_reconciled"] = order_allowed
