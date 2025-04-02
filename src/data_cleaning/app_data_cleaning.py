@@ -735,9 +735,9 @@ async def inserting_transaction_log_data(
             for transaction in transaction_log:
 
                 trade_id = transaction["trade_id"]
-                user_seq = transaction["user_seq"]
+                user_seq = int(transaction["user_seq"])
                 side = transaction["side"]
-                timestamp = transaction["timestamp"]
+                timestamp = int(transaction["timestamp"])
                 position = transaction["position"]
 
                 await db_mgt.update_status_data(
