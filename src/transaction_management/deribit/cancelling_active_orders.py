@@ -167,9 +167,11 @@ async def cancelling_orders(
                         for o in market_condition_all
                         if instrument_name_perpetual in o["instrument_name"]
                     ][0]
-                    
+
                     portfolio = [
-                        o for o in portfolio_all if currency_upper == o["currency"].upper()
+                        o
+                        for o in portfolio_all
+                        if currency_upper == o["currency"].upper()
                     ][0]
                     #! need to update currency to upper from starter
 

@@ -724,14 +724,10 @@ async def inserting_transaction_log_data(
             where_filter = f"trade_id"
 
             log.debug(
-            f"my_trades_currency_with_blanks_user_seq {my_trades_currency_with_blanks_user_seq}"
-        )
-            log.warning(
-            f"transaction_log {transaction_log}"
-        )
-            log.info([
-            o for o in my_trades_currency if o["user_seq"] is None
-        ])
+                f"my_trades_currency_with_blanks_user_seq {my_trades_currency_with_blanks_user_seq}"
+            )
+            log.warning(f"transaction_log {transaction_log}")
+            log.info([o for o in my_trades_currency if o["user_seq"] is None])
             for transaction in transaction_log:
 
                 trade_id = transaction["trade_id"]
@@ -758,7 +754,7 @@ async def inserting_transaction_log_data(
                 )
 
                 await db_mgt.update_status_data(
-                    archive_db_table, 
+                    archive_db_table,
                     "position",
                     where_filter,
                     trade_id,

@@ -234,16 +234,22 @@ async def my_trades_active_archived_not_reconciled_each_other(
         "amount",
     )
 
-    my_trades_instrument_name_active = await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
-        trade_db_table, instrument_name, "all", "all", column_trade
+    my_trades_instrument_name_active = (
+        await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
+            trade_db_table, instrument_name, "all", "all", column_trade
+        )
     )
 
-    my_trades_instrument_name_closed = await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
-        closed_db_table, instrument_name, "all", "all", column_trade
+    my_trades_instrument_name_closed = (
+        await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
+            closed_db_table, instrument_name, "all", "all", column_trade
+        )
     )
 
-    my_trades_instrument_name_archive = await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
-        archive_db_table, instrument_name, "all", "all", column_trade
+    my_trades_instrument_name_archive = (
+        await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
+            archive_db_table, instrument_name, "all", "all", column_trade
+        )
     )
 
     my_trades_archive_instrument_sorted = str_mod.sorting_list(

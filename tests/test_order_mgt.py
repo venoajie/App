@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from transaction_management.deribit.orders_management import (
+from transaction_management.deribit.processing_orders import (
     get_custom_label_oto,
     labelling_unlabelled_order_oto,
 )

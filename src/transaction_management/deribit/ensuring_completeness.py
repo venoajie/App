@@ -6,41 +6,22 @@ import orjson
 
 from loguru import logger as log
 
-from data_cleaning.managing_closed_transactions import (
-    clean_up_closed_transactions,
-    get_unrecorded_trade_transactions,
-)
-from data_cleaning.managing_delivered_transactions import (
-    is_instrument_name_has_delivered,
-    updating_delivered_instruments,
-)
-from data_cleaning.reconciling_db import (
-    is_my_trades_and_sub_account_size_reconciled_each_other,
-)
-from db_management.sqlite_management import executing_query_with_return
+from data_cleaning import managing_closed_transactions, reconciling_db
+from db_management import sqlite_management as db_mgt
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.api_requests import (
-    get_currencies,
-    get_instruments,
+from transaction_management.deribit import api_requests, processing_orders
+from utilities import (
+    pickling,
+    string_modification as str_mod,
+    system_tools,
+    time_modification as time_mod,
 )
-from transaction_management.deribit.orders_management import saving_traded_orders
-from utilities.pickling import read_data, replace_data
-from utilities.string_modification import (
-    extract_currency_from_text,
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-)
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,
-)
-from utilities.time_modification import get_now_unix_time as get_now_unix
 
 
 def get_settlement_period(strategy_attributes: list) -> list:
 
-    return remove_redundant_elements(
-        remove_double_brackets_in_list(
+    return str_mod.remove_redundant_elements(
+        str_mod.remove_double_brackets_in_list(
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
@@ -53,15 +34,15 @@ def reading_from_pkl_data(
 ) -> dict:
     """ """
 
-    path: str = provide_path_for_file(end_point, currency, status)
+    path: str = system_tools.provide_path_for_file(end_point, currency, status)
 
-    return read_data(path)
+    return pickling.read_data(path)
 
 
 async def get_instruments_from_deribit(currency: str) -> float:
     """ """
 
-    result = await get_instruments(currency)
+    result = await api_requests.get_instruments(currency)
 
     return result
 
@@ -70,9 +51,9 @@ async def update_instruments_per_currency(currency):
 
     instruments = await get_instruments_from_deribit(currency)
 
-    my_path_instruments = provide_path_for_file("instruments", currency)
+    my_path_instruments = system_tools.provide_path_for_file("instruments", currency)
 
-    replace_data(
+    pickling.replace_data(
         my_path_instruments,
         instruments,
     )
@@ -84,7 +65,7 @@ async def update_instruments(idle_time: int):
 
         while True:
 
-            get_currencies_all = await get_currencies()
+            get_currencies_all = await api_requests.get_currencies()
 
             currencies = [o["currency"] for o in get_currencies_all["result"]]
 
@@ -92,9 +73,9 @@ async def update_instruments(idle_time: int):
 
                 await update_instruments_per_currency(currency)
 
-            my_path_cur = provide_path_for_file("currencies")
+            my_path_cur = system_tools.provide_path_for_file("currencies")
 
-            replace_data(my_path_cur, currencies)
+            pickling.replace_data(my_path_cur, currencies)
 
             await asyncio.sleep(idle_time)
 
@@ -105,7 +86,7 @@ async def update_instruments(idle_time: int):
             "general_error",
         )
 
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
 
 
 async def reconciling_size(
@@ -160,7 +141,7 @@ async def reconciling_size(
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
-        my_trades_active_all = await executing_query_with_return(query_trades)
+        my_trades_active_all = await db_mgt.executing_query_with_return(query_trades)
 
         while True:
 
@@ -176,7 +157,7 @@ async def reconciling_size(
 
                     if my_trades_channel in message_channel:
 
-                        my_trades_active_all = await executing_query_with_return(
+                        my_trades_active_all = await db_mgt.executing_query_with_return(
                             query_trades
                         )
 
@@ -184,7 +165,7 @@ async def reconciling_size(
 
                         positions_cached = message_byte_data
 
-                        positions_cached_instrument = remove_redundant_elements(
+                        positions_cached_instrument = str_mod.remove_redundant_elements(
                             [o["instrument_name"] for o in positions_cached]
                         )
 
@@ -194,7 +175,7 @@ async def reconciling_size(
                             # sub account instruments
                             for instrument_name in positions_cached_instrument:
 
-                                currency: str = extract_currency_from_text(
+                                currency: str = str_mod.extract_currency_from_text(
                                     instrument_name
                                 )
 
@@ -205,7 +186,9 @@ async def reconciling_size(
                                 )
 
                                 my_trades_currency_all = (
-                                    await executing_query_with_return(query_trades_all)
+                                    await db_mgt.executing_query_with_return(
+                                        query_trades_all
+                                    )
                                 )
 
                                 archive_db_table = (
@@ -221,7 +204,7 @@ async def reconciling_size(
                                 # eliminating combo transactions as they're not recorded in the book
                                 if "-FS-" not in instrument_name:
 
-                                    my_trades_and_sub_account_size_reconciled = is_my_trades_and_sub_account_size_reconciled_each_other(
+                                    my_trades_and_sub_account_size_reconciled = reconciling_db.is_my_trades_and_sub_account_size_reconciled_each_other(
                                         instrument_name,
                                         my_trades_currency,
                                         positions_cached,
@@ -248,7 +231,7 @@ async def reconciling_size(
 
                                             one_minute = ONE_SECOND * 60
 
-                                            end_timestamp = get_now_unix()
+                                            end_timestamp = time_mod.get_now_unix_time()
 
                                             five_days_ago = end_timestamp - (
                                                 one_minute * 60 * 24 * 5
@@ -275,7 +258,7 @@ async def reconciling_size(
                                                 order_db_table,
                                             )
 
-                            await clean_up_closed_transactions(
+                            await managing_closed_transactions.clean_up_closed_transactions(
                                 currency,
                                 archive_db_table,
                                 my_trades_currency,
@@ -283,7 +266,7 @@ async def reconciling_size(
 
             except Exception as error:
 
-                parse_error_message(error)
+                system_tools.parse_error_message(error)
 
                 continue
 
@@ -297,7 +280,7 @@ async def reconciling_size(
             "general_error",
         )
 
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
 
 
 async def update_trades_from_exchange_based_on_latest_timestamp(
@@ -345,7 +328,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
 
                 log.error(f"{trade}")
 
-                await saving_traded_orders(
+                await processing_orders.saving_traded_orders(
                     trade,
                     archive_db_table,
                     order_db_table,
@@ -367,7 +350,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
 
                     log.debug(f"{trade_trd_id}")
 
-                    await saving_traded_orders(
+                    await processing_orders.saving_traded_orders(
                         trade,
                         archive_db_table,
                         order_db_table,

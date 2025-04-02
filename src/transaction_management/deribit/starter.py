@@ -164,7 +164,7 @@ def portfolio_combining(
     portfolio = (
         [o["portfolio"] for o in portfolio_all if o["type"] == "subaccount"][0]
     ).values()
-    
+
     #! need to update currency to upper
 
     result_template["params"].update({"data": portfolio})

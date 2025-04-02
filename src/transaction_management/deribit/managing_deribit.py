@@ -7,7 +7,7 @@ from loguru import logger as log
 
 # user defined formula
 from transaction_management.deribit.api_requests import SendApiRequest
-from transaction_management.deribit.orders_management import saving_traded_orders
+from transaction_management.deribit.processing_orders import saving_traded_orders
 
 
 def get_first_tick_query(

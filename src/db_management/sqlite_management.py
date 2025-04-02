@@ -80,7 +80,7 @@ async def insert_tables(
 
     """
     try:
-        
+
         log.critical(f"insert_tables params   {params}")
 
         async with aiosqlite.connect(
@@ -357,7 +357,7 @@ async def update_status_data(
         ) as db:
 
             await db.execute("pragma journal_mode=wal;")
-            
+
             log.info(f"query update status data {query}")
 
             await db.execute(query)

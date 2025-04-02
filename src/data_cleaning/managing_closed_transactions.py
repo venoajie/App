@@ -108,10 +108,10 @@ async def refill_db(
     my_trades_currency_active_with_blanks = [
         o for o in my_trades_currency_active if o["label"] is None
     ]
-    
+
     log.debug(
-            f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}"
-       )
+        f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}"
+    )
 
     if my_trades_currency_active_with_blanks:
         column_trade: str = (
@@ -136,7 +136,7 @@ async def refill_db(
 
         if my_trades_archive_instrument_id:
             for id in my_trades_archive_instrument_id:
-                
+
                 transaction = parsing_sqlite_json_output(
                     [
                         o["data"]
@@ -144,11 +144,8 @@ async def refill_db(
                         if id == o["trade_id"]
                     ]
                 )[0]
-                
-                log.warning(
-            f"transaction {transaction}"
-       )
 
+                log.warning(f"transaction {transaction}")
 
                 label_open: str = get_custom_label(transaction)
                 transaction.update({"label": label_open})
@@ -167,7 +164,7 @@ async def refill_db(
                 await insert_tables(
                     archive_db_table,
                     transaction,
-                    )
+                )
 
 
 def get_unrecorded_trade_transactions(
