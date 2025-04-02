@@ -14,7 +14,7 @@ from messaging import (
     subscribing_to_channels,
     telegram_bot as tlgrm,
 )
-from transaction_management.deribit import orders_management as ord_mgt, starter
+from transaction_management.deribit import processing_orders, starter
 from utilities import (
     string_modification as str_mod,
     system_tools,
@@ -239,7 +239,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
 
                 trade = trade_timestamp[0]
 
-                await ord_mgt.saving_traded_orders(
+                await processing_orders.saving_traded_orders(
                     trade,
                     archive_db_table,
                     order_db_table,
@@ -259,7 +259,7 @@ async def update_trades_from_exchange_based_on_latest_timestamp(
 
                     log.debug(f"{trade_trd_id}")
 
-                    await ord_mgt.saving_traded_orders(
+                    await processing_orders.saving_traded_orders(
                         trade,
                         archive_db_table,
                         order_db_table,

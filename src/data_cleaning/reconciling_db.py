@@ -8,18 +8,8 @@ import asyncio
 from loguru import logger as log
 
 # user defined formula
-from db_management.sqlite_management import deleting_row
-from db_management.sqlite_management import (
-    executing_query_based_on_currency_or_instrument_and_strategy as get_query,
-)
-from db_management.sqlite_management import insert_tables
-from utilities.string_modification import (
-    extract_currency_from_text,
-    extract_integers_from_text,
-    get_unique_elements,
-    remove_redundant_elements,
-    sorting_list,
-)
+from db_management import sqlite_management as db_mgt
+from utilities import string_modification as str_mod
 
 
 def get_sub_account_size_per_instrument(
@@ -123,7 +113,7 @@ def get_transaction_log_position_per_instrument(
             else str(
                 max(
                     [
-                        extract_integers_from_text(o["trade_id"])
+                        str_mod.extract_integers_from_text(o["trade_id"])
                         for o in from_transaction_log_instrument
                     ]
                 )
@@ -244,19 +234,19 @@ async def my_trades_active_archived_not_reconciled_each_other(
         "amount",
     )
 
-    my_trades_instrument_name_active = await get_query(
+    my_trades_instrument_name_active = await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
         trade_db_table, instrument_name, "all", "all", column_trade
     )
 
-    my_trades_instrument_name_closed = await get_query(
+    my_trades_instrument_name_closed = await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
         closed_db_table, instrument_name, "all", "all", column_trade
     )
 
-    my_trades_instrument_name_archive = await get_query(
+    my_trades_instrument_name_archive = await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
         archive_db_table, instrument_name, "all", "all", column_trade
     )
 
-    my_trades_archive_instrument_sorted = sorting_list(
+    my_trades_archive_instrument_sorted = str_mod.sorting_list(
         my_trades_instrument_name_archive, "timestamp", False
     )
 
@@ -272,7 +262,7 @@ async def my_trades_active_archived_not_reconciled_each_other(
 
     if my_trades_currency_active_with_blanks:
         for id in my_trades_currency_active_with_blanks:
-            await deleting_row(
+            await db_mgt.deleting_row(
                 "my_trades_all_json",
                 "databases/trading.sqlite3",
                 "id",
@@ -293,7 +283,7 @@ async def my_trades_active_archived_not_reconciled_each_other(
             )
 
             if transaction:
-                await insert_tables(trade_db_table, transaction)
+                await db_mgt.insert_tables(trade_db_table, transaction)
     else:
 
         from_sqlite_closed_trade_id = [
@@ -312,7 +302,7 @@ async def my_trades_active_archived_not_reconciled_each_other(
             from_sqlite_open_trade_id + from_sqlite_closed_trade_id
         )
 
-        unrecorded_trade_id = get_unique_elements(
+        unrecorded_trade_id = str_mod.get_unique_elements(
             from_exchange_trade_id, combined_trade_closed_open
         )
 
@@ -328,7 +318,7 @@ async def my_trades_active_archived_not_reconciled_each_other(
                 f"my_trades_active_archived_not_reconciled_each_other {transaction} "
             )
 
-            await insert_tables(trade_db_table, transaction)
+            await db_mgt.insert_tables(trade_db_table, transaction)
 
 
 def is_size_sub_account_and_my_trades_reconciled(
@@ -454,13 +444,13 @@ async def reconciling_orders(
         if orders_currency:
 
             if direction == "from_order_db_to_sub_account":
-                orders_instrument_name = remove_redundant_elements(
+                orders_instrument_name = str_mod.remove_redundant_elements(
                     [o["instrument_name"] for o in orders_currency]
                 )
 
             if direction == "from_sub_account_to_order_db":
 
-                orders_instrument_name = remove_redundant_elements(
+                orders_instrument_name = str_mod.remove_redundant_elements(
                     [o["instrument_name"] for o in sub_account_orders]
                 )
 
@@ -468,7 +458,7 @@ async def reconciling_orders(
 
                 for instrument_name in orders_instrument_name:
 
-                    currency = extract_currency_from_text(instrument_name)
+                    currency = str_mod.extract_currency_from_text(instrument_name)
 
                     len_order_is_reconciled_each_other = (
                         check_whether_order_db_reconciled_each_other(
@@ -486,7 +476,7 @@ async def reconciling_orders(
 
                         where_filter = f"instrument_name"
 
-                        await deleting_row(
+                        await db_mgt.deleting_row(
                             "orders_all_json",
                             "databases/trading.sqlite3",
                             where_filter,
@@ -496,7 +486,7 @@ async def reconciling_orders(
 
                         for order in sub_account_instrument_name:
 
-                            await insert_tables(order_db_table, order)
+                            await db_mgt.insert_tables(order_db_table, order)
 
                         await modify_order_and_db.resupply_sub_accountdb(currency)
 

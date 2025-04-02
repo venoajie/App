@@ -65,7 +65,7 @@ async def processing_orders(
         sub_account_cached_params = initial_data_subaccount["params"]
 
         sub_account_cached = sub_account_cached_params["data"]
-
+        
         orders_cached = sub_account_cached["orders_cached"]
 
         positions_cached = sub_account_cached["positions_cached"]
