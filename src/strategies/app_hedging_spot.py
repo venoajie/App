@@ -218,10 +218,10 @@ async def hedging_spot(
                     archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
                     # get portfolio data
-                    portfolio: list = [
-                        o for o in portfolio_all if currency_upper in o["currency"]
+                    portfolio = [
+                        o for o in portfolio_all if currency_lower == o["currency"]
                     ][0]
-
+                    
                     equity: float = portfolio["equity"]
 
                     ticker_perpetual_instrument_name = [

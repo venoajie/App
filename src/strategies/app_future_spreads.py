@@ -163,9 +163,8 @@ async def future_spreads(
 
                         # get portfolio data
                         portfolio = [
-                            o for o in portfolio_all if currency_upper in o["currency"]
-                        ][0]
-
+                        o for o in portfolio_all if currency_lower == o["currency"]
+                    ][0]
                         equity: float = portfolio["equity"]
 
                         ticker_perpetual_instrument_name = [

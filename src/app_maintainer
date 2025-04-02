@@ -112,7 +112,6 @@ async def main():
             result_template,
         )
         
-        log.info(initial_data_subaccount)
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]

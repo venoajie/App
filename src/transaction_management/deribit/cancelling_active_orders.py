@@ -164,14 +164,10 @@ async def cancelling_orders(
                         if instrument_name_perpetual in o["instrument_name"]
                     ][0]
                     
-                    log.debug(portfolio_all)
-
                     portfolio = [
                         o for o in portfolio_all if currency_lower == o["currency"]
                     ][0]
                     
-                    log.warning(portfolio)
-
                     equity: float = portfolio["equity"]
 
                     ticker_perpetual_instrument_name = [
@@ -182,6 +178,9 @@ async def cancelling_orders(
 
                     index_price = get_index(ticker_perpetual_instrument_name)
 
+                    log.critical(currency_upper)
+                    log.debug(my_trades_active_all)
+
                     my_trades_currency_all_transactions: list = (
                         []
                         if not my_trades_active_all
@@ -191,7 +190,7 @@ async def cancelling_orders(
                             if currency_upper in o["instrument_name"]
                         ]
                     )
-
+                    
                     my_trades_currency_all: list = (
                         []
                         if my_trades_currency_all_transactions == 0
