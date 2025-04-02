@@ -167,6 +167,9 @@ async def cancelling_orders(
                         for o in market_condition_all
                         if instrument_name_perpetual in o["instrument_name"]
                     ][0]
+                    
+                    log.critical(currency_lower)
+                    log.info(portfolio_all)
 
                     portfolio = [
                         o for o in portfolio_all if currency_lower == o["currency"]
