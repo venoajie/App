@@ -145,6 +145,8 @@ async def processing_orders(
                             )
 
                         else:
+                            
+                            log.debug(data)
 
                             if "OTO" not in data["order_id"]:
 
