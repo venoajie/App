@@ -161,9 +161,6 @@ async def caching_distributing_data(
 
                     if "user." in message_channel:
                         
-                        log.critical(message_channel)
-                        log.warning(data)
-
                         if "portfolio" in message_channel:
 
                             result["params"].update({"channel": portfolio_channel})
@@ -178,6 +175,9 @@ async def caching_distributing_data(
 
                         elif "changes" in message_channel:
 
+                            log.critical(message_channel)
+                            log.warning(data)
+
                             await updating_sub_account(
                                 client_redis,
                                 orders_cached,
@@ -188,6 +188,9 @@ async def caching_distributing_data(
                             )
 
                         else:
+                            
+                            log.critical(message_channel)
+                            log.warning(data)
 
                             result["params"].update({"data": data})
 
@@ -204,6 +207,8 @@ async def caching_distributing_data(
                                 )
 
                                 for trade in data:
+                                    
+                                    log.info(trade)
 
                                     update_cached_orders(
                                         orders_cached,
