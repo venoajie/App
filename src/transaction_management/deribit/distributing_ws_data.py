@@ -191,10 +191,46 @@ async def caching_distributing_data(
                             
                             log.critical(message_channel)
                             log.warning(data)
-
+                            
                             result["params"].update({"data": data})
 
                             if "trades" in message_channel:
+
+                                #! result example
+                                
+                                """
+                                [
+                                    {
+                                        'label': 'customShort-open-1743595398537', 
+                                        'timestamp': 1743595416236, 
+                                        'state': 'filled', 
+                                        'price': 1870.05, 
+                                        'direction': 'sell',
+                                        'index_price': 1869.77, 
+                                        'profit_loss': 0.0,
+                                        'instrument_name': 'ETH-PERPETUAL', 
+                                        'trade_seq': 175723279, 
+                                        'api': True,
+                                        'mark_price': 1869.94, 
+                                        'amount': 1.0,
+                                        'order_id': 'ETH-64159311162', 
+                                        'matching_id': None, 
+                                        'tick_direction': 0, 
+                                        'fee': 0.0,
+                                        'mmp': False, 
+                                        'post_only': True, 
+                                        'reduce_only': False, 
+                                        'self_trade': False, 
+                                        'contracts': 1.0, 
+                                        'trade_id': 'ETH-242752309',
+                                        'fee_currency': 'ETH',
+                                        'order_type': 'limit', 
+                                        'risk_reducing': False, 
+                                        'liquidity': 'M'
+                                    }
+                                ]
+                                
+                                """
 
                                 result["params"].update(
                                     {"channel": my_trade_receiving_channel}
@@ -215,7 +251,7 @@ async def caching_distributing_data(
                                         trade,
                                     )
 
-                            if "orders" in message_channel:
+                            if "order" in message_channel:
 
                                 currency: str = extract_currency_from_text(
                                     data["instrument_name"]
@@ -226,21 +262,21 @@ async def caching_distributing_data(
                                     data,
                                 )
 
-                            data = dict(
-                                current_order=data,
-                                open_orders=orders_cached,
-                                currency=currency,
-                                currency_upper=currency.upper(),
-                            )
+                                data = dict(
+                                    current_order=data,
+                                    open_orders=orders_cached,
+                                    currency=currency,
+                                    currency_upper=currency.upper(),
+                                )
 
-                            result["params"].update({"channel": order_update_channel})
-                            result["params"].update({"data": data})
+                                result["params"].update({"channel": order_update_channel})
+                                result["params"].update({"data": data})
 
-                            await publishing_result(
-                                pipe,
-                                order_update_channel,
-                                result,
-                            )
+                                await publishing_result(
+                                    pipe,
+                                    order_update_channel,
+                                    result,
+                                )
 
                             my_trades_active_all = await executing_query_with_return(
                                 query_trades

@@ -70,10 +70,6 @@ async def processing_orders(
 
         positions_cached = sub_account_cached["positions_cached"]
 
-        ordered_hedging = []
-
-        ordered_spread = []
-
         ordered = []
 
         from loguru import logger as log

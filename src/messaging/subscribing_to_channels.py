@@ -18,7 +18,6 @@ async def redis_channels(
     order_allowed_channel: str = redis_channels["order_is_allowed"]
     positions_update_channel: str = redis_channels["position_cache_updating"]
     ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
-    sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
     order_rest_channel: str = redis_channels["order_rest"]
     my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
     order_update_channel: str = redis_channels["order_cache_updating"]
@@ -42,9 +41,10 @@ async def redis_channels(
                 ]
             case "processing_orders":
                 channels = [
+                    my_trade_receiving_channel,
+                    portfolio_channel,
                     order_rest_channel,
                     order_update_channel,
-                    portfolio_channel,
                     sqlite_updating_channel,
                     sub_account_cached_channel,
                 ]
