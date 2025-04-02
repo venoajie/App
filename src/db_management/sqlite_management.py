@@ -355,6 +355,8 @@ async def update_status_data(
         ) as db:
 
             await db.execute("pragma journal_mode=wal;")
+            
+            log.info(f"query update status data {query}")
 
             await db.execute(query)
 
