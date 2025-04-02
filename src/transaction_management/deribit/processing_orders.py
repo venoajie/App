@@ -674,6 +674,7 @@ async def saving_oto_order(
             )
 
         else:
+            
             # log.error (f"transaction_main {transaction_main}")
             await db_mgt.insert_tables(
                 order_db_table,
