@@ -161,7 +161,7 @@ def portfolio_combining(
     result_template: dict,
 ) -> dict:
 
-    portfolio = [o["portfolio"] for o in portfolio_all if o["type"] == "subaccount"][0]
+    portfolio = ([o["portfolio"] for o in portfolio_all if o["type"] == "subaccount"][0]).values()
 
     result_template["params"].update({"data": portfolio})
     result_template["params"].update({"channel": portfolio_channel})
