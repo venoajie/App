@@ -95,6 +95,8 @@ async def cancelling_orders(
             my_trades_channel,
             result_template,
         )
+        
+        log.warning(initial_data_my_trades_active)
 
 
         # get portfolio from exchg
@@ -107,6 +109,8 @@ async def cancelling_orders(
         )
 
         my_trades_active_all = initial_data_my_trades_active["params"]["data"]
+
+        log.error(my_trades_active_all)
 
         portfolio_all = initial_data_portfolio["params"]["data"]
 
