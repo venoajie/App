@@ -153,6 +153,8 @@ async def cancelling_orders(
                     server_time = data["server_time"]
 
                     currency_upper = data["currency_upper"]
+                    
+                    currency_lower = currency_upper.lower()
 
                     instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
 
@@ -165,8 +167,10 @@ async def cancelling_orders(
                     log.debug(portfolio_all)
 
                     portfolio = [
-                        o for o in portfolio_all if currency_upper in o["currency"]
+                        o for o in portfolio_all if currency_lower in o["currency"]
                     ][0]
+                    
+                    log.warning(portfolio)
 
                     equity: float = portfolio["equity"]
 
