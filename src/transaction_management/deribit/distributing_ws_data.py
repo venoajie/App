@@ -160,6 +160,8 @@ async def caching_distributing_data(
                     )
 
                     if "user." in message_channel:
+                        
+                        log.warning(data)
 
                         if "portfolio" in message_channel:
 
