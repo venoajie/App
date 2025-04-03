@@ -239,6 +239,7 @@ async def caching_distributing_data(
                             data,
                             instrument_name_future,
                             result,
+                            server_time,
                             ticker_all_cached,
                             ticker_cached_channel,
                             )
@@ -509,6 +510,7 @@ async def incremental_ticker_in_message_channel(
     data: list,
     instrument_name_future: str,
     result: dict,
+    server_time: int,
     ticker_all_cached: list,
     ticker_cached_channel: str,
 ) -> None:
