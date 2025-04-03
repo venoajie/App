@@ -259,28 +259,22 @@ async def caching_distributing_data(
 
                     try:
 
-                        data: dict = message_params["data"]
-
                         message_channel: str = message_params["stream"]
-
-                        pub_message = dict(
-                            data=data,
-                        )
 
                         if "abnormaltradingnotices" in message_channel:
 
-                            result["params"].update(
-                                {"channel": abnormal_trading_notices}
+                            data: dict = message_params["data"]
+
+                            pub_message = dict(
+                                data=data,
                             )
-                            result["params"].update(pub_message)
 
-                            log.debug(result)
-
-                            await publishing_result(
+                            await abnormal_trading_notices_in_message_channel(
                                 pipe,
                                 abnormal_trading_notices,
+                                pub_message,
                                 result,
-                            )
+                                )
 
                     except:
 
@@ -625,3 +619,23 @@ async def chart_trades_in_message_channel(
         result,
     )
     
+    
+async def abnormal_trading_notices_in_message_channel(
+    pipe: object,
+    abnormal_trading_notices: str,
+    pub_message: list,
+    result: dict,
+) -> None:
+    
+    result["params"].update(
+        {"channel": abnormal_trading_notices}
+    )
+    result["params"].update(pub_message)
+
+    log.debug(result)
+
+    await publishing_result(
+        pipe,
+        abnormal_trading_notices,
+        result,
+    )
