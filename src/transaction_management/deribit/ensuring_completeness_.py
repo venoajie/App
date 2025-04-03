@@ -9,7 +9,7 @@ from loguru import logger as log
 from data_cleaning import managing_closed_transactions, reconciling_db
 from db_management import sqlite_management as db_mgt
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit import api_requests, processing_orders
+from transaction_management.deribit import api_requests, processing_orders, starter
 from utilities import (
     pickling,
     string_modification as str_mod,

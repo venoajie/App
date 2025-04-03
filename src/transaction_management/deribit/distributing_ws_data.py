@@ -196,87 +196,23 @@ async def caching_distributing_data(
 
                             if "trades" in message_channel:
 
-                                #! result example
-                                
-                                """
-                                [
-                                    {
-                                        'label': 'customShort-open-1743595398537', 
-                                        'timestamp': 1743595416236, 
-                                        'state': 'filled', 
-                                        'price': 1870.05, 
-                                        'direction': 'sell',
-                                        'index_price': 1869.77, 
-                                        'profit_loss': 0.0,
-                                        'instrument_name': 'ETH-PERPETUAL', 
-                                        'trade_seq': 175723279, 
-                                        'api': True,
-                                        'mark_price': 1869.94, 
-                                        'amount': 1.0,
-                                        'order_id': 'ETH-64159311162', 
-                                        'matching_id': None, 
-                                        'tick_direction': 0, 
-                                        'fee': 0.0,
-                                        'mmp': False, 
-                                        'post_only': True, 
-                                        'reduce_only': False, 
-                                        'self_trade': False, 
-                                        'contracts': 1.0, 
-                                        'trade_id': 'ETH-242752309',
-                                        'fee_currency': 'ETH',
-                                        'order_type': 'limit', 
-                                        'risk_reducing': False, 
-                                        'liquidity': 'M'
-                                    }
-                                ]
-                                
-                                """
-
-                                result["params"].update(
-                                    {"channel": my_trade_receiving_channel}
-                                )
-
-                                await publishing_result(
+                                await trades_in_message_channel(
                                     pipe,
+                                    data,
                                     my_trade_receiving_channel,
+                                    orders_cached,
                                     result,
-                                )
-
-                                for trade in data:
-                                    
-                                    log.info(trade)
-
-                                    update_cached_orders(
-                                        orders_cached,
-                                        trade,
                                     )
-
+                                
                             if "order" in message_channel:
 
-                                currency: str = extract_currency_from_text(
-                                    data["instrument_name"]
-                                )
-
-                                update_cached_orders(
-                                    orders_cached,
-                                    data,
-                                )
-
-                                data = dict(
-                                    current_order=data,
-                                    open_orders=orders_cached,
-                                    currency=currency,
-                                    currency_upper=currency.upper(),
-                                )
-
-                                result["params"].update({"channel": order_update_channel})
-                                result["params"].update({"data": data})
-
-                                await publishing_result(
+                                await order_in_message_channel(
                                     pipe,
+                                    data,
                                     order_update_channel,
+                                    orders_cached,
                                     result,
-                                )
+                                    )
 
                             my_trades_active_all = await executing_query_with_return(
                                 query_trades
@@ -297,105 +233,25 @@ async def caching_distributing_data(
                         == f"incremental_ticker.{instrument_name_future}"
                     ):
 
-                        # extract server time from data
-                        current_server_time = (
-                            data["timestamp"] + server_time
-                            if server_time == 0
-                            else data["timestamp"]
-                        )
-
-                        # updating current server time
-                        server_time = (
-                            current_server_time
-                            if server_time < current_server_time
-                            else server_time
-                        )
-
-                        pub_message.update({"instrument_name": instrument_name_future})
-                        pub_message.update({"currency_upper": currency_upper})
-
-                        for item in data:
-
-                            if (
-                                "stats" not in item
-                                and "instrument_name" not in item
-                                and "type" not in item
-                            ):
-                                [
-                                    o
-                                    for o in ticker_all_cached
-                                    if instrument_name_future in o["instrument_name"]
-                                ][0][item] = data[item]
-
-                            if "stats" in item:
-
-                                data_orders_stat = data[item]
-
-                                for item in data_orders_stat:
-                                    [
-                                        o
-                                        for o in ticker_all_cached
-                                        if instrument_name_future
-                                        in o["instrument_name"]
-                                    ][0]["stats"][item] = data_orders_stat[item]
-
-                        pub_message = dict(
-                            data=ticker_all_cached,
-                            server_time=server_time,
-                            instrument_name=instrument_name_future,
-                            currency_upper=currency_upper,
-                            currency=currency,
-                        )
-
-                        result["params"].update({"channel": ticker_cached_channel})
-                        result["params"].update({"data": pub_message})
-
-                        await saving_and_publishing_result(
-                            client_redis,
-                            ticker_cached_channel,
-                            ticker_keys,
-                            ticker_all_cached,
+                        await incremental_ticker_in_message_channel(
+                            pipe,
+                            currency,
+                            data,
+                            instrument_name_future,
                             result,
-                        )
-
-                        if "PERPETUAL" in instrument_name_future:
-
-                            WHERE_FILTER_TICK: str = "tick"
-
-                            resolution = 1
-
-                            TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
-
-                            await inserting_open_interest(
-                                currency,
-                                WHERE_FILTER_TICK,
-                                TABLE_OHLC1,
-                                data,
+                            ticker_all_cached,
+                            ticker_cached_channel,
                             )
-
+                        
                     if "chart.trades" in message_channel:
 
-                        try:
-                            resolution = int(message_channel.split(".")[3])
-
-                        except:
-                            resolution = message_channel.split(".")[3]
-
-                        pub_message.update(
-                            {"instrument_name": message_channel.split(".")[2]}
-                        )
-                        pub_message.update({"resolution": resolution})
-
-                        result["params"].update(
-                            {"channel": chart_low_high_tick_channel}
-                        )
-                        result["params"].update({"data": pub_message})
-
-                        await publishing_result(
+                        await chart_trades_in_message_channel(
                             pipe,
                             chart_low_high_tick_channel,
+                            message_channel,
+                            pub_message,
                             result,
-                        )
+                            )
 
                 except:
 
@@ -544,3 +400,224 @@ def reading_from_pkl_data(
 
     path: str = provide_path_for_file(end_point, currency, status)
     return read_data(path)
+
+
+async def trades_in_message_channel(
+    pipe: object,
+    data: list,
+    my_trade_receiving_channel: str,
+    orders_cached: list,
+    result: dict,
+) -> None:
+    
+    
+    """
+    
+    #! result example
+    
+    [
+        {
+            'label': 'customShort-open-1743595398537', 
+            'timestamp': 1743595416236, 
+            'state': 'filled', 
+            'price': 1870.05, 
+            'direction': 'sell',
+            'index_price': 1869.77, 
+            'profit_loss': 0.0,
+            'instrument_name': 'ETH-PERPETUAL', 
+            'trade_seq': 175723279, 
+            'api': True,
+            'mark_price': 1869.94, 
+            'amount': 1.0,
+            'order_id': 'ETH-64159311162', 
+            'matching_id': None, 
+            'tick_direction': 0, 
+            'fee': 0.0,
+            'mmp': False, 
+            'post_only': True, 
+            'reduce_only': False, 
+            'self_trade': False, 
+            'contracts': 1.0, 
+            'trade_id': 'ETH-242752309',
+            'fee_currency': 'ETH',
+            'order_type': 'limit', 
+            'risk_reducing': False, 
+            'liquidity': 'M'
+        }
+    ]
+    
+    """
+
+    result["params"].update(
+        {"channel": my_trade_receiving_channel}
+    )
+
+    await publishing_result(
+        pipe,
+        my_trade_receiving_channel,
+        result,
+    )
+
+    for trade in data:
+        
+        log.info(trade)
+
+        update_cached_orders(
+            orders_cached,
+            trade,
+        )
+        
+        
+async def order_in_message_channel(
+    pipe: object,
+    data: list,
+    order_update_channel: str,
+    orders_cached: list,
+    result: dict,
+) -> None:
+
+
+    currency: str = extract_currency_from_text(
+        data["instrument_name"]
+    )
+
+    update_cached_orders(
+        orders_cached,
+        data,
+    )
+
+    data = dict(
+        current_order=data,
+        open_orders=orders_cached,
+        currency=currency,
+        currency_upper=currency.upper(),
+    )
+
+    result["params"].update({"channel": order_update_channel})
+    result["params"].update({"data": data})
+
+    await publishing_result(
+        pipe,
+        order_update_channel,
+        result,
+    )
+    
+    
+async def incremental_ticker_in_message_channel(
+    pipe: object,
+    currency: str,
+    data: list,
+    instrument_name_future: str,
+    result: dict,
+    ticker_all_cached: list,
+    ticker_cached_channel: str,
+) -> None:
+    
+    
+    # extract server time from data
+    current_server_time = (
+        data["timestamp"] + server_time
+        if server_time == 0
+        else data["timestamp"]
+    )
+    
+    currency_upper = currency.upper()
+
+    # updating current server time
+    server_time = (
+        current_server_time
+        if server_time < current_server_time
+        else server_time
+    )
+
+    pub_message.update({"instrument_name": instrument_name_future})
+    pub_message.update({"currency_upper": currency_upper})
+
+    for item in data:
+
+        if (
+            "stats" not in item
+            and "instrument_name" not in item
+            and "type" not in item
+        ):
+            [
+                o
+                for o in ticker_all_cached
+                if instrument_name_future in o["instrument_name"]
+            ][0][item] = data[item]
+
+        if "stats" in item:
+
+            data_orders_stat = data[item]
+
+            for item in data_orders_stat:
+                [
+                    o
+                    for o in ticker_all_cached
+                    if instrument_name_future
+                    in o["instrument_name"]
+                ][0]["stats"][item] = data_orders_stat[item]
+
+    pub_message = dict(
+        data=ticker_all_cached,
+        server_time=server_time,
+        instrument_name=instrument_name_future,
+        currency_upper=currency_upper,
+        currency=currency,
+    )
+
+    result["params"].update({"channel": ticker_cached_channel})
+    result["params"].update({"data": pub_message})
+
+    await publishing_result(
+        pipe,
+        ticker_cached_channel,
+        result,
+    )
+    if "PERPETUAL" in instrument_name_future:
+
+        WHERE_FILTER_TICK: str = "tick"
+
+        resolution = 1
+
+        TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
+
+        await inserting_open_interest(
+            currency,
+            WHERE_FILTER_TICK,
+            TABLE_OHLC1,
+            data,
+        )
+
+    
+async def chart_trades_in_message_channel(
+    pipe: object,
+    chart_low_high_tick_channel: str,
+    message_channel: str,
+    pub_message: list,
+    result: dict,
+) -> None:
+    
+
+    try:
+        resolution = int(message_channel.split(".")[3])
+
+    except:
+        resolution = message_channel.split(".")[3]
+
+    pub_message.update(
+        {"instrument_name": message_channel.split(".")[2]}
+    )
+    pub_message.update({"resolution": resolution})
+
+    result["params"].update(
+        {"channel": chart_low_high_tick_channel}
+    )
+    result["params"].update({"data": pub_message})
+
+    await publishing_result(
+        pipe,
+        chart_low_high_tick_channel,
+        result,
+    )
+    
