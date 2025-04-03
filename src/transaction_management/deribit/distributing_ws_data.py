@@ -1,11 +1,9 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # built ins
 import asyncio
 
 import uvloop
-
 from loguru import logger as log
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())

@@ -114,6 +114,22 @@ async def processing_orders(
                                 order_db_table,
                             )
 
+                            for currency in currencies:
+
+                                result = await private_data.get_subaccounts_details(
+                                    currency
+                                )
+
+                                await updating_sub_account(
+                                    client_redis,
+                                    orders_cached,
+                                    positions_cached,
+                                    query_trades,
+                                    result,
+                                    sub_account_cached_channel,
+                                    message_byte_data,
+                                )
+
                     if order_rest_channel in message_channel:
 
                         log.critical(message_channel)
