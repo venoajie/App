@@ -7,34 +7,18 @@ import asyncio
 import uvloop
 
 from loguru import logger as log
-import orjson
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from db_management.redis_client import saving_and_publishing_result, publishing_result
-from db_management.sqlite_management import executing_query_with_return
-from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.api_requests import get_tickers
-from transaction_management.deribit.processing_orders import updating_sub_account
-from transaction_management.deribit.allocating_ohlc import inserting_open_interest
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
+from db_management import redis_client, sqlite_management as db_mgt
+from messaging import telegram_bot as tlgrm
+from transaction_management.deribit import (
+    allocating_ohlc,
+    api_requests,
+    get_instrument_summary,
+    processing_orders,
 )
-from utilities.caching import (
-    positions_updating_cached,
-    update_cached_orders,
-)
-from utilities.pickling import read_data
-from utilities.system_tools import (
-    parse_error_message,
-    provide_path_for_file,
-)
-from utilities.string_modification import (
-    extract_currency_from_text,
-    message_template,
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-)
+from utilities import caching, pickling, string_modification as str_mod, system_tools
 
 
 async def caching_distributing_data(
@@ -95,8 +79,6 @@ async def caching_distributing_data(
 
         ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
 
-        ticker_keys: str = redis_keys["ticker"]
-
         # prepare channels placeholders
         channels = [
             order_update_channel,
@@ -110,13 +92,9 @@ async def caching_distributing_data(
 
         portfolio = []
 
-        notional_value = 0
-
-        data_summary = {}
-
         settlement_periods = get_settlement_period(strategy_attributes)
 
-        futures_instruments = await get_futures_instruments(
+        futures_instruments = await get_instrument_summary.get_futures_instruments(
             currencies, settlement_periods
         )
 
@@ -134,7 +112,7 @@ async def caching_distributing_data(
 
         query_trades = f"SELECT * FROM  v_trading_all_active"
 
-        result = message_template()
+        result = str_mod.message_template()
 
         while True:
 
@@ -148,7 +126,7 @@ async def caching_distributing_data(
 
                     message_channel: str = message_params["channel"]
 
-                    currency: str = extract_currency_from_text(message_channel)
+                    currency: str = str_mod.extract_currency_from_text(message_channel)
 
                     currency_upper = currency.upper()
 
@@ -160,7 +138,7 @@ async def caching_distributing_data(
                     )
 
                     if "user." in message_channel:
-                        
+
                         if "portfolio" in message_channel:
 
                             result["params"].update({"channel": portfolio_channel})
@@ -178,7 +156,7 @@ async def caching_distributing_data(
                             log.critical(message_channel)
                             log.warning(data)
 
-                            await updating_sub_account(
+                            await processing_orders.updating_sub_account(
                                 client_redis,
                                 orders_cached,
                                 positions_cached,
@@ -188,10 +166,10 @@ async def caching_distributing_data(
                             )
 
                         else:
-                            
+
                             log.critical(message_channel)
                             log.warning(data)
-                            
+
                             result["params"].update({"data": data})
 
                             if "trades" in message_channel:
@@ -202,8 +180,8 @@ async def caching_distributing_data(
                                     my_trade_receiving_channel,
                                     orders_cached,
                                     result,
-                                    )
-                                
+                                )
+
                             if "order" in message_channel:
 
                                 await order_in_message_channel(
@@ -212,16 +190,16 @@ async def caching_distributing_data(
                                     order_update_channel,
                                     orders_cached,
                                     result,
-                                    )
+                                )
 
-                            my_trades_active_all = await executing_query_with_return(
-                                query_trades
+                            my_trades_active_all = (
+                                await db_mgt.executing_query_with_return(query_trades)
                             )
 
                             result["params"].update({"channel": my_trades_channel})
                             result["params"].update({"data": my_trades_active_all})
 
-                            await publishing_result(
+                            await redis_client.publishing_result(
                                 pipe,
                                 my_trades_channel,
                                 result,
@@ -243,8 +221,8 @@ async def caching_distributing_data(
                             server_time,
                             ticker_all_cached,
                             ticker_cached_channel,
-                            )
-                        
+                        )
+
                     if "chart.trades" in message_channel:
 
                         await chart_trades_in_message_channel(
@@ -253,7 +231,7 @@ async def caching_distributing_data(
                             message_channel,
                             pub_message,
                             result,
-                            )
+                        )
 
                 except:
 
@@ -274,7 +252,7 @@ async def caching_distributing_data(
                                 abnormal_trading_notices,
                                 pub_message,
                                 result,
-                                )
+                            )
 
                     except:
 
@@ -284,9 +262,9 @@ async def caching_distributing_data(
 
     except Exception as error:
 
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
 
-        await telegram_bot_sendtext(
+        await tlgrm.telegram_bot_sendtext(
             f"saving result {error}",
             "general_error",
         )
@@ -341,7 +319,7 @@ async def updating_portfolio(
 
     result["params"]["data"].update({"cached_portfolio": portfolio})
 
-    await publishing_result(
+    await redis_client.publishing_result(
         pipe,
         portfolio_channel,
         result,
@@ -350,8 +328,8 @@ async def updating_portfolio(
 
 def get_settlement_period(strategy_attributes: list) -> list:
 
-    return remove_redundant_elements(
-        remove_double_brackets_in_list(
+    return str_mod.remove_redundant_elements(
+        str_mod.remove_double_brackets_in_list(
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
@@ -380,7 +358,7 @@ def combining_ticker_data(instruments_name: str) -> list:
             result_instrument = result_instrument[0]
 
         else:
-            result_instrument = get_tickers(instrument_name)
+            result_instrument = api_requests.get_tickers(instrument_name)
 
         result.append(result_instrument)
 
@@ -394,8 +372,8 @@ def reading_from_pkl_data(
 ) -> dict:
     """ """
 
-    path: str = provide_path_for_file(end_point, currency, status)
-    return read_data(path)
+    path: str = system_tools.provide_path_for_file(end_point, currency, status)
+    return pickling.read_data(path)
 
 
 async def trades_in_message_channel(
@@ -405,65 +383,62 @@ async def trades_in_message_channel(
     orders_cached: list,
     result: dict,
 ) -> None:
-    
-    
+
     """
-    
+
     #! result example
-    
+
     [
         {
-            'label': 'customShort-open-1743595398537', 
-            'timestamp': 1743595416236, 
-            'state': 'filled', 
-            'price': 1870.05, 
+            'label': 'customShort-open-1743595398537',
+            'timestamp': 1743595416236,
+            'state': 'filled',
+            'price': 1870.05,
             'direction': 'sell',
-            'index_price': 1869.77, 
+            'index_price': 1869.77,
             'profit_loss': 0.0,
-            'instrument_name': 'ETH-PERPETUAL', 
-            'trade_seq': 175723279, 
+            'instrument_name': 'ETH-PERPETUAL',
+            'trade_seq': 175723279,
             'api': True,
-            'mark_price': 1869.94, 
+            'mark_price': 1869.94,
             'amount': 1.0,
-            'order_id': 'ETH-64159311162', 
-            'matching_id': None, 
-            'tick_direction': 0, 
+            'order_id': 'ETH-64159311162',
+            'matching_id': None,
+            'tick_direction': 0,
             'fee': 0.0,
-            'mmp': False, 
-            'post_only': True, 
-            'reduce_only': False, 
-            'self_trade': False, 
-            'contracts': 1.0, 
+            'mmp': False,
+            'post_only': True,
+            'reduce_only': False,
+            'self_trade': False,
+            'contracts': 1.0,
             'trade_id': 'ETH-242752309',
             'fee_currency': 'ETH',
-            'order_type': 'limit', 
-            'risk_reducing': False, 
+            'order_type': 'limit',
+            'risk_reducing': False,
             'liquidity': 'M'
         }
     ]
-    
+
     """
 
-    result["params"].update(
-        {"channel": my_trade_receiving_channel}
-    )
+    result["params"].update({"channel": my_trade_receiving_channel})
 
-    await publishing_result(
+    await redis_client.publishing_result(
         pipe,
         my_trade_receiving_channel,
         result,
     )
 
     for trade in data:
-        
+
         log.info(trade)
 
-        update_cached_orders(
+        caching.update_cached_orders(
             orders_cached,
             trade,
         )
-        
-        
+
+
 async def order_in_message_channel(
     pipe: object,
     data: list,
@@ -472,12 +447,9 @@ async def order_in_message_channel(
     result: dict,
 ) -> None:
 
+    currency: str = str_mod.extract_currency_from_text(data["instrument_name"])
 
-    currency: str = extract_currency_from_text(
-        data["instrument_name"]
-    )
-
-    update_cached_orders(
+    caching.update_cached_orders(
         orders_cached,
         data,
     )
@@ -492,13 +464,13 @@ async def order_in_message_channel(
     result["params"].update({"channel": order_update_channel})
     result["params"].update({"data": data})
 
-    await publishing_result(
+    await redis_client.publishing_result(
         pipe,
         order_update_channel,
         result,
     )
-    
-    
+
+
 async def incremental_ticker_in_message_channel(
     pipe: object,
     currency: str,
@@ -510,22 +482,17 @@ async def incremental_ticker_in_message_channel(
     ticker_all_cached: list,
     ticker_cached_channel: str,
 ) -> None:
-    
-    
+
     # extract server time from data
     current_server_time = (
-        data["timestamp"] + server_time
-        if server_time == 0
-        else data["timestamp"]
+        data["timestamp"] + server_time if server_time == 0 else data["timestamp"]
     )
-    
+
     currency_upper = currency.upper()
 
     # updating current server time
     server_time = (
-        current_server_time
-        if server_time < current_server_time
-        else server_time
+        current_server_time if server_time < current_server_time else server_time
     )
 
     pub_message.update({"instrument_name": instrument_name_future})
@@ -533,11 +500,7 @@ async def incremental_ticker_in_message_channel(
 
     for item in data:
 
-        if (
-            "stats" not in item
-            and "instrument_name" not in item
-            and "type" not in item
-        ):
+        if "stats" not in item and "instrument_name" not in item and "type" not in item:
             [
                 o
                 for o in ticker_all_cached
@@ -552,8 +515,7 @@ async def incremental_ticker_in_message_channel(
                 [
                     o
                     for o in ticker_all_cached
-                    if instrument_name_future
-                    in o["instrument_name"]
+                    if instrument_name_future in o["instrument_name"]
                 ][0]["stats"][item] = data_orders_stat[item]
 
     pub_message = dict(
@@ -567,7 +529,7 @@ async def incremental_ticker_in_message_channel(
     result["params"].update({"channel": ticker_cached_channel})
     result["params"].update({"data": pub_message})
 
-    await publishing_result(
+    await redis_client.publishing_result(
         pipe,
         ticker_cached_channel,
         result,
@@ -580,14 +542,14 @@ async def incremental_ticker_in_message_channel(
 
         TABLE_OHLC1: str = f"ohlc{resolution}_{currency}_perp_json"
 
-        await inserting_open_interest(
+        await allocating_ohlc.inserting_open_interest(
             currency,
             WHERE_FILTER_TICK,
             TABLE_OHLC1,
             data,
         )
 
-    
+
 async def chart_trades_in_message_channel(
     pipe: object,
     chart_low_high_tick_channel: str,
@@ -595,7 +557,6 @@ async def chart_trades_in_message_channel(
     pub_message: list,
     result: dict,
 ) -> None:
-    
 
     try:
         resolution = int(message_channel.split(".")[3])
@@ -603,38 +564,32 @@ async def chart_trades_in_message_channel(
     except:
         resolution = message_channel.split(".")[3]
 
-    pub_message.update(
-        {"instrument_name": message_channel.split(".")[2]}
-    )
+    pub_message.update({"instrument_name": message_channel.split(".")[2]})
     pub_message.update({"resolution": resolution})
 
-    result["params"].update(
-        {"channel": chart_low_high_tick_channel}
-    )
+    result["params"].update({"channel": chart_low_high_tick_channel})
     result["params"].update({"data": pub_message})
 
-    await publishing_result(
+    await redis_client.publishing_result(
         pipe,
         chart_low_high_tick_channel,
         result,
     )
-    
-    
+
+
 async def abnormal_trading_notices_in_message_channel(
     pipe: object,
     abnormal_trading_notices: str,
     pub_message: list,
     result: dict,
 ) -> None:
-    
-    result["params"].update(
-        {"channel": abnormal_trading_notices}
-    )
+
+    result["params"].update({"channel": abnormal_trading_notices})
     result["params"].update(pub_message)
 
     log.debug(result)
 
-    await publishing_result(
+    await redis_client.publishing_result(
         pipe,
         abnormal_trading_notices,
         result,

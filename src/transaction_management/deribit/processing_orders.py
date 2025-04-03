@@ -131,10 +131,10 @@ async def processing_orders(
                     if order_update_channel in message_channel:
 
                         data = data["current_order"]
-                        
+
                         log.critical(message_channel)
                         log.warning(data)
-                        
+
                         if "oto_order_ids" in data:
 
                             await saving_oto_order(
@@ -146,7 +146,7 @@ async def processing_orders(
                             )
 
                         else:
-                            
+
                             log.debug(data)
 
                             if "OTO" not in data["order_id"]:
@@ -675,7 +675,7 @@ async def saving_oto_order(
             )
 
         else:
-            
+
             # log.error (f"transaction_main {transaction_main}")
             await db_mgt.insert_tables(
                 order_db_table,
