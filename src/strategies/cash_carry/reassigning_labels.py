@@ -7,15 +7,9 @@ import asyncio
 from loguru import logger as log
 
 # user defined formula
-from db_management.sqlite_management import update_status_data
-from strategies.basic_strategy import get_label_integer
-from strategies.cash_carry.combo_auto import (
-    check_if_minimum_waiting_time_has_passed,
-)
-from utilities.string_modification import (
-    remove_redundant_elements,
-    sorting_list,
-)
+from db_management import sqlite_management as db_mgt
+from strategies.cash_carry import combo_auto
+from utilities import string_modification as str_mod
 
 
 def waiting_time_has_expired(
@@ -38,18 +32,22 @@ def waiting_time_has_expired(
 
     timestamp_perpetual: int = perpetual_trade["timestamp"]
 
-    waiting_time_for_perpetual_order: bool = check_if_minimum_waiting_time_has_passed(
-        waiting_minute_before_cancel,
-        timestamp_perpetual,
-        server_time,
+    waiting_time_for_perpetual_order: bool = (
+        combo_auto.check_if_minimum_waiting_time_has_passed(
+            waiting_minute_before_cancel,
+            timestamp_perpetual,
+            server_time,
+        )
     )
 
     timestamp_future: int = future_trade["timestamp"]
 
-    waiting_time_for_future_order: bool = check_if_minimum_waiting_time_has_passed(
-        waiting_minute_before_cancel,
-        timestamp_future,
-        server_time,
+    waiting_time_for_future_order: bool = (
+        combo_auto.check_if_minimum_waiting_time_has_passed(
+            waiting_minute_before_cancel,
+            timestamp_future,
+            server_time,
+        )
     )
 
     return waiting_time_for_perpetual_order and waiting_time_for_future_order
@@ -89,7 +87,7 @@ def get_redundant_ids(
 
     if my_trades_currency_strategy:
 
-        instrument_names = remove_redundant_elements(
+        instrument_names = str_mod.remove_redundant_elements(
             [o["instrument_name"] for o in my_trades_currency_strategy]
         )
 
@@ -105,7 +103,7 @@ def get_redundant_ids(
 
                 if my_trade_instrument_name:
 
-                    my_trades_label = remove_redundant_elements(
+                    my_trades_label = str_mod.remove_redundant_elements(
                         [(o["label"]) for o in my_trade_instrument_name]
                     )
 
@@ -136,14 +134,14 @@ def get_single_transaction(
 
     if my_trades_currency_strategy:
 
-        my_trades_label = remove_redundant_elements(
+        my_trades_label = str_mod.remove_redundant_elements(
             [(o["label"]) for o in my_trades_currency_strategy]
         )
 
         result = []
         for label in my_trades_label:
 
-            label_integer = get_label_integer(label)
+            label_integer = str_mod.parsing_label(label)["int"]
 
             transaction_under_label_integer = [
                 o for o in my_trades_currency_strategy if label_integer in o["label"]
@@ -172,11 +170,13 @@ async def updating_db_with_new_label(
 ) -> None:
     """ """
 
-    await update_status_data(
+    await db_mgt.update_status_data(
         archive_db_table, "label", filter, trade_id, new_label, "="
     )
 
-    await update_status_data(trade_db_table, "label", filter, trade_id, new_label, "=")
+    await db_mgt.update_status_data(
+        trade_db_table, "label", filter, trade_id, new_label, "="
+    )
 
 
 async def relabelling_double_ids(
@@ -198,7 +198,7 @@ async def relabelling_double_ids(
 
     if my_trades_currency_strategy:
 
-        instrument_names = remove_redundant_elements(
+        instrument_names = str_mod.remove_redundant_elements(
             [o["instrument_name"] for o in my_trades_currency_strategy]
         )
 
@@ -274,7 +274,7 @@ async def pairing_single_label(
 
     if single_label_transaction:
 
-        my_trades_amount = remove_redundant_elements(
+        my_trades_amount = str_mod.remove_redundant_elements(
             [abs(o["amount"]) for o in single_label_transaction]
         )
 
@@ -305,7 +305,7 @@ async def pairing_single_label(
             ]
 
             my_trades_with_the_same_amount_label_non_perpetual_instrument_name = (
-                remove_redundant_elements(
+                str_mod.remove_redundant_elements(
                     [
                         o["instrument_name"]
                         for o in my_trades_with_the_same_amount_label_non_perpetual
@@ -327,7 +327,7 @@ async def pairing_single_label(
                     if instrument_name_future in o["instrument_name"]
                 ]
 
-                my_trades_future_sorted = sorting_list(
+                my_trades_future_sorted = str_mod.sorting_list(
                     my_trades_with_the_same_amount_label_future, "price", True
                 )
 
@@ -342,7 +342,7 @@ async def pairing_single_label(
                         if o["price"] < price_future and o["amount"] > 0
                     ]
 
-                    my_trades_perpetual_with_lower_price_sorted = sorting_list(
+                    my_trades_perpetual_with_lower_price_sorted = str_mod.sorting_list(
                         my_trades_perpetual_with_lower_price, "price", False
                     )
 
@@ -379,7 +379,7 @@ async def pairing_single_label(
                                 # market contango
                                 if side_future == "sell" and side_perpetual == "buy":
 
-                                    await update_status_data(
+                                    await db_mgt.update_status_data(
                                         archive_db_table,
                                         "label",
                                         filter,

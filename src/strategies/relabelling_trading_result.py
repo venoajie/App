@@ -1,52 +1,37 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # built ins
 import asyncio
 
-import uvloop
-
 # installed
 from loguru import logger as log
+import uvloop
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from configuration.label_numbering import get_now_unix_time
 from data_cleaning.managing_closed_transactions import refill_db
-from db_management.sqlite_management import (
-    deleting_row,
-    executing_query_with_return,
-    querying_duplicated_transactions,
-    update_status_data,
+from db_management import sqlite_management as db_mgt
+from messaging import telegram_bot as tlgrm
+from strategies.cash_carry import reassigning_labels
+from transaction_management.deribit import (
+    cancelling_active_orders,
+    get_instrument_summary,
 )
-from messaging.telegram_bot import telegram_bot_sendtext
-from strategies.basic_strategy import get_label_integer
-from strategies.cash_carry.reassigning_labels import pairing_single_label
-from transaction_management.deribit.get_instrument_summary import (
-    get_futures_instruments,
+from utilities import (
+    pickling,
+    string_modification as str_mod,
+    system_tools,
+    time_modification as time_mod,
 )
-from transaction_management.deribit.managing_deribit import (
-    currency_inline_with_database_address,
-)
-
-from transaction_management.deribit.cancelling_active_orders import (
-    cancel_the_cancellables,
-)
-from utilities.pickling import read_data, replace_data
-from utilities.string_modification import (
-    remove_double_brackets_in_list,
-    remove_redundant_elements,
-)
-from utilities.system_tools import parse_error_message, provide_path_for_file
 
 
 async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
 
-    my_path_portfolio = provide_path_for_file(path, currency)
+    my_path_portfolio = system_tools.provide_path_for_file(path, currency)
 
     if currency_inline_with_database_address(currency, my_path_portfolio):
 
-        replace_data(my_path_portfolio, data_orders)
+        pickling.replace_data(my_path_portfolio, data_orders)
 
 
 async def relabelling_trades(
@@ -83,7 +68,7 @@ async def relabelling_trades(
 
         settlement_periods = get_settlement_period(strategy_attributes)
 
-        futures_instruments = await get_futures_instruments(
+        futures_instruments = await get_instrument_summary.get_futures_instruments(
             currencies,
             settlement_periods,
         )
@@ -101,7 +86,7 @@ async def relabelling_trades(
 
                 archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
-                archive_db_table = f"my_trades_all_{currency_lower}_json"
+                archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
                 sub_account = reading_from_pkl_data("sub_accounts", currency)
 
@@ -114,7 +99,7 @@ async def relabelling_trades(
                     query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
 
                     my_trades_currency_all_transactions: list = (
-                        await executing_query_with_return(query_trades)
+                        await db_mgt.executing_query_with_return(query_trades)
                     )
 
                     my_trades_currency_all: list = (
@@ -135,7 +120,7 @@ async def relabelling_trades(
                         o for o in my_trades_currency_all if o["label"] is not None
                     ]
 
-                    server_time = get_now_unix_time()
+                    server_time = time_mod.get_now_unix_time()
 
                     # handling transactions with no label
                     await refill_db(
@@ -145,7 +130,7 @@ async def relabelling_trades(
                     )
 
                     duplicated_trade_id_transactions = (
-                        await querying_duplicated_transactions(
+                        await db_mgt.querying_duplicated_transactions(
                             archive_db_table, "trade_id"
                         )
                     )
@@ -159,7 +144,7 @@ async def relabelling_trades(
                         ids = [o["id"] for o in duplicated_trade_id_transactions]
 
                         for id in ids:
-                            await deleting_row(
+                            await db_mgt.deleting_row(
                                 archive_db_table,
                                 "databases/trading.sqlite3",
                                 "id",
@@ -188,17 +173,19 @@ async def relabelling_trades(
                             ]
 
                             # get labels from active trades
-                            labels = remove_redundant_elements(
+                            labels = str_mod.remove_redundant_elements(
                                 my_trades_currency_strategy_labels
                             )
 
                             filter = "label"
 
-                            pairing_label = await pairing_single_label(
-                                strategy_attributes,
-                                archive_db_table,
-                                my_trades_currency_strategy,
-                                server_time,
+                            pairing_label = (
+                                await reassigning_labels.pairing_single_label(
+                                    strategy_attributes,
+                                    archive_db_table,
+                                    my_trades_currency_strategy,
+                                    server_time,
+                                )
                             )
 
                             if pairing_label:
@@ -211,7 +198,7 @@ async def relabelling_trades(
                                     if o["cancellable"] == True
                                 ]
 
-                                await cancel_the_cancellables(
+                                await cancelling_active_orders.cancel_the_cancellables(
                                     private_data,
                                     order_db_table,
                                     currency,
@@ -221,7 +208,7 @@ async def relabelling_trades(
                             #! closing active trades
                             for label in labels:
 
-                                label_integer: int = get_label_integer(label)
+                                label_integer: int = str_mod.parsing_label(label)["int"]
                                 selected_transaction = [
                                     o
                                     for o in my_trades_currency_strategy
@@ -254,7 +241,7 @@ async def relabelling_trades(
 
                                         new_label = f"futureSpread-open-{label_integer}"
 
-                                        await update_status_data(
+                                        await db_mgt.update_status_data(
                                             archive_db_table,
                                             "label",
                                             filter,
@@ -265,7 +252,7 @@ async def relabelling_trades(
 
                                         log.debug("renaming combo Auto done")
 
-                                        await cancel_the_cancellables(
+                                        await cancelling_active_orders.cancel_the_cancellables(
                                             private_data,
                                             order_db_table,
                                             currency,
@@ -287,7 +274,7 @@ async def relabelling_trades(
                                         if "closed" in label:
                                             new_label = f"futureSpreadAuto-closed-{label_integer}"
 
-                                        await update_status_data(
+                                        await db_mgt.update_status_data(
                                             archive_db_table,
                                             "label",
                                             filter,
@@ -322,7 +309,7 @@ async def relabelling_trades(
                                                     f"futureSpread-closed-{server_time}"
                                                 )
 
-                                            await update_status_data(
+                                            await db_mgt.update_status_data(
                                                 archive_db_table,
                                                 "label",
                                                 filter,
@@ -346,17 +333,17 @@ async def relabelling_trades(
 
     except Exception as error:
 
-        parse_error_message(error)
+        system_tools.parse_error_message(error)
 
-        await telegram_bot_sendtext(
+        await tlgrm.telegram_bot_sendtext(
             f"relabelling trading result {error}", "general_error"
         )
 
 
 def get_settlement_period(strategy_attributes) -> list:
 
-    return remove_redundant_elements(
-        remove_double_brackets_in_list(
+    return str_mod.remove_redundant_elements(
+        str_mod.remove_double_brackets_in_list(
             [o["settlement_period"] for o in strategy_attributes]
         )
     )
@@ -365,5 +352,12 @@ def get_settlement_period(strategy_attributes) -> list:
 def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
     """ """
 
-    path: str = provide_path_for_file(end_point, currency, status)
-    return read_data(path)
+    path: str = system_tools.provide_path_for_file(end_point, currency, status)
+    return pickling.read_data(path)
+
+
+def currency_inline_with_database_address(
+    currency: str,
+    database_address: str,
+) -> bool:
+    return currency.lower() in str(database_address)

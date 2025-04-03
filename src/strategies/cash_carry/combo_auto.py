@@ -20,9 +20,7 @@ from strategies.basic_strategy import (
     size_rounding,
     sum_order_under_closed_label_int,
 )
-from utilities.pickling import read_data
-from utilities.string_modification import parsing_label
-from utilities.system_tools import provide_path_for_file
+from utilities import pickling, string_modification as str_mod, system_tools
 
 # user defined formula
 
@@ -30,9 +28,9 @@ from utilities.system_tools import provide_path_for_file
 def reading_from_pkl_data(end_point: str, currency: str, status: str = None) -> dict:
     """ """
 
-    path: str = provide_path_for_file(end_point, currency, status)
+    path: str = system_tools.provide_path_for_file(end_point, currency, status)
 
-    data = read_data(path)
+    data = pickling.read_data(path)
 
     return data
 
@@ -162,7 +160,8 @@ def get_label_main(result: list, strategy_label: str) -> list:
     return [
         o
         for o in result
-        if parsing_label(strategy_label)["main"] == parsing_label(o["label"])["main"]
+        if str_mod.parsing_label(strategy_label)["main"]
+        == str_mod.parsing_label(o["label"])["main"]
     ]
 
 
@@ -259,19 +258,21 @@ def get_label(status: str, label_main_or_label_transactions: str) -> str:
     """
     provide transaction label
     """
-    from configuration import label_numbering
+    from utilities import label_numbering
 
     if status == "open":
         # get open label
-        label = label_numbering.labelling("open", label_main_or_label_transactions)
+        label = str_mod.labelling("open", label_main_or_label_transactions)
 
     if status == "closed":
 
         # parsing label id
-        label_id: int = parsing_label(label_main_or_label_transactions)["int"]
+        label_id: int = str_mod.parsing_label(label_main_or_label_transactions)["int"]
 
         # parsing label strategy
-        label_main: str = parsing_label(label_main_or_label_transactions)["main"]
+        label_main: str = str_mod.parsing_label(label_main_or_label_transactions)[
+            "main"
+        ]
 
         # combine id + label strategy
         label: str = f"""{label_main}-closed-{label_id}"""

@@ -10,7 +10,7 @@ from dataclassy import dataclass
 from loguru import logger as log
 
 # user defined formula
-from configuration import config, config_oci, id_numbering
+from configuration import config, config_oci
 from messaging import telegram_bot as tlgrm
 from utilities import string_modification as str_mod, time_modification as time_mod
 
@@ -26,7 +26,7 @@ async def private_connection(
     connection_url: str = "https://www.deribit.com/api/v2/",
 ) -> None:
 
-    id = id_numbering.id(
+    id = str_mod.id_numbering(
         endpoint,
         endpoint,
     )

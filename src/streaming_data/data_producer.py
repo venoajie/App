@@ -14,15 +14,10 @@ from dataclassy import dataclass, fields
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # user defined formula
-from configuration import config, config_oci, id_numbering
+from configuration import config, config_oci
 from messaging.telegram_bot import telegram_bot_sendtext
-from transaction_management.deribit.api_requests import (
-    get_api_end_point,
-)
-from utilities.string_modification import (
-    extract_currency_from_text,
-)
-from utilities.system_tools import parse_error_message
+from transaction_management.deribit import api_requests
+from utilities import string_modification as str_mod, system_tools
 
 
 def parse_dotenv(sub_account: str) -> dict:
@@ -98,7 +93,7 @@ class StreamingAccountData:
 
                         if "PERPETUAL" in instrument:
 
-                            currency = extract_currency_from_text(instrument)
+                            currency = str_mod.extract_currency_from_text(instrument)
                             portfolio = f"user.portfolio.{currency}"
 
                             ws_instruments.append(portfolio)
@@ -268,7 +263,7 @@ class StreamingAccountData:
 
             except Exception as error:
 
-                parse_error_message(error)
+                system_tools.parse_error_message(error)
 
                 await telegram_bot_sendtext(
                     (f"""data producer - {error}"""),
@@ -294,7 +289,7 @@ class StreamingAccountData:
 
         except Exception as error:
 
-            parse_error_message(error)
+            system_tools.parse_error_message(error)
 
             await telegram_bot_sendtext(
                 (f"""data producer establish_heartbeat - {error}"""),
@@ -319,7 +314,7 @@ class StreamingAccountData:
 
         except Exception as error:
 
-            parse_error_message(error)
+            system_tools.parse_error_message(error)
 
             await telegram_bot_sendtext(
                 (f"""data producer heartbeat_response - {error}"""),
@@ -347,7 +342,7 @@ class StreamingAccountData:
 
         except Exception as error:
 
-            parse_error_message(error)
+            system_tools.parse_error_message(error)
 
             await telegram_bot_sendtext(
                 (f"""data producer - {error}"""),
@@ -400,7 +395,7 @@ class StreamingAccountData:
 
         await asyncio.sleep(sleep_time)
 
-        id = id_numbering.id(
+        id = str_mod.id_numbering(
             operation,
             ws_channel,
         )
@@ -427,7 +422,7 @@ class StreamingAccountData:
 
         if "rest_api" in source:
 
-            extra_params: dict = await get_api_end_point(
+            extra_params: dict = await api_requests.get_api_end_point(
                 operation,
                 ws_channel,
             )

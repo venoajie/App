@@ -24,7 +24,7 @@ def get_first_tick_query(
 def first_tick_fr_sqlite_if_database_still_empty(count: int) -> int:
     """ """
 
-    from configuration.label_numbering import get_now_unix_time
+    from utilities.time_modification import get_now_unix_time
     from strategies.config_strategies import (
         paramaters_to_balancing_transactions,
     )

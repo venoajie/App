@@ -8,7 +8,7 @@ from dataclassy import dataclass
 from loguru import logger as log
 
 # user defined formula
-from utilities.string_modification import parsing_label
+from utilities import string_modification as str_mod
 
 
 def positions_and_orders(
@@ -166,18 +166,18 @@ def get_label(
 
     if status == "open":
 
-        from configuration import label_numbering
-
         # get open label
-        label = label_numbering.labelling("open", label_main_or_label_transactions)
+        label = str_mod.labelling("open", label_main_or_label_transactions)
 
     else:
 
         # parsing label id
-        label_id: int = parsing_label(label_main_or_label_transactions)["int"]
+        label_id: int = str_mod.parsing_label(label_main_or_label_transactions)["int"]
 
         # parsing label strategy
-        label_main: str = parsing_label(label_main_or_label_transactions)["main"]
+        label_main: str = str_mod.parsing_label(label_main_or_label_transactions)[
+            "main"
+        ]
 
         if status == "contra":
 
@@ -389,7 +389,7 @@ def get_transaction_price(transaction: dict) -> float:
 def get_label_integer(label: dict) -> bool:
     """ """
 
-    return parsing_label(label)["int"]
+    return str_mod.parsing_label(label)["int"]
 
 
 def get_order_label(data_from_db: list) -> list:
@@ -404,8 +404,8 @@ def get_label_super_main(result: list, strategy_label: str) -> list:
     return [
         o
         for o in result
-        if parsing_label(strategy_label)["super_main"]
-        == parsing_label(o["label"])["super_main"]
+        if str_mod.parsing_label(strategy_label)["super_main"]
+        == str_mod.parsing_label(o["label"])["super_main"]
     ]
 
 
