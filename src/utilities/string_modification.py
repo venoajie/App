@@ -542,7 +542,7 @@ def labelling(
 def id_numbering(
     operation: str,
     ws_channel: str,
-) -> int:
+) -> str:
     """
 
     id convention

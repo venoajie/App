@@ -7,18 +7,10 @@ import asyncio
 from dataclassy import dataclass, fields
 from loguru import logger as log
 
+from strategies.basic_strategy import basic_strategy as basic
 from strategies.basic_strategy import (
-    BasicStrategy,
-    are_size_and_order_appropriate,
-    check_if_next_closing_size_will_not_exceed_the_original,
-    delta_pct,
-    ensure_sign_consistency,
     get_label,
     get_label_integer,
-    is_minimum_waiting_time_has_passed,
-    profit_usd_has_exceed_target,
-    size_rounding,
-    sum_order_under_closed_label_int,
 )
 from utilities import pickling, string_modification as str_mod, system_tools
 
@@ -102,7 +94,7 @@ def determine_opening_size(
         basic_ticks_for_average_meovement,
     )
 
-    return size_rounding(instrument_name, instrument_attributes_futures, proposed_size)
+    return basic.size_rounding(instrument_name, instrument_attributes_futures, proposed_size)
 
 
 def is_contango(
@@ -244,7 +236,7 @@ def check_if_minimum_waiting_time_has_passed(
 
     cancel_allowed: bool = False
 
-    minimum_waiting_time_has_passed: bool = is_minimum_waiting_time_has_passed(
+    minimum_waiting_time_has_passed: bool = basic.is_minimum_waiting_time_has_passed(
         server_time, timestamp, threshold
     )
 
@@ -345,7 +337,7 @@ def is_contra_order_will_reduce_delta(
 
 
 @dataclass(unsafe_hash=True, slots=True)
-class ComboAuto(BasicStrategy):
+class ComboAuto(basic.BasicStrategy):
     """ """
 
     orders_currency_strategy: list
@@ -359,7 +351,7 @@ class ComboAuto(BasicStrategy):
     def __post_init__(self):
 
         self.delta: float = get_delta(self.my_trades_currency_strategy)
-        self.basic_params: str = BasicStrategy(
+        self.basic_params: str = basic.BasicStrategy(
             self.strategy_label, self.strategy_parameters
         )
 
@@ -1085,7 +1077,7 @@ class ComboAuto(BasicStrategy):
                 f"instrument_current_size {instrument_current_size} orders_instrument_transaction_net {orders_instrument_transaction_net} selected_transaction_size {selected_transaction_size}"
             )
 
-            sum_order_under_closed_label = sum_order_under_closed_label_int(
+            sum_order_under_closed_label = basic.sum_order_under_closed_label_int(
                 orders_instrument_transaction_closed, label_integer
             )
 
@@ -1095,9 +1087,9 @@ class ComboAuto(BasicStrategy):
 
             params.update({"size": size_abs})
 
-            size = size_abs * ensure_sign_consistency(counter_side)
+            size = size_abs * basic.ensure_sign_consistency(counter_side)
 
-            closing_size_ok = check_if_next_closing_size_will_not_exceed_the_original(
+            closing_size_ok = basic.check_if_next_closing_size_will_not_exceed_the_original(
                 basic_size, net_size, size
             )
 
@@ -1116,7 +1108,7 @@ class ComboAuto(BasicStrategy):
                     "best_ask_price"
                 ]
 
-                transaction_in_profit = profit_usd_has_exceed_target(
+                transaction_in_profit = basic.profit_usd_has_exceed_target(
                     tp_threshold,
                     selected_transaction_price,
                     ask_price_selected_transaction,
@@ -1195,7 +1187,7 @@ class ComboAuto(BasicStrategy):
 
             if "PERPETUAL" in instrument_name_transaction and closing_size_ok:
 
-                transaction_in_profit = profit_usd_has_exceed_target(
+                transaction_in_profit = basic.profit_usd_has_exceed_target(
                     tp_threshold,
                     selected_transaction_price,
                     ask_price_perpetual,
@@ -1279,7 +1271,7 @@ class ComboAuto(BasicStrategy):
             # if delta < 0:
             size_abs = abs(basic_size)
 
-            size = size_abs * ensure_sign_consistency(counter_side)
+            size = size_abs * basic.ensure_sign_consistency(counter_side)
 
             params.update({"side": counter_side})
 
@@ -1333,7 +1325,7 @@ class ComboAuto(BasicStrategy):
                     )
 
                 else:
-                    transaction_in_profit = profit_usd_has_exceed_target(
+                    transaction_in_profit = basic.profit_usd_has_exceed_target(
                         tp_threshold,
                         selected_transaction_price,
                         bid_price_perpetual,
@@ -1350,14 +1342,14 @@ class ComboAuto(BasicStrategy):
 
                 if transaction_in_profit:
 
-                    sum_order_under_closed_label = sum_order_under_closed_label_int(
+                    sum_order_under_closed_label = basic.sum_order_under_closed_label_int(
                         orders_instrument_perpetual_closed, label_integer
                     )
 
                     net_size = basic_size + sum_order_under_closed_label
 
                     closing_size_ok = (
-                        check_if_next_closing_size_will_not_exceed_the_original(
+                        basic.check_if_next_closing_size_will_not_exceed_the_original(
                             basic_size, net_size, size
                         )
                     )
@@ -1422,14 +1414,14 @@ class ComboAuto(BasicStrategy):
                 and ticker_selected_transaction
             ):
 
-                sum_order_under_closed_label = sum_order_under_closed_label_int(
+                sum_order_under_closed_label = basic.sum_order_under_closed_label_int(
                     orders_instrument_transaction_closed, label_integer
                 )
 
                 net_size = basic_size + sum_order_under_closed_label
 
                 closing_size_ok = (
-                    check_if_next_closing_size_will_not_exceed_the_original(
+                    basic.check_if_next_closing_size_will_not_exceed_the_original(
                         basic_size, net_size, size
                     )
                 )
@@ -1449,7 +1441,7 @@ class ComboAuto(BasicStrategy):
                         )
 
                     else:
-                        transaction_in_profit = profit_usd_has_exceed_target(
+                        transaction_in_profit = basic.profit_usd_has_exceed_target(
                             tp_threshold,
                             selected_transaction_price,
                             bid_price_selected_transaction,

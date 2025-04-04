@@ -86,8 +86,6 @@ async def relabelling_trades(
 
                 archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
-                archive_db_table: str = f"my_trades_all_{currency_lower}_json"
-
                 sub_account = reading_from_pkl_data("sub_accounts", currency)
 
                 sub_account = sub_account[0]
