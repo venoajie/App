@@ -151,7 +151,8 @@ async def reconciling_size(
                             archive_db_table,
                             currency,
                         )
-
+                        
+                        
                     if sub_account_cached_channel in message_channel:
                         positions_cached = data["positions"]
 
@@ -381,6 +382,19 @@ async def rechecking_based_on_sub_account(
             query_trades_active_where = (
                 f"WHERE instrument_name LIKE '%{instrument_name}%' AND is_open = 1"
             )
+            
+            query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
+
+            my_trades_currency_all_transactions: list = (
+                await db_mgt.executing_query_with_return(query_trades)
+            )
+            
+            # handling transactions with no label
+            await labelling_blank_labels(
+            instrument_name,
+            my_trades_currency_all_transactions,
+            archive_db_table,
+        )
 
             query_trades_active = (
                 f"{query_trades_active_basic} {query_trades_active_where}"
@@ -725,3 +739,83 @@ async def inserting_transaction_log_data(
                     position,
                     "=",
                 )
+
+
+
+async def labelling_blank_labels(
+    instrument_name: str,
+    my_trades_currency_active: list,
+    archive_db_table: str,
+) -> None:
+
+    my_trades_currency_active_with_blanks = [
+        o for o in my_trades_currency_active if o["label"] is None
+    ]
+
+    log.debug(
+        f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}"
+    )
+
+    if my_trades_currency_active_with_blanks:
+        column_trade: str = (
+            "id",
+            "instrument_name",
+            "data",
+            "label",
+            "trade_id",
+        )
+
+        my_trades_currency_archive: list = await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
+            archive_db_table, instrument_name, "all", "all", column_trade
+        )
+
+        my_trades_currency_active_with_blanks = [
+            o for o in my_trades_currency_archive if o["label"] is None
+        ]
+
+        my_trades_archive_instrument_id = [
+            o["trade_id"] for o in my_trades_currency_active_with_blanks
+        ]
+
+        if my_trades_archive_instrument_id:
+            for id in my_trades_archive_instrument_id:
+
+                transaction = str_mod.parsing_sqlite_json_output(
+                    [
+                        o["data"]
+                        for o in my_trades_currency_active_with_blanks
+                        if id == o["trade_id"]
+                    ]
+                )[0]
+
+                log.warning(f"transaction {transaction}")
+
+                label_open: str = get_custom_label(transaction)
+                
+                where_filter = "trade_id"
+                
+                await db_mgt.update_status_data(
+                                    archive_db_table,
+                                    "label",
+                                    where_filter,
+                                    id,
+                                    label_open,
+                                    "=",
+                                )
+
+
+def get_custom_label(transaction: list) -> str:
+
+    side = transaction["direction"]
+    side_label = "Short" if side == "sell" else "Long"
+
+    try:
+        last_update = transaction["timestamp"]
+    except:
+        try:
+            last_update = transaction["last_update_timestamp"]
+        except:
+            last_update = transaction["creation_timestamp"]
+
+    return f"custom{side_label.title()}-open-{last_update}"
+
