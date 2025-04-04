@@ -99,11 +99,11 @@ def get_custom_label(transaction: list) -> str:
     return f"custom{side_label.title()}-open-{last_update}"
 
 
-async def refill_db(
+async def labelling_blank_labels(
     instrument_name: str,
     my_trades_currency_active: list,
     archive_db_table: str,
-) -> list:
+) -> None:
 
     my_trades_currency_active_with_blanks = [
         o for o in my_trades_currency_active if o["label"] is None
@@ -148,23 +148,17 @@ async def refill_db(
                 log.warning(f"transaction {transaction}")
 
                 label_open: str = get_custom_label(transaction)
-                transaction.update({"label": label_open})
-                log.debug(transaction)
-
+                
                 where_filter = "trade_id"
-
-                await deleting_row(
-                    archive_db_table,
-                    "databases/trading.sqlite3",
-                    where_filter,
-                    "=",
-                    id,
-                )
-
-                await insert_tables(
-                    archive_db_table,
-                    transaction,
-                )
+                
+                await update_status_data(
+                                    archive_db_table,
+                                    "label",
+                                    where_filter,
+                                    id,
+                                    label_open,
+                                    "=",
+                                )
 
 
 def get_unrecorded_trade_transactions(

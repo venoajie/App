@@ -9,7 +9,7 @@ import uvloop
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.managing_closed_transactions import refill_db
+from data_cleaning.managing_closed_transactions import labelling_blank_labels
 from db_management import sqlite_management as db_mgt
 from messaging import telegram_bot as tlgrm
 from strategies.cash_carry import reassigning_labels
@@ -121,7 +121,7 @@ async def relabelling_trades(
                     server_time = time_mod.get_now_unix_time()
 
                     # handling transactions with no label
-                    await refill_db(
+                    await labelling_blank_labels(
                         currency,
                         my_trades_currency_all_transactions,
                         archive_db_table,

@@ -638,23 +638,6 @@ async def rechecking_based_on_data_in_sqlite(
                                     )
                                 )
 
-                                if sub_account_size == 0:
-
-                                    where_filter = "trade_id"
-
-                                    for trade in my_trades_instrument_name:
-
-                                        trade_id = trade["trade_id"]
-
-                                        await db_mgt.update_status_data(
-                                            archive_db_table,
-                                            "is_open",
-                                            where_filter,
-                                            trade_id,
-                                            0,
-                                            "=",
-                                        )
-
                     await managing_closed_transactions.clean_up_closed_transactions(
                         archive_db_table,
                         my_trades_active,
