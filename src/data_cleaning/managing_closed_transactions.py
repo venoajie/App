@@ -148,17 +148,17 @@ async def labelling_blank_labels(
                 log.warning(f"transaction {transaction}")
 
                 label_open: str = get_custom_label(transaction)
-                
+
                 where_filter = "trade_id"
-                
+
                 await update_status_data(
-                                    archive_db_table,
-                                    "label",
-                                    where_filter,
-                                    id,
-                                    label_open,
-                                    "=",
-                                )
+                    archive_db_table,
+                    "label",
+                    where_filter,
+                    id,
+                    label_open,
+                    "=",
+                )
 
 
 def get_unrecorded_trade_transactions(

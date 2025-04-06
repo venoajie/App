@@ -94,7 +94,9 @@ def determine_opening_size(
         basic_ticks_for_average_meovement,
     )
 
-    return basic.size_rounding(instrument_name, instrument_attributes_futures, proposed_size)
+    return basic.size_rounding(
+        instrument_name, instrument_attributes_futures, proposed_size
+    )
 
 
 def is_contango(
@@ -1089,8 +1091,10 @@ class ComboAuto(basic.BasicStrategy):
 
             size = size_abs * basic.ensure_sign_consistency(counter_side)
 
-            closing_size_ok = basic.check_if_next_closing_size_will_not_exceed_the_original(
-                basic_size, net_size, size
+            closing_size_ok = (
+                basic.check_if_next_closing_size_will_not_exceed_the_original(
+                    basic_size, net_size, size
+                )
             )
 
             # log.error (f"basic_size {basic_size} net_size {net_size} size {size} sum_order_under_closed_label {sum_order_under_closed_label}")
@@ -1342,8 +1346,10 @@ class ComboAuto(basic.BasicStrategy):
 
                 if transaction_in_profit:
 
-                    sum_order_under_closed_label = basic.sum_order_under_closed_label_int(
-                        orders_instrument_perpetual_closed, label_integer
+                    sum_order_under_closed_label = (
+                        basic.sum_order_under_closed_label_int(
+                            orders_instrument_perpetual_closed, label_integer
+                        )
                     )
 
                     net_size = basic_size + sum_order_under_closed_label
