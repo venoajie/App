@@ -104,6 +104,26 @@ async def reconciling_size(
 
                 five_days_ago = server_time - (one_minute * 60 * 24 * 5)
 
+                if order_allowed_channel in message_channel:
+
+                    order_allowed = data
+
+                    not_allowed_instruments = [
+                        o for o in order_allowed if o["size_is_reconciled"] == 0
+                    ]
+
+                    log.info(f"not_allowed_instruments {not_allowed_instruments}")
+                    
+                    currency_lower = currency.lower()
+
+                    archive_db_table = f"my_trades_all_{currency_lower}_json"
+
+                    await inserting_transaction_log_data(
+                            private_data,
+                            archive_db_table,
+                            currency,
+                        )
+
                 if ticker_cached_channel in message_channel:
 
                     exchange_server_time = data["server_time"]
@@ -352,12 +372,6 @@ async def rechecking_based_on_sub_account(
 
             archive_db_table = f"my_trades_all_{currency_lower}_json"
 
-            query_trades_active_basic = f"SELECT instrument_name, label, amount_dir as amount, trade_id  FROM  {archive_db_table}"
-
-            query_trades_active_where = (
-                f"WHERE instrument_name LIKE '%{instrument_name}%' AND is_open = 1"
-            )
-
             query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
 
             my_trades_currency_all_transactions: list = (
@@ -371,24 +385,12 @@ async def rechecking_based_on_sub_account(
                 archive_db_table,
             )
 
-            query_trades_active = (
-                f"{query_trades_active_basic} {query_trades_active_where}"
-            )
-
-            my_trades_instrument_name = await db_mgt.executing_query_with_return(
-                query_trades_active
-            )
-            log.warning(
-                f"my_trades_instrument_name will be replaced{my_trades_instrument_name}"
-            )
-
             my_trades_instrument_name = [] if my_trades_currency_all_transactions == [] else [
                 o
                 for o in my_trades_currency_all_transactions
                 if instrument_name in o["instrument_name"]
             ]
 
-            log.info(f"my_trades_instrument_name {my_trades_instrument_name}")
             await managing_closed_transactions.clean_up_closed_transactions(
                 archive_db_table,
                 my_trades_instrument_name,
