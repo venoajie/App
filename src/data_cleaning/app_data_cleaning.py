@@ -382,7 +382,7 @@ async def rechecking_based_on_sub_account(
                 f"my_trades_instrument_name will be replaced{my_trades_instrument_name}"
             )
 
-            my_trades_instrument_name = [
+            my_trades_instrument_name = [] if my_trades_currency_all_transactions == [] else [
                 o
                 for o in my_trades_currency_all_transactions
                 if instrument_name in o["instrument)name"]
