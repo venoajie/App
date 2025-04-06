@@ -105,6 +105,10 @@ async def reconciling_size(
                 five_days_ago = server_time - (one_minute * 60 * 24 * 5)
                 
                 log.info(f"{message_channel}")
+                
+                if message_channel is None:
+                    
+                    log.warning(f"{message_byte}")
 
                 if order_allowed_channel in message_channel:
                     
