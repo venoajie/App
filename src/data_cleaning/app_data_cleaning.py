@@ -118,7 +118,7 @@ async def reconciling_size(
                                             [
                                                 str_mod.extract_currency_from_text(o["instrument_name"])
                                                 for o in not_allowed_instruments
-                                            ]
+                                            ])
                     log.debug(f"transaction_currency {transaction_currency}")
                     
                     if transaction_currency:
