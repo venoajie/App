@@ -114,15 +114,26 @@ async def reconciling_size(
 
                     log.info(f"not_allowed_instruments {not_allowed_instruments}")
                     
-                    currency_lower = currency.lower()
+                    transaction_currency = str_mod.remove_redundant_elements(
+                                            [
+                                                str_mod.extract_currency_from_text(o["instrument_name"])
+                                                for o in not_allowed_instruments
+                                            ]
+                    log.debug(f"transaction_currency {transaction_currency}")
+                    
+                    if transaction_currency:
+                        
+                        for currency in transaction_currency:
+                            
+                            currency_lower = currency.lower()
 
-                    archive_db_table = f"my_trades_all_{currency_lower}_json"
+                            archive_db_table = f"my_trades_all_{currency_lower}_json"
 
-                    await inserting_transaction_log_data(
-                            private_data,
-                            archive_db_table,
-                            currency,
-                        )
+                            await inserting_transaction_log_data(
+                                    private_data,
+                                    archive_db_table,
+                                    currency,
+                                )
 
                 if ticker_cached_channel in message_channel:
 
