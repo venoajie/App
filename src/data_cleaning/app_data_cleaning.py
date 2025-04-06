@@ -503,7 +503,7 @@ async def rechecking_based_on_data_in_sqlite(
 def updating_order_allowed_cache(
     combined_order_allowed: list,
     instrument_name: str,
-    is_my_trades_and_sub_account_size_reconciled: bool,
+    my_trades_and_sub_account_size_reconciled: bool,
 ) -> None:
     """ """
 
