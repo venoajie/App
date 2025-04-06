@@ -89,7 +89,7 @@ async def reconciling_size(
         await redis_client.publishing_result(
             client_redis,
             order_allowed_channel,
-            result,
+            initial_data_order_allowed,
         )
 
         while True:
