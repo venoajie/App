@@ -106,10 +106,8 @@ async def reconciling_size(
 
                 if order_allowed_channel in message_channel:
 
-                    order_allowed = data
-
                     not_allowed_instruments = [
-                        o for o in order_allowed if o["size_is_reconciled"] == 0
+                        o for o in combined_order_allowed if o["size_is_reconciled"] == 0
                     ]
 
                     log.info(f"not_allowed_instruments {not_allowed_instruments}")
