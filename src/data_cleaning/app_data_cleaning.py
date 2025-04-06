@@ -103,9 +103,11 @@ async def reconciling_size(
                 data, message_channel = params["data"], params["channel"]
 
                 five_days_ago = server_time - (one_minute * 60 * 24 * 5)
+                
+                log.info(f"message_channel")
 
                 if order_allowed_channel in message_channel:
-
+                    
                     not_allowed_instruments = [
                         o for o in combined_order_allowed if o["size_is_reconciled"] == 0
                     ]
