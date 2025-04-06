@@ -7,7 +7,7 @@ import asyncio
 from dataclassy import dataclass, fields
 from loguru import logger as log
 
-from strategies.basic_strategy import basic_strategy as basic
+from strategies import basic_strategy as basic
 from strategies.basic_strategy import (
     get_label,
     get_label_integer,
