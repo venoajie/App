@@ -99,68 +99,6 @@ def get_custom_label(transaction: list) -> str:
     return f"custom{side_label.title()}-open-{last_update}"
 
 
-async def labelling_blank_labels(
-    instrument_name: str,
-    my_trades_currency_active: list,
-    archive_db_table: str,
-) -> None:
-
-    my_trades_currency_active_with_blanks = [
-        o for o in my_trades_currency_active if o["label"] is None
-    ]
-
-    log.debug(
-        f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}"
-    )
-
-    if my_trades_currency_active_with_blanks:
-        column_trade: str = (
-            "id",
-            "instrument_name",
-            "data",
-            "label",
-            "trade_id",
-        )
-
-        my_trades_currency_archive: list = await get_query(
-            archive_db_table, instrument_name, "all", "all", column_trade
-        )
-
-        my_trades_currency_active_with_blanks = [
-            o for o in my_trades_currency_archive if o["label"] is None
-        ]
-
-        my_trades_archive_instrument_id = [
-            o["trade_id"] for o in my_trades_currency_active_with_blanks
-        ]
-
-        if my_trades_archive_instrument_id:
-            for id in my_trades_archive_instrument_id:
-
-                transaction = parsing_sqlite_json_output(
-                    [
-                        o["data"]
-                        for o in my_trades_currency_active_with_blanks
-                        if id == o["trade_id"]
-                    ]
-                )[0]
-
-                log.warning(f"transaction {transaction}")
-
-                label_open: str = get_custom_label(transaction)
-
-                where_filter = "trade_id"
-
-                await update_status_data(
-                    archive_db_table,
-                    "label",
-                    where_filter,
-                    id,
-                    label_open,
-                    "=",
-                )
-
-
 def get_unrecorded_trade_transactions(
     direction: str,
     my_trades_instrument_name: list,

@@ -139,6 +139,8 @@ async def distributing_transaction_log_from_exchange(
     transaction_log: list,
 ) -> None:
 
+    log.warning(f"transaction_log {transaction_log}")
+
     if transaction_log:
 
         for transaction in transaction_log:

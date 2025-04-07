@@ -9,7 +9,6 @@ import uvloop
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from data_cleaning.managing_closed_transactions import labelling_blank_labels
 from db_management import sqlite_management as db_mgt
 from messaging import telegram_bot as tlgrm
 from strategies.cash_carry import reassigning_labels
@@ -23,15 +22,6 @@ from utilities import (
     system_tools,
     time_modification as time_mod,
 )
-
-
-async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
-
-    my_path_portfolio = system_tools.provide_path_for_file(path, currency)
-
-    if currency_inline_with_database_address(currency, my_path_portfolio):
-
-        pickling.replace_data(my_path_portfolio, data_orders)
 
 
 async def relabelling_trades(
@@ -354,8 +344,99 @@ def reading_from_pkl_data(end_point, currency, status: str = None) -> dict:
     return pickling.read_data(path)
 
 
+async def update_db_pkl(path: str, data_orders: dict, currency: str) -> None:
+
+    my_path_portfolio = system_tools.provide_path_for_file(path, currency)
+
+    if currency_inline_with_database_address(currency, my_path_portfolio):
+
+        pickling.replace_data(my_path_portfolio, data_orders)
+
+
 def currency_inline_with_database_address(
     currency: str,
     database_address: str,
 ) -> bool:
     return currency.lower() in str(database_address)
+
+
+async def labelling_blank_labels(
+    instrument_name: str,
+    my_trades_currency_active: list,
+    archive_db_table: str,
+) -> None:
+
+    my_trades_currency_active_with_blanks = (
+        []
+        if not my_trades_currency_active
+        else [o for o in my_trades_currency_active if o["label"] is None]
+    )
+
+    log.debug(
+        f"my_trades_currency_active_with_blanks {my_trades_currency_active_with_blanks}"
+    )
+
+    if my_trades_currency_active_with_blanks:
+        column_trade: str = (
+            "id",
+            "instrument_name",
+            "data",
+            "label",
+            "trade_id",
+        )
+
+        my_trades_currency_archive: list = (
+            await db_mgt.executing_query_based_on_currency_or_instrument_and_strategy(
+                archive_db_table, instrument_name, "all", "all", column_trade
+            )
+        )
+
+        my_trades_currency_active_with_blanks = [
+            o for o in my_trades_currency_archive if o["label"] is None
+        ]
+
+        my_trades_archive_instrument_id = [
+            o["trade_id"] for o in my_trades_currency_active_with_blanks
+        ]
+
+        if my_trades_archive_instrument_id:
+            for trade_id in my_trades_archive_instrument_id:
+
+                transaction = str_mod.parsing_sqlite_json_output(
+                    [
+                        o["data"]
+                        for o in my_trades_currency_active_with_blanks
+                        if trade_id == o["trade_id"]
+                    ]
+                )[0]
+
+                log.warning(f"transaction {transaction}")
+
+                label_open: str = get_custom_label(transaction)
+
+                where_filter = "trade_id"
+
+                await db_mgt.update_status_data(
+                    archive_db_table,
+                    "label",
+                    where_filter,
+                    trade_id,
+                    label_open,
+                    "=",
+                )
+
+
+def get_custom_label(transaction: list) -> str:
+
+    side = transaction["direction"]
+    side_label = "Short" if side == "sell" else "Long"
+
+    try:
+        last_update = transaction["timestamp"]
+    except:
+        try:
+            last_update = transaction["last_update_timestamp"]
+        except:
+            last_update = transaction["creation_timestamp"]
+
+    return f"custom{side_label.title()}-open-{last_update}"

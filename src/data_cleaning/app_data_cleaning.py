@@ -121,31 +121,24 @@ async def reconciling_size(
 
                     log.info(f"transaction_currency {transaction_currency}")
                     if transaction_currency:
-                        
+
                         one_day_ago = server_time - (one_minute * 60 * 24 * 1)
 
                         for currency_lower in transaction_currency:
 
                             archive_db_table = f"my_trades_all_{currency_lower}_json"
-                            
-                            queries = ["trade", "liquidation"]
-                            
-                            for query in queries:
 
-                                transaction_log = await private_data.get_transaction_log(
-                                    currency_lower,
-                                    one_day_ago,
-                                    1000,
-                                    query,
-                                )
-                                
-                                log.warning(f"transaction_log {transaction_log}")
-                                
-                                if transaction_log:
-                                    await starter.distributing_transaction_log_from_exchange(
-                                    archive_db_table,
-                                    transaction_log,
-                                )
+                            transaction_log = await private_data.get_transaction_log(
+                                currency_lower,
+                                one_day_ago,
+                                1000,
+                                "trade",
+                            )
+
+                            await starter.distributing_transaction_log_from_exchange(
+                                archive_db_table,
+                                transaction_log,
+                            )
 
                 if ticker_cached_channel in message_channel:
 
