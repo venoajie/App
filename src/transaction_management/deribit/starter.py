@@ -128,31 +128,44 @@ async def refill_db(
         "trade",
     )
 
-    for transaction in transaction_log:
-        result = {}
+    await distributing_transaction_log_from_exchange(
+        archive_db_table,
+        transaction_log,
+    )
 
-        if "sell" in transaction["side"]:
-            direction = "sell"
 
-        if "buy" in transaction["side"]:
-            direction = "buy"
+async def distributing_transaction_log_from_exchange(
+    archive_db_table: str,
+    transaction_log: list,
+) -> None:
 
-        result.update({"trade_id": transaction["trade_id"]})
-        result.update({"user_seq": transaction["user_seq"]})
-        result.update({"side": transaction["side"]})
-        result.update({"timestamp": transaction["timestamp"]})
-        result.update({"position": transaction["position"]})
-        result.update({"amount": transaction["amount"]})
-        result.update({"order_id": transaction["order_id"]})
-        result.update({"price": transaction["price"]})
-        result.update({"instrument_name": transaction["instrument_name"]})
-        result.update({"label": None})
-        result.update({"direction": direction})
+    if transaction_log:
 
-        await db_mgt.insert_tables(
-            archive_db_table,
-            result,
-        )
+        for transaction in transaction_log:
+            result = {}
+
+            if "sell" in transaction["side"]:
+                direction = "sell"
+
+            if "buy" in transaction["side"]:
+                direction = "buy"
+
+            result.update({"trade_id": transaction["trade_id"]})
+            result.update({"user_seq": transaction["user_seq"]})
+            result.update({"side": transaction["side"]})
+            result.update({"timestamp": transaction["timestamp"]})
+            result.update({"position": transaction["position"]})
+            result.update({"amount": transaction["amount"]})
+            result.update({"order_id": transaction["order_id"]})
+            result.update({"price": transaction["price"]})
+            result.update({"instrument_name": transaction["instrument_name"]})
+            result.update({"label": None})
+            result.update({"direction": direction})
+
+            await db_mgt.insert_tables(
+                archive_db_table,
+                result,
+            )
 
 
 def portfolio_combining(
