@@ -163,6 +163,7 @@ async def distributing_transaction_log_from_exchange(
             result.update({"instrument_name": transaction["instrument_name"]})
             result.update({"label": None})
             result.update({"direction": direction})
+            result.update({"currency": transaction["currency"]})
 
             await db_mgt.insert_tables(
                 archive_db_table,

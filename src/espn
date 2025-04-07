@@ -10,9 +10,8 @@ from loguru import logger as log
 
 week = 17
 season = 2023
-url = 'http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard'
-url = 'https://site.web.api.espn.com/apis/common/v3/sports/golf/athletes/3702/stats?season=2025'
-url = 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=400934572'
+
+url = 'https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/athletes/3915511/stats?region=us&lang=en&contentorigin=espn'
 payload = {
     'seasontype':2,
     'dates':season,
@@ -33,7 +32,7 @@ async def send_requests_to_url(end_point: str, payload) -> list:
             
 
         log.error (result.json())
-        return result.json()["events"]
+        return result.json()
 
     except Exception as error:
 
@@ -45,6 +44,9 @@ async def send_requests_to_url(end_point: str, payload) -> list:
         
 jsonData = asyncio.run (send_requests_to_url(url, payload))
 log.debug(jsonData)
+log.error(list(jsonData))
+log.info((jsonData)["categories"])
+log.warning((jsonData)["filters"])
 df = pd.json_normalize(
     jsonData,
     record_path=['competitions', 'competitors'],

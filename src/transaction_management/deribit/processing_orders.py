@@ -766,11 +766,23 @@ def trade_template() -> str:
     """
     combining result from websocket (user changes/trade)
         and rest API (get_transaction_log)
-
+        
+        instrument_name: str=None,
+        amount: int=None,
+        price: float=None,
+        side: str=None,
+        direction: str=None,
+        position: int=None,
+        currency: str=None,
+        timestamp: int=None,
+        trade_id: str=None,
+        order_id: str=None,
+        user_seq: int=None
+         
+    label is not registered since it needed as identification for no label
     """
     return dict(
         instrument_name=None,
-        #                 label=None, commented as label header is needed as identification for no label
         amount=None,
         price=None,
         side=None,

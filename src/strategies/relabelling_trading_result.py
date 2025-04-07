@@ -76,246 +76,238 @@ async def relabelling_trades(
 
                 archive_db_table: str = f"my_trades_all_{currency_lower}_json"
 
-                sub_account = reading_from_pkl_data("sub_accounts", currency)
+                query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
 
-                sub_account = sub_account[0]
+                my_trades_currency_all_transactions: list = (
+                    await db_mgt.executing_query_with_return(query_trades)
+                )
 
-                # sub_account_orders = sub_account["open_orders"]
-
-                if sub_account:
-
-                    query_trades = f"SELECT * FROM  v_{currency_lower}_trading_active"
-
-                    my_trades_currency_all_transactions: list = (
-                        await db_mgt.executing_query_with_return(query_trades)
-                    )
-
-                    my_trades_currency_all: list = (
-                        []
-                        if my_trades_currency_all_transactions == 0
-                        else [
-                            o
-                            for o in my_trades_currency_all_transactions
-                            if o["instrument_name"]
-                            in [
-                                o["instrument_name"]
-                                for o in instrument_attributes_futures_all
-                            ]
+                my_trades_currency_all: list = (
+                    []
+                    if my_trades_currency_all_transactions == 0
+                    else [
+                        o
+                        for o in my_trades_currency_all_transactions
+                        if o["instrument_name"]
+                        in [
+                            o["instrument_name"]
+                            for o in instrument_attributes_futures_all
                         ]
+                    ]
+                )
+
+                my_trades_currency: list = [
+                    o for o in my_trades_currency_all if o["label"] is not None
+                ]
+
+                server_time = time_mod.get_now_unix_time()
+
+                # handling transactions with no label
+                await labelling_blank_labels(
+                    currency,
+                    my_trades_currency_all_transactions,
+                    archive_db_table,
+                )
+
+                duplicated_trade_id_transactions = (
+                    await db_mgt.querying_duplicated_transactions(
+                        archive_db_table, "trade_id"
+                    )
+                )
+
+                if duplicated_trade_id_transactions:
+
+                    log.critical(
+                        f"duplicated_trade_id_transactions {duplicated_trade_id_transactions}"
                     )
 
-                    my_trades_currency: list = [
-                        o for o in my_trades_currency_all if o["label"] is not None
+                    ids = [o["id"] for o in duplicated_trade_id_transactions]
+
+                    for id in ids:
+                        await db_mgt.deleting_row(
+                            archive_db_table,
+                            "databases/trading.sqlite3",
+                            "id",
+                            "=",
+                            id,
+                        )
+
+                #                            break
+
+                for strategy in active_strategies:
+
+                    strategy_params = [
+                        o
+                        for o in strategy_attributes
+                        if o["strategy_label"] == strategy
+                    ][0]
+
+                    my_trades_currency_strategy = [
+                        o for o in my_trades_currency if strategy in (o["label"])
                     ]
 
-                    server_time = time_mod.get_now_unix_time()
+                    if "futureSpread" in strategy:
 
-                    # handling transactions with no label
-                    await labelling_blank_labels(
-                        currency,
-                        my_trades_currency_all_transactions,
-                        archive_db_table,
-                    )
-
-                    duplicated_trade_id_transactions = (
-                        await db_mgt.querying_duplicated_transactions(
-                            archive_db_table, "trade_id"
-                        )
-                    )
-
-                    if duplicated_trade_id_transactions:
-
-                        log.critical(
-                            f"duplicated_trade_id_transactions {duplicated_trade_id_transactions}"
-                        )
-
-                        ids = [o["id"] for o in duplicated_trade_id_transactions]
-
-                        for id in ids:
-                            await db_mgt.deleting_row(
-                                archive_db_table,
-                                "databases/trading.sqlite3",
-                                "id",
-                                "=",
-                                id,
-                            )
-
-                    #                            break
-
-                    for strategy in active_strategies:
-
-                        strategy_params = [
-                            o
-                            for o in strategy_attributes
-                            if o["strategy_label"] == strategy
-                        ][0]
-
-                        my_trades_currency_strategy = [
-                            o for o in my_trades_currency if strategy in (o["label"])
+                        my_trades_currency_strategy_labels: list = [
+                            o["label"] for o in my_trades_currency_strategy
                         ]
 
-                        if "futureSpread" in strategy:
+                        # get labels from active trades
+                        labels = str_mod.remove_redundant_elements(
+                            my_trades_currency_strategy_labels
+                        )
 
-                            my_trades_currency_strategy_labels: list = [
-                                o["label"] for o in my_trades_currency_strategy
+                        filter = "label"
+
+                        pairing_label = (
+                            await reassigning_labels.pairing_single_label(
+                                strategy_attributes,
+                                archive_db_table,
+                                my_trades_currency_strategy,
+                                server_time,
+                            )
+                        )
+
+                        if pairing_label:
+
+                            log.error(f"pairing_label {pairing_label}")
+
+                            cancellable_strategies = [
+                                o["strategy_label"]
+                                for o in strategy_attributes
+                                if o["cancellable"] == True
                             ]
 
-                            # get labels from active trades
-                            labels = str_mod.remove_redundant_elements(
-                                my_trades_currency_strategy_labels
+                            await cancelling_active_orders.cancel_the_cancellables(
+                                private_data,
+                                order_db_table,
+                                currency,
+                                cancellable_strategies,
                             )
 
-                            filter = "label"
+                        #! closing active trades
+                        for label in labels:
 
-                            pairing_label = (
-                                await reassigning_labels.pairing_single_label(
-                                    strategy_attributes,
-                                    archive_db_table,
-                                    my_trades_currency_strategy,
-                                    server_time,
-                                )
+                            label_integer: int = str_mod.parsing_label(label)["int"]
+                            selected_transaction = [
+                                o
+                                for o in my_trades_currency_strategy
+                                if str(label_integer) in o["label"]
+                            ]
+
+                            selected_transaction_amount = [
+                                o["amount"] for o in selected_transaction
+                            ]
+
+                            sum_selected_transaction = sum(
+                                selected_transaction_amount
+                            )
+                            len_selected_transaction = len(
+                                selected_transaction_amount
                             )
 
-                            if pairing_label:
+                            #! closing combo auto trading
+                            if "Auto" in label:
 
-                                log.error(f"pairing_label {pairing_label}")
+                                if sum_selected_transaction == 0:
 
-                                cancellable_strategies = [
-                                    o["strategy_label"]
-                                    for o in strategy_attributes
-                                    if o["cancellable"] == True
-                                ]
+                                    abnormal_transaction = [
+                                        o
+                                        for o in selected_transaction
+                                        if "closed" in o["label"]
+                                    ]
 
-                                await cancelling_active_orders.cancel_the_cancellables(
-                                    private_data,
-                                    order_db_table,
-                                    currency,
-                                    cancellable_strategies,
-                                )
-
-                            #! closing active trades
-                            for label in labels:
-
-                                label_integer: int = str_mod.parsing_label(label)["int"]
-                                selected_transaction = [
-                                    o
-                                    for o in my_trades_currency_strategy
-                                    if str(label_integer) in o["label"]
-                                ]
-
-                                selected_transaction_amount = [
-                                    o["amount"] for o in selected_transaction
-                                ]
-
-                                sum_selected_transaction = sum(
-                                    selected_transaction_amount
-                                )
-                                len_selected_transaction = len(
-                                    selected_transaction_amount
-                                )
-
-                                #! closing combo auto trading
-                                if "Auto" in label:
-
-                                    if sum_selected_transaction == 0:
-
-                                        abnormal_transaction = [
-                                            o
-                                            for o in selected_transaction
-                                            if "closed" in o["label"]
-                                        ]
-
-                                    else:
-
-                                        new_label = f"futureSpread-open-{label_integer}"
-
-                                        await db_mgt.update_status_data(
-                                            archive_db_table,
-                                            "label",
-                                            filter,
-                                            label,
-                                            new_label,
-                                            "=",
-                                        )
-
-                                        log.debug("renaming combo Auto done")
-
-                                        await cancelling_active_orders.cancel_the_cancellables(
-                                            private_data,
-                                            order_db_table,
-                                            currency,
-                                            cancellable_strategies,
-                                        )
-
-                                        # break
-
-                                #! renaming combo auto trading
                                 else:
 
-                                    if sum_selected_transaction == 0:
+                                    new_label = f"futureSpread-open-{label_integer}"
+
+                                    await db_mgt.update_status_data(
+                                        archive_db_table,
+                                        "label",
+                                        filter,
+                                        label,
+                                        new_label,
+                                        "=",
+                                    )
+
+                                    log.debug("renaming combo Auto done")
+
+                                    await cancelling_active_orders.cancel_the_cancellables(
+                                        private_data,
+                                        order_db_table,
+                                        currency,
+                                        cancellable_strategies,
+                                    )
+
+                                    # break
+
+                            #! renaming combo auto trading
+                            else:
+
+                                if sum_selected_transaction == 0:
+
+                                    if "open" in label:
+                                        new_label = (
+                                            f"futureSpreadAuto-open-{label_integer}"
+                                        )
+
+                                    if "closed" in label:
+                                        new_label = f"futureSpreadAuto-closed-{label_integer}"
+
+                                    await db_mgt.update_status_data(
+                                        archive_db_table,
+                                        "label",
+                                        filter,
+                                        label,
+                                        new_label,
+                                        "=",
+                                    )
+
+                                    # break
+
+                                #! closing unpaired transactions
+                                else:
+
+                                    if len_selected_transaction != 1:
+
+                                        selected_transaction_trade_id = (
+                                            [
+                                                o["trade_id"]
+                                                for o in selected_transaction
+                                            ]
+                                        )[0]
+
+                                        filter = "trade_id"
 
                                         if "open" in label:
                                             new_label = (
-                                                f"futureSpreadAuto-open-{label_integer}"
+                                                f"futureSpread-open-{server_time}"
                                             )
 
                                         if "closed" in label:
-                                            new_label = f"futureSpreadAuto-closed-{label_integer}"
+                                            new_label = (
+                                                f"futureSpread-closed-{server_time}"
+                                            )
 
                                         await db_mgt.update_status_data(
                                             archive_db_table,
                                             "label",
                                             filter,
-                                            label,
+                                            selected_transaction_trade_id,
                                             new_label,
                                             "=",
                                         )
 
                                         # break
 
-                                    #! closing unpaired transactions
                                     else:
 
-                                        if len_selected_transaction != 1:
+                                        if "closed" not in label:
+                                            pass
 
-                                            selected_transaction_trade_id = (
-                                                [
-                                                    o["trade_id"]
-                                                    for o in selected_transaction
-                                                ]
-                                            )[0]
+                    if "hedgingSpot" in strategy:
 
-                                            filter = "trade_id"
-
-                                            if "open" in label:
-                                                new_label = (
-                                                    f"futureSpread-open-{server_time}"
-                                                )
-
-                                            if "closed" in label:
-                                                new_label = (
-                                                    f"futureSpread-closed-{server_time}"
-                                                )
-
-                                            await db_mgt.update_status_data(
-                                                archive_db_table,
-                                                "label",
-                                                filter,
-                                                selected_transaction_trade_id,
-                                                new_label,
-                                                "=",
-                                            )
-
-                                            # break
-
-                                        else:
-
-                                            if "closed" not in label:
-                                                pass
-
-                        if "hedgingSpot" in strategy:
-
-                            pass
+                        pass
 
             await asyncio.sleep(1)
 
