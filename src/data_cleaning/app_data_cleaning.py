@@ -119,6 +119,7 @@ async def reconciling_size(
                         ]
                     )
 
+                    log.info(f"transaction_currency {transaction_currency}")
                     if transaction_currency:
                         
                         one_day_ago = server_time - (one_minute * 60 * 24 * 1)
@@ -137,6 +138,8 @@ async def reconciling_size(
                                     1000,
                                     query,
                                 )
+                                
+                                log.warning(f"transaction_log {transaction_log}")
                                 
                                 if transaction_log:
                                     await starter.distributing_transaction_log_from_exchange(
