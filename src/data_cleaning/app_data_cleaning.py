@@ -131,7 +131,7 @@ async def reconciling_size(
                             archive_db_table = f"my_trades_all_{currency_lower}_json"
 
                             transaction_log = await private_data.get_transaction_log(
-                                currency,
+                                currency_lower,
                                 five_days_ago,
                                 1000,
                                 "trade",
