@@ -246,7 +246,7 @@ async def deleting_row(
 
 
 async def querying_duplicated_transactions(
-    label: str = "my_trades_all_json",
+    label: str,
     group_by: str = "trade_id",
     database: str = "databases/trading.sqlite3",
 ) -> list:

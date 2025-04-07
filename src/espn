@@ -1,0 +1,95 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+# built ins
+import asyncio
+import pandas as pd
+import httpx
+from loguru import logger as log
+
+
+week = 17
+season = 2023
+url = 'http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard'
+url = 'https://site.web.api.espn.com/apis/common/v3/sports/golf/athletes/3702/stats?season=2025'
+url = 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=400934572'
+payload = {
+    'seasontype':2,
+    'dates':season,
+    'week':week}
+
+
+async def send_requests_to_url(end_point: str, payload) -> list:
+
+    try:
+
+        async with httpx.AsyncClient() as client:
+            result = await client.get(
+                end_point,
+                #params=payload,
+                follow_redirects=True,
+            )
+            
+            
+
+        log.error (result.json())
+        return result.json()["events"]
+
+    except Exception as error:
+
+        log.debug(error)
+        
+    except Exception as error:
+
+        log.debug(error)
+        
+jsonData = asyncio.run (send_requests_to_url(url, payload))
+log.debug(jsonData)
+df = pd.json_normalize(
+    jsonData,
+    record_path=['competitions', 'competitors'],
+    meta=['id','date'],
+    meta_prefix='meta-',
+    )
+
+home_df = df[df['homeAway'] == 'home']
+away_df = df[df['homeAway'] == 'away']
+
+# Merge home and away dataframes on meta-id and meta-date
+merged_df = pd.merge(home_df, away_df, on=['meta-id', 'meta-date'], suffixes=('_home', '_away'))
+
+# Select and rename the relevant columns
+final_df = merged_df[[
+    'meta-id', 'meta-date',
+    'team.name_home', 'score_home',
+    'team.name_away', 'score_away'
+]].rename(columns={
+    'meta-date': 'Date',
+    'team.name_home': 'Home Team',
+    'score_home': 'Home Score',
+    'team.name_away': 'Away Team',
+    'score_away': 'Away Score'
+}).drop('meta-id', axis=1)
+    
+final_df['Week'] = week
+
+
+if __name__ == "__main__":
+    
+    try:
+        print(final_df)
+        
+    except(
+        KeyboardInterrupt, 
+        SystemExit
+        ):
+        
+        asyncio.get_event_loop().run_until_complete(main())
+        
+    except Exception as error:
+        system_tools.parse_error_message(error)
+        
+        asyncio.run(telegram_bot_sendtext (
+            error,
+            "general_error"
+            ))

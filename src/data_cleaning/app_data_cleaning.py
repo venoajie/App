@@ -102,8 +102,6 @@ async def reconciling_size(
 
                 data, message_channel = params["data"], params["channel"]
 
-                five_days_ago = server_time - (one_minute * 60 * 24 * 5)
-
                 if order_allowed_channel in message_channel:
 
                     not_allowed_instruments = [
@@ -120,27 +118,31 @@ async def reconciling_size(
                             for o in not_allowed_instruments
                         ]
                     )
-                    log.debug(f"transaction_currency {transaction_currency}")
 
                     if transaction_currency:
+                        
+                        one_day_ago = server_time - (one_minute * 60 * 24 * 1)
 
                         for currency_lower in transaction_currency:
 
-                            log.error(f"currency_lower {currency_lower}")
-
                             archive_db_table = f"my_trades_all_{currency_lower}_json"
+                            
+                            queries = ["trade", "liquidation"]
+                            
+                            for query in queries:
 
-                            transaction_log = await private_data.get_transaction_log(
-                                currency_lower,
-                                five_days_ago,
-                                1000,
-                                "trade",
-                            )
-
-                            await starter.distributing_transaction_log_from_exchange(
-                                archive_db_table,
-                                transaction_log,
-                            )
+                                transaction_log = await private_data.get_transaction_log(
+                                    currency_lower,
+                                    one_day_ago,
+                                    1000,
+                                    query,
+                                )
+                                
+                                if transaction_log:
+                                    await starter.distributing_transaction_log_from_exchange(
+                                    archive_db_table,
+                                    transaction_log,
+                                )
 
                 if ticker_cached_channel in message_channel:
 
