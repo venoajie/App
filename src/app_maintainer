@@ -155,7 +155,7 @@ async def main():
                 resolutions,
                 np),
             
-            
+    """
             reconciling_size(
                 private_data,
                 client_redis,
@@ -164,6 +164,8 @@ async def main():
                 initial_data_subaccount,
                 futures_instruments,
                 ),                    
+    
+    """
                         )  
 
         await queue.join()
