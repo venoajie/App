@@ -164,8 +164,6 @@ async def main():
         
             saving_task_deribit,
 
-            saving_task_binance,
-         
             system_tools.back_up_db(60*10),
             
             pruning_db.clean_up_databases(60)
