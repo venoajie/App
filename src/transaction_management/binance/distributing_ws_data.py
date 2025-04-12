@@ -41,21 +41,16 @@ async def caching_distributing_data(
 
             async with client_redis.pipeline() as pipe:
 
-                data: dict = message_params["data"]
+                try:
+                    
+                    data: dict = message_params["data"]
 
-                message_channel: str = message_params["channel"]
-
-                currency: str = str_mod.extract_currency_from_text(message_channel)
-
-                currency_upper = currency.upper()
-
-                pub_message = dict(
+                    message_channel: str = message_params["stream"]
+                    
+                    pub_message = dict(
                     data=data,
                 )
-
-                try:
-                    message_channel: str = message_params["stream"]
-
+                    
                     if "abnormaltradingnotices" in message_channel:
 
                         data: dict = message_params["data"]
