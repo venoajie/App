@@ -41,47 +41,45 @@ async def caching_distributing_data(
 
             async with client_redis.pipeline() as pipe:
 
+                data: dict = message_params["data"]
+
+                message_channel: str = message_params["channel"]
+
+                currency: str = str_mod.extract_currency_from_text(message_channel)
+
+                currency_upper = currency.upper()
+
+                pub_message = dict(
+                    data=data,
+                    server_time=server_time,
+                    currency_upper=currency_upper,
+                    currency=currency,
+                )
+
                 try:
 
-                    data: dict = message_params["data"]
+                    message_channel: str = message_params["stream"]
 
-                    message_channel: str = message_params["channel"]
+                    if "abnormaltradingnotices" in message_channel:
 
-                    currency: str = str_mod.extract_currency_from_text(message_channel)
+                        data: dict = message_params["data"]
 
-                    currency_upper = currency.upper()
+                        pub_message = dict(
+                            data=data,
+                        )
 
-                    pub_message = dict(
-                        data=data,
-                        server_time=server_time,
-                        currency_upper=currency_upper,
-                        currency=currency,
-                    )
+                        await abnormal_trading_notices_in_message_channel(
+                            pipe,
+                            abnormal_trading_notices,
+                            pub_message,
+                            result,
+                        )
 
-                    try:
+                except:
 
-                        message_channel: str = message_params["stream"]
+                    data: dict = message_params["result"]
 
-                        if "abnormaltradingnotices" in message_channel:
-
-                            data: dict = message_params["data"]
-
-                            pub_message = dict(
-                                data=data,
-                            )
-
-                            await abnormal_trading_notices_in_message_channel(
-                                pipe,
-                                abnormal_trading_notices,
-                                pub_message,
-                                result,
-                            )
-
-                    except:
-
-                        data: dict = message_params["result"]
-
-                        await pipe.execute()
+                await pipe.execute()
 
     except Exception as error:
 
