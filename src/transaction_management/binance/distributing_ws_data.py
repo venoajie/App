@@ -16,10 +16,8 @@ from utilities import caching, pickling, string_modification as str_mod, system_
 async def caching_distributing_data(
     client_redis: object,
     currencies: list,
-    initial_data_subaccount: dict,
     redis_channels: list,
     redis_keys: list,
-    strategy_attributes,
     queue_general: object,
 ) -> None:
 
@@ -42,8 +40,6 @@ async def caching_distributing_data(
             async with client_redis.pipeline() as pipe:
 
                 try:
-                    
-                    log.warning(f"message_params {message_params}")
 
                     data: dict = message_params["data"]
                     
@@ -71,7 +67,7 @@ async def caching_distributing_data(
                     await pipe.execute()
 
                 except:
-                    pass
+                    system_tools.parse_error_message(error)
 
     except Exception as error:
 

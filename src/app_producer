@@ -148,10 +148,8 @@ async def main():
             distr_binance.caching_distributing_data(
                 client_redis,
                 currencies,
-                initial_data_subaccount,
                 redis_channels,
                 redis_keys,
-                strategy_attributes,
                 queue,
                 )
             ) 
