@@ -66,7 +66,7 @@ async def caching_distributing_data(
 
                     await pipe.execute()
 
-                except:
+                except Exception as error:
                     log.info(
                         f"error in message {message_params}"
                     )
