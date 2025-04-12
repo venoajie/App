@@ -72,6 +72,7 @@ yarl==1.17.0
 
 redis[hiredis]>=5.2.1    
  aioredis>=2.0.1
+ celery==5.2.2
  cffi==1.17.1
  circuitbreaker==2.0.0
  cryptography>=41.0.5,<44

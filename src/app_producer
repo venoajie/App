@@ -10,6 +10,7 @@ import sys
 # installed
 import uvloop
 import redis.asyncio as aioredis
+from celery import Celery
 #from redistimeseries.client import Client
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -18,7 +19,8 @@ from data_cleaning import pruning_db
 from messaging import telegram_bot as tlgrm
 from streaming_data.data_producer import StreamingAccountData
 from streaming_data.data_producer_binance import StreamingDataBinance
-from transaction_management.deribit import api_requests, distributing_ws_data, get_instrument_summary,starter
+from transaction_management.deribit import api_requests, distributing_ws_data as distr_deribit, get_instrument_summary,starter
+from transaction_management.binance import distributing_ws_data as distr_binance
 from utilities import string_modification as str_mod, system_tools
 
 def handle_ctrl_c(
@@ -29,6 +31,8 @@ def handle_ctrl_c(
     sys.exit(0)
                   
 signal_handler = system_tools.SignalHandler()
+
+app = Celery('myapp', broker='redis://host:port/0', backend='redis://host:port/0')
 
 async def main():
     """
@@ -128,8 +132,20 @@ async def main():
 )
             ) 
                  
-        saving_task = asyncio.create_task(
-            distributing_ws_data.caching_distributing_data(
+        saving_task_deribit = asyncio.create_task(
+            distr_deribit.caching_distributing_data(
+                client_redis,
+                currencies,
+                initial_data_subaccount,
+                redis_channels,
+                redis_keys,
+                strategy_attributes,
+                queue,
+                )
+            ) 
+                        
+        saving_task_binance = asyncio.create_task(
+            distr_binance.caching_distributing_data(
                 client_redis,
                 currencies,
                 initial_data_subaccount,
@@ -148,7 +164,9 @@ async def main():
             
             producer_task_binance,
         
-            saving_task,
+            saving_task_deribit,
+
+            saving_task_binance,
          
             system_tools.back_up_db(60*10),
             

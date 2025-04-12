@@ -120,17 +120,6 @@ async def main():
                  
         await asyncio.sleep(0.0005)
             
-        """
-        reconciling_size(
-            private_data,
-            client_redis,
-            redis_channels,
-            config_app,
-            initial_data_subaccount,
-            futures_instruments,
-            ),                    
-
-        """
         await asyncio.gather(
          
             cancelling_active_orders.cancelling_orders(
@@ -166,6 +155,15 @@ async def main():
                 resolutions,
                 np),
             
+            
+            reconciling_size(
+                private_data,
+                client_redis,
+                redis_channels,
+                config_app,
+                initial_data_subaccount,
+                futures_instruments,
+                ),                    
                         )  
 
         await queue.join()
