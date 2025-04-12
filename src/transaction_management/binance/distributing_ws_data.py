@@ -53,24 +53,28 @@ async def caching_distributing_data(
                     data=data,
                 )
 
-                message_channel: str = message_params["stream"]
+                try:
+                    message_channel: str = message_params["stream"]
 
-                if "abnormaltradingnotices" in message_channel:
+                    if "abnormaltradingnotices" in message_channel:
 
-                    data: dict = message_params["data"]
+                        data: dict = message_params["data"]
 
-                    pub_message = dict(
-                        data=data,
-                    )
+                        pub_message = dict(
+                            data=data,
+                        )
 
-                    await abnormal_trading_notices_in_message_channel(
-                        pipe,
-                        abnormal_trading_notices,
-                        pub_message,
-                        result,
-                    )
+                        await abnormal_trading_notices_in_message_channel(
+                            pipe,
+                            abnormal_trading_notices,
+                            pub_message,
+                            result,
+                        )
 
-                await pipe.execute()
+                    await pipe.execute()
+
+                except:
+                    pass
 
     except Exception as error:
 
