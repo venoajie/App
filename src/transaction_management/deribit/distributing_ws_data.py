@@ -240,7 +240,7 @@ async def caching_distributing_data(
 
                         message_channel: str = message_params["stream"]
 
-                        if  "abnormaltradingnotices" in message_channel:
+                        if False and "abnormaltradingnotices" in message_channel:
 
                             data: dict = message_params["data"]
 
