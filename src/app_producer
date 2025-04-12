@@ -18,9 +18,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from data_cleaning import pruning_db
 from messaging import telegram_bot as tlgrm
 from streaming_data.data_producer import StreamingAccountData
-from streaming_data.data_producer_binance import StreamingDataBinance
 from transaction_management.deribit import api_requests, distributing_ws_data as distr_deribit, get_instrument_summary,starter
-from transaction_management.binance import distributing_ws_data as distr_binance
 from utilities import string_modification as str_mod, system_tools
 
 def handle_ctrl_c(
@@ -112,7 +110,6 @@ async def main():
         queue = Queue(maxsize=1)
         
         stream = StreamingAccountData(sub_account_id)
-        stream_binance = StreamingDataBinance(sub_account_id)
         
         producer_task = asyncio.create_task(
             stream.ws_manager(
@@ -124,13 +121,6 @@ async def main():
 )
             ) 
                 
-        producer_task_binance = asyncio.create_task(
-            stream_binance.ws_manager(
-                client_redis,
-                redis_channels,
-                queue,
-)
-            ) 
                  
         saving_task_deribit = asyncio.create_task(
             distr_deribit.caching_distributing_data(
@@ -143,16 +133,7 @@ async def main():
                 queue,
                 )
             ) 
-                        
-        saving_task_binance = asyncio.create_task(
-            distr_binance.caching_distributing_data(
-                client_redis,
-                currencies,
-                redis_channels,
-                redis_keys,
-                queue,
-                )
-            ) 
+                
                         
         await asyncio.sleep(0.0005)
         
@@ -160,12 +141,8 @@ async def main():
             
             producer_task, 
             
-            producer_task_binance,
-        
             saving_task_deribit,
 
-            saving_task_binance,
-         
             system_tools.back_up_db(60*10),
             
             pruning_db.clean_up_databases(60)

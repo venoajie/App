@@ -233,31 +233,7 @@ async def caching_distributing_data(
 
                 except:
 
-                    try:
-                        
-                        log.info(
-                            f"error in message {message_params}")
-
-                        message_channel: str = message_params["stream"]
-
-                        if False and "abnormaltradingnotices" in message_channel:
-
-                            data: dict = message_params["data"]
-
-                            pub_message = dict(
-                                data=data,
-                            )
-
-                            await abnormal_trading_notices_in_message_channel(
-                                pipe,
-                                abnormal_trading_notices,
-                                pub_message,
-                                result,
-                            )
-
-                    except:
-
-                        data: dict = message_params["result"]
+                    pass
 
                 await pipe.execute()
 
@@ -574,24 +550,5 @@ async def chart_trades_in_message_channel(
     await redis_client.publishing_result(
         pipe,
         chart_low_high_tick_channel,
-        result,
-    )
-
-
-async def abnormal_trading_notices_in_message_channel(
-    pipe: object,
-    abnormal_trading_notices: str,
-    pub_message: list,
-    result: dict,
-) -> None:
-
-    result["params"].update({"channel": abnormal_trading_notices})
-    result["params"].update(pub_message)
-
-    log.debug(result)
-
-    await redis_client.publishing_result(
-        pipe,
-        abnormal_trading_notices,
         result,
     )
