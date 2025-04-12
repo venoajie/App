@@ -41,10 +41,10 @@ async def caching_distributing_data(
 
                 try:
 
+                    message_channel: str = message_params.get("stream")
+
                     data: dict = message_params["data"]
-                    
-                    message_channel: str = message_params["stream"]
-                    
+                                        
                     pub_message = dict(
                     data=data,
                 )

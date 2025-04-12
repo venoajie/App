@@ -143,7 +143,16 @@ async def main():
                 queue,
                 )
             ) 
-                    
+                        
+        saving_task_binance = asyncio.create_task(
+            distr_binance.caching_distributing_data(
+                client_redis,
+                currencies,
+                redis_channels,
+                redis_keys,
+                queue,
+                )
+            ) 
                         
         await asyncio.sleep(0.0005)
         
@@ -155,6 +164,8 @@ async def main():
         
             saving_task_deribit,
 
+            saving_task_binance,
+         
             system_tools.back_up_db(60*10),
             
             pruning_db.clean_up_databases(60)
