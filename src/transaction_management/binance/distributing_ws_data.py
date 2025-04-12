@@ -81,7 +81,7 @@ async def caching_distributing_data(
 
                         data: dict = message_params["result"]
 
-                await pipe.execute()
+                        await pipe.execute()
 
     except Exception as error:
 
