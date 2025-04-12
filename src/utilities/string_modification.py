@@ -517,6 +517,7 @@ def message_template() -> str:
     result.update({"method": "subscription"})
     result["params"].update({"data": None})
     result["params"].update({"channel": None})
+    result["params"].update({"stream": None})
 
     return result
 
