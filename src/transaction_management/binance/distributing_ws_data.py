@@ -51,9 +51,6 @@ async def caching_distributing_data(
 
                 pub_message = dict(
                     data=data,
-                    server_time=server_time,
-                    currency_upper=currency_upper,
-                    currency=currency,
                 )
 
                 try:
