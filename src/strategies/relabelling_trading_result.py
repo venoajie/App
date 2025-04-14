@@ -159,13 +159,11 @@ async def relabelling_trades(
 
                         filter = "label"
 
-                        pairing_label = (
-                            await reassigning_labels.pairing_single_label(
-                                strategy_attributes,
-                                archive_db_table,
-                                my_trades_currency_strategy,
-                                server_time,
-                            )
+                        pairing_label = await reassigning_labels.pairing_single_label(
+                            strategy_attributes,
+                            archive_db_table,
+                            my_trades_currency_strategy,
+                            server_time,
                         )
 
                         if pairing_label:
@@ -199,12 +197,8 @@ async def relabelling_trades(
                                 o["amount"] for o in selected_transaction
                             ]
 
-                            sum_selected_transaction = sum(
-                                selected_transaction_amount
-                            )
-                            len_selected_transaction = len(
-                                selected_transaction_amount
-                            )
+                            sum_selected_transaction = sum(selected_transaction_amount)
+                            len_selected_transaction = len(selected_transaction_amount)
 
                             #! closing combo auto trading
                             if "Auto" in label:
@@ -252,7 +246,9 @@ async def relabelling_trades(
                                         )
 
                                     if "closed" in label:
-                                        new_label = f"futureSpreadAuto-closed-{label_integer}"
+                                        new_label = (
+                                            f"futureSpreadAuto-closed-{label_integer}"
+                                        )
 
                                     await db_mgt.update_status_data(
                                         archive_db_table,

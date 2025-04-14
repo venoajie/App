@@ -1,4 +1,0 @@
-
-[[redis_channels]]
-# naming convention: ws/fix channel + action + attributes
-abnormal_trading_notices = "market.abnormal_trading_notices"
