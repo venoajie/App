@@ -1,0 +1,106 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+# built ins
+import asyncio
+from asyncio import Queue
+import sys
+
+# installed
+import uvloop
+import redis.asyncio as aioredis
+#from redistimeseries.client import Client
+
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+from messaging import telegram_bot as tlgrm
+from streaming_data.data_producer_binance import StreamingDataBinance
+from transaction_management import distributing_ws_data as distr_binance
+from utilities import string_modification as str_mod, system_tools
+
+
+async def main():
+    
+    # registering strategy config file    
+    file_toml = "config_strategies.toml"
+    
+    sub_account_id = "deribit-148510"
+    
+    try:
+
+        pool = aioredis.ConnectionPool.from_url(
+            "redis://localhost", 
+            port=6379, 
+            db=0, 
+            protocol=3, 
+            encoding="utf-8",
+            decode_responses=True
+            )
+        
+        client_redis: object = aioredis.Redis.from_pool(pool)
+        
+        # parsing config file
+        config_app = system_tools.get_config_tomli(file_toml)
+        
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+
+        queue = Queue(maxsize=1)
+
+        stream_binance = StreamingDataBinance(sub_account_id)
+                
+        producer_task_binance = asyncio.create_task(
+            stream_binance.ws_manager(
+                client_redis,
+                redis_channels,
+                queue,
+)
+            ) 
+                        
+        saving_task_binance = asyncio.create_task(
+            distr_binance.caching_distributing_data(
+                client_redis,
+                redis_channels,
+                queue,
+                )
+            ) 
+                                         
+        await asyncio.sleep(0.0005)
+        
+        await asyncio.gather(
+            
+            producer_task_binance,
+
+            saving_task_binance,
+                                )  
+
+        await queue.join()
+
+    except Exception as error:
+        
+        system_tools.parse_error_message(error)
+        await tlgrm.telegram_bot_sendtext (
+            f"app-{error}",
+            "general_error"
+            )
+
+if __name__ == "__main__":
+    
+    try:
+        
+        uvloop.run(main())
+        
+    except(
+        KeyboardInterrupt, 
+        SystemExit
+        ):
+        
+        asyncio.get_event_loop().run_until_complete(main())
+        
+    except Exception as error:
+        system_tools.parse_error_message(error)
+        
+        asyncio.run(tlgrm.telegram_bot_sendtext (
+            error,
+            "general_error"
+            ))
