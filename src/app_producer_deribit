@@ -32,6 +32,8 @@ async def main():
     try:
         
         config_path = sys_tools.provide_path_for_file(".env")
+        
+        print(config_path)
 
         private_data: object = api_requests.SendApiRequest(sub_account_id,config_path)
 
