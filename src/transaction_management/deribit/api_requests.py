@@ -38,6 +38,12 @@ async def private_connection(
         "params": params,
     }
 
+    from loguru import logger as log
+    
+    log.debug(f"parse_dotenv(sub_account) {parse_dotenv(sub_account)}")
+
+    log.warning(f"sub_account {sub_account} endpoint {endpoint} params {params} connection_url {connection_url}")
+
     client_id: str = parse_dotenv(sub_account)["client_id"]
     client_secret: str = config_oci.get_oci_key(parse_dotenv(sub_account)["key_ocid"])
 
