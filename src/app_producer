@@ -4,7 +4,7 @@
 # built ins
 import asyncio
 from asyncio import Queue
-import signal
+#import signal
 import sys
 
 # installed
@@ -162,6 +162,7 @@ async def main():
 if __name__ == "__main__":
     
     try:
+#        signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         
         uvloop.run(main())
         
