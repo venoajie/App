@@ -7,9 +7,6 @@
 - [ ] Create multiple environments (for production and testing)  
 - [ ] Add integration tests  
 - [ ] Smart grid trading
-- [ ] Fully implementing asynchronous  
-  - [ ] Using task  
-  - [ ] Scheduling  
 
 ### In Progress
 
