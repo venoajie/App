@@ -12,6 +12,8 @@ import redis.asyncio as aioredis
 #from redistimeseries.client import Client
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+from ws_streamer.configuration import config, config_oci
 from ws_streamer.messaging import telegram_bot as tlgrm
 from ws_streamer.restful_api.deribit import api_requests
 from ws_streamer.data_receiver import deribit as receiver_deribit
@@ -33,9 +35,15 @@ async def main():
         
         config_path = sys_tools.provide_path_for_file(".env")
         
-        print(config_path)
+        parsed= config.main_dotenv(
+            sub_account_id,
+            config_path,
+        )
+        
+        client_id: str = parsed["client_id"]
+        client_secret: str = config_oci.get_oci_key(parsed["key_ocid"])
 
-        private_data: object = api_requests.SendApiRequest(sub_account_id,config_path)
+        private_data: object = api_requests.SendApiRequest(sub_account_id,client_id,client_secret)
 
         pool = aioredis.ConnectionPool.from_url(
             "redis://localhost", 
