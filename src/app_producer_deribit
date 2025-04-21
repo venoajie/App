@@ -31,9 +31,9 @@ async def main():
     
     try:
         
-        file_name = config_path = sys_tools.provide_path_for_file(".env")
+        config_path = sys_tools.provide_path_for_file(".env")
 
-        private_data: object = api_requests.SendApiRequest(sub_account_id,file_name)
+        private_data: object = api_requests.SendApiRequest(sub_account_id,config_path)
 
         pool = aioredis.ConnectionPool.from_url(
             "redis://localhost", 
