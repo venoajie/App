@@ -10,7 +10,7 @@ import sys
 # installed
 import uvloop
 import redis.asyncio as aioredis
-from celery import Celery
+#from celery import Celery
 #from redistimeseries.client import Client
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -30,7 +30,7 @@ def handle_ctrl_c(
                   
 signal_handler = system_tools.SignalHandler()
 
-app = Celery('myapp', broker='redis://host:port/0', backend='redis://host:port/0')
+#app = Celery('myapp', broker='redis://host:port/0', backend='redis://host:port/0')
 
 async def main():
     """
@@ -162,7 +162,6 @@ async def main():
 if __name__ == "__main__":
     
     try:
-        signal.signal(signal.SIGINT, handle_ctrl_c) # terminate on ctrl-c
         
         uvloop.run(main())
         
