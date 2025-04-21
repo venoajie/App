@@ -1,0 +1,166 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+# built ins
+import asyncio
+from asyncio import Queue
+
+# installed
+import uvloop
+import redis.asyncio as aioredis
+
+#from redistimeseries.client import Client
+
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+from ws_streamer.messaging import telegram_bot as tlgrm
+from ws_streamer.restful_api.deribit import api_requests, starter
+
+
+from ws_streamer.data_receiver import deribit as receiver_deribit
+from ws_streamer.data_announcer.deribit import get_instrument_summary,distributing_ws_data as distr_deribit
+from ws_streamer.utilities import  string_modification as str_mod,system_tools
+
+async def main():
+    """
+    https://redis-py.readthedocs.io/en/stable/examples/asyncio_examples.html
+    """
+    sub_account_id = "deribit-148510"
+
+    # registering strategy config file    
+    file_toml = "config_strategies.toml"
+    
+    exchange = "deribit"
+    
+    try:
+
+        private_data: object = api_requests.SendApiRequest(sub_account_id)
+
+        pool = aioredis.ConnectionPool.from_url(
+            "redis://localhost", 
+            port=6379, 
+            db=0, 
+            protocol=3, 
+            encoding="utf-8",
+            decode_responses=True
+            )
+        
+        client_redis: object = aioredis.Redis.from_pool(pool)
+        
+        # parsing config file
+        config_app = system_tools.get_config_tomli(file_toml)
+
+        # get tradable strategies
+        tradable_config_app = config_app["tradable"]
+
+        # get TRADABLE currencies
+        currencies: list = [o["spot"] for o in tradable_config_app][0]
+
+        strategy_attributes = config_app["strategies"]
+
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+
+        settlement_periods = str_mod.remove_redundant_elements(
+        str_mod.remove_double_brackets_in_list(
+            [o["settlement_period"] for o in strategy_attributes]
+        )
+    )
+        
+        futures_instruments = await get_instrument_summary.get_futures_instruments(
+            currencies,
+            settlement_periods,
+        )
+
+        await starter.initial_procedures(
+            private_data,
+            config_app,
+            )
+        
+        # sub_account_combining
+        sub_accounts = [
+            await private_data.get_subaccounts_details(o) for o in currencies
+        ]
+        
+        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
+        
+        result_template = str_mod.message_template()
+        
+        initial_data_subaccount = starter.sub_account_combining(
+            sub_accounts,
+            sub_account_cached_channel,
+            result_template,
+        )
+                
+        redis_keys: dict = config_app["redis_keys"][0]
+        
+        resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
+
+        strategy_attributes = config_app["strategies"]
+
+        queue = Queue(maxsize=1)
+        
+        stream = receiver_deribit.StreamingAccountData(sub_account_id)
+        
+        producer_task = asyncio.create_task(
+            stream.ws_manager(
+                exchange,
+                queue,
+                futures_instruments,
+                resolutions,
+)
+            ) 
+                
+                 
+        saving_task_deribit = asyncio.create_task(
+            distr_deribit.caching_distributing_data(
+                client_redis,
+                currencies,
+                initial_data_subaccount,
+                redis_channels,
+                redis_keys,
+                strategy_attributes,
+                queue,
+                )
+            ) 
+                
+                        
+        await asyncio.sleep(0.0005)
+        
+        await asyncio.gather(
+            
+            producer_task, 
+            
+            saving_task_deribit,
+
+                        )  
+
+        await queue.join()
+
+    except Exception as error:
+        
+        system_tools.parse_error_message(error)
+        await tlgrm.telegram_bot_sendtext (
+            f"app-{error}",
+            "general_error"
+            )
+
+if __name__ == "__main__":
+    
+    try:
+        
+        uvloop.run(main())
+        
+    except(
+        KeyboardInterrupt, 
+        SystemExit
+        ):
+        
+        asyncio.get_event_loop().run_until_complete(main())
+        
+    except Exception as error:
+        system_tools.parse_error_message(error)
+        
+        asyncio.run(tlgrm.telegram_bot_sendtext (
+            error,
+            "general_error"
+            ))
