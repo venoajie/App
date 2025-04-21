@@ -16,7 +16,7 @@ from ws_streamer.messaging import telegram_bot as tlgrm
 from ws_streamer.restful_api.deribit import api_requests
 from ws_streamer.data_receiver import deribit as receiver_deribit
 from ws_streamer.data_announcer.deribit import get_instrument_summary,distributing_ws_data as distr_deribit, starter
-from ws_streamer.utilities import  string_modification as str_mod,system_tools
+from ws_streamer.utilities import  string_modification as str_mod,system_tools,system_tools as sys_tools
 
 async def main():
     """
@@ -30,8 +30,10 @@ async def main():
     exchange = "deribit"
     
     try:
+        
+        file_name = config_path = sys_tools.provide_path_for_file(".env")
 
-        private_data: object = api_requests.SendApiRequest(sub_account_id)
+        private_data: object = api_requests.SendApiRequest(sub_account_id,file_name)
 
         pool = aioredis.ConnectionPool.from_url(
             "redis://localhost", 
