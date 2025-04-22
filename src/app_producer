@@ -43,7 +43,7 @@ async def main():
     
     try:
 
-        from ws_streamer.configuration import config
+        from configuration import config
         
         config_path = system_tools.provide_path_for_file(".env")
         
