@@ -13,7 +13,7 @@ import redis.asyncio as aioredis
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from ws_streamer.configuration import config, config_oci
+from configuration import config, config_oci
 from ws_streamer.messaging import telegram_bot as tlgrm
 from ws_streamer.restful_api.deribit import api_requests
 from ws_streamer.data_receiver import deribit as receiver_deribit
