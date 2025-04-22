@@ -43,6 +43,19 @@ async def main():
     
     try:
 
+        from ws_streamer.configuration import config
+        
+        config_path = system_tools.provide_path_for_file(".env")
+        
+        parsed= config.main_dotenv(
+            sub_account_id,
+            config_path,
+        )
+        
+        from loguru import logger as log
+        
+        log.debug(f"parsed {parsed}")
+        
         private_data: object = api_requests.SendApiRequest(sub_account_id)
 
         pool = aioredis.ConnectionPool.from_url(
