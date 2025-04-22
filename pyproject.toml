@@ -8,7 +8,6 @@ dependencies = [
     "aioredis>=2.0.1",
     "aiosqlite==0.21.0",
     "black>=22.1.0",
-    "blue>=0.9.1",
     "celery==5.2.2",
     "certifi==2024.8.30",
     "click==8.0.2",
