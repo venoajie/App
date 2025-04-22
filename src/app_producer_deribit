@@ -40,6 +40,10 @@ async def main():
             config_path,
         )
         
+        from loguru import logger as log
+        
+        log.debug(f"parsed {parsed}")
+        
         client_id: str = parsed["client_id"]
         client_secret: str = config_oci.get_oci_key(parsed["key_ocid"])
 
