@@ -108,3 +108,11 @@ sub_account = {
 channel = "chart.trades.ETH-PERPETUAL.1D"
 
 print(channel.split(".")[3])
+
+
+try:
+    1 / 0
+except Exception as e:
+    import logging
+    err=logging.exception("Division failed")
+    print(err)
