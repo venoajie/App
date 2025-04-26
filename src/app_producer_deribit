@@ -14,11 +14,11 @@ import redis.asyncio as aioredis
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from configuration import config, config_oci
-from ws_streamer.messaging import telegram_bot as tlgrm
-from ws_streamer.restful_api.deribit import api_requests
-from ws_streamer.data_receiver import deribit as receiver_deribit
-from ws_streamer.data_announcer.deribit import get_instrument_summary,distributing_ws_data as distr_deribit, starter
-from ws_streamer.utilities import  string_modification as str_mod,system_tools,system_tools as sys_tools
+from streaming_helper.messaging import telegram_bot as tlgrm
+from streaming_helper.restful_api.deribit import api_requests
+from streaming_helper.data_receiver import deribit as receiver_deribit
+from streaming_helper.data_announcer.deribit import get_instrument_summary,distributing_ws_data as distr_deribit, starter
+from streaming_helper.utilities import  string_modification as str_mod,system_tools,system_tools as sys_tools
 
 async def main():
     """
