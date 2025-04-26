@@ -17,6 +17,14 @@ import asyncio
 from typing import Dict
 
 # installed
+import uvloop
+import redis.asyncio as aioredis
+
+#from redistimeseries.client import Client
+
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+# installed
 import aiohttp
 import httpx
 from aiohttp.helpers import BasicAuth
