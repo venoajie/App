@@ -791,9 +791,9 @@ async def main():
         await get_connected(
             endpoint,
             connection_url,
-            client_id= None,
-            client_secret= None,
-            params = None,
+            client_id,
+            client_secret,
+            params,
     )
 
     except Exception as error:
@@ -804,7 +804,9 @@ async def main():
             "general_error"
             )
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
+    
+    from streaming_helper.utilities import  string_modification as str_mod,system_tools,system_tools as sys_tools
     
     try:
         
@@ -818,5 +820,5 @@ if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main())
         
     except Exception as error:
-        streaming_helper.system_tools.parse_error_message(error)
+        sys_tools.parse_error_message(error)
         
