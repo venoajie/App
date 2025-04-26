@@ -51,29 +51,7 @@ async def get_connected(
         if client_id:
             
             if "telegram" in connection_url: 
-    
-                if params == "failed_order":
-                    try:
-                        try:
-                            bot_chatID = config.main_dotenv("telegram-failed_order")[
-                                "BOT_CHATID_FAILED_ORDER"
-                            ]
-                        except:
-                            bot_chatID = config.main_dotenv("telegram-failed_order")["bot_chatID"]
-                    except:
-                        bot_chatID = config.main_dotenv("telegram-failed_order")["bot_chatid"]
-
-                if params == "general_error":
-                    try:
-                        try:
-                            bot_chatID = config.main_dotenv("telegram-general_error")["bot_chatid"]
-                        except:
-                            bot_chatID = config.main_dotenv("telegram-general_error")["bot_chatID"]
-                    except:
-                        bot_chatID = config.main_dotenv("telegram-general_error")[
-                            "BOT_CHATID_GENERAL_ERROR"
-                        ]
-                                           
+                               
                 endpoint = (
                     client_id
                     + ("/sendMessage?chat_id=")
@@ -84,7 +62,14 @@ async def get_connected(
 
                 connection_endpoint = connection_url + endpoint
                 
-                response: Dict = await response.json()
+                async with session.post(
+                    connection_endpoint,
+                    auth=BasicAuth(client_id, client_secret),
+                ) as response:
+
+                    # RESToverHTTP Response Content
+                    response: Dict = await response.json()
+            
             
             if "deribit" in connection_url: 
 
@@ -113,11 +98,11 @@ async def get_connected(
                     response: Dict = await response.json()
 
         else:
-            
-                async with session.get(connection_endpoint) as response:
+        
+            async with session.get(connection_endpoint) as response:
 
-                    # RESToverHTTP Response Content
-                    response: Dict = await response.json()
+                # RESToverHTTP Response Content
+                response: Dict = await response.json()
 
         return response
 
