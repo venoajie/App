@@ -815,9 +815,9 @@ async def main():
     try:
         
         connection_url= "https://api.telegram.org/bot"
-        client_id: str= "1297409216:AAEYu9r7FNd_GQWnxQdM-K6PUSYSQsKuBgE",
-        client_secret: str= "-439743060",
-        params: str = "Tes",
+        client_id: str= "1297409216:AAEYu9r7FNd_GQWnxQdM-K6PUSYSQsKuBgE"
+        client_secret: str= "-439743060"
+        params: str = "Tes"
         
         endpoint =  (
         client_id
