@@ -84,7 +84,7 @@ async def get_connected(
 
                 connection_endpoint = connection_url + endpoint
                 
-                response = await session.get(connection_url + endpoint)
+                response: Dict = await response.json()
             
             if "deribit" in connection_url: 
 
