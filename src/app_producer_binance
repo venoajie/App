@@ -13,8 +13,6 @@ import redis.asyncio as aioredis
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from ws_streamer.messaging import telegram_bot as tlgrm
-
 #from exchange_streamer.streaming_data.data_producer_binance import StreamingDataBinance
 from streaming_helper.data_receiver import binance as receiver_binance
 from streaming_helper.data_announcer.binance import distributing_ws_data as distr_binance
