@@ -51,8 +51,7 @@ async def get_connected(
         if client_id:
             
             if "telegram" in connection_url: 
-                
-
+    
                 if params == "failed_order":
                     try:
                         try:
@@ -82,12 +81,12 @@ async def get_connected(
                     + ("&parse_mode=HTML&text=")
                     + str(bot_message)
                 )
-                print(f"endpoint {endpoint}")
+
                 connection_endpoint = connection_url + endpoint
                 
-                print(f"connection_endpoint {connection_endpoint}")
                 response = await session.get(connection_url + endpoint)
-                        if "deribit" in connection_url: 
+            
+            if "deribit" in connection_url: 
 
                 id = str_mod.id_numbering(
                     endpoint,
@@ -121,7 +120,6 @@ async def get_connected(
                     response: Dict = await response.json()
 
         return response
-        
 
 async def private_connection(
     endpoint: str,
