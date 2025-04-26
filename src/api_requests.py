@@ -75,11 +75,11 @@ async def get_connected(
                         ]
                                            
                 endpoint = (
-                    bot_token
+                    client_id
                     + ("/sendMessage?chat_id=")
-                    + bot_chatID
+                    + client_secret
                     + ("&parse_mode=HTML&text=")
-                    + str(bot_message)
+                    + str(params)
                 )
 
                 connection_endpoint = connection_url + endpoint
