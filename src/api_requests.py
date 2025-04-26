@@ -52,9 +52,42 @@ async def get_connected(
             
             if "telegram" in connection_url: 
                 
+
+                if params == "failed_order":
+                    try:
+                        try:
+                            bot_chatID = config.main_dotenv("telegram-failed_order")[
+                                "BOT_CHATID_FAILED_ORDER"
+                            ]
+                        except:
+                            bot_chatID = config.main_dotenv("telegram-failed_order")["bot_chatID"]
+                    except:
+                        bot_chatID = config.main_dotenv("telegram-failed_order")["bot_chatid"]
+
+                if params == "general_error":
+                    try:
+                        try:
+                            bot_chatID = config.main_dotenv("telegram-general_error")["bot_chatid"]
+                        except:
+                            bot_chatID = config.main_dotenv("telegram-general_error")["bot_chatID"]
+                    except:
+                        bot_chatID = config.main_dotenv("telegram-general_error")[
+                            "BOT_CHATID_GENERAL_ERROR"
+                        ]
+                                           
+                endpoint = (
+                    bot_token
+                    + ("/sendMessage?chat_id=")
+                    + bot_chatID
+                    + ("&parse_mode=HTML&text=")
+                    + str(bot_message)
+                )
+                print(f"endpoint {endpoint}")
+                connection_endpoint = connection_url + endpoint
+                
+                print(f"connection_endpoint {connection_endpoint}")
                 response = await session.get(connection_url + endpoint)
-            
-            if "deribit" in connection_url: 
+                        if "deribit" in connection_url: 
 
                 id = str_mod.id_numbering(
                     endpoint,
