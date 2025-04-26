@@ -62,13 +62,10 @@ async def get_connected(
 
                 connection_endpoint = connection_url + endpoint
                 
-                async with session.post(
-                    connection_endpoint,
-                    auth=BasicAuth(client_id, client_secret),
-                ) as response:
+                async with session.get(connection_url + endpoint) as response:
 
                     # RESToverHTTP Response Content
-                    response: Dict = await response.json()
+                    response = await response.json()
             
             
             if "deribit" in connection_url: 
