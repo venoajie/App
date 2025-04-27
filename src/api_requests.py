@@ -817,7 +817,7 @@ async def main():
         
                 
         from streaming_helper.restful_api.deribit import end_point_params_template as end_point_deribit
-        from configuration import config
+        from configuration import config, config_oci
         connection_url_telegram = end_point_telegram.basic_https()
 
         config_path = sys_tools.provide_path_for_file(".env")
