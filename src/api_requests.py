@@ -805,7 +805,7 @@ async def main():
         client_secret: str= "-439743060"
         params: str = "Tes"
 
-        await streaming_helper.restful_api.get_connected(
+        await connector(
             connection_url_telegram,
             None,
             client_id,
