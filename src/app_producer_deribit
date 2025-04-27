@@ -78,12 +78,8 @@ async def main():
             currencies,
             settlement_periods,
         )
+        print(futures_instruments)
 
-        await starter.initial_procedures(
-            private_data,
-            config_app,
-            )
-        
         subaccounts_end_point= end_point_params_template.get_subaccounts_end_point()
         subaccounts_params = end_point_params_template.get_subaccounts_params()
         connection_url = end_point_params_template.basic_https()
@@ -97,6 +93,12 @@ async def main():
         )
         
         print(result)
+
+        await starter.initial_procedures(
+            private_data,
+            config_app,
+            )
+        
                         
                         
 
@@ -129,6 +131,7 @@ async def main():
 
         producer_task = asyncio.create_task(
             stream.ws_manager(
+                client_redis,
                 exchange,
                 queue,
                 futures_instruments,
