@@ -805,7 +805,7 @@ async def main():
         client_secret: str= "-439743060"
         params: str = "Tes"
 
-        await connector(
+        await connector.get_connected(
             connection_url_telegram,
             None,
             client_id,
