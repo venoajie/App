@@ -32,7 +32,9 @@ from dataclassy import dataclass
 from loguru import logger as log
 
 # user defined formula
-from streaming_helper.messaging import telegram_bot as tlgrm
+
+from streaming_helper.restful_api.telegram import end_point_params_template as end_point_telegram
+from streaming_helper.restful_api import connector
 from streaming_helper.utilities import string_modification as str_mod, time_modification as time_mod
 
 
@@ -796,22 +798,16 @@ async def main():
     
     try:
         
+        connection_url_telegram = end_point_telegram.basic_https()
+
         connection_url= "https://api.telegram.org/bot"
         client_id: str= "1297409216:AAEYu9r7FNd_GQWnxQdM-K6PUSYSQsKuBgE"
         client_secret: str= "-439743060"
         params: str = "Tes"
-        
-        endpoint =  (
-        client_id
-        + ("/sendMessage?chat_id=")
-        + client_secret
-        + ("&parse_mode=HTML&text=")
-        + str(params)
-    )
-        
-        await get_connected(
-            endpoint,
-            connection_url,
+
+        await streaming_helper.restful_api.get_connected(
+            connection_url_telegram,
+            None,
             client_id,
             client_secret,
             params,
