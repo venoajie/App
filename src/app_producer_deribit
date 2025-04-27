@@ -18,7 +18,7 @@ from streaming_helper.messaging import telegram_bot as tlgrm
 from streaming_helper.restful_api.deribit import api_requests
 from streaming_helper.data_receiver import deribit as receiver_deribit
 from streaming_helper.data_announcer.deribit import get_instrument_summary,distributing_ws_data as distr_deribit, starter
-from streaming_helper.utilities import  string_modification as str_mod,system_tools,system_tools as sys_tools
+from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
 
 async def main():
     """
@@ -33,7 +33,7 @@ async def main():
     
     try:
         
-        config_path = sys_tools.provide_path_for_file(".env")
+        config_path = system_tools.provide_path_for_file(".env")
         
         parsed= config.main_dotenv(
             sub_account_id,
@@ -150,11 +150,9 @@ async def main():
         await queue.join()
 
     except Exception as error:
-        
-        system_tools.parse_error_message(error)
-        await tlgrm.telegram_bot_sendtext (
-            f"app-{error}",
-            "general_error"
+        await error_handling.parse_error_message_with_redis(
+            client_redis,
+            error,
             )
 
 if __name__ == "__main__":
@@ -171,9 +169,6 @@ if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main())
         
     except Exception as error:
-        system_tools.parse_error_message(error)
         
-        asyncio.run(tlgrm.telegram_bot_sendtext (
-            error,
-            "general_error"
-            ))
+        error_handling.parse_error_message(error)
+        

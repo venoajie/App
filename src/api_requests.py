@@ -34,9 +34,8 @@ from streaming_helper.restful_api.telegram import (
 )
 from streaming_helper.restful_api import connector
 from streaming_helper.utilities import (
-    string_modification as str_mod,
-    system_tools,
-    system_tools as sys_tools,
+    error_handling,
+    string_modification as str_mod
 )
 
 from streaming_helper.restful_api.deribit import (
@@ -94,9 +93,7 @@ async def main():
 
     except Exception as error:
 
-        print(f"AAAAAAAAAAAAAAAA {error}")
-
-        await system_tools.parse_error_message_with_redis(
+        await error_handling.parse_error_message_with_redis(
             client_redis,
             error,
         )
@@ -114,6 +111,4 @@ if __name__ == "__main__":
 
     except Exception as error:
 
-        print(f"BBBBBBBBBBBBBBBBBBBBBBB {error}")
-
-        sys_tools.parse_error_message(error)
+        error_handling.parse_error_message(error)

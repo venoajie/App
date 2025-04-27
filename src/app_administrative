@@ -14,7 +14,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from data_cleaning import pruning_db
 from streaming_helper.data_announcer.telegram import relaying_errors
-from utilities import string_modification as str_mod, system_tools
+from utilities import error_handling,string_modification as str_mod, system_tools
 from configuration import config
 
 def handle_ctrl_c(
@@ -75,7 +75,7 @@ async def main():
 
     except Exception as error:        
         
-        await system_tools.parse_error_message_with_redis(
+        await error_handling.parse_error_message_with_redis(
             client_redis,
             error,
         )   
@@ -95,5 +95,5 @@ if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main())
         
     except Exception as error:
-        system_tools.parse_error_message(error)
+        error_handling.parse_error_message(error)
         
