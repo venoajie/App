@@ -47,6 +47,17 @@ async def main():
     
     try:
         
+        pool = aioredis.ConnectionPool.from_url(
+            "redis://localhost", 
+            port=6379, 
+            db=0, 
+            protocol=3, 
+            encoding="utf-8",
+            decode_responses=True
+            )
+        
+        client_redis: object = aioredis.Redis.from_pool(pool)
+        
         connection_url_telegram = end_point_telegram.basic_https()
 
         client_id: str= "1297409216:AAEYu9r7FNd_GQWnxQdM-K6PUSYSQsKuBgE"
