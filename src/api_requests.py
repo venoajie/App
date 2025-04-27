@@ -831,7 +831,7 @@ async def main():
         client_id: str = parsed["client_id"]
         client_secret: str = config_oci.get_oci_key(parsed["key_ocid"])
 
-        basic_https_connection_url = end_poiend_point_deribitnt.basic_https()
+        basic_https_connection_url = end_point_deribit.basic_https()
 
         endpoint_tickers = end_point_deribit.get_tickers_end_point(instrument_name)
 
