@@ -15,6 +15,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from configuration import config, config_oci
 from streaming_helper.restful_api.deribit import end_point_params_template
+from streaming_helper.restful_api import connector
 from streaming_helper.data_receiver import deribit as receiver_deribit
 from streaming_helper.data_announcer.deribit import get_instrument_summary,distributing_ws_data as distr_deribit, starter
 from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
@@ -78,7 +79,7 @@ async def main():
             currencies,
             settlement_periods,
         )
-        print(futures_instruments)
+
 
         subaccounts_end_point= end_point_params_template.get_subaccounts_end_point()
         subaccounts_params = end_point_params_template.get_subaccounts_params()
