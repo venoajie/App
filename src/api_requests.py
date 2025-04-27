@@ -33,8 +33,6 @@ from loguru import logger as log
 
 # user defined formula
 
-from streaming_helper.restful_api.telegram import end_point_params_template as end_point_telegram
-from streaming_helper.restful_api import connector
 from streaming_helper.utilities import string_modification as str_mod, time_modification as time_mod
 
 
@@ -794,9 +792,13 @@ async def main():
     
     sub_account_id = "binance-None"
     
-    exchange = "binance"
+    exchange = "deribit"
     
     try:
+        
+                
+        from streaming_helper.restful_api.telegram import end_point_params_template as end_point_telegram
+        from streaming_helper.restful_api import connector
         
         connection_url_telegram = end_point_telegram.basic_https()
 
@@ -812,6 +814,36 @@ async def main():
             client_secret,
             params,
     )
+        
+                
+        from streaming_helper.restful_api.deribit import end_point_params_template as end_point_deribit
+        connection_url_telegram = end_point_telegram.basic_https()
+
+        config_path = sys_tools.provide_path_for_file(".env")
+        
+        parsed= config.main_dotenv(
+            sub_account_id,
+            config_path,
+        )
+        
+        
+        client_id: str = parsed["client_id"]
+        client_secret: str = config_oci.get_oci_key(parsed["key_ocid"])
+
+        private_data: object = api_requests.SendApiRequest(sub_account_id,client_id,client_secret)
+
+        basic_https_connection_url = end_point.basic_https()
+
+        endpoint_tickers = end_point.get_tickers_end_point(instrument_name)
+
+        result_instrument = await connector. get_connected(
+                    basic_https_connection_url,
+                        endpoint_tickers,
+                    )
+
+        
+        print(result_instrument)
+
 
     except Exception as error:
         
