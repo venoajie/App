@@ -500,16 +500,18 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
 
                                                     ticker_future = ticker_future[0]
 
-                                                    send_order: dict = await combo_auto.is_send_open_order_allowed_auto_combo(
-                                                        ticker_future,
-                                                        ticker_combo,
-                                                        notional,
-                                                        instrument_name_combo,
-                                                        instrument_attributes_futures_all,
-                                                        instrument_attributes_combo,
-                                                        monthly_target_profit,
-                                                        AVERAGE_MOVEMENT,
-                                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
+                                                    send_order: dict = (
+                                                        await combo_auto.is_send_open_order_allowed_auto_combo(
+                                                            ticker_future,
+                                                            ticker_combo,
+                                                            notional,
+                                                            instrument_name_combo,
+                                                            instrument_attributes_futures_all,
+                                                            instrument_attributes_combo,
+                                                            monthly_target_profit,
+                                                            AVERAGE_MOVEMENT,
+                                                            BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
+                                                        )
                                                     )
 
                                                     if (
@@ -554,18 +556,20 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                         and size_future_reconciled
                                                     ):
 
-                                                        send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
-                                                            ticker_future,
-                                                            instrument_attributes_futures_all,
-                                                            notional,
-                                                            monthly_target_profit,
-                                                            AVERAGE_MOVEMENT,
-                                                            BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
-                                                            min(
-                                                                1,
-                                                                max_order_currency,
-                                                            ),
-                                                            market_condition,
+                                                        send_order: dict = (
+                                                            await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
+                                                                ticker_future,
+                                                                instrument_attributes_futures_all,
+                                                                notional,
+                                                                monthly_target_profit,
+                                                                AVERAGE_MOVEMENT,
+                                                                BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
+                                                                min(
+                                                                    1,
+                                                                    max_order_currency,
+                                                                ),
+                                                                market_condition,
+                                                            )
                                                         )
 
                                                         if send_order["order_allowed"]:
@@ -624,10 +628,12 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                     ]
 
                                                     if not abnormal_transaction:
-                                                        send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto(
-                                                            label,
-                                                            instrument_attributes_combo_all,
-                                                            THRESHOLD_MARKET_CONDITIONS_COMBO,
+                                                        send_order: dict = (
+                                                            await combo_auto.is_send_exit_order_allowed_combo_auto(
+                                                                label,
+                                                                instrument_attributes_combo_all,
+                                                                THRESHOLD_MARKET_CONDITIONS_COMBO,
+                                                            )
                                                         )
 
                                                         if send_order["order_allowed"]:
@@ -755,15 +761,17 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                                         * 5
                                                                     )
 
-                                                                    send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                        ticker_transaction[
-                                                                            0
-                                                                        ],
-                                                                        instrument_attributes_futures_all,
-                                                                        TP_THRESHOLD,
-                                                                        transaction,
-                                                                        waiting_time_for_selected_transaction,
-                                                                        random_instruments_name,
+                                                                    send_order: dict = (
+                                                                        await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                                            ticker_transaction[
+                                                                                0
+                                                                            ],
+                                                                            instrument_attributes_futures_all,
+                                                                            TP_THRESHOLD,
+                                                                            transaction,
+                                                                            waiting_time_for_selected_transaction,
+                                                                            random_instruments_name,
+                                                                        )
                                                                     )
 
                                                                     if send_order[
@@ -868,14 +876,16 @@ async def executing_strategies(sub_account_id, queue, queue_cached_orders):
                                                     "best_ask_price"
                                                 ]
 
-                                                send_order: dict = await hedging.is_send_open_order_allowed(
-                                                    non_checked_strategies,
-                                                    instrument_name,
-                                                    instrument_attributes_futures_for_hedging,
-                                                    orders_currency_strategy,
-                                                    best_ask_prc,
-                                                    archive_db_table,
-                                                    trade_db_table,
+                                                send_order: dict = (
+                                                    await hedging.is_send_open_order_allowed(
+                                                        non_checked_strategies,
+                                                        instrument_name,
+                                                        instrument_attributes_futures_for_hedging,
+                                                        orders_currency_strategy,
+                                                        best_ask_prc,
+                                                        archive_db_table,
+                                                        trade_db_table,
+                                                    )
                                                 )
 
                                                 if send_order["order_allowed"]:

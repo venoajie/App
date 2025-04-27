@@ -28,7 +28,6 @@ async def caching_distributing_data(
     strategy_attributes,
     queue_general: object,
 ) -> None:
-
     """
     my_trades_channel:
     + send messages that "high probabilities" trade DB has changed
@@ -360,7 +359,6 @@ async def trades_in_message_channel(
     orders_cached: list,
     result: dict,
 ) -> None:
-
     """
 
     #! result example

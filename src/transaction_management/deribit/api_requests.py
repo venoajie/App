@@ -37,10 +37,12 @@ async def private_connection(
         "method": f"{endpoint}",
         "params": params,
     }
-    
+
     from loguru import logger as log
-    
-    log.debug(f"parse_dotenv(sub_account) {parse_dotenv(sub_account)} sub_account {sub_account}")
+
+    log.debug(
+        f"parse_dotenv(sub_account) {parse_dotenv(sub_account)} sub_account {sub_account}"
+    )
 
     client_id: str = parse_dotenv(sub_account)["client_id"]
     client_secret: str = config_oci.get_oci_key(parse_dotenv(sub_account)["key_ocid"])
@@ -395,7 +397,6 @@ class SendApiRequest:
         self,
         currency: str,
     ) -> list:
-
         """
 
         currency= BTC/ETH
@@ -596,7 +597,6 @@ class SendApiRequest:
         count: int = 1000,
         query: str = "trade",
     ) -> list:
-
         """
         query:
             trade, maker, taker, open, close, liquidation, buy, sell,

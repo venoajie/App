@@ -762,7 +762,6 @@ def is_order_has_executed(
 
 
 def trade_template() -> str:
-
     """
     combining result from websocket (user changes/trade)
         and rest API (get_transaction_log)

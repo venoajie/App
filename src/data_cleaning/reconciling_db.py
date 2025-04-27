@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""_summary_
-"""
+"""_summary_"""
 # built ins
 import asyncio
 

@@ -443,11 +443,11 @@ async def hedging_spot(
                                                     <= 0
                                                 ):
 
-                                                    best_bid_prc: (
-                                                        float
-                                                    ) = instrument_ticker[
-                                                        "best_bid_price"
-                                                    ]
+                                                    best_bid_prc: float = (
+                                                        instrument_ticker[
+                                                            "best_bid_price"
+                                                        ]
+                                                    )
 
                                                     nearest_transaction_to_index = get_nearest_transaction_to_index(
                                                         my_trades_currency_strategy_status,
@@ -455,13 +455,13 @@ async def hedging_spot(
                                                         best_bid_prc,
                                                     )
 
-                                                    send_closing_order: (
-                                                        dict
-                                                    ) = await hedging.is_send_exit_order_allowed(
-                                                        orders_currency_strategy_label_contra_status,
-                                                        best_bid_prc,
-                                                        nearest_transaction_to_index,
-                                                        # orders_currency_strategy
+                                                    send_closing_order: dict = (
+                                                        await hedging.is_send_exit_order_allowed(
+                                                            orders_currency_strategy_label_contra_status,
+                                                            best_bid_prc,
+                                                            nearest_transaction_to_index,
+                                                            # orders_currency_strategy
+                                                        )
                                                     )
 
                                                     if send_closing_order[
@@ -495,11 +495,11 @@ async def hedging_spot(
 
                                                 if not ordered and status == "closed":
 
-                                                    best_ask_prc: (
-                                                        float
-                                                    ) = instrument_ticker[
-                                                        "best_ask_price"
-                                                    ]
+                                                    best_ask_prc: float = (
+                                                        instrument_ticker[
+                                                            "best_ask_price"
+                                                        ]
+                                                    )
 
                                                     nearest_transaction_to_index = get_nearest_transaction_to_index(
                                                         my_trades_currency_strategy_status,
@@ -507,13 +507,13 @@ async def hedging_spot(
                                                         best_ask_prc,
                                                     )
 
-                                                    send_closing_order: (
-                                                        dict
-                                                    ) = await hedging.send_contra_order_for_orphaned_closed_transctions(
-                                                        orders_currency_strategy_label_contra_status,
-                                                        best_ask_prc,
-                                                        nearest_transaction_to_index,
-                                                        # orders_currency_strategy
+                                                    send_closing_order: dict = (
+                                                        await hedging.send_contra_order_for_orphaned_closed_transctions(
+                                                            orders_currency_strategy_label_contra_status,
+                                                            best_ask_prc,
+                                                            nearest_transaction_to_index,
+                                                            # orders_currency_strategy
+                                                        )
                                                     )
 
                                                     if send_order["order_allowed"]:
@@ -566,7 +566,6 @@ def compute_notional_value(
     index_price: float,
     equity: float,
 ) -> float:
-
     """ """
     return index_price * equity
 

@@ -276,9 +276,11 @@ async def cancelling_orders(
 
                                 if orders_currency_strategy:
                                     for order in orders_currency_strategy:
-                                        cancel_allowed: dict = await combo_auto.is_cancelling_orders_allowed(
-                                            order,
-                                            server_time,
+                                        cancel_allowed: dict = (
+                                            await combo_auto.is_cancelling_orders_allowed(
+                                                order,
+                                                server_time,
+                                            )
                                         )
 
                                         if cancel_allowed["cancel_allowed"]:

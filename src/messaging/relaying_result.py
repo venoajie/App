@@ -210,7 +210,7 @@ async def relaying_result(
                                 send_tlgrm = False
 
             except Exception as error:
-                
+
                 log.debug(error)
 
                 if "binance does not have market symbol" in error:
@@ -231,9 +231,9 @@ async def relaying_result(
                 await asyncio.sleep(0.001)
 
     except Exception as error:
-        
+
         log.warning(error)
-        
+
         if "binance does not have market symbol" in error:
             pass
 
@@ -248,7 +248,6 @@ async def relaying_result(
 
 
 async def sending_telegram(data: list) -> None:
-
     """
     noticeType = [
         PRICE_BREAKTHROUGH,
@@ -300,7 +299,6 @@ async def compute_price_changes_result(
     timeframe: str,
     limit: int,
 ) -> str:
-
     """ """
 
     wording = ""
@@ -377,7 +375,6 @@ def is_timestamp_expired(
     symbol_timestamp: int,
     threshold: int,
 ) -> dict:
-
     """
     check if the timestamp is expired
     """
@@ -389,7 +386,6 @@ def updating_cache(
     symbol: str,
     current_timestamp: int,
 ) -> dict:
-
     """ """
     res = {}
 
@@ -405,7 +401,6 @@ async def get_ticker(
     exchange: str,
     symbol: str,
 ) -> dict:
-
     """
     example: {
         'symbol': 'HARD/USDT',

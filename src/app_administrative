@@ -30,7 +30,6 @@ async def main():
     """
     """
 
-
     config_path = system_tools.provide_path_for_file(".env")
     sub_account_id = "telegram-general_error"
     
@@ -38,7 +37,6 @@ async def main():
         sub_account_id,
         config_path,
     )
-    
     
     client_id: str = parsed["bot_token"]
     client_secret: str= parsed["bot_chatID"]

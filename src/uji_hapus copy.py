@@ -113,9 +113,9 @@ print(channel.split(".")[3])
 try:
     1 / 0
 except Exception as e:
-    import logging,traceback
-    
-    err=traceback.format_exception(e)
+    import logging, traceback
+
+    err = traceback.format_exception(e)
     print(err)
-    err=traceback.format_exc()
+    err = traceback.format_exc()
     print(err)

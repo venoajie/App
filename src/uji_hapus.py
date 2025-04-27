@@ -812,4 +812,5 @@ try:
     1 / 0
 except Exception as e:
     import logging
+
     logging.exception("Division failed")

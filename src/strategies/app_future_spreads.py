@@ -410,18 +410,20 @@ async def future_spreads(
                                                     in random_instruments_name
                                                 ):
 
-                                                    send_order: dict = await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
-                                                        ticker_future,
-                                                        instrument_attributes_futures_all,
-                                                        notional,
-                                                        monthly_target_profit,
-                                                        AVERAGE_MOVEMENT,
-                                                        BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
-                                                        min(
-                                                            1,
-                                                            max_order_currency,
-                                                        ),
-                                                        market_condition,
+                                                    send_order: dict = (
+                                                        await combo_auto.is_send_open_order_constructing_manual_combo_allowed(
+                                                            ticker_future,
+                                                            instrument_attributes_futures_all,
+                                                            notional,
+                                                            monthly_target_profit,
+                                                            AVERAGE_MOVEMENT,
+                                                            BASIC_TICKS_FOR_AVERAGE_MOVEMENT,
+                                                            min(
+                                                                1,
+                                                                max_order_currency,
+                                                            ),
+                                                            market_condition,
+                                                        )
                                                     )
 
                                                     if send_order["order_allowed"]:
@@ -489,10 +491,12 @@ async def future_spreads(
                                                 ]
 
                                                 if not abnormal_transaction:
-                                                    send_order: dict = await combo_auto.is_send_exit_order_allowed_combo_auto(
-                                                        label,
-                                                        instrument_attributes_combo_all,
-                                                        THRESHOLD_MARKET_CONDITIONS_COMBO,
+                                                    send_order: dict = (
+                                                        await combo_auto.is_send_exit_order_allowed_combo_auto(
+                                                            label,
+                                                            instrument_attributes_combo_all,
+                                                            THRESHOLD_MARKET_CONDITIONS_COMBO,
+                                                        )
                                                     )
 
                                                     if send_order["order_allowed"]:
@@ -585,13 +589,17 @@ async def future_spreads(
                                                                 * 5
                                                             )
 
-                                                            send_order: dict = await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
-                                                                ticker_transaction[0],
-                                                                instrument_attributes_futures_all,
-                                                                TP_THRESHOLD,
-                                                                transaction,
-                                                                waiting_time_for_selected_transaction,
-                                                                random_instruments_name,
+                                                            send_order: dict = (
+                                                                await combo_auto.is_send_contra_order_for_unpaired_transaction_allowed(
+                                                                    ticker_transaction[
+                                                                        0
+                                                                    ],
+                                                                    instrument_attributes_futures_all,
+                                                                    TP_THRESHOLD,
+                                                                    transaction,
+                                                                    waiting_time_for_selected_transaction,
+                                                                    random_instruments_name,
+                                                                )
                                                             )
 
                                                             if send_order[
