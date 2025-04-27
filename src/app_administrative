@@ -15,6 +15,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 from data_cleaning import pruning_db
 from streaming_helper.data_announcer.telegram import relaying_errors
 from utilities import string_modification as str_mod, system_tools
+from configuration import config
 
 def handle_ctrl_c(
     signum, 
@@ -29,8 +30,18 @@ async def main():
     """
     """
 
-    client_id: str= "1297409216:AAEYu9r7FNd_GQWnxQdM-K6PUSYSQsKuBgE"
-    client_secret: str= "-439743060"
+
+    config_path = system_tools.provide_path_for_file(".env")
+    sub_account_id = "telegram-general_error"
+    
+    parsed= config.main_dotenv(
+        sub_account_id,
+        config_path,
+    )
+    
+    
+    client_id: str = parsed["bot_token"]
+    client_secret: str= parsed["bot_chatID"]
 
     pool = aioredis.ConnectionPool.from_url(
         "redis://localhost", 
