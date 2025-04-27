@@ -29,18 +29,8 @@ signal_handler = system_tools.SignalHandler()
 async def main():
     """
     """
-
-    config_path = system_tools.provide_path_for_file(".env")
     sub_account_id = "telegram-general_error"
     
-    parsed= config.main_dotenv(
-        sub_account_id,
-        config_path,
-    )
-    
-    client_id: str = parsed["bot_token"]
-    client_secret: str= parsed["bot_chatID"]
-
     pool = aioredis.ConnectionPool.from_url(
         "redis://localhost", 
         port=6379, 
@@ -54,13 +44,24 @@ async def main():
                 
     try:
 
+        config_path = system_tools.provide_path_for_file(".env")
+    
+        parsed= config.main_dotenv(
+            sub_account_id,
+            config_path,
+        )
+        
+        client_id: str = parsed["bot_token"]
+        client_secret: str= parsed["bot_chatID"]
+
         relayer = asyncio.create_task(
             relaying_errors.telegram_messaging(
-    client_redis,
-    client_id,
-    client_secret,
-                     
-))                
+                client_redis,
+                client_id,
+                client_secret,                              
+                )
+            )                
+        
         await asyncio.sleep(0.0005)
         
         await asyncio.gather(
@@ -70,8 +71,7 @@ async def main():
             system_tools.back_up_db(60*10),
             
             pruning_db.clean_up_databases(60)
-            
-                        )  
+            )  
 
     except Exception as error:        
         
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         
     except(
         KeyboardInterrupt, 
-        SystemExit
+        SystemExit,
         ):
         
         asyncio.get_event_loop().run_until_complete(main())
