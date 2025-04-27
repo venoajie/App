@@ -14,7 +14,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from data_cleaning import pruning_db
 from streaming_helper.data_announcer.telegram import relaying_errors
-from utilities import error_handling,string_modification as str_mod, system_tools
+from streaming_helper.utilities import error_handling,system_tools
 from configuration import config
 
 def handle_ctrl_c(
