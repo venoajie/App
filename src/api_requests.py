@@ -89,6 +89,8 @@ async def main():
 
     except Exception as error:
         
+        print(f"AAAAAAAAAAAAAAAA {error}")
+        
         await system_tools.parse_error_message_with_redis(
             client_redis,
             error,
@@ -108,5 +110,8 @@ if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main())
         
     except Exception as error:
+        
+        print(f"BBBBBBBBBBBBBBBBBBBBBBB {error}")
+        
         sys_tools.parse_error_message(error)
         
