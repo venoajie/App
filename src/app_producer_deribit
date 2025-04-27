@@ -14,8 +14,7 @@ import redis.asyncio as aioredis
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from configuration import config, config_oci
-from streaming_helper.messaging import telegram_bot as tlgrm
-from streaming_helper.restful_api.deribit import api_requests
+from streaming_helper.restful_api.deribit import end_point_params_template
 from streaming_helper.data_receiver import deribit as receiver_deribit
 from streaming_helper.data_announcer.deribit import get_instrument_summary,distributing_ws_data as distr_deribit, starter
 from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
@@ -43,8 +42,6 @@ async def main():
         
         client_id: str = parsed["client_id"]
         client_secret: str = config_oci.get_oci_key(parsed["key_ocid"])
-
-        private_data: object = api_requests.SendApiRequest(sub_account_id,client_id,client_secret)
 
         pool = aioredis.ConnectionPool.from_url(
             "redis://localhost", 
@@ -87,6 +84,22 @@ async def main():
             config_app,
             )
         
+        subaccounts_end_point= end_point_params_template.get_subaccounts_end_point()
+        subaccounts_params = end_point_params_template.get_subaccounts_params()
+        connection_url = end_point_params_template.basic_https()
+
+        result = await connector.get_connected(
+            connection_url,
+            subaccounts_end_point,
+            client_id,
+            client_secret,
+            subaccounts_params,
+        )
+        
+        print(result)
+                        
+                        
+
         # sub_account_combining
         sub_accounts = [
             await private_data.get_subaccounts_details(o) for o in currencies
