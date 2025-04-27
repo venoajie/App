@@ -63,17 +63,6 @@ async def main():
         
         connection_url_telegram = end_point_telegram.basic_https()
 
-        config_path = sys_tools.provide_path_for_file(".env")
-        
-        parsed= config.main_dotenv(
-            sub_account_id,
-            config_path,
-        )
-        
-        
-        client_id: str = parsed["client_id"]
-        client_secret: str = config_oci.get_oci_key(parsed["key_ocid"])
-
         basic_https_connection_url = end_point_deribit.basic_https()
 
         endpoint_tickers = end_point_deribit.get_tickers_end_point("BTC-PERPETUAL")
