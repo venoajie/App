@@ -833,7 +833,7 @@ async def main():
 
         basic_https_connection_url = end_point_deribit.basic_https()
 
-        endpoint_tickers = end_point_deribit.get_tickers_end_point(instrument_name)
+        endpoint_tickers = end_point_deribit.get_tickers_end_point("BTC-PERPETUAL")
 
         result_instrument = await connector. get_connected(
                     basic_https_connection_url,
