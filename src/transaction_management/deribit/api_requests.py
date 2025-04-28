@@ -54,7 +54,7 @@ async def private_connection(
             # RESToverHTTP Status Code
             status_code: int = response.status
             
-            log.error(f"payload {payload} endpoint {endpoint} params {params} status_code {status_code}")
+            log.error(f"payload {payload} endpoint {endpoint} params {params} status_code {status_code}  response {response}")
             log.debug(f"client_id {client_id} client_secret {client_secret} connection_endpoint {connection_url + endpoint} ")
 
             # RESToverHTTP Response Content
