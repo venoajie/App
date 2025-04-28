@@ -105,7 +105,7 @@ async def main():
             subaccounts_details_params,
         )
         
-        log.debug(result)        
+        log.critical(result)        
 
         subaccounts_params = end_point_params_template.get_subaccounts_params()
         subaccounts_end_point = end_point_params_template.get_subaccounts_details_end_point()
