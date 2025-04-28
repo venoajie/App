@@ -82,7 +82,7 @@ async def main():
 
 
         subaccounts_end_point= end_point_params_template.get_subaccounts_end_point()
-        subaccounts_params = end_point_params_template.get_subaccounts_params()
+        subaccounts_params = end_point_params_template.get_subaccounts_params("BTC")
         connection_url = end_point_params_template.basic_https()
 
         result = await connector.get_connected(
