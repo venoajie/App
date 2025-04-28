@@ -94,7 +94,17 @@ async def main():
         )
         
         print(result)
-
+        
+        from transaction_management.deribit import api_requests
+        
+        private_data: object = api_requests.SendApiRequest(sub_account_id)
+        
+        sub_accounts = [
+            await private_data.get_subaccounts_details(o) for o in currencies
+        ]
+        
+        print(sub_accounts)
+        
         await starter.initial_procedures(
             private_data,
             config_app,

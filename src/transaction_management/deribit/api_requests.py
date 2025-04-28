@@ -54,6 +54,9 @@ async def private_connection(
             json=payload,
         ) as response:
 
+            log.warning(f"payload {payload} endpoint {endpoint} params {params} ")
+            log.debug(f"client_id {client_id} client_secret {client_secret} connection_endpoint {connection_url + endpoint} ")
+
             # RESToverHTTP Status Code
             status_code: int = response.status
 
