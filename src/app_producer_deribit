@@ -90,7 +90,7 @@ async def main():
             await private_data.get_subaccounts_details(o) for o in currencies
         ]
         
-        log.error(sub_accounts)
+        log.error(private_data)
 
         connection_url = end_point_params_template.basic_https()
         
