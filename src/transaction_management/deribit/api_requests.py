@@ -40,10 +40,6 @@ async def private_connection(
 
     from loguru import logger as log
 
-    log.debug(
-        f"parse_dotenv(sub_account) {parse_dotenv(sub_account)} sub_account {sub_account}"
-    )
-
     client_id: str = parse_dotenv(sub_account)["client_id"]
     client_secret: str = config_oci.get_oci_key(parse_dotenv(sub_account)["key_ocid"])
 
@@ -54,7 +50,7 @@ async def private_connection(
             json=payload,
         ) as response:
 
-            log.warning(f"payload {payload} endpoint {endpoint} params {params} ")
+            log.error(f"payload {payload} endpoint {endpoint} params {params} ")
             log.debug(f"client_id {client_id} client_secret {client_secret} connection_endpoint {connection_url + endpoint} ")
 
             # RESToverHTTP Status Code

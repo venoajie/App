@@ -79,6 +79,8 @@ async def main():
             currencies,
             settlement_periods,
         )
+        
+        from loguru import logger as log
 
 
         subaccounts_end_point= end_point_params_template.get_subaccounts_params()
@@ -93,7 +95,7 @@ async def main():
             subaccounts_params,
         )
         
-        print(result)
+        log.warning(result)
         
 
         subaccounts_end_point= end_point_params_template.get_subaccounts_details_end_point()
@@ -107,7 +109,7 @@ async def main():
             subaccounts_params,
         )
         
-        print(result)
+        log.debug(result)
         
         from transaction_management.deribit import api_requests
         
