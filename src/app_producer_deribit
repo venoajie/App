@@ -95,8 +95,8 @@ async def main():
         connection_url = end_point_params_template.basic_https()
         
 
-        subaccounts_end_point= end_point_params_template.get_subaccounts_params()
-        subaccounts_params = end_point_params_template.get_subaccounts_details_end_point()
+        subaccounts_params = end_point_params_template.get_subaccounts_params()
+        subaccounts_end_point = end_point_params_template.get_subaccounts_details_end_point()
 
         result = await connector.get_connected(
             connection_url,
