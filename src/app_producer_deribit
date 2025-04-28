@@ -82,10 +82,21 @@ async def main():
         
         from loguru import logger as log
 
+        from transaction_management.deribit import api_requests
+        
+        private_data: object = api_requests.SendApiRequest(sub_account_id)
+        
+        sub_accounts = [
+            await private_data.get_subaccounts_details(o) for o in currencies
+        ]
+        
+        log.error(sub_accounts)
+
+        connection_url = end_point_params_template.basic_https()
+        
 
         subaccounts_end_point= end_point_params_template.get_subaccounts_params()
         subaccounts_params = end_point_params_template.get_subaccounts_details_end_point()
-        connection_url = end_point_params_template.basic_https()
 
         result = await connector.get_connected(
             connection_url,
@@ -110,16 +121,6 @@ async def main():
         )
         
         log.debug(result)
-        
-        from transaction_management.deribit import api_requests
-        
-        private_data: object = api_requests.SendApiRequest(sub_account_id)
-        
-        sub_accounts = [
-            await private_data.get_subaccounts_details(o) for o in currencies
-        ]
-        
-        print(sub_accounts)
         
         await starter.initial_procedures(
             private_data,
