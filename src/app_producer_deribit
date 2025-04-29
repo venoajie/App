@@ -114,7 +114,7 @@ async def main():
             subaccounts_details_end_point,
             client_id,
             client_secret,
-            end_point_params_template.get_subaccounts_details_params(o),
+            end_point_params_template.get_subaccounts_details_params(o)
         ) for o in currencies
         ]
         
