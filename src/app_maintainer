@@ -19,6 +19,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 #from transaction_management.deribit import api_requests, cancelling_active_orders,get_instrument_summary, processing_orders, starter
 from configuration import config, config_oci
 from market_understanding.price_action.candles_analysis import get_market_condition
+from streaming_helper.data_announcer.deribit import get_instrument_summary, starter
 from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
 
 
