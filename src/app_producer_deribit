@@ -93,15 +93,22 @@ async def main():
         
         # sub_account_combining
         
+        connection_url = end_point_params_template.basic_https()
+
+
+        subaccounts_details_end_point= end_point_params_template.get_subaccounts_details_end_point()
+        
+
         sub_accounts=[]
         
         for currency in currencies:
+            subaccounts_details_params = end_point_params_template.get_subaccounts_details_params(currency)
             sub_account = await connector.get_connected(
             connection_url,
             subaccounts_details_end_point,
             client_id,
             client_secret,
-            end_point_params_template.get_subaccounts_details_params(currency))
+            subaccounts_details_params)
             
             sub_accounts.append(sub_acccount)
             
