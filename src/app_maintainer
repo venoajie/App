@@ -31,6 +31,17 @@ def handle_ctrl_c(
                   
 signal_handler = system_tools.SignalHandler()
 
+pool = aioredis.ConnectionPool.from_url(
+    "redis://localhost", 
+    port=6379, 
+    db=0, 
+    protocol=3, 
+    encoding="utf-8",
+    decode_responses=True
+    )
+
+client_redis: object = aioredis.Redis.from_pool(pool)
+
 async def main():
     """
     """
@@ -56,17 +67,6 @@ async def main():
         client_id: str = parsed["client_id"]
         client_secret: str = config_oci.get_oci_key(parsed["key_ocid"])
 
-        pool = aioredis.ConnectionPool.from_url(
-            "redis://localhost", 
-            port=6379, 
-            db=0, 
-            protocol=3, 
-            encoding="utf-8",
-            decode_responses=True
-            )
-        
-        client_redis: object = aioredis.Redis.from_pool(pool)
-        
         # parsing config file
         config_app = system_tools.get_config_tomli(file_toml)
 
@@ -212,4 +212,7 @@ if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main())
         
     except Exception as error:
-        error_handling.parse_error_message(error)
+        await error_handling.parse_error_message_with_redis(
+            client_redis,
+            error,
+            )
