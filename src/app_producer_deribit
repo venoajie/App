@@ -89,6 +89,28 @@ async def main():
                                                        client_id,
                                                        client_secret)
 
+        result_template = str_mod.message_template()
+        
+        # sub_account_combining
+        
+        sub_accounts=[]
+        
+        for currency in currencies:
+            sub_account = await connector.get_connected(
+            connection_url,
+            subaccounts_details_end_point,
+            client_id,
+            client_secret,
+            end_point_params_template.get_subaccounts_details_params(currency))
+            
+            sub_accounts.append(sub_acccount)
+            
+        initial_data_subaccount = starter.sub_account_combining(
+            sub_accounts,
+            sub_account_cached_channel,
+            result_template,
+        )
+        
         producer_task = asyncio.create_task(
             stream.ws_manager(
                 client_redis,
