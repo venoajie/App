@@ -97,15 +97,6 @@ async def main():
         subaccounts_details_end_point= end_point_params_template.get_subaccounts_details_end_point()
         subaccounts_details_params = end_point_params_template.get_subaccounts_details_params("BTC")
 
-        result = await connector.get_connected(
-            connection_url,
-            subaccounts_details_end_point,
-            client_id,
-            client_secret,
-            subaccounts_details_params,
-        )
-        
-        log.critical(result)
         result = await connector. private_connection(
     connection_url,
     subaccounts_details_end_point,
@@ -114,7 +105,17 @@ async def main():
     subaccounts_details_params,
 )
        
-        log.critical(result)        
+        log.critical(f"connector private_connection {result}")        
+
+        result = await connector.get_connected(
+            connection_url,
+            subaccounts_details_end_point,
+            client_id,
+            client_secret,
+            subaccounts_details_params,
+        )
+        
+        log.critical(f"connector get_connected {result}")        
 
 
         subaccounts_params = end_point_params_template.get_subaccounts_params()
