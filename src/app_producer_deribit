@@ -9,8 +9,6 @@ from asyncio import Queue
 import uvloop
 import redis.asyncio as aioredis
 
-#from redistimeseries.client import Client
-
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from configuration import config, config_oci
@@ -22,9 +20,7 @@ from streaming_helper.utilities import  error_handling,string_modification as st
 
 async def main():
     """
-    https://redis-py.readthedocs.io/en/stable/examples/asyncio_examples.html
     """
-    sub_account_id = "deribit-148510"
 
     # registering strategy config file    
     file_toml = "config_strategies.toml"
@@ -39,8 +35,7 @@ async def main():
             sub_account_id,
             config_path,
         )
-        
-        
+                
         client_id: str = parsed["client_id"]
         client_secret: str = config_oci.get_oci_key(parsed["key_ocid"])
 
@@ -78,66 +73,6 @@ async def main():
         futures_instruments = await get_instrument_summary.get_futures_instruments(
             currencies,
             settlement_periods,
-        )
-        
-        from loguru import logger as log
-
-        from transaction_management.deribit import api_requests
-        
-        private_data: object = api_requests.SendApiRequest(sub_account_id)
-        
-        sub_accounts = [
-            await private_data.get_subaccounts_details(o) for o in currencies
-        ]
-        
-        connection_url = end_point_params_template.basic_https()
-
-        subaccounts_details_end_point= end_point_params_template.get_subaccounts_details_end_point()
-        subaccounts_details_params = end_point_params_template.get_subaccounts_details_params("BTC")
-
-        result = await connector.get_connected(
-            connection_url,
-            subaccounts_details_end_point,
-            client_id,
-            client_secret,
-            end_point_params_template.get_subaccounts_details_params(o),
-        )
-        
-
-        subaccounts_end_point = end_point_params_template.get_subaccounts_end_point()
-        subaccounts_params = end_point_params_template.get_subaccounts_params()
-
-        # sub_account_combining
-        sub_accounts = [
-            await connector.get_connected(
-            connection_url,
-            subaccounts_details_end_point,
-            client_id,
-            client_secret,
-            end_point_params_template.get_subaccounts_details_params(o)
-        ) for o in currencies
-        ]
-        
-        
-        log.warning(sub_accounts)
-        
-        await starter.initial_procedures(
-            private_data,
-            config_app,
-            )
-        
-                        
-                        
-
-        
-        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
-        
-        result_template = str_mod.message_template()
-        
-        initial_data_subaccount = starter.sub_account_combining(
-            sub_accounts,
-            sub_account_cached_channel,
-            result_template,
         )
                 
         redis_keys: dict = config_app["redis_keys"][0]
