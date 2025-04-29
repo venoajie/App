@@ -212,7 +212,7 @@ if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main())
         
     except Exception as error:
-        await error_handling.parse_error_message_with_redis(
+        asyncio.run (error_handling.parse_error_message_with_redis(
             client_redis,
             error,
-            )
+            ))
