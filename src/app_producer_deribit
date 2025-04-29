@@ -22,11 +22,13 @@ async def main():
     """
     """
 
-    # registering strategy config file    
-    file_toml = "config_strategies.toml"
-    
     exchange = "deribit"
     
+    sub_account_id = "deribit-148510"
+
+    # registering strategy config file    
+    file_toml = "config_strategies.toml"
+        
     try:
         
         config_path = system_tools.provide_path_for_file(".env")
