@@ -99,6 +99,8 @@ async def main():
         subaccounts_details_end_point= end_point_params_template.get_subaccounts_details_end_point()
         
 
+        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
+        
         sub_accounts=[]
         
         for currency in currencies:
