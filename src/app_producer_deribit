@@ -100,24 +100,26 @@ async def main():
             subaccounts_details_end_point,
             client_id,
             client_secret,
-            subaccounts_details_params,
+            end_point_params_template.get_subaccounts_details_params(o),
         )
         
-        log.critical(f"connector get_connected {result}")        
-
 
         subaccounts_end_point = end_point_params_template.get_subaccounts_end_point()
         subaccounts_params = end_point_params_template.get_subaccounts_params()
 
-        result = await connector.get_connected(
+        # sub_account_combining
+        sub_accounts = [
+            await connector.get_connected(
             connection_url,
-            subaccounts_end_point,
+            subaccounts_details_end_point,
             client_id,
             client_secret,
-            subaccounts_params,
-        )
+            end_point_params_template.get_subaccounts_details_params(o),
+        ) for o in currencies
+        ]
         
-        log.warning(result)
+        
+        log.warning(sub_accounts)
         
         await starter.initial_procedures(
             private_data,
@@ -127,10 +129,6 @@ async def main():
                         
                         
 
-        # sub_account_combining
-        sub_accounts = [
-            await private_data.get_subaccounts_details(o) for o in currencies
-        ]
         
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         
