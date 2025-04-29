@@ -113,27 +113,6 @@ async def main():
         
         result_template = str_mod.message_template()
 
-        from loguru import logger as log
-        
-        # sub_account_combining
-        
-        for currency in currencies:
-            subaccounts_details_params = end_point_params_template.get_subaccounts_details_params(currency)
-            
-            sub_account = await connector.get_connected(
-            connection_url,
-            subaccounts_details_end_point,
-            client_id,
-            client_secret,
-            subaccounts_details_params)
-            
-            sub_accounts.append(sub_account)
-            
-        initial_data_subaccount = starter.sub_account_combining(
-            sub_accounts,
-            sub_account_cached_channel,
-            result_template,
-        )
         
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
