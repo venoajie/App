@@ -18,6 +18,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 #from strategies.relabelling_trading_result import relabelling_trades
 #from transaction_management.deribit import api_requests, cancelling_active_orders,get_instrument_summary, processing_orders, starter
 from configuration import config, config_oci
+from streaming_helper.transaction_management.deribit import cancelling_active_orders
 from streaming_helper.restful_api.deribit import end_point_params_template
 from streaming_helper.restful_api import connector
 from market_understanding.price_action.candles_analysis import get_market_condition
@@ -109,10 +110,36 @@ async def main():
         #    config_app,
         #    )
         
+
+        result_template = str_mod.message_template()
+        
+        # sub_account_combining
+        
+        connection_url = end_point_params_template.basic_https()
+
+        subaccounts_details_end_point= end_point_params_template.get_subaccounts_details_end_point()
+        
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         
-        result_template = str_mod.message_template()
-
+        sub_accounts=[]
+        
+        for currency in currencies:
+            subaccounts_details_params = end_point_params_template.get_subaccounts_details_params(currency)
+            
+            sub_account = await connector.get_connected(
+            connection_url,
+            subaccounts_details_end_point,
+            client_id,
+            client_secret,
+            subaccounts_details_params)
+            
+            sub_accounts.append(sub_account)
+            
+        initial_data_subaccount = starter.sub_account_combining(
+            sub_accounts,
+            sub_account_cached_channel,
+            result_template,
+        )
         
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
@@ -137,16 +164,7 @@ async def main():
             relabelling_trades(
                 private_data,
                 config_app),
-         
-            cancelling_active_orders.cancelling_orders(
-            private_data,
-            currencies,
-            client_redis,
-            config_app,
-            initial_data_subaccount,
-            redis_channels,
-            strategy_attributes,
-                ),   
+            
                
             
             
@@ -162,6 +180,18 @@ async def main():
         """    
         await asyncio.gather(
          
+            cancelling_active_orders.cancelling_orders(
+            private_data,
+            client_id,
+            client_secret,
+            currencies,
+            client_redis,
+            config_app,
+            initial_data_subaccount,
+            redis_channels,
+            strategy_attributes,
+                ),
+            
             get_market_condition(
                 client_redis,
                 config_app,
