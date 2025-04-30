@@ -18,12 +18,13 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 #from strategies.relabelling_trading_result import relabelling_trades
 #from transaction_management.deribit import api_requests, cancelling_active_orders,get_instrument_summary, processing_orders, starter
 from configuration import config, config_oci
-from streaming_helper.transaction_management.deribit import cancelling_active_orders
+from streaming_helper.transaction_management.deribit import cancelling_active_orders,processing_orders
 from streaming_helper.restful_api.deribit import end_point_params_template
 from streaming_helper.restful_api import connector
 from market_understanding.price_action.candles_analysis import get_market_condition
 from streaming_helper.data_announcer.deribit import get_instrument_summary, starter
 from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
+from streaming_helper.strategies.deribit.relabelling_trading_result import relabelling_trades
 
 
 def handle_ctrl_c(
@@ -149,24 +150,6 @@ async def main():
         await asyncio.sleep(0.0005)
         """
         
-            processing_orders.processing_orders(
-                private_data,
-                client_redis,
-                cancellable_strategies,
-                currencies,
-                initial_data_subaccount,
-                order_db_table,
-                redis_channels,
-                strategy_attributes,
-                ),
-        
-            relabelling_trades(
-                private_data,
-                config_app),
-            
-               
-            
-            
             reconciling_size(
                 private_data,
                 client_redis,
@@ -178,6 +161,23 @@ async def main():
         
         """    
         await asyncio.gather(
+        
+            relabelling_trades(
+                client_redis,
+                private_data,
+                config_app),
+            
+            processing_orders.processing_orders(
+                client_id,
+                client_secret,
+                client_redis,
+                cancellable_strategies,
+                currencies,
+                initial_data_subaccount,
+                order_db_table,
+                redis_channels,
+                strategy_attributes,
+                ),
          
             cancelling_active_orders.cancelling_orders(
             client_id,
