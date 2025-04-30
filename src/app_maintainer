@@ -14,9 +14,7 @@ import redis.asyncio as aioredis
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-#from data_cleaning.app_data_cleaning import reconciling_size
-#from strategies.relabelling_trading_result import relabelling_trades
-#from transaction_management.deribit import api_requests, cancelling_active_orders,get_instrument_summary, processing_orders, starter
+from streaming_helper.data_cleaning.app_data_cleaning import reconciling_size
 from configuration import config, config_oci
 from streaming_helper.transaction_management.deribit import cancelling_active_orders,processing_orders
 from streaming_helper.restful_api.deribit import end_point_params_template
@@ -150,18 +148,20 @@ async def main():
         await asyncio.sleep(0.0005)
         """
         
+        
+        """    
+        await asyncio.gather(
+        
             reconciling_size(
-                private_data,
+                client_id,
+                client_secret,
                 client_redis,
                 redis_channels,
                 config_app,
                 initial_data_subaccount,
                 futures_instruments,
                 ),      
-        
-        """    
-        await asyncio.gather(
-        
+            
             relabelling_trades(
                 client_id,
                 client_secret,
