@@ -14,7 +14,7 @@ import redis.asyncio as aioredis
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-from streaming_helper.data_cleaning.app_data_cleaning import reconciling_size
+from streaming_helper.data_cleaning import app_data_cleaning
 from configuration import config, config_oci
 from streaming_helper.transaction_management.deribit import cancelling_active_orders,processing_orders
 from streaming_helper.restful_api.deribit import end_point_params_template
@@ -22,7 +22,7 @@ from streaming_helper.restful_api import connector
 from market_understanding.price_action.candles_analysis import get_market_condition
 from streaming_helper.data_announcer.deribit import get_instrument_summary, starter
 from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
-from streaming_helper.strategies.deribit.relabelling_trading_result import relabelling_trades
+from streaming_helper.strategies.deribit import relabelling_trading_result
 
 
 def handle_ctrl_c(
@@ -152,7 +152,7 @@ async def main():
         """    
         await asyncio.gather(
         
-            reconciling_size(
+            app_data_cleaning.reconciling_size(
                 client_id,
                 client_secret,
                 client_redis,
@@ -162,7 +162,7 @@ async def main():
                 futures_instruments,
                 ),      
             
-            relabelling_trades(
+            relabelling_trading_result.relabelling_trades(
                 client_id,
                 client_secret,
                 client_redis,
