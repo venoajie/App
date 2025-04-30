@@ -164,7 +164,6 @@ async def main():
         
             relabelling_trades(
                 client_redis,
-                private_data,
                 config_app),
             
             processing_orders.processing_orders(
