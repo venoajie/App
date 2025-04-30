@@ -163,6 +163,8 @@ async def main():
         await asyncio.gather(
         
             relabelling_trades(
+                client_id,
+                client_secret,
                 client_redis,
                 config_app),
             
