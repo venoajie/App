@@ -141,14 +141,9 @@ async def main():
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
-
-        queue = Queue(maxsize=1)
-                 
+   
         await asyncio.sleep(0.0005)
-        """
         
-        
-        """    
         await asyncio.gather(
         
             app_data_cleaning.reconciling_size(
@@ -199,8 +194,7 @@ async def main():
                 np),              
                         )  
 
-        await queue.join()
-
+   
     except Exception as error:
         
         await error_handling.parse_error_message_with_redis(
