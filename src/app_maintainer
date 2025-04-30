@@ -60,7 +60,6 @@ async def main():
         
     try:
 
-        #private_data: object = api_requests.SendApiRequest(sub_account_id)
 
         config_path = system_tools.provide_path_for_file(".env")
         
@@ -181,7 +180,6 @@ async def main():
         await asyncio.gather(
          
             cancelling_active_orders.cancelling_orders(
-            private_data,
             client_id,
             client_secret,
             currencies,
