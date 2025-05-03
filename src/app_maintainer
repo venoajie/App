@@ -121,16 +121,13 @@ async def main():
         for currency in currencies:
             
             sub_account = await api_request.get_subaccounts_details(currency)
-            
-            log.warning(f"sub_account: {sub_account}")
-            
+                        
             sub_accounts.append(sub_account)
             
         log.error(f"sub_account: {sub_accounts}")
-        sub_accounts_result = [] if not sub_accounts else [o["result"] for  o in sub_accounts][0]
-        log.warning(f"sub_accounts_result: {sub_accounts_result}")
+
         initial_data_subaccount = starter.sub_account_combining(
-            sub_accounts_result,
+            sub_accounts,
             sub_account_cached_channel,
             result_template,
         )
