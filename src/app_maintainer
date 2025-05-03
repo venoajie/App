@@ -16,13 +16,11 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from streaming_helper.data_cleaning import app_data_cleaning
 from configuration import config, config_oci
-from streaming_helper.transaction_management.deribit import cancelling_active_orders,processing_orders
 from streaming_helper.restful_api.deribit import end_point_params_template
 from streaming_helper.restful_api import connector
 from market_understanding.price_action.candles_analysis import get_market_condition
 from streaming_helper.data_announcer.deribit import get_instrument_summary, starter
 from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
-from streaming_helper.strategies.deribit import relabelling_trading_result
 
 
 def handle_ctrl_c(
@@ -117,7 +115,7 @@ async def main():
         subaccounts_details_end_point= end_point_params_template.get_subaccounts_details_end_point()
         
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
-        
+        from loguru import logger as log
         sub_accounts=[]
         
         for currency in currencies:
@@ -130,14 +128,17 @@ async def main():
             client_secret,
             subaccounts_details_params)
             
+            log.warning(f"sub_account: {sub_account}")
+            
             sub_accounts.append(sub_account)
             
+        log.error(f"sub_account: {sub_accounts}")
         initial_data_subaccount = starter.sub_account_combining(
             sub_accounts,
             sub_account_cached_channel,
             result_template,
         )
-        
+        log.info(f"initial_data_subaccount: {initial_data_subaccount}")        
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
