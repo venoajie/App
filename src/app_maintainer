@@ -44,7 +44,7 @@ async def main():
     file_toml = "config_strategies.toml"
         
     try:
-
+    
         pool = aioredis.ConnectionPool.from_url(
             "redis://localhost", 
             port=6379, 
@@ -66,6 +66,10 @@ async def main():
                 
         client_id: str = parsed["client_id"]
         client_secret: str = config_oci.get_oci_key(parsed["key_ocid"])
+
+        #instantiate api for private connection
+
+        api_request: object = end_point_params_template.SendApiRequest(client_id,client_secret)
 
         # parsing config file
         config_app = system_tools.get_config_tomli(file_toml)
@@ -108,25 +112,15 @@ async def main():
 
         result_template = str_mod.message_template()
         
-        # sub_account_combining
-        
-        connection_url = end_point_params_template.basic_https()
-
-        subaccounts_details_end_point= end_point_params_template.get_subaccounts_details_end_point()
-        
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         from loguru import logger as log
-        sub_accounts=[]
+        
+        # sub_account_combining
         
         for currency in currencies:
             subaccounts_details_params = end_point_params_template.get_subaccounts_details_params(currency)
             
-            sub_account = await connector.get_connected(
-            connection_url,
-            subaccounts_details_end_point,
-            client_id,
-            client_secret,
-            subaccounts_details_params)
+            sub_account = await api_request.get_subaccounts_details(currency)
             
             log.warning(f"sub_account: {sub_account}")
             
