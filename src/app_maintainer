@@ -157,11 +157,6 @@ async def main():
                 futures_instruments,
                 ),      
             
-            relabelling_trading_result.relabelling_trades(
-                client_id,
-                client_secret,
-                client_redis,
-                config_app),
                         )  
 
    
