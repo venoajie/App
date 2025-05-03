@@ -134,7 +134,7 @@ async def main():
             
         log.error(f"sub_account: {sub_accounts}")
         initial_data_subaccount = starter.sub_account_combining(
-            sub_accounts,
+            sub_accounts["result"],
             sub_account_cached_channel,
             result_template,
         )
