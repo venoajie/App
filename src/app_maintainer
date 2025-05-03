@@ -114,7 +114,7 @@ async def main():
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         
         # sub_account_combining        
-        sub_account = [await api_request.get_subaccounts_details(o) for o in currencies]
+        sub_accounts = [await api_request.get_subaccounts_details(o) for o in currencies]
 
         initial_data_subaccount = starter.sub_account_combining(
             sub_accounts,
