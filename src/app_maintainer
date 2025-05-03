@@ -161,37 +161,6 @@ async def main():
                 client_secret,
                 client_redis,
                 config_app),
-            
-            processing_orders.processing_orders(
-                client_id,
-                client_secret,
-                client_redis,
-                cancellable_strategies,
-                currencies,
-                initial_data_subaccount,
-                order_db_table,
-                redis_channels,
-                strategy_attributes,
-                ),
-         
-            cancelling_active_orders.cancelling_orders(
-            client_id,
-            client_secret,
-            currencies,
-            client_redis,
-            config_app,
-            initial_data_subaccount,
-            redis_channels,
-            strategy_attributes,
-                ),
-            
-            get_market_condition(
-                client_redis,
-                config_app,
-                currencies,
-                redis_channels,
-                resolutions,
-                np),              
                         )  
 
    
