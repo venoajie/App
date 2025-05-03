@@ -113,25 +113,16 @@ async def main():
         result_template = str_mod.message_template()
         
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
-        from loguru import logger as log
         
-        # sub_account_combining
-        
-        sub_accounts=[]
-        for currency in currencies:
-            
-            sub_account = await api_request.get_subaccounts_details(currency)
-                        
-            sub_accounts.append(sub_account)
-            
-        log.error(f"sub_account: {sub_accounts}")
+        # sub_account_combining        
+        sub_account = [await api_request.get_subaccounts_details(o) for o in currencies]
 
         initial_data_subaccount = starter.sub_account_combining(
             sub_accounts,
             sub_account_cached_channel,
             result_template,
         )
-        log.info(f"initial_data_subaccount: {initial_data_subaccount}")        
+
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
@@ -151,7 +142,6 @@ async def main():
                 ),      
             
                         )  
-
    
     except Exception as error:
         
