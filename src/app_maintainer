@@ -54,11 +54,11 @@ def printTable(table,align="",hasHeader=False,pad=2,isGrid=False):
     if hasHeader or isGrid: gridLine = "├"+"┼".join(lines)+"┤" # if any(drawLine)
 
     # --- print rows ---
-    print("┌"+"┬".join(lines)+"┐")
+    f"""({"┌"+"┬".join(lines)+"┐"})"""
     for y in range(numRows):
-        print(LSEP+SEP.join(table[y])+RSEP)
+        f"""({LSEP+SEP.join(table[y])+RSEP})"""
         if drawLine[y]: print(gridLine)
-    print("└"+"┴".join(lines)+"┘")
+    f"""({"└"+"┴".join(lines)+"┘"})"""
     
 async def main():
     """
