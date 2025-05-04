@@ -117,20 +117,29 @@ async def main():
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
+        
+        
+        connection_url_telegram = end_point_telegram.get_basic_https()
                 
-        await error_handling.parse_error_message_with_redis(
-            client_redis,
-            x,
-            )
+        await connector.get_connected(
+                            connection_url_telegram,
+                            None,
+                            client_id,
+                            client_secret,
+                            tes,
+                        )
 
         tes = f"<pre>{x}</pre>"
         
         print(tes)
         
-        await error_handling.parse_error_message_with_redis(
-            client_redis,
-            tes,
-            )
+        await connector.get_connected(
+                            connection_url_telegram,
+                            None,
+                            client_id,
+                            client_secret,
+                            tes,
+                        )
 
 
         #await starter.initial_procedures(
