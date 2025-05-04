@@ -119,7 +119,7 @@ async def main():
         redis_channels: dict = config_app["redis_channels"][0]
         
         
-        connection_url_telegram = end_point_telegram.get_basic_https()
+        connection_url_telegram = end_point_params_template.get_basic_https()
                 
         await connector.get_connected(
                             connection_url_telegram,
