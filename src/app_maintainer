@@ -25,15 +25,15 @@ from prettytable import PrettyTable
 
 x = PrettyTable()
 
-x.field_names = ["City name", "Area", "Population"]
+x.field_names = ["City name", "Area"]
 
-x.add_row(["Adelaide", 1295, 1158259])
-x.add_row(["Brisbane", 5905, 1857594])
-x.add_row(["Darwin", 112, 120900])
-x.add_row(["Hobart", 1357, 205556])
-x.add_row(["Sydney", 2058, 4336374])
-x.add_row(["Melbourne", 1566, 3806092])
-x.add_row(["Perth", 5386, 1554769])
+x.add_row(["Adelaide", 1295])
+x.add_row(["Brisbane", 5905])
+x.add_row(["Darwin", 112])
+x.add_row(["Hobart", 1357])
+x.add_row(["Sydney", 2058])
+x.add_row(["Melbourne", 1566])
+x.add_row(["Perth", 5386])
 
 print(x)
 
@@ -145,6 +145,18 @@ async def main():
                             tes,
                         )
         
+        tes = f"<pre>{x}</pre>"
+        
+        log.debug(tes)
+        
+        await connector.get_connected(
+                            connection_url_telegram,
+                            None,
+                            client_id,
+                            client_secret,
+                            tes,
+                        )
+
 
         #await starter.initial_procedures(
         #    private_data,
