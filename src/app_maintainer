@@ -123,6 +123,14 @@ async def main():
 )
         
         
+        parsed= config.main_dotenv(
+            sub_account_id,
+            config_path,
+        )
+        sub_account_id = "telegram-general_error"
+        client_id: str = parsed["bot_token"]
+        client_secret: str= parsed["bot_chatID"]
+        
         connection_url_telegram = end_point_telegram.basic_https()
                 
         await connector.get_connected(
