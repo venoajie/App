@@ -23,7 +23,7 @@ from streaming_helper.data_announcer.deribit import get_instrument_summary, star
 from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
 from prettytable import PrettyTable
 
-x = PrettyTable()
+x = PrettyTable().get_html_string(attributes={"class":"table"}, format=True)
 
 x.field_names = ["City name", "Area", "Population"]
 
@@ -138,7 +138,7 @@ async def main():
                             None,
                             client_id,
                             client_secret,
-                            x.get_html_string(attributes={"class":"table"}, format=True),
+                            x,
                         )
 
         tes = f"<pre>{x}</pre>"
