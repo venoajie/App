@@ -21,19 +21,6 @@ from streaming_helper.restful_api import connector
 from market_understanding.price_action.candles_analysis import get_market_condition
 from streaming_helper.data_announcer.deribit import get_instrument_summary, starter
 from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
-from prettytable import PrettyTable
-
-x = PrettyTable()
-
-x.field_names = ["City name", "Area"]
-
-x.add_row(["Adelaide", 1295])
-x.add_row(["Brisbane", 5905])
-x.add_row(["Darwin", 112])
-x.add_row(["Hobart", 1357])
-x.add_row(["Sydney", 2058])
-x.add_row(["Melbourne", 1566])
-x.add_row(["Perth", 5386])
 
 def handle_ctrl_c(
     signum, 
@@ -116,37 +103,6 @@ async def main():
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
         
-        from streaming_helper.restful_api.telegram import (
-    end_point_params_template as end_point_telegram,
-)
-        from loguru import logger as log
-        from prettytable import from_html_one
-        
-        
-        parsed= config.main_dotenv(
-            sub_account_id,
-            config_path,
-        )
-        sub_account_id = "telegram-general_error"
-        client_id: str = parsed["bot_token"]
-        client_secret: str= parsed["bot_chatID"]
-        
-        connection_url_telegram = end_point_telegram.basic_https()
-        
-        
-        tes = f"<pre>{x}</pre>"
-        
-        log.debug(tes)
-        
-        await connector.get_connected(
-                            connection_url_telegram,
-                            None,
-                            client_id,
-                            client_secret,
-                            tes,
-                        )
-
-
         #await starter.initial_procedures(
         #    private_data,
         #    config_app,

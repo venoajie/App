@@ -13,7 +13,7 @@ import redis.asyncio as aioredis
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 from data_cleaning import pruning_db
-from streaming_helper.data_announcer.telegram import relaying_errors
+from streaming_helper.data_announcer.telegram import relaying_message
 from streaming_helper.utilities import error_handling,system_tools
 from configuration import config
 
@@ -55,10 +55,11 @@ async def main():
         client_secret: str= parsed["bot_chatID"]
 
         relayer = asyncio.create_task(
-            relaying_errors.telegram_messaging(
+            relaying_message.telegram_messaging(
                 client_redis,
                 client_id,
-                client_secret,                              
+                client_secret,    
+                redis_channels,                
                 )
             )                
         
