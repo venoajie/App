@@ -35,8 +35,6 @@ x.add_row(["Sydney", 2058])
 x.add_row(["Melbourne", 1566])
 x.add_row(["Perth", 5386])
 
-print(x)
-
 def handle_ctrl_c(
     signum, 
     stack_frame
@@ -135,18 +133,6 @@ async def main():
         
         connection_url_telegram = end_point_telegram.basic_https()
         
-        response = '```\n{}```'.format(x.get_string())
-        update.message.reply_text(response, parse_mode='Markdown')
-        
-        log.warning(from_html_one(x.get_html_string(attributes={"id":"my_table", "class":"red_table"})))
-        tes  = from_html_one(x.get_html_string(attributes={"id":"my_table", "class":"red_table"}))
-        await connector.get_connected(
-                            connection_url_telegram,
-                            None,
-                            client_id,
-                            client_secret,
-                            tes,
-                        )
         
         tes = f"<pre>{x}</pre>"
         
