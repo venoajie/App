@@ -136,19 +136,7 @@ async def main():
         connection_url_telegram = end_point_telegram.basic_https()
         
         log.warning(from_html_one(x.get_html_string(attributes={"id":"my_table", "class":"red_table"})))
-        
-        await connector.get_connected(
-                            connection_url_telegram,
-                            None,
-                            client_id,
-                            client_secret,
-                            from_html_one(x.get_html_string(attributes={"id":"my_table", "class":"red_table"})),
-                        )
-        
-        tes = f"<pre>{x}</pre>"
-        
-        log.debug(tes)
-        
+        tes  = from_html_one(x.get_html_string(attributes={"id":"my_table", "class":"red_table"}))
         await connector.get_connected(
                             connection_url_telegram,
                             None,
@@ -156,7 +144,7 @@ async def main():
                             client_secret,
                             tes,
                         )
-
+        
 
         #await starter.initial_procedures(
         #    private_data,
