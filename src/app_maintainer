@@ -122,6 +122,7 @@ async def main():
     end_point_params_template as end_point_telegram,
 )
         from loguru import logger as log
+        from prettytable import from_html_one
         
         
         parsed= config.main_dotenv(
@@ -133,17 +134,17 @@ async def main():
         client_secret: str= parsed["bot_chatID"]
         
         connection_url_telegram = end_point_telegram.basic_https()
-                
+        
+        log.warning(from_html_one(x.get_html_string(attributes={"id":"my_table", "class":"red_table"})))
+        
         await connector.get_connected(
                             connection_url_telegram,
                             None,
                             client_id,
                             client_secret,
-                            x.get_html_string(attributes={"id":"my_table", "class":"red_table"}),
+                            from_html_one(x.get_html_string(attributes={"id":"my_table", "class":"red_table"})),
                         )
         
-        log.warning(x.get_html_string(attributes={"id":"my_table", "class":"red_table"}))
-
         tes = f"<pre>{x}</pre>"
         
         log.debug(tes)
