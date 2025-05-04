@@ -67,7 +67,7 @@ async def main():
         client_id: str = parsed["client_id"]
         client_secret: str = config_oci.get_oci_key(parsed["key_ocid"])
 
-        #instantiate api for private connection
+        #instantiate private connection
         api_request: object = end_point_params_template.SendApiRequest(client_id,client_secret)
 
         # parsing config file
