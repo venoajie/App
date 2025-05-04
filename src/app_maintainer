@@ -121,6 +121,7 @@ async def main():
         from streaming_helper.restful_api.telegram import (
     end_point_params_template as end_point_telegram,
 )
+        from loguru import logger as log
         
         
         parsed= config.main_dotenv(
@@ -140,10 +141,12 @@ async def main():
                             client_secret,
                             x.get_html_string(attributes={"id":"my_table", "class":"red_table"}),
                         )
+        
+        log.warning(x.get_html_string(attributes={"id":"my_table", "class":"red_table"}))
 
         tes = f"<pre>{x}</pre>"
         
-        print(tes)
+        log.debug(tes)
         
         await connector.get_connected(
                             connection_url_telegram,
