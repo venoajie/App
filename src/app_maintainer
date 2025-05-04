@@ -138,7 +138,7 @@ async def main():
                             None,
                             client_id,
                             client_secret,
-                            x,
+                            x.get_html_string(attributes={"class":"table"}, format=True),
                         )
 
         tes = f"<pre>{x}</pre>"
