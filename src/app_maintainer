@@ -118,7 +118,9 @@ async def main():
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
                 
-        tes = f'<pre>{x}</pre>'
+        tes = f"<pre>{x}</pre>"
+        
+        print(tes)
         
         await error_handling.parse_error_message_with_redis(
             client_redis,
