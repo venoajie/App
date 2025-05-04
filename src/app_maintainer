@@ -135,6 +135,9 @@ async def main():
         
         connection_url_telegram = end_point_telegram.basic_https()
         
+        response = '```\n{}```'.format(x.get_string())
+        update.message.reply_text(response, parse_mode='Markdown')
+        
         log.warning(from_html_one(x.get_html_string(attributes={"id":"my_table", "class":"red_table"})))
         tes  = from_html_one(x.get_html_string(attributes={"id":"my_table", "class":"red_table"}))
         await connector.get_connected(
