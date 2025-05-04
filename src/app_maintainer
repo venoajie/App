@@ -21,7 +21,21 @@ from streaming_helper.restful_api import connector
 from market_understanding.price_action.candles_analysis import get_market_condition
 from streaming_helper.data_announcer.deribit import get_instrument_summary, starter
 from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
+from prettytable import PrettyTable
 
+x = PrettyTable()
+
+x.field_names = ["City name", "Area", "Population", "Annual Rainfall"]
+
+x.add_row(["Adelaide", 1295, 1158259, 600.5])
+x.add_row(["Brisbane", 5905, 1857594, 1146.4])
+x.add_row(["Darwin", 112, 120900, 1714.7])
+x.add_row(["Hobart", 1357, 205556, 619.5])
+x.add_row(["Sydney", 2058, 4336374, 1214.8])
+x.add_row(["Melbourne", 1566, 3806092, 646.9])
+x.add_row(["Perth", 5386, 1554769, 869.4])
+
+print(x)
 
 def handle_ctrl_c(
     signum, 
@@ -33,33 +47,6 @@ def handle_ctrl_c(
                   
 signal_handler = system_tools.SignalHandler()
 
-def printTable(table,align="",hasHeader=False,pad=2,isGrid=False):
-    table = [row[:] for row in table] # copy table
-    numRows,numCols = len(table),len(table[0]) # table size
-    align = align.ljust(numCols,"L") # align left by default
-    align = ["RC".find(c)+1 for c in align] # convert to index (?RC=012)
-    widths = [max(len(row[col]) for row in table) for col in range(numCols)] # column widths
-
-    # --- apply column widths with alignments ---
-    if hasHeader: # header is centered
-        for x in range(numCols): table[0][x] = table[0][x].center(widths[x])
-    for y in range(hasHeader,numRows): # apply column alignments
-        for x in range(numCols): c = table[y][x]; table[y][x] = [c.ljust,c.rjust,c.center][align[x]](widths[x])
-
-    # --- data for printing
-    P = " "*pad; LSEP,SEP,RSEP = "│"+P, P+"│"+P, P+"│"
-    lines = ["─"*(widths[col]+pad*2) for col in range(numCols)]
-
-    drawLine = [isGrid]*numRows; drawLine[0]|=hasHeader; drawLine[-1] = False
-    if hasHeader or isGrid: gridLine = "├"+"┼".join(lines)+"┤" # if any(drawLine)
-
-    # --- print rows ---
-    f"""({"┌"+"┬".join(lines)+"┐"})"""
-    for y in range(numRows):
-        f"""({LSEP+SEP.join(table[y])+RSEP})"""
-        if drawLine[y]: print(gridLine)
-    f"""({"└"+"┴".join(lines)+"┘"})"""
-    
 async def main():
     """
     """
@@ -130,26 +117,8 @@ async def main():
 
         # get redis channels
         redis_channels: dict = config_app["redis_channels"][0]
-        
-        
-        table = [
-            ['Fruit',      'Animals',      'Numbers',    'Characters'],
-            ['Apple',      'Cat',          '123,456',    'Pac-Man'],
-            ['Banana',     'Dog',          '69',         'Donkey Kong'],
-            ['Mango',      'Horse',        '210',        'Bomberman'],
-            ['Pear',       'Lion',         '84,763,596', 'Pikachu'],
-            ['Watermelon', 'Elephant',     '1,000',      'Mario'],
-            ['Orange',     'Hippopotamus', '263',        'Ezio Auditore da Firenze'],
-            ['Cranberry',  'Hedgehog',     '2,495',      'Sonic']
-        ]
-
-        tes = printTable(table,align="RLRC",hasHeader=True)
-        
-        await error_handling.parse_error_message_with_redis(
-            client_redis,
-            tes,
-            )
-        tes = f'<pre>{tes}</pre>'
+                
+        tes = f'<pre>{x}</pre>'
         
         await error_handling.parse_error_message_with_redis(
             client_redis,
