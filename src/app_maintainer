@@ -123,7 +123,7 @@ async def main():
 )
         
         
-        connection_url_telegram = end_point_telegram.get_basic_https()
+        connection_url_telegram = end_point_telegram.basic_https()
                 
         await connector.get_connected(
                             connection_url_telegram,
