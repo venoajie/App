@@ -15,7 +15,7 @@ from configuration import config, config_oci
 from streaming_helper.restful_api.deribit import end_point_params_template
 from streaming_helper.data_receiver import deribit as receiver_deribit
 from streaming_helper.data_announcer.deribit import get_instrument_summary,distributing_ws_data as distr_deribit, starter
-from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
+from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools,template
 
 async def main():
     """
@@ -91,7 +91,7 @@ async def main():
                                                        client_id,
                                                        client_secret)
 
-        result_template = str_mod.message_template()
+        result_template = template.redis_message_template()
         
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         

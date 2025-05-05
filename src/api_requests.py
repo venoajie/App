@@ -33,10 +33,7 @@ from streaming_helper.restful_api.telegram import (
     end_point_params_template as end_point_telegram,
 )
 from streaming_helper.restful_api import connector
-from streaming_helper.utilities import (
-    error_handling,
-    string_modification as str_mod
-)
+from streaming_helper.utilities import error_handling, string_modification as str_mod
 
 from streaming_helper.restful_api.deribit import (
     end_point_params_template as end_point_deribit,

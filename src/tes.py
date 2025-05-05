@@ -273,42 +273,54 @@ my_dict = {
 
 log.error(my_dict.values())
 
-def printTable(table,align="",hasHeader=False,pad=2,isGrid=False):
-    table = [row[:] for row in table] # copy table
-    numRows,numCols = len(table),len(table[0]) # table size
-    align = align.ljust(numCols,"L") # align left by default
-    align = ["RC".find(c)+1 for c in align] # convert to index (?RC=012)
-    widths = [max(len(row[col]) for row in table) for col in range(numCols)] # column widths
+
+def printTable(table, align="", hasHeader=False, pad=2, isGrid=False):
+    table = [row[:] for row in table]  # copy table
+    numRows, numCols = len(table), len(table[0])  # table size
+    align = align.ljust(numCols, "L")  # align left by default
+    align = ["RC".find(c) + 1 for c in align]  # convert to index (?RC=012)
+    widths = [
+        max(len(row[col]) for row in table) for col in range(numCols)
+    ]  # column widths
 
     # --- apply column widths with alignments ---
-    if hasHeader: # header is centered
-        for x in range(numCols): table[0][x] = table[0][x].center(widths[x])
-    for y in range(hasHeader,numRows): # apply column alignments
-        for x in range(numCols): c = table[y][x]; table[y][x] = [c.ljust,c.rjust,c.center][align[x]](widths[x])
+    if hasHeader:  # header is centered
+        for x in range(numCols):
+            table[0][x] = table[0][x].center(widths[x])
+    for y in range(hasHeader, numRows):  # apply column alignments
+        for x in range(numCols):
+            c = table[y][x]
+            table[y][x] = [c.ljust, c.rjust, c.center][align[x]](widths[x])
 
     # --- data for printing
-    P = " "*pad; LSEP,SEP,RSEP = "│"+P, P+"│"+P, P+"│"
-    lines = ["─"*(widths[col]+pad*2) for col in range(numCols)]
+    P = " " * pad
+    LSEP, SEP, RSEP = "│" + P, P + "│" + P, P + "│"
+    lines = ["─" * (widths[col] + pad * 2) for col in range(numCols)]
 
-    drawLine = [isGrid]*numRows; drawLine[0]|=hasHeader; drawLine[-1] = False
-    if hasHeader or isGrid: gridLine = "├"+"┼".join(lines)+"┤" # if any(drawLine)
+    drawLine = [isGrid] * numRows
+    drawLine[0] |= hasHeader
+    drawLine[-1] = False
+    if hasHeader or isGrid:
+        gridLine = "├" + "┼".join(lines) + "┤"  # if any(drawLine)
 
     # --- print rows ---
-    print("┌"+"┬".join(lines)+"┐")
+    print("┌" + "┬".join(lines) + "┐")
     for y in range(numRows):
-        print(LSEP+SEP.join(table[y])+RSEP)
-        if drawLine[y]: print(gridLine)
-    print("└"+"┴".join(lines)+"┘")
-    
+        print(LSEP + SEP.join(table[y]) + RSEP)
+        if drawLine[y]:
+            print(gridLine)
+    print("└" + "┴".join(lines) + "┘")
+
+
 table = [
-    ['Fruit',      'Animals',      'Numbers',    'Characters'],
-    ['Apple',      'Cat',          '123,456',    'Pac-Man'],
-    ['Banana',     'Dog',          '69',         'Donkey Kong'],
-    ['Mango',      'Horse',        '210',        'Bomberman'],
-    ['Pear',       'Lion',         '84,763,596', 'Pikachu'],
-    ['Watermelon', 'Elephant',     '1,000',      'Mario'],
-    ['Orange',     'Hippopotamus', '263',        'Ezio Auditore da Firenze'],
-    ['Cranberry',  'Hedgehog',     '2,495',      'Sonic']
+    ["Fruit", "Animals", "Numbers", "Characters"],
+    ["Apple", "Cat", "123,456", "Pac-Man"],
+    ["Banana", "Dog", "69", "Donkey Kong"],
+    ["Mango", "Horse", "210", "Bomberman"],
+    ["Pear", "Lion", "84,763,596", "Pikachu"],
+    ["Watermelon", "Elephant", "1,000", "Mario"],
+    ["Orange", "Hippopotamus", "263", "Ezio Auditore da Firenze"],
+    ["Cranberry", "Hedgehog", "2,495", "Sonic"],
 ]
 
-printTable(table,align="RLRC",hasHeader=True)
+printTable(table, align="RLRC", hasHeader=True)

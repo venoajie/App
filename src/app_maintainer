@@ -20,7 +20,7 @@ from streaming_helper.restful_api.deribit import end_point_params_template
 from streaming_helper.restful_api import connector
 from market_understanding.price_action.candles_analysis import get_market_condition
 from streaming_helper.data_announcer.deribit import get_instrument_summary, starter
-from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools
+from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools,template
 
 def handle_ctrl_c(
     signum, 
@@ -109,7 +109,7 @@ async def main():
         #    )
         
 
-        result_template = str_mod.message_template()
+        result_template = template.redis_message_template()
         
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         

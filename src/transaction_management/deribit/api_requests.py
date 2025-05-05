@@ -50,12 +50,15 @@ async def private_connection(
             json=payload,
         ) as response:
 
-         
             # RESToverHTTP Status Code
             status_code: int = response.status
-            
-            log.error(f"payload {payload} endpoint {endpoint} params {params} status_code {status_code}  response {response}")
-            log.debug(f"client_id {client_id} client_secret {client_secret} connection_endpoint {connection_url + endpoint} ")
+
+            log.error(
+                f"payload {payload} endpoint {endpoint} params {params} status_code {status_code}  response {response}"
+            )
+            log.debug(
+                f"client_id {client_id} client_secret {client_secret} connection_endpoint {connection_url + endpoint} "
+            )
 
             # RESToverHTTP Response Content
             response: Dict = await response.json()
