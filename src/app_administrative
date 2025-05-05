@@ -42,7 +42,13 @@ async def main():
     
     client_redis: object = aioredis.Redis.from_pool(pool)
                 
+    # registering strategy config file    
+    file_toml = "config_strategies.toml"
+
     try:
+
+        # parsing config file
+        config_app = system_tools.get_config_tomli(file_toml)
 
         config_path = system_tools.provide_path_for_file(".env")
     
@@ -53,6 +59,9 @@ async def main():
         
         client_id: str = parsed["bot_token"]
         client_secret: str= parsed["bot_chatID"]
+
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
 
         relayer = asyncio.create_task(
             relaying_message.telegram_messaging(
