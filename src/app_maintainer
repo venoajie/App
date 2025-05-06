@@ -22,16 +22,6 @@ from market_understanding.price_action.candles_analysis import get_market_condit
 from streaming_helper.data_announcer.deribit import get_instrument_summary, starter
 from streaming_helper.utilities import  error_handling,string_modification as str_mod,system_tools,template
 
-def handle_ctrl_c(
-    signum, 
-    stack_frame
-    )->None:
-    
-    sys.exit(0)
-    
-                  
-signal_handler = system_tools.SignalHandler()
-
 async def main():
     """
     """
@@ -148,6 +138,16 @@ async def main():
             client_redis,
             error,
             )
+
+def handle_ctrl_c(
+    signum, 
+    stack_frame
+    )->None:
+    
+    sys.exit(0)
+    
+                  
+signal_handler = system_tools.SignalHandler()
 
 if __name__ == "__main__":
     
