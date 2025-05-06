@@ -19,7 +19,7 @@ from data_cleaning import pruning_db
 from messaging import telegram_bot as tlgrm
 from streaming_data.data_producer import StreamingAccountData
 from transaction_management.deribit import api_requests, distributing_ws_data as distr_deribit, get_instrument_summary,starter
-from utilities import string_modification as str_mod, system_tools
+from utilities import string_modification as str_mod, system_tools,template
 
 def handle_ctrl_c(
     signum, 
@@ -93,7 +93,7 @@ async def main():
         
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         
-        result_template = str_mod.message_template()
+        result_template = template.message_template()
         
         initial_data_subaccount = starter.sub_account_combining(
             sub_accounts,
