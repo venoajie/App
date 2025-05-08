@@ -111,6 +111,10 @@ async def main():
             result_template,
         )
         
+        simulate_portfolio = await api_request.simulate_portfolio("ETH-PERPETUAL",1,True)
+        
+        log.info(f"simulate portfolio: {simulate_portfolio}")
+        
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
