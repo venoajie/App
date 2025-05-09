@@ -84,6 +84,29 @@ def main_dotenv(header: str = "None", filename: str = ".env") -> dict:
     return credentials
 
 
+
+
+def get_postgres_uri():  #(1)
+    
+    """
+    https://www.cosmicpython.com/book/appendix_project_structure.html
+
+    Returns:
+        _type_: _description_
+    """
+    host = os.environ.get("DB_HOST", "localhost")  #(2)
+    port = 54321 if host == "localhost" else 5432
+    password = os.environ.get("DB_PASSWORD", "abc123")
+    user, db_name = "allocation", "allocation"
+    return f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
+
+
+def get_api_url():
+    host = os.environ.get("API_HOST", "localhost")
+    port = 5005 if host == "localhost" else 80
+    return f"http://{host}:{port}"
+
+
 if __name__ == "__main__":
     try:
         test = main_dotenv("telegram-failed_order")
