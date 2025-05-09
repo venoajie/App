@@ -139,7 +139,18 @@ async def main():
                 
                 print(f"message channel: {message_channel}")
 
+            except Exception as error:
 
+
+                await error_handling.parse_error_message_with_redis(
+                    client_redis,
+                    error,
+                )
+
+                continue
+
+            finally:
+                await asyncio.sleep(0.001)
    
     except Exception as error:
         
