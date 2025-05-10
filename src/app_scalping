@@ -23,6 +23,7 @@ from streaming_helper.utilities import  error_handling,string_modification as st
 from streaming_helper.strategies.deribit import relabelling_trading_result
 from streaming_helper.channel_management.deribit import subscribing_to_channels
 from streaming_helper.channel_management import get_published_messages
+from streaming_helper.db_management import sqlite_management as db_mgt
 
 pool = aioredis.ConnectionPool.from_url(
     "redis://localhost", 
