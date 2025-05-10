@@ -36,6 +36,16 @@ pool = aioredis.ConnectionPool.from_url(
 
 client_redis: object = aioredis.Redis.from_pool(pool)
 
+
+def get_settlement_period(strategy_attributes) -> list:
+
+    return str_mod.remove_redundant_elements(
+        str_mod.remove_double_brackets_in_list(
+            [o["settlement_period"] for o in strategy_attributes]
+        )
+    )
+
+
 async def main():
     """
     """
@@ -363,12 +373,3 @@ if __name__ == "__main__":
             ))
         
         
-
-def get_settlement_period(strategy_attributes) -> list:
-
-    return str_mod.remove_redundant_elements(
-        str_mod.remove_double_brackets_in_list(
-            [o["settlement_period"] for o in strategy_attributes]
-        )
-    )
-
