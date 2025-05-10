@@ -168,6 +168,14 @@ async def main():
 
         market_condition_all = []
 
+        # get redis channels
+        market_analytics_channel: str = redis_channels["market_analytics_update"]
+        ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
+        portfolio_channel: str = redis_channels["portfolio"]
+        my_trades_channel: str = redis_channels["my_trades_cache_updating"]
+        order_update_channel: str = redis_channels["order_cache_updating"]
+        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
+
         while True:
 
             try:
