@@ -361,3 +361,14 @@ if __name__ == "__main__":
             client_redis,
             error,
             ))
+        
+        
+
+def get_settlement_period(strategy_attributes) -> list:
+
+    return str_mod.remove_redundant_elements(
+        str_mod.remove_double_brackets_in_list(
+            [o["settlement_period"] for o in strategy_attributes]
+        )
+    )
+
