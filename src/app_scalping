@@ -181,13 +181,11 @@ async def main():
 
             try:
 
-                message_byte = await pubsub.get_message(pubsub)
-                                
+                message_byte = await pubsub.get_message()
+
                 params = await get_published_messages.get_redis_message(message_byte)
 
                 data, message_channel = params["data"], params["channel"]
-                
-                print(f"message channel: {message_channel}")
 
                 if my_trade_receiving_channel in message_channel:
 
