@@ -118,14 +118,52 @@ async def main():
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
-   
-        await asyncio.sleep(0.0005)
-                # subscribe to channels
+        
+        # subscribe to channels
         await subscribing_to_channels.redis_channels(
             pubsub,
             redis_channels,
-            "future_spread",
+            "scalping",
         )
+
+        cached_ticker_all = []
+
+        not_cancel = True
+
+        sub_account_cached_params = initial_data_subaccount["params"]
+
+        sub_account_cached = sub_account_cached_params["data"]
+
+        cached_orders = sub_account_cached["orders_cached"]
+
+        query_trades = f"SELECT * FROM  v_trading_all_active"
+
+        result_template = template.redis_message_template()
+
+        my_trades_active_from_db = await db_mgt.executing_query_with_return(
+            query_trades
+        )
+
+        initial_data_my_trades_active = starter.my_trades_active_combining(
+            my_trades_active_from_db,
+            my_trades_channel,
+            result_template,
+        )
+
+        my_trades_active_all = initial_data_my_trades_active["params"]["data"]
+
+        # get portfolio from exchg
+        portfolio_from_exchg = await api_request.get_subaccounts()
+
+        initial_data_portfolio = starter.portfolio_combining(
+            portfolio_from_exchg,
+            portfolio_channel,
+            result_template,
+        )
+
+        portfolio_all = initial_data_portfolio["params"]["data"]
+
+        market_condition_all = []
 
         while True:
 
@@ -139,8 +177,216 @@ async def main():
                 
                 print(f"message channel: {message_channel}")
 
-            except Exception as error:
+                if my_trade_receiving_channel in message_channel:
 
+                    my_trades_active_all = data
+                    
+                if sub_account_cached_channel in message_channel:
+
+                    cached_orders = data["open_orders"]
+
+                    my_trades_active_all = data["my_trades"]
+
+                if market_analytics_channel in message_channel:
+
+                    market_condition_all = data
+
+                if portfolio_channel in message_channel:
+
+                    portfolio_all = data["cached_portfolio"]
+
+                if sub_account_cached_channel in message_channel:
+
+                    cached_orders = data["open_orders"]
+
+                    my_trades_active_all = data["my_trades"]
+
+                if my_trades_channel in message_channel:
+
+                    my_trades_active_all = data
+
+                if order_update_channel in message_channel:
+
+                    cached_orders = data["open_orders"]
+
+                if ticker_cached_channel in message_channel and market_condition_all:
+
+                    cached_ticker_all = data["data"]
+
+                    server_time = data["server_time"]
+
+                    currency_upper = data["currency_upper"]
+
+                    currency_lower = currency_upper.lower()
+
+                    instrument_name_perpetual = f"{currency_upper}-PERPETUAL"
+
+                    market_condition = [
+                        o
+                        for o in market_condition_all
+                        if instrument_name_perpetual in o["instrument_name"]
+                    ][0]
+
+                    portfolio = [
+                        o
+                        for o in portfolio_all
+                        if currency_upper == o["currency"].upper()
+                    ][0]
+                    #! need to update currency to upper from starter
+
+                    equity: float = portfolio["equity"]
+
+                    ticker_perpetual_instrument_name = [
+                        o
+                        for o in cached_ticker_all
+                        if instrument_name_perpetual in o["instrument_name"]
+                    ][0]
+
+                    index_price = get_index(ticker_perpetual_instrument_name)
+
+                    my_trades_currency_all_transactions: list = (
+                        []
+                        if not my_trades_active_all
+                        else [
+                            o
+                            for o in my_trades_active_all
+                            if currency_upper in o["instrument_name"]
+                        ]
+                    )
+
+                    my_trades_currency_all: list = (
+                        []
+                        if my_trades_currency_all_transactions == 0
+                        else [
+                            o
+                            for o in my_trades_currency_all_transactions
+                            if o["instrument_name"]
+                            in [
+                                o["instrument_name"]
+                                for o in instrument_attributes_futures_all
+                            ]
+                        ]
+                    )
+
+                    orders_currency = (
+                        []
+                        if not cached_orders
+                        else [
+                            o
+                            for o in cached_orders
+                            if currency_upper in o["instrument_name"]
+                        ]
+                    )
+
+                    if index_price is not None and equity > 0:
+
+                        my_trades_currency: list = [
+                            o for o in my_trades_currency_all if o["label"] is not None
+                        ]
+
+                        notional: float = compute_notional_value(index_price, equity)
+
+                        for strategy in active_strategies:
+
+                            strategy_params = [
+                                o
+                                for o in strategy_attributes
+                                if o["strategy_label"] == strategy
+                            ][0]
+
+                            my_trades_currency_strategy = [
+                                o
+                                for o in my_trades_currency
+                                if strategy in (o["label"])
+                            ]
+
+                            orders_currency_strategy = (
+                                []
+                                if not orders_currency
+                                else [
+                                    o
+                                    for o in orders_currency
+                                    if strategy in (o["label"])
+                                ]
+                            )
+
+                            await cancelling_double_ids(
+                                api_request,
+                                client_secret,
+                                order_db_table,
+                                orders_currency_strategy,
+                            )
+
+                            if "futureSpread" in strategy:
+
+                                strategy_params = [
+                                    o
+                                    for o in strategy_attributes
+                                    if o["strategy_label"] == strategy
+                                ][0]
+
+                                combo_auto = combo.ComboAuto(
+                                    strategy,
+                                    strategy_params,
+                                    orders_currency_strategy,
+                                    server_time,
+                                    market_condition,
+                                    my_trades_currency_strategy,
+                                )
+
+                                if orders_currency_strategy:
+                                    for order in orders_currency_strategy:
+                                        cancel_allowed: dict = (
+                                            await combo_auto.is_cancelling_orders_allowed(
+                                                order,
+                                                server_time,
+                                            )
+                                        )
+
+                                        if cancel_allowed["cancel_allowed"]:
+                                            await if_cancel_is_true(
+                                                api_request,
+                                                order_db_table,
+                                                cancel_allowed,
+                                            )
+
+                                            not_cancel = False
+
+                            if "hedgingSpot" in strategy:
+
+                                max_position: int = notional * -1
+
+                                hedging = hedging_spot.HedgingSpot(
+                                    strategy,
+                                    strategy_params,
+                                    max_position,
+                                    my_trades_currency_strategy,
+                                    market_condition,
+                                    index_price,
+                                    my_trades_currency_all,
+                                )
+
+                                if orders_currency_strategy:
+
+                                    for order in orders_currency_strategy:
+                                        cancel_allowed: dict = (
+                                            await hedging.is_cancelling_orders_allowed(
+                                                order,
+                                                orders_currency_strategy,
+                                                server_time,
+                                            )
+                                        )
+
+                                        if cancel_allowed["cancel_allowed"]:
+                                            await if_cancel_is_true(
+                                                api_request,
+                                                order_db_table,
+                                                cancel_allowed,
+                                            )
+
+                                            not_cancel = False
+
+            except Exception as error:
 
                 await error_handling.parse_error_message_with_redis(
                     client_redis,
