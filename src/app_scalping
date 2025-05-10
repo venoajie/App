@@ -104,19 +104,16 @@ async def main():
         #    private_data,
         #    config_app,
         #    )
+
+        # get redis channels
+        market_analytics_channel: str = redis_channels["market_analytics_update"]
+        ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
+        portfolio_channel: str = redis_channels["portfolio"]
+        my_trades_channel: str = redis_channels["my_trades_cache_updating"]
+        order_update_channel: str = redis_channels["order_cache_updating"]
+        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
         
         result_template = template.redis_message_template()
-        
-        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
-            
-        # sub_account_combining        
-        sub_accounts = [await api_request.get_subaccounts_details(o) for o in currencies]
-        
-        initial_data_subaccount = starter.sub_account_combining(
-            sub_accounts,
-            sub_account_cached_channel,
-            result_template,
-        )
         
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
@@ -132,6 +129,18 @@ async def main():
         cached_ticker_all = []
 
         not_cancel = True
+
+        
+        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
+            
+        # sub_account_combining        
+        sub_accounts = [await api_request.get_subaccounts_details(o) for o in currencies]
+        
+        initial_data_subaccount = starter.sub_account_combining(
+            sub_accounts,
+            sub_account_cached_channel,
+            result_template,
+        )
 
         sub_account_cached_params = initial_data_subaccount["params"]
 
@@ -167,14 +176,6 @@ async def main():
         portfolio_all = initial_data_portfolio["params"]["data"]
 
         market_condition_all = []
-
-        # get redis channels
-        market_analytics_channel: str = redis_channels["market_analytics_update"]
-        ticker_cached_channel: str = redis_channels["ticker_cache_updating"]
-        portfolio_channel: str = redis_channels["portfolio"]
-        my_trades_channel: str = redis_channels["my_trades_cache_updating"]
-        order_update_channel: str = redis_channels["order_cache_updating"]
-        sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
 
         while True:
 
