@@ -41,8 +41,10 @@ async def main():
     
     exchange = "deribit"
     
-    sub_account_id = "deribit-148510"
-
+    sub_account_id = f"{exchange}-148510"
+    
+    strategy = "scalping"
+    
     # registering strategy config file    
     file_toml = "config_strategies.toml"
         
@@ -286,106 +288,31 @@ async def main():
 
                         notional: float = compute_notional_value(index_price, equity)
 
-                        for strategy in active_strategies:
+                        strategy_params = [
+                            o
+                            for o in strategy_attributes
+                            if o["strategy_label"] == strategy
+                        ][0]
 
-                            strategy_params = [
-                                o
-                                for o in strategy_attributes
-                                if o["strategy_label"] == strategy
-                            ][0]
+                        my_trades_currency_strategy = [
+                            o
+                            for o in my_trades_currency
+                            if strategy in (o["label"])
+                        ]
 
-                            my_trades_currency_strategy = [
+                        orders_currency_strategy = (
+                            []
+                            if not orders_currency
+                            else [
                                 o
-                                for o in my_trades_currency
+                                for o in orders_currency
                                 if strategy in (o["label"])
                             ]
-
-                            orders_currency_strategy = (
-                                []
-                                if not orders_currency
-                                else [
-                                    o
-                                    for o in orders_currency
-                                    if strategy in (o["label"])
-                                ]
-                            )
-
-                            await cancelling_double_ids(
-                                api_request,
-                                client_secret,
-                                order_db_table,
-                                orders_currency_strategy,
-                            )
-
-                            if "futureSpread" in strategy:
-
-                                strategy_params = [
-                                    o
-                                    for o in strategy_attributes
-                                    if o["strategy_label"] == strategy
-                                ][0]
-
-                                combo_auto = combo.ComboAuto(
-                                    strategy,
-                                    strategy_params,
-                                    orders_currency_strategy,
-                                    server_time,
-                                    market_condition,
-                                    my_trades_currency_strategy,
-                                )
-
-                                if orders_currency_strategy:
-                                    for order in orders_currency_strategy:
-                                        cancel_allowed: dict = (
-                                            await combo_auto.is_cancelling_orders_allowed(
-                                                order,
-                                                server_time,
-                                            )
-                                        )
-
-                                        if cancel_allowed["cancel_allowed"]:
-                                            await if_cancel_is_true(
-                                                api_request,
-                                                order_db_table,
-                                                cancel_allowed,
-                                            )
-
-                                            not_cancel = False
-
-                            if "hedgingSpot" in strategy:
-
-                                max_position: int = notional * -1
-
-                                hedging = hedging_spot.HedgingSpot(
-                                    strategy,
-                                    strategy_params,
-                                    max_position,
-                                    my_trades_currency_strategy,
-                                    market_condition,
-                                    index_price,
-                                    my_trades_currency_all,
-                                )
-
-                                if orders_currency_strategy:
-
-                                    for order in orders_currency_strategy:
-                                        cancel_allowed: dict = (
-                                            await hedging.is_cancelling_orders_allowed(
-                                                order,
-                                                orders_currency_strategy,
-                                                server_time,
-                                            )
-                                        )
-
-                                        if cancel_allowed["cancel_allowed"]:
-                                            await if_cancel_is_true(
-                                                api_request,
-                                                order_db_table,
-                                                cancel_allowed,
-                                            )
-
-                                            not_cancel = False
-
+                        )
+                        
+                        max_position: int = notional * -1
+    
+    
             except Exception as error:
 
                 await error_handling.parse_error_message_with_redis(
