@@ -122,6 +122,7 @@ async def main():
         my_trades_channel: str = redis_channels["my_trades_cache_updating"]
         order_update_channel: str = redis_channels["order_cache_updating"]
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
+        my_trade_receiving_channel: str = redis_channels["my_trade_receiving"]
         
         result_template = template.redis_message_template()
         
