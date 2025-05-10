@@ -51,6 +51,9 @@ async def main():
         
     try:
 
+        # connecting to redis pubsub
+        pubsub: object = client_redis.pubsub()
+
         config_path = system_tools.provide_path_for_file(".env")
         
         parsed= config.main_dotenv(
@@ -67,8 +70,15 @@ async def main():
         # parsing config file
         config_app = system_tools.get_config_tomli(file_toml)
 
-        # connecting to redis pubsub
-        pubsub: object = client_redis.pubsub()
+        # get redis channels
+        redis_channels: dict = config_app["redis_channels"][0]
+        
+        # subscribe to channels
+        await subscribing_to_channels.redis_channels(
+            pubsub,
+            redis_channels,
+            "scalping",
+        )
 
         # get tradable strategies
         tradable_config_app = config_app["tradable"]
@@ -86,24 +96,14 @@ async def main():
             o["strategy_label"] for o in strategy_attributes if o["cancellable"] == True
         ]
 
-        settlement_periods = str_mod.remove_redundant_elements(
-        str_mod.remove_double_brackets_in_list(
-            [o["settlement_period"] for o in strategy_attributes]
-        )
-    )
-        
+        settlement_periods = get_settlement_period(strategy_attributes)
+
         futures_instruments = await get_instrument_summary.get_futures_instruments(
             currencies,
             settlement_periods,
         )
 
-        # get redis channels
-        redis_channels: dict = config_app["redis_channels"][0]
-
-        #await starter.initial_procedures(
-        #    private_data,
-        #    config_app,
-        #    )
+        instrument_attributes_futures_all = futures_instruments["active_futures"]
 
         # get redis channels
         market_analytics_channel: str = redis_channels["market_analytics_update"]
@@ -118,18 +118,10 @@ async def main():
         resolutions: list = [o["resolutions"] for o in tradable_config_app][0]
 
         strategy_attributes = config_app["strategies"]
-        
-        # subscribe to channels
-        await subscribing_to_channels.redis_channels(
-            pubsub,
-            redis_channels,
-            "scalping",
-        )
 
         cached_ticker_all = []
 
         not_cancel = True
-
         
         sub_account_cached_channel: str = redis_channels["sub_account_cache_updating"]
             
